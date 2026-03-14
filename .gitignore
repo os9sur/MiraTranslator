@@ -1,5 +1,5 @@
 # 忽略私密的配置文件
-#private_config.js
+private_config.js
 
 # 忽略图片文件夹
 img
