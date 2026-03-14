@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira Translator"
+  },
+  "appDesc": {
+    "message": "<0.5MB: Public engines + custom AI APIs. Features Immersive Web & YouTube bilingual translation with Google Drive & WebDAV sync."
+  },
+  "ERROR_400": {
+    "message": "API Error: Invalid request or low balance."
+  },
+  "ERROR_401": {
+    "message": "API Error: Invalid API Key."
+  },
+  "ERROR_402": {
+    "message": "API Error: Insufficient balance."
+  },
+  "ERROR_403": {
+    "message": "API Error: Forbidden. Check permissions or IP whitelist."
+  },
+  "ERROR_404": {
+    "message": "API Error: Model not found or invalid URL."
+  },
+  "ERROR_429": {
+    "message": "API Error: Quota exceeded or rate limited."
+  },
+  "ERROR_500": {
+    "message": "API Error: Server error (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "Request timeout: Check network or proxy."
+  },
+  "ERROR_GENERIC": {
+    "message": "Translation Failed: Check API configuration."
+  }
+}

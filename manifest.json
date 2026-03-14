@@ -1,0 +1,90 @@
+{
+  "manifest_version": 3,
+  "name": "__MSG_appName__",
+  "description": "__MSG_appDesc__",
+  "key": "{{MY_KEY}}",
+  "default_locale": "en",
+  "version": "3.3.6.1",
+  "version_name": "3.3.6.1-dev",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{{FIREFOX_ID}}",
+      "strict_min_version": "109.0"
+    }
+  },
+  "background": {
+    "_scripts": [
+      "background.js"
+    ],
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "alarms",
+    "identity"
+  ],
+  "oauth2": {
+    "client_id": "{{MY_ID}}",
+    "scopes": [
+      "https://www.googleapis.com/auth/drive.appdata"
+    ]
+  },
+  "host_permissions": [
+    "<all_urls>",
+    "https://www.bing.com/*",
+    "https://cn.bing.com/*",
+    "https://*.bing.com/*",
+    "https://www.googleapis.com/*",
+    "https://translation.googleapis.com/*",
+    "https://translate.googleapis.com/*",
+    "https://*.translate.google.com/*",
+    "https://*.googlevideo.com/*",
+    "https://api.openai.com/*",
+    "https://api.siliconflow.cn/*",
+    "https://api-free.deepl.com/*",
+    "https://api.deepl.com/*",
+    "https://fanyi-api.baidu.com/*",
+    "https://api.cognitive.microsofttranslator.com/*",
+    "https://translate.volcengineapi.com/*",
+    "https://tmt.tencentcloudapi.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.youtube.com/*"
+      ],
+      "js": [
+        "utils.js",
+        "inject.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN",
+      "all_frames": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "constants.js",
+        "i18n.js",
+        "site-rules.js",
+        "utils.js",
+        "content_pick_script.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  }
+}

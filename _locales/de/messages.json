@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira Translator"
+  },
+  "appDesc": {
+    "message": "<0,5 MB: Standard-Engines & eigene KI-APIs. Immersive Übersetzung, YouTube-Untertitel & Sync über Google Drive/WebDAV."
+  },
+  "ERROR_400": {
+    "message": "API-Fehler: Ungültige Anfrage oder Guthaben leer."
+  },
+  "ERROR_401": {
+    "message": "API-Fehler: Ungültiger API-Key."
+  },
+  "ERROR_402": {
+    "message": "API-Fehler: Guthaben nicht ausreichend."
+  },
+  "ERROR_403": {
+    "message": "API-Fehler: Zugriff verweigert. Berechtigungen oder IP-Whitelist prüfen."
+  },
+  "ERROR_404": {
+    "message": "API-Fehler: Modell nicht gefunden."
+  },
+  "ERROR_429": {
+    "message": "API-Fehler: Kontingent erschöpft."
+  },
+  "ERROR_500": {
+    "message": "API-Fehler: Serverfehler (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "Zeitüberschreitung: Netzwerk prüfen."
+  },
+  "ERROR_GENERIC": {
+    "message": "Übersetzung fehlgeschlagen: Konfig prüfen."
+  }
+}

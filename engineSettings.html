@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="i18n.js"></script>
+    <script src="constants.js"></script>
+    <title>Mira Translator</title>
+    <link rel="stylesheet" href="engineSettings.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="current-status-bar">
+                <div data-i18n="currentActiveEngine" class="status-label">当前生效引擎</div>
+                <div id="active-engine-name" class="status-value"></div>
+            </div>
+            <div data-i18n="engineListTitle" class="sidebar-header">引擎列表</div>
+            <div class="scroll-area" id="engine-sidebar-list"></div>
+            <div class="sidebar-footer">
+                <div class="cache-status-panel">
+                    <div class="cache-label">
+                        <span data-i18n="cacheTitle">缓存</span>
+                        <b id="cache-size">0.00 MB</b>
+                    </div>
+                    <button data-i18n="clearBtn" id="clear-cache-btn" class="text-link-btn">清除</button>
+                </div>
+                <button data-i18n="addTranslationService" class="btn-add-trigger" id="add-new-config">+ 添加翻译服务</button>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div id="close-engineSettingsWindow" class="close-btn" title=""></div>
+            <div id="dynamic-form-container"></div>
+            <div class="bottom-bar hidden" id="global-actions">
+                <div id="tips" style="font-size: 12px; margin-bottom: 8px; min-height: 18px;"></div>
+                <div class="button-group">
+                    <button data-i18n="testConnection" class="btn-test" id="testApiConfig">⚡ 测试连接</button>
+                    <button data-i18n="save" class="btn-save" id="saveApiConfig">应用并保存</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div id="engine-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div id="close-modal" class="close-btn" title=""></div>
+            <div class="header-area">
+                <h2 data-i18n="addTranslationService">添加翻译模板</h2>
+                <p data-i18n="initEngineTip" style="color: var(--text-dim); font-size: 13px; margin: 8px 0 0 0;">
+                    请选择要初始化的引擎实例</p>
+            </div>
+            <div id="template-grid" class="template-grid"> </div>
+        </div>
+    </div>
+    <script src="utils.js"></script>
+    <script src="engineSettings.js"></script>
+</body>
+</html>

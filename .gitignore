@@ -1,0 +1,16 @@
+# 忽略私密的配置文件
+#private_config.js
+
+# 忽略图片文件夹
+img
+
+# 忽略构建输出目录
+dists
+
+tools
+
+# 忽略 Node.js 依赖库
+node_modules
+
+# 忽略日志文件
+.log

@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira 翻訳"
+  },
+  "appDesc": {
+    "message": "0.5MB未満：パブリックエンジン内蔵＆カスタムAI API対応。全文翻訳、YouTube二ヶ国語字幕、Google Drive/WebDAV同期搭載。"
+  },
+  "ERROR_400": {
+    "message": "APIエラー：無効なリクエストまたは残高不足。"
+  },
+  "ERROR_401": {
+    "message": "APIエラー：APIキーが無効です。"
+  },
+  "ERROR_402": {
+    "message": "APIエラー：残高不足です。"
+  },
+  "ERROR_403": {
+    "message": "APIエラー：アクセス拒否。権限またはIP制限を確認してください。"
+  },
+  "ERROR_404": {
+    "message": "APIエラー：モデルが見つからないかURLが不正です。"
+  },
+  "ERROR_429": {
+    "message": "APIエラー：利用制限超過。"
+  },
+  "ERROR_500": {
+    "message": "APIエラー：サーバーエラー（500）。"
+  },
+  "ERROR_TIMEOUT": {
+    "message": "タイムアウト：ネットワーク設定を確認してください。"
+  },
+  "ERROR_GENERIC": {
+    "message": "翻訳失敗：API設定を確認してください。"
+  }
+}

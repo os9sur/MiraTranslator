@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira 번역"
+  },
+  "appDesc": {
+    "message": "0.5MB 미만: 기본 공용 엔진 및 커스텀 AI API 지원. 몰입형 번역, YouTube 이중 자막, Google Drive 및 WebDAV 동기화."
+  },
+  "ERROR_400": {
+    "message": "API 오류: 잘못된 요청 또는 잔액 부족."
+  },
+  "ERROR_401": {
+    "message": "API 오류: 잘못된 API 키."
+  },
+  "ERROR_402": {
+    "message": "API 오류: 잔액이 부족합니다."
+  },
+  "ERROR_403": {
+    "message": "API 오류: 권한 거부. API 키 권한이나 IP 제한을 확인하세요."
+  },
+  "ERROR_404": {
+    "message": "API 오류: 모델을 찾을 수 없거나 URL 오류."
+  },
+  "ERROR_429": {
+    "message": "API 오류: 한도 초과 또는 요청 과다."
+  },
+  "ERROR_500": {
+    "message": "API 오류: 서버 오류 (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "요청 시간 초과: 네트워크를 확인하세요."
+  },
+  "ERROR_GENERIC": {
+    "message": "번역 실패: API 설정을 확인하세요."
+  }
+}

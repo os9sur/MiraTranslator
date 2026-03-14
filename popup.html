@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="i18n.js"></script>
+  <script src="constants.js"></script>
+  <title>Mira Translator</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html {
+      overflow: hidden;
+    }
+    body {
+      width: 280px;
+      min-width: 250px;
+      max-width: 580px;
+      min-height: fit-content;
+      padding: 10px 12px;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14px;
+      background: #0f172a;
+      color: #e5e7eb;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: width 0.2s ease-in-out;
+    }
+    .mira-hint-icon {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #555;
+      color: #fff;
+      font-size: 10px;
+      text-align: center;
+      line-height: 14px;
+      cursor: help;
+      margin-left: 4px;
+      font-style: normal;
+    }
+    @keyframes mira-pulse {
+      0% {
+        box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.5), 0 0 6px 2px rgba(59, 130, 246, 0.25);
+      }
+      50% {
+        box-shadow: 0 0 5px 2px rgba(59, 130, 246, 0.7), 0 0 10px 4px rgba(59, 130, 246, 0.35);
+      }
+      100% {
+        box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.5), 0 0 6px 2px rgba(59, 130, 246, 0.25);
+      }
+    }
+    #donateOverlay {
+      width: 100%;
+      height: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    div:not(.allow-select),
+    span:not(.allow-select),
+    label:not(.allow-select) {
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .allow-select,
+    .allow-select * {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
+    .style-tab.active {
+      background: #38bdf8 !important;
+      color: #020617 !important;
+      font-weight: bold;
+    }
+    html.full-screen-mode {
+      width: 100% !important;
+      height: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #02040a !important;
+      overflow: hidden !important;
+    }
+    body.full-screen-mode {
+      width: 100vw !important;
+      height: 100vh !important;
+      min-width: 100vw !important;
+      min-height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background-color: #02040a !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      overflow: visible !important;
+    }
+    body.full-screen-mode #syncSettingsPanel,
+    body.full-screen-mode #settingsPanel {
+      position: relative !important;
+      left: auto !important;
+      top: auto !important;
+      display: none;
+      flex-direction: column !important;
+      width: 400px !important;
+      max-height: 85vh !important;
+      background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+      padding: 40px !important;
+      border-radius: 24px !important;
+      border: none !important;
+      overflow-y: auto !important;
+      overflow-x: visible !important;
+      animation: eclipse-glow-refined 5s ease-in-out infinite alternate;
+    }
+    @keyframes eclipse-glow-refined {
+      0% {
+        box-shadow:
+          0 0 20px rgba(0, 0, 0, 0.8),
+          0 0 35px rgba(56, 189, 248, 0.25),
+          0 0 60px rgba(56, 189, 248, 0.1);
+      }
+      100% {
+        box-shadow:
+          0 0 40px rgba(0, 0, 0, 0.6),
+          0 0 60px rgba(56, 189, 248, 0.5),
+          0 0 100px rgba(56, 189, 248, 0.35),
+          0 0 150px rgba(56, 189, 248, 0.15);
+      }
+    }
+    body.full-screen-mode #mainContainer,
+    body.full-screen-mode .main-header {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- 查单词开始 -->
+  <div id="searchPanel"
+    style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 110; display: none; padding: 12px; box-sizing: border-box; flex-direction: column; border-radius: 10px;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <div style="width: 6px; height: 6px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 6px #38bdf8;">
+        </div>
+        <span style="font-weight: 800; font-size: 11px; letter-spacing: 1px; color: #38bdf8;">QUICK LOOKUP</span>
+      </div>
+      <span id="closeSearchPanel" class="close-btn-common"
+        style="cursor: pointer; font-size: 16px;font-weight:bold; color: #94a3b8; line-height: 1;">✕</span>
+    </div>
+    <textarea id="searchTextInput" data-i18n="inputAndEnter" rows="1" placeholder="Word or sentence..."
+      class="mira-input-terminal"
+      style="min-height: 36px; max-height: 80px;padding-top: 10px; margin-bottom: 8px; overflow-y: auto !important;"></textarea>
+    <div id="searchResultArea" style="display: none; flex: none; height: auto;max-height: 60vh; min-height: 0; 
+            overflow-y: auto; background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid #1e293b; border-radius: 8px; padding: 10px; 
+            padding-right: 6px; 
+            flex-direction: column;
+            scrollbar-width: thin; 
+            scrollbar-color: rgba(56, 189, 248, 0.3) transparent;">
+      <div id="resVoiceHeader"
+        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px solid rgba(56, 189, 248, 0.1); padding-bottom: 6px;">
+        <div style="flex: 1; min-width: 0; margin-right: 8px;">
+          <div id="resSourceText" class="allow-select"
+            style="color: #ffffffd4; font-size: 14px; font-weight: bold; word-break: break-all;">
+          </div>
+          <div id="resPhonetic" class="allow-select"
+            style="color: #94a3b8; font-size: 11px; font-family: sans-serif; margin-top: 2px;">
+          </div>
+        </div>
+        <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
+          <button id="ttsBtn" class="icon-btn" data-i18n="pronunciation" data-i18n-title title="Pronounce">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+            </svg>
+          </button>
+          <button id="resSaveBtn" class="icon-btn" data-i18n="collect" data-i18n-title title="Collect">
+            <svg id="res-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+              </polygon>
+            </svg>
+          </button>
+          <button id="resRefreshBtn" class="icon-btn" data-i18n="retranslate" data-i18n-title title="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div id="resContent" class="allow-select"
+        style="color: #38bdf8; font-size: 12px; line-height: 1.6;user-select: auto !important;"></div>
+    </div>
+    <div id="actionArea" style="margin-top: 12px; display: none; flex-shrink: 0;">
+      <button id="openNotebookSecondary" class="openNotebook" style="
+            width: 100%;
+            height: 35px;
+            background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+          ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span data-i18n="wordBook">生词本</span>
+      </button>
+    </div>
+  </div>
+  <!-- 查单词结束 -->
+  <div id="mainContainer">
+    <!-- 设置 -->
+    <div class="main-header" style="margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; 
+                filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));">
+            <img src="/icons/icon-48.png" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+          <span id="app-name-label" data-i18n="appName"
+            style="font-weight: 900; font-size: 12px; letter-spacing: 1.5px; color: #ffffffeb; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-style: italic;"></span>
+        </div>
+        <div id="advancedSettingsBtn" data-i18n="moreSettings" class="icon-action-btn"
+          style="padding: 4px; color: rgba(255,255,255,0.5); cursor: pointer;" data-i18n-title
+          title="Advanced settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <!-- 横向轨道 -->
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+            <!-- Slider 小按钮 -->
+            <circle class="slider-knob k1" cx="7" cy="6" r="1.8" />
+            <circle class="slider-knob k2" cx="15" cy="12" r="1.8" />
+            <circle class="slider-knob k3" cx="11" cy="18" r="1.8" />
+          </svg>
+        </div>
+      </div>
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 0px;">
+        <div id="openSettings" class="engine-pulse-active"
+          style="flex: 1; display: flex; align-items: center; justify-content: center; height: 28px; font-size: 11px; border-radius: 14px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.3); cursor: pointer; box-sizing: border-box; color: rgb(56, 189, 248); padding: 0 4px; min-width: 0;">
+          <span id="currentEngineName" style="
+            color: #38bdf8; 
+            font-weight: 600; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            display: inline-block;
+          ">Google Translate</span>
+          <div id="keyWarningDot" class="warning-dot-anim"
+            style="width: 10px; height: 10px; line-height: 10px; font-size: 8px; margin-left: 6px; background: rgb(239, 68, 68); border-radius: 50%; text-align: center; color: white; font-weight: bold; display: none;">
+            !</div>
+        </div>
+        <div id="quickSearchBtn"
+          style="flex: 1; display: flex; align-items: center; justify-content: center; height: 28px; font-size: 11px; border-radius: 14px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; box-sizing: border-box;padding: 0 4px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            style="margin-right: 6px;">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span data-i18n="instantTranslation" style="font-weight: 800; letter-spacing: 0.5px;">SEARCH</span>
+        </div>
+      </div>
+    </div>
+    <!-- 设置结束 -->
+    <div id="tabCurrentGlobal"
+      style="display: flex; background: #1e293b; border-radius: 8px; padding: 2px; margin-bottom: 5px;margin-top: 0px;">
+      <div id="tabCurrent" class="tab active"
+        style="flex: 1; text-align: center; padding: 6px; cursor: pointer; font-size: 12px; border-radius: 6px;"
+        data-i18n="currentSite">当前网站</div>
+      <div id="tabGlobal" class="tab"
+        style="flex: 1; text-align: center; padding: 6px; cursor: pointer; font-size: 12px; border-radius: 6px;"
+        data-i18n="globalSetting">全局默认</div>
+    </div>
+    <div id="domainIndicator" class="domain-tag">
+      🌐 <span id="currentDomain">loading...</span>
+    </div>
+    <!-- 单选按钮开始 -->
+    <div class="row" id="webTranslationOptionContainer">
+      <label data-i18n="pageTrans">网页翻译</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" title="重新翻译此页" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
+          </svg>
+        </button>
+        <div id="autoSwitchPage" class="switch">
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+    <div class="row" id="selectTextOptionContainer">
+      <label data-i18n="selectTrans">划词翻译</label>
+      <div id="autoSwitchSelectText" class="switch">
+        <div class="dot"></div>
+      </div>
+    </div>
+    <div class="row" id="youtube-option-container">
+      <label data-i18n="ytTrans">Youtube双语字幕</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" title="重新预翻译字幕" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
+          </svg>
+        </button>
+        <div id="autoSwitchYT" class="switch">
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+    <!-- 单选按钮结束 -->
+    <div id="targetLangCombox" class="row">
+      <label data-i18n="targetLang"
+        style="overflow-wrap: break-word;word-wrap: break-word;word-break: normal;">目标语言</label>
+      <select id="targetLang" style="width: 120px;max-width: 150px;">
+        <!-- 置顶高频语言 -->
+        <option value="en">English</option>
+        <option value="zh-CN">简体中文</option>
+        <option value="zh-TW">繁體中文</option>
+        <option value="ja">日本語</option>
+        <option value="ko">한국어</option>
+        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+          ── Southeast Asia ──
+        </option>
+        <option value="id">Bahasa Indonesia</option> <!-- B -->
+        <option value="ms">Bahasa Melayu</option> <!-- B -->
+        <option value="th">ไทย</option> <!-- ไ -->
+        <option value="vi">Tiếng Việt</option> <!-- T -->
+        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+          ── Middle East & South Asia ──
+        </option>
+        <option value="ar">العربية</option> <!-- ا -->
+        <option value="bn">বাংলা</option> <!-- ব -->
+        <option value="fa">فارسی</option> <!-- ف -->
+        <option value="hi">हिन्दी</option> <!-- ह -->
+        <option value="he">עברית</option> <!-- ע -->
+        <option value="tr">Türkçe</option> <!-- T -->
+        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+          ── Americas & Europe ──
+        </option>
+        <option value="bg">Български</option> <!-- B -->
+        <option value="cs">Čeština</option> <!-- C -->
+        <option value="da">Dansk</option> <!-- D -->
+        <option value="de">Deutsch</option> <!-- D -->
+        <option value="et">Eesti</option> <!-- E -->
+        <option value="el">Ελληνικά</option> <!-- E -->
+        <option value="es">Español</option> <!-- E -->
+        <option value="fr">Français</option> <!-- F -->
+        <option value="ga">Gaeilge</option> <!-- G -->
+        <option value="hr">Hrvatski</option> <!-- H -->
+        <option value="it">Italiano</option> <!-- I -->
+        <option value="lv">Latviešu</option> <!-- L -->
+        <option value="lt">Lietuvių</option> <!-- L -->
+        <option value="hu">Magyar</option> <!-- M -->
+        <option value="nl">Nederlands</option> <!-- N -->
+        <option value="no">Norsk</option> <!-- N -->
+        <option value="pl">Polski</option> <!-- P -->
+        <option value="pt">Português</option> <!-- P -->
+        <option value="ro">Română</option> <!-- R -->
+        <option value="ru">Русский</option> <!-- R -->
+        <option value="sk">Slovenčina</option> <!-- S -->
+        <option value="sl">Slovenščina</option> <!-- S -->
+        <option value="fi">Suomi</option> <!-- S -->
+        <option value="sv">Svenska</option> <!-- S -->
+        <option value="uk">Українська</option> <!-- U -->
+        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+          ── Africa ──
+        </option>
+        <option value="af">Afrikaans</option> <!-- A -->
+        <option value="am">አማርኛ</option> <!-- አ -->
+        <option value="ha">Hausa</option> <!-- H -->
+        <option value="zu">IsiZulu</option> <!-- I -->
+        <option value="sw">Kiswahili</option> <!-- K -->
+        <option value="yo">Yorùbá</option> <!-- Y -->
+      </select>
+    </div>
+    <div id="inspectContainer" class="row-group"
+      style="margin-top: 6px; border-top: 1px solid #334155; padding-top: 8px;">
+      <div id="inspectElementLabel" data-i18n="personalizedScan"
+        style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">个性化扫描配置 (失去焦点自动保存)
+      </div>
+      <button id="inspectElement"
+        style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; padding-right: 1px; cursor: pointer;">
+        <span style="position: absolute; left: 6px; font-size: 1.2rem; line-height: 1; pointer-events: none;">
+          🔍
+        </span>
+        <span data-i18n="smartPicker" style="display: block; font-size: 13px; text-align: center; line-height: 1.3;">
+          开启智能拾取器<br>(ESC/右键 退出)
+        </span>
+      </button>
+      <div class="row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <label data-i18n="matchSelector" style="font-size: 11px; color: #94a3b8;">生效列表 (CSS 选择器)</label>
+          <span id="builtinRuleHint" title="此网站已有内置规则，当前配置优先于全局默认"
+            style="display:none; width:14px; height:14px; border-radius:50%; background:#3b82f6; color:#fff; font-size:10px; font-weight:bold; text-align:center; line-height:14px; cursor:help; font-style:normal; flex-shrink:0; vertical-align:middle; position:relative;
+  box-shadow: 0 0 6px 2px rgba(59,130,246,0.8), 0 0 12px 4px rgba(59,130,246,0.4);animation: mira-pulse 2s ease-in-out infinite;">?</span>
+        </div>
+        <textarea id="conf-selectors" class="mira-input-terminal"
+          style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; font-family: monospace;resize: none !important;">
+      </textarea>
+      </div>
+      <div class="row" style="margin-bottom: 3px;">
+        <label data-i18n="minChars" style="font-size: 11px;color:#94a3b8;">最小字数</label>
+        <input type="number" id="conf-minlen" min="0" style="
+    width: 60px; 
+    font-size: 12px; 
+    background: #020617; 
+    border: 1px solid #334155; 
+    color: #38bdf8; 
+    padding: 6px; 
+    border-radius: 4px; 
+    outline: none; 
+    transition: all 0.3s ease;
+    text-align: center;
+    box-sizing: border-box;
+  " this.style.boxShadow='0 0 10px rgba(56, 189, 248, 0.5), inset 0 0 4px rgba(56, 189, 248, 0.2)' ;"
+          this.style.boxShadow='none' ;">
+      </div>
+    </div>
+    <div class="row" style="margin-top: 0px; border-top: 1px solid #334155; padding-top: 8px;">
+      <button id="openNotebook" class="openNotebook" style="
+      width: 100%;
+      height: 35px;
+      background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    ">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span data-i18n="wordBook">生词本</span>
+      </button>
+    </div>
+  </div>
+  <!-- 设置 -->
+  <div id="settingsPanel"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 100; display: none; padding: 20px; box-sizing: border-box; flex-direction: column;">
+    <div class="row" style="margin-bottom: 11px;">
+      <h3 data-i18n="translationEngineConfig" style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">
+        ENGINE CONFIG</h3>
+      <span id="closeSettings" class="close-btn-common">✕</span>
+    </div>
+    <div style="margin-bottom: 0px;">
+      <label data-i18n="selectTranslationEngine"
+        style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">SELECT
+        TRANSLATOR</label>
+      <div class="custom-combobox" id="engineCombobox">
+        <input type="text" id="engineSelect" class="api-input-field" readonly value="Google Translate"
+          style="cursor: pointer;">
+        <div class="combobox-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"></path>
+          </svg>
+        </div>
+        <div class="combobox-dropdown">
+          <div class="dropdown-group-label">General Translation</div>
+          <div class="dropdown-item" data-value="google">Google Translate</div>
+          <div class="dropdown-item" data-value="bing">Microsoft Bing</div>
+          <div class="dropdown-item" data-value="deepl">DeepL API</div>
+          <div class="dropdown-item" data-value="baidu">Baidu Translation</div>
+          <div class="dropdown-group-label">AI Models (LLM)</div>
+          <div class="dropdown-item" data-value="openai">OpenAI (ChatGPT)</div>
+          <div class="dropdown-item" data-value="claude">Anthropic (Claude)</div>
+          <div class="dropdown-item" data-value="gemini">Google (Gemini)</div>
+          <div class="dropdown-item" data-value="deepseek">DeepSeek</div>
+          <div class="dropdown-item" data-value="grok">xAI (Grok)</div>
+          <div class="dropdown-group-label">Cloud Infrastructure</div>
+          <div class="dropdown-item" data-value="google_v3">Google Cloud (v3)</div>
+          <div class="dropdown-item" data-value="microsoft">Microsoft Azure</div>
+          <div class="dropdown-item" data-value="volc">ByteDance Volcengine</div>
+          <div class="dropdown-item" data-value="tencent">Tencent Cloud</div>
+          <div class="dropdown-group-label">Advanced & Custom</div>
+          <div class="dropdown-item" data-value="siliconflow">SiliconFlow (Aggregator)</div>
+          <div class="dropdown-item" data-value="custom_ai">Custom API (OpenAI-Compatible)</div>
+        </div>
+      </div>
+    </div>
+    <div id="apiInputs" style="margin-top: 0px;">
+    </div>
+    <!-- 清理缓存 -->
+    <div id="cacheManager"
+      style="margin: 14px 0 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px dashed rgba(148, 163, 184, 0.2); padding-bottom: 12px;margin-bottom: 10px;">
+      <div style="font-size: 10px; color: #94a3b8; display: flex; flex-direction: column; gap: 2px;">
+        <div data-i18n="cacheTitle" style="letter-spacing: 0.5px;">STORAGE USED</div>
+        <div id="cacheSizeText" style="color: #38bdf8; font-weight: bold;">0.0 KB</div>
+      </div>
+      <button id="clearAllCache" data-i18n="clearAllCache"
+        style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;">
+        CLEAR ALL CACHE
+      </button>
+    </div>
+    <div class="allow-select">
+      <p id="tips" style="margin: 0; font-size: 10px; color: #ffc048; line-height: 1.4;">
+        💡 <strong data-i18n="whatIsAPIKey">什么是密钥 (API Key)?</strong><br>
+        <span data-i18n="apiKeyDescription"> 这是引擎服务商提供的身份凭证。没有它，备选引擎无法工作。</span>
+        <a href="#engineSelect" data-i18n="viewTutorial" style="color: #38bdf8; text-decoration: none;">查看获取教程
+          →</a>
+      </p>
+    </div>
+    <!-- 测试连接 -->
+    <button id="testApiConfig" class="cool-test-btn">
+      <span id="testBtnIcon">⚡</span>
+      <span id="testBtnText" data-i18n="testConnection">TEST CONNECTION</span>
+    </button>
+    <!-- 保存 -->
+    <button id="saveApiConfig" data-i18n="save" class="cool-btn">
+      APPLY CHANGES
+    </button>
+  </div>
+  <div id="advancedMenu" class="advancedMenu">
+    <div class="menu-item" id="btnGoStyle">
+      <svg viewBox="0 0 24 24">
+        <path class="icon-main" d="M2.5 21.5l14-14 1.5 1.5-14 14z" />
+        <path class="icon-main" d="M16 6.5l2-2 1.5 1.5-2 2z" />
+        <g class="icon-star">
+          <path d="M19 0l1.5 3 3 1.5-3 1.5-1.5 3-1.5-3-3-1.5 3-1.5 1.5-3z" />
+          <path d="M10 2l1.2 2.5 2.5 1.2-2.5 1.2-1.2 2.5-1.2-2.5-2.5-1.2 2.5-1.2 1.2-2.5z" />
+          <path d="M10 2l1.2 2.5 2.5 1.2-2.5 1.2-1.2 2.5-1.2-2.5-2.5-1.2 2.5-1.2 1.2-2.5z" />
+          <circle cx="21" cy="9" r="1.5" />
+          <circle cx="15" cy="11" r="1" />
+        </g>
+      </svg>
+      <span data-i18n="styleCustomization">样式自定义</span>
+    </div>
+    <div class="menu-item engine-item" id="btnGoEngine">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="icon-main" style="width: 22px; height: 22px;">
+        <path d="M2.5,19L7.8,5h3.4l5.3,14h-2.8l-1.2-3.5H6.5L5.3,19H2.5z M8.9,13.2h3.2l-1.6-4.5L8.9,13.2z" />
+        <path d="M18,5h3v14h-3V5z" />
+      </svg>
+      <span data-i18n="engineConfig">引擎配置</span>
+    </div>
+    <div class="menu-item" id="openSyncPanel">
+      <svg class="cloud-icon" viewBox="0 0 24 24">
+        <path class="icon-main cloud-a" opacity="0.6"
+          d="M7.5,13c-1.9,0-3.5-1.6-3.5-3.5S5.6,6,7.5,6c0.4,0,0.8,0.1,1.1,0.2C9.5,4.1,11.6,2.5,14,2.5c3.3,0,6,2.7,6,6c0,0.3,0,0.6-0.1,0.9c1.5,0.6,2.6,2.1,2.6,3.8c0,2.4-1.9,4.3-4.3,4.3H7.5z" />
+        <path class="icon-main cloud-b"
+          d="M15,20c-2.2,0-4-1.8-4-4c0-0.2,0-0.4,0.1-0.6C9.1,14.8,8,13,8,11c0-2.8,2.2-5,5-5c0.7,0,1.4,0.1,2,0.4C15.8,4.6,17.7,3.5,20,3.5c2.8,0,5,2.2,5,5c0,0.3,0,0.6-0.1,0.9c1.5,0.6,2.6,2.1,2.6,3.8c0,2.4-1.9,4.3-4.3,4.3H15z"
+          transform="translate(-5, 2)" />
+      </svg>
+      <span data-i18n="cloudSync">云同步</span>
+    </div>
+    <!-- <div class="menu-item donate-item" id="btnDonate">
+      <svg viewBox="0 0 24 24">
+        <path class="icon-main" d="M3 8h14c0 0-0.5 8-1.5 10.5C14.5 21 12 22 10 22s-4.5-1-5.5-3.5C3.5 16 3 8 3 8z" />
+        <path class="icon-main"
+          d="M17 10h2.5c1.9 0 3.5 1.6 3.5 3.5S21.4 17 19.5 17H17v-7zm2.5 5c0.8 0 1.5-0.7 1.5-1.5S20.3 12 19.5 12H17v3h2.5z" />
+        <g class="icon-star">
+          <path d="M7 2c0.8 1.5-0.8 1.5-0.8 3s0.8 1.5 0.8 3h1.5c0-1.5-0.8-1.5-0.8-3s0.8-1.5 0.8-3H7z" />
+          <path d="M11 1c0.8 1.5-0.8 1.5-0.8 3s0.8 1.5 0.8 3h1.5c0-1.5-0.8-1.5-0.8-3s0.8-1.5 0.8-3H11z" />
+          <path d="M15 2c0.8 1.5-0.8 1.5-0.8 3s0.8 1.5 0.8 3h1.5c0-1.5-0.8-1.5-0.8-3s0.8-1.5 0.8-3H15z" />
+        </g>
+      </svg>
+      <span data-i18n="buyMeACoffee">请作者喝杯咖啡</span>
+    </div> -->
+  </div>
+  <!-- 云同步panel开始 -->
+  <div id="syncSettingsPanel"
+    style="position: fixed; top: 0; left: 0; width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 125; display: none; padding: 20px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    <div class="settings-card-wrapper">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">CLOUD SYNC</h3>
+        <span id="closeSyncPanel" class="close-btn-common">✕</span>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label
+          style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">STORAGE
+          PROVIDER</label>
+        <select id="syncMethod" class="select"
+          style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #e5e7eb; padding: 8px; border-radius: 6px;">
+          <option value="googleDrive">Google Drive</option>
+          <option value="webdav">WebDAV (NAS...)</option>
+          <option data-i18n="manualExportImport" value="local">手动导出/导入 (JSON)</option>
+        </select>
+        <div
+          style="margin-top: 8px; padding: 0 4px; font-size: 12px; color: #94a3b8; display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap;">
+          <span data-i18n="syncContent" style="opacity: 0.8;">同步内容</span>
+          <span style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            • <span data-i18n="wordBook" style="color: #38bdf8;">生词本</span>
+            <span style="color: #38bdf8;">• AppData</span>
+          </span>
+        </div>
+      </div>
+      <div id="webdavConfigArea"
+        style="display: none; background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px;">
+        <input type="text" id="webdavUrl" placeholder="Server URL (e.g. https://...)"
+          style="width: 100%; margin-bottom: 8px;" class="api-input-field">
+        <input type="text" id="webdavUser" placeholder="Username" style="width: 100%; margin-bottom: 8px;"
+          class="api-input-field">
+        <input type="password" id="webdavPass" placeholder="App Password" style="width: 100%;" class="api-input-field">
+      </div>
+      <div
+        style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
+        <div class="row" style="margin-bottom: 12px; border-bottom: none; padding-top: 0;">
+          <label data-i18n="autoBackgroundSync" style="font-size: 13px; color: #f1f5f9;">自动后台同步</label>
+          <div id="autoSyncToggle" class="switch" style="transform: scale(0.85);">
+            <div class="dot"></div>
+          </div>
+        </div>
+        <div id="syncFrequencyArea"
+          style="display: flex; justify-content: space-between; align-items: center; opacity: 0.5; pointer-events: none; transition: all 0.3s;">
+          <label data-i18n="syncFrequency" style="font-size: 11px; color: #94a3b8;">同步频率</label>
+          <select id="syncFrequency"
+            style="background: #0f172a; border: 1px solid #334155; color: #38bdf8; font-size: 11px; border-radius: 4px; padding: 2px 6px;">
+            <!-- <option   value="1">每 1 分钟</option> -->
+            <option data-i18n="every15Minutes" value="15">每 15 分钟</option>
+            <option data-i18n="everyHour" value="60">每小时</option>
+            <option data-i18n="everyDay" value="1440">每天</option>
+          </select>
+        </div>
+      </div>
+      <div id="syncSettingsPanel">
+        <div class="sync-config-section">
+        </div>
+        <div class="sync-actions-footer" style="margin-top: auto; padding-top: 15px;">
+          <div style="display: flex; gap: 10px;">
+            <button id="manualSyncPush" class="cool-test-btn"
+              style="flex: 1; margin: 0; font-size: 13px; padding: 10px 5px; flex-direction: column;">
+              <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
+              <div class="sync-log-scroller"></div>
+            </button>
+            <button id="manualSyncPull" class="cool-test-btn"
+              style="flex: 1; margin: 0; font-size: 13px; background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; padding: 10px 5px; flex-direction: column;">
+              <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
+              <div class="sync-log-scroller"></div>
+            </button>
+          </div>
+          <div id="localFileActions" style="margin-top: 15px; display: flex; gap: 10px;">
+            <button id="exportJson" data-i18n="export"
+              style="flex: 1; background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 6px; border-radius: 4px;">导出
+              JSON</button>
+            <button id="importJson" data-i18n="import"
+              style="flex: 1; background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 6px; border-radius: 4px;">导入
+              JSON</button>
+          </div>
+          <div id="syncStatus" style="margin-top: 12px; font-size: 10px; color: #64748b; text-align: center;">
+            上次同步: 尚未同步
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 风格设置panel开始 -->
+  <div id="styleSettingsPanel"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 15px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+      <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">STYLE
+        CUSTOMIZATION</span>
+      <span id="closeStylePanel" class="close-btn-common">✕</span>
+    </div>
+    <div
+      style="display: flex; background: #0f172a; border-radius: 8px; padding: 3px; margin-bottom: 15px; border: 1px solid #334155; flex-shrink: 0;">
+      <div id="tab-web" class="style-tab active"
+        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer; border-radius:6px; transition:0.3s;">
+        <span data-i18n="webTranslation">网页翻译</span>
+      </div>
+      <div id="tab-yt" class="style-tab"
+        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer; border-radius:6px; transition:0.3s; color:#94a3b8;">
+        <span data-i18n="youtubeSubtitles">YouTube 字幕</span>
+      </div>
+    </div>
+    <div id="stylePreviewContainer"
+      style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 15px; min-height: 85px; display: flex; align-items: center; justify-content: center; border: 1px dashed #334155; position: relative; overflow: hidden;">
+      <div id="preview-web-box" style="display: block; width: 100%;">
+        <!-- <div
+          style="font-size: 11px; color: #64748b; margin-bottom: 4px; border-left: 2px solid #334155; padding-left: 8px;">
+          The climate is changing.</div> -->
+        <div id="webPreviewText" data-i18n="translationExample" style="transition: all 0.3s ease;">Time flies...</div>
+      </div>
+      <div id="preview-yt-box" style="display: none; width: 100%; text-align: center;">
+        <div data-i18n="translationExampleYTOrigin"
+          style="font-size: 20px; color: #ffffff; margin-bottom: 6px; text-shadow: 1px 1px 2px #000;">You matter!
+        </div>
+        <div id="ytPreviewText" data-i18n="translationExampleYTTrans"
+          style="transition: all 0.3s ease; display: inline-block; border-radius: 4px; line-height: 1.4; padding: 2px 8px;">
+          你很重要!</div>
+      </div>
+    </div>
+    <div id="webStyleControls" style="display: block;">
+      <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
+        <label data-i18n="textColorPalette"
+          style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <div class="color-preset" data-color="#60a5fa"
+            style="width:20px; height:20px; border-radius:4px; background:#60a5fa; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#10b981"
+            style="width:20px; height:20px; border-radius:4px; background:#10b981; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#f59e0b"
+            style="width:20px; height:20px; border-radius:4px; background:#f59e0b; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#ef4444"
+            style="width:20px; height:20px; border-radius:4px; background:#ef4444; cursor:pointer;"></div>
+          <input type="color" id="style-color" value="#60a5fa"
+            style="border:none; width:42px; height:24px; background:none; cursor:pointer; padding:0;">
+        </div>
+      </div>
+      <div style="margin-bottom: 12px; display: none;">
+        <div style="display: flex; justify-content: space-between;">
+          <label data-i18n="fontSize" style="font-size: 12px; color: #94a3b8;">字体大小</label>
+          <span id="fontSizeVal" style="font-size: 11px; color: #38bdf8;">16px</span>
+        </div>
+        <input type="range" id="style-fontSize" min="8" max="40" step="1" value="16"
+          style="width: 100%; accent-color: #38bdf8;">
+      </div>
+      <div style="margin-bottom: 12px; display: flex; gap: 10px;align-items: flex-end;">
+        <div style="flex: 1;">
+          <label data-i18n="borderStyle"
+            style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">边框样式</label>
+          <select id="style-borderType" class="select">
+            <option data-i18n="quoteStyle" value="left">引用样式</option>
+            <option data-i18n="solidBorder" value="solid">四周实线</option>
+            <option data-i18n="dashedBorder" value="dashed">四周虚线</option>
+            <option data-i18n="noBorder" value="none">无边框</option>
+            <option data-i18n="dashedUnderline" value="dashedUnderline">虚线下划线</option>
+            <option data-i18n="solidUnderline" value="underline">直线下划线</option>
+            <option data-i18n="dottedUnderline" value="dottedUnderline">点状下划线</option>
+            <option data-i18n="wavyUnderline" value="wavy">波浪下划线</option>
+            <option data-i18n="lightHighlight" value="highlight">浅色高亮</option>
+            <option data-i18n="markerLine" value="marker">马克笔划线</option>
+            <option data-i18n="paperShadow" value="paper">白纸阴影</option>
+            <option data-i18n="italicText" value="italic">斜体文字</option>
+            <option data-i18n="boldText" value="bold">加粗文字</option>
+            <option data-i18n="translucentDim" value="opacity">半透明弱化</option>
+            <option data-i18n="topDivider" value="dividingLine">上方分割线</option>
+          </select>
+        </div>
+        <div style="width: 100%;">
+          <label data-i18n="borderColor"
+            style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 4px;margin-left: 3px;">边框颜色</label>
+          <input type="color" id="style-borderColor" value="#38bdf8"
+            style="border:none; width:33%; height:26px; background:none; cursor:pointer;">
+        </div>
+      </div>
+      <div class="row"
+        style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155;">
+        <label data-i18n="studyMode" style="font-size: 12px; color: #f1f5f9;">学习模式 (悬停显示内容)</label>
+        <div id="switch-blur" class="switch" style="transform: scale(0.8);">
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+    <div id="ytStyleControls" style="display: none;">
+      <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
+        <label data-i18n="textColorPalette"
+          style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <div class="color-preset" data-color="#60a5fa"
+            style="width:20px; height:20px; border-radius:4px; background:#60a5fa; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#10b981"
+            style="width:20px; height:20px; border-radius:4px; background:#10b981; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#f59e0b"
+            style="width:20px; height:20px; border-radius:4px; background:#f59e0b; cursor:pointer;"></div>
+          <div class="color-preset" data-color="#ef4444"
+            style="width:20px; height:20px; border-radius:4px; background:#ef4444; cursor:pointer;"></div>
+          <input type="color" id="yt-style-color" value="#60a5fa"
+            style="border:none; width:42px; height:24px; background:none; cursor:pointer; padding:0;">
+        </div>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <label data-i18n="subtitleSize" style="font-size: 11px; color: #94a3b8;">字幕大小</label>
+          <span id="ytFontSizeVal" style="font-size: 11px; color: #38bdf8;">32px</span>
+        </div>
+        <input type="range" id="yt-style-fontSize" min="16" max="60" step="1" value="22"
+          style="width: 100%; accent-color: #38bdf8;">
+      </div>
+      <div style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <label data-i18n="backgroundOpacity" style="font-size: 11px; color: #94a3b8;">背景块透明度</label>
+          <span id="ytBgOpacityVal" style="font-size: 11px; color: #38bdf8;">0.4</span>
+        </div>
+        <input type="range" id="yt-style-bgOpacity" min="0" max="0.9" step="0.05" value="0.4"
+          style="width: 100%; accent-color: #38bdf8;">
+      </div>
+    </div>
+    <button id="saveStyleConfig" data-i18n="applyAndSync" class="cool-btn"
+      style="margin-top: auto; flex-shrink: 0;">应用并同步到网页</button>
+  </div>
+  <!-- donate -->
+  <!-- <div id="donateOverlay"
+    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; z-index: 1000; align-items: center; justify-content: center; color: white;">
+    <div
+      style="background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 25px 20px; text-align: center; position: relative; width: 560px;">
+      <div id="closeDonate"
+        style="position: absolute; top: 10px; right: 10px; cursor: pointer; padding: 5px; opacity: 0.6; font-size: 20px;">
+        ✕</div>
+      <h3 data-i18n="supportDeveloper" style="margin: 0 0 25px; font-size: 16px; color: #facc15;">☕ 支持作者持续更新</h3>
+      <div id="donateContainer" style="display: flex; gap: 15px; justify-content: center; align-items: flex-start;">
+        <div id="unit-alipay" style="width: 150px; flex-shrink: 0; transition: transform 0.2s;">
+          <div
+            style="background: #0ea5e9; color: white; font-size: 12px; font-weight: bold; padding: 4px 0; border-radius: 6px 6px 0 0;">
+            Alipay (支付宝)</div>
+          <div
+            style="background: white; padding: 5px; border-radius: 0 0 6px 6px; width: 150px; height: 150px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; cursor: default;">
+            <img src="img/alipay.png" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+        </div>
+        <div id="unit-wechat" style="width: 150px; flex-shrink: 0; transition: transform 0.2s;">
+          <div
+            style="background: #22c55e; color: white; font-size: 12px; font-weight: bold; padding: 4px 0; border-radius: 6px 6px 0 0;">
+            WeChat (微信)</div>
+          <div
+            style="background: white; padding: 5px; border-radius: 0 0 6px 6px; width: 150px; height: 150px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; cursor: default;">
+            <img src="img/wechat_pay.png" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
+        </div>
+        <div id="unit-paypal"
+          style="width: 150px; flex-shrink: 0; cursor: pointer; transition: all 0.2s; position: relative;"
+          class="donate-link">
+          <div
+            style="background: #003087; color: white; font-size: 12px; font-weight: bold; padding: 4px 0; border-radius: 6px 6px 0 0;">
+            PayPal</div>
+          <div
+            style="background: white; padding: 5px; border-radius: 0 0 6px 6px; width: 150px; height: 150px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+            <img src="img/paypal_me.png" style="width: 100%; height: 100%; object-fit: contain;">
+            <div class="paypal-overlay" data-i18n="scanOrClick"
+              style="position: absolute; bottom: 0; left: 0;font-weight:bold; width: 100%; height: 18px; background: #003087; color: #85ff39; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: height 0.2s; overflow: hidden;">
+              Scan or Click ↗
+            </div>
+          </div>
+        </div>
+      </div>
+      <p data-i18n="devStory"
+        style="font-size: 13px; color: #64748b; margin-top: 20px; line-height: 1.6; max-width: 400px; margin-left: auto; margin-right: auto;">
+        本插件由作者在业余时间独立开发并免费维护。每一个好评和支持都是我持续更新的动力。✨
+      </p>
+      <p data-i18n="thankYou" style="font-size: 22px; color: #94a3b8; margin-top: 25px;">Thanks for your support! ❤️</p>
+    </div>
+  </div> -->
+  <!-- donate end -->
+  <div id="toast" class="toast-hidden"></div>
+  <script src="utils.js"></script>
+  <script src="site-rules.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

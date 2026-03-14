@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira Translator"
+  },
+  "appDesc": {
+    "message": "<0.5MB: Standart motorlar ve özel AI API desteği. Tam sayfa çeviri, YouTube çift dilli altyazı ve Google Drive/WebDAV senk."
+  },
+  "ERROR_400": {
+    "message": "API Hatası: Geçersiz istek veya yetersiz bakiye."
+  },
+  "ERROR_401": {
+    "message": "API Hatası: Geçersiz API anahtarı."
+  },
+  "ERROR_402": {
+    "message": "API Hatası: Yetersiz bakiye."
+  },
+  "ERROR_403": {
+    "message": "API Hatası: Erişim engellendi. Yetkileri veya IP beyaz listesini kontrol edin."
+  },
+  "ERROR_404": {
+    "message": "API Hatası: Model bulunamadı."
+  },
+  "ERROR_429": {
+    "message": "API Hatası: Kota aşıldı."
+  },
+  "ERROR_500": {
+    "message": "API Hatası: Sunucu hatası (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "Zaman aşımı: Bağlantıyı kontrol edin."
+  },
+  "ERROR_GENERIC": {
+    "message": "Çeviri başarısız: API ayarlarını kontrol edin."
+  }
+}

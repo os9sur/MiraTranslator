@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira Translator"
+  },
+  "appDesc": {
+    "message": "<0.5MB: Motori pubblici e API AI personalizzate. Traduzione immersiva, YouTube bilingue e sincro Google Drive/WebDAV."
+  },
+  "ERROR_400": {
+    "message": "Errore API: Richiesta non valida o credito esaurito."
+  },
+  "ERROR_401": {
+    "message": "Errore API: Chiave API non valida."
+  },
+  "ERROR_402": {
+    "message": "Errore API: Saldo insufficiente."
+  },
+  "ERROR_403": {
+    "message": "Errore API: Accesso negato. Controlla i permessi o la whitelist IP."
+  },
+  "ERROR_404": {
+    "message": "Errore API: Modello non trovato."
+  },
+  "ERROR_429": {
+    "message": "Errore API: Quota superata."
+  },
+  "ERROR_500": {
+    "message": "Errore API: Errore del server (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "Tempo scaduto: Controlla la rete."
+  },
+  "ERROR_GENERIC": {
+    "message": "Traduzione fallita: Controlla la config API."
+  }
+}

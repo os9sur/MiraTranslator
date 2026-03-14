@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira 翻譯"
+  },
+  "appDesc": {
+    "message": "不到 0.5MB：內置公共引擎及自定義 AI API 接入。整合沉浸式全文、劃詞及 YouTube 雙語字幕，支援 Google Drive 與私有雲同步。"
+  },
+  "ERROR_400": {
+    "message": "翻譯介面提示：請求無效或帳戶餘額不足。"
+  },
+  "ERROR_401": {
+    "message": "翻譯介面提示：API Key 無效，請檢查擴充功能設定。"
+  },
+  "ERROR_402": {
+    "message": "翻譯介面提示：帳戶餘額不足，請檢查並儲值。"
+  },
+  "ERROR_403": {
+    "message": "翻譯介面提示：權限不足，API Key 無權存取該模型或受 IP 限制。"
+  },
+  "ERROR_404": {
+    "message": "翻譯介面提示：模型名稱不存在或 API 路徑錯誤。"
+  },
+  "ERROR_429": {
+    "message": "翻譯介面提示：額度用盡或請求過快。"
+  },
+  "ERROR_500": {
+    "message": "翻譯介面提示：服務器暫時不可用（500 錯誤）。"
+  },
+  "ERROR_TIMEOUT": {
+    "message": "翻譯請求超時：請檢查網路或代理設定。"
+  },
+  "ERROR_GENERIC": {
+    "message": "翻譯失敗：請檢查網路連線或 API 設定。"
+  }
+}

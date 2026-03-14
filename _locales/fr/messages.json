@@ -1,0 +1,35 @@
+{
+  "appName": {
+    "message": "Mira Translator"
+  },
+  "appDesc": {
+    "message": "<0.5Mo : Moteurs publics et API IA personnalisée. Traduction immersive, YouTube bilingue et synchro Google Drive/WebDAV."
+  },
+  "ERROR_400": {
+    "message": "Erreur API : Requête invalide ou solde insuffisant."
+  },
+  "ERROR_401": {
+    "message": "Erreur API : Clé API invalide."
+  },
+  "ERROR_402": {
+    "message": "Erreur API : Solde insuffisant."
+  },
+  "ERROR_403": {
+    "message": "Erreur API : Accès refusé. Vérifiez les permissions ou la liste blanche IP."
+  },
+  "ERROR_404": {
+    "message": "Erreur API : Modèle non trouvé."
+  },
+  "ERROR_429": {
+    "message": "Erreur API : Quota dépassé."
+  },
+  "ERROR_500": {
+    "message": "Erreur API : Erreur serveur (500)."
+  },
+  "ERROR_TIMEOUT": {
+    "message": "Délai d'attente dépassé : Vérifiez le réseau."
+  },
+  "ERROR_GENERIC": {
+    "message": "Échec de la traduction : Vérifiez la config API."
+  }
+}
