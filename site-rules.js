@@ -13,8 +13,25 @@ const SiteRules = {
             minLen: 3
         },
         "amazon.com": {
-            selectors: "p, li, #productTitle, div[data-testid='overall-summary'] span, .a-list-item",
-            minLen: 3
+            selectors: [
+                "p",
+                "#productTitle",
+                "div[data-testid='overall-summary'] span",
+                "#featurebullets_feature_div .a-list-item",
+                "[data-hook='review-collapsed'] > span",
+                "span.review-text-content > span",
+                "[class*='line-clamp-4']",
+                "[class*='line-clamp-6']",
+                ".p13n-sc-uncoverable-faceout a.aok-block span:not([class])",
+                "li.p13n-intuition-product-grid__grid-item span.a-size-base-plus",
+                "[class*='prodInfo'] span.a-size-base-plus:not([class*='brand'])",
+                "[class*='twoAsinsProductDetail'] span.a-size-base-plus:not([class*='brand'])",
+                "span.inline-twister-dim-title-value",
+                ".prodDetTable td",
+                "span.a-size-base.a-text-bold",
+                "h3.a-size-medium.a-color-base",
+            ].join(", "),
+            minLen: 8
         },
         "wikipedia.org": {
             selectors: "#content h1, #mw-content-text p, #mw-content-text h2, #mw-content-text h3, #mw-content-text li:not(:has(.autonym)), #mw-content-text figcaption,.thumbcaption",

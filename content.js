@@ -1324,11 +1324,16 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
     textHolder.text += `(L${idx}: ${textContent})`;
   } else if (node.nodeType === 1) {
     if (node.tagName === 'SUP') return;
+    if (node.tagName === 'SCRIPT') return;
+    if (node.tagName === 'STYLE') return;
     if (node.classList?.contains('kt-paragraph-translation')) return;
     const isIndependentBlock = ['UL', 'OL', 'P'].includes(node.tagName);
     if (isIndependentBlock) return;
     if (node.tagName === 'IMG' && node.alt) {
-      textHolder.text += node.alt;
+      const alt = node.alt.trim();
+      if (alt.length > 0 && alt.length < 50 && !/^\d|stars|rating/i.test(alt)) {
+        textHolder.text += alt;
+      }
       return;
     }
     Array.from(node.childNodes).forEach(child =>
@@ -1477,8 +1482,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isSubListItem = el.tagName === 'LI' && !!el.closest('ul')?.parentElement?.closest('li');
   const isIndependent = ['P', 'LI'].includes(el.tagName);
   if (!isIndependent && !isSubListItem && el.parentElement) {
-    const isTrendTitle = isTwitter && el.closest('[data-testid="trend"]');
-    if (!isTrendTitle && el.parentElement.closest('[data-translating="true"], [data-translated="true"]')) {
+    const isAmazonReviewSpan = isAmazon && !!el.closest('[data-hook="review-collapsed"]');
+    const isTrendTitle = isTwitter && !!el.closest('[data-testid="trend"]');
+    const isAmazonCarouselTitle = isAmazon && el.tagName === 'SPAN';
+
+    if (!isAmazonReviewSpan && !isTrendTitle && !isAmazonCarouselTitle &&
+      el.parentElement.closest('[data-translating="true"], [data-translated="true"]')) {
       return;
     }
   }
@@ -1606,16 +1615,40 @@ async function handleTranslateElement(el, forceRefresh = false) {
         });
         el.insertAdjacentElement('afterend', transContainer);
       } else {
-        el.appendChild(transContainer);
+        const expanderContainer = el.closest('.a-expander-container');
+        if (expanderContainer) {
+          expanderContainer.insertAdjacentElement('afterend', transContainer);
+        } else {
+          el.appendChild(transContainer);
+        }
       }
-      if (el.closest('.a-carousel-card, .a-truncate, .p13n-sc-uncoverable-faceout, .a-list-item')) {
+      if (el.closest('#featurebullets_feature_div')) {
+        transContainer.style.setProperty('margin-top', '2px', 'important');
+        transContainer.style.setProperty('margin-bottom', '4px', 'important');
+      }
+      if (el.closest('.a-carousel-card, .a-truncate, .p13n-sc-uncoverable-faceout, [class*="prodInfo"], [class*="twoAsinsProductDetail"], li.p13n-intuition-product-grid__grid-item') ||
+        (el.closest('.a-list-item') && !el.closest('[data-hook="review-collapsed"]') && !el.closest('[data-hook="review-body"]'))) {
+
+        if (transContainer.parentNode) transContainer.parentNode.removeChild(transContainer);
+        el.insertAdjacentElement('afterend', transContainer);
+
+        transContainer.style.setProperty('display', 'block', 'important');
+        transContainer.style.setProperty('position', 'relative', 'important');
+        transContainer.style.setProperty('clear', 'both', 'important');
+        transContainer.style.setProperty('width', '100%', 'important');
+        transContainer.style.setProperty('margin-top', '20px', 'important');
+        transContainer.style.setProperty('z-index', '1', 'important');
+
         el.style.setProperty('height', 'auto', 'important');
         el.style.setProperty('max-height', 'none', 'important');
+        el.style.setProperty('overflow', 'visible', 'important');
+
         let parent = el.parentElement;
-        for (let i = 0; i < 5 && parent; i++) {
+        for (let i = 0; i < 12 && parent && parent !== document.body; i++) {
           parent.style.setProperty('height', 'auto', 'important');
           parent.style.setProperty('max-height', 'none', 'important');
           parent.style.setProperty('overflow', 'visible', 'important');
+          parent.style.setProperty('-webkit-line-clamp', 'unset', 'important');
           parent = parent.parentElement;
         }
       }
@@ -1957,10 +1990,14 @@ async function executeReScan(config) {
         }
         if (el.dataset.translating === 'true') continue;
         if (el.tagName === 'DIV' && (activeRules.includes('p') || activeRules.includes('li') || activeRules.includes('span'))) {
-          const hasDirectText = Array.from(el.childNodes).some(n =>
-            n.nodeType === 3 && n.textContent.trim().length > 1
-          );
-          if (!hasDirectText && el.querySelector('p, li, span')) continue;
+          const isAmazonProductTitle = location.hostname.includes('amazon.') &&
+            el.className.includes('line-clamp');
+          if (!isAmazonProductTitle) {
+            const hasDirectText = Array.from(el.childNodes).some(n =>
+              n.nodeType === 3 && n.textContent.trim().length > 1
+            );
+            if (!hasDirectText && el.querySelector('p, li, span')) continue;
+          }
         }
         const rect = el.getBoundingClientRect();
         const isInViewportBuffer = rect.top < window.innerHeight + 800 && rect.bottom > -800;
@@ -1997,6 +2034,23 @@ async function executeReScan(config) {
 async function scanContent(forcedSelectors = null) {
   if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
   if (forcedSelectors === null && currentActiveSelectors === "__LOADING__") return;
+  if (forcedSelectors === null && typeof SiteRules !== 'undefined') {
+    const domain = window.location.hostname.replace('www.', '');
+    if (SiteRules.hasRule(domain)) {
+      const presetSelectors = SiteRules.getRule(domain).selectors;
+      // 合并 custom selector
+      const storage = await safeGetStorage(['scanConfig']);
+      const customSelectors = storage?.scanConfig?.custom?.[domain]?.selectors || "";
+      if (customSelectors) {
+        currentActiveSelectors = [...new Set([
+          ...presetSelectors.split(',').map(s => s.trim()).filter(Boolean),
+          ...customSelectors.split(',').map(s => s.trim()).filter(Boolean),
+        ])].join(', ');
+      } else {
+        currentActiveSelectors = presetSelectors;
+      }
+    }
+  }
   try {
     const isX = location.hostname.includes('x.com');
     const isMSN = location.hostname.includes('msn.com');
@@ -2023,7 +2077,18 @@ async function scanContent(forcedSelectors = null) {
     allTargets.forEach(el => {
       if (!el || el.nodeType !== 1) return;
       const isAmazon = location.hostname.includes('amazon.');
-      const isAmazonReview = el.getAttribute('data-hook') === 'review-body' || el.classList.contains('review-text-content');
+      const isAmazonReview = el.getAttribute('data-hook') === 'review-body';
+      if (isAmazon && el.tagName === 'LI' && el.classList.contains('a-carousel-card')) {
+        el.dataset.translated = 'true';
+        return;
+      }
+      if (isAmazon && el.getAttribute('data-hook') === 'review') {
+        const reviewSpan = el.querySelector("[data-hook='review-collapsed'] > span");
+        if (reviewSpan && reviewSpan.dataset.translated !== 'true') {
+          handleTranslateElement(reviewSpan);
+        }
+        return;
+      }
       const isYTComment = el.classList.contains('yt-core-attributed-string') || el.id === 'content-text';
       const isSpecialSite = isAmazonReview || isYTComment || isX || isAmazon;
       let targetEl = el;
