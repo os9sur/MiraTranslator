@@ -102,11 +102,14 @@ window.browser = (function () {
             };
             if (!scanConfig.custom) scanConfig.custom = {};
             const presetRule = SiteRules.getRule(location.hostname);
-            let baseSelectors = (scanConfig.custom[domain]?.selectors) ||
-                (presetRule.selectors) ||
-                (scanConfig.global?.selectors) || "p";
-            let oldArray = baseSelectors.split(',').map(s => s.trim()).filter(Boolean);
-            let finalSelectors = [...new Set([...oldArray, selector])].join(', ');
+            const customSelectors = scanConfig.custom[domain]?.selectors || "";
+            const presetSelectors = presetRule?.selectors || scanConfig.global?.selectors || "p";
+
+            const oldArray = [...new Set([
+                ...presetSelectors.split(',').map(s => s.trim()).filter(Boolean),
+                ...customSelectors.split(',').map(s => s.trim()).filter(Boolean),
+            ])];
+            const finalSelectors = [...new Set([...oldArray, selector])].join(', ');
             scanConfig.custom[domain] = {
                 selectors: finalSelectors,
                 minLen: scanConfig.custom[domain]?.minLen || presetRule.minLen || 0
