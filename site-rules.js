@@ -65,7 +65,7 @@ const SiteRules = {
             minLen: 3
         },
         "google.com": {
-            selectors: "h3, .VwiC3b, .hgKElc, .LGOj9e span",
+            selectors: "h3, .VwiC3b > span, .VwiC3b:not(:has(> span)), .hgKElc, .LGOj9e span",
             minLen: 3
         },
         "quora.com": {
