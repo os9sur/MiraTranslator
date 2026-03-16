@@ -1608,6 +1608,10 @@ async function handleTranslateElement(el, forceRefresh = false) {
       transContainer.style.setProperty('display', 'block', 'important');
       transContainer.style.setProperty('margin-top', '4px', 'important');
       transContainer.style.setProperty('font-weight', 'normal', 'important');
+      const lineClampParent = el.closest('[style*="-webkit-line-clamp"]') || el;
+      lineClampParent.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+      lineClampParent.style.setProperty('display', 'block', 'important');
+      lineClampParent.style.setProperty('overflow', 'visible', 'important');
     } else if (isAmazon) {
       if (el.id === 'productTitle') {
         Array.from(el.childNodes).forEach(node => {
