@@ -1,27 +1,27 @@
 {
   "appName": {
-    "message": "Mira 번역"
+    "message": "Mira 번역 - 몰입형 전체 웹 및 YouTube 이중 자막"
   },
   "appDesc": {
-    "message": "0.5MB 미만: 기본 공용 엔진 및 커스텀 AI API 지원. 몰입형 번역, YouTube 이중 자막, Google Drive 및 WebDAV 동기화."
+    "message": "0.5MB 미만: 오픈 소스, 추적 없음. 기본 엔진 + 개인 AI API (자체 Key). 몰입형 번역, YouTube 자막, WebDAV/GDrive 동기화 지원."
   },
   "ERROR_400": {
     "message": "API 오류: 잘못된 요청 또는 잔액 부족."
   },
   "ERROR_401": {
-    "message": "API 오류: 잘못된 API 키."
+    "message": "API 오류: API 키가 잘못되었습니다."
   },
   "ERROR_402": {
-    "message": "API 오류: 잔액이 부족합니다."
+    "message": "API 오류: 할당량 또는 잔액이 부족합니다."
   },
   "ERROR_403": {
-    "message": "API 오류: 권한 거부. API 키 권한이나 IP 제한을 확인하세요."
+    "message": "API 오류: 권한 거부. API 키 권한을 확인하세요."
   },
   "ERROR_404": {
     "message": "API 오류: 모델을 찾을 수 없거나 URL 오류."
   },
   "ERROR_429": {
-    "message": "API 오류: 한도 초과 또는 요청 과다."
+    "message": "API 오류: 요청 한도 초과."
   },
   "ERROR_500": {
     "message": "API 오류: 서버 오류 (500)."

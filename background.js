@@ -123,7 +123,7 @@ async function applySyncResultToLocal(mergedData) {
         }
     }
     const configToStore = { ...mergedData, lastSyncTime: Date.now() };
-    delete configToStore.vocabulary; 
+    delete configToStore.vocabulary;
     await chrome.storage.local.set(configToStore);
     logger.log("[Sync-Local] 配置项更新成功");
 }
@@ -362,7 +362,7 @@ function mergeVocabulary(local, remote) {
         if (word) {
             map.set(word, {
                 ...item,
-                word: word 
+                word: word
             });
         }
     });
@@ -381,13 +381,13 @@ function mergeVocabulary(local, remote) {
         if (localItem) {
             const localTs = getTs(localItem);
             if (remoteTs > localTs) {
-                map.set(word, { ...remoteItem, word: word }); 
+                map.set(word, { ...remoteItem, word: word });
                 updatedCount++;
             } else {
-                ignoredCount++; 
+                ignoredCount++;
             }
         } else {
-            map.set(word, { ...remoteItem, word: word }); 
+            map.set(word, { ...remoteItem, word: word });
             addedCount++;
         }
     });
@@ -495,7 +495,7 @@ const Translators = {
         if (!text) return null;
         const isCN = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
         const host = isCN ? 'cn.bing.com' : 'www.bing.com';
-        let bingTarget = 'zh-Hans'; 
+        let bingTarget = 'zh-Hans';
         if (targetLang) {
             const low = targetLang.toLowerCase();
             if (low.includes('hant') || low.includes('tw') || low.includes('hk')) {
@@ -518,7 +518,7 @@ const Translators = {
                                 bingCache = { ig: igMatch[1], key, token, ts: Date.now() };
                             }
                         } finally {
-                            bingTokenPromise = null; 
+                            bingTokenPromise = null;
                         }
                     })();
                 }
@@ -526,7 +526,7 @@ const Translators = {
             }
         }
         try {
-            await refreshToken(); 
+            await refreshToken();
             const url = `https://${host}/ttranslatev3?isTwinTranslation=true&IG=${bingCache.ig}&IID=translator.5022.1`;
             const res = await fetch(url, {
                 method: 'POST',
@@ -605,10 +605,15 @@ const Translators = {
             hangul: /\p{Script=Hangul}/u,
         };
         let sl = 'auto';
-        if (PATTERNS.kana.test(query)) sl = 'ja';      
-        else if (PATTERNS.hangul.test(query)) sl = 'ko'; 
+        if (PATTERNS.kana.test(query)) sl = 'ja';
+        else if (PATTERNS.hangul.test(query)) sl = 'ko';
         else if (/\p{Script=Thai}/u.test(query)) sl = 'th';
-        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${target}&dt=t&dt=bd&dt=rm&dt=ex&dt=md&q=${encodeURIComponent(query)}`;
+
+        const buildUrl = (q, extraDt = '') =>
+            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${target}&dt=t${extraDt}&q=${encodeURIComponent(q)}`;
+
+        const url = buildUrl(query, '&dt=bd&dt=rm&dt=ex&dt=md');
+
         try {
             const res = await fetch(url);
             if (!res.ok) throw new Error("Google Blocked");
@@ -627,9 +632,21 @@ const Translators = {
             }
             let examples = [];
             if (data[13] && data[13][0]) {
-                examples = data[13][0].slice(0, 2).map(item => {
-                    return item[0].replace(/<\/?b>/g, '');
-                });
+                const rawExamples = data[13][0].slice(0, 2).map(item =>
+                    item[0].replace(/<\/?b>/g, '')
+                );
+                examples = await Promise.all(
+                    rawExamples.map(async (sentence) => {
+                        try {
+                            const tRes = await fetch(buildUrl(sentence));
+                            const tData = await tRes.json();
+                            const cn = tData[0].map(i => i[0]).filter(Boolean).join('');
+                            return { en: sentence, cn };
+                        } catch {
+                            return { en: sentence, cn: '' };
+                        }
+                    })
+                );
             }
             return { phonetic, basic, dictData, examples };
         } catch (e) {
@@ -1000,15 +1017,15 @@ async function processTranslate(req) {
         const hasSpace = trimmedText.includes(' ');
         const isSingleQuery = !req.text.includes('[[') && !req.text.includes('⟦KT_');
         const _s = {
-            cjk: /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(trimmedText), 
+            cjk: /[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF]/.test(trimmedText),
             thai: /[\u0E00-\u0E7F]/.test(trimmedText),
             korean: /[\uAC00-\uD7AF]/.test(trimmedText),
-            arabic: /[\u0600-\u06FF]/.test(trimmedText), 
+            arabic: /[\u0600-\u06FF]/.test(trimmedText),
             hebrew: /[\u0590-\u05FF]/.test(trimmedText),
-            devanagari: /[\u0900-\u097F]/.test(trimmedText), 
+            devanagari: /[\u0900-\u097F]/.test(trimmedText),
             bengali: /[\u0980-\u09FF]/.test(trimmedText),
             greek: /[\u0370-\u03FF]/.test(trimmedText),
-            cyrillic: /[\u0400-\u04FF]/.test(trimmedText), 
+            cyrillic: /[\u0400-\u04FF]/.test(trimmedText),
         };
         let isWord = false;
         const hasPunctuation = /[，。！？；：,.;:!?\n\r]/.test(trimmedText);
@@ -1033,13 +1050,6 @@ async function processTranslate(req) {
         let rawResult = "";
         if (engine === 'google') {
             rawResult = await Translators.google(req.text, req.targetLang);
-   logger.log('[Google原始返回]', {
-    type: typeof rawResult,           
-    isNull: rawResult === null,
-    value: typeof rawResult === 'string' 
-      ? rawResult.slice(0, 60)        
-      : JSON.stringify(rawResult)?.slice(0, 100)  
-  });
         }
         else if (engine === 'bing') {
             rawResult = await Translators.bing(req.text, req.targetLang);
@@ -1073,15 +1083,16 @@ async function processTranslate(req) {
                     `  "phonetic": "IPA phonetics (if applicable)",`,
                     `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
                     `  "dictData": [`,
-                    `    {"pos": "n./v./adj.", "definition": "distinctive meaning in ${targetLanguageName}"}`,
+                    `    {"pos": "n./v./adj.", "definition": "A comma-separated list of meanings for this specific part of speech (e.g., '平台, 基础, 位置')"}`,
                     `  ],`,
-                    `  "examples": ["Original example (translated to ${targetLanguageName})"]`,
+                    `  "examples": ["Original sentence in source language | ${targetLanguageName} translation"]`,
                     `}`,
                     `Constraints:`,
-                    `1. 'dictData' must contain AT MOST 6 unique and high-quality definitions.`, 
-                    `2. Strictly avoid any repetition in 'definition' or 'pos' fields.`,
-                    `3. If the word is very common, provide only the most essential meanings.`,
-                    `4. Respond with JSON ONLY. No conversation, no Markdown code blocks.`
+                    `1. MUST GROUP definitions by part of speech. Each unique 'pos' (e.g., 'n.') should appear ONLY ONCE in the 'dictData' array.`,
+                    `2. Combine multiple meanings of the same 'pos' into a single comma-separated string in the 'definition' field.`,
+                    `3. 'dictData' must contain AT MOST 6 high-quality definitions in total.`,
+                    `4. If the word is very common, provide only the most essential meanings.`,
+                    `5. Respond with JSON ONLY. No conversation, no Markdown code blocks.`
                 ].join('\n');
             } else if (isSubtitle) {
                 systemPrompt = [
@@ -1147,7 +1158,11 @@ async function processTranslate(req) {
                             pos: item.pos,
                             meanings: Array.isArray(item.definition) ? item.definition : [item.definition]
                         })),
-                        examples: parsed.examples || []
+                        examples: (parsed.examples || []).map(ex => {
+                            if (typeof ex === 'object') return ex;
+                            const parts = ex.split(' | ');
+                            return { en: parts[0]?.trim() || '', cn: parts[1]?.trim() || '' };
+                        })
                     };
                 } catch (e) {
                     finalData.basic = cleanedResult.replace(/\n+/g, '\n');
@@ -1274,7 +1289,7 @@ async function executeSyncTask() {
 }
 const DB_CONFIG = { name: 'MiraTranslatorDB', version: 2, store: 'cache' };
 let dbInstance = null;
-let dbPromise = null; 
+let dbPromise = null;
 async function getDB() {
     if (dbInstance) return dbInstance;
     if (dbPromise) return dbPromise;
@@ -1288,14 +1303,14 @@ async function getDB() {
         };
         request.onsuccess = () => {
             dbInstance = request.result;
-            dbPromise = null; 
+            dbPromise = null;
             dbInstance.onclose = () => {
                 dbInstance = null;
             };
             resolve(dbInstance);
         };
         request.onerror = (e) => {
-            dbPromise = null; 
+            dbPromise = null;
             reject(e.target.error);
         };
     });
@@ -1305,7 +1320,7 @@ async function handleSafeToggle({ word, trans, action }) {
     logger.log(`[BG-Handle] 开始处理 ${action}, 单词: ${word}`);
     try {
         const wordLower = word.trim().toLowerCase();
-        const dbKey = `vb_${wordLower}`; 
+        const dbKey = `vb_${wordLower}`;
         const now = Date.now();
         const tab = await getActiveTab();
         let currentUrl = tab?.url || "";
@@ -1378,7 +1393,7 @@ async function handleIdbGetSize(prefix) {
         request.onsuccess = (e) => {
             const cursor = e.target.result;
             if (cursor) {
-                const item = cursor.value; 
+                const item = cursor.value;
                 const idLen = item.id.length;
                 const dataLen = typeof item.data === 'string'
                     ? item.data.length
@@ -1386,7 +1401,7 @@ async function handleIdbGetSize(prefix) {
                 totalBytes += (idLen + dataLen) * 2;
                 cursor.continue();
             } else {
-                resolve(totalBytes); 
+                resolve(totalBytes);
             }
         };
         request.onerror = () => resolve(0);
@@ -1471,7 +1486,7 @@ const iconCache = new Map();
 async function generateStatusIcon(active, subActive) {
     const cacheKey = `${active}_${subActive}`;
     if (iconCache.has(cacheKey)) return iconCache.get(cacheKey);
-    const size = 128; 
+    const size = 128;
     const canvas = new OffscreenCanvas(size, size);
     const ctx = canvas.getContext('2d');
     try {
@@ -1487,8 +1502,8 @@ async function generateStatusIcon(active, subActive) {
         iconCache.set(cacheKey, imageData);
         return imageData;
     }
-    const themeColor = "#39FF14"; 
-    const badgeH = 64;            
+    const themeColor = "#39FF14";
+    const badgeH = 64;
     const badgeY = size - badgeH;
     const badgeW = (active && subActive) ? size : 80;
     const badgeX = size - badgeW;
@@ -1513,7 +1528,7 @@ async function generateStatusIcon(active, subActive) {
  */
 function drawCheck(ctx, x, y, size, color) {
     ctx.strokeStyle = color;
-    ctx.lineWidth = 14; 
+    ctx.lineWidth = 14;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.beginPath();
@@ -1535,7 +1550,7 @@ function drawText(ctx, text, x, y, color) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!chrome.runtime || !chrome.runtime.id) return;
     const safeSendResponse = (data) => {
-        try { sendResponse(data); } catch (e) {  }
+        try { sendResponse(data); } catch (e) { }
     };
     if (request.type === 'START_AUTH' || request.action === 'AUTH_FIREFOX') {
         handleAuthFlow(safeSendResponse);
@@ -1595,8 +1610,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleSafeToggle(request.data)
             .then(() => { if (typeof logger !== 'undefined') logger.log(`[BG-Log] ${request.data.word} 处理完成`); })
             .catch(err => { if (typeof logger !== 'undefined') logger.error(`[BG-Log] ${request.data.word} 处理出错:`, err); });
-        safeSendResponse({ status: 'received' }); 
-        return false; 
+        safeSendResponse({ status: 'received' });
+        return false;
     }
     if (request.action === "UPDATE_ICON") {
         const tabId = sender.tab?.id;

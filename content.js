@@ -23,8 +23,20 @@ chrome.storage.onChanged.addListener((changes, area) => {
     window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'zh-CN';
   }
 });
-const APP_NAME = chrome.i18n.getMessage('appName') ||
-  'Mira Translator';
+let APP_NAME = 'Mira Translator';
+async function initApp() {
+  try {
+    loadTargetLanguage().then(() => {
+      APP_NAME = t('appName') || 'Mira Translator';
+    });
+  } catch (error) {
+    logger.error("Failed to initialize app:", error);
+  }
+}
+
+initApp();
+logger.log(window.currentTargetL);
+
 const TRANS_STATUS = {
   LOADING: 'loading',
   DONE: 'done',
@@ -189,24 +201,24 @@ async function applyUserStyles(transEl, directConfig = null) {
       const isWikiParagraph = isWiki &&
         transEl.parentElement?.className?.includes('mw-parser-output');
       let defaultCss = `
-    display: block !important;
-    width: auto !important;
-    clear: ${clearStyle} !important;
-    margin: 6px ${sourceMarginLeft} 4px ${sourceMarginLeft} !important;
-padding-left: ${sourcePaddingLeft} !important;
-    text-align: ${sourceAlign} !important; 
-    color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
-    font-style: ${transEl.dataset.translated === 'true' ? 'normal' : 'italic'} !important;
-    text-decoration: underline !important;
-    text-decoration-style: dashed !important;
-    text-decoration-color: #38bdf866 !important;
-    text-decoration-thickness: 0.5px !important;
-    text-underline-offset: 7px !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    animation: fadeIn 0.6s ease-out !important;
-  `;
+      display: block !important;
+      width: auto !important;
+      clear: ${clearStyle} !important;
+      margin: 6px ${sourceMarginLeft} 4px ${sourceMarginLeft} !important;
+      padding-left: ${sourcePaddingLeft} !important;
+      text-align: ${sourceAlign} !important; 
+      color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
+      font-style: ${transEl.dataset.translated === 'true' ? 'normal' : 'italic'} !important;
+      text-decoration: underline !important;
+      text-decoration-style: dashed !important;
+      text-decoration-color: #38bdf866 !important;
+      text-decoration-thickness: 0.5px !important;
+      text-underline-offset: 5px !important;
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      animation: fadeIn 0.6s ease-out !important;
+    `;
       transEl.style.cssText = defaultCss;
       const oldWrapper = transEl.querySelector('.mira-default-wrapper');
       if (oldWrapper) {
@@ -286,13 +298,13 @@ padding-left: ${sourcePaddingLeft} !important;
             text-decoration-style: ${style} !important;
             text-decoration-color: ${borderColor} !important;
             text-decoration-thickness: 0.5px !important;
-            text-underline-offset: 6px !important;
+            text-underline-offset: 5px !important;
           `;
         finalPadding = "0 0 1px 5px";
         break;
       }
       case 'wavy':
-        css += `text-decoration: underline wavy ${borderColor} !important; text-underline-offset: 4px !important;`;
+        css += `text-decoration: underline wavy ${borderColor} !important; text-underline-offset: 5px !important;`;
         finalPadding = "0 0 0 5px";
         break;
       case 'highlight':
@@ -1082,6 +1094,7 @@ const TranslationBatcher = {
           });
         });
       }
+      transContent = transContent.replace(/[（(]\s*L\d+\s*[：:]\s*[）)]/g, '').trim();
       const { mentionMap } = item;
       if (mentionMap && Object.keys(mentionMap).length > 0) {
         Object.keys(mentionMap).forEach(idx => {
@@ -1343,7 +1356,17 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
-  if (!el) return;
+  if (el.tagName === 'LI') {
+    const rawText = el.innerText?.trim() || '';
+    const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
+    const isTooLong = rawText.length > 500;
+    if (hasSubMenu || isTooLong) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
   if (el.isContentEditable ||
     el.tagName === 'TEXTAREA' ||
     el.tagName === 'INPUT' ||
@@ -1603,7 +1626,44 @@ async function handleTranslateElement(el, forceRefresh = false) {
         .kt-paragraph-translation { display: block !important; clear: both !important; width: 100% !important; position: relative !important; }
       `);
       finalCheckNode.insertAdjacentElement('afterend', transContainer);
-    } else if (isGoogle) {
+    } else if (el.tagName === 'LI' && (
+      el.closest('nav, [class*="sidebar"], [id*="sidebar"]') ||
+      (el.querySelector(':scope > a') && !el.querySelector(':scope > p, :scope > div:not(.kt-paragraph-translation)'))
+    )) {
+      const textDiv = el.querySelector('a > div > div:first-child')
+        || el.querySelector('[class*="nav-text"]')
+        || el.querySelector('[class*="menu-title"] span, [class*="nav-title"] span')
+        || null;
+      if (textDiv) {
+        textDiv.appendChild(transContainer);
+        transContainer.style.setProperty('display', 'block', 'important');
+        transContainer.style.setProperty('margin-top', '2px', 'important');
+        transContainer.style.setProperty('padding-left', '0', 'important');
+        transContainer.style.setProperty('font-size', '0.9em', 'important');
+      } else {
+        el.appendChild(transContainer);
+        transContainer.style.setProperty('display', 'block', 'important');
+        transContainer.style.setProperty('margin-top', '2px', 'important');
+        transContainer.style.setProperty('margin-left', '0', 'important');
+        transContainer.style.setProperty('padding-left', '0', 'important');
+        transContainer.style.setProperty('font-size', '0.9em', 'important');
+      }
+    }
+    else if (el.tagName === 'TD') {
+      el.appendChild(transContainer);
+      transContainer.style.setProperty('display', 'block', 'important');
+      transContainer.style.setProperty('margin-top', '4px', 'important');
+      transContainer.style.setProperty('padding-top', '4px', 'important');
+      transContainer.style.setProperty('border-top', '1px dashed rgba(128,128,128,0.3)', 'important');
+      transContainer.style.setProperty('font-size', '0.85em', 'important');
+      transContainer.style.setProperty('line-height', '1.4', 'important');
+      transContainer.style.setProperty('white-space', 'normal', 'important');
+      transContainer.style.setProperty('word-break', 'break-word', 'important');
+      transContainer.style.setProperty('width', '100%', 'important');
+      transContainer.style.setProperty('max-width', '100%', 'important');
+      transContainer.style.setProperty('box-sizing', 'border-box', 'important');
+    }
+    else if (isGoogle) {
       el.appendChild(transContainer);
       transContainer.style.setProperty('display', 'block', 'important');
       transContainer.style.setProperty('margin-top', '4px', 'important');
@@ -2821,7 +2881,7 @@ function initSelectionTranslate() {
     }
     .ex-item {
       margin-bottom: 10px;
-      border-left: 3px solid #0288c7a6;
+      border-left: 3px solid #25cbf6ab;
       padding-left: 10px;
       padding-right: 5px;
       border-radius: 2px;
@@ -3498,6 +3558,15 @@ function initSelectionTranslate() {
     refreshBtn.onclick = async (e) => {
       e?.stopPropagation();
       if (refreshBtn?.classList.contains('spinning')) return;
+
+      const coreText = text.trim()
+        .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+        .toLowerCase();
+      const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+      const allCache = await idb.getAll('tr_');
+      const keysToRemove = Object.keys(allCache).filter(k => k.includes(textFingerprint));
+      if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
+
       const saveBtnRef = shadow.getElementById('p-save');
       if (saveBtnRef) saveBtnRef._miraReady = false;
       const basicEl = shadow.getElementById('p-basic');

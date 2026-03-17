@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setTimeout(() => {
       container.classList.remove('first-time-highlight');
       container.style.border = "1px solid transparent";
-    }, 4000); 
+    }, 4000);
   }
   const myInput = document.getElementById('conf-minlen');
   if (myInput) {
@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           );
           if (!hasValidData) throw new Error(t('invalidConfigFile'));
           const incomingVocabulary = Array.isArray(importedData.vocabulary) ? importedData.vocabulary : [];
-          delete importedData.vocabulary; 
+          delete importedData.vocabulary;
           if (importedData.apiKeys && !importedData.userConfigs) {
             const oldEngine = importedData.selectedEngine || 'google';
             const oldApiKeys = importedData.apiKeys || {};
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   document.getElementById('closeSyncPanel').onclick = () => {
     const syncPanel = document.getElementById('syncSettingsPanel');
-    const advMenu = document.getElementById('advancedMenu'); 
+    const advMenu = document.getElementById('advancedMenu');
     if (syncPanel) syncPanel.style.display = 'none';
     if (advMenu?.style) {
       advMenu.style.display = 'flex';
@@ -353,13 +353,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const config = data.syncConfig || {};
     const method = config.method || 'local';
     if (method === 'local') {
-      showToast(t('manualModeNoSync'), 'info'); 
+      showToast(t('manualModeNoSync'), 'info');
       updateSyncProgressUI(btnId, '', false);
       return;
     }
     if (method === 'webdav') {
       if (!config.webdavUrl || !config.webdavUser || !config.webdavPass) {
-        showToast(t('webdavConfigIncomplete'), 'error'); 
+        showToast(t('webdavConfigIncomplete'), 'error');
         updateSyncProgressUI(btnId, '', false);
         return;
       }
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           updateSyncProgressUI(btnId, 'Reauthorizing...', true);
           await chrome.storage.local.remove("google_drive_token");
           if (typeof getGoogleTokenForFirefox === 'function') {
-            return getGoogleTokenForFirefox(btn, originalText, direction); 
+            return getGoogleTokenForFirefox(btn, originalText, direction);
           }
         } else {
           updateSyncProgressUI(btnId, 'sync_failed ✕', true);
@@ -591,7 +591,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const activeConfig = currentConfig.activeConfig || { engine: 'google', data: {} };
       const engine = activeConfig.engine;
-      const engineData = activeConfig.data; 
+      const engineData = activeConfig.data;
       const engineInput = document.getElementById('engineSelect');
       if (engineInput) engineInput.value = engine;
       renderApiInputs(engine, engineData);
@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       url.startsWith('about:') ||
       url.startsWith('chrome-extension://') ||
       url.includes('chrome.google.com/webstore') ||
-      url.includes('chromewebstore.google.com')||
+      url.includes('chromewebstore.google.com') ||
       url.includes('linkedin.com');
     if (isRestrictedPage) {
       [
@@ -746,19 +746,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (langEl && currentConfig.targetLanguage) {
     langEl.value = currentConfig.targetLanguage;
   }
-  const appName = chrome.i18n.getMessage('appName') ||
-    'Mira Trans';
-  const nameLabel = document.getElementById('app-name-label');
-  if (nameLabel) {
-    nameLabel.textContent = appName;
-  }
+  
   initAllComboboxes();
   const gearBtn = document.getElementById('advancedSettingsBtn');
   const advMenu = document.getElementById('advancedMenu');
   const stylePanel = document.getElementById('styleSettingsPanel');
-  const enginePanel = document.getElementById('settingsPanel');
   const webPreview = document.getElementById('webPreviewText');
-  const ytPreview = document.getElementById('ytPreviewText');
   const colorInput = document.getElementById('style-color');
   const fontSizeInput = document.getElementById('style-fontSize');
   const borderTypeSelect = document.getElementById('style-borderType');
@@ -1066,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     return posMapping[p] || (p.length <= 3 ? `${p}.` : p);
   }
-  async function executeTranslation(text) {
+  async function executeTranslation(text, forceRefresh = false) {
     resultArea.style.display = 'flex';
     resultArea.style.userSelect = 'text';
     resContent.innerHTML = `<span style="color: #64748b; font-size: 11px;">${t('loading')}</span>`;
@@ -1130,9 +1123,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         if (examples.length > 0) {
           html += `<div style="margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; user-select:text !important;">
-                  <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
-                  ${examples.map(ex => `<div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic; margin-bottom: 6px;">"${ex}"</div>`).join('')}
-              </div>`;
+        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
+        ${examples.map(ex => {
+            const en = typeof ex === 'string' ? ex : (ex.en || '');
+            const cn = typeof ex === 'object' ? (ex.cn || '') : '';
+            return `<div style="margin-bottom: 8px;">
+                <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">"${en}"</div>
+                ${cn ? `<div style="color: rgba(255,255,255,0.4); font-size: 11px; font-style: italic; margin-top: 2px;">${cn}</div>` : ''}
+            </div>`;
+          }).join('')}
+    </div>`;
         }
         resContent.innerHTML = html || "No translation found.";
         if (typeof updateSaveBtnStatus === 'function') {
@@ -1206,7 +1206,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fullTranslation = {
           basic: cachedData.basic || "",
           phonetic: cachedData.phonetic || "",
-          dictData: cachedData.dictData || [] 
+          dictData: cachedData.dictData || []
         };
         logger.log("[Popup] 成功从内存 Map 中提取完整词典数据");
       } else {
@@ -1220,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         type: 'SAFE_TOGGLE_VOCABULARY',
         data: {
           word: wordText,
-          trans: fullTranslation, 
+          trans: fullTranslation,
           action: actionType
         }
       });
@@ -1283,7 +1283,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       resRefreshBtn.classList.add('spinning');
       if (resContent) resContent.style.opacity = '0.5';
       try {
-        await executeTranslation(text);
+        const coreText = text
+          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+          .toLowerCase();
+        const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+        const allCache = await idb.getAll('tr_');
+        const keysToRemove = Object.keys(allCache).filter(k => k.includes(textFingerprint));
+        if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
+
+        await executeTranslation(text, true);
       } finally {
         setTimeout(() => {
           resRefreshBtn.classList.remove('spinning');
@@ -1296,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnElement.classList.add('loading');
     try {
       if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-        showUpdateNotification(); 
+        showUpdateNotification();
         btnElement.classList.remove('loading');
         return;
       }
@@ -1477,7 +1485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (currentMode === 'global') return;
     try {
       if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-        showUpdateNotification(); 
+        showUpdateNotification();
         return;
       }
       const tab = await getActiveTab();
@@ -1520,7 +1528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (selectorInput) {
       selectorInput.value = (targetConfig && targetConfig.selectors)
-        ? formatSelectors(targetConfig.selectors)  
+        ? formatSelectors(targetConfig.selectors)
         : '';
       _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
     }
@@ -1694,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const openNotebook = async () => {
     await safeCreateTab('notebook.html');
-    window.close(); 
+    window.close();
   };
   document.getElementById('openNotebook').onclick = openNotebook;
   document.getElementById('openNotebookSecondary').onclick = openNotebook;

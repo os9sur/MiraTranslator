@@ -1,35 +1,35 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Dịch đắm chìm và phụ đề YouTube song ngữ"
   },
   "appDesc": {
-    "message": "Dưới 0.5MB: Tích hợp công cụ công cộng & API AI cá nhân. Dịch đắm chìm, phụ đề YouTube song ngữ, đồng bộ Google Drive & WebDAV."
+    "message": "<0.5MB: Mã nguồn mở, an toàn. Engine công cộng + AI API (Key riêng). Dịch Web/YouTube và đồng bộ WebDAV/GDrive."
   },
   "ERROR_400": {
     "message": "Lỗi API: Yêu cầu không hợp lệ hoặc hết số dư."
   },
   "ERROR_401": {
-    "message": "Lỗi API: Mã API không hợp lệ."
+    "message": "Lỗi API: Mã API không hợp lệ. Kiểm tra cài đặt."
   },
   "ERROR_402": {
-    "message": "Lỗi API: Không đủ số dư."
+    "message": "Lỗi API: Hết hạn mức hoặc thiếu số dư."
   },
   "ERROR_403": {
-    "message": "Lỗi API: Truy cập bị từ chối. Kiểm tra quyền hoặc danh sách trắng IP."
+    "message": "Lỗi API: Truy cập bị từ chối."
   },
   "ERROR_404": {
     "message": "Lỗi API: Không tìm thấy mẫu hoặc URL sai."
   },
   "ERROR_429": {
-    "message": "Lỗi API: Hết hạn mức hoặc yêu cầu quá nhanh."
+    "message": "Lỗi API: Yêu cầu quá nhanh hoặc hết hạn mức."
   },
   "ERROR_500": {
     "message": "Lỗi API: Lỗi máy chủ (500)."
   },
   "ERROR_TIMEOUT": {
-    "message": "Hết thời gian chờ: Kiểm tra mạng/proxy."
+    "message": "Hết thời gian chờ: Kiểm tra mạng."
   },
   "ERROR_GENERIC": {
-    "message": "Lỗi dịch thuật: Kiểm tra cấu hình API."
+    "message": "Dịch thất bại: Kiểm tra cấu hình API."
   }
 }

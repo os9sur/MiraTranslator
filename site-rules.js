@@ -96,9 +96,13 @@ const SiteRules = {
             ].join(", "),
             minLen: 3
         },
+        "claude.com": {
+            selectors: "h1, h2, h3, h4, p, [data-as='p'], [data-as='li'], li, td",
+            minLen: 10
+        }
     },
     generic: {
-        selectors: "article li, section li, .article-body li, .post-content li,h1, h2, h3, p",
+        selectors: "article li, section li, .article-body li, .post-content li, main li, [role='main'] li, .content li, .docs li, li:not(nav *):not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']), h1, h2, h3, p",
         minLen: 15
     },
     getRule(hostname) {

@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻译"
+    "message": "Mira 翻译 - 沉浸式全文与 YouTube 双语字幕"
   },
   "appDesc": {
-    "message": "不到 0.5MB：内置公共引擎及自定义 AI API 接入。集成沉浸式全文、划词及 YouTube 双语字幕，支持 Google Drive 与私有云同步。"
+    "message": "不到 0.5MB：开源安全、零追踪。内置公共引擎，支持私有 AI API (自备 Key) 接入。沉浸式全文、划词及 YouTube 双语翻译，支持 Google Drive/WebDAV 云同步。"
   },
   "ERROR_400": {
     "message": "翻译接口提示：请求无效或账户余额不足。"
@@ -12,7 +12,7 @@
     "message": "翻译接口提示：API Key 无效，请检查插件设置。"
   },
   "ERROR_402": {
-    "message": "翻译接口提示：账户余额不足，请检查并充值。"
+    "message": "翻译接口提示：配额不足或账户余额不足。"
   },
   "ERROR_403": {
     "message": "翻译接口提示：权限不足，API Key 无权访问该模型或受 IP 限制。"

@@ -291,7 +291,12 @@ function t(key, forcedLang) {
   syncI18nDict();
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
-  let lang = forcedLang || langEl?.value || root.currentConfig?.targetLanguage || navigator.language || 'en';
+  let lang = forcedLang 
+    || root.currentTargetL 
+    || langEl?.value 
+    || root.currentConfig?.targetLanguage 
+    || navigator.language 
+    || 'en';
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
@@ -676,6 +681,13 @@ const AI_LLM_WHITE_LIST = [
   'siliconflow',
   'custom_ai'
 ];
+const TRADITIONAL_ENGINE_LIST = [
+  'google',
+  'deepl',
+  'deeplx',
+  'youdao',
+  'bing'
+];
 async function safeGetStorage(keys) {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
     showUpdateNotice();
@@ -862,6 +874,20 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
         await idb.set({ [cacheKey]: result });
+
+        if (forceRefresh) {
+          const coreText = query
+            .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+            .toLowerCase();
+          const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+          const allCache = await idb.getAll('tr_');
+
+          const keysToRemove = Object.keys(allCache).filter(k =>
+            k.includes(textFingerprint) && k !== cacheKey
+          );
+
+          if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
+        }
       }
     }
     wordTranslationCache.set(query.toLowerCase(), result);

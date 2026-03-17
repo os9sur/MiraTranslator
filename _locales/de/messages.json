@@ -1,21 +1,21 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Immersive Übersetzung & YouTube-Untertitel"
   },
   "appDesc": {
-    "message": "<0,5 MB: Standard-Engines & eigene KI-APIs. Immersive Übersetzung, YouTube-Untertitel & Sync über Google Drive/WebDAV."
+    "message": "<0,5MB: Open-Source, sicher. Standard-Engines + KI-API (Eigener Key). Web/YouTube-Übersetzung & WebDAV/GDrive-Sync."
   },
   "ERROR_400": {
     "message": "API-Fehler: Ungültige Anfrage oder Guthaben leer."
   },
   "ERROR_401": {
-    "message": "API-Fehler: Ungültiger API-Key."
+    "message": "API-Fehler: API-Key ungültig."
   },
   "ERROR_402": {
-    "message": "API-Fehler: Guthaben nicht ausreichend."
+    "message": "API-Fehler: Kontingent oder Guthaben leer."
   },
   "ERROR_403": {
-    "message": "API-Fehler: Zugriff verweigert. Berechtigungen oder IP-Whitelist prüfen."
+    "message": "API-Fehler: Zugriff verweigert."
   },
   "ERROR_404": {
     "message": "API-Fehler: Modell nicht gefunden."
@@ -30,6 +30,6 @@
     "message": "Zeitüberschreitung: Netzwerk prüfen."
   },
   "ERROR_GENERIC": {
-    "message": "Übersetzung fehlgeschlagen: Konfig prüfen."
+    "message": "Fehler: API-Konfiguration prüfen."
   }
 }

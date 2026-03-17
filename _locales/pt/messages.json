@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Tradução imersiva e legendas do YouTube"
   },
   "appDesc": {
-    "message": "<0.5MB: Motores públicos e APIs de IA personalizadas. Tradução imersiva, YouTube bilingue e sincro Google Drive/WebDAV."
+    "message": "<0.5MB: Código aberto, seguro. Motores públicos + AI API (Chave própria). Tradução Web/YouTube e sincro WebDAV/GDrive."
   },
   "ERROR_400": {
     "message": "Erro de API: Solicitação inválida ou saldo insuficiente."
@@ -12,10 +12,10 @@
     "message": "Erro de API: Chave API inválida."
   },
   "ERROR_402": {
-    "message": "Erro de API: Saldo insuficiente."
+    "message": "Erro de API: Cota ou saldo insuficiente."
   },
   "ERROR_403": {
-    "message": "Erro de API: Acesso negado. Verifique permissões ou lista branca de IP."
+    "message": "Erro de API: Acesso negado."
   },
   "ERROR_404": {
     "message": "Erro de API: Modelo não encontrado."
@@ -30,6 +30,6 @@
     "message": "Tempo esgotado: Verifique a conexão."
   },
   "ERROR_GENERIC": {
-    "message": "Falha na traduzione: Verifique a config."
+    "message": "Falha: Verifique a configuração da API."
   }
 }
