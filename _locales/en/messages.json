@@ -1,18 +1,18 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Immersive Web & YouTube Dual Subtitles"
   },
   "appDesc": {
-    "message": "<0.5MB: Public engines + custom AI APIs. Features Immersive Web & YouTube bilingual translation with Google Drive & WebDAV sync."
+    "message": "<0.5MB: Open-source, no tracking. Built-in engines + Private AI API (Own Key). Immersive Web/YouTube translation & GDrive sync."
   },
   "ERROR_400": {
     "message": "API Error: Invalid request or low balance."
   },
   "ERROR_401": {
-    "message": "API Error: Invalid API Key."
+    "message": "API Error: Invalid API Key. Check settings."
   },
   "ERROR_402": {
-    "message": "API Error: Insufficient balance."
+    "message": "API Error: Quota exceeded or insufficient balance."
   },
   "ERROR_403": {
     "message": "API Error: Forbidden. Check permissions or IP whitelist."
@@ -21,7 +21,7 @@
     "message": "API Error: Model not found or invalid URL."
   },
   "ERROR_429": {
-    "message": "API Error: Quota exceeded or rate limited."
+    "message": "API Error: Rate limited or quota exceeded."
   },
   "ERROR_500": {
     "message": "API Error: Server error (500)."

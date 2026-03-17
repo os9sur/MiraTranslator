@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Tam sayfa çeviri ve YouTube çift dilli altyazı"
   },
   "appDesc": {
-    "message": "<0.5MB: Standart motorlar ve özel AI API desteği. Tam sayfa çeviri, YouTube çift dilli altyazı ve Google Drive/WebDAV senk."
+    "message": "<0.5MB: Açık kaynak, güvenli. Standart motorlar + AI API (Kendi Key'iniz). Web/YouTube çeviri ve WebDAV/GDrive senk."
   },
   "ERROR_400": {
     "message": "API Hatası: Geçersiz istek veya yetersiz bakiye."
@@ -12,13 +12,13 @@
     "message": "API Hatası: Geçersiz API anahtarı."
   },
   "ERROR_402": {
-    "message": "API Hatası: Yetersiz bakiye."
+    "message": "API Hatası: Kota veya bakiye yetersiz."
   },
   "ERROR_403": {
-    "message": "API Hatası: Erişim engellendi. Yetkileri veya IP beyaz listesini kontrol edin."
+    "message": "API Hatası: Erişim engellendi."
   },
   "ERROR_404": {
-    "message": "API Hatası: Model bulunamadı."
+    "message": "API Hatası: Model bulunamadى."
   },
   "ERROR_429": {
     "message": "API Hatası: Kota aşıldı."

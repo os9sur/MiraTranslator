@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻訳"
+    "message": "Mira 翻訳 - 没入型全文翻訳と YouTube 2ヶ国語字幕"
   },
   "appDesc": {
-    "message": "0.5MB未満：パブリックエンジン内蔵＆カスタムAI API対応。全文翻訳、YouTube二ヶ国語字幕、Google Drive/WebDAV同期搭載。"
+    "message": "0.5MB未満：オープンソース、追跡なし。標準エンジン＋私用AI API (自前Key)。全文翻訳、YouTube字幕、WebDAV/GDrive同期対応。"
   },
   "ERROR_400": {
     "message": "APIエラー：無効なリクエストまたは残高不足。"
@@ -12,16 +12,16 @@
     "message": "APIエラー：APIキーが無効です。"
   },
   "ERROR_402": {
-    "message": "APIエラー：残高不足です。"
+    "message": "APIエラー：利用枠不足または残高不足です。"
   },
   "ERROR_403": {
-    "message": "APIエラー：アクセス拒否。権限またはIP制限を確認してください。"
+    "message": "APIエラー：アクセス拒否。権限を確認してください。"
   },
   "ERROR_404": {
-    "message": "APIエラー：モデルが見つからないかURLが不正です。"
+    "message": "APIエラー：モデル名またはURLが不正です。"
   },
   "ERROR_429": {
-    "message": "APIエラー：利用制限超過。"
+    "message": "APIエラー：リクエスト過多または制限超過。"
   },
   "ERROR_500": {
     "message": "APIエラー：サーバーエラー（500）。"
