@@ -1400,7 +1400,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
       ytd-video-owner-renderer #channel-name,
       .ytd-channel-name,
       ytd-guide-entry-renderer,
-      #guide-section-title
+      #guide-section-title,
+      ytd-active-account-header-renderer,
+      ytd-multi-page-menu-renderer
     `);
     if (isExcluded) {
       el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
@@ -4155,7 +4157,6 @@ if (!document.getElementById('mira-global-style')) {
         #kt-yt-box {
             position: absolute !important;
             left: 50% !important;
-            bottom: 80px; 
             transform: translateX(-50%);
             display: flex;
             width: max-content !important;
@@ -4446,7 +4447,7 @@ async function createSubtitleBox(player) {
     if (data.ytBoxBottom && parseInt(data.ytBoxBottom) > 10) {
       box.style.bottom = data.ytBoxBottom;
     } else {
-      box.style.bottom = '80px';
+      box.style.bottom = '20px';
     }
     if (data.ytStyleSettings) {
       applySubtitleSettings(data.ytStyleSettings);
