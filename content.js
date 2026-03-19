@@ -976,8 +976,13 @@ const TranslationBatcher = {
       } else {
         if (needTranslate.length === 1) {
           needTranslate[0]._singleRetry = true;
+          // 单条直接发原文，不加标记
+          mergedText = needTranslate[0].textForTranslation || needTranslate[0].text;
+        } else {
+          mergedText = needTranslate.map((item, idx) =>
+            `${pre}${idx}${suf}\n${item.textForTranslation || item.text}`
+          ).join('\n\n');
         }
-        mergedText = needTranslate.map((item, idx) => `${pre}${idx}${suf}\n${item.textForTranslation || item.text}`).join('\n\n');
       }
       const normalizedText = mergedText.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
       const res = await getDetailedTranslation(normalizedText, true, null, { skipCache: true, isBatch: true });
@@ -1066,6 +1071,7 @@ const TranslationBatcher = {
     const compareBase = item.textForTranslation || originalText;
     const normalizedTrans = normalizeForCompare(transContent);
     const normalizedBase = normalizeForCompare(compareBase);
+
     el.dataset.translated = "true";
     this.unlock(el);
     try {
@@ -1400,7 +1406,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
       ytd-video-owner-renderer #channel-name,
       .ytd-channel-name,
       ytd-guide-entry-renderer,
-      #guide-section-title
+      #guide-section-title,
+      ytd-active-account-header-renderer,
+      ytd-multi-page-menu-renderer
     `);
     if (isExcluded) {
       el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
@@ -3669,7 +3677,7 @@ function initSelectionTranslate() {
               const highlightedEn = en.replace(regex, `<span style="color: #38BDF8; font-weight: 600;">$1</span>`);
               return `<div class="ex-item" style="margin-bottom: 10px; direction: ${rtl ? 'rtl' : 'ltr'}; text-align: ${rtl ? 'right' : 'left'};">
             <div class="ex-en" style="font-style: italic; line-height: 1.4;">${highlightedEn}</div>
-            <div class="ex-cn" style="font-style: italic; opacity: 0.8; font-size: 0.9em;">${cn}</div>
+            <div class="ex-cn" style="font-style: italic; opacity: 0.9; font-size: 12px;">${cn}</div>
           </div>`;
             }).join('');
         } else {
@@ -4155,7 +4163,6 @@ if (!document.getElementById('mira-global-style')) {
         #kt-yt-box {
             position: absolute !important;
             left: 50% !important;
-            bottom: 80px; 
             transform: translateX(-50%);
             display: flex;
             width: max-content !important;
@@ -4446,7 +4453,7 @@ async function createSubtitleBox(player) {
     if (data.ytBoxBottom && parseInt(data.ytBoxBottom) > 10) {
       box.style.bottom = data.ytBoxBottom;
     } else {
-      box.style.bottom = '80px';
+      box.style.bottom = '20px';
     }
     if (data.ytStyleSettings) {
       applySubtitleSettings(data.ytStyleSettings);

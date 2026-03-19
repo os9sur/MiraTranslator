@@ -291,11 +291,11 @@ function t(key, forcedLang) {
   syncI18nDict();
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
-  let lang = forcedLang 
-    || root.currentTargetL 
-    || langEl?.value 
-    || root.currentConfig?.targetLanguage 
-    || navigator.language 
+  let lang = forcedLang
+    || root.currentTargetL
+    || langEl?.value
+    || root.currentConfig?.targetLanguage
+    || navigator.language
     || 'en';
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
@@ -569,10 +569,13 @@ function detectLatinLanguage(cleanText, cleanChars, targetPrefix) {
 }
 function detectIsAlreadyTarget(text, targetLang) {
   if (!text) return true;
+
   if (/^\s*[\d.,\s\-+%$€¥£#@!?]+\s*$/.test(text)) return true;
-  const hasCJK = /[\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(text);
-  if (text.length > 12 && /[\d*]/.test(text) && !/\s/.test(text) && !hasCJK) return true;
-  const cleanChars = Array.from(text).filter(char =>
+  const textWithoutUrls = text
+    .replace(/https?:\/\/[^\s]+/g, '');
+  const hasCJK = /[\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(textWithoutUrls);
+  if (textWithoutUrls.length > 12 && /[\d*]/.test(textWithoutUrls) && !/\s/.test(textWithoutUrls) && !hasCJK) return true;
+  const cleanChars = Array.from(textWithoutUrls).filter(char =>
     /\p{L}/u.test(char) &&
     !/[\s\n\r\t\u00A0\u2000-\u200a\u2028\u2029\u3000\ufeff]/u.test(char) &&
     !/\p{P}|\p{S}/u.test(char)

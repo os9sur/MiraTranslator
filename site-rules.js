@@ -5,7 +5,7 @@ const SiteRules = {
             minLen: 3
         },
         "youtube.com": {
-            selectors: "p, #content-text, #video-title, .yt-lockup-metadata-view-model__title, .yt-core-attributed-string:not(button *):not([role='button'] *), yt-formatted-string:not(#info):not(#title):not(button *)",
+            selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *)",
             minLen: 10
         },
         "news.ycombinator.com": {
