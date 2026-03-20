@@ -159,6 +159,40 @@ async function getActiveTab() {
     }
   });
 }
+
+let _isGoogleAccessible = null;
+let _defaultEngine = 'bing';
+
+async function checkGoogleAbility() {
+  if (_isGoogleAccessible !== null) return _isGoogleAccessible;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    await fetch('https://www.google.com/generate_204', {
+      mode: 'no-cors',
+      cache: 'no-cache',
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+    _isGoogleAccessible = true;
+    _defaultEngine = 'google';
+  } catch (e) {
+    _isGoogleAccessible = false;
+    _defaultEngine = 'bing';
+  }
+  return _isGoogleAccessible;
+}
+
+async function getInitialActiveConfig() {
+  await checkGoogleAbility();
+  return { engine: _defaultEngine, data: {} };
+}
+
+function getRuntimeDefaultEngine() {
+  return _defaultEngine;
+}
+
+
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: false, select: true, yt: true };
 if (typeof chrome !== 'undefined' && chrome.storage) {
@@ -485,7 +519,7 @@ function getCacheKey(text, engine, lang) {
   const coreText = text
     .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
     .toLowerCase();
-  const safeEngine = (engine || 'google').toLowerCase();
+  const safeEngine = (engine || getRuntimeDefaultEngine()).toLowerCase();
   const safeLang = (lang || 'zh-cn').replace('_', '-').toLowerCase();
   let contentPart;
   if (typeof hash === 'function') {
@@ -743,6 +777,7 @@ async function lookupCache(text, engine, lang) {
   }
   return { result: actualResult, hitKey, singleKey };
 }
+//通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
@@ -757,7 +792,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const { skipCache = false, isBatch = false } = options;
   let engine = (
     storage.activeConfig?.engine ||
-    (typeof currentEngine !== 'undefined' ? currentEngine : 'google')
+    (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
   ).toLowerCase();
   let lang = (
     manualLang ||
@@ -814,7 +849,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   try {
     if (!forceRefresh && !isBatch) {
       const hit = await lookupCache(query, engine, lang);
-      if (hit) {
+      if (hit && !hit.result.isBatch) {
         wordTranslationCache.set(query.toLowerCase(), hit.result);
         return hit.result;
       }
@@ -855,6 +890,9 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       phonetic: "",
       dictData: [],
       examples: [],
+      wordForms: [],
+      prototype: null,
+      source: "",
       isFallback: false,
       timestamp: Date.now()
     };
@@ -865,7 +903,10 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       result.phonetic = data.phonetic || "";
       result.dictData = data.dictData || [];
       result.examples = data.examples || [];
+      result.wordForms = data.wordForms || [];
+      result.prototype = data.prototype || null;
       result.isFallback = data.isFallback || false;
+      result.source = data.source || "";
     }
     if (result.basic && (!result.dictData || result.dictData.length === 0)) {
       if (isAI && !isBatch) {

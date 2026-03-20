@@ -1,8 +1,12 @@
 const SiteRules = {
     defaults: {
         "x.com": {
-            selectors: "p, [data-testid='tweetText'], [data-testid='trend'] div[dir='ltr'][style*='line-clamp'] > span, [data-testid='trend'] div[dir='ltr']:not([style*='line-clamp']):not([style*='color: rgb(113']) > span, div[data-testid='UserDescription'] span, [data-testid^='news_sidebar_article'] div[dir='ltr']:first-of-type span, [data-testid='primaryColumn'] div[dir='auto'] > span, [data-testid='primaryColumn'] div.r-knv0ih div[dir='ltr'] > span",
+            selectors: "p, [data-testid='tweetText'], [data-testid='trend'] div[dir='ltr'][style*='line-clamp'] > span, [data-testid='trend'] div[dir='ltr']:not([style*='line-clamp']):not([style*='color: rgb(113']) > span, div[data-testid='UserDescription'] span, [data-testid^='news_sidebar_article'] div[dir='ltr']:first-of-type span, [data-testid='primaryColumn'] div[dir='auto'] > span, [data-testid='primaryColumn'] div.r-knv0ih div[dir='ltr'] > span, [data-testid='placementTracking'] button div[style*='line-clamp: 2'] > span",
             minLen: 3
+        },
+        "grok.com": {
+            selectors: "h1, h2, h3, h4, p, li, [class*='message'] p, [class*='response'] p, [class*='answer'] p",
+            minLen: 10
         },
         "youtube.com": {
             selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *)",
@@ -99,10 +103,28 @@ const SiteRules = {
         "claude.com": {
             selectors: "h1, h2, h3, h4, p, [data-as='p'], [data-as='li'], li, td",
             minLen: 10
+        },
+        "foxnews.com": {
+            selectors: "h1:not(.branding h1), h2, h3:not(a h3):not(:has(button)), h4:not(a h4):not(.content h4):not(.more-section-item-title), p, .headline, .dek, article p, .related-item a",
+            minLen: 15
+        },
+        "reuters.com": {
+            selectors: "h1, h2, h3, p, span[data-testid='TitleHeading'], [class*='nav-dropdown'] li, article li",
+            minLen: 10
         }
     },
     generic: {
-        selectors: "article li, section li, .article-body li, .post-content li, main li, [role='main'] li, .content li, .docs li, li:not(nav *):not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']), h1, h2, h3, p",
+        selectors: [
+            "h1, h2, h3, p",
+            "article li",
+            "section li",
+            "main li",
+            "[role='main'] li",
+            ".content li",
+            ".post li",
+            ".entry li",
+            "li:not(nav *):not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']):not([role='listbox'] *):not([role='combobox'] *):not([class*='menu'] *):not([class*='sidebar'] *):not([class*='nav'] *)"
+        ].join(", "),
         minLen: 15
     },
     getRule(hostname) {

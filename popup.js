@@ -118,8 +118,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     try {
       const vocabularyList = await safeSendMessage({ type: 'IDB_GET_ALL', prefix: 'vb_' });
-      if (!vocabularyList) return;
-      data.vocabulary = vocabularyList;
+      const list = Array.isArray(vocabularyList)
+        ? vocabularyList
+        : Object.values(vocabularyList || {});
+      data.vocabulary = list.filter(item => !item.deleted);
     } catch (err) {
       logger.error("Export Vocabulary failed:", err);
       data.vocabulary = [];
@@ -138,7 +140,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.download = `MiraTrans_Backup_${dateStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("Backup exported successfully", "success");
+    showToast(`${t('export')} ${t('success')}!`, "success");
   };
   document.getElementById('importJson').onclick = () => {
     const input = document.createElement('input');
@@ -189,9 +191,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             await Promise.all(promises);
           }
-          const finalCount = await idb.vocabulary.getCount();
+          const allWords = await idb.vocabulary.getAll();
+          const finalCount = allWords.filter(item => !item.deleted).length;
           showToast(
-            `${t('importSuccess')} ${t('importSuccess')} ${finalCount} ${t('importSuccessCount')}`,
+            `${t('importSuccess')} ${finalCount} ${t('importSuccessCount')}`,
             'success'
           );
         } catch (err) {
@@ -746,7 +749,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (langEl && currentConfig.targetLanguage) {
     langEl.value = currentConfig.targetLanguage;
   }
-  
+
   initAllComboboxes();
   const gearBtn = document.getElementById('advancedSettingsBtn');
   const advMenu = document.getElementById('advancedMenu');
@@ -1622,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const _local_selectors = normalizeSelectors(selectorInput.value.trim());
       const _local_minLen = parseInt(minLenInput.value) || 5;
       const _isCurrentMode = document.getElementById('tabCurrent').classList.contains('active');
-      const _local_storage_res = await chrome.storage.local.get('scanConfig');
+      const _local_storage_res = await safeGetStorage('scanConfig');
       let _finalConfig = { global: {}, custom: {} };
       if (_local_storage_res && _local_storage_res.scanConfig) {
         if (typeof _local_storage_res.scanConfig === 'object') {
@@ -1714,4 +1717,104 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btnGoEngine').onclick = openSettings;
   applyI18n(currentConfig.targetLanguage);
   refreshUI();
+
+// 测试当前引擎是否可用
+async function checkEngineStatus() {
+    const settingsBtn = document.getElementById('openSettings');
+    if (!settingsBtn) return;
+
+    const engine = currentConfig?.activeConfig?.engine || currentConfig?.selectedEngine || 'google';
+    const targetLang = currentConfig?.targetLanguage || 'zh-CN';
+
+    try {
+        if (engine === 'google') {
+            // Google 直接 ping 接口验证数据结构
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), 5000);
+            try {
+                const res = await fetch(
+                    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
+                    { signal: controller.signal }
+                );
+                clearTimeout(timer);
+                const data = await res.json();
+                const translated = data?.[0]?.[0]?.[0];
+                if (!res.ok || !translated || translated === 'hello') {
+                    showEngineWarning(settingsBtn);
+                }
+            } catch (e) {
+                clearTimeout(timer);
+                showEngineWarning(settingsBtn);
+            }
+            return;
+        }
+
+        // 非 Google：复用设置页的测试逻辑
+        const isTargetEn = targetLang.toLowerCase().startsWith('en');
+        const testText = isTargetEn ? '你好' : 'Good morning';
+
+        const res = await Promise.race([
+            safeSendMessage({
+                type: 'TRANSLATE',
+                text: testText,
+                targetLang: targetLang,
+            }),
+            new Promise(resolve => setTimeout(() => resolve(null), 8000))
+        ]);
+
+        if (!res) { showEngineWarning(settingsBtn); return; }
+        if (res.error) { showEngineWarning(settingsBtn); return; }
+
+        const data = res.currentTranslationResponse || res.result;
+        if (!data) { showEngineWarning(settingsBtn); return; }
+        if (data.error) { showEngineWarning(settingsBtn); return; }
+
+        const translatedText = (typeof data === 'string'
+            ? data
+            : (data.basic || data.translatedText || "")
+        ).trim();
+
+        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+
+        if (!hasContent || !isNotOriginal) {
+            showEngineWarning(settingsBtn);
+        }
+
+    } catch (e) {
+        showEngineWarning(settingsBtn);
+    }
+}
+
+function showEngineWarning(settingsBtn) {
+    if (settingsBtn.querySelector('.engine-warning')) return;
+    
+    settingsBtn.style.position = 'relative';
+    settingsBtn.title = 'Engine may not be working, click to check settings';
+    
+    const warning = document.createElement('span');
+    warning.className = 'engine-warning';
+    warning.style.cssText = `
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        background: #ef4444;
+        border-radius: 50%;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        line-height: 1;
+        cursor: pointer;
+    `;
+    warning.textContent = '!';
+    settingsBtn.appendChild(warning);
+}
+
+checkEngineStatus();
 });

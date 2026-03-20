@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('exportBtn').onclick = async () => {
     const vocabulary = await idb.vocabulary.getAll();
     const activeVocab = vocabulary.filter(item => !item.deleted);
-    if (activeVocab.length === 0) return alert(_t('noExportWords') || "没有可导出的单词");
+    if (activeVocab.length === 0) return alert(_t('noExportWords') || "No data to export");
     let csvContent = `\ufeff${_t('word')},${_t('meaning')},Source,URL,${_t('addTime')}\n`;
     activeVocab.forEach(item => {
       let transText = "";

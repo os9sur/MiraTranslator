@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `
             <div class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
                 <div class="engine-info">
-                    ${isRunning ? '<span class="status-dot"></span>' : ''}
+                    ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
                     <span class="engine-name">${c.alias}</span>
                 </div>
                 ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
@@ -207,13 +207,89 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.querySelectorAll('.engine-item').forEach(el => {
             el.onclick = (e) => {
                 if (e.target.classList.contains('del-icon')) {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     deleteItem(el.dataset.id, e);
                 } else {
                     switchInstance(el.dataset.id);
                 }
             };
         });
+        checkCurrentEngineStatus(lastActiveId, userConfigs);
+    }
+    async function checkCurrentEngineStatus(lastActiveId, userConfigs) {
+        const dot = document.querySelector(`.status-dot[data-id="${lastActiveId}"]`);
+        if (!dot) return;
+
+        const config = userConfigs.find(c => c.id === lastActiveId);
+        if (!config) return;
+
+        const storage = await safeGetStorage(['targetLanguage']).catch(() => ({}));
+        const targetLang = storage?.targetLanguage || 'zh-CN';
+        const isTargetEn = targetLang.toLowerCase().startsWith('en');
+        const testText = isTargetEn ? '你好' : 'Good morning';
+
+        try {
+            let failed = false;
+
+            if (config.engine === 'google') {
+                // 复用 checkConnectivity 的方式
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 3000);
+                try {
+                    await fetch('https://www.google.com/generate_204', {
+                        mode: 'no-cors', signal: controller.signal
+                    });
+                    clearTimeout(timer);
+                } catch (e) {
+                    clearTimeout(timer);
+                    failed = true;
+                }
+            } else if (config.engine === 'bing') {
+                // bing 默认可用，不检测
+                failed = false;
+            } else {
+                // AI 引擎：复用 testApiConfig 的判断逻辑
+                const instanceData = await safeGetStorage(`data_${lastActiveId}`);
+                const tempKeys = instanceData?.[`data_${lastActiveId}`] || {};
+
+                const res = await Promise.race([
+                    safeSendMessage({
+                        type: 'TRANSLATE',
+                        text: testText,
+                        targetLang,
+                        isTest: true,
+                        engine: config.engine,
+                        tempKeys
+                    }),
+                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                ]);
+
+                if (!res || res.error) {
+                    failed = true;
+                } else {
+                    const data = res.currentTranslationResponse;
+                    if (!data || data.error) {
+                        failed = true;
+                    } else {
+                        const translatedText = (typeof data === 'string'
+                            ? data
+                            : (data.translatedText || data.basic || "")
+                        ).trim();
+                        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+                        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+                        if (!hasContent || !isNotOriginal) failed = true;
+                    }
+                }
+            }
+
+            dot.classList.remove('checking');
+            dot.classList.add(failed ? 'error' : 'success');
+            dot.title = failed ? 'Engine not working' : 'Engine working';
+
+        } catch (e) {
+            dot.classList.remove('checking');
+            dot.classList.add('error');
+        }
     }
     async function switchInstance(id) {
         currentId = id;
@@ -242,42 +318,77 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-    <div class="main-header">
-        <h2 style="margin:0">${displayAlias}</h2>
-    </div>
-    <div class="form-container">
-        <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
-            <div class="notice-icon" style="color: #3fb950; font-size: 24px; margin-bottom: 10px; ">✓</div>
-            <p style="margin: 0 0 15px 0;"><strong>${displayAlias}</strong> ${t('ready')}</p>
-            <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
-            <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
-                ${t('freeInterfaceTipsInfo')}
-            </p>
-            <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
-                ✨ ${t('wantBetterExperience')} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip')}</span>
-            </p>
+        <div class="main-header">
+            <h2 style="margin:0">${displayAlias}</h2>
         </div>
-        <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%;">
-            ${t('enableEngineNow')}
-        </button>
-    </div>
-`;
+        <div class="form-container">
+            <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
+                <div id="statusIcon" class="notice-icon" style="color: #8b949e; font-size: 24px; margin-bottom: 10px;">⌛</div>
+                <p style="margin: 0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing')}</strong></p>
+                <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
+                <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
+                    ${t('freeInterfaceTipsInfo')}
+                </p>
+                <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
+                    ✨ ${t('wantBetterExperience')} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip')}</span>
+                </p>
+            </div>
+            <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%; display: none;">
+                ${t('enableEngineNow')}
+            </button>
+        </div>
+    `;
+
+            const checkConnectivity = async () => {
+                const icon = document.getElementById('statusIcon');
+                const text = document.getElementById('statusText');
+                const btn = document.getElementById('activateBuiltIn');
+
+                let isOk = false;
+                try {
+                    if (config.engine === 'google') {
+                        const controller = new AbortController();
+                        const timeout = setTimeout(() => controller.abort(), 3000);
+                        await fetch('https://www.google.com/generate_204', { mode: 'no-cors', signal: controller.signal });
+                        clearTimeout(timeout);
+                        isOk = true;
+                    } else if (config.engine === 'bing' || config.engine === 'youdao') {
+                        isOk = true;
+                    }
+                } catch (e) {
+                    isOk = false;
+                }
+
+                if (isOk) {
+                    icon.innerText = '✓';
+                    icon.style.color = '#3fb950';
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready')}`;
+                    btn.style.display = 'block';
+                } else {
+                    icon.innerText = '✕';
+                    icon.style.color = '#f85149';
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed')}`;
+                    btn.style.display = 'block';
+                    btn.style.opacity = '0.6';
+                }
+            };
+
+            checkConnectivity();
+
             document.getElementById('activateBuiltIn').onclick = async (e) => {
                 const btn = e.target;
-                const textEnabled = t('enabled');
-                const textEnableNow = t('enableEngineNow');
                 btn.disabled = true;
                 await chrome.storage.local.set({ lastActiveId: id });
                 if (typeof syncGlobalConfig === 'function') {
                     await syncGlobalConfig(id, config.engine, {});
                 }
-                btn.innerText = textEnabled;        
+                btn.innerText = t('enabled');
                 btn.style.background = "#22c55e";
                 isDirty = false;
                 renderSidebar();
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerText = textEnableNow;  
+                    btn.innerText = t('enableEngineNow');
                     btn.style.background = "";
                 }, 1000);
             };
@@ -293,7 +404,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (opts && opts.length > 0) {
                 inputHtml = `
             <div class="custom-combobox">
-                <input type="${inputType  || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
+                <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
                 <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
                 <div class="combobox-dropdown">
                     ${opts.map(opt => `<div class="dropdown-item" data-value="${opt}">${opt}</div>`).join('')}
@@ -301,7 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
             } else {
                 const placeholder = (k === 'alias') ? displayAlias : (p || '');
-                inputHtml = `<input type="${inputType  || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
+                inputHtml = `<input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
             }
             return `
             <div class="form-group">
@@ -503,7 +614,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (timerId) clearTimeout(parseInt(timerId));
         const item = icon.closest('.engine-item');
         if (item) {
-            item.style.pointerEvents = "none"; 
+            item.style.pointerEvents = "none";
             item.style.transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
             item.style.opacity = "0";
             item.style.transform = "translateX(-20px)";
@@ -645,11 +756,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (n >= 10000) {
             const wan = (n / 10000).toFixed(1).replace('.0', '');
             if (lang.startsWith('zh')) {
-                return wan + 'w'; 
+                return wan + 'w';
             } else if (lang === 'ja') {
-                return wan + '万'; 
+                return wan + '万';
             } else if (lang === 'ko') {
-                return wan + '만'; 
+                return wan + '만';
             }
         }
         if (n >= 1000) {
@@ -686,21 +797,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const activeTimer = btn.dataset.timer;
             if (activeTimer) clearTimeout(Number(activeTimer));
             btn.disabled = true;
-            btn.innerText = `${t("clearing")}...`;
+            btn.innerText = `${t("clearing")}`;
             await idb.clearPrefix('tr_');
-            let animationDuration = 800; 
+            let animationDuration = 800;
             if (cacheSizeEl) {
                 const currentVal = parseFloat(cacheSizeEl.innerText.replace(/[^\d.]/g, '')) || 0;
                 if (typeof animateNumber === 'function') {
                     animateNumber(cacheSizeEl, currentVal, 0, animationDuration);
                 } else {
                     cacheSizeEl.innerText = "0";
-                    animationDuration = 0; 
+                    animationDuration = 0;
                 }
             }
             setTimeout(() => {
                 btn.innerText = `${t('completed', testTarget)} ✓`;
-                btn.style.setProperty('color', '#4ade80', 'important'); 
+                btn.style.setProperty('color', '#4ade80', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
                 if (typeof showToast === 'function') showToast(t("cacheCleared"), "success");
@@ -753,7 +864,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const closeBtn = document.getElementById('close-engineSettingsWindow');
     if (closeBtn) {
-        closeBtn.addEventListener('click', async () => { 
+        closeBtn.addEventListener('click', async () => {
             if (isDirty) {
                 if (!confirm(window.t("confirmClose"))) {
                     return;
@@ -762,7 +873,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.remove) {
                 try {
                     chrome.tabs.getCurrent((tab) => {
-                        const err1 = chrome.runtime.lastError; 
+                        const err1 = chrome.runtime.lastError;
                         if (!err1 && tab && tab.id) {
                             chrome.tabs.remove(tab.id, () => {
                                 const err2 = chrome.runtime.lastError;

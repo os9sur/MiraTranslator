@@ -37,6 +37,27 @@ async function initApp() {
 initApp();
 logger.log(window.currentTargetL);
 
+(async () => {
+  let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
+
+  if (!res || !res.activeConfig) {
+    const finalCfg = await getInitialActiveConfig();
+
+    window.currentConfig.activeConfig = finalCfg;
+    window.currentConfig.selectedEngine = finalCfg.engine;
+
+    await chrome.storage.local.set({ activeConfig: finalCfg });
+
+    res = {
+      activeConfig: finalCfg,
+      targetLanguage: (navigator.language || 'zh-CN').replace('_', '-').toLowerCase()
+    };
+  }
+
+  syncLocalState(res);
+})();
+
+
 const TRANS_STATUS = {
   LOADING: 'loading',
   DONE: 'done',
@@ -85,8 +106,8 @@ if (typeof fastMemoryCache === 'undefined') var fastMemoryCache = new Map();
 if (typeof pendingRequests === 'undefined') var pendingRequests = new Set();
 window.currentConfig = {
   targetLanguage: (navigator.language || 'zh-CN').replace('_', '-'),
-  selectedEngine: 'google',
-  activeConfig: { engine: 'google', data: {} }
+  selectedEngine: getRuntimeDefaultEngine(),
+  activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
 async function syncLocalState(storageData) {
   if (storageData.targetLanguage) {
@@ -95,12 +116,21 @@ async function syncLocalState(storageData) {
     window.currentTargetL = lang;
     applyI18n(lang);
   }
+
   if (storageData.activeConfig) {
-    const cfg = storageData.activeConfig || { engine: 'google', data: {} };
-    window.currentConfig.selectedEngine = cfg.engine || 'google';
+    const cfg = storageData.activeConfig;
+    window.currentConfig.selectedEngine = cfg.engine || getRuntimeDefaultEngine();
     window.currentConfig.activeConfig = cfg;
-    window.currentEngine = cfg.engine || 'google';
+    window.currentEngine = cfg.engine || getRuntimeDefaultEngine();
+  } else {
+    const defEngine = getRuntimeDefaultEngine();
+    window.currentConfig.selectedEngine = defEngine;
+    window.currentEngine = defEngine;
+    if (!window.currentConfig.activeConfig) {
+      window.currentConfig.activeConfig = { engine: defEngine, data: {} };
+    }
   }
+
   if (typeof checkEngineStatus === 'function') checkEngineStatus();
 }
 (async () => {
@@ -400,6 +430,65 @@ async function runWithConcurrency(tasks, limit = 4) {
     }
   }
   return Promise.all(results);
+}
+
+const DYNAMIC_WATCHER_SITES = [
+  'foxnews.com',
+  'grok.com',
+  'cnn.com',
+  'bbc.com',
+  'reuters.com',
+  // 按需添加白名单,动态标题扫描问题
+];
+function ensureDynamicContentWatcher() {
+  const host = location.hostname;
+  const needsWatcher = DYNAMIC_WATCHER_SITES.some(site => host.includes(site));
+  if (!needsWatcher) return;
+  if (window.__mira_dynamic_observer) return;
+  // AI 对话页面用更长的 debounce，等流式输出结束
+  const isAIChat = [
+    'grok.com',
+    'claude.ai',
+    'chatgpt.com',
+    'gemini.google.com',
+    'copilot.microsoft.com',
+    'bing.com/chat',
+    'perplexity.ai',
+    'poe.com',
+    'character.ai',
+    'huggingface.co/chat',
+    'mistral.ai',
+    'cohere.com',
+    'you.com',
+    'phind.com',
+    'deepseek.com',
+    'kimi.moonshot.cn',
+    'tongyi.aliyun.com',
+    'yiyan.baidu.com',
+    'hailuoai.com',
+    'doubao.com',
+  ].some(s => host.includes(s));
+  const debounceDelay = isAIChat ? 2000 : 800;
+
+  let debounceTimer = null;
+  window.__mira_dynamic_observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList?.contains('kt-paragraph-translation')) continue;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          executeReScan({ selectors: currentActiveSelectors });
+        }, debounceDelay);
+        return;
+      }
+    }
+  });
+
+  window.__mira_dynamic_observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 }
 function ensureYouTubeNavigationListener() {
   if (!location.hostname.includes('youtube.com')) return;
@@ -822,6 +911,32 @@ const normalizeForCompare = (text) => {
     .replace(/[\s\p{P}\p{S}]/gu, '')
     .trim();
 };
+function shrinkHeadingIfOverflow(container, el) {
+  if (!['H1', 'H2', 'H3', 'H4'].includes(el.tagName)) return;
+
+  const originFontSize = parseFloat(container.style.fontSize);
+  if (!originFontSize || originFontSize <= 24) return;
+
+  const containerWidth = el.closest('article, main, [class*="article"], [class*="content"]')
+    ?.getBoundingClientRect()?.width ||
+    el.parentElement?.getBoundingClientRect()?.width || 0;
+
+  if (containerWidth <= 0) return;
+  if (container.scrollWidth <= containerWidth) return; // 没溢出不处理
+
+  const MIN_SIZE = 16;
+  let lo = MIN_SIZE, hi = originFontSize;
+  while (hi - lo > 0.5) {
+    const mid = (lo + hi) / 2;
+    container.style.setProperty('font-size', `${mid}px`, 'important');
+    if (container.scrollWidth > containerWidth) {
+      hi = mid;
+    } else {
+      lo = mid;
+    }
+  }
+  container.style.setProperty('font-size', `${Math.max(lo, MIN_SIZE)}px`, 'important');
+}
 const TranslationBatcher = {
   queue: [],
   timer: null,
@@ -908,7 +1023,7 @@ const TranslationBatcher = {
       this.isProcessing = false;
       return;
     }
-    const engine = (storage.activeConfig?.engine || 'google').toLowerCase();
+    const engine = (storage.activeConfig?.engine || getRuntimeDefaultEngine()).toLowerCase();
     const lang = (storage.targetLanguage || navigator.language || 'zh-CN').replace('_', '-').toLowerCase();
     let currentBatch = [];
     let currentLength = 0;
@@ -1029,7 +1144,8 @@ const TranslationBatcher = {
               [item.singleKey]: {
                 basic: singleTrans,
                 timestamp: Date.now(),
-                isFallback: res?.isFallback || false
+                isFallback: res?.isFallback || false,
+                isBatch: true
               }
             });
           }
@@ -1053,7 +1169,31 @@ const TranslationBatcher = {
       needTranslate.forEach(item => {
         item.el.removeAttribute('data-mira-token');
         this.unlock(item.el);
-        if (item.container?.parentNode) item.container.remove();
+        if (item.container?.parentNode) {
+          const errorText = err.message || "Translation failed";
+          const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
+          let displayMessage = "";
+          if (match) {
+            let errorCode = match[0];
+            if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
+            const friendlyMsg = chrome.i18n.getMessage(`ERROR_${errorCode}`);
+            displayMessage = friendlyMsg
+              ? `${friendlyMsg} (Code: ${errorCode})`
+              : `API Error (Code: ${errorCode})`;
+          } else if (errorText.toLowerCase().includes("timeout")) {
+            displayMessage = chrome.i18n.getMessage("ERROR_TIMEOUT") || "Request Timeout";
+          } else {
+            displayMessage = errorText.length < 100 ? errorText : "Translation failed";
+          }
+          item.container.innerText = `⚠ ${displayMessage}`;
+          item.container.style.color = "#f87171";
+          item.container.style.fontStyle = "italic";
+          item.container.style.fontSize = "0.85em";
+          item.container.classList.remove('kt-loading');
+          // 标记 el，避免无限重试
+          item.el.dataset.translated = "error";
+          item.el.dataset.lastErrorTime = String(Date.now());
+        }
       });
     } finally {
       this.finishProcessing(hasError);
@@ -1150,6 +1290,7 @@ const TranslationBatcher = {
       Array.from(tempDiv.childNodes).forEach(node => {
         container.appendChild(node.cloneNode(true));
       });
+      shrinkHeadingIfOverflow(container, el);
       container.style.fontStyle = "normal";
       container.style.color = "";
       container.dataset.translated = "true";
@@ -1321,33 +1462,25 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
   return true;
 }
 function extractTextWithLinks(node, el, linkMap, textHolder) {
-  if (node.nodeType === 3) {
+  if (node.nodeType === Node.TEXT_NODE) {
     const content = node.textContent;
     const isSequenceIndicator = /^\s*[\(\[]?\d+[\.\)\]]?\s*$/.test(content);
     if (isSequenceIndicator && el.childNodes.length > 1) return;
     textHolder.text += content;
-  } else if (node.nodeName === 'A') {
-    const isCitation = node.closest('sup')
-      || /^\s*\[\d+\]\s*$/.test(node.textContent);
-    if (isCitation) return;
-    const textContent = node.textContent.trim();
-    const hasOnlyImg = textContent === '' && node.querySelector('img');
-    if (hasOnlyImg) return;
-    const idx = linkMap.length;
-    linkMap.push({
-      href: node.href,
-      className: node.className,
-      target: node.target,
-      textContent: textContent
-    });
-    textHolder.text += `(L${idx}: ${textContent})`;
-  } else if (node.nodeType === 1) {
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
     if (node.tagName === 'SUP') return;
-    if (node.tagName === 'SCRIPT') return;
-    if (node.tagName === 'STYLE') return;
     if (node.classList?.contains('kt-paragraph-translation')) return;
-    const isIndependentBlock = ['UL', 'OL', 'P'].includes(node.tagName);
-    if (isIndependentBlock) return;
+    if (node.nodeName === 'A') {
+      const isCitation = node.closest('sup') || /^\s*\[\d+\]\s*$/.test(node.textContent);
+      if (isCitation) return;
+      const textContent = node.textContent.trim();
+      if (textContent === '' && node.querySelector('img')) return;
+      const idx = linkMap.length;
+      linkMap.push({ href: node.href, className: node.className, target: node.target, textContent });
+      textHolder.text += `(L${idx}: ${textContent})`;
+      return;
+    }
     if (node.tagName === 'IMG' && node.alt) {
       const alt = node.alt.trim();
       if (alt.length > 0 && alt.length < 50 && !/^\d|stars|rating/i.test(alt)) {
@@ -1355,6 +1488,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
       }
       return;
     }
+    if (['UL', 'OL', 'P'].includes(node.tagName)) return;
     Array.from(node.childNodes).forEach(child =>
       extractTextWithLinks(child, el, linkMap, textHolder)
     );
@@ -1362,6 +1496,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
+
   if (el.tagName === 'LI') {
     const rawText = el.innerText?.trim() || '';
     const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
@@ -1379,6 +1514,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
     el.closest('[contenteditable="true"]') ||
     el.closest('textarea') ||
     el.closest('input')) {
+    return;
+  }
+  if (el.querySelector('script, style')) {
+    el.dataset.translated = 'true';
+    el.removeAttribute('data-mira-processing');
+    _miraProcessingSet.delete(el);
     return;
   }
   const isYoutube = location.hostname.includes('youtube.com');
@@ -1457,7 +1598,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     ) return;
   } else if (el.dataset.translated === 'error') {
     const lastError = parseInt(el.dataset.lastErrorTime || 0);
-    if (Date.now() - lastError < 30000) return;
+    if (Date.now() - lastError < 30000) return;// 30秒内不重试
   } else {
     if (el.dataset.translating === 'true' || el.hasAttribute('data-mira-processing')) return;
   }
@@ -1777,12 +1918,18 @@ async function handleTranslateElement(el, forceRefresh = false) {
       const trendKeyword = !trendLineClamp && el.closest('[data-testid="trend"]')
         ? el.closest('[data-testid="trend"] div[dir="ltr"]:not([style*="line-clamp"])')
         : null;
-
+      const placementTrackingTitle = el.closest('[data-testid="placementTracking"] button div[style*="line-clamp"]');
       if (trendLineClamp) {
         trendLineClamp.insertAdjacentElement('afterend', transContainer);
       } else if (trendKeyword) {
         trendKeyword.insertAdjacentElement('afterend', transContainer);
-      } else if (lineClampParent) {
+      } else if (placementTrackingTitle) {
+        placementTrackingTitle.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+        placementTrackingTitle.style.setProperty('overflow', 'visible', 'important');
+        placementTrackingTitle.style.setProperty('display', 'block', 'important');
+        placementTrackingTitle.insertAdjacentElement('afterend', transContainer);
+      }
+      else if (lineClampParent) {
         lineClampParent.insertAdjacentElement('afterend', transContainer);
       } else {
         mountTarget.insertAdjacentElement('afterend', transContainer);
@@ -1839,6 +1986,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   el.removeAttribute('data-mira-container-pending');
   if (typeof applyUserStyles === 'function') {
     await applyUserStyles(transContainer);
+
     if (!existingContainer) {
       transContainer.classList.add('kt-loading');
     }
@@ -1846,6 +1994,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const originFontSize = originStyle.fontSize;
     const originFontWeight = originStyle.fontWeight;
     transContainer.style.setProperty('font-size', originFontSize, 'important');
+
     if (isYoutube && (isYoutubeCustomTag || youtubeListTitleLink)) {
       transContainer.style.setProperty('font-weight', originFontWeight, 'important');
       transContainer.style.setProperty('margin-top', youtubeListTitleLink ? '6px' : '12px', 'important');
@@ -2187,6 +2336,7 @@ async function scanContent(forcedSelectors = null) {
           }
         }
       }
+
       if (targetEl.dataset.translated === "true") return;
       if (targetEl.dataset.translating === "true" && !isAmazonReview) return;
       const textContent = (isAmazonReview || isYTComment) ? (targetEl.textContent || "") : (targetEl.innerText || targetEl.textContent || "");
@@ -2211,7 +2361,7 @@ async function scanContent(forcedSelectors = null) {
       }
       if (!isSpecialSite) {
         let parent = targetEl.parentElement;
-        let isIndependent = ['P', 'LI'].includes(targetEl.tagName);
+        const isIndependent = ['P', 'LI', 'H1', 'H2', 'H3', 'H4'].includes(targetEl.tagName);
         if (!isIndependent) {
           while (parent && parent !== document.documentElement) {
             if (typeof parent.matches === 'function' && parent.matches(finalSelectors)) {
@@ -2244,6 +2394,10 @@ async function scanContent(forcedSelectors = null) {
     });
   } catch (e) {
     logger.error("[Mira Translator] ScanContent Error:", e);
+  }
+
+  if (!window.__mira_dynamic_observer) {
+    ensureDynamicContentWatcher();
   }
 }
 /**
@@ -2469,7 +2623,7 @@ function initSelectionTranslate() {
             width: finalRect.width + 'px',
             height: finalRect.height + 'px'
           };
-          localStorage.setItem('eclipse-translator-settings', JSON.stringify(settings));
+          localStorage.setItem('eclipse-translator-settings', JSON.stringify(settings));//设置窗口大小
           window.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
         }
@@ -2491,7 +2645,6 @@ function initSelectionTranslate() {
 :host {
     --p-bg: rgba(18, 18, 18, 0.95);
     --p-text-main: #ffffffb7;
-    --p-text-query: rgba(255, 255, 255, 0.85);
     --p-text-query: rgb(31 31 35 / 34%);
     --p-text-muted: rgba(255, 255, 255, 0.6);
     --p-text-detail: rgba(255, 255, 255, 0.6);
@@ -3470,6 +3623,7 @@ function initSelectionTranslate() {
     <div id="p-basic" class="basic" style="margin-top: 8px;">Loading...</div>
     <div id="p-detail" class="detail" style="display:none; margin-top: 10px;margin-bottom: 10px"></div>
     <div id="p-examples" style="display:none; margin-top: 12px;"></div>
+    <div id="p-source" style="display:none; margin-top:10px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;"></div>
 </div>`;
     popupEl.classList.remove('is-hidden');
     popupEl.style.display = 'flex';
@@ -3637,15 +3791,38 @@ function initSelectionTranslate() {
       }
       const pD = shadow.getElementById('p-detail');
       if (pD?.style) {
-        if (res.dictData?.length > 0) {
+        if (res.dictData?.length > 0 || res.wordForms?.length > 0 || res.prototype) {
           pD.style.display = 'block';
-          pD.innerHTML = res.dictData.map(i => {
+
+          let detailHtml = (res.dictData || []).map(i => {
             const localPos = escapeHtml(localizePos(i.pos, targetLang) || '');
             const cleanMeanings = (i.meanings || [])
               .map(m => escapeHtml(cleanMarker(m)))
               .join(', ');
             return `<div><b style="color:#319BCA; font-size:12px;margin-right:4px;">${localPos}</b> ${cleanMeanings}</div>`;
           }).join('');
+
+          if (res.wordForms?.length > 0 || res.prototype) {
+            let formsHtml = '';
+
+            if (res.prototype) {
+              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-accent) 8%, transparent);border:0.5px solid color-mix(in srgb, var(--p-accent) 40%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
+                <span style="color:var(--p-text-muted);font-size:11px;">原型</span>
+                <span style="color:var(--p-accent);font-weight:500;">${escapeHtml(res.prototype)}</span>
+            </span>`;
+            }
+
+            (res.wordForms || []).forEach(wf => {
+              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-text-main) 5%, transparent);border:0.5px solid color-mix(in srgb, var(--p-border) 60%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
+                <span style="color:var(--p-text-muted);font-size:11px;">${escapeHtml(wf.name)}</span>
+                <span style="color:var(--p-text-main);font-weight:500;">${escapeHtml(wf.value)}</span>
+            </span>`;
+            });
+
+            detailHtml += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
+          }
+
+          pD.innerHTML = detailHtml;
         } else {
           pD.style.display = 'none';
         }
@@ -3657,7 +3834,8 @@ function initSelectionTranslate() {
           basic: res.basic || "",
           phonetic: res.phonetic || "",
           dictData: res.dictData || [],
-          examples: res.examples || []
+          examples: res.examples || [],
+          prototype: res.prototype || null
         };
         saveBtn._miraReady = true;
       }
@@ -3682,6 +3860,16 @@ function initSelectionTranslate() {
             }).join('');
         } else {
           pE.style.display = 'none';
+        }
+      }
+
+      const pSource = shadow.getElementById('p-source');
+      if (pSource) {
+        if (res.source) {
+          pSource.style.display = 'block';
+          pSource.innerText = `Source: ${res.source}`;
+        } else {
+          pSource.style.display = 'none';
         }
       }
     }
@@ -4014,7 +4202,7 @@ window.addEventListener('KT_DATA_READY', (e) => {
   fullSubtitleData = e.detail;
   if (typeof fastMemoryCache !== 'undefined') fastMemoryCache.clear();
   if (typeof pendingRequests !== 'undefined') pendingRequests.clear();
-  const engine = window.currentConfig?.selectedEngine || 'google';
+  const engine = window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   semanticGroups = mergeToSemantic(fullSubtitleData, isAI);
   lastDataLength = fullSubtitleData.length;
@@ -4249,7 +4437,7 @@ async function batchPrefetch(startIndex) {
   const slice = semanticGroups.slice(windowStart, windowEnd);
   if (!slice.length) return;
   const activeCfg = window.currentConfig?.activeConfig || {};
-  const engine = activeCfg.engine || window.currentConfig?.selectedEngine || 'google';
+  const engine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
   let lang = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
   lang = lang.replace('_', '-').toLowerCase();
   const isTraditional = !AI_LLM_WHITE_LIST.includes(engine);
@@ -4360,7 +4548,7 @@ function syncSubtitleDisplay() {
     const tEl = document.getElementById('yt-t');
     const oEl = document.getElementById('yt-o');
     const activeCfg = window.currentConfig?.activeConfig || {};
-    const currentEngine = activeCfg.engine || window.currentConfig?.selectedEngine || 'google';
+    const currentEngine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
     const currentTargetL = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
     const cacheKey = getCacheKey(group.text, currentEngine, currentTargetL);
     const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
