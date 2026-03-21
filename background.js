@@ -1755,3 +1755,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     return false;
 });
+
+// ============ 卸载反馈逻辑 ============
+(function() {
+  const uiLang = chrome.i18n.getUILanguage(); 
+  let langParam = 'en';
+
+  if (uiLang === 'zh-CN') {
+    langParam = 'zh-CN';
+  } else if (uiLang.startsWith('zh')) {
+    langParam = 'zh-TW';
+  } else if (uiLang.startsWith('ja')) {
+    langParam = 'ja';
+  }
+
+  const uninstallUrl = `https://tally.so/r/68xBrJ?lang=${langParam}`;
+  
+  // 设置卸载跳转
+  chrome.runtime.setUninstallURL(uninstallUrl);
+})();
