@@ -99,15 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById(id).onchange = saveSyncConfig;
   });
   document.getElementById('exportJson').onclick = async () => {
-    const configKeys = [
-      'userConfigs',
-      'activeConfig',
-      'siteSettings',
-      'customRules',
-      'uiConfig',
-      'scanConfig',
-      'lastActiveId'
-    ];
+    const configKeys = STORAGE_KEYS.export();
     const data = await safeGetStorage(configKeys);
     if (!data) return;
     if (data.userConfigs && Array.isArray(data.userConfigs)) {
@@ -153,10 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       reader.onload = async (event) => {
         try {
           const importedData = JSON.parse(event.target.result);
-          const newKeys = ['userConfigs', 'activeConfig'];
-          const oldKeys = ['selectedEngine', 'apiKeys'];
-          const otherKeys = ['vocabulary', 'siteSettings', 'customRules', 'uiConfig', 'scanConfig'];
-          const allValidKeys = [...newKeys, ...oldKeys, ...otherKeys];
+          const allValidKeys = [...STORAGE_KEYS.sync(), 'vocabulary'];
           const hasValidData = allValidKeys.some(key =>
             Object.prototype.hasOwnProperty.call(importedData, key)
           );
@@ -1113,16 +1102,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (basic) {
           html += `<div style="font-weight: bold; color: #38BDF8; margin-bottom: 10px; font-size: 15px; user-select:text !important;">${basic}</div>`;
         }
-        if (dicts.length > 0) {
-          html += dicts.map(item => {
+        // 合并相同 pos
+        const mergedDicts = (dicts).reduce((acc, item) => {
+          const meanings = item.meanings?.length > 0
+            ? item.meanings
+            : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+          const existing = acc.find(d => d.pos === item.pos);
+          if (existing) {
+            existing.meanings = [...existing.meanings, ...meanings];
+          } else {
+            acc.push({ ...item, meanings });
+          }
+          return acc;
+        }, []).map(item => ({
+          ...item,
+          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
+        }));
+
+        if (mergedDicts.length > 0) {
+          html += mergedDicts.map(item => {
             const englishPos = (typeof formatPosToEnglish === 'function')
               ? formatPosToEnglish(item.pos)
               : (item.pos || "");
-            return `<div style="margin-bottom: 6px; display: flex; align-items: baseline; line-height: 1.4; user-select:text !important;">
-                      <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
-                      <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
-                  </div>`;
+            return `<div style="margin-bottom: 6px; display: flex; align-items: baseline; line-height: 1.4;">
+              <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
+              <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
+            </div>`;
           }).join('');
+        }
+        // 词形/时态显示
+        const wordForms = response.wordForms || [];
+        const prototype = response.prototype;
+        const protoLower = (prototype || '').toLowerCase().trim();
+        const textLower = text.toLowerCase().trim();
+
+        if (prototype && protoLower !== textLower || wordForms.length > 0) {
+          let formsHtml = '';
+
+          if (prototype && protoLower !== textLower) {
+            formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(99,179,237,0.1);border:0.5px solid rgba(99,179,237,0.4);border-radius:6px;padding:3px 8px;font-size:12px;">
+      <span style="color:#94a3b8;font-size:11px;">原型</span>
+      <span style="color:#38bdf8;font-weight:500;">${prototype}</span>
+    </span>`;
+          }
+
+          wordForms.forEach(wf => {
+            formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 8px;font-size:12px;">
+      <span style="color:#94a3b8;font-size:11px;">${wf.name}</span>
+      <span style="color:rgba(255,255,255,0.85);font-weight:500;">${wf.value}</span>
+    </span>`;
+          });
+
+          html += `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
         }
         if (examples.length > 0) {
           html += `<div style="margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; user-select:text !important;">
@@ -1136,6 +1167,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
           }).join('')}
     </div>`;
+        }
+        if (response.source) {
+          html += `<div style="margin-top:10px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
         }
         resContent.innerHTML = html || "No translation found.";
         if (typeof updateSaveBtnStatus === 'function') {
@@ -1718,8 +1752,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyI18n(currentConfig.targetLanguage);
   refreshUI();
 
-// 测试当前引擎是否可用
-async function checkEngineStatus() {
+  // 测试当前引擎是否可用
+  async function checkEngineStatus() {
     const settingsBtn = document.getElementById('openSettings');
     if (!settingsBtn) return;
 
@@ -1727,71 +1761,71 @@ async function checkEngineStatus() {
     const targetLang = currentConfig?.targetLanguage || 'zh-CN';
 
     try {
-        if (engine === 'google') {
-            // Google 直接 ping 接口验证数据结构
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 5000);
-            try {
-                const res = await fetch(
-                    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
-                    { signal: controller.signal }
-                );
-                clearTimeout(timer);
-                const data = await res.json();
-                const translated = data?.[0]?.[0]?.[0];
-                if (!res.ok || !translated || translated === 'hello') {
-                    showEngineWarning(settingsBtn);
-                }
-            } catch (e) {
-                clearTimeout(timer);
-                showEngineWarning(settingsBtn);
-            }
-            return;
-        }
-
-        // 非 Google：复用设置页的测试逻辑
-        const isTargetEn = targetLang.toLowerCase().startsWith('en');
-        const testText = isTargetEn ? '你好' : 'Good morning';
-
-        const res = await Promise.race([
-            safeSendMessage({
-                type: 'TRANSLATE',
-                text: testText,
-                targetLang: targetLang,
-            }),
-            new Promise(resolve => setTimeout(() => resolve(null), 8000))
-        ]);
-
-        if (!res) { showEngineWarning(settingsBtn); return; }
-        if (res.error) { showEngineWarning(settingsBtn); return; }
-
-        const data = res.currentTranslationResponse || res.result;
-        if (!data) { showEngineWarning(settingsBtn); return; }
-        if (data.error) { showEngineWarning(settingsBtn); return; }
-
-        const translatedText = (typeof data === 'string'
-            ? data
-            : (data.basic || data.translatedText || "")
-        ).trim();
-
-        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
-        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
-
-        if (!hasContent || !isNotOriginal) {
+      if (engine === 'google') {
+        // Google 直接 ping 接口验证数据结构
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        try {
+          const res = await fetch(
+            'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
+            { signal: controller.signal }
+          );
+          clearTimeout(timer);
+          const data = await res.json();
+          const translated = data?.[0]?.[0]?.[0];
+          if (!res.ok || !translated || translated === 'hello') {
             showEngineWarning(settingsBtn);
+          }
+        } catch (e) {
+          clearTimeout(timer);
+          showEngineWarning(settingsBtn);
         }
+        return;
+      }
+
+      // 非 Google：复用设置页的测试逻辑
+      const isTargetEn = targetLang.toLowerCase().startsWith('en');
+      const testText = isTargetEn ? '你好' : 'Good morning';
+
+      const res = await Promise.race([
+        safeSendMessage({
+          type: 'TRANSLATE',
+          text: testText,
+          targetLang: targetLang,
+        }),
+        new Promise(resolve => setTimeout(() => resolve(null), 8000))
+      ]);
+
+      if (!res) { showEngineWarning(settingsBtn); return; }
+      if (res.error) { showEngineWarning(settingsBtn); return; }
+
+      const data = res.currentTranslationResponse || res.result;
+      if (!data) { showEngineWarning(settingsBtn); return; }
+      if (data.error) { showEngineWarning(settingsBtn); return; }
+
+      const translatedText = (typeof data === 'string'
+        ? data
+        : (data.basic || data.translatedText || "")
+      ).trim();
+
+      const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+      const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+
+      if (!hasContent || !isNotOriginal) {
+        showEngineWarning(settingsBtn);
+      }
 
     } catch (e) {
-        showEngineWarning(settingsBtn);
+      showEngineWarning(settingsBtn);
     }
-}
+  }
 
-function showEngineWarning(settingsBtn) {
+  function showEngineWarning(settingsBtn) {
     if (settingsBtn.querySelector('.engine-warning')) return;
-    
+
     settingsBtn.style.position = 'relative';
     settingsBtn.title = 'Engine may not be working, click to check settings';
-    
+
     const warning = document.createElement('span');
     warning.className = 'engine-warning';
     warning.style.cssText = `
@@ -1814,7 +1848,7 @@ function showEngineWarning(settingsBtn) {
     `;
     warning.textContent = '!';
     settingsBtn.appendChild(warning);
-}
+  }
 
-checkEngineStatus();
+  checkEngineStatus();
 });

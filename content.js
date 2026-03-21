@@ -2619,11 +2619,12 @@ function initSelectionTranslate() {
           panel.style.height = 'auto';
           panel.style.maxHeight = finalRect.height + 'px';
           panel.style.minHeight = finalRect.height + 'px';
-          const settings = {
-            width: finalRect.width + 'px',
-            height: finalRect.height + 'px'
-          };
-          localStorage.setItem('eclipse-translator-settings', JSON.stringify(settings));//设置窗口大小
+          chrome.storage.local.set({
+            uiConfig: {
+              width: finalRect.width + 'px',
+              height: finalRect.height + 'px'
+            }
+          });//设置窗口大小
           window.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
         }
@@ -3349,26 +3350,25 @@ function initSelectionTranslate() {
     <div class="resizer" data-dir="br" style="position:absolute; bottom:-8px; right:-8px; width:16px; height:16px; cursor:nwse-resize; z-index:2147483648;"></div>
 `;
     shadow.appendChild(popupEl);
-    const saved = localStorage.getItem('eclipse-translator-settings');
-    if (saved) {
-      try {
-        const { width, height } = JSON.parse(saved);
-        popupEl.style.display = 'flex';
-        popupEl.style.flexDirection = 'column';
-        const finalMaxW = Math.min(parseInt(width), window.innerWidth * 0.9);
-        const finalMaxH = Math.min(parseInt(height), window.innerHeight * 0.9);
-        popupEl.style.maxWidth = finalMaxW + 'px';
-        popupEl.style.maxHeight = finalMaxH + 'px';
-        popupEl.style.width = 'fit-content';
-        popupEl.style.maxWidth = width;
-        popupEl.style.minWidth = '280px';
-        popupEl.style.height = height;
-        popupEl.style.maxHeight = height;
-        popupEl.style.boxSizing = 'border-box';
-      } catch (e) {
-        logger.error('Failed to load saved settings', e);
+    chrome.storage.local.get('uiConfig', (res) => {
+      const settings = res?.uiConfig;
+      if (settings?.width && settings?.height) {
+        try {
+          const finalMaxW = Math.min(parseInt(settings.width), window.innerWidth * 0.9);
+          const finalMaxH = Math.min(parseInt(settings.height), window.innerHeight * 0.9);
+          popupEl.style.maxWidth = finalMaxW + 'px';
+          popupEl.style.maxHeight = finalMaxH + 'px';
+          popupEl.style.width = 'fit-content';
+          popupEl.style.maxWidth = settings.width;
+          popupEl.style.minWidth = '280px';
+          popupEl.style.height = settings.height;
+          popupEl.style.maxHeight = settings.height;
+          popupEl.style.boxSizing = 'border-box';
+        } catch (e) {
+          logger.error('Failed to load uiConfig', e);
+        }
       }
-    }
+    });
     enablePanelResize(popupEl);
   }
   function setPanelGlowColor(panel) {
@@ -3636,7 +3636,8 @@ function initSelectionTranslate() {
       saveBtnInit._miraReady = false;
       saveBtnInit._miraSnapshot = null;
     }
-    const settings = JSON.parse(localStorage.getItem('eclipse-translator-settings') || '{}');
+    const settingsRes = await safeGetStorage('uiConfig');
+    const settings = settingsRes?.uiConfig || {};
     if (settings.width) {
       popupEl.style.maxWidth = settings.width;
     } else {
@@ -3766,6 +3767,7 @@ function initSelectionTranslate() {
     };
     function fillPopupData(res, shadow, text, targetLang) {
       if (!shadow || !res) return;
+
       const escapeHtml = (str) => {
         if (typeof str !== 'string') return '';
         return str
@@ -3778,6 +3780,25 @@ function initSelectionTranslate() {
       const cleanMarker = (str) => {
         if (typeof str !== 'string') return str;
         return str.replace(/\[\[\d+\]\]\s*/g, '').trim();
+      };
+      //合并相同 pos
+      const mergedDictData = (res.dictData || []).reduce((acc, item) => {
+        const meanings = item.meanings?.length > 0
+          ? item.meanings
+          : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+        const existing = acc.find(d => d.pos === item.pos);
+        if (existing) {
+          existing.meanings = [...existing.meanings, ...meanings];
+        } else {
+          acc.push({ ...item, meanings });
+        }
+        return acc;
+      }, []);
+      res = {
+        ...res, dictData: mergedDictData.map(item => ({
+          ...item,
+          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
+        }))
       };
       const pPhonetic = shadow.getElementById('p-phonetic');
       if (pPhonetic) {
@@ -3801,20 +3822,27 @@ function initSelectionTranslate() {
               .join(', ');
             return `<div><b style="color:#319BCA; font-size:12px;margin-right:4px;">${localPos}</b> ${cleanMeanings}</div>`;
           }).join('');
+          const ZH_FORM_TW = {
+            '过去式': '過去式', '过去分词': '過去分詞', '现在分词': '現在分詞',
+            '第三人称单数': '第三人稱單數', '复数': '複數', '单数': '單數',
+            '比较级': '比較級', '最高级': '最高級'
+          };
 
+          const isTraditional = (targetLang || '').toLowerCase().includes('tw') || (targetLang || '').toLowerCase().includes('hk');
           if (res.wordForms?.length > 0 || res.prototype) {
             let formsHtml = '';
 
-            if (res.prototype) {
+            if (res.prototype && res.prototype.toLowerCase().trim() !== text.toLowerCase().trim()) {
               formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-accent) 8%, transparent);border:0.5px solid color-mix(in srgb, var(--p-accent) 40%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
-                <span style="color:var(--p-text-muted);font-size:11px;">原型</span>
+                <span style="color:var(--p-text-muted);font-size:11px;">${isTraditional ? '原型' : '原型'}</span>
                 <span style="color:var(--p-accent);font-weight:500;">${escapeHtml(res.prototype)}</span>
             </span>`;
             }
 
             (res.wordForms || []).forEach(wf => {
+              const localName = isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name;
               formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-text-main) 5%, transparent);border:0.5px solid color-mix(in srgb, var(--p-border) 60%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
-                <span style="color:var(--p-text-muted);font-size:11px;">${escapeHtml(wf.name)}</span>
+                <span style="color:var(--p-text-muted);font-size:11px;">${escapeHtml(localName)}</span>
                 <span style="color:var(--p-text-main);font-weight:500;">${escapeHtml(wf.value)}</span>
             </span>`;
             });

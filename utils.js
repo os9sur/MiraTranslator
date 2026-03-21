@@ -725,6 +725,18 @@ const TRADITIONAL_ENGINE_LIST = [
   'youdao',
   'bing'
 ];
+
+const STORAGE_KEYS = {
+    core: ['userConfigs', 'activeConfig', 'lastActiveId'],
+    settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig'],
+    sync: function() {
+        return [...this.core, ...this.settings];
+    },
+    export: function() {
+        return [...this.core, ...this.settings];
+    }
+};
+
 async function safeGetStorage(keys) {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
     showUpdateNotice();
