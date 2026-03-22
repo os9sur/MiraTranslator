@@ -7,6 +7,7 @@ const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
 document.addEventListener('DOMContentLoaded', async () => {
+  safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
   const container = document.getElementById('webTranslationOptionContainer');
   const storageKey = 'hasSeenTranslationGuide';
   if (!localStorage.getItem(storageKey)) {
@@ -153,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const incomingVocabulary = Array.isArray(importedData.vocabulary) ? importedData.vocabulary : [];
           delete importedData.vocabulary;
           if (importedData.apiKeys && !importedData.userConfigs) {
-            const oldEngine = importedData.selectedEngine || 'google';
+            const oldEngine = importedData.selectedEngine || _defaultEngine;
             const oldApiKeys = importedData.apiKeys || {};
             const migrationId = 'inst_migrated_' + Date.now();
             importedData.userConfigs = [{
@@ -324,9 +325,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.classList.add('syncing');
     if (keyName) {
       scroller.innerHTML = `
-            <div style="font-size: 8px; opacity: 0.5; margin-bottom: 2px;">SYNCING...</div>
-            <div class="log-item">> ${keyName}</div>
-        `;
+              <div style="font-size: 8px; opacity: 0.5; margin-bottom: 2px;">SYNCING...</div>
+              <div class="log-item">> ${keyName}</div>
+          `;
     }
   }
   document.getElementById('manualSyncPush').onclick = async () => {
@@ -509,11 +510,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       container.style.backgroundColor = '#222';
       container.style.backgroundImage = `
-      linear-gradient(45deg, #333 25%, transparent 25%), 
-      linear-gradient(-45deg, #333 25%, transparent 25%), 
-      linear-gradient(45deg, transparent 75%, #333 75%), 
-      linear-gradient(-45deg, transparent 75%, #333 75%)
-    `;
+        linear-gradient(45deg, #333 25%, transparent 25%), 
+        linear-gradient(-45deg, #333 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #333 75%), 
+        linear-gradient(-45deg, transparent 75%, #333 75%)
+      `;
       container.style.backgroundSize = '20px 20px';
       container.style.backgroundPosition = '0 0, 0 10px, 10px 10px, 10px 0';
     }
@@ -528,9 +529,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigator.language ||
     'zh-CN';
   const targetLang = effectiveLang.replace('_', '-');
+  if (!langRes.targetLanguage) {
+    await chrome.storage.local.set({ targetLanguage: targetLang });
+  }
+
   applyI18n(targetLang);
   const data = await safeGetStorage({
-    activeConfig: { engine: 'google', data: {} },
+    activeConfig: { engine: _defaultEngine, data: {} },
     globalConfig: { page: true, select: true, yt: true },
     siteSettings: {},
     targetLanguage: targetLang,
@@ -581,7 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (settingsPanel) {
         settingsPanel.style.setProperty('display', 'flex', 'important');
       }
-      const activeConfig = currentConfig.activeConfig || { engine: 'google', data: {} };
+      const activeConfig = currentConfig.activeConfig || { engine: _defaultEngine, data: {} };
       const engine = activeConfig.engine;
       const engineData = activeConfig.data;
       const engineInput = document.getElementById('engineSelect');
@@ -728,10 +733,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const res = await safeGetStorage(['targetLanguage', 'activeConfig', 'userConfigs']);
   if (!res) return;
   window.currentConfig = {
-    targetLanguage: res.targetLanguage || 'zh-CN',
-    selectedEngine: res.activeConfig?.engine || 'google',
+    targetLanguage: res.targetLanguage || targetLang,
+    selectedEngine: res.activeConfig?.engine || _defaultEngine,
     apiKeys: res.activeConfig?.data || {},
-    activeConfig: res.activeConfig || { engine: 'google', data: {} },
+    activeConfig: res.activeConfig || { engine: _defaultEngine, data: {} },
     userConfigs: res.userConfigs || []
   };
   const langEl = document.getElementById('targetLang');
@@ -1063,11 +1068,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res) return;
       let targetL = res.targetLanguage || navigator.language || 'zh-CN';
       targetL = targetL.replace('_', '-');
-      let engine = res.activeConfig?.engine || 'google';
+      let engine = res.activeConfig?.engine || _defaultEngine;
       if (window.currentConfig) {
         window.currentConfig.targetLanguage = targetL;
         window.currentConfig.selectedEngine = engine;
-        window.currentConfig.activeConfig = res.activeConfig || { engine: 'google', data: {} };
+        window.currentConfig.activeConfig = res.activeConfig || { engine: _defaultEngine, data: {} };
       }
       if (typeof currentEngine !== 'undefined') currentEngine = engine;
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", targetLanguage="${targetL}", engine="${engine}"`);
@@ -1125,9 +1130,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               ? formatPosToEnglish(item.pos)
               : (item.pos || "");
             return `<div style="margin-bottom: 6px; display: flex; align-items: baseline; line-height: 1.4;">
-              <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
-              <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
-            </div>`;
+                <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
+                <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
+              </div>`;
           }).join('');
         }
         // 词形/时态显示
@@ -1141,35 +1146,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           if (prototype && protoLower !== textLower) {
             formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(99,179,237,0.1);border:0.5px solid rgba(99,179,237,0.4);border-radius:6px;padding:3px 8px;font-size:12px;">
-      <span style="color:#94a3b8;font-size:11px;">原型</span>
-      <span style="color:#38bdf8;font-weight:500;">${prototype}</span>
-    </span>`;
+        <span style="color:#94a3b8;font-size:11px;">原型</span>
+        <span style="color:#38bdf8;font-weight:500;">${prototype}</span>
+      </span>`;
           }
 
           wordForms.forEach(wf => {
             formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 8px;font-size:12px;">
-      <span style="color:#94a3b8;font-size:11px;">${wf.name}</span>
-      <span style="color:rgba(255,255,255,0.85);font-weight:500;">${wf.value}</span>
-    </span>`;
+        <span style="color:#94a3b8;font-size:11px;">${wf.name}</span>
+        <span style="color:rgba(255,255,255,0.85);font-weight:500;">${wf.value}</span>
+      </span>`;
           });
 
           html += `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
         }
         if (examples.length > 0) {
           html += `<div style="margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; user-select:text !important;">
-        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
-        ${examples.map(ex => {
+          <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
+          ${examples.map(ex => {
             const en = typeof ex === 'string' ? ex : (ex.en || '');
             const cn = typeof ex === 'object' ? (ex.cn || '') : '';
             return `<div style="margin-bottom: 8px;">
-                <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">"${en}"</div>
-                ${cn ? `<div style="color: rgba(255,255,255,0.4); font-size: 11px; font-style: italic; margin-top: 2px;">${cn}</div>` : ''}
-            </div>`;
+                  <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">"${en}"</div>
+                  ${cn ? `<div style="color: rgba(255,255,255,0.4); font-size: 11px; font-style: italic; margin-top: 2px;">${cn}</div>` : ''}
+              </div>`;
           }).join('')}
-    </div>`;
+      </div>`;
         }
         if (response.source) {
-          html += `<div style="margin-top:10px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
+          html += `<div style="margin-top:2px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
         }
         resContent.innerHTML = html || "No translation found.";
         if (typeof updateSaveBtnStatus === 'function') {
@@ -1286,6 +1291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputElem = document.getElementById('searchTextInput');
     const textToSpeak = inputElem?.value.trim();
     if (!textToSpeak) return;
+    this.classList.add('tts-loading');
     const ut = new SpeechSynthesisUtterance(textToSpeak);
     ut.rate = 0.6;
     ut.pitch = 1.0;
@@ -1302,8 +1308,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       ut.lang = 'en-US';
     }
     ut.onstart = () => {
-      this.classList.add('speaking-wave');
-      this.querySelector('svg').classList.add('icon-active');
+        this.classList.remove('tts-loading');  
+        this.classList.add('speaking-wave');
+        this.querySelector('svg').classList.add('icon-active');
     };
     ut.onend = () => {
       this.classList.remove('speaking-wave');
@@ -1467,7 +1474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (targetLangEl) targetLangEl.value = targetL;
       if (typeof updateEngineTips === 'function') {
         const engineSelect = document.getElementById('engineSelect');
-        const currentEngine = engineSelect ? engineSelect.value : 'google';
+        const currentEngine = engineSelect ? engineSelect.value : _defaultEngine;
         updateEngineTips(currentEngine);
       }
       const domainLabel = document.getElementById('domainIndicator');
@@ -1486,9 +1493,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const { activeConfig } = await safeGetStorage('activeConfig');
       const engineNameEl = document.getElementById('currentEngineName');
-      if (engineNameEl && activeConfig) {
-        const activeCfg = activeConfig || { engine: 'google', data: {} };
-        const engineId = activeCfg.engine || 'google';
+      if (engineNameEl) {
+        const activeCfg = activeConfig || { engine: _defaultEngine, data: {} };
+        const engineId = activeCfg.engine || _defaultEngine;
         const alias = activeCfg.alias || activeCfg.data?.alias;
         const engineMap = {
           'google': 'Google Translate',
@@ -1497,11 +1504,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let displayName;
         if (engineMap[engineId]) {
           displayName = engineMap[engineId];
-        }
-        else if (alias && alias !== engineId) {
+        } else if (alias && alias !== engineId) {
           displayName = alias;
-        }
-        else {
+        } else {
           displayName = engineId.charAt(0).toUpperCase() + engineId.slice(1);
         }
         engineNameEl.innerText = displayName;
@@ -1757,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const settingsBtn = document.getElementById('openSettings');
     if (!settingsBtn) return;
 
-    const engine = currentConfig?.activeConfig?.engine || currentConfig?.selectedEngine || 'google';
+    const engine = currentConfig?.activeConfig?.engine || currentConfig?.selectedEngine || _defaultEngine;
     const targetLang = currentConfig?.targetLanguage || 'zh-CN';
 
     try {
@@ -1829,23 +1834,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     const warning = document.createElement('span');
     warning.className = 'engine-warning';
     warning.style.cssText = `
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        width: 14px;
-        height: 14px;
-        background: #ef4444;
-        border-radius: 50%;
-        color: white;
-        font-size: 10px;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-        line-height: 1;
-        cursor: pointer;
-    `;
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 14px;
+          height: 14px;
+          background: #ef4444;
+          border-radius: 50%;
+          color: white;
+          font-size: 10px;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          line-height: 1;
+          cursor: pointer;
+      `;
     warning.textContent = '!';
     settingsBtn.appendChild(warning);
   }

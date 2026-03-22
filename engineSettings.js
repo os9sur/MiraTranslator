@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res) return;
     window.currentConfig = {
         targetLanguage: res.targetLanguage || (navigator.language || 'zh-CN').replace('_', '-'),
-        selectedEngine: res.selectedEngine || 'google',
+        selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
     const testTarget = window.currentConfig.targetLanguage;
@@ -176,7 +176,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const match = userConfigs.find(c => c.engine === data.selectedEngine);
             if (match) startId = match.id;
         }
-        if (!startId) startId = userConfigs[0].id;
+
+        if (!startId) {
+            const defaultMatch = userConfigs.find(c => c.engine === _defaultEngine);
+            startId = defaultMatch ? defaultMatch.id : userConfigs[0].id;
+        }
         await switchInstance(startId);
         bindEvents();
     }
@@ -184,7 +188,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('engine-sidebar-list');
         const data = await safeGetStorage('lastActiveId');
         if (!data) return;
-        const lastActiveId = data?.lastActiveId ?? 'google_builtin';
+        const defaultId = userConfigs.find(c => c.engine === _defaultEngine)?.id ?? userConfigs[0].id;
+        const lastActiveId = data?.lastActiveId ?? defaultId;//默认引擎
         const activeConfig = userConfigs.find(c => c.id === lastActiveId);
         const statusValueEl = document.getElementById('active-engine-name');
         if (statusValueEl) {
@@ -305,7 +310,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (saved.geminiKey && activeEngine === 'google') {
             activeEngine = 'gemini';
         }
-        const tpl = TEMPLATES[activeEngine] || TEMPLATES['google'];
+        const tpl = TEMPLATES[activeEngine] || TEMPLATES[_defaultEngine];
         const displayAlias = config.alias || tpl.name || activeEngine;
         const tipsDesc = document.getElementById('tips');
         const testBtn = document.getElementById('testApiConfig');

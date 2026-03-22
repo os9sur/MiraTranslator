@@ -2935,3 +2935,85 @@ self.i18nAttach2 = {
     getApiKey: "API Key Al ↗"
   }
 };
+self.i18nAttach3 = {
+  "zh-CN": {
+    note: "备注",
+    notePlaceholder: "四级/托福/语境...",
+    highlightVocab: "在网页高亮生词"
+  },
+  "zh-TW": {
+    note: "備註",
+    notePlaceholder: "",
+    highlightVocab: "在網頁高亮生詞"
+  },
+  "en": {
+    note: "Note",
+    notePlaceholder: "",
+    highlightVocab: "Highlight on page"
+  },
+  "ja": {
+    note: "メモ",
+    notePlaceholder: "",
+    highlightVocab: "ページ上で単語を強調"
+  },
+  "ko": {
+    note: "메모",
+    notePlaceholder: "",
+    highlightVocab: "페이지에서 단어 강조"
+  },
+  "es": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Resaltar en la página"
+  },
+  "fr": {
+    note: "Note",
+    notePlaceholder: "",
+    highlightVocab: "Surligner sur la page"
+  },
+  "de": {
+    note: "Notiz",
+    notePlaceholder: "",
+    highlightVocab: "Auf Seite hervorheben"
+  },
+  "ru": {
+    note: "Заметка",
+    notePlaceholder: "",
+    highlightVocab: "Выделить на странице"
+  },
+  "pt": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Destacar na página"
+  },
+  "it": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Evidenzia nella pagina"
+  },
+  "vi": {
+    note: "Ghi chú",
+    notePlaceholder: "",
+    highlightVocab: "Làm nổi bật trên trang"
+  },
+  "th": {
+    note: "บันทึก",
+    notePlaceholder: "",
+    highlightVocab: "เน้นคำบนหน้าเว็บ"
+  },
+  "ar": {
+    note: "ملاحظة",
+    notePlaceholder: "",
+    highlightVocab: "تمييز على الصفحة"
+  },
+  "fa": {
+    note: "یادداشت",
+    notePlaceholder: "",
+    highlightVocab: "برجسته در صفحه"
+  },
+  "tr": {
+    note: "Not",
+    notePlaceholder: "",
+    highlightVocab: "Sayfada vurgula"
+  }
+};

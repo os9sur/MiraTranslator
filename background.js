@@ -495,6 +495,34 @@ async function fetchFreeDictionary(word) {
 let bingCache = { ig: '', key: '', token: '', ts: 0 };
 let bingTokenPromise = null;
 const Translators = {
+
+    _withYoudaoDict: async function (basicText, originalText, targetLang, sourceName) {
+        const isEnglishWord = /^[a-zA-Z-]+$/.test(originalText.trim());
+        const isChineseTarget = targetLang.toLowerCase().includes('zh');
+
+        if (isEnglishWord && isChineseTarget) {
+            const youdaoData = await Translators._youdaoDict(originalText.trim());
+            if (youdaoData) {
+                return {
+                    basic: basicText,
+                    phonetic: youdaoData.phonetic,
+                    dictData: youdaoData.dictData,
+                    examples: youdaoData.examples,
+                    wordForms: youdaoData.wordForms || [],
+                    prototype: youdaoData.prototype || null,
+                    source: `${sourceName}+Youdao`
+                };
+            }
+        }
+
+        return {
+            basic: basicText,
+            phonetic: "",
+            dictData: [],
+            examples: [],
+            source: sourceName
+        };
+    },
     bing: async function (text, targetLang) {
         if (!text) return null;
         const isCN = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
@@ -549,31 +577,7 @@ const Translators = {
             }
 
             const bingBasic = data[0].translations[0].text;
-            const isEnglishWord = /^[a-zA-Z-]+$/.test(text.trim());
-
-            // 仅对单个英文单词尝试拼接有道
-            if (isEnglishWord) {
-                const youdaoData = await Translators._youdaoDict(text.trim());
-                if (youdaoData) {
-                    return {
-                        basic: bingBasic,
-                        phonetic: youdaoData.phonetic,
-                        dictData: youdaoData.dictData,
-                        examples: youdaoData.examples,
-                        wordForms: youdaoData.wordForms || [],
-                        prototype: youdaoData.prototype || null,
-                        source: 'Bing+Youdao'
-                    };
-                }
-            }
-
-            return {
-                basic: bingBasic,
-                phonetic: "",
-                dictData: [],
-                examples: [],
-                source: 'Bing'
-            };
+            return await Translators._withYoudaoDict(bingBasic, text, targetLang, 'Bing');
         } catch (e) {
             bingCache.ig = null;
             throw new Error(`Bing_API_Error: ${e.message}`);
@@ -755,7 +759,7 @@ const Translators = {
                 logger.error("Google 返回数据结构异常:", data);
                 throw new Error("Empty translation result");
             }
-            return translation;
+            return await Translators._withYoudaoDict(translation, text, target, 'Google Cloud');
         } catch (e) {
             logger.error("google_v3 链路异常:", e.message);
             throw e;
@@ -939,12 +943,9 @@ const Translators = {
             const salt = Date.now().toString();
             const sign = md5(baiduAppId + text + salt + baiduKey);
             const langMap = {
-                'ja': 'jp',
-                'ja-jp': 'jp',
-                'fr': 'fra',
-                'fr-fr': 'fra',
-                'ko': 'kor',
-                'ko-kr': 'kor'
+                'ja': 'jp', 'ja-jp': 'jp',
+                'fr': 'fra', 'fr-fr': 'fra',
+                'ko': 'kor', 'ko-kr': 'kor'
             };
             let baiduTarget = target.toLowerCase();
             if (baiduTarget.includes('zh')) {
@@ -956,23 +957,18 @@ const Translators = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
-                    q: text,
-                    from: 'auto',
-                    to: baiduTarget,
-                    appid: baiduAppId,
-                    salt: salt,
-                    sign: sign
+                    q: text, from: 'auto', to: baiduTarget,
+                    appid: baiduAppId, salt, sign
                 })
             });
             const data = await res.json();
             if (data.error_code && data.error_code !== "52000") {
-                logger.error("百度 API 报错:", data);
                 throw new Error(`Baidu [${data.error_code}]: ${data.error_msg}`);
             }
-            if (data.trans_result && data.trans_result[0]) {
-                return data.trans_result[0].dst;
-            }
-            throw new Error("未获取到翻译内容");
+            if (!data.trans_result?.[0]) throw new Error("未获取到翻译内容");
+
+            const baiduBasic = data.trans_result[0].dst;
+            return await Translators._withYoudaoDict(baiduBasic, text, target, 'Baidu');
         } catch (e) {
             logger.error("百度翻译链路异常:", e.message);
             throw e;
@@ -987,7 +983,8 @@ const Translators = {
         });
         const res = await fetch(`https://${host}`, { method: "POST", headers, body: JSON.stringify(payload) });
         const data = await res.json();
-        return data.Response.TargetText;
+        const tencentBasic = data.Response.TargetText;
+        return await Translators._withYoudaoDict(tencentBasic, text, target, 'Tencent');
     },
     deepl: async (text, target, keys) => {
         const { deeplKey } = keys;
@@ -1011,7 +1008,8 @@ const Translators = {
             throw new Error(`DeepL Error [${res.status}]: ${data.message || 'Check your Key'}`);
         }
         if (data.translations && data.translations[0]) {
-            return data.translations[0].text;
+            const deeplBasic = data.translations[0].text;
+            return await Translators._withYoudaoDict(deeplBasic, text, target, 'DeepL');
         }
         throw new Error("DeepL returned empty result");
     },
@@ -1033,7 +1031,8 @@ const Translators = {
                 throw new Error(`MS Azure Error [${errorCode}]: ${errorMsg}`);
             }
             if (data && data[0]?.translations?.[0]?.text) {
-                return data[0].translations[0].text;
+                const msBasic = data[0].translations[0].text;
+                return await Translators._withYoudaoDict(msBasic, text, target, 'Microsoft');
             }
             throw new Error('MS Azure Error: Unexpected response structure');
         } catch (err) {
@@ -1085,7 +1084,7 @@ async function processTranslate(req) {
             }
             const config = storage.activeConfig;
             if (!config) {
-                engine = 'google';
+                engine = _defaultEngine;
                 data = {};
             } else {
                 engine = config.engine;
@@ -1156,33 +1155,33 @@ async function processTranslate(req) {
             const targetLanguageName = getFriendlyLanguageName(req.targetLang);
             if (isWord) {
                 systemPrompt = [
-                `You are a professional multilingual dictionary.`,
-                `For the input "${req.text}", detect its source language and provide its definition in ${targetLanguageName}.`,
-                `IMPORTANT: The "basic" and "dictData.definition" fields MUST be written in ${targetLanguageName}. If ${targetLanguageName} is Traditional Chinese, use 繁體字 exclusively.`,
-                `Return a JSON object:`,
-                `{`,
-                `  "phonetic": "IPA phonetics (if applicable)",`,
-                `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
-                `  "dictData": [`,
-                `    {"pos": "n./v./adj.", "definition": "A comma-separated list of meanings for this specific part of speech (e.g., '平台, 基础, 位置')"}`,
-                `  ],`,
-                `  "examples": ["Original sentence in source language | ${targetLanguageName} translation"],`,
-                `  "wordForms": [{"name": "past tense / 复数 / 活用形 etc.", "value": "the form"}],`,
-                `  "prototype": "base/root form if input is inflected, otherwise null"`,
-                `}`,
-                `Constraints:`,
-                `1. MUST GROUP definitions by part of speech. Each unique 'pos' (e.g., 'n.') should appear ONLY ONCE in the 'dictData' array.`,
-                `2. Combine multiple meanings of the same 'pos' into a single comma-separated string in the 'definition' field.`,
-                `3. 'dictData' must contain AT MOST 6 high-quality definitions in total.`,
-                `4. If the word is very common, provide only the most essential meanings.`,
-                `5. For 'wordForms': provide ONLY the morphological forms OF THE EXACT INPUT WORD "${req.text}" itself. For example, if input is "forward": wordForms should be [过去式:forwarded, 过去分词:forwarded, 现在分词:forwarding, 第三人称单数:forwards]. NEVER use forms of a different word. Use EXACTLY these name values (do not translate or rephrase):`,
-                `   - verb: "过去式", "过去分词", "现在分词", "第三人称单数"`,
-                `   - noun: "复数"`,
-                `   - adjective: "比较级", "最高级"`,
-                `   Only include forms applicable to the input word's actual part of speech. Return [] for Chinese, Thai, Vietnamese.`,
-                `6. For 'prototype': ONLY return a value if "${req.text}" is itself a grammatically inflected form. "running" → "run", "helpers" → "helper", "forwarded" → "forward". If "${req.text}" is already a base form, return null. NEVER return a semantically related word like "go" for "forward". When in doubt, return null.`,
+                    `You are a professional multilingual dictionary.`,
+                    `For the input "${req.text}", detect its source language and provide its definition in ${targetLanguageName}.`,
+                    `IMPORTANT: The "basic" and "dictData.definition" fields MUST be written in ${targetLanguageName}. If ${targetLanguageName} is Traditional Chinese, use 繁體字 exclusively.`,
+                    `Return a JSON object:`,
+                    `{`,
+                    `  "phonetic": "IPA phonetics (if applicable)",`,
+                    `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
+                    `  "dictData": [`,
+                    `    {"pos": "n./v./adj.", "definition": "A comma-separated list of meanings for this specific part of speech (e.g., '平台, 基础, 位置')"}`,
+                    `  ],`,
+                    `  "examples": ["Original sentence in source language | ${targetLanguageName} translation"],`,
+                    `  "wordForms": [{"name": "past tense / 复数 / 活用形 etc.", "value": "the form"}],`,
+                    `  "prototype": "base/root form if input is inflected, otherwise null"`,
+                    `}`,
+                    `Constraints:`,
+                    `1. MUST GROUP definitions by part of speech. Each unique 'pos' (e.g., 'n.') should appear ONLY ONCE in the 'dictData' array.`,
+                    `2. Combine multiple meanings of the same 'pos' into a single comma-separated string in the 'definition' field.`,
+                    `3. 'dictData' must contain AT MOST 6 high-quality definitions in total.`,
+                    `4. If the word is very common, provide only the most essential meanings.`,
+                    `5. For 'wordForms': provide ONLY the morphological forms OF THE EXACT INPUT WORD "${req.text}" itself. For example, if input is "forward": wordForms should be [过去式:forwarded, 过去分词:forwarded, 现在分词:forwarding, 第三人称单数:forwards]. NEVER use forms of a different word. Use EXACTLY these name values (do not translate or rephrase):`,
+                    `   - verb: "过去式", "过去分词", "现在分词", "第三人称单数"`,
+                    `   - noun: "复数"`,
+                    `   - adjective: "比较级", "最高级"`,
+                    `   Only include forms applicable to the input word's actual part of speech. Return [] for Chinese, Thai, Vietnamese.`,
+                    `6. For 'prototype': ONLY return a value if "${req.text}" is itself a grammatically inflected form. "running" → "run", "helpers" → "helper", "forwarded" → "forward". If "${req.text}" is already a base form, return null. NEVER return a semantically related word like "go" for "forward". When in doubt, return null.`,
                     `7. Respond with PURE JSON ONLY. Absolutely no Markdown, no code fences, no backticks, no explanations. The response must start with '{' and end with '}'.`,
-                `8. CRITICAL: Your entire response must be a single valid JSON object. If you output anything other than raw JSON, it will cause a system error. Do not add any text before '{' or after '}'.`
+                    `8. CRITICAL: Your entire response must be a single valid JSON object. If you output anything other than raw JSON, it will cause a system error. Do not add any text before '{' or after '}'.`
                 ].join('\n');
             } else if (isSubtitle) {
                 systemPrompt = [
@@ -1251,7 +1250,7 @@ async function processTranslate(req) {
             if (cleanedResult.startsWith('{') && cleanedResult.endsWith('}')) {
                 try {
                     const parsed = JSON.parse(cleanedResult);
-                     //logger.log('[processTranslate] parsed:', JSON.stringify(parsed));
+                    //logger.log('[processTranslate] parsed:', JSON.stringify(parsed));
                     finalData = {
                         ...finalData,
                         basic: parsed.basic || "",
@@ -1671,11 +1670,39 @@ function drawText(ctx, text, x, y, color) {
     ctx.textBaseline = "middle";
     ctx.fillText(text, x, y + 10);
 }
+
+// 安装或浏览器启动时检测一次
+chrome.runtime.onInstalled.addListener(() => detectAndCacheDefaultEngine(false));
+chrome.runtime.onStartup.addListener(() => detectAndCacheDefaultEngine(false));
+
+async function detectAndCacheDefaultEngine(force = false) {
+    if (!force) {
+        const res = await chrome.storage.local.get(['_defaultEngine', '_defaultEngineTime']);
+        const age = Date.now() - (res._defaultEngineTime || 0);
+        if (res._defaultEngine && age < 24 * 60 * 60 * 1000) return;
+    }
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        await fetch('https://www.google.com/generate_204', {
+            mode: 'no-cors', cache: 'no-cache', signal: controller.signal
+        });
+        clearTimeout(timeout);
+        chrome.storage.local.set({ _defaultEngine: 'google', _defaultEngineTime: Date.now() });
+    } catch (e) {
+        chrome.storage.local.set({ _defaultEngine: 'bing', _defaultEngineTime: Date.now() });
+    }
+}
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!chrome.runtime || !chrome.runtime.id) return;
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
+    if (request.type === 'CHECK_DEFAULT_ENGINE') {
+        detectAndCacheDefaultEngine(true);
+        safeSendResponse({ ok: true });
+        return false;
+    }
     if (request.type === 'START_AUTH' || request.action === 'AUTH_FIREFOX') {
         handleAuthFlow(safeSendResponse);
         return true;
@@ -1763,20 +1790,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // ============ 卸载反馈逻辑 ============
-(function() {
-  const uiLang = chrome.i18n.getUILanguage(); 
-  let langParam = 'en';
+(function () {
+    const uiLang = chrome.i18n.getUILanguage();
+    let langParam = 'en';
 
-  if (uiLang === 'zh-CN') {
-    langParam = 'zh-CN';
-  } else if (uiLang.startsWith('zh')) {
-    langParam = 'zh-TW';
-  } else if (uiLang.startsWith('ja')) {
-    langParam = 'ja';
-  }
+    if (uiLang === 'zh-CN') {
+        langParam = 'zh-CN';
+    } else if (uiLang.startsWith('zh')) {
+        langParam = 'zh-TW';
+    } else if (uiLang.startsWith('ja')) {
+        langParam = 'ja';
+    }
 
-  const uninstallUrl = `https://tally.so/r/68xBrJ?lang=${langParam}`;
-  
-  // 设置卸载跳转
-  chrome.runtime.setUninstallURL(uninstallUrl);
+    const uninstallUrl = `https://tally.so/r/68xBrJ?lang=${langParam}`;
+
+    // 设置卸载跳转
+    chrome.runtime.setUninstallURL(uninstallUrl);
 })();

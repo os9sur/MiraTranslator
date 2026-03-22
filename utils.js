@@ -160,43 +160,26 @@ async function getActiveTab() {
   });
 }
 
-let _isGoogleAccessible = null;
-let _defaultEngine = 'bing';
+let _defaultEngine = 'bing'; 
 
-async function checkGoogleAbility() {
-  if (_isGoogleAccessible !== null) return _isGoogleAccessible;
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2000);
-    await fetch('https://www.google.com/generate_204', {
-      mode: 'no-cors',
-      cache: 'no-cache',
-      signal: controller.signal
-    });
-    clearTimeout(timeout);
-    _isGoogleAccessible = true;
-    _defaultEngine = 'google';
-  } catch (e) {
-    _isGoogleAccessible = false;
-    _defaultEngine = 'bing';
-  }
-  return _isGoogleAccessible;
-}
+let _defaultEngineReady = safeGetStorage(['_defaultEngine']).then(res => {
+    if (res._defaultEngine) _defaultEngine = res._defaultEngine;
+});
 
 async function getInitialActiveConfig() {
-  await checkGoogleAbility();
-  return { engine: _defaultEngine, data: {} };
+    await _defaultEngineReady;
+    return { engine: _defaultEngine, data: {} };
 }
 
 function getRuntimeDefaultEngine() {
-  return _defaultEngine;
+    return _defaultEngine;
 }
 
 
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: false, select: true, yt: true };
 if (typeof chrome !== 'undefined' && chrome.storage) {
-  chrome.storage.local.get(['siteSettings', 'globalConfig'], (res) => {
+  safeGetStorage(['siteSettings', 'globalConfig'], (res) => {
     if (res.siteSettings) cachedSiteSettings = res.siteSettings;
     if (res.globalConfig) cachedGlobalConfig = res.globalConfig;
   });
@@ -247,7 +230,7 @@ async function safeSendMessage(message) {
     }
   });
 }
-let isNoticeShowing = false;
+var isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
   isNoticeShowing = true;
@@ -306,7 +289,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2','i18nAttach3'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];

@@ -38,16 +38,15 @@ initApp();
 logger.log(window.currentTargetL);
 
 (async () => {
+  await _defaultEngineReady; // 等缓存读完
+
   let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
 
   if (!res || !res.activeConfig) {
-    const finalCfg = await getInitialActiveConfig();
+    const finalCfg = { engine: _defaultEngine, data: {} };
 
     window.currentConfig.activeConfig = finalCfg;
     window.currentConfig.selectedEngine = finalCfg.engine;
-
-    await chrome.storage.local.set({ activeConfig: finalCfg });
-
     res = {
       activeConfig: finalCfg,
       targetLanguage: (navigator.language || 'zh-CN').replace('_', '-').toLowerCase()
@@ -56,7 +55,6 @@ logger.log(window.currentTargetL);
 
   syncLocalState(res);
 })();
-
 
 const TRANS_STATUS = {
   LOADING: 'loading',
@@ -2444,6 +2442,11 @@ let lastUtterance = null;
 function speak(text, speakBtn) {
   if (!window.speechSynthesis || !text) return;
   window.speechSynthesis.cancel();
+  if (speakBtn) {
+    speakBtn.classList.remove('is-speaking');
+    speakBtn.classList.add('is-loading');
+  }
+
   lastUtterance = new SpeechSynthesisUtterance(text);
   lastUtterance.rate = 0.8;
   lastUtterance.volume = 1.0;
@@ -2510,9 +2513,14 @@ function speak(text, speakBtn) {
     window.speechSynthesis.speak(lastUtterance);
   }, 50);
   if (speakBtn) {
-    speakBtn.classList.remove('is-speaking');
-    lastUtterance.onstart = () => speakBtn.classList.add('is-speaking');
-    const stop = () => speakBtn?.classList.remove('is-speaking');
+    lastUtterance.onstart = () => {
+      speakBtn.classList.remove('is-loading');
+      speakBtn.classList.add('is-speaking');
+    };
+    const stop = () => {
+      speakBtn?.classList.remove('is-speaking');
+      speakBtn?.classList.remove('is-loading');
+    };
     lastUtterance.onend = stop;
     lastUtterance.onerror = stop;
   }
@@ -3110,7 +3118,9 @@ function initSelectionTranslate() {
     }
     .header-controls {
         position: absolute;
-        top: 1px;      
+        height: 28px;
+        top: 1px;  
+        padding-top: 10px;    
         right: 9px;    
         display: flex;
         align-items: center;
@@ -3232,6 +3242,34 @@ function initSelectionTranslate() {
     .speak-btn::after {
       pointer-events: none;
     }
+@keyframes speak-loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.speak-btn.is-loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(56, 189, 248, 0.2);
+    border-top-color: #38bdf8;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: speak-loading 0.7s linear infinite;
+}
+
+.speak-btn.is-loading svg {
+    opacity: 0.4;
+    stroke: #38bdf8 !important;
+}
+
     @keyframes logo-glow {
       0% {
         filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
@@ -3350,7 +3388,7 @@ function initSelectionTranslate() {
     <div class="resizer" data-dir="br" style="position:absolute; bottom:-8px; right:-8px; width:16px; height:16px; cursor:nwse-resize; z-index:2147483648;"></div>
 `;
     shadow.appendChild(popupEl);
-    chrome.storage.local.get('uiConfig', (res) => {
+    safeGetStorage('uiConfig', (res) => {
       const settings = res?.uiConfig;
       if (settings?.width && settings?.height) {
         try {
@@ -3623,7 +3661,7 @@ function initSelectionTranslate() {
     <div id="p-basic" class="basic" style="margin-top: 8px;">Loading...</div>
     <div id="p-detail" class="detail" style="display:none; margin-top: 10px;margin-bottom: 10px"></div>
     <div id="p-examples" style="display:none; margin-top: 12px;"></div>
-    <div id="p-source" style="display:none; margin-top:10px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;"></div>
+    <div id="p-source" style="display:none; margin-top:1px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;"></div>
 </div>`;
     popupEl.classList.remove('is-hidden');
     popupEl.style.display = 'flex';
@@ -3639,14 +3677,17 @@ function initSelectionTranslate() {
     const settingsRes = await safeGetStorage('uiConfig');
     const settings = settingsRes?.uiConfig || {};
     if (settings.width) {
+      popupEl.style.width = settings.width;
       popupEl.style.maxWidth = settings.width;
     } else {
-      popupEl.style.maxWidth = '450px';
+      // 用户未设置时给合理默认宽度
+      popupEl.style.width = '360px';
+      popupEl.style.maxWidth = '360px';
     }
     if (settings.height) {
       popupEl.style.maxHeight = settings.height;
     } else {
-      popupEl.style.maxHeight = '85vh';
+      popupEl.style.maxHeight = '50vh';//默认高度
     }
     popupEl.style.visibility = 'visible';
     const pQuary = shadow.getElementById('p-query');
@@ -3901,6 +3942,7 @@ function initSelectionTranslate() {
         }
       }
     }
+    //收藏
     shadow.getElementById('p-save').onclick = async (e) => {
       e.stopPropagation();
       const saveBtn = shadow.getElementById('p-save');
@@ -3951,10 +3993,7 @@ function initSelectionTranslate() {
           };
         }
       }
-      let existingEntry = await idb.vocabulary.get(dbKey);
-      if (!existingEntry) {
-        existingEntry = await idb.vocabulary.get(wordText);
-      }
+      let existingEntry = await idb.vocabulary.get(wordText);
       let isActive = false;
       let entryToSave = null;
       if (existingEntry) {
@@ -4000,6 +4039,8 @@ function initSelectionTranslate() {
         star.setAttribute('fill', 'none');
         star.setAttribute('stroke', 'rgba(255,255,255,0.8)');
       }
+      // 检查高亮开关是否开启
+      await window.__vocabOnSave?.(wordText, isActive);
     };
     const dragZone = shadow.getElementById('drag-zone');
     const header = shadow.getElementById('p-header');
@@ -4219,6 +4260,256 @@ function initSelectionTranslate() {
     }
   }, true);
   //小按钮相关逻辑结束----------
+
+  (async () => {
+    const doHighlight = (words, vocabulary) => {
+      const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const regex = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+
+      const wordMap = {};
+      Object.values(vocabulary).forEach(item => {
+        if (item && !item.deleted && item.word) {
+          wordMap[item.word.toLowerCase()] = item;
+        }
+      });
+
+      if (!document.getElementById('vocab-highlight-style')) {
+        const style = document.createElement('style');
+        style.id = 'vocab-highlight-style';
+        style.textContent = `
+        .vocab-highlight {
+          background: linear-gradient(120deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.25) 100%);
+          color: #38bdf8;
+          border-bottom: 1px solid rgba(56,189,248,0.5);
+          border-radius: 2px;
+          cursor: pointer;
+          padding: 0 1px;
+          transition: background 0.2s;
+        }
+        .vocab-highlight:hover {
+          background: linear-gradient(120deg, rgba(56,189,248,0.3) 0%, rgba(56,189,248,0.4) 100%);
+        }
+      `;
+        document.head.appendChild(style);
+      }
+
+      const processed = new WeakSet();
+
+      const createHighlightSpan = (text, entry) => {
+        const span = document.createElement('span');
+        span.className = 'vocab-highlight';
+        span.textContent = text;
+        if (entry) {
+          // mousedown stopPropagation 阻止 document mousedown 关闭窗口
+          span.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+          });
+          span.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!shadowHost) initShadowDOM();
+            renderAndShowPopup(
+              entry.word,
+              { clientX: e.clientX, clientY: e.clientY },
+              shadowHost.shadowRoot,
+              window.currentTargetL || 'zh-CN'
+            );
+          });
+        }
+        return span;
+      };
+
+      const walkWithRegex = (node, reg, getEntry) => {
+        if (processed.has(node)) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (!node.textContent.trim()) return;
+          if (!reg.test(node.textContent)) { reg.lastIndex = 0; return; }
+          reg.lastIndex = 0;
+          processed.add(node);
+
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match;
+          reg.lastIndex = 0;
+
+          while ((match = reg.exec(node.textContent)) !== null) {
+            if (match.index > lastIndex) {
+              frag.appendChild(document.createTextNode(
+                node.textContent.slice(lastIndex, match.index)
+              ));
+            }
+            const entry = getEntry(match[0]);
+            frag.appendChild(createHighlightSpan(match[0], entry));
+            lastIndex = match.index + match[0].length;
+          }
+
+          if (lastIndex < node.textContent.length) {
+            frag.appendChild(document.createTextNode(
+              node.textContent.slice(lastIndex)
+            ));
+          }
+          node.parentNode?.replaceChild(frag, node);
+
+        } else if (
+          node.nodeType === Node.ELEMENT_NODE &&
+          !['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'NOSCRIPT'].includes(node.tagName) &&
+          !node.classList.contains('vocab-highlight')
+        ) {
+          processed.add(node);
+          Array.from(node.childNodes).forEach(n => walkWithRegex(n, reg, getEntry));
+        }
+      };
+
+      const walk = (node) => walkWithRegex(node, regex,
+        (matchText) => wordMap[matchText.toLowerCase()]
+      );
+
+      const highlightWord = async (word) => {
+        const freshEntry = await idb.vocabulary.get(word);
+        if (!freshEntry || freshEntry.deleted) return;
+
+        const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const singleRegex = new RegExp(`\\b(${esc})\\b`, 'gi');
+        wordMap[word.toLowerCase()] = freshEntry;
+
+        // 暂停 Observer 防止触发循环
+        observer.disconnect();
+
+        // 专门遍历文本节点，不检查 processed
+        const walkForNew = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            if (!node.textContent.trim()) return;
+            singleRegex.lastIndex = 0;
+            if (!singleRegex.test(node.textContent)) return;
+            singleRegex.lastIndex = 0;
+
+            const frag = document.createDocumentFragment();
+            let lastIndex = 0;
+            let match;
+            singleRegex.lastIndex = 0;
+
+            while ((match = singleRegex.exec(node.textContent)) !== null) {
+              if (match.index > lastIndex) {
+                frag.appendChild(document.createTextNode(
+                  node.textContent.slice(lastIndex, match.index)
+                ));
+              }
+              frag.appendChild(createHighlightSpan(match[0], freshEntry));
+              lastIndex = match.index + match[0].length;
+            }
+            if (lastIndex < node.textContent.length) {
+              frag.appendChild(document.createTextNode(
+                node.textContent.slice(lastIndex)
+              ));
+            }
+            if (node.parentNode) {
+              node.parentNode.replaceChild(frag, node);
+            }
+
+          } else if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            !['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'NOSCRIPT'].includes(node.tagName) &&
+            !node.classList.contains('vocab-highlight')
+          ) {
+            Array.from(node.childNodes).forEach(walkForNew);
+          }
+        };
+
+        walkForNew(document.body);
+
+        // 恢复 Observer
+        observer.observe(document.body, { childList: true, subtree: true });
+      };
+      let observer = null;
+      const removeHighlight = (word) => {
+        observer.disconnect();
+
+        const els = Array.from(document.querySelectorAll('.vocab-highlight'));
+        els.forEach(el => {
+          if (el.textContent.toLowerCase() === word.toLowerCase()) {
+            const textNode = document.createTextNode(el.textContent);
+            const parent = el.parentNode;
+            if (parent) {
+              parent.replaceChild(textNode, el);
+              processed.add(textNode);
+            }
+          }
+        });
+        delete wordMap[word.toLowerCase()];
+        observer.observe(document.body, { childList: true, subtree: true });
+      };
+
+      window.__vocabHighlightWord = highlightWord;
+      window.__vocabRemoveHighlight = removeHighlight;
+
+      // p-save 联动：监听来自 renderAndShowPopup 的收藏事件
+      window.__vocabOnSave = async (wordText, isActive) => {
+        if (!window.__vocabHighlightWord) return;
+        if (isActive) {
+          await highlightWord(wordText);
+        } else {
+          removeHighlight(wordText);
+        }
+      };
+
+      walk(document.body);
+
+      observer = new MutationObserver((mutations) => {
+        const newNodes = [];
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (!processed.has(node)) newNodes.push(node);
+          });
+        });
+        if (newNodes.length === 0) return;
+        requestAnimationFrame(() => newNodes.forEach(walk));
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      chrome.storage.onChanged.addListener((changes) => {
+        if (changes.vocabHighlight?.newValue === false) {
+          observer.disconnect();
+          document.querySelectorAll('.vocab-highlight').forEach(el => {
+            el.replaceWith(document.createTextNode(el.textContent));
+          });
+          const s = document.getElementById('vocab-highlight-style');
+          if (s) s.remove();
+          window.__vocabHighlightWord = null;
+          window.__vocabRemoveHighlight = null;
+          window.__vocabOnSave = null;
+        }
+      });
+    };
+
+    async function initHighlight() {
+      const vocabulary = await safeSendMessage({ type: 'IDB_GET_ALL', prefix: 'vb_' });
+      if (!vocabulary) return;
+
+      const words = Object.values(vocabulary)
+        .filter(item => item && !item.deleted && item.word)
+        .map(item => item.word.toLowerCase());
+
+      if (words.length === 0) return;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => doHighlight(words, vocabulary));
+      } else {
+        doHighlight(words, vocabulary);
+      }
+    }
+
+    const storage = await safeGetStorage('vocabHighlight');
+    if (storage?.vocabHighlight) {
+      await initHighlight();
+    }
+
+    chrome.storage.onChanged.addListener(async (changes) => {
+      if (changes.vocabHighlight?.newValue === true) {
+        await initHighlight();
+      }
+    });
+  })();
+
 }
 
 //yt
