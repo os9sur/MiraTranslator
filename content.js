@@ -715,6 +715,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ status: "ok" });
   }
   else if (msg.action === 'RE_SCAN_PAGE') {
+    if (msg.lang) {
+      window.currentTargetL = msg.lang;
+    }
     if (typeof executeReScan === 'function') executeReScan(msg.config);
     sendResponse({ status: "success" });
   }
@@ -2627,7 +2630,7 @@ function initSelectionTranslate() {
           panel.style.height = 'auto';
           panel.style.maxHeight = finalRect.height + 'px';
           panel.style.minHeight = finalRect.height + 'px';
-          chrome.storage.local.set({
+          safeSetStorage({
             uiConfig: {
               width: finalRect.width + 'px',
               height: finalRect.height + 'px'
@@ -4171,6 +4174,10 @@ function initSelectionTranslate() {
       if (!selection) return;
       const text = selection.toString().trim();
       if (!text || text.length > 1000) return;
+      // 确保语言已加载
+      if (!window.__LANG_READY__) {
+        await window.__LANG_PROMISE__;
+      }
       const targetLang = window.currentTargetL || navigator.language || 'en';
       const isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
       if (isAlreadyTarget) {
@@ -4264,7 +4271,13 @@ function initSelectionTranslate() {
   (async () => {
     const doHighlight = (words, vocabulary) => {
       const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-      const regex = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
+      const isLatinWord = (w) => /^[a-zA-Z0-9_]+$/.test(w);
+      const patterns = escaped.map((w, i) =>
+        isLatinWord(words[i])
+          ? `\\b${w}\\b`
+          : `(${w})`
+      );
+      const regex = new RegExp(patterns.join('|'), 'giu');
 
       const wordMap = {};
       Object.values(vocabulary).forEach(item => {
@@ -4305,6 +4318,8 @@ function initSelectionTranslate() {
             e.stopPropagation();
           });
           span.addEventListener('click', (e) => {
+            // 如果在字幕容器里，不弹出 Shadow DOM 窗口
+            if (e.target.closest('#kt-yt-box')) return;
             e.stopPropagation();
             if (!shadowHost) initShadowDOM();
             renderAndShowPopup(
@@ -4368,7 +4383,10 @@ function initSelectionTranslate() {
         if (!freshEntry || freshEntry.deleted) return;
 
         const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const singleRegex = new RegExp(`\\b(${esc})\\b`, 'gi');
+        const isLatin = /^[a-zA-Z0-9_]+$/.test(word);
+        const singleRegex = isLatin
+          ? new RegExp(`\\b(${esc})\\b`, 'giu')
+          : new RegExp(`(${esc})`, 'giu');
         wordMap[word.toLowerCase()] = freshEntry;
 
         // 暂停 Observer 防止触发循环
@@ -5006,7 +5024,7 @@ function enableYtBoxDrag(box) {
       isDragging = false;
       box.classList.remove('dragging');
       document.body.style.cursor = 'default';
-      chrome.storage.local.set({ ytBoxBottom: box.style.bottom });
+      safeSetStorage({ ytBoxBottom: box.style.bottom });
     }
   });
 }
@@ -5066,19 +5084,27 @@ function renderWords(text, container) {
   words.forEach(word => {
     const trimmed = word.trim();
     if (trimmed.length > 0) {
+      const cleanWord = trimmed.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」]/g, "");
+
       const span = document.createElement('span');
       span.className = 'kt-word';
       span.innerText = word;
+
+      // 高亮判断
+      if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
+        span.style.color = '#facc15';
+        span.style.borderBottom = '1px solid rgba(250, 204, 21, 0.6)';
+      }
+
       if (isCJK) {
         span.style.margin = '0 0.5px';
         span.style.display = 'inline-block';
       }
       span.onmouseenter = (e) => { if (typeof handleWordMouseEnter === 'function') handleWordMouseEnter(e, trimmed); };
       span.onmouseleave = (e) => { if (typeof handleWordMouseLeave === 'function') handleWordMouseLeave(e); };
-      span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, trimmed); };
+      span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, cleanWord); };
       span.onclick = (e) => {
         e.preventDefault(); e.stopPropagation();
-        const cleanWord = trimmed.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」]/g, "");
         if (typeof speak === 'function') speak(cleanWord, span);
         const originalColor = span.style.color;
         span.style.color = '#facc15';
@@ -5119,8 +5145,24 @@ async function handleWordMouseEnter(e, word) {
   }
   e.target.style.background = 'rgba(56, 189, 248, 0.4)';
   e.target.style.borderRadius = '4px';
-  const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
-  if (!cleanWord) return;
+  const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」『』【】…—～・]/g, "").trim();
+  if (!cleanWord || cleanWord.length === 0) return;
+
+  // 纯数字
+  if (/^\d+$/.test(cleanWord)) return;
+
+  // 单个字符（标点、符号、单独数字）
+  if (/^[\p{P}\p{S}]$/u.test(cleanWord)) return;
+
+  // 纯空白
+  if (/^\s+$/.test(cleanWord)) return;
+
+  // 单个英文字母 
+  if (/^[a-zA-Z]$/.test(cleanWord)) return;
+
+  // 纯符号组合 
+  if (/^[\p{P}\p{S}\s]+$/u.test(cleanWord)) return;
+
   const [entry, storage] = await Promise.all([
     idb.vocabulary.get(cleanWord),
     safeGetStorage(['targetLanguage'])
@@ -5132,20 +5174,20 @@ async function handleWordMouseEnter(e, word) {
     tooltip = document.createElement('div');
     tooltip.id = 'kt-word-tooltip';
     tooltip.style.cssText = `
-            position: fixed; z-index: 2147483647; background: #1e293b !important; 
-            color: white !important; padding: 10px 14px; border-radius: 8px; 
-            font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            pointer-events: none; max-width: 240px; line-height: 1.5;
-            display: none; flex-direction: column;
-            box-sizing: border-box;
-            transition: top 0.15s ease-out;
-            border: 1px solid #334155;
-        `;
+    position: fixed; z-index: 2147483647; background: #1e293b !important; 
+    color: white !important; padding: 10px 14px; border-radius: 8px; 
+    font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    pointer-events: none; min-width: 160px; max-width: 320px; width: fit-content;
+    line-height: 1.5; display: none; flex-direction: column;
+    box-sizing: border-box;
+    transition: top 0.15s ease-out;
+    border: 1px solid #334155;
+`;
     const moviePlayer = document.querySelector('.html5-video-player') || document.body;
     moviePlayer.appendChild(tooltip);
   }
   tooltip.style.border = isCollected ? '2px solid #facc15' : '1px solid #334155';
-  const tipText = isCollected ? t('alreadyAddedFeedback') : t('hintAddAction');
+  const tipText = isCollected ? t('alreadyAddedFeedback', currentLang) : t('hintAddAction', currentLang);
   const tipColor = isCollected ? '#facc15' : '#94a3b8';
   tooltip.innerHTML = `
         <div id="kt-word-def" data-status="loading" style="color:#94a3b8">Loading...</div>
@@ -5157,34 +5199,40 @@ async function handleWordMouseEnter(e, word) {
   tooltip.style.visibility = 'visible';
   repositionTooltip(tooltip, e.target);
   try {
-    const res = await getDetailedTranslation(cleanWord, false, currentLang);
+    const res = await getDetailedTranslation(cleanWord, false, currentLang, { lightweight: true });
     const defEl = tooltip.querySelector('#kt-word-def');
     if (res && defEl) {
       const phoneticStr = res.phonetic ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-left: 8px;">[${res.phonetic}]</span>` : '';
       let dictHtml = '';
       if (res.dictData && res.dictData.length > 0) {
-        dictHtml = res.dictData.map(i => {
-          const meaningsStr = Array.isArray(i.meanings) ? i.meanings.join(', ') : (i.meanings || "");
+        dictHtml = res.dictData.map((i, index) => {
+          const meanings = Array.isArray(i.meanings) ? i.meanings : [i.meanings || ""];
+          const firstMeaning = meanings[0] || "";
           const localizedPos = localizePos(i.pos, currentLang);
+          const maxH = index === 0 ? '5.6em' : '1.4em'; // 第一个词性显示4行，其他1行
           return `
-                        <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
-                            <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px;">${localizedPos}</b>
-                            <span style="color:#E2E8F0; font-size:13px; line-height:1.4;">${meaningsStr}</span>
-                        </div>
-                    `;
+    <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
+        <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">${localizedPos}</b>
+        <div style="position:relative; flex:1; min-width:0;">
+            <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block; max-height:2.8em; overflow:hidden; white-space:normal; word-break:break-word;">${firstMeaning}</span>
+            <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em; background:linear-gradient(to right, transparent, #1e293b);"></div>
+        </div>
+    </div>
+`;
         }).join('');
       } else {
         dictHtml = `<div style="color: #e2e8f0; font-size: 13px; margin-top: 4px;">${res.basic}</div>`;
       }
       defEl.innerHTML = `
-                <div style="display: flex; align-items: baseline; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px;">
-                    <span style="font-size: 16px; font-weight: 700; color: #ffffff;">${cleanWord}</span>
-                    ${phoneticStr}
-                </div>
-                <div style="overflow-y: auto; scrollbar-width: none;">
-                    ${dictHtml}
-                </div>
-            `;
+    <div style="display: flex; align-items: baseline; gap: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px;">
+        <span style="font-size: 16px; font-weight: 700; color: #ffffff;">${cleanWord}</span>
+        ${phoneticStr}
+        <span style="font-size: 13px; color: #38bdf8; margin-left: 4px;">${res.basic}</span>
+    </div>
+    <div style="width: 100%;">
+        ${dictHtml}
+    </div>
+`;
       defEl.setAttribute('data-status', 'success');
       repositionTooltip(tooltip, e.target);
     }
@@ -5240,7 +5288,7 @@ function repositionTooltip(tipEl, targetEl) {
 }
 async function handleWordDblClick(e, word) {
   e.stopPropagation();
-  const cleanWord = word.trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
+  const cleanWord = word;
   if (!cleanWord) return;
   const wordLower = cleanWord.toLowerCase();
   let fullTranslation = null;
@@ -5309,7 +5357,7 @@ async function handleWordDblClick(e, word) {
     tooltip.style.border = isAddedNow ? '2px solid #facc15' : '1px solid #334155';
     const tipLine = tooltip.querySelector('#kt-word-tip');
     if (tipLine) {
-      tipLine.innerText = isAddedNow ? t('addedFeedback') : t('hintAddAction');
+      tipLine.innerText = isAddedNow ? t('addedFeedback', currentLang) : t('hintAddAction', currentLang);
       tipLine.style.color = isAddedNow ? '#facc15' : '#94a3b8';
     }
   }
@@ -5319,27 +5367,7 @@ async function handleWordDblClick(e, word) {
       isAddedNow ? `⭐ ${t('alreadyInVocabulary')}` : `🗑️ ${t('removed')}`
     );
   }
-}
-function showCollectFeedback(target, text) {
-  try {
-    const rect = target.getBoundingClientRect();
-    const fb = document.createElement('div');
-    fb.innerText = text;
-    fb.style.cssText = `
-            position: fixed; z-index: 2147483647; color: #facc15; font-size: 12px;
-            font-weight: bold; pointer-events: none; transition: all 0.5s;
-            left: ${rect.left}px; top: ${rect.top - 20}px;
-            text-shadow: 1px 1px 2px black;
-        `;
-    document.body.appendChild(fb);
-    setTimeout(() => {
-      fb.style.top = `${rect.top - 40}px`;
-      fb.style.opacity = '0';
-      setTimeout(() => fb.remove(), 500);
-    }, 10);
-  } catch (e) {
-    logger.error('Failed to show collect feedback', e);
-  }
+  await window.__vocabOnSave?.(cleanWord, isAddedNow);
 }
 function showCollectFeedback(target, text) {
   try {

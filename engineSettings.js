@@ -144,9 +144,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             c.id !== 'bing_builtin'
         );
         if (customConfigs.length === 0 && Object.keys(oldApiKeys).length > 0) {
-            Object.keys(TEMPLATES).forEach(engineKey => {
+            for (const engineKey of Object.keys(TEMPLATES)) {
                 const tpl = TEMPLATES[engineKey];
-                if (tpl.isBuiltIn) return;
+                if (tpl.isBuiltIn) continue;  
                 const hasKey = tpl.fields?.some(f => oldApiKeys[f.k]);
                 if (hasKey) {
                     const newId = `inst_migration_${engineKey}`;
@@ -159,15 +159,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const instanceSpecificData = {};
                         tpl.fields.forEach(f => {
                             if (oldApiKeys[f.k]) instanceSpecificData[f.k] = oldApiKeys[f.k];
-                        });
-                        chrome.storage.local.set({ [`data_${newId}`]: instanceSpecificData });
+                        }); 
+                        await safeSetStorage({ [`data_${newId}`]: instanceSpecificData });
                     }
                 }
-            });
+            }
         }
         userConfigs = [...builtInEngines, ...customConfigs];
         if (JSON.stringify(data.userConfigs) !== JSON.stringify(userConfigs)) {
-            await chrome.storage.local.set({ userConfigs });
+            await safeSetStorage({ userConfigs });
         }
         renderSidebar();
         let startId = data.lastActiveId && userConfigs.find(c => c.id === data.lastActiveId)
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('activateBuiltIn').onclick = async (e) => {
                 const btn = e.target;
                 btn.disabled = true;
-                await chrome.storage.local.set({ lastActiveId: id });
+                await safeSetStorage({ lastActiveId: id });
                 if (typeof syncGlobalConfig === 'function') {
                     await syncGlobalConfig(id, config.engine, {});
                 }
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const engineTemplate = TEMPLATES[finalEngine] || {};
                     userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
                 }
-                await chrome.storage.local.set({
+                await safeSetStorage({
                     [`data_${currentId}`]: data,
                     userConfigs: userConfigs,
                     lastActiveId: currentId
@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             grid.innerHTML = html;
             modal.classList.remove('hidden');
         };
-        document.getElementById('template-grid').onclick = (e) => {
+        document.getElementById('template-grid').onclick = async (e) => {
             const card = e.target.closest('.tpl-card');
             if (!card) return;
             const engineKey = card.dataset.type;
@@ -585,12 +585,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 engine: engineKey,
                 alias: `${t('newBadge')} ${template.name}`
             });
-            chrome.storage.local.set({ userConfigs }, () => {
-                modal.classList.add('hidden');
-                if (typeof renderSidebar === 'function') renderSidebar();
-                switchInstance(newId);
-                logger.log(`成功添加引擎: ${template.name}`);
-            });
+
+            await safeSetStorage({ userConfigs });
+            modal.classList.add('hidden');
+            if (typeof renderSidebar === 'function') renderSidebar();
+            switchInstance(newId);
+            logger.log(`成功添加引擎: ${template.name}`);
         };
         const closeBtn = document.getElementById('close-modal') || document.querySelector('.close-btn');
         if (closeBtn) {
@@ -629,7 +629,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         setTimeout(async () => {
             userConfigs = userConfigs.filter(c => String(c.id) !== String(id));
-            await chrome.storage.local.set({ userConfigs });
+            await safeSetStorage({ userConfigs });
             await chrome.storage.local.remove(`data_${id}`);
             if (currentId === id) {
                 currentId = userConfigs.length > 0 ? userConfigs[0].id : '';
@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             engine: engineType,
             data: instanceData
         };
-        await chrome.storage.local.set({
+        await safeSetStorage({
             activeConfig,
             lastActiveId: instanceId
         });

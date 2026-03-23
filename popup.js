@@ -6,18 +6,54 @@ let currentMode = 'current';
 const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
+
+//新用户蒙层
+async function initOnboarding() {
+  const tab = await getActiveTab();
+  const url = tab?.url || "";
+
+  //  受限页面，直接退出，不显示蒙层
+  if (MiraUtils.isRestrictedUrl(url)) {
+    return;
+  }
+  const guideEl = document.getElementById('welcome-guide');
+  const targetBox = document.getElementById('targetLangCombox');
+  const selectEl = document.getElementById('targetLang');
+  const storageKey = 'mira_onboarding_v1';
+
+  const completeOnboarding = () => {
+    if (!guideEl || guideEl.style.display === 'none') return;
+    localStorage.setItem(storageKey, 'true');
+    guideEl.style.transition = 'opacity 0.4s ease';
+    guideEl.style.opacity = '0';
+
+    setTimeout(() => {
+      guideEl.style.display = 'none';
+      targetBox.classList.remove('first-time-highlight');
+    }, 400);
+  };
+
+  if (!localStorage.getItem(storageKey)) {
+    guideEl.style.display = 'flex';
+    targetBox.classList.add('first-time-highlight');
+    document.getElementById('close-guide-btn').onclick = completeOnboarding;
+    if (selectEl) {
+      selectEl.addEventListener('mousedown', () => {
+        //  500ms 后自动关掉蒙层 
+        setTimeout(completeOnboarding, 500);
+      });
+    }
+    //  点击蒙层背景 关闭 
+    guideEl.addEventListener('click', (e) => {
+      if (e.target === guideEl) completeOnboarding();
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
-  const container = document.getElementById('webTranslationOptionContainer');
-  const storageKey = 'hasSeenTranslationGuide';
-  if (!localStorage.getItem(storageKey)) {
-    container.classList.add('first-time-highlight');
-    localStorage.setItem(storageKey, 'true');
-    setTimeout(() => {
-      container.classList.remove('first-time-highlight');
-      container.style.border = "1px solid transparent";
-    }, 4000);
-  }
+  await initOnboarding();
+
   const myInput = document.getElementById('conf-minlen');
   if (myInput) {
     myInput.addEventListener('input', function () {
@@ -93,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       webdavPass: document.getElementById('webdavPass').value,
       frequency: parseInt(document.getElementById('syncFrequency').value, 10) || 60
     };
-    await chrome.storage.local.set({ syncConfig: config });
+    await safeSetStorage({ syncConfig: config });
     logger.log("💾 [Config Saved]:", config);
   }
   ['webdavUrl', 'webdavUser', 'webdavPass', 'syncFrequency', 'syncMethod'].forEach(id => {
@@ -172,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             delete importedData.apiKeys;
             delete importedData.selectedEngine;
           }
-          await chrome.storage.local.set(importedData);
+          await safeSetStorage(importedData);
           if (incomingVocabulary.length > 0) {
             const promises = incomingVocabulary.map(item => {
               const word = item.word || item.w;
@@ -240,8 +276,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await safeGetStorage('syncConfig');
     if (!data) return;
     const newConfig = { ...(data.syncConfig || {}), frequency: newFreq };
-    chrome.storage.local.set({ syncConfig: newConfig });
+    await safeSetStorage({ syncConfig: newConfig });
   };
+
   document.getElementById('autoSyncToggle').onclick = async function () {
     this.classList.toggle('active');
     const isActive = this.classList.contains('active');
@@ -253,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await safeGetStorage('syncConfig');
     if (!data) return;
     const newConfig = { ...(data.syncConfig || {}), frequency: currentFreq };
-    chrome.storage.local.set({
+    await safeSetStorage({
       autoSync: isActive,
       syncConfig: newConfig
     });
@@ -337,11 +374,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await performUnifiedSync('manualSyncPull', 'pull');
   };
   async function performUnifiedSync(btnId, direction) {
+    logger.log('[DEBUG] 进入 performUnifiedSync, direction:', direction);
     const btn = document.getElementById(btnId);
     const originalText = btn.innerText;
     updateSyncProgressUI(btnId, 'initializing', true);
     await saveSyncConfig();
     const data = await safeGetStorage(['syncConfig', 'google_drive_token']);
+    logger.log('[DEBUG] storage data:', data);
     if (!data) return;
     const config = data.syncConfig || {};
     const method = config.method || 'local';
@@ -362,6 +401,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
       if (!isFirefox) {
         safeSendMessage({ type: 'START_AUTH' }).then((response) => {
+           logger.log('[DEBUG] START_AUTH response:', response); 
           if (!response) {
             updateSyncProgressUI(btnId, '', false);
             return;
@@ -425,7 +465,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const storagePayload = { ...merged };
           delete storagePayload.vocabulary;
           delete storagePayload.idb_vocabulary;
-          await chrome.storage.local.set({
+          await safeSetStorage({
             ...storagePayload,
             lastSyncTime: now
           });
@@ -530,7 +570,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     'zh-CN';
   const targetLang = effectiveLang.replace('_', '-');
   if (!langRes.targetLanguage) {
-    await chrome.storage.local.set({ targetLanguage: targetLang });
+    await safeSetStorage({ targetLanguage: targetLang });
   }
 
   applyI18n(targetLang);
@@ -688,16 +728,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function initPopupUI() {
     const tab = await getActiveTab();
     const url = tab?.url || "";
-    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-    const isRestrictedPage = !url ||
-      url.startsWith('chrome://') ||
-      url.startsWith('edge://') ||
-      url.startsWith('about:') ||
-      url.startsWith('chrome-extension://') ||
-      url.includes('chrome.google.com/webstore') ||
-      url.includes('chromewebstore.google.com') ||
-      url.includes('linkedin.com');
-    if (isRestrictedPage) {
+    const isYouTube = MiraUtils.isYouTubeUrl(url);
+    const isRestricted = MiraUtils.isRestrictedUrl(url);
+    if (isRestricted) {
       [
         ytRow,
         inspectContainer,
@@ -710,16 +743,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       const domainEl = document.getElementById('currentDomain');
       if (domainEl) domainEl.innerText = "Restricted Page";
-    } else if (isYouTube) {
-      if (ytRow) {
-        ytRow.classList.remove('disabled');
-        ytRow.style.display = 'flex';
-      }
-      if (inspectContainer) inspectContainer.style.display = 'none';
-      [webTranslationOptionContainer, selectTextOptionContainer].forEach(el => {
-        if (el) el.style.display = '';
-      });
-    } else {
+    } 
+    // else if (isYouTube) {
+    //   if (ytRow) {
+    //     ytRow.classList.remove('disabled');
+    //     ytRow.style.display = 'flex';
+    //   }
+    //   if (inspectContainer) inspectContainer.style.display = 'none';
+    //   [webTranslationOptionContainer, selectTextOptionContainer].forEach(el => {
+    //     if (el) el.style.display = '';
+    //   });
+    // } 
+    else {
       if (ytRow) {
         ytRow.classList.add('disabled');
         ytRow.style.display = 'none';
@@ -971,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       bgOpacity: parseFloat(document.getElementById('yt-style-bgOpacity').value),
       color: document.getElementById('yt-style-color').value
     };
-    await chrome.storage.local.set({
+    await safeSetStorage({
       'userStyleConfig': config,
       'ytStyleSettings': ytConfig
     });
@@ -1308,9 +1343,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       ut.lang = 'en-US';
     }
     ut.onstart = () => {
-        this.classList.remove('tts-loading');  
-        this.classList.add('speaking-wave');
-        this.querySelector('svg').classList.add('icon-active');
+      this.classList.remove('tts-loading');
+      this.classList.add('speaking-wave');
+      this.querySelector('svg').classList.add('icon-active');
     };
     ut.onend = () => {
       this.classList.remove('speaking-wave');
@@ -1605,7 +1640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         gc[key] = !gc[key];
       }
-      await chrome.storage.local.set({
+      await safeSetStorage({
         globalConfig: gc,
         siteSettings: ss
       });
@@ -1685,7 +1720,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         _finalConfig.global.selectors = _local_selectors;
         _finalConfig.global.minLen = _local_minLen;
       }
-      await chrome.storage.local.set({ scanConfig: _finalConfig });
+      await safeSetStorage({ scanConfig: _finalConfig });
       if (window.currentConfig) {
         window.currentConfig.scanConfig = _finalConfig;
       }
@@ -1724,7 +1759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       langSelect.disabled = true;
       const lang = langSelect.value;
       currentConfig.targetLanguage = lang;
-      await chrome.storage.local.set({ targetLanguage: lang });
+      await safeSetStorage({ targetLanguage: lang });
       applyI18n(lang);
       const response = await safeSendToTab(activeTab.id, {
         action: 'RE_SCAN_PAGE',

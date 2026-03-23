@@ -1,10 +1,12 @@
 {
   "name": "mira_translator",
-  "version": "3.3.6.6",
+  "version": "3.3.6.7",
   "scripts": {
     "build:chrome": "node build.js --browser=chrome",
+    "build:edge": "node build.js --browser=edge",
     "build:firefox": "node build.js --browser=firefox",
     "dev": "node build.js --browser=chrome --dev",
+    "dev:edge": "node build.js --browser=edge --dev",
     "dev:firefox": "node build.js --browser=firefox --dev"
   },
   "dependencies": {

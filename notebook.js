@@ -20,11 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   toggle.onclick = async () => {
     highlightEnabled = !highlightEnabled;
     updateToggleUI(highlightEnabled);
-    try {
-      await chrome.storage.local.set({ vocabHighlight: highlightEnabled });
-    } catch (e) {
-      logger.error('保存高亮设置失败', e);
-    }
+    await safeSetStorage({ vocabHighlight: highlightEnabled });
   };
   if (storage === undefined) {
     if (typeof showUpdateNotice === 'function') showUpdateNotice();

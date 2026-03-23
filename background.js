@@ -3,44 +3,44 @@ importScripts('utils.js');
 const isFirefox = /Firefox/.test(navigator.userAgent);
 const SYNC_FILE_NAME = 'mira_sync.json';
 const baseKeys = STORAGE_KEYS.sync();
-function mergeVocabulary(local = [], remote = []) {
-    logger.group("--- [Mira-Debug] 开始合并生词 ---");
-    const safeLocal = Array.isArray(local) ? local : [];
-    const safeRemote = Array.isArray(remote) ? remote : [];
-    logger.log(`本地条数: ${safeLocal.length}, 云端条数: ${safeRemote.length}`);
-    const map = new Map();
-    // 辅助函数
-    const normalize = (item) => {
-        if (!item) return null;
-        const wordValue = (item.word || item.w || "").toLowerCase().trim();
-        if (!wordValue) return null;
-        return {
-            ...item,
-            word: wordValue,
-            trans: item.trans || item.t || "",
-            src: item.src || item.url || "",
-            title: item.title || "",
-            updated: Number(item.updated || item.date || item.ts || Date.now()),
-            deleted: !!item.deleted
-        };
-    };
-    safeLocal.forEach(item => {
-        const clean = normalize(item);
-        if (clean) map.set(clean.word, clean);
-    });
-    safeRemote.forEach(remoteItem => {
-        const cleanRemote = normalize(remoteItem);
-        if (!cleanRemote) return;
-        const existing = map.get(cleanRemote.word);
-        if (!existing || cleanRemote.updated > existing.updated) {
-            map.set(cleanRemote.word, cleanRemote);
-        }
-    });
-    const result = Array.from(map.values()).sort((a, b) => b.updated - a.updated);
-    logger.log(`最终合并后总条数: ${result.length}`);
-    logger.groupEnd();
-    return result;
-}
+// function mergeVocabulary(local = [], remote = []) {
+//     logger.group("--- [Mira-Debug] 开始合并生词 ---");
+//     const safeLocal = Array.isArray(local) ? local : [];
+//     const safeRemote = Array.isArray(remote) ? remote : [];
+//     logger.log(`本地条数: ${safeLocal.length}, 云端条数: ${safeRemote.length}`);
+//     const map = new Map();
+//     // 辅助函数
+//     const normalize = (item) => {
+//         if (!item) return null;
+//         const wordValue = (item.word || item.w || "").toLowerCase().trim();
+//         if (!wordValue) return null;
+//         return {
+//             ...item,
+//             word: wordValue,
+//             trans: item.trans || item.t || "",
+//             src: item.src || item.url || "",
+//             title: item.title || "",
+//             updated: Number(item.updated || item.date || item.ts || Date.now()),
+//             deleted: !!item.deleted
+//         };
+//     };
+//     safeLocal.forEach(item => {
+//         const clean = normalize(item);
+//         if (clean) map.set(clean.word, clean);
+//     });
+//     safeRemote.forEach(remoteItem => {
+//         const cleanRemote = normalize(remoteItem);
+//         if (!cleanRemote) return;
+//         const existing = map.get(cleanRemote.word);
+//         if (!existing || cleanRemote.updated > existing.updated) {
+//             map.set(cleanRemote.word, cleanRemote);
+//         }
+//     });
+//     const result = Array.from(map.values()).sort((a, b) => b.updated - a.updated);
+//     logger.log(`最终合并后总条数: ${result.length}`);
+//     logger.groupEnd();
+//     return result;
+// }
 async function ensureRemoteDir(config) {
     const { webdavUrl, webdavUser, webdavPass } = config;
     const auth = btoa(unescape(encodeURIComponent(`${webdavUser}:${webdavPass}`)));
@@ -124,7 +124,7 @@ async function applySyncResultToLocal(mergedData) {
     }
     const configToStore = { ...mergedData, lastSyncTime: Date.now() };
     delete configToStore.vocabulary;
-    await chrome.storage.local.set(configToStore);
+    await safeSetStorage(configToStore);
     logger.log("[Sync-Local] 配置项更新成功");
 }
 async function webdavRequest(config, method, body = null) {
@@ -189,15 +189,50 @@ async function syncWithWebDAV(config, direction) {
     }
 }
 async function handleAuthFlow(sendResponse) {
-    const isFirefox = typeof browser !== 'undefined';
+    const isFirefox = typeof browser !== 'undefined' 
+                      && /Firefox/.test(navigator.userAgent);
+    if (isFirefox) {
+        sendResponse({ success: false, error: "Firefox should use its own auth flow" });
+        return;
+    }
+
+    // 用 userAgentData 精确区分，UA 字符串无法可靠区分 Chrome 和 Edge
+    const brands = navigator.userAgentData?.brands?.map(b => b.brand) || [];
+    const isEdge = brands.includes('Microsoft Edge');
+
+    if (isEdge) {
+        logger.log("[Mira-LOG] 检测到 Edge 环境，使用 launchWebAuthFlow...");
+        const clientId = "{{MY_ID}}";
+        const redirectUrl = chrome.identity.getRedirectURL();
+        const authUrl = "https://accounts.google.com/o/oauth2/auth" +
+            `?client_id=${clientId}` +
+            `&response_type=token` +
+            `&redirect_uri=${encodeURIComponent(redirectUrl)}` +
+            `&scope=${encodeURIComponent("https://www.googleapis.com/auth/drive.appdata")}`;
+
+        chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true }, async (responseUrl) => {
+            if (chrome.runtime.lastError || !responseUrl) {
+                sendResponse({ success: false, error: chrome.runtime.lastError?.message || "授权失败" });
+                return;
+            }
+            const match = responseUrl.match(/access_token=([^&]+)/);
+            if (match) {
+                await chrome.storage.local.set({ "google_drive_token": match[1] });
+                sendResponse({ success: true });
+            } else {
+                sendResponse({ success: false, error: "无法提取 Token" });
+            }
+        });
+        return;
+    }
+
+    // Chrome 走原来的路径
     logger.log("[Mira-LOG] 检测到 Chrome 环境，使用 getAuthToken...");
     chrome.identity.getAuthToken({ interactive: true }, (token) => {
         if (chrome.runtime.lastError) {
-            logger.error("[Mira-ERROR] Chrome 授权失败:", chrome.runtime.lastError.message);
             sendResponse({ success: false, error: chrome.runtime.lastError.message });
         } else if (token) {
             chrome.storage.local.set({ "google_drive_token": token }, () => {
-                logger.log("[Mira-LOG] Chrome Token 获取并保存成功。");
                 sendResponse({ success: true });
             });
         }
@@ -238,7 +273,8 @@ async function handleSyncFlow(message, sendResponse) {
             const checkData = await safeGetStorage("google_drive_token");
             if (checkData?.google_drive_token && chrome.runtime?.id) {
                 chrome.storage.local.remove("google_drive_token");
-                if (chrome.identity?.removeCachedAuthToken) {
+                // Edge 没有 removeCachedAuthToken，需要判断
+                if (chrome.identity?.removeCachedAuthToken && !/Edg\//.test(navigator.userAgent)) {
                     chrome.identity.removeCachedAuthToken({ token: checkData.google_drive_token }, () => { });
                 }
             }
@@ -666,7 +702,7 @@ const Translators = {
         const result = await Translators._youdaoDict(text.trim());
         return result || { phonetic: "", basic: text, dictData: [], examples: [], source: 'Error' };
     },
-    google: async (text, target) => {
+    google: async (text, target, lightweight = false) => {
         if (!text || text.trim().length < 1) return null;
         const query = text.trim();
         const PATTERNS = {
@@ -687,7 +723,7 @@ const Translators = {
         try {
             // controller 用来控制超时，5秒没响应就 abort
             const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 5000);
+            const timer = setTimeout(() => controller.abort(), 7000);
 
             const res = await fetch(url, { signal: controller.signal });
             clearTimeout(timer); // 请求成功，清除超时计时器
@@ -708,14 +744,13 @@ const Translators = {
                 }));
             }
             let examples = [];
-            if (data[13] && data[13][0]) {
+            if (data[13] && data[13][0] && !lightweight) {
                 const rawExamples = data[13][0].slice(0, 2).map(item =>
                     item[0].replace(/<\/?b>/g, '')
                 );
                 examples = await Promise.all(
                     rawExamples.map(async (sentence) => {
                         try {
-                            // 例句翻译也加超时，但单独用一个 controller
                             const exController = new AbortController();
                             const exTimer = setTimeout(() => exController.abort(), 3000);
                             const tRes = await fetch(buildUrl(sentence), { signal: exController.signal });
@@ -1128,7 +1163,7 @@ async function processTranslate(req) {
         const isSubtitle = req.isSubtitle === true;
         let rawResult = "";
         if (engine === 'google') {
-            rawResult = await Translators.google(req.text, req.targetLang);
+            rawResult = await Translators.google(req.text, req.targetLang, req.lightweight);
         }
         else if (engine === 'bing') {
             rawResult = await Translators.bing(req.text, req.targetLang);
@@ -1677,7 +1712,8 @@ chrome.runtime.onStartup.addListener(() => detectAndCacheDefaultEngine(false));
 
 async function detectAndCacheDefaultEngine(force = false) {
     if (!force) {
-        const res = await chrome.storage.local.get(['_defaultEngine', '_defaultEngineTime']);
+        const res = await safeGetStorage(['_defaultEngine', '_defaultEngineTime']);
+        if (res === null) return;
         const age = Date.now() - (res._defaultEngineTime || 0);
         if (res._defaultEngine && age < 24 * 60 * 60 * 1000) return;
     }
@@ -1688,9 +1724,9 @@ async function detectAndCacheDefaultEngine(force = false) {
             mode: 'no-cors', cache: 'no-cache', signal: controller.signal
         });
         clearTimeout(timeout);
-        chrome.storage.local.set({ _defaultEngine: 'google', _defaultEngineTime: Date.now() });
+        await safeSetStorage({ _defaultEngine: 'google', _defaultEngineTime: Date.now() });
     } catch (e) {
-        chrome.storage.local.set({ _defaultEngine: 'bing', _defaultEngineTime: Date.now() });
+        await safeSetStorage({ _defaultEngine: 'bing', _defaultEngineTime: Date.now() });
     }
 }
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -1713,7 +1749,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     if (request.type === 'TRANSLATE') {
         const text = request.text || "";
-        const targetLang = request.to || 'zh';
+        const targetLang = request.targetLang || 'zh';
         const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(text);
         const hasJpSpecific = /[\u3005\u3007\u303B々ヶ]|訳|込|対|実|関|气|駅|図|楽|願|枠|締|銭|渋|録|覧|匂|畑|峠|働|済|摂|択|変|継/.test(text);
         if (targetLang === 'zh' && (hasKana || hasJpSpecific)) {

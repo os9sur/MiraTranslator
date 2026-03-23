@@ -1709,112 +1709,96 @@ self.i18nYTData = {
   "zh-CN": {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次双击取消",
-    hintAdd: "双击收藏到生词本",
     alreadyAddedFeedback: "⭐ 已在生词本，双击取消",
     hintAddAction: "双击收藏到生词本"
   },
   "zh-TW": {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次雙擊取消",
-    hintAdd: "雙擊收藏到單字本",
     alreadyAddedFeedback: "⭐ 已在單字本，雙擊取消",
     hintAddAction: "雙擊收藏到單字本"
   },
   "en": {
     removed: "Removed",
     addedFeedback: "⭐ Added to collection, double-click to undo",
-    hintAdd: "Double-click to save to vocabulary",
     alreadyAddedFeedback: "⭐ Already in vocabulary, double-click to undo",
     hintAddAction: "Double-click to save to vocabulary"
   },
   "ja": {
     removed: "削除済み",
     addedFeedback: "⭐ コレクションに追加しました、ダブルクリックで取り消し",
-    hintAdd: "ダブルクリックで単語帳に保存",
     alreadyAddedFeedback: "⭐ 単語帳に既に存在します、ダブルクリックで取り消し",
     hintAddAction: "ダブルクリックで単語帳に保存"
   },
   "ko": {
     removed: "제거됨",
     addedFeedback: "⭐ 콜렉션에 추가됨, 더블클릭하여 취소",
-    hintAdd: "더블클릭하여 단어장에 저장",
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
     hintAddAction: "더블클릭하여 단어장에 저장"
   },
   "es": {
     removed: "Eliminado",
     addedFeedback: "⭐ Añadido a la colección, doble clic para deshacer",
-    hintAdd: "Doble clic para guardar en el vocabulario",
     alreadyAddedFeedback: "⭐ Ya está en el vocabulario, doble clic para deshacer",
     hintAddAction: "Doble clic para guardar en el vocabulario"
   },
   "fr": {
     removed: "Supprimé",
     addedFeedback: "⭐ Ajouté à la collection, double-clic pour annuler",
-    hintAdd: "Double-clic pour sauvegarder dans le lexique",
     alreadyAddedFeedback: "⭐ Déjà dans le lexique, double-clic pour annuler",
     hintAddAction: "Double-clic pour sauvegarder dans le lexique"
   },
   "de": {
     removed: "Entfernt",
     addedFeedback: "⭐ Zur Sammlung hinzugefügt, Doppelklick zum Rückgängig",
-    hintAdd: "Doppelklick zum Speichern im Vokabelheft",
     alreadyAddedFeedback: "⭐ Bereits im Vokabelheft, Doppelklick zum Rückgängig",
     hintAddAction: "Doppelklick zum Speichern im Vokabelheft"
   },
   "ru": {
     removed: "Удалено",
     addedFeedback: "⭐ Добавлено в коллекцию, двойной щелчок для отмены",
-    hintAdd: "Двойной щелчок для сохранения в словарь",
     alreadyAddedFeedback: "⭐ Уже в словаре, двойной щелчок для отмены",
     hintAddAction: "Двойной щелчок для сохранения в словарь"
   },
   "pt": {
     removed: "Removido",
     addedFeedback: "⭐ Adicionado à coleção, clique duplo para desfazer",
-    hintAdd: "Clique duplo para salvar no vocabulário",
     alreadyAddedFeedback: "⭐ Já no vocabulário, clique duplo para desfazer",
     hintAddAction: "Clique duplo para salvar no vocabulário"
   },
   "it": {
     removed: "Rimosso",
     addedFeedback: "⭐ Aggiunto alla collezione, doppio clic per annullare",
-    hintAdd: "Doppio clic per salvare nel vocabolario",
     alreadyAddedFeedback: "⭐ Già nel vocabolario, doppio clic per annullare",
     hintAddAction: "Doppio clic per salvare nel vocabolario"
   },
   "vi": {
     removed: "Đã xóa",
     addedFeedback: "⭐ Đã thêm vào bộ sưu tập, nhấp đôi để hoàn tác",
-    hintAdd: "Nhấp đôi để lưu vào sổ từ vựng",
     alreadyAddedFeedback: "⭐ Đã có trong sổ từ vựng, nhấp đôi để hoàn tác",
     hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng"
   },
   "th": {
     removed: "ลบแล้ว",
     addedFeedback: "⭐ เพิ่มไปยังคอลเลกชันแล้ว, ดับเบิลคลิกเพื่อยกเลิก",
-    hintAdd: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์",
     alreadyAddedFeedback: "⭐ อยู่ในสมุดคำศัพท์แล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์"
   },
   "ar": {
     removed: "تم الإزالة",
     addedFeedback: "⭐ تمت الإضافة إلى المجموعة، انقر نقرًا مزدوجًا للتراجع",
-    hintAdd: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات",
     alreadyAddedFeedback: "⭐ موجود بالفعل في مفكرة الكلمات، انقر نقرًا مزدوجًا للتراجع",
     hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات"
   },
   "fa": {
     removed: "حذف شد",
     addedFeedback: "⭐ به مجموعه اضافه شد، دوبار کلیک برای لغو",
-    hintAdd: "دوبار کلیک برای ذخیره در دفتر لغات",
     alreadyAddedFeedback: "⭐ قبلاً در دفتر لغات است، دوبار کلیک برای لغو",
     hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات"
   },
   "tr": {
     removed: "Kaldırıldı",
     addedFeedback: "⭐ Koleksiyona eklendi, geri almak için çift tıklayın",
-    hintAdd: "Kelime defterine kaydetmek için çift tıklayın",
     alreadyAddedFeedback: "⭐ Zaten kelime defterinde, geri almak için çift tıklayın",
     hintAddAction: "Kelime defterine kaydetmek için çift tıklayın"
   }
@@ -3015,5 +2999,151 @@ self.i18nAttach3 = {
     note: "Not",
     notePlaceholder: "",
     highlightVocab: "Sayfada vurgula"
+  }
+};
+self.i18nAttach4 = {
+  "zh-CN": {
+    welcomeTitle: "欢迎使用 Mira! 🪄",
+    setLanguage: "请选择你的目标语言",
+    translatePrefix: "Mira 将把网页内容与 YouTube 视频字幕翻译为",
+    translateHighlight: "你选择的语言",
+    translateSuffix: "",
+    btnGotIt: "开始使用",
+    changeSetting: "你可以随时在设置中修改目标语言"
+  },
+  "zh-TW": {
+    welcomeTitle: "歡迎使用 Mira! 🪄",
+    setLanguage: "請選擇你的目標語言",
+    translatePrefix: "Mira 將把網頁內容與 YouTube 視頻字幕翻譯為",
+    translateHighlight: "你選擇的語言",
+    translateSuffix: "",
+    btnGotIt: "開始使用",
+    changeSetting: "你可以隨時在設置中修改目標語言"
+  },
+  "en": {
+    welcomeTitle: "Welcome to Mira! 🪄",
+    setLanguage: "Select Your Target Language",
+    translatePrefix: "Mira will translate web pages and YouTube subtitles into",
+    translateHighlight: "the language you select above.",
+    translateSuffix: "",
+    btnGotIt: "Get Started",
+    changeSetting: "You can change this anytime in settings."
+  },
+  "ja": {
+    welcomeTitle: "Mira へようこそ! 🪄",
+    setLanguage: "翻訳先の言語を選択してください",
+    translatePrefix: "Miraは、ウェブページと YouTube 動画の字幕を",
+    translateHighlight: "選択した言語",
+    translateSuffix: "に翻訳します。",
+    btnGotIt: "使ってみる",
+    changeSetting: "設定からいつでも変更できます。"
+  },
+  "ko": {
+    welcomeTitle: "Mira에 오신 것을 환영합니다! 🪄",
+    setLanguage: "대상 언어를 선택하세요",
+    translatePrefix: "Mira가 웹 페이지와 YouTube 동영상 자막을",
+    translateHighlight: "선택한 언어",
+    translateSuffix: "로 번역합니다.",
+    btnGotIt: "시작하기",
+    changeSetting: "설정에서 언제든지 변경할 수 있습니다."
+  },
+  "es": {
+    welcomeTitle: "¡Bienvenido a Mira! 🪄",
+    setLanguage: "Seleccionar idioma de destino",
+    translatePrefix: "Mira traducirá páginas web y subtítulos de YouTube al",
+    translateHighlight: "idioma que selecciones arriba.",
+    translateSuffix: "",
+    btnGotIt: "¡Entendido!",
+    changeSetting: "Puedes cambiarlo en los ajustes en cualquier momento."
+  },
+  "fr": {
+    welcomeTitle: "Bienvenue sur Mira ! 🪄",
+    setLanguage: "Choisir la langue cible",
+    translatePrefix: "Mira traduira les pages web et les sous-titres YouTube dans",
+    translateHighlight: "la langue sélectionnée.",
+    translateSuffix: "",
+    btnGotIt: "C'est compris !",
+    changeSetting: "Modifiable à tout moment dans les paramètres."
+  },
+  "de": {
+    welcomeTitle: "Willkommen bei Mira! 🪄",
+    setLanguage: "Zielsprache wählen",
+    translatePrefix: "Mira übersetzt Webseiten und YouTube-Untertitel in",
+    translateHighlight: "deine gewählte Sprache",
+    translateSuffix: ".",
+    btnGotIt: "Loslegen",
+    changeSetting: "Jederzeit in den Einstellungen änderbar."
+  },
+  "ru": {
+    welcomeTitle: "Добро пожаловать в Mira! 🪄",
+    setLanguage: "Выберите целевой язык",
+    translatePrefix: "Mira переведет веб-страницы и субтитры YouTube на",
+    translateHighlight: "выбранный язык",
+    translateSuffix: ".",
+    btnGotIt: "Начать",
+    changeSetting: "Можно изменить в любое время в настройках."
+  },
+  "pt": {
+    welcomeTitle: "Bem-vindo ao Mira! 🪄",
+    setLanguage: "Escolher idioma de destino",
+    translatePrefix: "O Mira traduzirá páginas e legendas do YouTube para",
+    translateHighlight: "o idioma selecionado.",
+    translateSuffix: "",
+    btnGotIt: "Começar",
+    changeSetting: "Altere quando quiser nas configurações."
+  },
+  "it": {
+    welcomeTitle: "Benvenuto su Mira! 🪄",
+    setLanguage: "Seleziona la lingua di destinazione",
+    translatePrefix: "Mira tradurrà le pagine web e i sottotitoli di YouTube nella",
+    translateHighlight: "lingua selezionata sopra.",
+    translateSuffix: "",
+    btnGotIt: "Inizia",
+    changeSetting: "Puoi cambiarlo in qualsiasi momento nelle impostazioni."
+  },
+  "vi": {
+    welcomeTitle: "Chào mừng đến với Mira! 🪄",
+    setLanguage: "Chọn ngôn ngữ mục tiêu",
+    translatePrefix: "Mira sẽ dịch các trang web và phụ đề YouTube sang",
+    translateHighlight: "ngôn ngữ bạn chọn ở trên.",
+    translateSuffix: "",
+    btnGotIt: "Bắt đầu",
+    changeSetting: "Bạn có thể thay đổi cài đặt này bất cứ lúc nào."
+  },
+  "th": {
+    welcomeTitle: "ยินดีต้อนรับสู่ Mira! 🪄",
+    setLanguage: "เลือกภาษาเป้าหมายของคุณ",
+    translatePrefix: "Mira จะแปลหน้าเว็บและคำบรรยายของ YouTube เป็น",
+    translateHighlight: "ภาษาที่คุณเลือกไว้ด้านบน",
+    translateSuffix: "",
+    btnGotIt: "เริ่มใช้งาน",
+    changeSetting: "คุณสามารถเปลี่ยนสิ่งนี้ได้ตลอดเวลาในการตั้งค่า"
+  },
+  "ar": {
+    welcomeTitle: "! 🪄 Mira مرحباً بك في",
+    setLanguage: "اختر لغتك المفضلة",
+    translatePrefix: "بترجمة صفحات الويب وترجمات يوتيوب إلى Mira ستعمل",
+    translateHighlight: "اللغة التي تختارها أعلاه",
+    translateSuffix: "",
+    btnGotIt: "ابدأ الآن",
+    changeSetting: "يمكنك تغيير هذا في أي وقت من الإعدادات."
+  },
+  "fa": {
+    welcomeTitle: "! 🪄 Mira به خوش آمدید",
+    setLanguage: "زبان مقصد را انتخاب کنید",
+    translatePrefix: "صفحات وب و زیرنویس‌های یوتیوب را به Mira",
+    translateHighlight: "زبانی که در بالا انتخاب کردید",
+    translateSuffix: "ترجمه می‌کند.",
+    btnGotIt: "شروع کنید",
+    changeSetting: "می‌توانید این را در هر زمان در تنظیمات تغییر دهید."
+  },
+  "tr": {
+    welcomeTitle: "Mira'ya Hoş Geldiniz! 🪄",
+    setLanguage: "Hedef Dilinizi Seçin",
+    translatePrefix: "Mira, web sayfalarını ve YouTube altyazılarını",
+    translateHighlight: "yukarıda seçtiğiniz dile",
+    translateSuffix: "çevirecektir.",
+    btnGotIt: "Başla",
+    changeSetting: "Bunu istediğiniz zaman ayarlardan değiştirebilirsiniz."
   }
 };

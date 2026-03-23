@@ -10,44 +10,55 @@ const targetBrowser = process.argv.find(arg => arg.startsWith('--browser='))?.sp
 const srcDir = __dirname;
 const distDir = path.join(__dirname, 'dists');
 
+// 每个浏览器输出到独立子目录
+const browserDistDir = path.join(distDir, targetBrowser);
+
 async function build() {
     try {
         logger.log(`🚀 Building for [Browser: ${targetBrowser.toUpperCase()}] [Mode: ${IS_DEV_MODE ? 'Development' : 'Production'}]...`);
+        logger.log(`📁 Output directory: ${browserDistDir}`);
 
-        // 1. Clean and prepare distribution directory
-        if (fs.existsSync(distDir)) fs.emptyDirSync(distDir);
-        else fs.ensureDirSync(distDir);
+        // 1. Clean and prepare distribution directory (only current browser's folder)
+        if (fs.existsSync(browserDistDir)) fs.emptyDirSync(browserDistDir);
+        else fs.ensureDirSync(browserDistDir);
 
         // 2. Copy source files to dist (excluding dev-specific files)
         const items = fs.readdirSync(srcDir);
-        const excludeList = ['dists', '.git', '.vscode', '.gitignore', 'node_modules', 'private_config.js', 'build.js', 'package.json', 'package-lock.json', 'pnpm-lock.yaml', 'README.md', 'tools', 'LICENSE', 'img', 'images'];
+        const excludeList = [
+            'dists', '.git', '.vscode', '.gitignore', 'node_modules',
+            'private_config.js', 'build.js', 'package.json',
+            'package-lock.json', 'pnpm-lock.yaml', 'README.md',
+            'tools', 'LICENSE', 'img', 'images'
+        ];
 
         items.forEach(item => {
             if (!excludeList.includes(item)) {
-                fs.copySync(path.join(srcDir, item), path.join(distDir, item));
+                fs.copySync(path.join(srcDir, item), path.join(browserDistDir, item));
             }
         });
 
         // 3. Process target files with unified placeholder replacement
         const targetFiles = ['manifest.json', 'background.js', 'popup.js', 'utils.js', 'README.md'];
-        
+
         targetFiles.forEach(file => {
-            // README.md is updated in the source root to keep Git history in sync, others in dists
             const isReadme = file === 'README.md';
-            const filePath = isReadme ? path.join(srcDir, file) : path.join(distDir, file);
-            
+            const filePath = isReadme ? path.join(srcDir, file) : path.join(browserDistDir, file);
+
             if (!fs.existsSync(filePath)) return;
 
             let content = fs.readFileSync(filePath, 'utf8');
 
             // --- Unified Placeholder Replacement ---
-            content = content.replace(/{{MY_ID}}/g, config.CLIENT_ID || '');
+            const finalClientId = targetBrowser === 'edge'
+                ? (config.CLIENT_ID_EDGE || config.CLIENT_ID)
+                : config.CLIENT_ID;
+
+            content = content.replace(/{{MY_ID}}/g, finalClientId || '');
             content = content.replace(/{{MY_KEY}}/g, config.MANIFEST_KEY || '');
             content = content.replace(/IS_DEV\s*=\s*(true|false)/g, `IS_DEV = ${IS_DEV_MODE}`);
 
-            // --- Smart Version Update (No manual placeholders needed in README) ---
+            // --- Smart Version Update ---
             if (isReadme) {
-                // Regex to find Shields.io badge: https://img.shields.io/badge/Version-3.3.6.0-blue
                 const versionBadgeRegex = /(https:\/\/img\.shields\.io\/badge\/Version-)([\d\.]+)(-[a-z]+)/g;
                 content = content.replace(versionBadgeRegex, `$1${pkg.version}$3`);
             }
@@ -68,9 +79,20 @@ async function build() {
                 if (targetBrowser === 'firefox') {
                     manifest.background = { "scripts": ["background.js"] };
                     manifest.browser_specific_settings = { gecko: { id: config.FIREFOX_ID } };
-                } else {
+                    delete manifest.key;
+                    delete manifest.oauth2;
+                } else if (targetBrowser === 'edge') {
                     manifest.background = { "service_worker": "background.js" };
+                    delete manifest.browser_specific_settings;
+                    delete manifest.oauth2;
+                    delete manifest.key;
+                } else {
+                    // Chrome
+                    manifest.background = { "service_worker": "background.js" };
+                    delete manifest.browser_specific_settings;
+                    // key 和 oauth2 保留给 Chrome
                 }
+
                 content = JSON.stringify(manifest, null, 2);
             }
 
@@ -83,9 +105,9 @@ async function build() {
             logger.log(' 🛠️  Development mode: Skipping minification...');
         } else {
             logger.log(' ⚡ Production mode: Minifying JS bundle...');
-            const distItems = fs.readdirSync(distDir);
+            const distItems = fs.readdirSync(browserDistDir);
             for (const file of distItems) {
-                const filePath = path.join(distDir, file);
+                const filePath = path.join(browserDistDir, file);
 
                 if (fs.statSync(filePath).isFile() && path.extname(file) === '.js') {
                     if (file === 'constants.js') continue;
@@ -94,11 +116,11 @@ async function build() {
                     const terserOptions = {
                         compress: {
                             dead_code: true,
-                            drop_console: true, 
+                            drop_console: true,
                             passes: 2
                         },
-                        mangle: true,  
-                        sourceMap: false  
+                        mangle: true,
+                        sourceMap: false
                     };
 
                     try {
@@ -113,6 +135,7 @@ async function build() {
         }
 
         logger.log(`\n ✨ Build completed successfully! [${new Date().toLocaleString()}]`);
+        logger.log(`📦 Output: ${browserDistDir}`);
     } catch (err) {
         logger.error(' ❌ Build failed:', err);
     }

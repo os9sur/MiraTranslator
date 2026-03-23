@@ -160,28 +160,28 @@ async function getActiveTab() {
   });
 }
 
-let _defaultEngine = 'bing'; 
+let _defaultEngine = 'bing';
 
-let _defaultEngineReady = safeGetStorage(['_defaultEngine']).then(res => {
-    if (res._defaultEngine) _defaultEngine = res._defaultEngine;
+let _defaultEngineReady = safeGetStorage(['_defaultEngine'], true).then(res => {
+  if (res && res._defaultEngine) _defaultEngine = res._defaultEngine;
 });
 
 async function getInitialActiveConfig() {
-    await _defaultEngineReady;
-    return { engine: _defaultEngine, data: {} };
+  await _defaultEngineReady;
+  return { engine: _defaultEngine, data: {} };
 }
 
 function getRuntimeDefaultEngine() {
-    return _defaultEngine;
+  return _defaultEngine;
 }
 
 
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: false, select: true, yt: true };
 if (typeof chrome !== 'undefined' && chrome.storage) {
-  safeGetStorage(['siteSettings', 'globalConfig'], (res) => {
-    if (res.siteSettings) cachedSiteSettings = res.siteSettings;
-    if (res.globalConfig) cachedGlobalConfig = res.globalConfig;
+  safeGetStorage(['siteSettings', 'globalConfig'], true).then(res => {
+    if (res?.siteSettings) cachedSiteSettings = res.siteSettings;
+    if (res?.globalConfig) cachedGlobalConfig = res.globalConfig;
   });
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.siteSettings) cachedSiteSettings = changes.siteSettings.newValue;
@@ -233,63 +233,95 @@ async function safeSendMessage(message) {
 var isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
+
   isNoticeShowing = true;
+
   const div = document.createElement('div');
   div.id = 'mira-update-notice';
   const finalMsg = t("update_notice") === "update_notice"
-    ? "MIRA 插件已更新，请点击此处刷新页面以继续使用!"
+    ? "Mira Translator has been updated. Please click here to refresh the page."
     : t("update_notice");
   div.style.cssText = `
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 10000000;
-    background: #1f2937;
-    color: #f3f4f6;
-    padding: 14px 24px;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 14px;
-    border: 1px solid #374151;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  `;
-  const svgIcon = `
-    <svg class="mira-refresh-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
-      <path d="M23 4v6h-6"></path>
-      <path d="M1 20v-6h6"></path>
-      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-    </svg>
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 10000000;
+        background: #1f2937;
+        color: #f3f4f6;
+        padding: 14px 24px;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 14px;
+        border: 1px solid #374151;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     `;
-  div.innerHTML = `
-  ${svgIcon}
-  <span style="margin-left: 8px;">${finalMsg}</span>
-`;
+
+  // 用 DOM API 创建 SVG，避免 innerHTML TrustedHTML 限制
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'mira-refresh-svg');
+  svg.setAttribute('width', '18');
+  svg.setAttribute('height', '18');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2.5');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+  const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path1.setAttribute('d', 'M23 4v6h-6');
+  const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path2.setAttribute('d', 'M1 20v-6h6');
+  const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path3.setAttribute('d', 'M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15');
+  svg.appendChild(path1);
+  svg.appendChild(path2);
+  svg.appendChild(path3);
+
+  const span = document.createElement('span');
+  span.style.marginLeft = '8px';
+  span.textContent = finalMsg;
+
+  div.appendChild(svg);
+  div.appendChild(span);
+
   div.onmouseenter = () => {
     div.style.background = '#374151';
     div.style.transform = 'translateY(-2px)';
-    const svg = div.querySelector('.mira-refresh-svg');
-    if (svg) svg.style.transform = 'rotate(360deg)';
+    const svgEl = div.querySelector('.mira-refresh-svg');
+    if (svgEl) svgEl.style.transform = 'rotate(360deg)';
   };
   div.onmouseleave = () => {
     div.style.background = '#1f2937';
     div.style.transform = 'translateY(0)';
-    const svg = div.querySelector('.mira-refresh-svg');
-    if (svg) svg.style.transform = 'rotate(0deg)';
+    const svgEl = div.querySelector('.mira-refresh-svg');
+    if (svgEl) svgEl.style.transform = 'rotate(0deg)';
   };
-  div.onclick = () => location.reload();
-  document.body.appendChild(div);
+  div.onclick = (e) => {
+    e.stopPropagation();
+    isNoticeShowing = true;
+    div.style.display = 'none';
+    location.reload();
+  };
+  const target = document.body || document.documentElement;
+  if (target) {
+    target.appendChild(div);
+  } else {
+    isNoticeShowing = false;
+  }
 }
 var i18nDict = {};
-let isSynced = false;
+var isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2','i18nAttach3'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3','i18nAttach4'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -306,6 +338,7 @@ function syncI18nDict(force = false) {
 }
 function t(key, forcedLang) {
   syncI18nDict();
+  if (!i18nDict || Object.keys(i18nDict).length === 0) return key;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
   let lang = forcedLang
@@ -319,6 +352,7 @@ function t(key, forcedLang) {
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
   return dict[key] || key;
 }
+
 function applyI18n(forcedLang) {
   if (typeof document === 'undefined') return;
   syncI18nDict();
@@ -710,31 +744,47 @@ const TRADITIONAL_ENGINE_LIST = [
 ];
 
 const STORAGE_KEYS = {
-    core: ['userConfigs', 'activeConfig', 'lastActiveId'],
-    settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig'],
-    sync: function() {
-        return [...this.core, ...this.settings];
-    },
-    export: function() {
-        return [...this.core, ...this.settings];
-    }
+  core: ['userConfigs', 'activeConfig', 'lastActiveId'],
+  settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig'],
+  sync: function () {
+    return [...this.core, ...this.settings];
+  },
+  export: function () {
+    return [...this.core, ...this.settings];
+  }
 };
 
-async function safeGetStorage(keys) {
+async function safeGetStorage(keys, silent = false) {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-    showUpdateNotice();
+    if (!silent) showUpdateNotice();
     return null;
   }
-  if (IS_MAIN_WORLD) {
-    return null;
-  }
+  if (IS_MAIN_WORLD) return null;
   try {
     return await chrome.storage.local.get(keys);
   } catch (e) {
     if (e.message.includes("context invalidated")) {
-      showUpdateNotice();
+      if (!silent) showUpdateNotice();
     }
     return null;
+  }
+}
+async function safeSetStorage(items) {
+  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+    showUpdateNotice();
+    return false;
+  }
+  if (IS_MAIN_WORLD) {
+    return false;
+  }
+  try {
+    await chrome.storage.local.set(items);
+    return true;
+  } catch (e) {
+    if (e.message.includes("context invalidated")) {
+      showUpdateNotice();
+    }
+    return false;
   }
 }
 async function lookupCache(text, engine, lang) {
@@ -784,7 +834,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
   const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!storage) return;
-  const { skipCache = false, isBatch = false } = options;
+  const { skipCache = false, isBatch = false, lightweight = false } = options;
   let engine = (
     storage.activeConfig?.engine ||
     (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
@@ -857,6 +907,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           type: 'TRANSLATE',
           text: query,
           targetLang: lang,
+          lightweight,
           isSubtitle: query.includes('⟦KT_') && isAI
         }),
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
@@ -965,3 +1016,35 @@ async function refreshIcon() {
     subActive: subActive
   });
 }
+
+var MiraUtils = {
+  /**
+   * 判断当前 URL 是否为受限页面
+   */
+  isRestrictedUrl: function (url) {
+    if (!url) return true;
+
+    const restrictedPrefixes = [
+      'chrome://',
+      'edge://',
+      'about:',
+      'chrome-extension://',
+      'devtools://'
+    ];
+
+    const restrictedDomains = [
+      'chrome.google.com/webstore',
+      'chromewebstore.google.com'
+    ];
+
+    const isPrefixMatch = restrictedPrefixes.some(prefix => url.startsWith(prefix));
+    const isDomainMatch = restrictedDomains.some(domain => url.includes(domain));
+
+    return isPrefixMatch || isDomainMatch;
+  },
+
+  isYouTubeUrl: function (url) {
+    if (!url) return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
+};

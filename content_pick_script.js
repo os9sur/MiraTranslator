@@ -121,7 +121,7 @@ window.browser = (function () {
                 ss[domain].page = true;
             }
             if (chrome.runtime?.id) {
-                await chrome.storage.local.set({
+                await safeSetStorage({
                     scanConfig,
                     siteSettings: ss
                 });

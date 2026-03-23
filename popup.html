@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
     html {
       overflow: hidden;
     }
+
     body {
       width: 280px;
       min-width: 250px;
@@ -29,6 +31,7 @@
       overflow-x: hidden;
       transition: width 0.2s ease-in-out;
     }
+
     .mira-hint-icon {
       display: inline-block;
       width: 14px;
@@ -43,40 +46,49 @@
       margin-left: 4px;
       font-style: normal;
     }
+
     @keyframes mira-pulse {
       0% {
         box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.5), 0 0 6px 2px rgba(59, 130, 246, 0.25);
       }
+
       50% {
         box-shadow: 0 0 5px 2px rgba(59, 130, 246, 0.7), 0 0 10px 4px rgba(59, 130, 246, 0.35);
       }
+
       100% {
         box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.5), 0 0 6px 2px rgba(59, 130, 246, 0.25);
       }
     }
+
     #donateOverlay {
       width: 100%;
       height: 100%;
     }
+
     * {
       box-sizing: border-box;
     }
+
     div:not(.allow-select),
     span:not(.allow-select),
     label:not(.allow-select) {
       -webkit-user-select: none;
       user-select: none;
     }
+
     .allow-select,
     .allow-select * {
       -webkit-user-select: text !important;
       user-select: text !important;
     }
+
     .style-tab.active {
       background: #38bdf8 !important;
       color: #020617 !important;
       font-weight: bold;
     }
+
     html.full-screen-mode {
       width: 100% !important;
       height: 100% !important;
@@ -85,6 +97,7 @@
       background-color: #02040a !important;
       overflow: hidden !important;
     }
+
     body.full-screen-mode {
       width: 100vw !important;
       height: 100vh !important;
@@ -98,6 +111,7 @@
       align-items: center !important;
       overflow: visible !important;
     }
+
     body.full-screen-mode #syncSettingsPanel,
     body.full-screen-mode #settingsPanel {
       position: relative !important;
@@ -115,6 +129,7 @@
       overflow-x: visible !important;
       animation: eclipse-glow-refined 5s ease-in-out infinite alternate;
     }
+
     @keyframes eclipse-glow-refined {
       0% {
         box-shadow:
@@ -122,6 +137,7 @@
           0 0 35px rgba(56, 189, 248, 0.25),
           0 0 60px rgba(56, 189, 248, 0.1);
       }
+
       100% {
         box-shadow:
           0 0 40px rgba(0, 0, 0, 0.6),
@@ -130,13 +146,44 @@
           0 0 150px rgba(56, 189, 248, 0.15);
       }
     }
+
     body.full-screen-mode #mainContainer,
     body.full-screen-mode .main-header {
       display: none !important;
     }
   </style>
 </head>
+
 <body>
+  <!-- 第一次使用欢迎提示 -->
+<div id="welcome-guide"
+    style="display: none; position: fixed; inset: 0; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); z-index: 10000; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; box-sizing: border-box; overflow-y: auto;">
+
+    <div style="text-align: center; margin-top: 5vh; margin-bottom: 20px; width: 100%;">
+      <h1 data-i18n="welcomeTitle" style="color: #58a6ff; margin: 0 0 8px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Welcome to Mira! 🚀</h1>
+      <h2 data-i18n="setLanguage" style="color: #f0f6fc; margin: 0; font-size: 16px; font-weight: 400; opacity: 0.85;">Select Your Target Language</h2>
+    </div>
+
+    <div id="guide-spacer" style="height: 120px; width: 100%; pointer-events: none;margin-bottom: 20px;">
+    </div>
+
+    <div style="text-align: center; max-width: 260px;">
+      <p style="color: #8b949e; font-size: 14px; line-height: 1.6; margin-bottom: 30px;">
+        <span data-i18n="translatePrefix">Mira will translate web pages into</span>
+        <br>
+        <b style="color: #58a6ff;" data-i18n="translateHighlight">the language you select above.</b>
+        <span data-i18n="translateSuffix"></span>
+      </p>
+
+      <button id="close-guide-btn" data-i18n="btnGotIt"
+        style="background: #238636; color: white; border: none; padding: 14px 60px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 16px; box-shadow: 0 4px 15px rgba(35, 134, 54, 0.4);">
+        Got it!
+      </button>
+
+      <p data-i18n="changeSetting" style="color: #484f58; font-size: 11px; margin-top: 20px;">You can change this
+        anytime in settings.</p>
+    </div>
+  </div>
   <!-- 查单词开始 -->
   <div id="searchPanel"
     style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 110; display: none; padding: 12px; box-sizing: border-box; flex-direction: column; border-radius: 10px;">
@@ -328,66 +375,69 @@
     <div id="targetLangCombox" class="row">
       <label data-i18n="targetLang"
         style="overflow-wrap: break-word;word-wrap: break-word;word-break: normal;">目标语言</label>
-      <select id="targetLang" style="width: 120px;max-width: 150px;">
-        <!-- 置顶高频语言 -->
+      <select id="targetLang" style="width: 115px;max-width: 200px;">
         <option value="en">English</option>
-        <option value="zh-CN">简体中文</option>
-        <option value="zh-TW">繁體中文</option>
-        <option value="ja">日本語</option>
-        <option value="ko">한국어</option>
+        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
+        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+
         <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
           ── Southeast Asia ──
         </option>
-        <option value="id">Bahasa Indonesia</option> <!-- B -->
-        <option value="ms">Bahasa Melayu</option> <!-- B -->
-        <option value="th">ไทย</option> <!-- ไ -->
-        <option value="vi">Tiếng Việt</option> <!-- T -->
+        <option value="id">Bahasa Indonesia (Indonesian)</option>
+        <option value="ms">Bahasa Melayu (Malay)</option>
+        <option value="th">ไทย (Thai)</option>
+        <option value="vi">Tiếng Việt (Vietnamese)</option>
+
         <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
           ── Middle East & South Asia ──
         </option>
-        <option value="ar">العربية</option> <!-- ا -->
-        <option value="bn">বাংলা</option> <!-- ব -->
-        <option value="fa">فارسی</option> <!-- ف -->
-        <option value="hi">हिन्दी</option> <!-- ह -->
-        <option value="he">עברית</option> <!-- ע -->
-        <option value="tr">Türkçe</option> <!-- T -->
+        <option value="ar">العربية (Arabic)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="fa">فارسی (Persian)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="he">עברית (Hebrew)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+
         <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
           ── Americas & Europe ──
         </option>
-        <option value="bg">Български</option> <!-- B -->
-        <option value="cs">Čeština</option> <!-- C -->
-        <option value="da">Dansk</option> <!-- D -->
-        <option value="de">Deutsch</option> <!-- D -->
-        <option value="et">Eesti</option> <!-- E -->
-        <option value="el">Ελληνικά</option> <!-- E -->
-        <option value="es">Español</option> <!-- E -->
-        <option value="fr">Français</option> <!-- F -->
-        <option value="ga">Gaeilge</option> <!-- G -->
-        <option value="hr">Hrvatski</option> <!-- H -->
-        <option value="it">Italiano</option> <!-- I -->
-        <option value="lv">Latviešu</option> <!-- L -->
-        <option value="lt">Lietuvių</option> <!-- L -->
-        <option value="hu">Magyar</option> <!-- M -->
-        <option value="nl">Nederlands</option> <!-- N -->
-        <option value="no">Norsk</option> <!-- N -->
-        <option value="pl">Polski</option> <!-- P -->
-        <option value="pt">Português</option> <!-- P -->
-        <option value="ro">Română</option> <!-- R -->
-        <option value="ru">Русский</option> <!-- R -->
-        <option value="sk">Slovenčina</option> <!-- S -->
-        <option value="sl">Slovenščina</option> <!-- S -->
-        <option value="fi">Suomi</option> <!-- S -->
-        <option value="sv">Svenska</option> <!-- S -->
-        <option value="uk">Українська</option> <!-- U -->
+        <option value="bg">Български (Bulgarian)</option>
+        <option value="cs">Čeština (Czech)</option>
+        <option value="da">Dansk (Danish)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="et">Eesti (Estonian)</option>
+        <option value="el">Ελληνικά (Greek)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="ga">Gaeilge (Irish)</option>
+        <option value="hr">Hrvatski (Croatian)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="lv">Latviešu (Latvian)</option>
+        <option value="lt">Lietuvių (Lithuanian)</option>
+        <option value="hu">Magyar (Hungarian)</option>
+        <option value="nl">Nederlands (Dutch)</option>
+        <option value="no">Norsk (Norwegian)</option>
+        <option value="pl">Polski (Polish)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="ro">Română (Romanian)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="sk">Slovenčina (Slovak)</option>
+        <option value="sl">Slovenščina (Slovenian)</option>
+        <option value="fi">Suomi (Finnish)</option>
+        <option value="sv">Svenska (Swedish)</option>
+        <option value="uk">Українська (Ukrainian)</option>
+
         <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
           ── Africa ──
         </option>
-        <option value="af">Afrikaans</option> <!-- A -->
-        <option value="am">አማርኛ</option> <!-- አ -->
-        <option value="ha">Hausa</option> <!-- H -->
-        <option value="zu">IsiZulu</option> <!-- I -->
-        <option value="sw">Kiswahili</option> <!-- K -->
-        <option value="yo">Yorùbá</option> <!-- Y -->
+        <option value="af">Afrikaans</option>
+        <option value="am">አማርኛ (Amharic)</option>
+        <option value="ha">Hausa</option>
+        <option value="zu">IsiZulu (Zulu)</option>
+        <option value="sw">Kiswahili (Swahili)</option>
+        <option value="yo">Yorùbá (Yoruba)</option>
       </select>
     </div>
     <div id="inspectContainer" class="row-group"
@@ -859,4 +909,5 @@
   <script src="site-rules.js"></script>
   <script src="popup.js"></script>
 </body>
+
 </html>
