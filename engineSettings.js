@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
     window.currentConfig = {
-        targetLanguage: res.ui_language || (navigator.language || 'zh-CN').replace('_', '-'),//ui_language
+        targetLanguage: res.ui_language || (navigator.language || 'en').replace('_', '-'),//ui_language
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!config) return;
 
         const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-        const targetLang = storage?.ui_language || 'zh-CN';
+        const targetLang = storage?.ui_language || 'en';
         const isTargetEn = targetLang.toLowerCase().startsWith('en');
         const testText = isTargetEn ? '你好' : 'Good morning';
 
@@ -753,7 +753,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const effectiveLang = langRes.ui_language ||
         (navigator.languages && navigator.languages[0]) ||
         navigator.language ||
-        'zh-CN';
+        'en';
     const targetLang = effectiveLang.replace('_', '-');
     window.applyI18n(targetLang);
     const formatCountByLang = (num, lang) => {

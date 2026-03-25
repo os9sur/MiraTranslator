@@ -175,6 +175,12 @@ function getRuntimeDefaultEngine() {
   return _defaultEngine;
 }
 
+function getCurrentLang() {
+  return window.currentConfig?.targetLanguage ||
+    window.currentTargetL ||
+    navigator.language ||
+    'en'; 
+}
 
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: false, select: true, yt: true };
@@ -321,7 +327,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -864,7 +870,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     manualLang ||
     storage.targetLanguage ||
     navigator.language ||
-    'zh-CN'
+    'en'
   ).replace('_', '-').toLowerCase();
   lang = lang.replace('_', '-').toLowerCase();
   const targetBase = lang.split('-')[0];
@@ -913,13 +919,29 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const cacheKey = getCacheKey(query, engine, lang);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
-    if (!forceRefresh && !isBatch) {
-      const hit = await lookupCache(query, engine, lang);
-      if (hit && !hit.result.isBatch) {
-        wordTranslationCache.set(query.toLowerCase(), hit.result);
-        return hit.result;
-      }
+    // lookupCache 返回结果后，加一层校验
+if (!forceRefresh && !isBatch) {
+  const hit = await lookupCache(query, engine, lang);
+  if (hit && !hit.result.isBatch) {
+    const cached = hit.result;
+
+    // 检测缓存是否是脏数据（basic是JSON字符串）
+    if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(cached.basic);
+        // 是脏数据，修复并重写缓存
+        cached.basic = parsed.basic || cached.basic;
+        cached.phonetic = parsed.phonetic || cached.phonetic || "";
+        cached.dictData = parsed.dictData || cached.dictData || [];
+        cached.examples = parsed.examples || cached.examples || [];
+        await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
+      } catch { /* 不是JSON，正常数据 */ }
     }
+
+    wordTranslationCache.set(query.toLowerCase(), cached);
+    return cached;
+  }
+}
     pendingRequests.add(cacheKey);
     let response;
     try {
@@ -964,7 +986,20 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       timestamp: Date.now()
     };
     if (typeof data === 'string') {
-      result.basic = data;
+      // 解析JSON
+      try {
+        const parsed = JSON.parse(data);
+        result.basic = parsed.basic || parsed.result || data;
+        result.phonetic = parsed.phonetic || "";
+        result.dictData = parsed.dictData || [];
+        result.examples = parsed.examples || [];
+        result.wordForms = parsed.wordForms || [];
+        result.prototype = parsed.prototype || null;
+        result.isFallback = parsed.isFallback || false;
+        result.source = parsed.source || "";
+      } catch {
+        result.basic = data;
+      }
     } else if (data && typeof data === 'object') {
       result.basic = data.basic || data.result || "";
       result.phonetic = data.phonetic || "";
@@ -982,6 +1017,40 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         result.basic = result.basic.trim();
       }
     }
+    // 归并重复pos的dictData
+if (result.dictData && result.dictData.length > 0) {
+    
+  const merged = {};
+  result.dictData.forEach(item => {
+    const pos = item.pos || '';
+    
+    // 兼容多种结构
+    let def = '';
+    if (typeof item.definition === 'string') {
+      def = item.definition;
+    } else if (Array.isArray(item.definition)) {
+      def = item.definition.join(', ');
+    } else if (Array.isArray(item.meanings)) {
+      def = item.meanings.join(', ');
+    } else if (typeof item.meanings === 'string') {
+      def = item.meanings;
+    }
+
+    if (!def) return; // 没有内容的跳过，不生成空行
+    
+    if (!merged[pos]) {
+      merged[pos] = def;
+    } else {
+      merged[pos] += ', ' + def;
+    }
+  });
+
+  result.dictData = Object.entries(merged).map(([pos, definition]) => ({
+    pos, definition
+  }));
+  
+  logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
+}
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
         await idb.set({ [cacheKey]: result });

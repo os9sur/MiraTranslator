@@ -23,7 +23,7 @@ async function initOnboarding() {
   const storageKey = 'mira_onboarding_v1';
 
   const completeOnboarding = () => {
-    if (!guideEl || guideEl.style.display === 'none') return; 
+    if (!guideEl || guideEl.style.display === 'none') return;
     if (labelEl) labelEl.style.display = 'block';
     localStorage.setItem(storageKey, 'true');
     guideEl.style.transition = 'opacity 0.4s ease';
@@ -537,7 +537,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       statusEl.innerText = `${t('lastSync')} ${timeStr}`;
       statusEl.style.color = '#94a3b8';
     } else {
-      statusEl.innerText = t('neverSynced',globalUiLang) || 'Not synced';
+      statusEl.innerText = t('neverSynced', globalUiLang) || 'Not synced';
     }
   }
   function toggleStyleTab(type) {
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const effectiveLang = langRes.targetLanguage ||
     (navigator.languages && navigator.languages[0]) ||
     navigator.language ||
-    'zh-CN';
+    'en';
   const targetLang = effectiveLang.replace('_', '-');
   if (!langRes.targetLanguage) {
     await safeSetStorage({ targetLanguage: targetLang });
@@ -1146,55 +1146,99 @@ document.addEventListener('DOMContentLoaded', async () => {
     resPhonetic.innerText = '';
     resVoiceHeader.style.display = 'none';
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+
     try {
       const res = await safeGetStorage(['targetLanguage', 'activeConfig']);
       if (!res) return;
-      let targetL = res.targetLanguage || navigator.language || 'zh-CN';
+
+      let targetL = res.targetLanguage || navigator.language || 'en';
       targetL = targetL.replace('_', '-');
       let engine = res.activeConfig?.engine || _defaultEngine;
+
       if (window.currentConfig) {
         window.currentConfig.targetLanguage = targetL;
         window.currentConfig.selectedEngine = engine;
         window.currentConfig.activeConfig = res.activeConfig || { engine: _defaultEngine, data: {} };
       }
       if (typeof currentEngine !== 'undefined') currentEngine = engine;
+
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", targetLanguage="${targetL}", engine="${engine}"`);
-      const hasHan = /\p{Script=Han}/u.test(text);
-      const hasJa = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text);
-      const hasKo = /\p{Script=Hangul}/u.test(text);
-      const isPureChineseInput = hasHan && !hasJa && !hasKo;
-      let uiLang = chrome.i18n.getUILanguage();
-      if (isPureChineseInput && targetL.startsWith('zh')) {
-        targetL = 'en';
-      } else if (!isPureChineseInput && !hasJa && !hasKo && targetL.startsWith('en')) {
-        targetL = uiLang.startsWith('en') ? 'zh-CN' : uiLang;
+
+      // ── 通用语言检测 
+      function detectInputLang(str) {
+        if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(str)) return 'ja';
+        if (/\p{Script=Hangul}/u.test(str)) return 'ko';
+        if (/\p{Script=Han}/u.test(str)) return 'zh';
+        if (/\p{Script=Arabic}/u.test(str)) return 'ar';
+        if (/\p{Script=Cyrillic}/u.test(str)) return 'ru';
+        if (/\p{Script=Thai}/u.test(str)) return 'th';
+        if (/\p{Script=Hebrew}/u.test(str)) return 'he';
+        if (/\p{Script=Devanagari}/u.test(str)) return 'hi';
+        if (/^[a-zA-Z\s.,!?'"()\-]+$/.test(str.trim())) return 'en';
+        return 'unknown';
       }
+
+      const inputLang = detectInputLang(text);
+      const targetBase = targetL.split('-')[0].toLowerCase();
+      const uiLang = chrome.i18n.getUILanguage() || 'en';
+      const uiBase = uiLang.split('-')[0].toLowerCase();
+
+      // ── 反向翻译判断 
+      // 输入语言和目标语言相同时，自动反向
+      const isSameLang =
+        inputLang !== 'unknown' && (
+          inputLang === targetBase ||
+          // 中文变体统一处理：zh-CN,zh-TW
+          (inputLang === 'zh' && targetBase === 'zh')
+        );
+
+      if (isSameLang) {
+        if (targetBase === 'en') {
+          // 目标英文但输入英文 → 翻译成界面语言，界面也是英文则 fallback zh-CN
+          targetL = uiBase === 'en' ? 'zh-CN' : uiLang;
+        } else {
+          targetL = 'en';
+        }
+        logger.log(`[Mira-LOG] 反向翻译触发: inputLang=${inputLang}, 新targetL=${targetL}`);
+      }
+
       const response = await getDetailedTranslation(text, false, targetL);
+
       if (response && !response.isError) {
         currentTranslationResponse = response;
         resVoiceHeader.style.display = 'flex';
         resSource.innerText = text;
+
         const actionArea = document.getElementById('actionArea');
         if (actionArea) actionArea.style.display = 'block';
         if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'block';
         resultArea.style.display = 'flex';
         resultArea.style.userSelect = 'text';
-        let basic = response.basic || "";
-        let phonetic = response.phonetic || "";
-        let dicts = response.dictData || [];
-        let examples = response.examples || [];
+
+        const basic = response.basic || "";
+        const phonetic = response.phonetic || "";
+        const dicts = response.dictData || [];
+        const examples = response.examples || [];
+
         if (resPhonetic) {
-          resPhonetic.innerText = phonetic ? (phonetic.startsWith('[') ? phonetic : `[${phonetic}]`) : "";
+          resPhonetic.innerText = phonetic
+            ? (phonetic.startsWith('[') ? phonetic : `[${phonetic}]`)
+            : "";
         }
+
         let html = "";
+
         if (basic) {
-          html += `<div style="font-weight: bold; color: #38BDF8; margin-bottom: 10px; font-size: 15px; user-select:text !important;">${basic}</div>`;
+          html += `<div style="font-weight:bold; color:#38BDF8; margin-bottom:10px; font-size:15px; user-select:text !important;">${basic}</div>`;
         }
+
         // 合并相同 pos
-        const mergedDicts = (dicts).reduce((acc, item) => {
+        const mergedDicts = dicts.reduce((acc, item) => {
           const meanings = item.meanings?.length > 0
             ? item.meanings
-            : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+            : (item.definition
+              ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))]
+              : []);
           const existing = acc.find(d => d.pos === item.pos);
           if (existing) {
             existing.meanings = [...existing.meanings, ...meanings];
@@ -1212,64 +1256,72 @@ document.addEventListener('DOMContentLoaded', async () => {
             const englishPos = (typeof formatPosToEnglish === 'function')
               ? formatPosToEnglish(item.pos)
               : (item.pos || "");
-            return `<div style="margin-bottom: 6px; display: flex; align-items: baseline; line-height: 1.4;">
-                <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
-                <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
-              </div>`;
+            return `
+            <div style="margin-bottom:6px; display:flex; align-items:baseline; line-height:1.4;">
+              <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:8px; min-width:32px;">${englishPos}.</span>
+              <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
+            </div>`;
           }).join('');
         }
-        // 词形/时态显示
+
+        // 词形/时态
         const wordForms = response.wordForms || [];
         const prototype = response.prototype;
         const protoLower = (prototype || '').toLowerCase().trim();
         const textLower = text.toLowerCase().trim();
 
-        if (prototype && protoLower !== textLower || wordForms.length > 0) {
+        if ((prototype && protoLower !== textLower) || wordForms.length > 0) {
           let formsHtml = '';
-
           if (prototype && protoLower !== textLower) {
-            formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(99,179,237,0.1);border:0.5px solid rgba(99,179,237,0.4);border-radius:6px;padding:3px 8px;font-size:12px;">
-        <span style="color:#94a3b8;font-size:11px;">原型</span>
-        <span style="color:#38bdf8;font-weight:500;">${prototype}</span>
-      </span>`;
+            formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,179,237,0.1); border:0.5px solid rgba(99,179,237,0.4); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">原型</span>
+              <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
+            </span>`;
           }
-
           wordForms.forEach(wf => {
-            formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.15);border-radius:6px;padding:3px 8px;font-size:12px;">
-        <span style="color:#94a3b8;font-size:11px;">${wf.name}</span>
-        <span style="color:rgba(255,255,255,0.85);font-weight:500;">${wf.value}</span>
-      </span>`;
+            formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">${wf.name}</span>
+              <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
+            </span>`;
           });
-
-          html += `<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
+          html += `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${formsHtml}</div>`;
         }
+
+        // 例句
         if (examples.length > 0) {
-          html += `<div style="margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; user-select:text !important;">
-          <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
-          ${examples.map(ex => {
+          html += `
+          <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
+            <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
+            ${examples.map(ex => {
             const en = typeof ex === 'string' ? ex : (ex.en || '');
             const cn = typeof ex === 'object' ? (ex.cn || '') : '';
-            return `<div style="margin-bottom: 8px;">
-                  <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">"${en}"</div>
-                  ${cn ? `<div style="color: rgba(255,255,255,0.4); font-size: 11px; font-style: italic; margin-top: 2px;">${cn}</div>` : ''}
-              </div>`;
+            return `
+                <div style="margin-bottom:8px;">
+                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic;">"${en}"</div>
+                  ${cn ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${cn}</div>` : ''}
+                </div>`;
           }).join('')}
-      </div>`;
+          </div>`;
         }
+
         if (response.source) {
           html += `<div style="margin-top:2px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
         }
+
         resContent.innerHTML = html || "No translation found.";
+
         if (typeof updateSaveBtnStatus === 'function') {
           await updateSaveBtnStatus(text);
         }
       } else {
         const errorMsg = response?.basic || response?.error || 'No response';
-        resContent.innerHTML = `<span style="color: #ef4444;">${errorMsg}</span>`;
+        resContent.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
       }
     } catch (err) {
       logger.error("Popup Logic Error:", err);
-      resContent.innerHTML = `<span style="color: #ef4444;">Error: ${err.message}</span>`;
+      resContent.innerHTML = `<span style="color:#ef4444;">Error: ${err.message}</span>`;
     }
   }
   async function updateSaveBtnStatus(word, isJustSaved = null) {
@@ -1530,7 +1582,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (statusEl) {
         statusEl.innerText = storage.lastSyncTime
           ? `${t('lastSync')} ${new Date(storage.lastSyncTime).toLocaleString()}`
-          : (t('neverSynced',globalUiLang) || 'Not synced');
+          : (t('neverSynced', globalUiLang) || 'Not synced');
       }
       if (storage.syncConfig) {
         const scSync = storage.syncConfig;
@@ -1551,7 +1603,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setVal('webdavPass', scSync.webdavPass);
         setVal('syncFrequency', scSync.frequency);
       }
-      let targetL = targetLang || window.currentConfig.targetLanguage || navigator.language || 'zh-CN';
+      let targetL = targetLang || window.currentConfig.targetLanguage || navigator.language || 'en';
       targetL = targetL.replace('_', '-');
       const targetLangEl = document.getElementById('targetLang');
       if (targetLangEl) targetLangEl.value = targetL;
@@ -1564,7 +1616,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       //  恢复界面语言下拉框状态 
       const uiLangSelect = document.getElementById('uiLangSelect');
       if (uiLangSelect) {
-        const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'zh-CN';
+        const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'en';
         uiLangSelect.value = savedUiLang;
       }
 

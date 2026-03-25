@@ -1,26 +1,36 @@
-window.currentTargetL = navigator.language || 'zh-CN';
+
+window.currentTargetL = navigator.language || 'en'; 
+
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
+
 function loadTargetLanguage() {
   if (window.__LANG_PROMISE__) return window.__LANG_PROMISE__;
   window.__LANG_PROMISE__ = chrome.storage.local
-    .get(['targetLanguage'])
+    .get(['targetLanguage', 'ui_language'])
     .then(res => {
-      window.currentTargetL = res?.targetLanguage || navigator.language || 'zh-CN';
+      window.currentTargetL = res?.targetLanguage || navigator.language || 'en';
+      window.uiLanguage = res?.ui_language || navigator.language || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     })
     .catch(() => {
-      window.currentTargetL = navigator.language || 'zh-CN';
+      window.currentTargetL = navigator.language || 'en';
+      window.uiLanguage = navigator.language || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     });
   return window.__LANG_PROMISE__;
 }
+
 loadTargetLanguage();
+
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.targetLanguage) {
-    window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'zh-CN';
+  if (area === 'local') {
+    if (changes.targetLanguage)
+      window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'en';
+    if (changes.ui_language)
+      window.uiLanguage = changes.ui_language.newValue || navigator.language || 'en';
   }
 });
 let APP_NAME = 'Mira Translator';
@@ -49,7 +59,7 @@ logger.log(window.currentTargetL);
     window.currentConfig.selectedEngine = finalCfg.engine;
     res = {
       activeConfig: finalCfg,
-      targetLanguage: (navigator.language || 'zh-CN').replace('_', '-').toLowerCase()
+      targetLanguage: (navigator.language || 'en').replace('_', '-').toLowerCase()
     };
   }
 
@@ -103,7 +113,7 @@ function getCommentFallbackSelectors(domain) {
 if (typeof fastMemoryCache === 'undefined') var fastMemoryCache = new Map();
 if (typeof pendingRequests === 'undefined') var pendingRequests = new Set();
 window.currentConfig = {
-  targetLanguage: (navigator.language || 'zh-CN').replace('_', '-'),
+  targetLanguage: (navigator.language || 'en').replace('_', '-'),
   selectedEngine: getRuntimeDefaultEngine(),
   activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
@@ -740,6 +750,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     isYTEnabled = msg.enabled;
     if (typeof refreshIcon === 'function') refreshIcon();
     if (typeof syncSubtitleDisplay === 'function') syncSubtitleDisplay();
+    const dlBtn = document.getElementById('kt-subtitle-download');
+    if (dlBtn) dlBtn.style.display = msg.enabled ? 'inline-flex' : 'none';
     sendResponse({ status: "ok" });
   }
   else if (msg.action === 'PREVIEW_YT_STYLE') {
@@ -1025,7 +1037,7 @@ const TranslationBatcher = {
       return;
     }
     const engine = (storage.activeConfig?.engine || getRuntimeDefaultEngine()).toLowerCase();
-    const lang = (storage.targetLanguage || navigator.language || 'zh-CN').replace('_', '-').toLowerCase();
+    const lang = (storage.targetLanguage || navigator.language || 'en').replace('_', '-').toLowerCase();
     let currentBatch = [];
     let currentLength = 0;
     const isAI = AI_LLM_WHITE_LIST.includes(engine);
@@ -4225,7 +4237,7 @@ function initSelectionTranslate() {
       logoBtn.onmouseenter = async () => {
         forceHideLogo();
         const storage = await safeGetStorage(['targetLanguage']);
-        const currentTarget = storage?.targetLanguage || navigator.language || 'zh-CN';
+        const currentTarget = storage?.targetLanguage || navigator.language || 'en';
         let finalQuery = text;
         const hasHan = /[\u4e00-\u9fa5]/.test(text);
         const hasEn = /[a-zA-Z]/.test(text);
@@ -4326,7 +4338,7 @@ function initSelectionTranslate() {
               entry.word,
               { clientX: e.clientX, clientY: e.clientY },
               shadowHost.shadowRoot,
-              window.currentTargetL || 'zh-CN'
+              window.currentTargetL || 'en'
             );
           });
         }
@@ -4531,10 +4543,486 @@ function initSelectionTranslate() {
 }
 
 //yt
+
 let fullSubtitleData = [];
 let semanticGroups = [];
 lastSubIndex = -1;
 let lastDataLength = 0;
+
+// ===== 字幕下载功能开始 =====
+// 全局下载锁
+let isDownloading = false;
+function formatSRTTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const ms = Math.round((seconds % 1) * 1000);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+}
+
+function buildSRT(groups, translationMap = null) {
+  return groups.map((g, i) => {
+    const start = formatSRTTime(g.start);
+    const end = formatSRTTime(g.end);
+    const original = g.text;
+    const translation = translationMap?.[i];
+
+    let content = original;
+    if (translation) content += `\n${translation}`;
+
+    return `${i + 1}\n${start} --> ${end}\n${content}`;
+  }).join('\n\n');
+}
+
+function getVideoTitle() {
+  return document.querySelector('h1.ytd-video-primary-info-renderer')?.textContent?.trim()
+    || document.title.replace(' - YouTube', '').trim()
+    || 'subtitle';
+}
+// 下载前最后做一次校验补漏
+let downloadAbortController = null;
+
+async function fillMissingTranslations(translationMap, engine, lang, isAI, signal) {
+  const stillMissing = [];
+  semanticGroups.forEach((g, i) => {
+    if (!translationMap[i]) stillMissing.push(i);
+  });
+
+  if (stillMissing.length === 0) return;
+
+  logger.log(`[Download] 最终补漏 ${stillMissing.length} 句`);
+  const btn = document.getElementById('kt-download-btn');
+
+  function sleep(ms) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(resolve, ms);
+      signal?.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new Error('ABORTED'));
+      });
+    });
+  }
+
+  for (const idx of stillMissing) {
+    if (signal?.aborted) throw new Error('ABORTED');
+
+    const text = semanticGroups[idx].text;
+    const key = getCacheKey(text, engine, lang);
+
+    let success = false;
+    for (let retry = 0; retry < 5; retry++) {
+      if (signal?.aborted) throw new Error('ABORTED');
+      try {
+        const res = await getDetailedTranslation(text);
+        if (res?.basic) {
+          translationMap[idx] = res.basic;
+          fastMemoryCache.set(key, { basic: res.basic });
+          success = true;
+          break;
+        }
+      } catch (e) {
+        if (e.message === 'ABORTED') throw e;
+        const isRateLimit = e?.message?.includes('429') ||
+          e?.message?.toLowerCase().includes('rate limit');
+        if (isRateLimit) {
+          const delay = 5000 * Math.pow(2, retry);
+          if (btn) {
+            btn._savedText = `⏸ ${Math.round(delay / 1000)}s`;
+            if (btn.textContent !== '✕ Cancel') btn.textContent = btn._savedText;
+          }
+          await sleep(delay);
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (success) {
+      const done = Object.keys(translationMap).filter(k => translationMap[k]).length;
+      if (btn) {
+        btn._savedText = `⏳ ${done}/${semanticGroups.length}`;
+        if (btn.textContent !== '✕ Cancel') btn.textContent = btn._savedText;
+      }
+    }
+
+    await sleep(isAI ? 2000 : 500);
+  }
+}
+// 自定义confirm弹窗
+function showMiraConfirm(msg) {
+  return new Promise(resolve => {
+    // 防止重复
+    document.getElementById('mira-confirm-modal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'mira-confirm-modal';
+    modal.style.cssText = `
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    `;
+
+    modal.innerHTML = `
+  <div style="
+    background: #1e293b; border: 1px solid #334155;
+    border-radius: 12px; padding: 24px 28px;
+    max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    font-family: system-ui, sans-serif; color: white;
+  ">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <img src="${ASSETS.logoBase64}" style="width:20px; height:20px; border-radius:4px;" />
+      <span style="font-weight:700; font-size:15px; color:#38bdf8;">Mira Translator</span>
+    </div>
+    <div style="font-size:14px; line-height:1.7; color:#cbd5e1; white-space:pre-line;">${msg}</div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button id="mira-confirm-cancel" style="
+        padding: 8px 20px; border-radius: 8px; border: 1px solid #475569;
+        background: transparent; color: #94a3b8; cursor: pointer; font-size: 13px;
+        transition: all 0.25s ease; position: relative; overflow: hidden;
+      ">${t('cancel', window.uiLanguage) || 'Cancel'}</button>
+      <button id="mira-confirm-ok" style="
+        padding: 8px 20px; border-radius: 8px; border: none;
+        background: linear-gradient(135deg, #38bdf8, #818cf8);
+        color: #0f172a; cursor: pointer; font-size: 13px;
+        font-weight: 600; transition: all 0.25s ease;
+        position: relative; overflow: hidden;
+        box-shadow: 0 0 0 rgba(56,189,248,0);
+      ">OK</button>
+    </div>
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    const okBtn = modal.querySelector('#mira-confirm-ok');
+    const cancelBtn = modal.querySelector('#mira-confirm-cancel');
+
+    // OK 按钮：发光 + 上浮 + 渐变位移
+    okBtn.onmouseenter = () => {
+      okBtn.style.transform = 'translateY(-2px) scale(1.03)';
+      okBtn.style.boxShadow = '0 0 16px rgba(56,189,248,0.6), 0 0 32px rgba(129,140,248,0.3)';
+      okBtn.style.background = 'linear-gradient(135deg, #7dd3fc, #a5b4fc)';
+    };
+    okBtn.onmouseleave = () => {
+      okBtn.style.transform = 'translateY(0) scale(1)';
+      okBtn.style.boxShadow = '0 0 0 rgba(56,189,248,0)';
+      okBtn.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
+    };
+    okBtn.onmousedown = () => {
+      okBtn.style.transform = 'translateY(1px) scale(0.97)';
+      okBtn.style.boxShadow = '0 0 8px rgba(56,189,248,0.3)';
+    };
+    okBtn.onmouseup = () => {
+      okBtn.style.transform = 'translateY(-2px) scale(1.03)';
+    };
+
+    cancelBtn.onmouseenter = () => {
+      cancelBtn.style.borderColor = '#64748b';
+      cancelBtn.style.color = '#e2e8f0';
+      cancelBtn.style.background = 'rgba(255,255,255,0.05)';
+      cancelBtn.style.transform = 'translateY(-1px)';
+    };
+    cancelBtn.onmouseleave = () => {
+      cancelBtn.style.borderColor = '#475569';
+      cancelBtn.style.color = '#94a3b8';
+      cancelBtn.style.background = 'transparent';
+      cancelBtn.style.transform = 'translateY(0)';
+    };
+    cancelBtn.onmousedown = () => {
+      cancelBtn.style.transform = 'translateY(1px)';
+      cancelBtn.style.background = 'rgba(255,255,255,0.03)';
+    };
+    cancelBtn.onmouseup = () => {
+      cancelBtn.style.transform = 'translateY(-1px)';
+    };
+
+    okBtn.onclick = () => { modal.remove(); resolve(true); };
+    cancelBtn.onclick = () => { modal.remove(); resolve(false); };
+    modal.onclick = (e) => {
+      if (e.target === modal) { modal.remove(); resolve(false); }
+    };
+  });
+}
+
+async function downloadSubtitles(withTranslation = false) {
+  if (!semanticGroups?.length) return;
+
+  // 正在下载时点击 = 取消
+  if (isDownloading) {
+    downloadAbortController?.abort();
+    return;
+  }
+
+  downloadAbortController = new AbortController();
+  const signal = downloadAbortController.signal;
+
+  function checkAborted() {
+    if (signal.aborted) throw new Error('ABORTED');
+  }
+
+  const activeCfg = window.currentConfig?.activeConfig || {};
+  const engine = activeCfg.engine ||
+    window.currentConfig?.selectedEngine ||
+    getRuntimeDefaultEngine();
+  const lang = window.currentConfig?.targetLanguage ||
+    window.currentTargetL ||
+    navigator.language || 'en';
+  const uiLang = window.uiLanguage || lang;
+  const isAI = AI_LLM_WHITE_LIST.includes(engine);
+
+  let translationMap = null;
+
+  if (withTranslation) {
+    translationMap = {};
+    const missing = [];
+    let hitCount = 0;
+
+    semanticGroups.forEach((g, i) => {
+      const key = getCacheKey(g.text, engine, lang);
+      const cached = fastMemoryCache.get(key);
+      if (cached?.basic) {
+        translationMap[i] = cached.basic;
+        hitCount++;
+      } else {
+        const fingerprint = key.substring(key.indexOf('_', 3));
+        const aiHit = AI_LLM_WHITE_LIST.find(ai =>
+          fastMemoryCache.has(`tr_${ai}${fingerprint}`)
+        );
+        if (aiHit) {
+          const fallback = fastMemoryCache.get(`tr_${aiHit}${fingerprint}`);
+          if (fallback?.basic) {
+            translationMap[i] = fallback.basic;
+            fastMemoryCache.set(key, fallback);
+            hitCount++;
+            return;
+          }
+        }
+        missing.push(i);
+      }
+    });
+
+    logger.log(`[Download] 缓存命中 ${hitCount}/${semanticGroups.length}，缺失 ${missing.length} 句`);
+
+    const total = semanticGroups.length;
+    const cacheRate = Math.round((hitCount / total) * 100);
+
+    if (isAI && missing.length > 10) {
+      const msg = (cacheRate < 30
+        ? t('dlRateLow', uiLang)
+        : t('dlRatePartial', uiLang)
+      ).replace('{rate}', cacheRate)
+        .replace('{missing}', missing.length);
+
+      const confirmed = await showMiraConfirm(msg);
+      if (!confirmed) return;
+
+      const content = buildSRT(semanticGroups, translationMap);
+      triggerDownload(content, `[Mira] ${getVideoTitle()}_bilingual_${cacheRate}pct.txt`);
+      return;
+    }
+
+    if (missing.length > 0) {
+      isDownloading = true;
+
+      const btn = document.getElementById('kt-download-btn');
+
+      function setBtnCancel() {
+        if (!btn) return;
+        btn._savedText = `⏳ 0/${total}`;
+        btn.textContent = btn._savedText;
+        btn.style.background = 'rgba(239,68,68,0.15)';
+        btn.style.borderColor = 'rgba(239,68,68,0.4)';
+        btn.style.color = '#f87171';
+        btn.disabled = false;
+
+        btn.onmouseenter = () => {
+          if (!isDownloading) return;
+          btn._savedText = btn._savedText || btn.textContent;
+          btn.textContent = '✕ Cancel';
+          btn.style.background = 'rgba(239,68,68,0.35)';
+        };
+        btn.onmouseleave = () => {
+          if (!isDownloading) return;
+          btn.textContent = btn._savedText || btn.textContent;
+          btn.style.background = 'rgba(239,68,68,0.15)';
+        };
+      }
+
+      function resetBtn() {
+        if (!btn) return;
+        btn.textContent = `⬇ ${t('bilingual', uiLang)} TXT`;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.disabled = false;
+        btn.onmouseenter = null;
+        btn.onmouseleave = null;
+        btn._savedText = null;
+      }
+
+      function updateProgress(extra = '') {
+        if (signal.aborted || !btn) return;
+        const done = Object.keys(translationMap).length;
+        const text = extra || `⏳ ${done}/${total}`;
+        btn._savedText = text;
+        // hover 中不打断显示
+        if (btn.textContent !== '✕ Cancel') btn.textContent = text;
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, ms);
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer);
+            reject(new Error('ABORTED'));
+          });
+        });
+      }
+
+      async function translateChunkWithRetry(chunk, retryCount = 0) {
+        checkAborted();
+        const MAX_RETRIES = 4;
+        const BASE_DELAY = 3000;
+        const payload = chunk
+          .map(item => `⟦KT_${item.absoluteIndex}⟧ ${item.text}`)
+          .join('\n');
+        try {
+          const res = await getDetailedTranslation(payload);
+          checkAborted();
+          if (res?.basic) {
+            const split = splitBatchTranslation(res.basic);
+            chunk.forEach(item => {
+              if (split[item.absoluteIndex]) {
+                translationMap[item.absoluteIndex] = split[item.absoluteIndex];
+                fastMemoryCache.set(item.key, { basic: split[item.absoluteIndex] });
+              }
+            });
+            updateProgress();
+          }
+        } catch (e) {
+          if (e.message === 'ABORTED') throw e;
+          const isRateLimit =
+            e?.status === 429 ||
+            e?.message?.includes('429') ||
+            e?.message?.toLowerCase().includes('rate limit') ||
+            e?.message?.toLowerCase().includes('too many');
+          if (isRateLimit && retryCount < MAX_RETRIES) {
+            const delay = BASE_DELAY * Math.pow(2, retryCount);
+            logger.warn(`Rate limited, retry ${retryCount + 1}/${MAX_RETRIES} after ${delay}ms`);
+            updateProgress(`⏸ ${Math.round(delay / 1000)}s`);
+            await sleep(delay);
+            updateProgress();
+            return translateChunkWithRetry(chunk, retryCount + 1);
+          }
+          logger.warn('Chunk failed after retries:', e);
+        }
+      }
+
+      const CHUNK_SIZE = isAI ? 3 : 5;
+      const CHUNK_INTERVAL = isAI ? 2000 : 800;
+
+      const chunks = [];
+      for (let i = 0; i < missing.length; i += CHUNK_SIZE) {
+        chunks.push(
+          missing.slice(i, i + CHUNK_SIZE).map(idx => ({
+            absoluteIndex: idx,
+            text: semanticGroups[idx].text,
+            key: getCacheKey(semanticGroups[idx].text, engine, lang)
+          }))
+        );
+      }
+
+      setBtnCancel();
+
+      try {
+        for (let i = 0; i < chunks.length; i++) {
+          await translateChunkWithRetry(chunks[i]);
+          if (i < chunks.length - 1) await sleep(CHUNK_INTERVAL);
+        }
+        await fillMissingTranslations(translationMap, engine, lang, isAI, signal);
+      } catch (e) {
+        if (e.message === 'ABORTED') {
+          logger.log('[Download] 用户取消下载');
+          isDownloading = false;
+          downloadAbortController = null;
+          resetBtn();
+          return;
+        }
+      }
+
+      isDownloading = false;
+      downloadAbortController = null;
+      resetBtn();
+    }
+  }
+
+  const content = buildSRT(semanticGroups, translationMap);
+  const filename = `[Mira] ${getVideoTitle()}${withTranslation ? '_bilingual' : ''}.txt`;
+  triggerDownload(content, filename);
+}
+
+function triggerDownload(content, filename) {
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function injectDownloadButton() {
+  if (document.getElementById('kt-subtitle-download')) return;
+  // 挂载到 YT 右下角工具栏区域
+  const target = document.querySelector('.ytp-right-controls');
+  if (!target) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'kt-subtitle-download';
+  wrapper.style.cssText = `
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-right: 8px; margin-left: 12px; opacity: 0;
+    animation: ktFadeIn 0.3s ease forwards;
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ktFadeIn { to { opacity: 1; } }
+    .kt-dl-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white; border-radius: 6px;
+      padding: 3px 10px; font-size: 13px;
+      cursor: pointer; transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .kt-dl-btn:hover { background: rgba(255,255,255,0.25); }
+  `;
+  document.head.appendChild(style);
+
+  const btnOriginal = document.createElement('button');
+  btnOriginal.className = 'kt-dl-btn';
+  btnOriginal.textContent = '⬇ TXT';
+  btnOriginal.title = t('dlOriginal', window.uiLanguage);//下载原文字幕
+  btnOriginal.onclick = () => downloadSubtitles(false);
+
+  const btnBilingual = document.createElement('button');
+  btnBilingual.id = 'kt-download-btn';
+  btnBilingual.className = 'kt-dl-btn';
+  btnBilingual.textContent = `⬇ ${t('bilingual', window.uiLanguage)} TXT`;//双语
+  btnBilingual.title = t('dlBilingual', window.uiLanguage);//下载双语字幕（含翻译）
+  btnBilingual.onclick = () => downloadSubtitles(true);
+
+  wrapper.appendChild(btnOriginal);
+  wrapper.appendChild(btnBilingual);
+  target.prepend(wrapper);
+}
+
+function removeDownloadButton() {
+  document.getElementById('kt-subtitle-download')?.remove();
+}
+//字幕下载功能结束--------
+
 window.addEventListener('KT_DATA_READY', (e) => {
   fullSubtitleData = e.detail;
   if (typeof fastMemoryCache !== 'undefined') fastMemoryCache.clear();
@@ -4548,6 +5036,10 @@ window.addEventListener('KT_DATA_READY', (e) => {
       batchPrefetch(0);
     }, 200);
   }
+  injectDownloadButton();
+  const dlBtn = document.getElementById('kt-subtitle-download');
+  if (dlBtn) dlBtn.style.display =
+    (typeof isYTEnabled === 'undefined' || isYTEnabled) ? 'inline-flex' : 'none';
 });
 (function initVideoResetListener() {
   const video = document.querySelector('video');
@@ -4572,6 +5064,7 @@ window.addEventListener('KT_DATA_READY', (e) => {
     if (oEl) oEl.innerHTML = '';
     if (tEl) tEl.innerText = '';
     if (tEl) tEl.classList.remove('kt-loading');
+    removeDownloadButton();
   });
 })();
 
@@ -4743,7 +5236,12 @@ if (!document.getElementById('mira-global-style')) {
         color: #94a3b8 !important;     
         text-shadow: none !important;  
         font-size: 20px !important;   
-    }
+        }
+        #kt-yt-box.kt-settings-open {
+        z-index: 100 !important;
+        opacity: 0.25 !important;
+        transition: opacity 0.2s ease;
+       }
     `;
   document.head.appendChild(style);
 }
@@ -4765,7 +5263,9 @@ function splitBatchTranslation(translatedText) {
   }
   return map;
 }
+
 async function batchPrefetch(startIndex) {
+  if (isDownloading) return;
   const now = Date.now();
   if (now - lastBatchTime < BATCH_GAP) return;
   lastBatchTime = now;
@@ -4775,7 +5275,7 @@ async function batchPrefetch(startIndex) {
   if (!slice.length) return;
   const activeCfg = window.currentConfig?.activeConfig || {};
   const engine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
-  let lang = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
+  let lang = getCurrentLang();
   lang = lang.replace('_', '-').toLowerCase();
   const isTraditional = !AI_LLM_WHITE_LIST.includes(engine);
   const itemsToTranslate = [];
@@ -4886,7 +5386,7 @@ function syncSubtitleDisplay() {
     const oEl = document.getElementById('yt-o');
     const activeCfg = window.currentConfig?.activeConfig || {};
     const currentEngine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
-    const currentTargetL = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
+    const currentTargetL = getCurrentLang();
     const cacheKey = getCacheKey(group.text, currentEngine, currentTargetL);
     const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
     const isBing = currentEngine === 'bing';
@@ -5069,6 +5569,29 @@ function initSubtitleAvoidance() {
     });
   });
 }
+function initSettingsAvoidance() {
+  const player = document.querySelector('.html5-video-player');
+  if (!player) return;
+
+  function checkSettingsOpen() {
+    const settingsMenu = document.querySelector('.ytp-popup.ytp-settings-menu');
+    const box = document.getElementById('kt-yt-box');
+    if (!box) return;
+
+    const isOpen = settingsMenu && settingsMenu.offsetHeight > 0;
+    box.classList.toggle('kt-settings-open', isOpen);
+  }
+
+  // 同时监听 style 和 class 变化
+  new MutationObserver(checkSettingsOpen).observe(player, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class'],
+    childList: true
+  });
+}
+
+setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 function renderWords(text, container) {
   if (!container) return;
@@ -5147,92 +5670,101 @@ async function handleWordMouseEnter(e, word) {
   e.target.style.borderRadius = '4px';
   const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」『』【】…—～・]/g, "").trim();
   if (!cleanWord || cleanWord.length === 0) return;
-
-  // 纯数字
   if (/^\d+$/.test(cleanWord)) return;
-
-  // 单个字符（标点、符号、单独数字）
   if (/^[\p{P}\p{S}]$/u.test(cleanWord)) return;
-
-  // 纯空白
   if (/^\s+$/.test(cleanWord)) return;
-
-  // 单个英文字母 
   if (/^[a-zA-Z]$/.test(cleanWord)) return;
-
-  // 纯符号组合 
   if (/^[\p{P}\p{S}\s]+$/u.test(cleanWord)) return;
 
   const [entry, storage] = await Promise.all([
     idb.vocabulary.get(cleanWord),
     safeGetStorage(['targetLanguage'])
   ]);
-  const currentLang = storage?.targetLanguage || navigator.language || 'zh-CN';
+  const currentLang = storage?.targetLanguage || navigator.language || 'en';
   const isCollected = !!(entry && entry.deleted === false);
+
   let tooltip = document.getElementById('kt-word-tooltip');
   if (!tooltip) {
     tooltip = document.createElement('div');
     tooltip.id = 'kt-word-tooltip';
     tooltip.style.cssText = `
-    position: fixed; z-index: 2147483647; background: #1e293b !important; 
-    color: white !important; padding: 10px 14px; border-radius: 8px; 
-    font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    pointer-events: none; min-width: 160px; max-width: 320px; width: fit-content;
-    line-height: 1.5; display: none; flex-direction: column;
-    box-sizing: border-box;
-    transition: top 0.15s ease-out;
-    border: 1px solid #334155;
-`;
+      position: fixed; z-index: 2147483647; background: #1e293b !important;
+      color: white !important; padding: 10px 14px; border-radius: 8px;
+      font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      pointer-events: none; min-width: 160px; max-width: 260px; width: fit-content;
+      line-height: 1.5; display: none; flex-direction: column;
+      box-sizing: border-box; transition: top 0.15s ease-out;
+      border: 1px solid #334155;
+    `;
     const moviePlayer = document.querySelector('.html5-video-player') || document.body;
     moviePlayer.appendChild(tooltip);
   }
+
   tooltip.style.border = isCollected ? '2px solid #facc15' : '1px solid #334155';
   const tipText = isCollected ? t('alreadyAddedFeedback', currentLang) : t('hintAddAction', currentLang);
   const tipColor = isCollected ? '#facc15' : '#94a3b8';
   tooltip.innerHTML = `
-        <div id="kt-word-def" data-status="loading" style="color:#94a3b8">Loading...</div>
-        <div id="kt-word-tip" style="font-size: 11px; color: ${tipColor}; border-top: 1px solid #334155; padding-top: 4px; margin-top: 4px; white-space: normal; word-break: break-word;">
-            ${tipText}
-        </div>
-    `;
+    <div id="kt-word-def" data-status="loading" style="color:#94a3b8">Loading...</div>
+    <div id="kt-word-tip" style="font-size: 11px; color: ${tipColor}; border-top: 1px solid #334155; padding-top: 4px; margin-top: 4px; white-space: normal; word-break: break-word;">
+      ${tipText}
+    </div>
+  `;
   tooltip.style.display = 'flex';
   tooltip.style.visibility = 'visible';
   repositionTooltip(tooltip, e.target);
+
   try {
     const res = await getDetailedTranslation(cleanWord, false, currentLang, { lightweight: true });
     const defEl = tooltip.querySelector('#kt-word-def');
     if (res && defEl) {
-      const phoneticStr = res.phonetic ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-left: 8px;">[${res.phonetic}]</span>` : '';
+      const phoneticStr = res.phonetic
+        ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; width: 100%;">[${res.phonetic}]</span>`
+        : '';
+
       let dictHtml = '';
       if (res.dictData && res.dictData.length > 0) {
         dictHtml = res.dictData.map((i, index) => {
-          const meanings = Array.isArray(i.meanings) ? i.meanings : [i.meanings || ""];
-          const firstMeaning = meanings[0] || "";
+          const meaning = typeof i.definition === 'string' && i.definition
+            ? i.definition
+            : Array.isArray(i.definition)
+              ? i.definition.join(', ')
+              : Array.isArray(i.meanings)
+                ? i.meanings.join(', ')
+                : typeof i.meanings === 'string'
+                  ? i.meanings
+                  : '';
+
+          if (!meaning) return '';
+
           const localizedPos = localizePos(i.pos, currentLang);
-          const maxH = index === 0 ? '5.6em' : '1.4em'; // 第一个词性显示4行，其他1行
+          // 第一条显示3行，其余2行
+          const maxH = index === 0 ? '4.2em' : '2.8em';
           return `
-    <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
-        <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">${localizedPos}</b>
-        <div style="position:relative; flex:1; min-width:0;">
-            <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block; max-height:2.8em; overflow:hidden; white-space:normal; word-break:break-word;">${firstMeaning}</span>
-            <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em; background:linear-gradient(to right, transparent, #1e293b);"></div>
-        </div>
-    </div>
-`;
-        }).join('');
+            <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
+              <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">${localizedPos}</b>
+              <div style="position:relative; flex:1; min-width:0;">
+                <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block;
+                  max-height:${maxH}; overflow:hidden; white-space:normal; word-break:break-word;">${meaning}</span>
+                <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em;
+                  background:linear-gradient(to right, transparent, #1e293b);"></div>
+              </div>
+            </div>
+          `;
+        }).filter(Boolean).join('');
       } else {
         dictHtml = `<div style="color: #e2e8f0; font-size: 13px; margin-top: 4px;">${res.basic}</div>`;
       }
+
       defEl.innerHTML = `
-    <div style="display: flex; align-items: baseline; gap: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px;">
+      <div style="display: flex; align-items: baseline; gap: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px; flex-wrap: wrap;">
         <span style="font-size: 16px; font-weight: 700; color: #ffffff;">${cleanWord}</span>
+        <span style="font-size: 18px; color: #38bdf8; margin-left: 4px;">${res.basic}</span>
         ${phoneticStr}
-        <span style="font-size: 13px; color: #38bdf8; margin-left: 4px;">${res.basic}</span>
-    </div>
-    <div style="width: 100%;">
+      </div>
+      <div style="width: 100%;">
         ${dictHtml}
-    </div>
-`;
+      </div>
+    `;
       defEl.setAttribute('data-status', 'success');
       repositionTooltip(tooltip, e.target);
     }
@@ -5272,16 +5804,28 @@ function repositionTooltip(tipEl, targetEl) {
   const realHeight = tipEl.offsetHeight || 0;
   const realWidth = tipEl.offsetWidth || 0;
   const spacing = 10;
+
+  // 用播放器边界而不是 window 宽度
+  const player = document.querySelector('.html5-video-player');
+  const playerRect = player ? player.getBoundingClientRect() : null;
+  const rightBoundary = playerRect
+    ? Math.min(playerRect.right - 10, window.innerWidth - 10)
+    : window.innerWidth - 10;
+  const leftBoundary = playerRect ? playerRect.left + 10 : 10;
+
+  // 垂直：优先显示在单词上方，不够则显示下方
   let topPos = rect.top - realHeight - spacing;
   if (topPos < 10) {
     topPos = rect.bottom + spacing;
   }
+
+  // 水平：优先左对齐单词，超出播放器右边界则向左推
   let leftPos = rect.left;
-  const viewportWidth = window.innerWidth;
-  if (leftPos + realWidth > viewportWidth - 10) {
-    leftPos = viewportWidth - realWidth - 10;
+  if (leftPos + realWidth > rightBoundary) {
+    leftPos = rightBoundary - realWidth;
   }
-  if (leftPos < 10) leftPos = 10;
+  if (leftPos < leftBoundary) leftPos = leftBoundary;
+
   tipEl.style.left = `${leftPos}px`;
   tipEl.style.top = `${topPos}px`;
   tipEl.style.visibility = 'visible';
@@ -5293,7 +5837,7 @@ async function handleWordDblClick(e, word) {
   const wordLower = cleanWord.toLowerCase();
   let fullTranslation = null;
   const storage = await safeGetStorage(['targetLanguage']);
-  const currentLang = storage?.targetLanguage || navigator.language || 'zh-CN';
+  const currentLang = storage?.targetLanguage || navigator.language || 'en';
   const res = await getDetailedTranslation(cleanWord, false, currentLang);
   if (res && !res.isError) {
     fullTranslation = {
@@ -5409,3 +5953,4 @@ function closeTooltipAndResume() {
     }
   }
 }
+

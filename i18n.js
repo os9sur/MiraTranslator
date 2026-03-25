@@ -1193,12 +1193,12 @@ self.i18nStyleData = {
   },
   "ja": {
     pinUnpin: "固定 / 固定解除",
-    instantTranslation: "クイック翻訳", 
+    instantTranslation: "クイック翻訳",
     inputAndEnter: "入力してEnter...↵",
     selectEngine: "翻訳サービスの選択",
-    styleCustomization: "翻訳表示の設定", 
+    styleCustomization: "翻訳表示の設定",
     engineConfig: "翻訳サービスの選択",
-    stylePreview: "プレビュー", 
+    stylePreview: "プレビュー",
     translationExampleWeb: "光陰矢のごとし",
     translationExampleYTOrigin: "You matter!",
     translationExampleYTTrans: "あなたは大切です！",
@@ -1207,16 +1207,16 @@ self.i18nStyleData = {
     borderStyle: "枠線のスタイル",
     quoteStyle: "引用スタイル",
     solidBorder: "実線",
-    dashedBorder: "破線", 
+    dashedBorder: "破線",
     noBorder: "枠線なし",
     dashedUnderline: "破線の下線",
     solidUnderline: "実線の下線",
-    dottedUnderline: "点線の下线", 
+    dottedUnderline: "点線の下线",
     wavyUnderline: "波線の下線",
     lightHighlight: "ハイライト",
     markerLine: "マーカー",
     paperShadow: "シャドウ",
-    italicText: "斜体", 
+    italicText: "斜体",
     boldText: "太字",
     translucentDim: "ブラックベール",
     topDivider: "区切り線",
@@ -1231,12 +1231,12 @@ self.i18nStyleData = {
   },
   "ko": {
     pinUnpin: "고정 / 해제",
-    instantTranslation: "빠른 번역", 
+    instantTranslation: "빠른 번역",
     inputAndEnter: "입력하고 Enter...↵",
     styleCustomization: "번역 스타일 설정",
     engineConfig: "번역 서비스 선택",
     stylePreview: "미리보기",
-    translationExampleWeb: "시간이 참 빠르네요", 
+    translationExampleWeb: "시간이 참 빠르네요",
     translationExampleYTOrigin: "You matter!",
     translationExampleYTTrans: "당신은 소중합니다!",
     textColorPalette: "텍스트 색상 / 팔레트",
@@ -1254,7 +1254,7 @@ self.i18nStyleData = {
     markerLine: "마커 라인",
     paperShadow: "종이 그림자",
     italicText: "이탤릭",
-    boldText: "굵게", 
+    boldText: "굵게",
     translucentDim: "검은 베일",
     topDivider: "상단 구분선",
     borderColor: "테두리 색상",
@@ -3164,3 +3164,121 @@ self.i18nAttach4 = {
     changeSetting: "قابل تغییر در تنظیمات."
   }
 };
+self.i18nAttach5 = {
+  "zh-CN": {
+    dlOriginal: "下载原文字幕",
+    dlBilingual: "下载双语字幕（含翻译）",
+    bilingual: "双语"
+  },
+  "zh-TW": {
+    dlOriginal: "下載原文字幕",
+    dlBilingual: "下載雙語字幕（含翻譯）",
+    bilingual: "雙語"
+  },
+  "en": {
+    dlOriginal: "Download Original Subtitles",
+    dlBilingual: "Download Bilingual (with Translation)",
+    bilingual: "Bilingual"
+  },
+  "ja": {
+    dlOriginal: "原文字幕をダウンロード",
+    dlBilingual: "2ヶ国語字幕をダウンロード（翻訳あり）",
+    bilingual: "2ヶ国語"
+  },
+  "ko": {
+    dlOriginal: "원본 자막 다운로드",
+    dlBilingual: "이중 언어 자막 다운로드 (번역 포함)",
+    bilingual: "이중 언어"
+  },
+  "es": {
+    dlOriginal: "Descargar subtítulos originales",
+    dlBilingual: "Descargar bilingües (con traducción)",
+    bilingual: "Bilingüe"
+  },
+  "fr": {
+    dlOriginal: "Télécharger les sous-titres originaux",
+    dlBilingual: "Télécharger bilingue (avec traduction)",
+    bilingual: "Bilingue"
+  },
+  "de": {
+    dlOriginal: "Original-Untertitel herunterladen",
+    dlBilingual: "Bilingual herunterladen (mit Übersetzung)",
+    bilingual: "Bilingual"
+  },
+  "ru": {
+    dlOriginal: "Скачать оригинальные субтитры",
+    dlBilingual: "Скачать двуязычные (с переводом)",
+    bilingual: "Двуязычный"
+  },
+  "pt": {
+    dlOriginal: "Baixar legendas originais",
+    dlBilingual: "Baixar bilíngue (com tradução)",
+    bilingual: "Bilíngue"
+  },
+  "it": {
+    dlOriginal: "Scarica sottotitoli originali",
+    dlBilingual: "Scarica bilingue (con traduzione)",
+    bilingual: "Bilingue"
+  },
+  "vi": {
+    dlOriginal: "Tải phụ đề gốc",
+    dlBilingual: "Tải phụ đề song ngữ (có bản dịch)",
+    bilingual: "Song ngữ"
+  },
+  "th": {
+    dlOriginal: "ดาวน์โหลดคำบรรยายต้นฉบับ",
+    dlBilingual: "ดาวน์โหลดสองภาษา (พร้อมคำแปล)",
+    bilingual: "สองภาษา"
+  },
+  "ar": {
+    dlOriginal: "تحميل الترجمة الأصلية",
+    dlBilingual: "تحميل ثنائية اللغة (مع الترجمة)",
+    bilingual: "ثنائية اللغة"
+  },
+  "fa": {
+    dlOriginal: "دانلود زیرنویس اصلی",
+    dlBilingual: "دانلود دو زبانه (همراه با ترجمه)",
+    bilingual: "دو زبانه"
+  },
+  "tr": {
+    dlOriginal: "Orijinal altyazıları indir",
+    dlBilingual: "İki dilli indir (çeviri dahil)",
+    bilingual: "İki dilli"
+  }
+};
+
+self.i18nAttach6 = {
+  'zh-CN': {
+    // 新增下载相关
+    'dlRateLow': '当前仅翻译了 {rate}% 的字幕。\n\nAI 翻译有每分钟请求限制，建议先观看视频让字幕自动翻译，看完后再下载效果最佳。\n\n是否下载已有的 {rate}% 部分？',
+    'dlRatePartial': '已翻译 {rate}%，还有 {missing} 句未翻译。\n\nAI 翻译有速率限制，建议继续观看视频后再下载。\n\n是否下载已有部分？',
+  },
+  'zh-TW': {
+    'dlRateLow': '目前僅翻譯了 {rate}% 的字幕。\n\nAI 翻譯有每分鐘請求限制，建議先觀看影片讓字幕自動翻譯，看完後再下載效果最佳。\n\n是否下載已有的 {rate}% 部分？',
+    'dlRatePartial': '已翻譯 {rate}%，還有 {missing} 句未翻譯。\n\nAI 翻譯有速率限制，建議繼續觀看影片後再下載。\n\n是否下載已有部分？',
+  },
+  'en': {
+    'dlRateLow': 'Only {rate}% of subtitles translated.\n\nAI translation has per-minute rate limits. Watch the video first to let subtitles auto-translate, then download for best results.\n\nDownload available {rate}% now?',
+    'dlRatePartial': '{rate}% translated, {missing} segments missing.\n\nAI translation has rate limits. Consider watching more before downloading.\n\nDownload available portion now?',
+  },
+  'ja': {
+    'dlRateLow': '字幕の {rate}% のみ翻訳済みです。\n\nAI翻訳には毎分のリクエスト制限があります。動画を視聴してから再ダウンロードをお勧めします。\n\n現在の {rate}% をダウンロードしますか？',
+    'dlRatePartial': '{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\nAI翻訳にはレート制限があります。動画をもう少し視聴してからダウンロードをお勧めします。\n\n現在の部分をダウンロードしますか？',
+  },
+  'ko': {
+    'dlRateLow': '자막의 {rate}%만 번역되었습니다.\n\nAI 번역은 분당 요청 제한이 있습니다. 동영상을 시청하여 자막을 자동 번역한 후 다운로드하는 것을 권장합니다.\n\n현재 {rate}%를 다운로드하시겠습니까?',
+    'dlRatePartial': '{rate}% 번역됨, {missing}개 미번역.\n\nAI 번역은 속도 제한이 있습니다. 동영상을 더 시청한 후 다운로드하는 것을 권장합니다.\n\n현재 부분을 다운로드하시겠습니까?',
+  },
+  'fr': {
+    'dlRateLow': 'Seulement {rate}% des sous-titres traduits.\n\nLa traduction IA a des limites par minute. Regardez la vidéo pour laisser les sous-titres se traduire automatiquement, puis téléchargez.\n\nTélécharger les {rate}% disponibles ?',
+    'dlRatePartial': '{rate}% traduit, {missing} segments manquants.\n\nLa traduction IA a des limites de débit. Continuez à regarder avant de télécharger.\n\nTélécharger la partie disponible ?',
+  },
+  'de': {
+    'dlRateLow': 'Nur {rate}% der Untertitel übersetzt.\n\nKI-Übersetzung hat minutenbasierte Anfragelimits. Schauen Sie das Video zuerst, damit die Untertitel automatisch übersetzt werden.\n\nVerfügbare {rate}% jetzt herunterladen?',
+    'dlRatePartial': '{rate}% übersetzt, {missing} Segmente fehlen.\n\nKI-Übersetzung hat Ratenlimits. Schauen Sie mehr vom Video, bevor Sie herunterladen.\n\nVerfügbaren Teil herunterladen?',
+  },
+  'es': {
+    'dlRateLow': 'Solo {rate}% de subtítulos traducidos.\n\nLa traducción IA tiene límites por minuto. Mira el video primero para que los subtítulos se traduzcan automáticamente.\n\n¿Descargar el {rate}% disponible?',
+    'dlRatePartial': '{rate}% traducido, {missing} segmentos sin traducir.\n\nLa traducción IA tiene límites de velocidad. Considera ver más antes de descargar.\n\n¿Descargar la parte disponible?',
+  }
+}
