@@ -5,7 +5,9 @@ window.browser = (function () {
     let isInspecting = false;
     let hoverOverlay = null;
     let lastHoveredElement = null;
-    function createOverlay() {
+    let hoverTooltip = null;
+
+    function createOverlay(lang) {
         if (hoverOverlay) return;
         hoverOverlay = document.createElement('div');
         hoverOverlay.id = "translate-helper-overlay";
@@ -22,7 +24,45 @@ window.browser = (function () {
             box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
         `;
         document.body.appendChild(hoverOverlay);
+
+        // 光标附近的提示框
+        hoverTooltip = document.createElement('div');
+        hoverTooltip.id = "translate-helper-tooltip";
+        hoverTooltip.style.cssText = `
+            position: fixed !important;
+            pointer-events: none !important;
+            z-index: 2147483647 !important;
+            display: none;
+            background: rgba(15, 23, 42, 0.92) !important;
+            color: #f1f5f9 !important;
+            font-size: 12px !important;
+            line-height: 1.5 !important;
+            padding: 6px 10px !important;
+            border-radius: 6px !important;
+            white-space: pre !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+            border: 1px solid rgba(56, 189, 248, 0.5) !important;
+            width: max-content !important;
+            max-width: 280px !important;
+        `;
+        hoverTooltip.textContent = t('smartPicker', lang);
+        document.body.appendChild(hoverTooltip);
     }
+    document.addEventListener('mousemove', (e) => {
+        if (!isInspecting || !hoverTooltip) return;
+        const offsetX = 14;
+        const offsetY = 14;
+        let x = e.clientX + offsetX;
+        let y = e.clientY + offsetY;
+        // 防止超出右边/底部视口
+        const tw = hoverTooltip.offsetWidth || 160;
+        const th = hoverTooltip.offsetHeight || 48;
+        if (x + tw > window.innerWidth - 8) x = e.clientX - tw - offsetX;
+        if (y + th > window.innerHeight - 8) y = e.clientY - th - offsetY;
+        hoverTooltip.style.left = x + "px";
+        hoverTooltip.style.top = y + "px";
+    }, true);
+
     function syncOverlayPosition() {
         if (!isInspecting || !lastHoveredElement || !hoverOverlay) return;
         const rect = lastHoveredElement.getBoundingClientRect();
@@ -31,18 +71,21 @@ window.browser = (function () {
         hoverOverlay.style.width = rect.width + "px";
         hoverOverlay.style.height = rect.height + "px";
     }
-    window.startInspector = function () {
+    window.startInspector = function (lang) {
         logger.log("拾取器激活...");
         isInspecting = true;
         createOverlay();
+        if (hoverTooltip) hoverTooltip.textContent = t('smartPicker', lang);
         hoverOverlay.style.display = "block";
         hoverOverlay.style.borderColor = "#38bdf8";
         document.body.style.cursor = "crosshair";
+        hoverTooltip.style.display = "block";
         window.addEventListener('scroll', syncOverlayPosition, { passive: true });
     };
     function stopInspecting() {
         isInspecting = false;
         if (hoverOverlay) hoverOverlay.style.display = "none";
+        if (hoverTooltip) hoverTooltip.style.display = "none";
         document.body.style.cursor = "default";
         window.removeEventListener('scroll', syncOverlayPosition);
         lastHoveredElement = null;
@@ -162,7 +205,7 @@ window.browser = (function () {
         try {
             if (msg.action === "START_INSPECT") {
                 if (typeof window.startInspector === 'function') {
-                    window.startInspector();
+                    window.startInspector(msg.lang);
                     sendResponse({ status: "started" });
                 } else {
                     logger.warn("[Mira] startInspector is not defined. Script might be corrupted.");

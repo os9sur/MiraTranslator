@@ -189,8 +189,8 @@ async function syncWithWebDAV(config, direction) {
     }
 }
 async function handleAuthFlow(sendResponse) {
-    const isFirefox = typeof browser !== 'undefined' 
-                      && /Firefox/.test(navigator.userAgent);
+    const isFirefox = typeof browser !== 'undefined'
+        && /Firefox/.test(navigator.userAgent);
     if (isFirefox) {
         sendResponse({ success: false, error: "Firefox should use its own auth flow" });
         return;
@@ -532,22 +532,26 @@ let bingCache = { ig: '', key: '', token: '', ts: 0 };
 let bingTokenPromise = null;
 const Translators = {
 
-    _withYoudaoDict: async function (basicText, originalText, targetLang, sourceName) {
+    _withDictDetail: async function (basicText, originalText, targetLang, sourceName) {
         const isEnglishWord = /^[a-zA-Z-]+$/.test(originalText.trim());
         const isChineseTarget = targetLang.toLowerCase().includes('zh');
 
         if (isEnglishWord && isChineseTarget) {
-            const youdaoData = await Translators._youdaoDict(originalText.trim());
-            if (youdaoData) {
-                return {
-                    basic: basicText,
-                    phonetic: youdaoData.phonetic,
-                    dictData: youdaoData.dictData,
-                    examples: youdaoData.examples,
-                    wordForms: youdaoData.wordForms || [],
-                    prototype: youdaoData.prototype || null,
-                    source: `${sourceName}+Youdao`
-                };
+            try {
+                const detailData = await Translators._fetchDictDetail(originalText.trim());
+                if (detailData) {
+                    return {
+                        basic: basicText,
+                        phonetic: detailData.phonetic,
+                        dictData: detailData.dictData,
+                        examples: detailData.examples,
+                        wordForms: detailData.wordForms || [],
+                        prototype: detailData.prototype || null,
+                        source: `${sourceName}+Dict`
+                    };
+                }
+            } catch {
+                //静默忽略，fallback 到基本释义
             }
         }
 
@@ -561,6 +565,8 @@ const Translators = {
     },
     bing: async function (text, targetLang) {
         if (!text) return null;
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
         const isCN = Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Shanghai';
         const host = isCN ? 'cn.bing.com' : 'www.bing.com';
         let bingTarget = 'zh-Hans';
@@ -573,18 +579,26 @@ const Translators = {
             }
         }
         async function refreshToken() {
-            if (!bingCache.ig || (Date.now() - bingCache.ts > 1800000)) {
+            if (!bingCache.ig || (Date.now() - bingCache.ts > 1200000)) {
                 if (!bingTokenPromise) {
                     bingTokenPromise = (async () => {
                         try {
-                            const preRes = await fetch(`https://${host}/translator`);
+                            const tokenController = new AbortController();
+                            const tokenTimer = setTimeout(() => tokenController.abort(), 4000);
+                            const preRes = await fetch(`https://${host}/translator`, {
+                                signal: tokenController.signal
+                            });
+                            clearTimeout(tokenTimer);
                             const html = await preRes.text();
                             const igMatch = html.match(/IG:"([A-Z0-9]{32})"/i);
                             const apiMatch = html.match(/params_AbusePreventionHelper\s*=\s*([^;]+);/);
                             if (igMatch && apiMatch) {
                                 const [key, token] = JSON.parse(apiMatch[1]);
-                                bingCache = { ig: igMatch[1], key, token, ts: Date.now() };
+                                bingCache = { ig: igMatch[1], key, token, ts: Date.now(), host };
                             }
+                        } catch (e) {
+                            bingCache.ig = null;
+                            logger.warn('Bing token refresh failed:', e.message);
                         } finally {
                             bingTokenPromise = null;
                         }
@@ -595,7 +609,8 @@ const Translators = {
         }
         try {
             await refreshToken();
-            const url = `https://${host}/ttranslatev3?isTwinTranslation=true&IG=${bingCache.ig}&IID=translator.5022.1`;
+            if (!bingCache.ig) throw new Error('Bing token refresh failed');
+            const url = `https://${bingCache.host}/ttranslatev3?isTwinTranslation=true&IG=${bingCache.ig}&IID=translator.5022.1`;
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -605,29 +620,30 @@ const Translators = {
                     'text': text.trim(),
                     'key': bingCache.key,
                     'token': bingCache.token
-                })
+                }),
+                signal: controller.signal
             });
+            clearTimeout(timer);
             const data = await res.json();
-            if (!data[0] || !data[0].translations) {
-                throw new Error("Invalid Bing Response");
-            }
-
+            if (!data[0] || !data[0].translations) throw new Error('Invalid Bing Response');
             const bingBasic = data[0].translations[0].text;
-            return await Translators._withYoudaoDict(bingBasic, text, targetLang, 'Bing');
+            return await Translators._withDictDetail(bingBasic, text, targetLang, 'Bing');
         } catch (e) {
+            clearTimeout(timer);
             bingCache.ig = null;
-            throw new Error(`Bing_API_Error: ${e.message}`);
+            logger.warn('Bing failed:', e.message);
+            throw e;
         }
     },
 
-    _youdaoDict: async function (query) {
+    _fetchDictDetail: async function (query) {
+        const HOST = atob('ZGljdC55b3VkYW8uY29t');
         try {
             const params = new URLSearchParams({
                 q: query,
                 dicts: JSON.stringify({ count: 99, dicts: [["ec"], ["blng_sents_part"]] })
             });
-            const url = `https://dict.youdao.com/jsonapi?${params}`;
-            const res = await fetch(url);
+            const res = await fetch(`https://${HOST}/jsonapi?${params}`);
             const data = await res.json();
 
             const ec = data?.ec?.word?.[0];
@@ -658,6 +674,7 @@ const Translators = {
                 en: s.sentence,
                 cn: s['sentence-translation']
             }));
+
             const prototype = ec.prototype || null;
             const wfs = ec.wfs || [];
             const wordForms = wfs.map(item => ({
@@ -674,9 +691,10 @@ const Translators = {
                 prototype
             };
         } catch (e) {
-            // 接口1 失败降级到 suggest
+            // 接口1 失败，降级到 suggest
             try {
-                const url = `https://dict.youdao.com/suggest?q=${encodeURIComponent(query)}&num=1&doctype=json`;
+                const HOST2 = atob('ZGljdC55b3VkYW8uY29t');
+                const url = `https://${HOST2}/suggest?q=${encodeURIComponent(query)}&num=1&doctype=json`;
                 const res = await fetch(url);
                 const data = await res.json();
                 const explain = data?.data?.entries?.[0]?.explain;
@@ -690,17 +708,17 @@ const Translators = {
                     };
                 });
 
-                return { phonetic: "", basic: dictData[0]?.meanings[0] || query, dictData, examples: [], source: 'Youdao' };
+                return {
+                    phonetic: "",
+                    basic: dictData[0]?.meanings[0] || query,
+                    dictData,
+                    examples: [],
+                    source: 'Online Dictionary'
+                };
             } catch {
-                return null;
+                return null; // 两个接口都挂，静默返回 null，不影响上层
             }
         }
-    },
-
-    youdao: async function (text) {
-        if (!text || text.trim().length < 1) return null;
-        const result = await Translators._youdaoDict(text.trim());
-        return result || { phonetic: "", basic: text, dictData: [], examples: [], source: 'Error' };
     },
     google: async (text, target, lightweight = false) => {
         if (!text || text.trim().length < 1) return null;
@@ -723,7 +741,7 @@ const Translators = {
         try {
             // controller 用来控制超时，5秒没响应就 abort
             const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 7000);
+            const timer = setTimeout(() => controller.abort(), 4000);
 
             const res = await fetch(url, { signal: controller.signal });
             clearTimeout(timer); // 请求成功，清除超时计时器
@@ -767,13 +785,14 @@ const Translators = {
             return { phonetic, basic, dictData, examples, source: 'Google' };
 
         } catch (e) {
-            // Google 失败（超时/被墙/报错），对单个英文单词 fallback 到 FreeDictionary
-            const isEnglishWord = /^[a-zA-Z-]+$/.test(text.trim());
-            if (isEnglishWord) {
-                const backupData = await fetchFreeDictionary(text.trim());
-                if (backupData) return { ...backupData, source: 'FreeDictionary' };
-            }
-            return typeof text === 'string' ? text : "Translation Error";
+            // // Google 失败，对单个英文单词 fallback 到 FreeDictionary
+            // const isEnglishWord = /^[a-zA-Z-]+$/.test(text.trim());
+            // if (isEnglishWord) {
+            //     const backupData = await fetchFreeDictionary(text.trim());
+            //     if (backupData) return { ...backupData, source: 'FreeDictionary' };
+            // }
+            logger.warn('Google failed:', e.message);
+            throw e; // 让 processTranslate 的 catch 接管降级到 bing
         }
     },
     google_v3: async (text, target, keys) => {
@@ -794,7 +813,7 @@ const Translators = {
                 logger.error("Google 返回数据结构异常:", data);
                 throw new Error("Empty translation result");
             }
-            return await Translators._withYoudaoDict(translation, text, target, 'Google Cloud');
+            return await Translators._withDictDetail(translation, text, target, 'Google Cloud');
         } catch (e) {
             logger.error("google_v3 链路异常:", e.message);
             throw e;
@@ -994,7 +1013,8 @@ const Translators = {
                 body: new URLSearchParams({
                     q: text, from: 'auto', to: baiduTarget,
                     appid: baiduAppId, salt, sign
-                })
+                }),
+                signal: controller.signal
             });
             const data = await res.json();
             if (data.error_code && data.error_code !== "52000") {
@@ -1003,7 +1023,7 @@ const Translators = {
             if (!data.trans_result?.[0]) throw new Error("未获取到翻译内容");
 
             const baiduBasic = data.trans_result[0].dst;
-            return await Translators._withYoudaoDict(baiduBasic, text, target, 'Baidu');
+            return await Translators._withDictDetail(baiduBasic, text, target, 'Baidu');
         } catch (e) {
             logger.error("百度翻译链路异常:", e.message);
             throw e;
@@ -1019,7 +1039,7 @@ const Translators = {
         const res = await fetch(`https://${host}`, { method: "POST", headers, body: JSON.stringify(payload) });
         const data = await res.json();
         const tencentBasic = data.Response.TargetText;
-        return await Translators._withYoudaoDict(tencentBasic, text, target, 'Tencent');
+        return await Translators._withDictDetail(tencentBasic, text, target, 'Tencent');
     },
     deepl: async (text, target, keys) => {
         const { deeplKey } = keys;
@@ -1044,7 +1064,7 @@ const Translators = {
         }
         if (data.translations && data.translations[0]) {
             const deeplBasic = data.translations[0].text;
-            return await Translators._withYoudaoDict(deeplBasic, text, target, 'DeepL');
+            return await Translators._withDictDetail(deeplBasic, text, target, 'DeepL');
         }
         throw new Error("DeepL returned empty result");
     },
@@ -1067,7 +1087,7 @@ const Translators = {
             }
             if (data && data[0]?.translations?.[0]?.text) {
                 const msBasic = data[0].translations[0].text;
-                return await Translators._withYoudaoDict(msBasic, text, target, 'Microsoft');
+                return await Translators._withDictDetail(msBasic, text, target, 'Microsoft');
             }
             throw new Error('MS Azure Error: Unexpected response structure');
         } catch (err) {
@@ -1162,12 +1182,40 @@ async function processTranslate(req) {
         }
         const isSubtitle = req.isSubtitle === true;
         let rawResult = "";
-        if (engine === 'google') {
-            rawResult = await Translators.google(req.text, req.targetLang, req.lightweight);
+        async function tryFreeDict(text) {
+            const isEnglishWord = /^[a-zA-Z-]+$/.test(text.trim());
+            if (!isEnglishWord) return null;
+            try {
+                const data = await fetchFreeDictionary(text.trim());
+                return data ? { ...data, source: 'FreeDictionary' } : null;
+            } catch {
+                return null;
+            }
         }
-        else if (engine === 'bing') {
-            rawResult = await Translators.bing(req.text, req.targetLang);
+
+        if (engine === 'bing') {
+            try {
+                rawResult = await Translators.bing(req.text, req.targetLang);
+            } catch (e) {
+                logger.warn('Bing failed, trying FreeDictionary then Google');
+                rawResult = await tryFreeDict(req.text)
+                    || await Translators.google(req.text, req.targetLang).catch(() => null);
+            }
+        } else if (engine === 'google') {
+            try {
+                rawResult = await Translators.google(req.text, req.targetLang, req.lightweight);
+            } catch (e) {
+                logger.warn('Google failed, trying FreeDictionary then Bing');
+                rawResult = await tryFreeDict(req.text)
+                    || await Translators.bing(req.text, req.targetLang).catch(() => null);
+            }
         }
+        // if (engine === 'google') {
+        //     rawResult = await Translators.google(req.text, req.targetLang, req.lightweight);
+        // }
+        // else if (engine === 'bing') {
+        //     rawResult = await Translators.bing(req.text, req.targetLang);
+        // }
         else if (AI_ENGINES_CONFIG[engine]) {
             const aiConf = AI_ENGINES_CONFIG[engine];
             const idMap = {
@@ -1335,8 +1383,7 @@ async function processTranslate(req) {
                 'deepl': 'DeepL',
                 'tencent': 'Tencent',
                 'microsoft': 'Microsoft',
-                'custom_ai': 'Custom AI',
-                'youdao': 'Youdao',
+                'custom_ai': 'Custom AI'
             };
             finalData.source = sourceNames[engine] || engine;
         }

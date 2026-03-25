@@ -36,12 +36,48 @@
   background-color: #334155;
   color: #ffffff;
 }
+
+.row-text {
+  display: flex;
+  width: 100%;
+  height: 32px; 
+  border-radius: 6px;
+  padding: 0 8px; 
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  box-sizing: border-box;
+}
+.row-text.disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.row-text > div:last-child {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; 
+  gap: 4px;
+  min-width: 60px; 
+  height: 100%;
+}
+.row-text:hover {
+  background: rgba(255, 255, 255, 0.05); 
+}
+.row-text label {
+  flex: 1;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
 .row {
   display: flex;
   width: 100%;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px !important;
+  /* margin-bottom: 6px !important; */
   min-height: 24px;
 }
 .row.disabled {
@@ -57,6 +93,7 @@
   word-break: break-all;
   line-height: 1.4;
 }
+
 .row select,
 .row .switch {
   flex-shrink: 0;
@@ -237,7 +274,7 @@ select:hover {
   background: rgba(56, 189, 248, 0.1);
   padding: 4px 10px;
   border-radius: 20px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
   border: 1px solid rgba(56, 189, 248, 0.2);
   transition:
     opacity 0.3s ease,
@@ -1235,6 +1272,8 @@ input:-ms-input-placeholder {
 }
 .advancedMenu {
   position: absolute;
+  min-width: 160px;
+  max-width: 200px;
   top: 45px;
   right: 10px;
   background: rgba(30, 35, 59, 0.92);
@@ -1246,7 +1285,6 @@ input:-ms-input-placeholder {
     0 8px 10px -6px rgba(0, 0, 0, 0.3);
   display: none;
   z-index: 130;
-  min-width: 175px;
   padding: 6px;
   animation: menuFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1631,8 +1669,76 @@ yt-attributed-string+.kt-paragraph-translation {
     100% { transform: scale(1); box-shadow: 0 0 10px #58a6ff; }
 }
 
-/* 按钮点击反馈 */
 #close-guide-btn:active {
     transform: scale(0.95);
     background: #2ea043;
+}
+
+/*  UI 设置容器 */
+.menu-ui-setting {
+  display: flex;
+  flex-direction: column; 
+  padding: 5px 8px 5px 8px;
+  gap: 6px;
+}
+
+.ui-select-tiny { 
+  width: 100%; 
+  max-width: 172px;  
+  /* 处理超长文本显示省略号 */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  background: #161b22;
+  color: #f0f6fc;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.ui-lang-label {
+  font-size: 11px;
+  color: #d5dbe2;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ui-select-tiny:hover {
+  border-color:#30363d;
+   /* #58a6ff; */
+}
+
+#targetLang, #uiLangSelect {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0d1117;
+  color: #f0f6fc;
+  border: 1px solid #30363d;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none; 
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: auto;
+}
+
+#targetLang:hover,
+#targetLang:focus {
+  outline: none;
+  border-color: #58a6ff; 
+  box-shadow: 
+    0 0 10px rgba(88, 166, 255, 0.5),  
+    0 0 35px rgba(88, 166, 255, 0.3); 
+  transition: box-shadow 0.2s ease-in-out;
+}
+#uiLangSelect:hover,
+#uiLangSelect:focus {
+  border-color: #09518b;
 }

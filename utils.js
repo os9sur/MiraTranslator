@@ -230,7 +230,7 @@ async function safeSendMessage(message) {
     }
   });
 }
-var isNoticeShowing = false;
+let isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
 
@@ -316,12 +316,12 @@ function showUpdateNotice() {
     isNoticeShowing = false;
   }
 }
-var i18nDict = {};
-var isSynced = false;
+let i18nDict = {};
+let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3','i18nAttach4'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -373,6 +373,28 @@ function applyI18n(forcedLang) {
     }
   });
 }
+
+const i18nAPI = typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n : null;
+let globalUiLang = i18nAPI
+  ? i18nAPI.getUILanguage().replace('_', '-')
+  : navigator.language.replace('_', '-');
+
+async function initUILanguage() {
+  const uiSelect = document.getElementById('uiLangSelect');
+  if (!uiSelect) return;
+
+  const storage = await safeGetStorage(['ui_language'], true);
+
+  if (storage?.ui_language) {
+    uiSelect.value = storage.ui_language;
+    globalUiLang = storage.ui_language;
+  } else {
+    uiSelect.value = globalUiLang;
+  }
+
+  applyI18n(globalUiLang);
+}
+
 function standardizeResult(raw, originalText) {
   const schema = {
     basic: "",
@@ -739,7 +761,6 @@ const TRADITIONAL_ENGINE_LIST = [
   'google',
   'deepl',
   'deeplx',
-  'youdao',
   'bing'
 ];
 
@@ -1017,7 +1038,7 @@ async function refreshIcon() {
   });
 }
 
-var MiraUtils = {
+const MiraUtils = {
   /**
    * 判断当前 URL 是否为受限页面
    */

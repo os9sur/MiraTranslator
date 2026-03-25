@@ -3,14 +3,14 @@ window.browser = (function () {
 })();
 let userConfig = null;
 document.addEventListener('DOMContentLoaded', async () => {
-    const res = await safeGetStorage(['targetLanguage', 'selectedEngine', 'apiKeys']);
+    const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
     window.currentConfig = {
-        targetLanguage: res.targetLanguage || (navigator.language || 'zh-CN').replace('_', '-'),
+        targetLanguage: res.ui_language || (navigator.language || 'zh-CN').replace('_', '-'),//ui_language
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
-    const testTarget = window.currentConfig.targetLanguage;
+    const testTarget = window.currentConfig.ui_language;
     const TEMPLATES = {
         'google': {
             name: 'Google Translate', isBuiltIn: true, color: '#4285F4', meta: 'G.FREE'
@@ -228,8 +228,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const config = userConfigs.find(c => c.id === lastActiveId);
         if (!config) return;
 
-        const storage = await safeGetStorage(['targetLanguage']).catch(() => ({}));
-        const targetLang = storage?.targetLanguage || 'zh-CN';
+        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+        const targetLang = storage?.ui_language || 'zh-CN';
         const isTargetEn = targetLang.toLowerCase().startsWith('en');
         const testText = isTargetEn ? '你好' : 'Good morning';
 
@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         await fetch('https://www.google.com/generate_204', { mode: 'no-cors', signal: controller.signal });
                         clearTimeout(timeout);
                         isOk = true;
-                    } else if (config.engine === 'bing' || config.engine === 'youdao') {
+                    } else if (config.engine === 'bing') {
                         isOk = true;
                     }
                 } catch (e) {
@@ -664,8 +664,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipsDesc.style.color = "";
             tipsDesc.innerText = "";
         }
-        const storage = await safeGetStorage(['targetLanguage']).catch(() => ({}));
-        const testTargetLang = storage?.targetLanguage || window.currentConfig?.targetLanguage || 'en';
+        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || 'en';
         const tempKeys = {};
         document.querySelectorAll('.api-input-field').forEach(input => {
             const key = input.getAttribute('data-key');
@@ -748,9 +748,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.currentConfig = { activeConfig };
         logger.log(`[Config] 激活配置: ${instanceId}`);
     }
-    const langRes = await safeGetStorage(['targetLanguage']);
+    const langRes = await safeGetStorage(['ui_language']);
     if (!langRes) return;
-    const effectiveLang = langRes.targetLanguage ||
+    const effectiveLang = langRes.ui_language ||
         (navigator.languages && navigator.languages[0]) ||
         navigator.language ||
         'zh-CN';

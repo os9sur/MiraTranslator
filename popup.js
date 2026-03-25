@@ -12,17 +12,19 @@ async function initOnboarding() {
   const tab = await getActiveTab();
   const url = tab?.url || "";
 
-  //  受限页面，直接退出，不显示蒙层
+  // 受限页面，直接退出，不显示蒙层
   if (MiraUtils.isRestrictedUrl(url)) {
     return;
   }
   const guideEl = document.getElementById('welcome-guide');
   const targetBox = document.getElementById('targetLangCombox');
+  const labelEl = document.getElementById('targetLangLabelText');
   const selectEl = document.getElementById('targetLang');
   const storageKey = 'mira_onboarding_v1';
 
   const completeOnboarding = () => {
-    if (!guideEl || guideEl.style.display === 'none') return;
+    if (!guideEl || guideEl.style.display === 'none') return; 
+    if (labelEl) labelEl.style.display = 'block';
     localStorage.setItem(storageKey, 'true');
     guideEl.style.transition = 'opacity 0.4s ease';
     guideEl.style.opacity = '0';
@@ -30,23 +32,33 @@ async function initOnboarding() {
     setTimeout(() => {
       guideEl.style.display = 'none';
       targetBox.classList.remove('first-time-highlight');
+      //  蒙层消失时，恢复原生高度，不再占用多余空间
+      document.body.style.minHeight = '';
     }, 400);
   };
 
   if (!localStorage.getItem(storageKey)) {
+    if (labelEl) labelEl.style.display = 'none';
+    //  强制撑开 popup 窗口，保证蒙层内容完全展示
+    document.body.style.minHeight = '620px';
+
     guideEl.style.display = 'flex';
     targetBox.classList.add('first-time-highlight');
     document.getElementById('close-guide-btn').onclick = completeOnboarding;
+
     if (selectEl) {
       selectEl.addEventListener('mousedown', () => {
-        //  500ms 后自动关掉蒙层 
+        // 500ms 后自动关掉蒙层 
         setTimeout(completeOnboarding, 500);
       });
     }
-    //  点击蒙层背景 关闭 
+    // 点击蒙层背景关闭 
     guideEl.addEventListener('click', (e) => {
       if (e.target === guideEl) completeOnboarding();
     });
+  } else {
+    // 非第一次加载，Label 显示
+    if (labelEl) labelEl.style.display = 'block';
   }
 }
 
@@ -401,7 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
       if (!isFirefox) {
         safeSendMessage({ type: 'START_AUTH' }).then((response) => {
-           logger.log('[DEBUG] START_AUTH response:', response); 
+          logger.log('[DEBUG] START_AUTH response:', response);
           if (!response) {
             updateSyncProgressUI(btnId, '', false);
             return;
@@ -525,7 +537,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       statusEl.innerText = `${t('lastSync')} ${timeStr}`;
       statusEl.style.color = '#94a3b8';
     } else {
-      statusEl.innerText = t('neverSynced') || '尚未同步';
+      statusEl.innerText = t('neverSynced',globalUiLang) || 'Not synced';
     }
   }
   function toggleStyleTab(type) {
@@ -573,7 +585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await safeSetStorage({ targetLanguage: targetLang });
   }
 
-  applyI18n(targetLang);
+  initUILanguage();
   const data = await safeGetStorage({
     activeConfig: { engine: _defaultEngine, data: {} },
     globalConfig: { page: true, select: true, yt: true },
@@ -730,6 +742,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const url = tab?.url || "";
     const isYouTube = MiraUtils.isYouTubeUrl(url);
     const isRestricted = MiraUtils.isRestrictedUrl(url);
+
+    const hintEl = document.getElementById('restrictedHint');
+
+    //  受限页面：严格互斥，只做隐藏和显示提示
     if (isRestricted) {
       [
         ytRow,
@@ -741,24 +757,40 @@ document.addEventListener('DOMContentLoaded', async () => {
       ].forEach(el => {
         if (el) el.style.display = 'none';
       });
+
+      if (hintEl) hintEl.style.display = 'flex';
+
       const domainEl = document.getElementById('currentDomain');
       if (domainEl) domainEl.innerText = "Restricted Page";
-    } 
-    // else if (isYouTube) {
-    //   if (ytRow) {
-    //     ytRow.classList.remove('disabled');
-    //     ytRow.style.display = 'flex';
-    //   }
-    //   if (inspectContainer) inspectContainer.style.display = 'none';
-    //   [webTranslationOptionContainer, selectTextOptionContainer].forEach(el => {
-    //     if (el) el.style.display = '';
-    //   });
-    // } 
+    }
+    // YouTube 页面
+    else if (isYouTube) {
+      if (hintEl) hintEl.style.display = 'none';
+
+      if (ytRow) {
+        ytRow.classList.remove('disabled');
+        ytRow.style.display = 'flex';
+      }
+      if (inspectContainer) inspectContainer.style.display = 'none';
+      if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
+      if (targetLangCombox) targetLangCombox.style.display = 'flex';
+
+      [webTranslationOptionContainer, selectTextOptionContainer].forEach(el => {
+        if (el) el.style.display = '';
+      });
+    }
+    //  普通页面
     else {
+      if (hintEl) hintEl.style.display = 'none';
+
       if (ytRow) {
         ytRow.classList.add('disabled');
         ytRow.style.display = 'none';
       }
+
+      if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
+      if (targetLangCombox) targetLangCombox.style.display = 'flex';
+
       if (inspectContainer) inspectContainer.style.display = '';
       if (webTranslationOptionContainer) webTranslationOptionContainer.style.display = '';
       if (selectTextOptionContainer) selectTextOptionContainer.style.display = '';
@@ -960,6 +992,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
   });
+  // 切换UI语言
+  const uiSelect = document.getElementById('uiLangSelect');
+  if (uiSelect) {
+    uiSelect.onclick = (e) => e.stopPropagation();
+
+    uiSelect.onchange = async (e) => {
+      const selectedLang = e.target.value;
+      const success = await safeSetStorage({ ui_language: selectedLang });
+      if (success) {
+        globalUiLang = selectedLang;
+        applyI18n(selectedLang);
+        const menu = document.getElementById('advancedMenu');
+        if (menu) menu.style.display = 'none';
+      }
+    };
+  }
   document.getElementById('btnGoStyle').addEventListener('click', async () => {
     advMenu.style.display = 'none';
     stylePanel.style.display = 'flex';
@@ -1419,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (tab && tab.url) {
         window.domain = new URL(tab.url).hostname.replace('www.', '');
       }
-      const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig'];
+      const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig', 'ui_language'];
       const storage = await safeGetStorage(keys);
       if (!storage) {
         logger.error("[Mira-Trace] refreshUI 无法获取 storage");
@@ -1482,7 +1530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (statusEl) {
         statusEl.innerText = storage.lastSyncTime
           ? `${t('lastSync')} ${new Date(storage.lastSyncTime).toLocaleString()}`
-          : (t('neverSynced') || '尚未同步');
+          : (t('neverSynced',globalUiLang) || 'Not synced');
       }
       if (storage.syncConfig) {
         const scSync = storage.syncConfig;
@@ -1512,6 +1560,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const currentEngine = engineSelect ? engineSelect.value : _defaultEngine;
         updateEngineTips(currentEngine);
       }
+
+      //  恢复界面语言下拉框状态 
+      const uiLangSelect = document.getElementById('uiLangSelect');
+      if (uiLangSelect) {
+        const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'zh-CN';
+        uiLangSelect.value = savedUiLang;
+      }
+
       const domainLabel = document.getElementById('domainIndicator');
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
@@ -1567,15 +1623,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const tab = await getActiveTab();
       if (tab?.id) {
-        safeSendToTab(tab.id, { action: 'START_INSPECT' }).catch(() => { });
-        setTimeout(() => {
-          window.close();
-        }, 10);
+        safeSendToTab(tab.id, {
+          action: 'START_INSPECT',
+          lang: globalUiLang
+        }).catch(() => { });
+        setTimeout(() => window.close(), 10);
       } else {
         window.close();
       }
     } catch (err) {
-      if (err.message.includes("context invalidated")) {
+      if (err.message?.includes("context invalidated")) {
         showUpdateNotification();
       } else {
         logger.error("启动拾取失败:", err);
@@ -1583,6 +1640,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   });
+
   const updateScanInputs = () => {
     if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
     const config = window.currentConfig || {};
@@ -1753,6 +1811,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   selectorInput.addEventListener('blur', saveScanConfig);
   minLenInput.addEventListener('blur', saveScanConfig);
+  //切换网页翻译目标语言
   document.getElementById('targetLang').onchange = async (e) => {
     const langSelect = document.getElementById('targetLang');
     try {
@@ -1760,7 +1819,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const lang = langSelect.value;
       currentConfig.targetLanguage = lang;
       await safeSetStorage({ targetLanguage: lang });
-      applyI18n(lang);
       const response = await safeSendToTab(activeTab.id, {
         action: 'RE_SCAN_PAGE',
         config: { forceAll: true },
@@ -1789,7 +1847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   document.getElementById('openSettings').onclick = openSettings;
   document.getElementById('btnGoEngine').onclick = openSettings;
-  applyI18n(currentConfig.targetLanguage);
+  initUILanguage();
   refreshUI();
 
   // 测试当前引擎是否可用

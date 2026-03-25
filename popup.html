@@ -18,7 +18,7 @@
       min-width: 250px;
       max-width: 580px;
       min-height: fit-content;
-      padding: 10px 12px;
+      padding: 5px 12px;
       margin: 0;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -156,18 +156,22 @@
 
 <body>
   <!-- 第一次使用欢迎提示 -->
-<div id="welcome-guide"
+  <div id="welcome-guide"
     style="display: none; position: fixed; inset: 0; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); z-index: 10000; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; box-sizing: border-box; overflow-y: auto;">
 
-    <div style="text-align: center; margin-top: 5vh; margin-bottom: 20px; width: 100%;">
-      <h1 data-i18n="welcomeTitle" style="color: #58a6ff; margin: 0 0 8px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Welcome to Mira! 🚀</h1>
-      <h2 data-i18n="setLanguage" style="color: #f0f6fc; margin: 0; font-size: 16px; font-weight: 400; opacity: 0.85;">Select Your Target Language</h2>
+    <div style="text-align: center; margin-top: 7vh; margin-bottom: 20px; width: 100%;">
+      <h1 data-i18n="welcomeTitle"
+        style="color: #58a6ff; margin: 0 0 8px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">Welcome to
+        Mira! 🚀</h1>
+      <h2 data-i18n="setLanguage"
+        style="color: #f0f6fc; margin-top: 5vh; font-size: 16px; font-weight: 400; opacity: 0.85;">Select Your Target
+        Language</h2>
     </div>
 
     <div id="guide-spacer" style="height: 120px; width: 100%; pointer-events: none;margin-bottom: 20px;">
     </div>
 
-    <div style="text-align: center; max-width: 260px;">
+    <div style="text-align: center; max-width: 260px;margin-top: 36px;">
       <p style="color: #8b949e; font-size: 14px; line-height: 1.6; margin-bottom: 30px;">
         <span data-i18n="translatePrefix">Mira will translate web pages into</span>
         <br>
@@ -336,13 +340,24 @@
     <div id="domainIndicator" class="domain-tag">
       🌐 <span id="currentDomain">loading...</span>
     </div>
+    <div id="restrictedHint"
+      style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; text-align: center;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" style="width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5;">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <p data-i18n="restrictedNotice" style="font-size: 13px; color: #8b949e; line-height: 1.5; margin: 0;">
+        此页面受浏览器安全策略限制<br>Mira 无法在此运行
+      </p>
+    </div>
     <!-- 单选按钮开始 -->
-    <div class="row" id="webTranslationOptionContainer">
-      <label data-i18n="pageTrans">网页翻译</label>
+    <div class="row-text" id="webTranslationOptionContainer">
+      <label data-i18n="pageTrans" style="font-size: 14px;">网页翻译</label>
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" title="重新翻译此页" style="display: none;">
+        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" title="重新翻译此页" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-            stroke-linejoin="round">
+            stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
           </svg>
         </button>
@@ -351,18 +366,22 @@
         </div>
       </div>
     </div>
-    <div class="row" id="selectTextOptionContainer">
-      <label data-i18n="selectTrans">划词翻译</label>
-      <div id="autoSwitchSelectText" class="switch">
-        <div class="dot"></div>
+
+    <div class="row-text" id="selectTextOptionContainer">
+      <label data-i18n="selectTrans" style="font-size: 14px;">划词翻译</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <div id="autoSwitchSelectText" class="switch">
+          <div class="dot"></div>
+        </div>
       </div>
     </div>
-    <div class="row" id="youtube-option-container">
-      <label data-i18n="ytTrans">Youtube双语字幕</label>
+
+    <div class="row-text" id="youtube-option-container">
+      <label data-i18n="ytTrans" style="font-size: 14px;">Youtube双语字幕</label>
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" title="重新预翻译字幕" style="display: none;">
+        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" title="重新预翻译字幕" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-            stroke-linejoin="round">
+            stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
           </svg>
         </button>
@@ -371,18 +390,25 @@
         </div>
       </div>
     </div>
-    <!-- 单选按钮结束 -->
-    <div id="targetLangCombox" class="row">
-      <label data-i18n="targetLang"
-        style="overflow-wrap: break-word;word-wrap: break-word;word-break: normal;">目标语言</label>
-      <select id="targetLang" style="width: 115px;max-width: 200px;">
+    <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 0 3px 0; width: 100%;"></div>
+
+    <div id="targetLangCombox"
+      style="display: flex; flex-direction: column; align-items: stretch; gap: 4px;padding: 5px;">
+      <label data-i18n="targetLang" id="targetLangLabelText"
+        style="color: #e6e9ee; font-size: 12px; font-weight: 500; padding-left: 2px; line-height: 1;margin-bottom: 7px !important;">
+        目标语言
+      </label>
+
+      <select id="targetLang"
+        style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;">
         <option value="en">English</option>
         <option value="zh-CN">简体中文 (Chinese Simplified)</option>
         <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
         <option value="ja">日本語 (Japanese)</option>
         <option value="ko">한국어 (Korean)</option>
 
-        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+        <option disabled
+          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
           ── Southeast Asia ──
         </option>
         <option value="id">Bahasa Indonesia (Indonesian)</option>
@@ -390,7 +416,8 @@
         <option value="th">ไทย (Thai)</option>
         <option value="vi">Tiếng Việt (Vietnamese)</option>
 
-        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+        <option disabled
+          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
           ── Middle East & South Asia ──
         </option>
         <option value="ar">العربية (Arabic)</option>
@@ -400,7 +427,8 @@
         <option value="he">עברית (Hebrew)</option>
         <option value="tr">Türkçe (Turkish)</option>
 
-        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+        <option disabled
+          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
           ── Americas & Europe ──
         </option>
         <option value="bg">Български (Bulgarian)</option>
@@ -429,7 +457,8 @@
         <option value="sv">Svenska (Swedish)</option>
         <option value="uk">Українська (Ukrainian)</option>
 
-        <option disabled style="background: #3a4146e8; color: #fff; font-weight: 650; font-style: italic;">
+        <option disabled
+          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
           ── Africa ──
         </option>
         <option value="af">Afrikaans</option>
@@ -457,7 +486,7 @@
       <div class="row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
         <div style="display: flex; align-items: center; gap: 4px;">
           <label data-i18n="matchSelector" style="font-size: 11px; color: #94a3b8;">生效列表 (CSS 选择器)</label>
-          <span id="builtinRuleHint" title="此网站已有内置规则，当前配置优先于全局默认"
+          <span id="builtinRuleHint" data-i18n="builtinRuleHint" data-i18n-title title="此网站已有内置规则，当前配置优先于全局默认"
             style="display:none; width:14px; height:14px; border-radius:50%; background:#3b82f6; color:#fff; font-size:10px; font-weight:bold; text-align:center; line-height:14px; cursor:help; font-style:normal; flex-shrink:0; vertical-align:middle; position:relative;
   box-shadow: 0 0 6px 2px rgba(59,130,246,0.8), 0 0 12px 4px rgba(59,130,246,0.4);animation: mira-pulse 2s ease-in-out infinite;">?</span>
         </div>
@@ -465,7 +494,7 @@
           style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; font-family: monospace;resize: none !important;">
       </textarea>
       </div>
-      <div class="row" style="margin-bottom: 3px;">
+      <div class="row" style="margin-bottom: 3px;margin-top: 3px;">
         <label data-i18n="minChars" style="font-size: 11px;color:#94a3b8;">最小字数</label>
         <input type="number" id="conf-minlen" min="0" style="
     width: 60px; 
@@ -483,7 +512,7 @@
           this.style.boxShadow='none' ;">
       </div>
     </div>
-    <div class="row" style="margin-top: 0px; border-top: 1px solid #334155; padding-top: 8px;">
+    <div class="row" style="margin-top: 3px; border-top: 1px solid #334155; padding-top: 8px;">
       <button id="openNotebook" class="openNotebook" style="
       width: 100%;
       height: 35px;
@@ -584,7 +613,39 @@
       APPLY CHANGES
     </button>
   </div>
-  <div id="advancedMenu" class="advancedMenu">
+  <div id="advancedMenu" class="advancedMenu" style="min-width: 180px;">
+    <div class="menu-ui-setting">
+      <div class="ui-lang-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          style="width:13px; height:13px; opacity:0.6;">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span data-i18n="uiLanguage">界面语言</span>
+      </div>
+      <select id="uiLangSelect" class="ui-select-tiny">
+        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
+        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
+        <option value="en">English</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+        <option value="vi">Tiếng Việt (Vietnamese)</option>
+        <option value="th">ไทย (Thai)</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="fa">فارسی (Persian)</option>
+      </select>
+    </div>
+
+    <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 0 12px 8px 12px;"></div>
+
     <div class="menu-item" id="btnGoStyle">
       <svg viewBox="0 0 24 24">
         <path class="icon-main" d="M2.5 21.5l14-14 1.5 1.5-14 14z" />

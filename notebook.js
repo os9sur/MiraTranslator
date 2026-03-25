@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const vocabBody = document.getElementById('vocabBody');
   const wordInp = document.getElementById('wordInp');
   const transInp = document.getElementById('transInp');
-  const storage = await safeGetStorage('targetLanguage');
+  const storage = await safeGetStorage('ui_language');
   // 读取高亮开关状态
   const highlightStorage = await safeGetStorage('vocabHighlight');
   let highlightEnabled = highlightStorage?.vocabHighlight || false;
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   const targetLanguage =
-    storage?.targetLanguage ||
+    storage?.ui_language ||
     navigator.language?.replace('_', '-') ||
     'en';
   const _t = (key) => {
