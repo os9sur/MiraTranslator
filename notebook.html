@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <script src="i18n.js"></script>
@@ -14,44 +15,54 @@
       display: flex;
       justify-content: center;
     }
+
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 1100px;
     }
+
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-    .search-wrapper {
+
+    .search-bar-wrapper {
       position: relative;
-      display: flex;
-      align-items: center;
+      margin-bottom: 12px;
+      display: inline-block;
     }
-    .search-input {
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid #334155;
-      color: white;
-      padding: 7px 12px 7px 32px;
-      border-radius: 6px;
-      font-size: 13px;
-      outline: none;
-      width: 140px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .search-bar-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
     }
-    .search-input:focus {
-      width: 220px;
+
+    .search-bar-input {
+    width: 200px;
+    background: rgb(23 40 81 / 64%);
+    border: 1px solid #687e9c;
+    color: white;
+    padding: 10px 16px 10px 42px;
+    border-radius: 999px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .search-bar-input:focus {
+      width: 400px;
       border-color: #38bdf8;
       background: #020617;
       box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
     }
-    .search-icon {
-      position: absolute;
-      left: 10px;
-      color: #64748b;
-      pointer-events: none;
-    }
+
     .btn {
       padding: 8px 16px;
       border-radius: 6px;
@@ -67,30 +78,36 @@
       justify-content: center;
       box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     }
+
     .btn:hover {
       transform: translateY(-1.5px);
       filter: brightness(1.1);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+
     .btn:active {
       transform: translateY(0px);
       filter: brightness(0.95);
     }
+
     .btn-primary {
       background: #38bdf8;
       color: #000;
     }
+
     .btn-danger {
       background: #ef4444;
       color: white;
       padding: 4px 8px;
       font-size: 12px;
     }
+
     .btn-export {
       background: #22c55e;
       color: white;
       margin-right: 10px;
     }
+
     .add-box {
       background: #1e293b;
       padding: 15px;
@@ -101,6 +118,7 @@
       gap: 10px;
       border: 1px solid #334155;
     }
+
     input {
       background: #020617;
       border: 1px solid #334155;
@@ -110,15 +128,19 @@
       font-size: 14px;
       outline: none;
     }
+
     input:focus {
       border-color: #38bdf8;
     }
+
     #wordInp {
       flex: 0 0 180px;
     }
+
     #transInp {
       flex: 1;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -126,6 +148,7 @@
       overflow: hidden;
       table-layout: fixed;
     }
+
     th,
     td {
       padding: 12px 16px;
@@ -134,21 +157,57 @@
       vertical-align: top;
       word-break: break-word;
     }
+
     th:nth-child(1) {
-      width: 180px;
+      width: 160px;
     }
+
+    /* 单词 */
     th:nth-child(2) {
       width: auto;
     }
+
+    /* 释义 */
     th:nth-child(3) {
-      width: 160px;
+      width: 130px;
     }
+
+    /* 备注  */
     th:nth-child(4) {
-      width: 120px;
+      width: 150px;
     }
+
+    /* 来源 */
     th:nth-child(5) {
-      width: 100px;
+      width: 110px;
     }
+
+    /* 时间 */
+    th:nth-child(6) {
+      width: 80px;
+    }
+
+    /* 操作 */
+    .note-empty {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #9eafc6;
+      font-size: 12px;
+      cursor: pointer;
+      border: 1px dashed #41723e;
+      border-radius: 4px;
+      padding: 2px 8px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .note-empty:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    /* 操作列 */
     th {
       background: rgba(30, 41, 59, 0.8);
       color: #94a3b8;
@@ -157,17 +216,21 @@
       letter-spacing: 0.05em;
       border-bottom: 1px solid rgba(56, 189, 248, 0.2);
     }
+
     #vocabBody tr:nth-child(even) {
       background-color: rgba(51, 65, 85, 0.4) !important;
     }
+
     #vocabBody tr:hover {
       background-color: rgba(56, 189, 248, 0.1) !important;
     }
+
     .source-wrapper {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
+
     .source-link {
       color: #38bdf8;
       font-size: 12px;
@@ -177,9 +240,11 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .source-link:hover {
       text-decoration: underline;
     }
+
     .source-title {
       color: #64748b;
       font-size: 10px;
@@ -189,6 +254,7 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
     #pagination {
       margin-top: 24px;
       display: flex;
@@ -196,12 +262,14 @@
       align-items: center;
       gap: 15px;
     }
+
     .word-text {
       font-weight: 600;
       color: #38bdf8;
       font-size: 15px;
       margin-right: 6px;
     }
+
     .speaker-icon {
       cursor: pointer;
       color: #64748b;
@@ -209,9 +277,11 @@
       display: inline-flex;
       vertical-align: middle;
     }
+
     .speaker-icon:hover {
       color: #38bdf8;
     }
+
     .undo-container {
       display: flex;
       align-items: center;
@@ -224,12 +294,14 @@
       width: 85px;
       box-sizing: border-box;
     }
+
     .delete-countdown {
       color: #ef4444;
       font-size: 11px;
       font-weight: bold;
       font-family: monospace;
     }
+
     .undo-link {
       color: #38bdf8 !important;
       font-size: 11px;
@@ -237,11 +309,13 @@
       text-decoration: underline !important;
       cursor: pointer;
     }
+
     .row-fade-out {
       opacity: 0;
       transform: translateX(20px);
       transition: all 0.4s ease-out;
     }
+
     .row-collapse {
       height: 0 !important;
       padding-top: 0 !important;
@@ -251,40 +325,49 @@
       overflow: hidden;
       transition: all 0.3s ease-in-out;
     }
+
     .speaker-btn:hover {
       color: #38bdf8 !important;
       transform: scale(1.1);
     }
+
     .speaker-btn.speaking {
       color: #38bdf8 !important;
       animation: pulse-ring 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
+
     @keyframes pulse-ring {
       0% {
         transform: scale(1);
         opacity: 1;
       }
+
       50% {
         transform: scale(1.2);
         opacity: 0.7;
       }
+
       100% {
         transform: scale(1);
         opacity: 1;
       }
     }
+
     .speaker-btn.speaking svg path {
       stroke-dasharray: 10;
       animation: wave-offset 0.5s linear infinite;
     }
+
     @keyframes wave-offset {
       from {
         stroke-dashoffset: 20;
       }
+
       to {
         stroke-dashoffset: 0;
       }
     }
+
     .table-container {
       background: #1e293b;
       border-radius: 12px;
@@ -298,6 +381,7 @@
       margin-top: 20px;
       margin-bottom: 50px;
     }
+
     #vocabTable {
       width: 100%;
       border-collapse: separate;
@@ -306,21 +390,26 @@
       border: none;
       table-layout: fixed;
     }
+
     #vocabBody tr:last-child td {
       border-bottom: none;
     }
+
+    #vocabTable td:nth-child(3) {
+      width: 130px;
+      max-width: 130px;
+      word-break: break-all;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <div class="header">
       <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
-      <div style="display: flex; gap: 12px;">
-        <div class="search-wrapper">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInp" class="search-input" data-i18n="searchVocabulary"
-            data-i18n-type="placeholder" placeholder="搜索生词本...">
-        </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
         <button id="exportBtn" class="btn btn-export" data-i18n="exportCSV">导出 CSV</button>
       </div>
     </div>
@@ -329,12 +418,41 @@
       <input type="text" id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning...">
       <button id="addBtn" class="btn btn-primary" data-i18n="manualAdd">手动添加</button>
     </div>
+     
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+  
+  <!-- 搜索框 -->
+  <div class="search-bar-wrapper" style="margin-bottom:0;">
+    <span class="search-bar-icon">🔍</span>
+    <input type="text" id="searchInp" class="search-bar-input" 
+      data-i18n="searchVocabulary" data-i18n-type="placeholder" 
+      placeholder="搜索生词本...">
+  </div>
+
+  <!--  高亮开关 -->
+  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
+    <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
+    <div id="highlightToggle" style="
+      width:36px; height:20px; border-radius:999px; 
+      background:#334155; cursor:pointer; position:relative;
+      transition: background 0.2s;">
+      <div id="highlightThumb" style="
+        width:16px; height:16px; border-radius:50%; 
+        background:white; position:absolute; top:2px; left:2px;
+        transition: left 0.2s;">
+      </div>
+    </div>
+  </label>
+
+</div>
+
     <div class="table-container">
       <table id="vocabTable">
         <thead>
           <tr>
             <th data-i18n="word">单词/句子</th>
             <th data-i18n="meaning">释义</th>
+            <th data-i18n="note">备注</th>
             <th data-i18n="source">来源</th>
             <th data-i18n="addTime">时间</th>
             <th data-i18n="operation">操作</th>
@@ -353,4 +471,5 @@
   <script src="utils.js"></script>
   <script src="notebook.js"></script>
 </body>
+
 </html>

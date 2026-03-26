@@ -159,12 +159,35 @@ async function getActiveTab() {
     }
   });
 }
+
+let _defaultEngine = 'bing';
+
+let _defaultEngineReady = safeGetStorage(['_defaultEngine'], true).then(res => {
+  if (res && res._defaultEngine) _defaultEngine = res._defaultEngine;
+});
+
+async function getInitialActiveConfig() {
+  await _defaultEngineReady;
+  return { engine: _defaultEngine, data: {} };
+}
+
+function getRuntimeDefaultEngine() {
+  return _defaultEngine;
+}
+
+function getCurrentLang() {
+  return window.currentConfig?.targetLanguage ||
+    window.currentTargetL ||
+    navigator.language ||
+    'en';
+}
+
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: false, select: true, yt: true };
 if (typeof chrome !== 'undefined' && chrome.storage) {
-  chrome.storage.local.get(['siteSettings', 'globalConfig'], (res) => {
-    if (res.siteSettings) cachedSiteSettings = res.siteSettings;
-    if (res.globalConfig) cachedGlobalConfig = res.globalConfig;
+  safeGetStorage(['siteSettings', 'globalConfig'], true).then(res => {
+    if (res?.siteSettings) cachedSiteSettings = res.siteSettings;
+    if (res?.globalConfig) cachedGlobalConfig = res.globalConfig;
   });
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.siteSettings) cachedSiteSettings = changes.siteSettings.newValue;
@@ -216,63 +239,95 @@ async function safeSendMessage(message) {
 let isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
+
   isNoticeShowing = true;
+
   const div = document.createElement('div');
   div.id = 'mira-update-notice';
   const finalMsg = t("update_notice") === "update_notice"
-    ? "MIRA 插件已更新，请点击此处刷新页面以继续使用!"
+    ? "Mira Translator has been updated. Please click here to refresh the page."
     : t("update_notice");
   div.style.cssText = `
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 10000000;
-    background: #1f2937;
-    color: #f3f4f6;
-    padding: 14px 24px;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 14px;
-    border: 1px solid #374151;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  `;
-  const svgIcon = `
-    <svg class="mira-refresh-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);">
-      <path d="M23 4v6h-6"></path>
-      <path d="M1 20v-6h6"></path>
-      <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-    </svg>
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 10000000;
+        background: #1f2937;
+        color: #f3f4f6;
+        padding: 14px 24px;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 14px;
+        border: 1px solid #374151;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     `;
-  div.innerHTML = `
-  ${svgIcon}
-  <span style="margin-left: 8px;">${finalMsg}</span>
-`;
+
+  // 用 DOM API 创建 SVG，避免 innerHTML TrustedHTML 限制
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'mira-refresh-svg');
+  svg.setAttribute('width', '18');
+  svg.setAttribute('height', '18');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2.5');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+
+  const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path1.setAttribute('d', 'M23 4v6h-6');
+  const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path2.setAttribute('d', 'M1 20v-6h6');
+  const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path3.setAttribute('d', 'M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15');
+  svg.appendChild(path1);
+  svg.appendChild(path2);
+  svg.appendChild(path3);
+
+  const span = document.createElement('span');
+  span.style.marginLeft = '8px';
+  span.textContent = finalMsg;
+
+  div.appendChild(svg);
+  div.appendChild(span);
+
   div.onmouseenter = () => {
     div.style.background = '#374151';
     div.style.transform = 'translateY(-2px)';
-    const svg = div.querySelector('.mira-refresh-svg');
-    if (svg) svg.style.transform = 'rotate(360deg)';
+    const svgEl = div.querySelector('.mira-refresh-svg');
+    if (svgEl) svgEl.style.transform = 'rotate(360deg)';
   };
   div.onmouseleave = () => {
     div.style.background = '#1f2937';
     div.style.transform = 'translateY(0)';
-    const svg = div.querySelector('.mira-refresh-svg');
-    if (svg) svg.style.transform = 'rotate(0deg)';
+    const svgEl = div.querySelector('.mira-refresh-svg');
+    if (svgEl) svgEl.style.transform = 'rotate(0deg)';
   };
-  div.onclick = () => location.reload();
-  document.body.appendChild(div);
+  div.onclick = (e) => {
+    e.stopPropagation();
+    isNoticeShowing = true;
+    div.style.display = 'none';
+    location.reload();
+  };
+  const target = document.body || document.documentElement;
+  if (target) {
+    target.appendChild(div);
+  } else {
+    isNoticeShowing = false;
+  }
 }
-var i18nDict = {};
+let i18nDict = {};
 let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -289,6 +344,7 @@ function syncI18nDict(force = false) {
 }
 function t(key, forcedLang) {
   syncI18nDict();
+  if (!i18nDict || Object.keys(i18nDict).length === 0) return key;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
   let lang = forcedLang
@@ -302,6 +358,7 @@ function t(key, forcedLang) {
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
   return dict[key] || key;
 }
+
 function applyI18n(forcedLang) {
   if (typeof document === 'undefined') return;
   syncI18nDict();
@@ -322,6 +379,28 @@ function applyI18n(forcedLang) {
     }
   });
 }
+
+const i18nAPI = typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n : null;
+let globalUiLang = i18nAPI
+  ? i18nAPI.getUILanguage().replace('_', '-')
+  : navigator.language.replace('_', '-');
+
+async function initUILanguage() {
+  const uiSelect = document.getElementById('uiLangSelect');
+  if (!uiSelect) return;
+
+  const storage = await safeGetStorage(['ui_language'], true);
+
+  if (storage?.ui_language) {
+    uiSelect.value = storage.ui_language;
+    globalUiLang = storage.ui_language;
+  } else {
+    uiSelect.value = globalUiLang;
+  }
+
+  applyI18n(globalUiLang);
+}
+
 function standardizeResult(raw, originalText) {
   const schema = {
     basic: "",
@@ -485,7 +564,7 @@ function getCacheKey(text, engine, lang) {
   const coreText = text
     .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
     .toLowerCase();
-  const safeEngine = (engine || 'google').toLowerCase();
+  const safeEngine = (engine || getRuntimeDefaultEngine()).toLowerCase();
   const safeLang = (lang || 'zh-cn').replace('_', '-').toLowerCase();
   let contentPart;
   if (typeof hash === 'function') {
@@ -637,7 +716,7 @@ const POS_MAP = {
     'en': 'adv.', 'fr': 'adv.', 'de': 'Adv.'
   },
   '介词': {
-    'zh-cn': '介词', 'zh-tw': '前置詞', 'ja': '前置詞', 'ko': '전치사',
+    'zh-cn': '介词', 'zh-tw': '介系詞', 'ja': '前置詞', 'ko': '전치사',
     'en': 'prep.', 'fr': 'prép.', 'de': 'Präp.'
   },
   '连词': {
@@ -666,10 +745,38 @@ const POS_MAP = {
  * @param {string} pos - 原始词性名称（通常为简体中文）
  * @param {string} targetLang - 目标语言代码（如 "zh-CN", "zh-TW", "ja-JP", "en"）
  */
+// 建立反向查找表：所有语言的词性表达 → 简体中文 key
+const POS_REVERSE_MAP = (() => {
+  const map = {};
+  for (const [cnKey, translations] of Object.entries(POS_MAP)) {
+    map[cnKey] = cnKey; // 自身
+    for (const val of Object.values(translations)) {
+      if (val) map[val.toLowerCase()] = cnKey;
+    }
+  }
+  // 补充 AI 常见的缩写/变体
+  const extra = {
+    'n': '名词', 'noun': '名词',
+    'v': '动词', 'verb': '动词',
+    'adj': '形容词', 'adjective': '形容词',
+    'adv': '副词', 'adverb': '副词',
+    'prep': '介词', 'preposition': '介词',
+    'conj': '连词', 'conjunction': '连词',
+    'pron': '代词', 'pronoun': '代词',
+    'art': '冠词', 'article': '冠词',
+    'interj': '感叹词', 'interjection': '感叹词',
+    'num': '数词', 'numeral': '数词', '介系词': '介词',
+    '介系詞': '介词',
+  };
+  return { ...map, ...extra };
+})();
+
 function localizePos(pos, targetLang) {
   if (!pos || !targetLang) return pos;
-  const entry = POS_MAP[pos.trim()];
-  if (!entry) return pos;
+  const normalized = pos.trim().replace(/\.$/, ''); // 去掉末尾的点
+  const cnKey = POS_REVERSE_MAP[normalized] || POS_REVERSE_MAP[normalized.toLowerCase()];
+  if (!cnKey) return pos; // 完全未知的词性，原样返回
+  const entry = POS_MAP[cnKey];
   const langFull = targetLang.toLowerCase();
   const langShort = langFull.split('-')[0];
   return entry[langFull] || entry[langShort] || pos;
@@ -688,24 +795,51 @@ const TRADITIONAL_ENGINE_LIST = [
   'google',
   'deepl',
   'deeplx',
-  'youdao',
   'bing'
 ];
-async function safeGetStorage(keys) {
+
+const STORAGE_KEYS = {
+  core: ['userConfigs', 'activeConfig', 'lastActiveId'],
+  settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig'],
+  sync: function () {
+    return [...this.core, ...this.settings];
+  },
+  export: function () {
+    return [...this.core, ...this.settings];
+  }
+};
+
+async function safeGetStorage(keys, silent = false) {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-    showUpdateNotice();
+    if (!silent) showUpdateNotice();
     return null;
   }
-  if (IS_MAIN_WORLD) {
-    return null;
-  }
+  if (IS_MAIN_WORLD) return null;
   try {
     return await chrome.storage.local.get(keys);
   } catch (e) {
     if (e.message.includes("context invalidated")) {
-      showUpdateNotice();
+      if (!silent) showUpdateNotice();
     }
     return null;
+  }
+}
+async function safeSetStorage(items) {
+  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+    showUpdateNotice();
+    return false;
+  }
+  if (IS_MAIN_WORLD) {
+    return false;
+  }
+  try {
+    await chrome.storage.local.set(items);
+    return true;
+  } catch (e) {
+    if (e.message.includes("context invalidated")) {
+      showUpdateNotice();
+    }
+    return false;
   }
 }
 async function lookupCache(text, engine, lang) {
@@ -743,9 +877,94 @@ async function lookupCache(text, engine, lang) {
   }
   return { result: actualResult, hitKey, singleKey };
 }
+
+function getPhoneticLabel(langCode) {
+  const base = (langCode || 'en').split('-')[0].toLowerCase();
+  const labels = {
+    'ja': 'あ/a',
+    'zh': '拼',
+    'ko': '한',
+    'ar': 'ع',
+    'hi': 'अ', // 印地语
+    'th': 'ก',
+    'el': 'Ω',
+    'ru': 'Я'
+  };
+  return labels[base] || 'Ph';
+}
+
+let lastUtterance = null;
+
+function speakText(text, speakBtn, forcedLang) {
+  if (!window.speechSynthesis || !text) return;
+
+  window.speechSynthesis.cancel();
+
+  if (speakBtn) {
+    speakBtn.classList.remove('is-speaking', 'speaking-wave');
+    speakBtn.classList.add('is-loading', 'tts-loading');
+  }
+
+  lastUtterance = new SpeechSynthesisUtterance(text);
+  lastUtterance.volume = 1.0;
+
+  const langMap = {
+    'ja': 'ja-JP', 'zh': 'zh-CN', 'en': 'en-US', 'ko': 'ko-KR',
+    'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU'
+  };
+
+  let targetLang = '';
+  if (forcedLang) {
+    const base = forcedLang.split('-')[0].toLowerCase();
+    targetLang = langMap[base] || forcedLang;
+  }
+
+  // 如果没有强制指定语言，走正则识别
+  if (!targetLang) {
+    if (/[\u3040-\u30ff]/.test(text)) targetLang = 'ja-JP';
+    else if (/\p{Script=Hangul}/u.test(text)) targetLang = 'ko-KR';
+    else if (/\p{Script=Han}/u.test(text)) targetLang = /[繁體國語]/.test(text) ? 'zh-TW' : 'zh-CN';
+    else if (/[äöüßÄÖÜ]/.test(text)) targetLang = 'de-DE';
+    else if (/[éàèâîôûçëïüÿœæ]/.test(text)) targetLang = 'fr-FR';
+    else if (/[ñ¿¡]/.test(text)) targetLang = 'es-ES';
+    else if (/\p{Script=Cyrillic}/u.test(text)) targetLang = 'ru-RU';
+    else targetLang = 'en-US'; // 默认
+  }
+
+  lastUtterance.lang = targetLang;
+
+  if (targetLang.startsWith('ja')) lastUtterance.rate = 0.6;
+  else if (targetLang.startsWith('zh')) lastUtterance.rate = 0.85;
+  else lastUtterance.rate = 0.8;
+
+  const forceReset = new SpeechSynthesisUtterance("");
+  window.speechSynthesis.speak(forceReset);
+
+  setTimeout(() => {
+    window.speechSynthesis.speak(lastUtterance);
+  }, 50);
+
+  if (speakBtn) {
+    lastUtterance.onstart = () => {
+      speakBtn.classList.remove('is-loading', 'tts-loading');
+      speakBtn.classList.add('is-speaking', 'speaking-wave');
+      speakBtn.querySelector('svg')?.classList.add('icon-active');
+    };
+
+    const stop = () => {
+      speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+      speakBtn.querySelector('svg')?.classList.remove('icon-active');
+    };
+
+    lastUtterance.onend = stop;
+    lastUtterance.onerror = stop;
+  }
+}
+//通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
+  logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang || '').split('-')[0]);
   if (!text) return null;
   const query = text.trim();
   if (!query) return null;
@@ -754,17 +973,26 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
   const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!storage) return;
-  const { skipCache = false, isBatch = false } = options;
+  const {
+    skipCache = false,
+    isBatch = false,
+    lightweight = false,
+    needPhonetic = false,
+    hintInputLang = null,
+    hintLangA = null,
+    hintLangB = null
+  } = options;
   let engine = (
     storage.activeConfig?.engine ||
-    (typeof currentEngine !== 'undefined' ? currentEngine : 'google')
+    (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
   ).toLowerCase();
   let lang = (
     manualLang ||
     storage.targetLanguage ||
     navigator.language ||
-    'zh-CN'
+    'en'
   ).replace('_', '-').toLowerCase();
+
   lang = lang.replace('_', '-').toLowerCase();
   const targetBase = lang.split('-')[0];
   const hasHan = LANGUAGE_PATTERNS['zh']?.test(query) || false;
@@ -772,29 +1000,39 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const hasKo = LANGUAGE_PATTERNS['ko']?.test(query) || false;
   const hasLatinEx = LANGUAGE_PATTERNS['latinEx']?.test(query) || false;
   const isPureEnglish = LANGUAGE_PATTERNS['en']?.test(query) || false;
+
+  //logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
   if (!isBatch) {
     let isSame = false;
-    if (targetBase === 'en' && isPureEnglish) {
-      isSame = true;
-    } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
-      const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
-      isSame = !targetIsTraditional;
-    } else if (targetBase === 'ja' && hasJa) {
-      isSame = true;
-    } else if (targetBase === 'ko' && hasKo) {
-      isSame = true;
-    } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
-      isSame = true;
-    } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
-      isSame = true;
-    } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
-      isSame = true;
+
+    // 如果外部明确传入了输入语言，且与目标语言不同，跳过所有isSame检测
+    if (hintInputLang && hintInputLang !== targetBase) {
+      isSame = false;
+    } else {
+      if (targetBase === 'en' && isPureEnglish) {
+        isSame = true;
+      } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
+        const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
+        isSame = !targetIsTraditional;
+      } else if (targetBase === 'ja' && hasJa) {
+        isSame = true;
+      } else if (targetBase === 'ko' && hasKo) {
+        isSame = true;
+      } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
+        isSame = true;
+      } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
+        isSame = true;
+      } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
+        isSame = true;
+      }
     }
+
     if (isSame) {
       const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
       wordTranslationCache.set(query.toLowerCase(), result);
       return result;
     }
+    // chrome.i18n检测同理
     try {
       const detection = await new Promise((resolve) => {
         if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
@@ -802,24 +1040,41 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       });
       if (detection && detection.isReliable) {
         const detected = detection.languages[0].language.toLowerCase();
-        if (detected === targetBase) {
+        // 外部有hint时，不信任chrome检测结果
+        if (!hintInputLang && detected === targetBase) {
           return { basic: query, isSameLang: true, timestamp: Date.now() };
         }
       }
     } catch (e) { }
-  } else {
   }
   const cacheKey = getCacheKey(query, engine, lang);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
+    // lookupCache 返回结果后，校验
     if (!forceRefresh && !isBatch) {
       const hit = await lookupCache(query, engine, lang);
-      if (hit) {
-        wordTranslationCache.set(query.toLowerCase(), hit.result);
-        return hit.result;
+      if (hit && !hit.result.isBatch) {
+        const cached = hit.result;
+
+        // 检测缓存是否是脏数据（basic是JSON字符串）
+        if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(cached.basic);
+            // 是脏数据，修复并重写缓存
+            cached.basic = parsed.basic || cached.basic;
+            cached.phonetic = parsed.phonetic || cached.phonetic || "";
+            cached.dictData = parsed.dictData || cached.dictData || [];
+            cached.examples = parsed.examples || cached.examples || [];
+            await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
+          } catch { /* 不是JSON，正常数据 */ }
+        }
+
+        wordTranslationCache.set(query.toLowerCase(), cached);
+        return cached;
       }
     }
     pendingRequests.add(cacheKey);
+    //logger.log("[发送请求] query:", query, "lang:", lang, "needPhonetic:", needPhonetic);
     let response;
     try {
       response = await Promise.race([
@@ -827,6 +1082,11 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           type: 'TRANSLATE',
           text: query,
           targetLang: lang,
+          lightweight,
+          needPhonetic,
+          hintInputLang,
+          hintLangA,
+          hintLangB,
           isSubtitle: query.includes('⟦KT_') && isAI
         }),
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
@@ -853,19 +1113,42 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     let result = {
       basic: "",
       phonetic: "",
+      sourcePhonetic: "",
       dictData: [],
       examples: [],
+      wordForms: [],
+      prototype: null,
+      source: "",
       isFallback: false,
       timestamp: Date.now()
     };
     if (typeof data === 'string') {
-      result.basic = data;
+      // 解析JSON
+      try {
+        const parsed = JSON.parse(data);
+        result.basic = parsed.basic || parsed.result || data;
+        result.phonetic = parsed.phonetic || "";
+        result.sourcePhonetic = parsed.sourcePhonetic || "";
+        result.dictData = parsed.dictData || [];
+        result.examples = parsed.examples || [];
+        result.wordForms = parsed.wordForms || [];
+        result.prototype = parsed.prototype || null;
+        result.isFallback = parsed.isFallback || false;
+        result.source = parsed.source || "";
+      } catch {
+        result.basic = data;
+      }
     } else if (data && typeof data === 'object') {
       result.basic = data.basic || data.result || "";
       result.phonetic = data.phonetic || "";
       result.dictData = data.dictData || [];
       result.examples = data.examples || [];
+      result.wordForms = data.wordForms || [];
+      result.prototype = data.prototype || null;
       result.isFallback = data.isFallback || false;
+      result.source = data.source || "";
+      result.targetPhonetic = data.targetPhonetic || data.romaji || data.pinyin || data.transliteration || "";
+      result.sourcePhonetic = data.sourcePhonetic || "";
     }
     if (result.basic && (!result.dictData || result.dictData.length === 0)) {
       if (isAI && !isBatch) {
@@ -873,6 +1156,40 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       } else {
         result.basic = result.basic.trim();
       }
+    }
+    // 归并重复pos的dictData
+    if (result.dictData && result.dictData.length > 0) {
+
+      const merged = {};
+      result.dictData.forEach(item => {
+        const pos = item.pos || '';
+
+        // 兼容多种结构
+        let def = '';
+        if (typeof item.definition === 'string') {
+          def = item.definition;
+        } else if (Array.isArray(item.definition)) {
+          def = item.definition.join(', ');
+        } else if (Array.isArray(item.meanings)) {
+          def = item.meanings.join(', ');
+        } else if (typeof item.meanings === 'string') {
+          def = item.meanings;
+        }
+
+        if (!def) return; // 没有内容的跳过，不生成空行
+
+        if (!merged[pos]) {
+          merged[pos] = def;
+        } else {
+          merged[pos] += ', ' + def;
+        }
+      });
+
+      result.dictData = Object.entries(merged).map(([pos, definition]) => ({
+        pos, definition
+      }));
+
+      logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
     }
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
@@ -929,3 +1246,35 @@ async function refreshIcon() {
     subActive: subActive
   });
 }
+
+const MiraUtils = {
+  /**
+   * 判断当前 URL 是否为受限页面
+   */
+  isRestrictedUrl: function (url) {
+    if (!url) return true;
+
+    const restrictedPrefixes = [
+      'chrome://',
+      'edge://',
+      'about:',
+      'chrome-extension://',
+      'devtools://'
+    ];
+
+    const restrictedDomains = [
+      'chrome.google.com/webstore',
+      'chromewebstore.google.com'
+    ];
+
+    const isPrefixMatch = restrictedPrefixes.some(prefix => url.startsWith(prefix));
+    const isDomainMatch = restrictedDomains.some(domain => url.includes(domain));
+
+    return isPrefixMatch || isDomainMatch;
+  },
+
+  isYouTubeUrl: function (url) {
+    if (!url) return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
+};

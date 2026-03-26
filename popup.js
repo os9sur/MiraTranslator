@@ -6,17 +6,127 @@ let currentMode = 'current';
 const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
-document.addEventListener('DOMContentLoaded', async () => {
-  const container = document.getElementById('webTranslationOptionContainer');
-  const storageKey = 'hasSeenTranslationGuide';
-  if (!localStorage.getItem(storageKey)) {
-    container.classList.add('first-time-highlight');
-    localStorage.setItem(storageKey, 'true');
-    setTimeout(() => {
-      container.classList.remove('first-time-highlight');
-      container.style.border = "1px solid transparent";
-    }, 4000);
+
+//新用户蒙层
+async function initOnboarding() {
+  const tab = await getActiveTab();
+  const url = tab?.url || "";
+
+  // 受限页面，直接退出，不显示蒙层
+  if (MiraUtils.isRestrictedUrl(url)) {
+    return;
   }
+  const guideEl = document.getElementById('welcome-guide');
+  const targetBox = document.getElementById('targetLangCombox');
+  const labelEl = document.getElementById('targetLangLabelText');
+  const selectEl = document.getElementById('targetLang');
+  const storageKey = 'mira_onboarding_v1';
+
+  const completeOnboarding = () => {
+    if (!guideEl || guideEl.style.display === 'none') return;
+    if (labelEl) labelEl.style.display = 'block';
+    localStorage.setItem(storageKey, 'true');
+    guideEl.style.transition = 'opacity 0.4s ease';
+    guideEl.style.opacity = '0';
+
+    setTimeout(() => {
+      guideEl.style.display = 'none';
+      targetBox.classList.remove('first-time-highlight');
+      //  蒙层消失时，恢复原生高度，不再占用多余空间
+      document.body.style.minHeight = '';
+    }, 400);
+  };
+
+  if (!localStorage.getItem(storageKey)) {
+    if (labelEl) labelEl.style.display = 'none';
+    //  强制撑开 popup 窗口，保证蒙层内容完全展示
+    document.body.style.minHeight = '620px';
+
+    guideEl.style.display = 'flex';
+    targetBox.classList.add('first-time-highlight');
+    document.getElementById('close-guide-btn').onclick = completeOnboarding;
+
+    if (selectEl) {
+      selectEl.addEventListener('mousedown', () => {
+        // 500ms 后自动关掉蒙层 
+        setTimeout(completeOnboarding, 500);
+      });
+    }
+    // 点击蒙层背景关闭 
+    guideEl.addEventListener('click', (e) => {
+      if (e.target === guideEl) completeOnboarding();
+    });
+  } else {
+    // 非第一次加载，Label 显示
+    if (labelEl) labelEl.style.display = 'block';
+  }
+}
+
+
+
+document.addEventListener('DOMContentLoaded', async () => {
+  safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
+  await initOnboarding();
+  const res_uiLanguage = await safeGetStorage('ui_language');
+  if (res_uiLanguage) {
+    window.currentConfig = {
+      ui_language: res_uiLanguage.ui_language || (navigator.language || 'en').replace('_', '-')
+    };
+  }
+  // ── 语言对初始化
+  async function initLangPair() {
+    const r = await safeGetStorage(['lpLangA', 'lpLangB']);
+    const langA = r?.lpLangA || 'en';
+    const langB = r?.lpLangB || navigator.language || 'ja';
+
+    const selA = document.getElementById('lpSelA');
+    const selB = document.getElementById('lpSelB');
+    if (selA) selA.value = langA;
+    if (selB) selB.value = langB;
+    updateLpBadges();
+  }
+
+  function updateLpBadges() {
+    const selA = document.getElementById('lpSelA');
+    const selB = document.getElementById('lpSelB');
+    const badgeA = document.getElementById('lpBadgeA');
+    const badgeB = document.getElementById('lpBadgeB');
+    if (!selA || !selB || !badgeA || !badgeB) return;
+
+    const labelA = selA.options[selA.selectedIndex]?.text || '';
+    const labelB = selB.options[selB.selectedIndex]?.text || '';
+    badgeA.textContent = labelA.slice(0, 2).toUpperCase();
+    badgeB.textContent = labelB.slice(0, 2).toUpperCase();
+  }
+
+  // 语言对 UI 事件绑定
+  function bindLangPairEvents() {
+    document.getElementById('langPairToggle')?.addEventListener('click', () => {
+      document.getElementById('langPairTag').style.display = 'none';
+      document.getElementById('langPairEdit').style.display = 'flex';
+      document.getElementById('lpArrow').textContent = '⇄';
+    });
+
+    document.getElementById('lpDoneBtn')?.addEventListener('click', async () => {
+      updateLpBadges();
+      document.getElementById('langPairEdit').style.display = 'none';
+      document.getElementById('langPairTag').style.display = 'flex';
+      document.getElementById('lpArrow').textContent = '→';
+      await chrome.storage.local.set({
+        lpLangA: document.getElementById('lpSelA').value,
+        lpLangB: document.getElementById('lpSelB').value,
+      });
+    });
+
+    document.getElementById('lpSwapBtn')?.addEventListener('click', () => {
+      const a = document.getElementById('lpSelA');
+      const b = document.getElementById('lpSelB');
+      [a.value, b.value] = [b.value, a.value];
+      updateLpBadges();
+    });
+  }
+  initLangPair();
+  bindLangPairEvents();
   const myInput = document.getElementById('conf-minlen');
   if (myInput) {
     myInput.addEventListener('input', function () {
@@ -92,22 +202,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       webdavPass: document.getElementById('webdavPass').value,
       frequency: parseInt(document.getElementById('syncFrequency').value, 10) || 60
     };
-    await chrome.storage.local.set({ syncConfig: config });
+    await safeSetStorage({ syncConfig: config });
     logger.log("💾 [Config Saved]:", config);
   }
   ['webdavUrl', 'webdavUser', 'webdavPass', 'syncFrequency', 'syncMethod'].forEach(id => {
     document.getElementById(id).onchange = saveSyncConfig;
   });
   document.getElementById('exportJson').onclick = async () => {
-    const configKeys = [
-      'userConfigs',
-      'activeConfig',
-      'siteSettings',
-      'customRules',
-      'uiConfig',
-      'scanConfig',
-      'lastActiveId'
-    ];
+    const configKeys = STORAGE_KEYS.export();
     const data = await safeGetStorage(configKeys);
     if (!data) return;
     if (data.userConfigs && Array.isArray(data.userConfigs)) {
@@ -118,8 +220,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     try {
       const vocabularyList = await safeSendMessage({ type: 'IDB_GET_ALL', prefix: 'vb_' });
-      if (!vocabularyList) return;
-      data.vocabulary = vocabularyList;
+      const list = Array.isArray(vocabularyList)
+        ? vocabularyList
+        : Object.values(vocabularyList || {});
+      data.vocabulary = list.filter(item => !item.deleted);
     } catch (err) {
       logger.error("Export Vocabulary failed:", err);
       data.vocabulary = [];
@@ -138,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.download = `MiraTrans_Backup_${dateStr}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    showToast("Backup exported successfully", "success");
+    showToast(`${t('export')} ${t('success')}!`, "success");
   };
   document.getElementById('importJson').onclick = () => {
     const input = document.createElement('input');
@@ -151,10 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       reader.onload = async (event) => {
         try {
           const importedData = JSON.parse(event.target.result);
-          const newKeys = ['userConfigs', 'activeConfig'];
-          const oldKeys = ['selectedEngine', 'apiKeys'];
-          const otherKeys = ['vocabulary', 'siteSettings', 'customRules', 'uiConfig', 'scanConfig'];
-          const allValidKeys = [...newKeys, ...oldKeys, ...otherKeys];
+          const allValidKeys = [...STORAGE_KEYS.sync(), 'vocabulary'];
           const hasValidData = allValidKeys.some(key =>
             Object.prototype.hasOwnProperty.call(importedData, key)
           );
@@ -162,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const incomingVocabulary = Array.isArray(importedData.vocabulary) ? importedData.vocabulary : [];
           delete importedData.vocabulary;
           if (importedData.apiKeys && !importedData.userConfigs) {
-            const oldEngine = importedData.selectedEngine || 'google';
+            const oldEngine = importedData.selectedEngine || _defaultEngine;
             const oldApiKeys = importedData.apiKeys || {};
             const migrationId = 'inst_migrated_' + Date.now();
             importedData.userConfigs = [{
@@ -180,7 +281,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             delete importedData.apiKeys;
             delete importedData.selectedEngine;
           }
-          await chrome.storage.local.set(importedData);
+          await safeSetStorage(importedData);
           if (incomingVocabulary.length > 0) {
             const promises = incomingVocabulary.map(item => {
               const word = item.word || item.w;
@@ -189,9 +290,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             await Promise.all(promises);
           }
-          const finalCount = await idb.vocabulary.getCount();
+          const allWords = await idb.vocabulary.getAll();
+          const finalCount = allWords.filter(item => !item.deleted).length;
           showToast(
-            `${t('importSuccess')} ${t('importSuccess')} ${finalCount} ${t('importSuccessCount')}`,
+            `${t('importSuccess')} ${finalCount} ${t('importSuccessCount')}`,
             'success'
           );
         } catch (err) {
@@ -247,8 +349,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await safeGetStorage('syncConfig');
     if (!data) return;
     const newConfig = { ...(data.syncConfig || {}), frequency: newFreq };
-    chrome.storage.local.set({ syncConfig: newConfig });
+    await safeSetStorage({ syncConfig: newConfig });
   };
+
   document.getElementById('autoSyncToggle').onclick = async function () {
     this.classList.toggle('active');
     const isActive = this.classList.contains('active');
@@ -260,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await safeGetStorage('syncConfig');
     if (!data) return;
     const newConfig = { ...(data.syncConfig || {}), frequency: currentFreq };
-    chrome.storage.local.set({
+    await safeSetStorage({
       autoSync: isActive,
       syncConfig: newConfig
     });
@@ -332,9 +435,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.classList.add('syncing');
     if (keyName) {
       scroller.innerHTML = `
-            <div style="font-size: 8px; opacity: 0.5; margin-bottom: 2px;">SYNCING...</div>
-            <div class="log-item">> ${keyName}</div>
-        `;
+              <div style="font-size: 8px; opacity: 0.5; margin-bottom: 2px;">SYNCING...</div>
+              <div class="log-item">> ${keyName}</div>
+          `;
     }
   }
   document.getElementById('manualSyncPush').onclick = async () => {
@@ -344,11 +447,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await performUnifiedSync('manualSyncPull', 'pull');
   };
   async function performUnifiedSync(btnId, direction) {
+    logger.log('[DEBUG] 进入 performUnifiedSync, direction:', direction);
     const btn = document.getElementById(btnId);
     const originalText = btn.innerText;
     updateSyncProgressUI(btnId, 'initializing', true);
     await saveSyncConfig();
     const data = await safeGetStorage(['syncConfig', 'google_drive_token']);
+    logger.log('[DEBUG] storage data:', data);
     if (!data) return;
     const config = data.syncConfig || {};
     const method = config.method || 'local';
@@ -369,6 +474,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
       if (!isFirefox) {
         safeSendMessage({ type: 'START_AUTH' }).then((response) => {
+          logger.log('[DEBUG] START_AUTH response:', response);
           if (!response) {
             updateSyncProgressUI(btnId, '', false);
             return;
@@ -432,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           const storagePayload = { ...merged };
           delete storagePayload.vocabulary;
           delete storagePayload.idb_vocabulary;
-          await chrome.storage.local.set({
+          await safeSetStorage({
             ...storagePayload,
             lastSyncTime: now
           });
@@ -492,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       statusEl.innerText = `${t('lastSync')} ${timeStr}`;
       statusEl.style.color = '#94a3b8';
     } else {
-      statusEl.innerText = t('neverSynced') || '尚未同步';
+      statusEl.innerText = t('neverSynced', globalUiLang) || 'Not synced';
     }
   }
   function toggleStyleTab(type) {
@@ -517,11 +623,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       container.style.backgroundColor = '#222';
       container.style.backgroundImage = `
-      linear-gradient(45deg, #333 25%, transparent 25%), 
-      linear-gradient(-45deg, #333 25%, transparent 25%), 
-      linear-gradient(45deg, transparent 75%, #333 75%), 
-      linear-gradient(-45deg, transparent 75%, #333 75%)
-    `;
+        linear-gradient(45deg, #333 25%, transparent 25%), 
+        linear-gradient(-45deg, #333 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #333 75%), 
+        linear-gradient(-45deg, transparent 75%, #333 75%)
+      `;
       container.style.backgroundSize = '20px 20px';
       container.style.backgroundPosition = '0 0, 0 10px, 10px 10px, 10px 0';
     }
@@ -534,11 +640,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const effectiveLang = langRes.targetLanguage ||
     (navigator.languages && navigator.languages[0]) ||
     navigator.language ||
-    'zh-CN';
+    'en';
   const targetLang = effectiveLang.replace('_', '-');
-  applyI18n(targetLang);
+  if (!langRes.targetLanguage) {
+    await safeSetStorage({ targetLanguage: targetLang });
+  }
+
+  initUILanguage();
   const data = await safeGetStorage({
-    activeConfig: { engine: 'google', data: {} },
+    activeConfig: { engine: _defaultEngine, data: {} },
     globalConfig: { page: true, select: true, yt: true },
     siteSettings: {},
     targetLanguage: targetLang,
@@ -589,7 +699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (settingsPanel) {
         settingsPanel.style.setProperty('display', 'flex', 'important');
       }
-      const activeConfig = currentConfig.activeConfig || { engine: 'google', data: {} };
+      const activeConfig = currentConfig.activeConfig || { engine: _defaultEngine, data: {} };
       const engine = activeConfig.engine;
       const engineData = activeConfig.data;
       const engineInput = document.getElementById('engineSelect');
@@ -691,16 +801,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function initPopupUI() {
     const tab = await getActiveTab();
     const url = tab?.url || "";
-    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
-    const isRestrictedPage = !url ||
-      url.startsWith('chrome://') ||
-      url.startsWith('edge://') ||
-      url.startsWith('about:') ||
-      url.startsWith('chrome-extension://') ||
-      url.includes('chrome.google.com/webstore') ||
-      url.includes('chromewebstore.google.com') ||
-      url.includes('linkedin.com');
-    if (isRestrictedPage) {
+    const isYouTube = MiraUtils.isYouTubeUrl(url);
+    const isRestricted = MiraUtils.isRestrictedUrl(url);
+
+    const hintEl = document.getElementById('restrictedHint');
+    const seperateLine = document.getElementById('seperateLine');
+    //  受限页面：严格互斥，只做隐藏和显示提示
+    if (isRestricted) {
       [
         ytRow,
         inspectContainer,
@@ -711,22 +818,41 @@ document.addEventListener('DOMContentLoaded', async () => {
       ].forEach(el => {
         if (el) el.style.display = 'none';
       });
+
+      if (hintEl) hintEl.style.display = 'flex';
+      seperateLine.style.display = 'none';
+
       const domainEl = document.getElementById('currentDomain');
       if (domainEl) domainEl.innerText = "Restricted Page";
-    } else if (isYouTube) {
+    }
+    // YouTube 页面
+    else if (isYouTube) {
+      if (hintEl) hintEl.style.display = 'none';
+
       if (ytRow) {
         ytRow.classList.remove('disabled');
         ytRow.style.display = 'flex';
       }
       if (inspectContainer) inspectContainer.style.display = 'none';
+      if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
+      if (targetLangCombox) targetLangCombox.style.display = 'flex';
+
       [webTranslationOptionContainer, selectTextOptionContainer].forEach(el => {
         if (el) el.style.display = '';
       });
-    } else {
+    }
+    //  普通页面
+    else {
+      if (hintEl) hintEl.style.display = 'none';
+      seperateLine.style.display = '';
       if (ytRow) {
         ytRow.classList.add('disabled');
         ytRow.style.display = 'none';
       }
+
+      if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
+      if (targetLangCombox) targetLangCombox.style.display = 'flex';
+
       if (inspectContainer) inspectContainer.style.display = '';
       if (webTranslationOptionContainer) webTranslationOptionContainer.style.display = '';
       if (selectTextOptionContainer) selectTextOptionContainer.style.display = '';
@@ -736,17 +862,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const res = await safeGetStorage(['targetLanguage', 'activeConfig', 'userConfigs']);
   if (!res) return;
   window.currentConfig = {
-    targetLanguage: res.targetLanguage || 'zh-CN',
-    selectedEngine: res.activeConfig?.engine || 'google',
+    targetLanguage: res.targetLanguage || targetLang,
+    selectedEngine: res.activeConfig?.engine || _defaultEngine,
     apiKeys: res.activeConfig?.data || {},
-    activeConfig: res.activeConfig || { engine: 'google', data: {} },
+    activeConfig: res.activeConfig || { engine: _defaultEngine, data: {} },
     userConfigs: res.userConfigs || []
   };
   const langEl = document.getElementById('targetLang');
   if (langEl && currentConfig.targetLanguage) {
     langEl.value = currentConfig.targetLanguage;
   }
-  
+
   initAllComboboxes();
   const gearBtn = document.getElementById('advancedSettingsBtn');
   const advMenu = document.getElementById('advancedMenu');
@@ -928,6 +1054,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
   });
+  // 切换UI语言
+  const uiSelect = document.getElementById('uiLangSelect');
+  if (uiSelect) {
+    uiSelect.onclick = (e) => e.stopPropagation();
+
+    uiSelect.onchange = async (e) => {
+      const selectedLang = e.target.value;
+      const success = await safeSetStorage({ ui_language: selectedLang });
+      if (success) {
+        globalUiLang = selectedLang;
+        applyI18n(selectedLang);
+        const menu = document.getElementById('advancedMenu');
+        if (menu) menu.style.display = 'none';
+      }
+    };
+  }
   document.getElementById('btnGoStyle').addEventListener('click', async () => {
     advMenu.style.display = 'none';
     stylePanel.style.display = 'flex';
@@ -962,6 +1104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     advMenu.style.display = 'none';
   });
   document.getElementById('saveStyleConfig').addEventListener('click', async () => {
+    const currentUiLang = window.currentConfig.ui_language;
     const isYTTab = document.getElementById('tab-yt').classList.contains('active');
     const config = {
       color: document.getElementById('style-color').value,
@@ -974,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       bgOpacity: parseFloat(document.getElementById('yt-style-bgOpacity').value),
       color: document.getElementById('yt-style-color').value
     };
-    await chrome.storage.local.set({
+    await safeSetStorage({
       'userStyleConfig': config,
       'ytStyleSettings': ytConfig
     });
@@ -1000,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const btn = document.getElementById('saveStyleConfig');
     const oldText = btn.innerText;
-    btn.innerText = t('appliedAndSaved') + " ✅";
+    btn.innerText = t('appliedAndSaved', currentUiLang) + " ✅";
     setTimeout(() => {
       btn.innerText = oldText;
     }, 800);
@@ -1039,6 +1182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (actionArea) actionArea.style.display = 'none';
         return;
       }
+      //即时翻译
       executeTranslation(text);
     }
   };
@@ -1066,30 +1210,90 @@ document.addEventListener('DOMContentLoaded', async () => {
     resPhonetic.innerText = '';
     resVoiceHeader.style.display = 'none';
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+
     try {
-      const res = await safeGetStorage(['targetLanguage', 'activeConfig']);
+      const res = await safeGetStorage('activeConfig');
       if (!res) return;
-      let targetL = res.targetLanguage || navigator.language || 'zh-CN';
-      targetL = targetL.replace('_', '-');
-      let engine = res.activeConfig?.engine || 'google';
+
+      // ── 读取语言对 
+      const langA = (document.getElementById('lpSelA').value || 'en').replace('_', '-');
+      const langB = (document.getElementById('lpSelB').value || 'ja').replace('_', '-');
+      const baseA = langA.split('-')[0].toLowerCase();
+      const baseB = langB.split('-')[0].toLowerCase();
+
+      let engine = res.activeConfig?.engine || _defaultEngine;
+
       if (window.currentConfig) {
-        window.currentConfig.targetLanguage = targetL;
         window.currentConfig.selectedEngine = engine;
-        window.currentConfig.activeConfig = res.activeConfig || { engine: 'google', data: {} };
+        window.currentConfig.activeConfig = res.activeConfig || { engine: _defaultEngine, data: {} };
       }
       if (typeof currentEngine !== 'undefined') currentEngine = engine;
-      logger.log(`[Mira-LOG] 翻译请求: text="${text}", targetLanguage="${targetL}", engine="${engine}"`);
-      const hasHan = /\p{Script=Han}/u.test(text);
-      const hasJa = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text);
-      const hasKo = /\p{Script=Hangul}/u.test(text);
-      const isPureChineseInput = hasHan && !hasJa && !hasKo;
-      let uiLang = chrome.i18n.getUILanguage();
-      if (isPureChineseInput && targetL.startsWith('zh')) {
-        targetL = 'en';
-      } else if (!isPureChineseInput && !hasJa && !hasKo && targetL.startsWith('en')) {
-        targetL = uiLang.startsWith('en') ? 'zh-CN' : uiLang;
+
+      // ── 通用语言检测  
+      function detectInputLang(str) {
+        // 平假名/片假名优先判断：可区分汉字日语混合文本
+        if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(str)) return 'ja';
+        if (/\p{Script=Hangul}/u.test(str)) return 'ko';
+        if (/\p{Script=Han}/u.test(str)) return 'zh';
+        if (/\p{Script=Arabic}/u.test(str)) return 'ar';
+        if (/\p{Script=Cyrillic}/u.test(str)) return 'ru';
+        if (/\p{Script=Thai}/u.test(str)) return 'th';
+        if (/\p{Script=Hebrew}/u.test(str)) return 'he';
+        if (/\p{Script=Devanagari}/u.test(str)) return 'hi';
+        if (/^[a-zA-Z\s.,!?'"()\-]+$/.test(str.trim())) return 'en';
+        return 'unknown';
       }
-      const response = await getDetailedTranslation(text, false, targetL);
+
+      const inputLang = detectInputLang(text);
+
+      // 纯汉字时（inputLang==='zh'），看语言对里有没有ja
+      // 如果有ja，则优先认为是ja
+      function resolveInputLang(detectedLang, baseA, baseB) {
+        if (detectedLang !== 'zh') return detectedLang;
+        // 纯汉字：语言对里有ja就归为ja
+        if (baseA === 'ja' || baseB === 'ja') return 'ja';
+        // 语言对里有zh就归为zh
+        if (baseA === 'zh' || baseB === 'zh') return 'zh';
+        // 都不是，保持zh
+        return 'zh';
+      }
+
+      const resolvedLang = resolveInputLang(inputLang, baseA, baseB);
+
+      const matchesA = resolvedLang === baseA
+        || (resolvedLang === 'zh' && baseA === 'zh')
+        || (resolvedLang === 'latin' && LATIN_BASED_LANGS.has(baseA));
+
+      const matchesB = resolvedLang === baseB
+        || (resolvedLang === 'zh' && baseB === 'zh')
+        || (resolvedLang === 'latin' && LATIN_BASED_LANGS.has(baseB));
+
+      let targetL;
+      if (matchesB && !matchesA) {
+        targetL = langA;
+      } else {
+        targetL = langB;
+      }
+
+      // ── 纯汉字日语无法通过字符检测区分（无假名时 detectInputLang 返回 zh）
+      // 此时若语言对包含 ja，根据语言对配置做兜底：
+      // 若 A=ja 且 inputLang=zh → 实为日语，译成 B
+      // 若 B=ja 且 inputLang=zh → 实为日语，译成 A
+      // 由于无法确定，保持 fallback 到 B，但更新 currentConfig 中的 targetLanguage
+      if (window.currentConfig) {
+        window.currentConfig.targetLanguage = targetL;
+      }
+
+      logger.log(`[Mira-LOG] 翻译请求: text="${text}", inputLang="${inputLang}", langA="${langA}", langB="${langB}", targetL="${targetL}", engine="${engine}"`);
+
+      // 翻译 
+      const response = await getDetailedTranslation(text, false, targetL, {
+        needPhonetic: true,
+        hintInputLang: resolvedLang,
+        hintLangA: langA,
+        hintLangB: langB
+      });
+
       if (response && !response.isError) {
         currentTranslationResponse = response;
         resVoiceHeader.style.display = 'flex';
@@ -1099,52 +1303,150 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'block';
         resultArea.style.display = 'flex';
         resultArea.style.userSelect = 'text';
-        let basic = response.basic || "";
-        let phonetic = response.phonetic || "";
-        let dicts = response.dictData || [];
-        let examples = response.examples || [];
+
+        const basic = response.basic || '';
+        const phonetic = response.phonetic || '';
+        const dicts = response.dictData || [];
+        const examples = response.examples || [];
+        const targetPhonetic =
+          response.targetPhonetic ||   // API 直接返回译文音标
+          response.romaji ||            // 日语 romaji
+          response.pinyin ||            // 中文拼音
+          response.transliteration ||   // 通用转写
+          '';
+        logger.log('basic:', response.basic);
+        logger.log('targetPhonetic:', response.targetPhonetic);
+        window._lastTranslationBasic = basic || '';
+        const ttsBtnTarget = document.getElementById('ttsBtnTarget');
+        if (ttsBtnTarget) ttsBtnTarget.style.display = basic ? 'inline-flex' : 'none';
+        const sourcePhonetic = response.sourcePhonetic || '';
+        logger.log("sourcePhonetic: ", sourcePhonetic);
         if (resPhonetic) {
-          resPhonetic.innerText = phonetic ? (phonetic.startsWith('[') ? phonetic : `[${phonetic}]`) : "";
+          resPhonetic.innerText = sourcePhonetic
+            ? `[${sourcePhonetic}]`
+            : '';
         }
-        let html = "";
+
+        let html = '';
+
         if (basic) {
-          html += `<div style="font-weight: bold; color: #38BDF8; margin-bottom: 10px; font-size: 15px; user-select:text !important;">${basic}</div>`;
+          const hasPhonetic = !!targetPhonetic;
+          const phoneticLabel = getPhoneticLabel(targetL);
+          html += `
+            <div style="margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:bold; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
+                ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
+              </div>
+              ${hasPhonetic ? `
+                <div id="targetPhoneticRow" style="
+                  display:none; color:#64748b; font-size:11px;
+                  margin-top:3px; user-select:text;
+                ">${targetPhonetic}</div>` : ''}
+            </div>`;
         }
-        if (dicts.length > 0) {
-          html += dicts.map(item => {
+
+        // 合并相同 pos
+        const mergedDicts = dicts.reduce((acc, item) => {
+          const meanings = item.meanings?.length > 0
+            ? item.meanings
+            : (item.definition
+              ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))]
+              : []);
+          const existing = acc.find(d => d.pos === item.pos);
+          if (existing) {
+            existing.meanings = [...existing.meanings, ...meanings];
+          } else {
+            acc.push({ ...item, meanings });
+          }
+          return acc;
+        }, []).map(item => ({
+          ...item,
+          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
+        }));
+
+        if (mergedDicts.length > 0) {
+          html += mergedDicts.map(item => {
             const englishPos = (typeof formatPosToEnglish === 'function')
               ? formatPosToEnglish(item.pos)
-              : (item.pos || "");
-            return `<div style="margin-bottom: 6px; display: flex; align-items: baseline; line-height: 1.4; user-select:text !important;">
-                      <span style="color: #94a3b8; font-size: 11px; font-weight: bold; margin-right: 8px; min-width: 32px;">${englishPos}.</span>
-                      <span style="color: #38bdf8; font-size: 13px;">${item.meanings.join(', ')}</span>
-                  </div>`;
+              : (item.pos || '');
+            return `
+            <div style="margin-bottom:6px; display:flex; align-items:baseline; line-height:1.4;">
+              <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:8px; min-width:32px;">${englishPos}.</span>
+              <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
+            </div>`;
           }).join('');
         }
-        if (examples.length > 0) {
-          html += `<div style="margin-top: 12px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; user-select:text !important;">
-        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 5px; text-transform: uppercase;">Examples</div>
-        ${examples.map(ex => {
-            const en = typeof ex === 'string' ? ex : (ex.en || '');
-            const cn = typeof ex === 'object' ? (ex.cn || '') : '';
-            return `<div style="margin-bottom: 8px;">
-                <div style="color: rgba(255,255,255,0.6); font-size: 12px; font-style: italic;">"${en}"</div>
-                ${cn ? `<div style="color: rgba(255,255,255,0.4); font-size: 11px; font-style: italic; margin-top: 2px;">${cn}</div>` : ''}
-            </div>`;
-          }).join('')}
-    </div>`;
+
+        // 词形/时态
+        const wordForms = response.wordForms || [];
+        const prototype = response.prototype;
+        const protoLower = (prototype || '').toLowerCase().trim();
+        const textLower = text.toLowerCase().trim();
+
+        if ((prototype && protoLower !== textLower) || wordForms.length > 0) {
+          let formsHtml = '';
+          if (prototype && protoLower !== textLower) {
+            formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,179,237,0.1); border:0.5px solid rgba(99,179,237,0.4); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">原型</span>
+              <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
+            </span>`;
+          }
+          wordForms.forEach(wf => {
+            formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">${wf.name}</span>
+              <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
+            </span>`;
+          });
+          html += `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${formsHtml}</div>`;
         }
-        resContent.innerHTML = html || "No translation found.";
+
+        // 例句
+        if (examples.length > 0) {
+          html += `
+          <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
+            <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
+            ${examples.map(ex => {
+            const src = typeof ex === 'string' ? ex : (ex.en || '');
+            const tgt = typeof ex === 'object' ? (ex.cn || '') : '';
+            return `
+                <div style="margin-bottom:8px;">
+                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic;">"${src}"</div>
+                  ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
+                </div>`;
+          }).join('')}
+          </div>`;
+        }
+
+        if (response.source) {
+          html += `<div style="margin-top:2px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
+        }
+
+        resContent.innerHTML = html || 'No translation found.';
+
+        // 绑定音标切换
+        const toggleBtn = document.getElementById('togglePhoneticBtn');
+        const phoneticRow = document.getElementById('targetPhoneticRow');
+
+        if (toggleBtn && phoneticRow) {
+          toggleBtn.onclick = () => {
+            const isHidden = phoneticRow.style.display === 'none';
+            phoneticRow.style.display = isHidden ? 'block' : 'none';
+            toggleBtn.classList.toggle('active', isHidden);
+          };
+        }
         if (typeof updateSaveBtnStatus === 'function') {
           await updateSaveBtnStatus(text);
         }
       } else {
         const errorMsg = response?.basic || response?.error || 'No response';
-        resContent.innerHTML = `<span style="color: #ef4444;">${errorMsg}</span>`;
+        resContent.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
       }
     } catch (err) {
-      logger.error("Popup Logic Error:", err);
-      resContent.innerHTML = `<span style="color: #ef4444;">Error: ${err.message}</span>`;
+      logger.error('Popup Logic Error:', err);
+      resContent.innerHTML = `<span style="color:#ef4444;">Error: ${err.message}</span>`;
     }
   }
   async function updateSaveBtnStatus(word, isJustSaved = null) {
@@ -1245,35 +1547,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     resultArea.style.display = 'none';
     notebookBtn.style.display = 'none';
   };
+
+  // ── 原文发音
   document.getElementById('ttsBtn').onclick = function () {
-    const inputElem = document.getElementById('searchTextInput');
-    const textToSpeak = inputElem?.value.trim();
-    if (!textToSpeak) return;
-    const ut = new SpeechSynthesisUtterance(textToSpeak);
-    ut.rate = 0.6;
-    ut.pitch = 1.0;
-    if (/[\u3040-\u30ff\u31f0-\u31ff]/.test(textToSpeak)) {
-      ut.lang = 'ja-JP';
-    }
-    else if (/[\uac00-\ud7af]/.test(textToSpeak)) {
-      ut.lang = 'ko-KR';
-    }
-    else if (/[\u4e00-\u9fa5]/.test(textToSpeak)) {
-      ut.lang = 'zh-CN';
-    }
-    else {
-      ut.lang = 'en-US';
-    }
-    ut.onstart = () => {
-      this.classList.add('speaking-wave');
-      this.querySelector('svg').classList.add('icon-active');
-    };
-    ut.onend = () => {
-      this.classList.remove('speaking-wave');
-      this.querySelector('svg').classList.remove('icon-active');
-    };
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(ut);
+    const text = document.getElementById('searchTextInput')?.value.trim();
+    const langA = document.getElementById('lpSelA').value;
+
+    const input = document.getElementById('searchTextInput');
+    input.style.transition = 'box-shadow 0.05s ease';
+    input.style.boxShadow = '0 0 8px 2px rgba(56,189,248,0.8), 0 0 20px 4px rgba(56,189,248,0.3), inset 0 0 8px rgba(56,189,248,0.15)';
+    input.style.borderColor = 'rgba(56,189,248,0.9)';
+    setTimeout(() => {
+      input.style.transition = 'box-shadow 0.8s ease, border-color 0.8s ease';
+      input.style.boxShadow = '';
+      input.style.borderColor = '';
+    }, 150);
+
+    speakText(text, this, langA);
+  };
+
+  // ── 译文发音
+  document.getElementById('ttsBtnTarget').onclick = async function () {
+    const text = window._lastTranslationBasic;
+    const langB = document.getElementById('lpSelB').value;
+
+    const resultArea = document.getElementById('searchResultArea');
+    const originalBorderColor = '#1e293b';
+
+    resultArea.style.transition = 'box-shadow 0.05s ease, border-color 0.05s ease';
+    resultArea.style.boxShadow = '0 0 8px 2px rgba(56,189,248,0.8), 0 0 20px 4px rgba(56,189,248,0.3)';
+    resultArea.style.borderColor = 'rgba(56,189,248,0.9)';
+    setTimeout(() => {
+      resultArea.style.transition = 'box-shadow 0.8s ease, border-color 0.8s ease';
+      resultArea.style.boxShadow = '';
+      resultArea.style.borderColor = originalBorderColor;
+    }, 150);
+
+    speakText(text, this, langB);
   };
   if (resRefreshBtn) {
     resRefreshBtn.onclick = async function () {
@@ -1340,12 +1650,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (tab && tab.url) {
         window.domain = new URL(tab.url).hostname.replace('www.', '');
       }
-      const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig'];
+      const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig', 'ui_language'];
       const storage = await safeGetStorage(keys);
       if (!storage) {
         logger.error("[Mira-Trace] refreshUI 无法获取 storage");
         return;
       }
+      const currentUiLang = storage.ui_language || navigator.language || 'en';
       if (!window.currentConfig) window.currentConfig = {};
       Object.assign(window.currentConfig, storage);
       if (!window.currentConfig.scanConfig) {
@@ -1402,8 +1713,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       const statusEl = document.getElementById('syncStatus');
       if (statusEl) {
         statusEl.innerText = storage.lastSyncTime
-          ? `${t('lastSync')} ${new Date(storage.lastSyncTime).toLocaleString()}`
-          : (t('neverSynced') || '尚未同步');
+          ? `${t('lastSync', currentUiLang)} ${new Date(storage.lastSyncTime).toLocaleString()}`
+          : (t('neverSynced', currentUiLang) || 'Not synced');
       }
       if (storage.syncConfig) {
         const scSync = storage.syncConfig;
@@ -1424,15 +1735,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         setVal('webdavPass', scSync.webdavPass);
         setVal('syncFrequency', scSync.frequency);
       }
-      let targetL = targetLang || window.currentConfig.targetLanguage || navigator.language || 'zh-CN';
+      let targetL = targetLang || window.currentConfig.targetLanguage || navigator.language || 'en';
       targetL = targetL.replace('_', '-');
       const targetLangEl = document.getElementById('targetLang');
       if (targetLangEl) targetLangEl.value = targetL;
       if (typeof updateEngineTips === 'function') {
         const engineSelect = document.getElementById('engineSelect');
-        const currentEngine = engineSelect ? engineSelect.value : 'google';
+        const currentEngine = engineSelect ? engineSelect.value : _defaultEngine;
         updateEngineTips(currentEngine);
       }
+
+      //  恢复界面语言下拉框状态 
+      const uiLangSelect = document.getElementById('uiLangSelect');
+      if (uiLangSelect) {
+        const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'en';
+        uiLangSelect.value = savedUiLang;
+      }
+
       const domainLabel = document.getElementById('domainIndicator');
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
@@ -1449,9 +1768,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const { activeConfig } = await safeGetStorage('activeConfig');
       const engineNameEl = document.getElementById('currentEngineName');
-      if (engineNameEl && activeConfig) {
-        const activeCfg = activeConfig || { engine: 'google', data: {} };
-        const engineId = activeCfg.engine || 'google';
+      if (engineNameEl) {
+        const activeCfg = activeConfig || { engine: _defaultEngine, data: {} };
+        const engineId = activeCfg.engine || _defaultEngine;
         const alias = activeCfg.alias || activeCfg.data?.alias;
         const engineMap = {
           'google': 'Google Translate',
@@ -1460,11 +1779,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         let displayName;
         if (engineMap[engineId]) {
           displayName = engineMap[engineId];
-        }
-        else if (alias && alias !== engineId) {
+        } else if (alias && alias !== engineId) {
           displayName = alias;
-        }
-        else {
+        } else {
           displayName = engineId.charAt(0).toUpperCase() + engineId.slice(1);
         }
         engineNameEl.innerText = displayName;
@@ -1490,15 +1807,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const tab = await getActiveTab();
       if (tab?.id) {
-        safeSendToTab(tab.id, { action: 'START_INSPECT' }).catch(() => { });
-        setTimeout(() => {
-          window.close();
-        }, 10);
+        safeSendToTab(tab.id, {
+          action: 'START_INSPECT',
+          lang: globalUiLang
+        }).catch(() => { });
+        setTimeout(() => window.close(), 10);
       } else {
         window.close();
       }
     } catch (err) {
-      if (err.message.includes("context invalidated")) {
+      if (err.message?.includes("context invalidated")) {
         showUpdateNotification();
       } else {
         logger.error("启动拾取失败:", err);
@@ -1506,6 +1824,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   });
+
   const updateScanInputs = () => {
     if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
     const config = window.currentConfig || {};
@@ -1563,7 +1882,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         gc[key] = !gc[key];
       }
-      await chrome.storage.local.set({
+      await safeSetStorage({
         globalConfig: gc,
         siteSettings: ss
       });
@@ -1622,7 +1941,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const _local_selectors = normalizeSelectors(selectorInput.value.trim());
       const _local_minLen = parseInt(minLenInput.value) || 5;
       const _isCurrentMode = document.getElementById('tabCurrent').classList.contains('active');
-      const _local_storage_res = await chrome.storage.local.get('scanConfig');
+      const _local_storage_res = await safeGetStorage('scanConfig');
       let _finalConfig = { global: {}, custom: {} };
       if (_local_storage_res && _local_storage_res.scanConfig) {
         if (typeof _local_storage_res.scanConfig === 'object') {
@@ -1643,7 +1962,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         _finalConfig.global.selectors = _local_selectors;
         _finalConfig.global.minLen = _local_minLen;
       }
-      await chrome.storage.local.set({ scanConfig: _finalConfig });
+      await safeSetStorage({ scanConfig: _finalConfig });
       if (window.currentConfig) {
         window.currentConfig.scanConfig = _finalConfig;
       }
@@ -1676,14 +1995,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   selectorInput.addEventListener('blur', saveScanConfig);
   minLenInput.addEventListener('blur', saveScanConfig);
+  //切换网页翻译目标语言
   document.getElementById('targetLang').onchange = async (e) => {
     const langSelect = document.getElementById('targetLang');
     try {
       langSelect.disabled = true;
       const lang = langSelect.value;
       currentConfig.targetLanguage = lang;
-      await chrome.storage.local.set({ targetLanguage: lang });
-      applyI18n(lang);
+      await safeSetStorage({ targetLanguage: lang });
       const response = await safeSendToTab(activeTab.id, {
         action: 'RE_SCAN_PAGE',
         config: { forceAll: true },
@@ -1712,6 +2031,106 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   document.getElementById('openSettings').onclick = openSettings;
   document.getElementById('btnGoEngine').onclick = openSettings;
-  applyI18n(currentConfig.targetLanguage);
+  initUILanguage();
   refreshUI();
+
+  // 测试当前引擎是否可用
+  async function checkEngineStatus() {
+    const settingsBtn = document.getElementById('openSettings');
+    if (!settingsBtn) return;
+
+    const engine = currentConfig?.activeConfig?.engine || currentConfig?.selectedEngine || _defaultEngine;
+    const targetLang = currentConfig?.targetLanguage || 'zh-CN';
+
+    try {
+      if (engine === 'google') {
+        // Google 直接 ping 接口验证数据结构
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 5000);
+        try {
+          const res = await fetch(
+            'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
+            { signal: controller.signal }
+          );
+          clearTimeout(timer);
+          const data = await res.json();
+          const translated = data?.[0]?.[0]?.[0];
+          if (!res.ok || !translated || translated === 'hello') {
+            showEngineWarning(settingsBtn);
+          }
+        } catch (e) {
+          clearTimeout(timer);
+          showEngineWarning(settingsBtn);
+        }
+        return;
+      }
+
+      // 非 Google：复用设置页的测试逻辑
+      const isTargetEn = targetLang.toLowerCase().startsWith('en');
+      const testText = isTargetEn ? '你好' : 'Good morning';
+
+      const res = await Promise.race([
+        safeSendMessage({
+          type: 'TRANSLATE',
+          text: testText,
+          targetLang: targetLang,
+        }),
+        new Promise(resolve => setTimeout(() => resolve(null), 8000))
+      ]);
+
+      if (!res) { showEngineWarning(settingsBtn); return; }
+      if (res.error) { showEngineWarning(settingsBtn); return; }
+
+      const data = res.currentTranslationResponse || res.result;
+      if (!data) { showEngineWarning(settingsBtn); return; }
+      if (data.error) { showEngineWarning(settingsBtn); return; }
+
+      const translatedText = (typeof data === 'string'
+        ? data
+        : (data.basic || data.translatedText || "")
+      ).trim();
+
+      const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+      const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+
+      if (!hasContent || !isNotOriginal) {
+        showEngineWarning(settingsBtn);
+      }
+
+    } catch (e) {
+      showEngineWarning(settingsBtn);
+    }
+  }
+
+  function showEngineWarning(settingsBtn) {
+    if (settingsBtn.querySelector('.engine-warning')) return;
+
+    settingsBtn.style.position = 'relative';
+    settingsBtn.title = 'Engine may not be working, click to check settings';
+
+    const warning = document.createElement('span');
+    warning.className = 'engine-warning';
+    warning.style.cssText = `
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 14px;
+          height: 14px;
+          background: #ef4444;
+          border-radius: 50%;
+          color: white;
+          font-size: 10px;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          line-height: 1;
+          cursor: pointer;
+      `;
+    warning.textContent = '!';
+    settingsBtn.appendChild(warning);
+  }
+
+  checkEngineStatus();
 });

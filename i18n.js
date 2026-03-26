@@ -7,7 +7,6 @@ self.i18nData = {
     pageTrans: "网页翻译",
     selectTrans: "划词翻译",
     ytTrans: "YouTube双语字幕",
-    targetLang: "目标语言",
     wordBook: "生词本",
     myWordBook: "我的生词本",
     exportCSV: "导出 CSV",
@@ -21,7 +20,7 @@ self.i18nData = {
     operation: "操作",
     noCollection: "暂无收藏单词",
     completeContent: "请填写完整内容",
-    noExportWords: "没有可导出的单词",
+    noExportWords: "没有可导出的数据",
     currentSite: "当前网站",
     globalSetting: "全局默认",
     personalizedScan: "自定义翻译区域 (修改即生效)",
@@ -40,7 +39,6 @@ self.i18nData = {
     pageTrans: "網頁翻譯",
     selectTrans: "劃詞翻譯",
     ytTrans: "YouTube雙語字幕",
-    targetLang: "目標語言",
     wordBook: "單字本",
     myWordBook: "我的單字本",
     exportCSV: "導出 CSV",
@@ -54,9 +52,9 @@ self.i18nData = {
     operation: "操作",
     noCollection: "暫無收藏單詞",
     completeContent: "請填寫完整內容",
-    noExportWords: "沒有可導出的單詞",
+    noExportWords: "沒有可導出的數據",
     currentSite: "當前網站",
-    globalSetting: "全局默認",
+    globalSetting: "全局預設",
     personalizedScan: "自定義翻譯區域 (修改即生效)",
     smartPicker: "點此拾取頁面區域\n(ESC/右鍵 退出)",
     matchSelector: "生效列表 (CSS 選擇器)",
@@ -73,7 +71,6 @@ self.i18nData = {
     pageTrans: "Web Translation",
     selectTrans: "Selection Translation",
     ytTrans: "YouTube Bilingual Subs",
-    targetLang: "Target Language",
     wordBook: "Vocabulary",
     myWordBook: "My Wordbook",
     exportCSV: "Export CSV",
@@ -87,7 +84,7 @@ self.i18nData = {
     operation: "Action",
     noCollection: "No saved words",
     completeContent: "Please fill in all fields",
-    noExportWords: "No words to export",
+    noExportWords: "No data to export",
     currentSite: "Current Site",
     globalSetting: "Global Default",
     personalizedScan: "Custom Translation Areas (Auto-saves)",
@@ -106,7 +103,6 @@ self.i18nData = {
     pageTrans: "ページ翻訳",
     selectTrans: "選択範囲翻訳",
     ytTrans: "YouTube二ヶ国語字幕",
-    targetLang: "ターゲット言語",
     wordBook: "単語帳",
     myWordBook: "マイ単語帳",
     exportCSV: "CSV出力",
@@ -120,7 +116,7 @@ self.i18nData = {
     operation: "操作",
     noCollection: "保存された単語はありません",
     completeContent: "すべての項目を入力してください",
-    noExportWords: "出力する単語がありません",
+    noExportWords: "出力するデータがありません",
     currentSite: "現在のサイト",
     globalSetting: "グローバル設定",
     personalizedScan: "翻訳エリアのカスタマイズ (自動保存)",
@@ -139,7 +135,6 @@ self.i18nData = {
     pageTrans: "페이지 번역",
     selectTrans: "드래그 번역",
     ytTrans: "YouTube 이중 언어 자막",
-    targetLang: "대상 언어",
     wordBook: "단어장",
     myWordBook: "나의 단어장",
     exportCSV: "CSV 내보내기",
@@ -153,7 +148,7 @@ self.i18nData = {
     operation: "작업",
     noCollection: "수집된 단어가 없습니다",
     completeContent: "모든 내용을 입력해주세요",
-    noExportWords: "내보낼 단어가 없습니다",
+    noExportWords: "내보낼 데이터가 없습니다",
     currentSite: "현재 사이트",
     globalSetting: "전역 기본값",
     personalizedScan: "사용자 정의 번역 영역 (자동 저장)",
@@ -172,7 +167,6 @@ self.i18nData = {
     pageTrans: "Traducción de Página",
     selectTrans: "Traducción de Selección",
     ytTrans: "Subtítulos de YouTube",
-    targetLang: "Idioma Destino",
     wordBook: "Vocabulario",
     myWordBook: "Mi Vocabulario",
     exportCSV: "Exportar CSV",
@@ -186,7 +180,7 @@ self.i18nData = {
     operation: "Acción",
     noCollection: "Sin palabras guardadas",
     completeContent: "Complete todos los campos",
-    noExportWords: "No hay palabras para exportar",
+    noExportWords: "No hay datos para exportar",
     currentSite: "Sitio Actual",
     globalSetting: "Ajuste Global",
     personalizedScan: "Áreas de traducción personalizadas (Auto-guardar)",
@@ -205,7 +199,6 @@ self.i18nData = {
     pageTrans: "Traduction de Page",
     selectTrans: "Traduction de Sélection",
     ytTrans: "Sous-titres YouTube",
-    targetLang: "Langue Cible",
     wordBook: "Vocabulaire",
     myWordBook: "Mon Vocabulaire",
     exportCSV: "Exporter CSV",
@@ -219,7 +212,7 @@ self.i18nData = {
     operation: "Action",
     noCollection: "Aucun mot enregistré",
     completeContent: "Veuillez remplir tout",
-    noExportWords: "Aucun mot à exporter",
+    noExportWords: "Aucune donnée à exporter",
     currentSite: "Site Actuel",
     globalSetting: "Réglage Global",
     personalizedScan: "Zones de traduction personnalisées (Auto-sauvegarde)",
@@ -238,7 +231,6 @@ self.i18nData = {
     pageTrans: "Seitenübersetzung",
     selectTrans: "Textauswahl-Übersetzung",
     ytTrans: "YouTube-Untertitel",
-    targetLang: "Zielsprache",
     wordBook: "Vokabelheft",
     myWordBook: "Mein Vokabelheft",
     exportCSV: "CSV Exportieren",
@@ -252,10 +244,10 @@ self.i18nData = {
     operation: "Aktion",
     noCollection: "Keine Wörter gespeichert",
     completeContent: "Bitte alles ausfüllen",
-    noExportWords: "Keine Wörter zum Exportieren",
+    noExportWords: "Keine Daten zum Exportieren",
     currentSite: "Aktuelle Seite",
     globalSetting: "Globaler Standard",
-    personalizedScan: "Übersetzungsbereiche anpassen (Autom. Speichern)",
+    personalizedScan: "Übersetzungsbereiche festlegen",
     smartPicker: "Bereiche auf der Seite auswählen\n(ESC/Rechtsklick zum Beenden)",
     matchSelector: "Aktive Elemente (CSS-Selektoren)",
     minChars: "Kurze Sätze überspringen (Min. Zeichen)",
@@ -271,7 +263,6 @@ self.i18nData = {
     pageTrans: "Перевод страницы",
     selectTrans: "Перевод выделения",
     ytTrans: "Субтитры YouTube",
-    targetLang: "Целевой язык",
     wordBook: "Словарь",
     myWordBook: "Мой словарь",
     exportCSV: "Экспорт в CSV",
@@ -285,9 +276,9 @@ self.i18nData = {
     operation: "Действие",
     noCollection: "Нет сохраненных слов",
     completeContent: "Заполните все поля",
-    noExportWords: "Нет слов для экспорта",
+    noExportWords: "Нет данных для экспорта",
     currentSite: "Текущий сайт",
-    globalSetting: "Глобальная настройка",
+    globalSetting: "Глобально",
     personalizedScan: "Настройка зон перевода (Автосохранение)",
     smartPicker: "Нажмите, чтобы выбрать область\n(ESC/Прав. клик для выхода)",
     matchSelector: "Активные элементы (CSS-селекторы)",
@@ -304,7 +295,6 @@ self.i18nData = {
     pageTrans: "Tradução de Página",
     selectTrans: "Tradução de Seleção",
     ytTrans: "Legendas do YouTube",
-    targetLang: "Idioma de Destino",
     wordBook: "Vocabulário",
     myWordBook: "Meu Vocabulário",
     exportCSV: "Exportar CSV",
@@ -318,7 +308,7 @@ self.i18nData = {
     operation: "Ação",
     noCollection: "Nenhuma palavra salva",
     completeContent: "Preencha tudo",
-    noExportWords: "Sem palavras para exportar",
+    noExportWords: "Sem dados para exportar",
     currentSite: "Site Atual",
     globalSetting: "Padrão Global",
     personalizedScan: "Áreas de tradução personalizadas (Auto-salvar)",
@@ -337,7 +327,6 @@ self.i18nData = {
     pageTrans: "Traduzione Pagina",
     selectTrans: "Traduzione Selezione",
     ytTrans: "Sottotitoli YouTube",
-    targetLang: "Lingua Destinazione",
     wordBook: "Glossario",
     myWordBook: "Il Mio Glossario",
     exportCSV: "Esporta CSV",
@@ -351,7 +340,7 @@ self.i18nData = {
     operation: "Azione",
     noCollection: "Nessuna parola salvata",
     completeContent: "Compila tutti i campi",
-    noExportWords: "Nessuna parola da esportare",
+    noExportWords: "Nessun dato da esportare",
     currentSite: "Sito Attuale",
     globalSetting: "Predefinito Globale",
     personalizedScan: "Aree di traduzione personalizzate (Auto-salvataggio)",
@@ -370,7 +359,6 @@ self.i18nData = {
     pageTrans: "Dịch trang",
     selectTrans: "Dịch đoạn chọn",
     ytTrans: "Phụ đề YouTube",
-    targetLang: "Ngôn ngữ đích",
     wordBook: "Sổ từ vựng",
     myWordBook: "Sổ từ của tôi",
     exportCSV: "Xuất CSV",
@@ -384,7 +372,7 @@ self.i18nData = {
     operation: "Thao tác",
     noCollection: "Chưa có từ nào",
     completeContent: "Vui lòng điền đầy đủ",
-    noExportWords: "Không có từ để xuất",
+    noExportWords: "Không có dữ liệu để xuất",
     currentSite: "Trang hiện tại",
     globalSetting: "Mặc định chung",
     personalizedScan: "Tùy chỉnh khu vực dịch (Tự động lưu)",
@@ -403,7 +391,6 @@ self.i18nData = {
     pageTrans: "แปลหน้าเว็บ",
     selectTrans: "แปลส่วนที่เลือก",
     ytTrans: "คำบรรยาย YouTube",
-    targetLang: "ภาษาเป้าหมาย",
     wordBook: "สมุดคำศัพท์",
     myWordBook: "สมุดคำศัพท์ของฉัน",
     exportCSV: "ส่งออก CSV",
@@ -417,7 +404,7 @@ self.i18nData = {
     operation: "การดำเนินการ",
     noCollection: "ยังไม่มีคำศัพท์ที่เก็บ",
     completeContent: "กรุณากรอกข้อมูลให้ครบ",
-    noExportWords: "ไม่มีคำศัพท์ที่จะส่งออก",
+    noExportWords: "ไม่มีข้อมูลที่จะส่งออก",
     currentSite: "ไซต์ปัจจุบัน",
     globalSetting: "ค่าเริ่มต้นทั่วไป",
     personalizedScan: "กำหนดพื้นที่แปลภาษา (บันทึกอัตโนมัติ)",
@@ -436,7 +423,6 @@ self.i18nData = {
     pageTrans: "ترجمة الصفحة",
     selectTrans: "ترجمة النص المحدد",
     ytTrans: "ترجمة يوتيوب",
-    targetLang: "اللغة المستهدفة",
     wordBook: "دفتر الكلمات",
     myWordBook: "دفتر كلماتي",
     exportCSV: "تصدير CSV",
@@ -450,7 +436,7 @@ self.i18nData = {
     operation: "عملية",
     noCollection: "لا توجد كلمات محفوظة",
     completeContent: "يرجى ملء كافة الحقول",
-    noExportWords: "لا توجد كلمات للتصدير",
+    noExportWords: "لا توجد بيانات للتصدير",
     currentSite: "الموقع الحالي",
     globalSetting: "الإعداد العام",
     personalizedScan: "تخصيص مناطق الترجمة (حفظ تلقائي)",
@@ -469,7 +455,6 @@ self.i18nData = {
     pageTrans: "ترجمه صفحه",
     selectTrans: "ترجمه متن انتخاب شده",
     ytTrans: "زیرنویس یوتیوب",
-    targetLang: "زبان مقصد",
     wordBook: "دفترچه کلمات",
     myWordBook: "دفترچه من",
     exportCSV: "خروجی CSV",
@@ -483,7 +468,7 @@ self.i18nData = {
     operation: "عملیات",
     noCollection: "کلمه‌ای ذخیره نشده است",
     completeContent: "لطفاً همه موارد را پر کنید",
-    noExportWords: "کلمه‌ای برای خروجی وجود ندارد",
+    noExportWords: "داده‌ای برای خروجی وجود ندارد",
     currentSite: "سایت فعلی",
     globalSetting: "تنظیمات کلی",
     personalizedScan: "سفارشی‌سازی مناطق ترجمه (ذخیره خودکار)",
@@ -502,7 +487,6 @@ self.i18nData = {
     pageTrans: "Sayfa Çevirisi",
     selectTrans: "Seçim Çevirisi",
     ytTrans: "YouTube Altyazı",
-    targetLang: "Hedef Dil",
     wordBook: "Kelime Defteri",
     myWordBook: "Kelime Defterim",
     exportCSV: "CSV Dışa Aktar",
@@ -516,7 +500,7 @@ self.i18nData = {
     operation: "İşlem",
     noCollection: "Kaydedilmiş kelime yok",
     completeContent: "Lütfen tüm alanları doldurun",
-    noExportWords: "Dışa aktarılacak kelime yok",
+    noExportWords: "Dışa aktarılacak veri yok",
     currentSite: "Mevcut Site",
     globalSetting: "Genel Ayar",
     personalizedScan: "Çeviri Alanlarını Özelleştir (Oto-kaydet)",
@@ -1100,10 +1084,9 @@ self.i18nStyleData = {
     pinUnpin: "固定 / 取消固定",
     instantTranslation: "即时翻译",
     inputAndEnter: "输入并回车...↵",
-    selectEngine: "选择引擎",
     styleCustomization: "样式自定义",
-    engineConfig: "引擎配置",
-    stylePreview: "风格预览",
+    engineConfig: "选择翻译服务",
+    stylePreview: "翻译样式设置",
     translationExampleWeb: "时光飞逝",
     translationExampleYTOrigin: "You matter!",
     translationExampleYTTrans: "你很重要!",
@@ -1132,15 +1115,14 @@ self.i18nStyleData = {
     webTranslation: "网页翻译",
     youtubeSubtitles: "YouTube 字幕",
     subtitleSize: "字幕大小",
-    backgroundOpacity: "背景透明度"
+    backgroundOpacity: "背景不透明度"
   },
   "zh-TW": {
     pinUnpin: "固定 / 取消固定",
     instantTranslation: "即時翻譯",
     inputAndEnter: "輸入並回車...↵",
-    selectEngine: "選擇引擎",
-    styleCustomization: "樣式自訂",
-    engineConfig: "引擎配置",
+    styleCustomization: "翻譯樣式設定",
+    engineConfig: "選擇翻譯服務",
     stylePreview: "風格預覽",
     translationExampleWeb: "時光飛逝",
     translationExampleYTOrigin: "You matter!",
@@ -1170,15 +1152,14 @@ self.i18nStyleData = {
     webTranslation: "網頁翻譯",
     youtubeSubtitles: "YouTube 字幕",
     subtitleSize: "字幕大小",
-    backgroundOpacity: "背景透明度"
+    backgroundOpacity: "背景不透明度"
   },
   "en": {
     pinUnpin: "Pin / Unpin",
     instantTranslation: "Search",
     inputAndEnter: "Input and press Enter...↵",
-    selectEngine: "Select Engine",
-    styleCustomization: "Style Customization",
-    engineConfig: "Engine Configuration",
+    styleCustomization: "Translation Style",
+    engineConfig: "Select Translator",
     stylePreview: "Style Preview",
     translationExampleWeb: "Time flies",
     translationExampleYTOrigin: "You matter!",
@@ -1212,12 +1193,12 @@ self.i18nStyleData = {
   },
   "ja": {
     pinUnpin: "固定 / 固定解除",
-    instantTranslation: "クイック翻訳", 
+    instantTranslation: "クイック翻訳",
     inputAndEnter: "入力してEnter...↵",
-    selectEngine: "エンジン選択",
-    styleCustomization: "スタイル設定", 
-    engineConfig: "エンジン構成",
-    stylePreview: "プレビュー", 
+    selectEngine: "翻訳サービスの選択",
+    styleCustomization: "翻訳表示の設定",
+    engineConfig: "翻訳サービスの選択",
+    stylePreview: "プレビュー",
     translationExampleWeb: "光陰矢のごとし",
     translationExampleYTOrigin: "You matter!",
     translationExampleYTTrans: "あなたは大切です！",
@@ -1226,16 +1207,16 @@ self.i18nStyleData = {
     borderStyle: "枠線のスタイル",
     quoteStyle: "引用スタイル",
     solidBorder: "実線",
-    dashedBorder: "破線", 
+    dashedBorder: "破線",
     noBorder: "枠線なし",
     dashedUnderline: "破線の下線",
     solidUnderline: "実線の下線",
-    dottedUnderline: "点線の下线", 
+    dottedUnderline: "点線の下线",
     wavyUnderline: "波線の下線",
     lightHighlight: "ハイライト",
     markerLine: "マーカー",
     paperShadow: "シャドウ",
-    italicText: "斜体", 
+    italicText: "斜体",
     boldText: "太字",
     translucentDim: "ブラックベール",
     topDivider: "区切り線",
@@ -1250,13 +1231,12 @@ self.i18nStyleData = {
   },
   "ko": {
     pinUnpin: "고정 / 해제",
-    instantTranslation: "빠른 번역", 
+    instantTranslation: "빠른 번역",
     inputAndEnter: "입력하고 Enter...↵",
-    selectEngine: "엔진 선택",
-    styleCustomization: "스타일 맞춤 설정",
-    engineConfig: "엔진 구성",
+    styleCustomization: "번역 스타일 설정",
+    engineConfig: "번역 서비스 선택",
     stylePreview: "미리보기",
-    translationExampleWeb: "시간이 참 빠르네요", 
+    translationExampleWeb: "시간이 참 빠르네요",
     translationExampleYTOrigin: "You matter!",
     translationExampleYTTrans: "당신은 소중합니다!",
     textColorPalette: "텍스트 색상 / 팔레트",
@@ -1274,7 +1254,7 @@ self.i18nStyleData = {
     markerLine: "마커 라인",
     paperShadow: "종이 그림자",
     italicText: "이탤릭",
-    boldText: "굵게", 
+    boldText: "굵게",
     translucentDim: "검은 베일",
     topDivider: "상단 구분선",
     borderColor: "테두리 색상",
@@ -1290,9 +1270,8 @@ self.i18nStyleData = {
     pinUnpin: "Fijar / Desfijar",
     instantTranslation: "Trad. rápida",
     inputAndEnter: "Escriba y Enter...↵",
-    selectEngine: "Seleccionar Motor",
-    styleCustomization: "Personalización Estilo",
-    engineConfig: "Configuración Motor",
+    styleCustomization: "Estilo de traducción",
+    engineConfig: "Cambiar traductor",
     stylePreview: "Vista Previa",
     translationExampleWeb: "El tiempo vuela",
     translationExampleYTOrigin: "You matter!",
@@ -1318,19 +1297,18 @@ self.i18nStyleData = {
     borderColor: "Color del Borde",
     studyMode: "Modo Estudio (Hover)",
     applyAndSync: "Aplicar y Sincronizar",
-    cloudSync: "Sincronización en la Nube",
+    cloudSync: "Sincronización",
     webTranslation: "Traducción Web",
     youtubeSubtitles: "Subtítulos YouTube",
     subtitleSize: "Tamaño de Subtítulo",
-    backgroundOpacity: "Opacidad de Fondo"
+    backgroundOpacity: "Opacidad del fondo"
   },
   "fr": {
     pinUnpin: "Épingler / Désépingler",
     instantTranslation: "Trad. rapide",
     inputAndEnter: "Saisir & Entrée...↵",
-    selectEngine: "Sélectionner le Moteur",
-    styleCustomization: "Personnalisation Style",
-    engineConfig: "Configuration Moteur",
+    styleCustomization: "Style de traduction",
+    engineConfig: "Choix du traducteur",
     stylePreview: "Aperçu du Style",
     translationExampleWeb: "Le temps passe vite",
     translationExampleYTOrigin: "You matter!",
@@ -1356,19 +1334,18 @@ self.i18nStyleData = {
     borderColor: "Couleur de la Bordure",
     studyMode: "Mode Étude (Survol)",
     applyAndSync: "Appliquer et Synchroniser",
-    cloudSync: "Synchronisation Cloud",
+    cloudSync: "Synchronisation",
     webTranslation: "Traduction Web",
     youtubeSubtitles: "Sous-titres YouTube",
     subtitleSize: "Taille des Sous-titres",
-    backgroundOpacity: "Opacité de l'Arrière-plan"
+    backgroundOpacity: "Opacité de l'arrière-plan"
   },
   "de": {
     pinUnpin: "Anheften / Lösen",
     instantTranslation: "Direkt-Übers.",
     inputAndEnter: "Schreiben & Enter...↵",
-    selectEngine: "Engine wählen",
-    styleCustomization: "Stilanpassung",
-    engineConfig: "Engine-Konfiguration",
+    styleCustomization: "Übersetzungs-Stil",
+    engineConfig: "Übersetzer wählen",
     stylePreview: "Stil-Vorschau",
     translationExampleWeb: "Die Zeit vergeht wie im Flug",
     translationExampleYTOrigin: "You matter!",
@@ -1398,15 +1375,14 @@ self.i18nStyleData = {
     webTranslation: "Web-Übersetzung",
     youtubeSubtitles: "YouTube-Untertitel",
     subtitleSize: "Untertitelgröße",
-    backgroundOpacity: "Hintergrunddeckkraft"
+    backgroundOpacity: "Hintergrund-Deckkraft"
   },
   "ru": {
     pinUnpin: "Закрепить / Открепить",
-    instantTranslation: "Быстрый перевод",
+    instantTranslation: "Поиск",
     inputAndEnter: "Введите и Enter...↵",
-    selectEngine: "Выбор движка",
     styleCustomization: "Настройка стиля",
-    engineConfig: "Конфигурация движка",
+    engineConfig: "Сервис перевода",
     stylePreview: "Предпросмотр",
     translationExampleWeb: "Время летит",
     translationExampleYTOrigin: "You matter!",
@@ -1432,17 +1408,16 @@ self.i18nStyleData = {
     borderColor: "Цвет рамки",
     studyMode: "Режим обучения (наведите курсор)",
     applyAndSync: "Применить и синхронизировать",
-    cloudSync: "Облачная синхронизация",
+    cloudSync: "Синхронизация",
     webTranslation: "Перевод веб-страниц",
     youtubeSubtitles: "Субтитры YouTube",
     subtitleSize: "Размер субтитров",
-    backgroundOpacity: "Прозрачность фона"
+    backgroundOpacity: "Непрозрачность фона"
   },
   "pt": {
     pinUnpin: "Fixar / Desafixar",
     instantTranslation: "Trad. rápida",
     inputAndEnter: "Digite e Enter...↵",
-    selectEngine: "Selecionar Motor",
     styleCustomization: "Personalizar Estilo",
     engineConfig: "Configuração Motor",
     stylePreview: "Pré-visualização",
@@ -1470,7 +1445,7 @@ self.i18nStyleData = {
     borderColor: "Cor da Borda",
     studyMode: "Modo Estudo (Hover)",
     applyAndSync: "Aplicar e Sincronizar",
-    cloudSync: "Sincronização Cloud",
+    cloudSync: "Sincronização",
     webTranslation: "Tradução Web",
     youtubeSubtitles: "Legendas YouTube",
     subtitleSize: "Tamanho da Legenda",
@@ -1480,7 +1455,6 @@ self.i18nStyleData = {
     pinUnpin: "Fissa / Sblocca",
     instantTranslation: "Trad. rapida",
     inputAndEnter: "Scrivi e premi Enter...↵",
-    selectEngine: "Motore",
     styleCustomization: "Personalizza Stile",
     engineConfig: "Config. Motore",
     stylePreview: "Anteprima",
@@ -1508,7 +1482,7 @@ self.i18nStyleData = {
     borderColor: "Colore Bordo",
     studyMode: "Modo Studio (Hover)",
     applyAndSync: "Applica e Sincronizza",
-    cloudSync: "Sincronizzazione Cloud",
+    cloudSync: "Sincronizzazione",
     webTranslation: "Traduzione Web",
     youtubeSubtitles: "Sottotitoli YouTube",
     subtitleSize: "Dimensione Sottotitoli",
@@ -1518,7 +1492,6 @@ self.i18nStyleData = {
     pinUnpin: "Ghim / Bỏ ghim",
     instantTranslation: "Dịch Tức Thì",
     inputAndEnter: "Nhập và nhấn Enter...↵",
-    selectEngine: "Chọn Công cụ",
     styleCustomization: "Tùy chỉnh Kiểu dáng",
     engineConfig: "Cấu hình Công cụ",
     stylePreview: "Xem trước Kiểu dáng",
@@ -1550,13 +1523,12 @@ self.i18nStyleData = {
     webTranslation: "Dịch trang web",
     youtubeSubtitles: "Phụ đề YouTube",
     subtitleSize: "Kích thước phụ đề",
-    backgroundOpacity: "Độ mờ nền"
+    backgroundOpacity: "Độ mờ hậu cảnh"
   },
   "th": {
     pinUnpin: "ปักหมุด / ถอดหมุด",
     instantTranslation: "แปลทันที",
     inputAndEnter: "พิมพ์และกด Enter...↵",
-    selectEngine: "เลือกเครื่องมือ",
     styleCustomization: "ปรับแต่งสไตล์",
     engineConfig: "การตั้งค่าเครื่องมือ",
     stylePreview: "ตัวอย่างสไตล์",
@@ -1588,13 +1560,12 @@ self.i18nStyleData = {
     webTranslation: "แปลหน้าเว็บ",
     youtubeSubtitles: "คำบรรยาย YouTube",
     subtitleSize: "ขนาดคำบรรยาย",
-    backgroundOpacity: "ความทึบพื้นหลัง"
+    backgroundOpacity: "ความทึบแสงพื้นหลัง"
   },
   "ar": {
     pinUnpin: "تثبيت / فك",
     instantTranslation: "ترجمة سريعة",
     inputAndEnter: "↵...Enter اكتب واضغط",
-    selectEngine: "اختر المحرك",
     styleCustomization: "تخصيص النمط",
     engineConfig: "إعدادات المحرك",
     stylePreview: "معاينة",
@@ -1632,7 +1603,6 @@ self.i18nStyleData = {
     pinUnpin: "پین / رها کردن",
     instantTranslation: "ترجمه سریع",
     inputAndEnter: "↵...تایپ و اینتر",
-    selectEngine: "انتخاب موتور",
     styleCustomization: "سفارشی‌سازی ظاهر",
     engineConfig: "تنظیمات موتور",
     stylePreview: "پیش‌نمایش",
@@ -1670,9 +1640,8 @@ self.i18nStyleData = {
     pinUnpin: "Sabitle / Sabitlemeyi Kaldır",
     instantTranslation: "Anlık Çeviri",
     inputAndEnter: "Girin ve Enter...↵",
-    selectEngine: "Motor Seç",
     styleCustomization: "Stil Özelleştirme",
-    engineConfig: "Motor Yapılandırması",
+    engineConfig: "Çeviri Hizmeti Seç",
     stylePreview: "Stil Önizleme",
     translationExampleWeb: "Zaman uçar",
     translationExampleYTOrigin: "You matter!",
@@ -1709,112 +1678,96 @@ self.i18nYTData = {
   "zh-CN": {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次双击取消",
-    hintAdd: "双击收藏到生词本",
     alreadyAddedFeedback: "⭐ 已在生词本，双击取消",
     hintAddAction: "双击收藏到生词本"
   },
   "zh-TW": {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次雙擊取消",
-    hintAdd: "雙擊收藏到單字本",
     alreadyAddedFeedback: "⭐ 已在單字本，雙擊取消",
     hintAddAction: "雙擊收藏到單字本"
   },
   "en": {
     removed: "Removed",
     addedFeedback: "⭐ Added to collection, double-click to undo",
-    hintAdd: "Double-click to save to vocabulary",
     alreadyAddedFeedback: "⭐ Already in vocabulary, double-click to undo",
     hintAddAction: "Double-click to save to vocabulary"
   },
   "ja": {
     removed: "削除済み",
     addedFeedback: "⭐ コレクションに追加しました、ダブルクリックで取り消し",
-    hintAdd: "ダブルクリックで単語帳に保存",
     alreadyAddedFeedback: "⭐ 単語帳に既に存在します、ダブルクリックで取り消し",
     hintAddAction: "ダブルクリックで単語帳に保存"
   },
   "ko": {
     removed: "제거됨",
     addedFeedback: "⭐ 콜렉션에 추가됨, 더블클릭하여 취소",
-    hintAdd: "더블클릭하여 단어장에 저장",
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
     hintAddAction: "더블클릭하여 단어장에 저장"
   },
   "es": {
     removed: "Eliminado",
     addedFeedback: "⭐ Añadido a la colección, doble clic para deshacer",
-    hintAdd: "Doble clic para guardar en el vocabulario",
     alreadyAddedFeedback: "⭐ Ya está en el vocabulario, doble clic para deshacer",
     hintAddAction: "Doble clic para guardar en el vocabulario"
   },
   "fr": {
     removed: "Supprimé",
     addedFeedback: "⭐ Ajouté à la collection, double-clic pour annuler",
-    hintAdd: "Double-clic pour sauvegarder dans le lexique",
     alreadyAddedFeedback: "⭐ Déjà dans le lexique, double-clic pour annuler",
     hintAddAction: "Double-clic pour sauvegarder dans le lexique"
   },
   "de": {
     removed: "Entfernt",
     addedFeedback: "⭐ Zur Sammlung hinzugefügt, Doppelklick zum Rückgängig",
-    hintAdd: "Doppelklick zum Speichern im Vokabelheft",
     alreadyAddedFeedback: "⭐ Bereits im Vokabelheft, Doppelklick zum Rückgängig",
     hintAddAction: "Doppelklick zum Speichern im Vokabelheft"
   },
   "ru": {
     removed: "Удалено",
     addedFeedback: "⭐ Добавлено в коллекцию, двойной щелчок для отмены",
-    hintAdd: "Двойной щелчок для сохранения в словарь",
     alreadyAddedFeedback: "⭐ Уже в словаре, двойной щелчок для отмены",
     hintAddAction: "Двойной щелчок для сохранения в словарь"
   },
   "pt": {
     removed: "Removido",
     addedFeedback: "⭐ Adicionado à coleção, clique duplo para desfazer",
-    hintAdd: "Clique duplo para salvar no vocabulário",
     alreadyAddedFeedback: "⭐ Já no vocabulário, clique duplo para desfazer",
     hintAddAction: "Clique duplo para salvar no vocabulário"
   },
   "it": {
     removed: "Rimosso",
     addedFeedback: "⭐ Aggiunto alla collezione, doppio clic per annullare",
-    hintAdd: "Doppio clic per salvare nel vocabolario",
     alreadyAddedFeedback: "⭐ Già nel vocabolario, doppio clic per annullare",
     hintAddAction: "Doppio clic per salvare nel vocabolario"
   },
   "vi": {
     removed: "Đã xóa",
     addedFeedback: "⭐ Đã thêm vào bộ sưu tập, nhấp đôi để hoàn tác",
-    hintAdd: "Nhấp đôi để lưu vào sổ từ vựng",
     alreadyAddedFeedback: "⭐ Đã có trong sổ từ vựng, nhấp đôi để hoàn tác",
     hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng"
   },
   "th": {
     removed: "ลบแล้ว",
     addedFeedback: "⭐ เพิ่มไปยังคอลเลกชันแล้ว, ดับเบิลคลิกเพื่อยกเลิก",
-    hintAdd: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์",
     alreadyAddedFeedback: "⭐ อยู่ในสมุดคำศัพท์แล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์"
   },
   "ar": {
     removed: "تم الإزالة",
     addedFeedback: "⭐ تمت الإضافة إلى المجموعة، انقر نقرًا مزدوجًا للتراجع",
-    hintAdd: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات",
     alreadyAddedFeedback: "⭐ موجود بالفعل في مفكرة الكلمات، انقر نقرًا مزدوجًا للتراجع",
     hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات"
   },
   "fa": {
     removed: "حذف شد",
     addedFeedback: "⭐ به مجموعه اضافه شد، دوبار کلیک برای لغو",
-    hintAdd: "دوبار کلیک برای ذخیره در دفتر لغات",
     alreadyAddedFeedback: "⭐ قبلاً در دفتر لغات است، دوبار کلیک برای لغو",
     hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات"
   },
   "tr": {
     removed: "Kaldırıldı",
     addedFeedback: "⭐ Koleksiyona eklendi, geri almak için çift tıklayın",
-    hintAdd: "Kelime defterine kaydetmek için çift tıklayın",
     alreadyAddedFeedback: "⭐ Zaten kelime defterinde, geri almak için çift tıklayın",
     hintAddAction: "Kelime defterine kaydetmek için çift tıklayın"
   }
@@ -1946,7 +1899,7 @@ self.i18nSyncData = {
     restoreFromCloud: "从云端恢复 ↓",
     export: "导出",
     import: "导入",
-    lastSyncNone: "上次同步: 尚未同步",
+    neverSynced: "尚未同步",
     lastSync: "上次同步:",
     invalidConfigFile: "无效的配置文件：未发现任何可识别的设置或生词数据",
     importSuccess: "导入成功！共计",
@@ -1982,7 +1935,7 @@ self.i18nSyncData = {
     restoreFromCloud: "從雲端恢復 ↓",
     export: "匯出",
     import: "匯入",
-    lastSyncNone: "上次同步: 尚未同步",
+    neverSynced: "尚未同步",
     lastSync: "上次同步:",
     invalidConfigFile: "無效的設定檔：未發現任何可識別的設置或生詞數據",
     importSuccess: "匯入成功！共計",
@@ -2018,7 +1971,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Restore ↓",
     export: "Export",
     import: "Import",
-    lastSyncNone: "Last Sync: Never",
+    neverSynced: "Not synced",
     lastSync: "Last Sync:",
     invalidConfigFile: "Invalid config file: No recognized settings or vocabulary found",
     importSuccess: "Import successful!",
@@ -2054,7 +2007,7 @@ self.i18nSyncData = {
     restoreFromCloud: "復元 ↓",
     export: "エクスポート",
     import: "インポート",
-    lastSyncNone: "最終同期: 未同期",
+    neverSynced: "未同期",
     lastSync: "最終同期:",
     invalidConfigFile: "無効な設定ファイル：認識可能な設定や単語データが見つかりません",
     importSuccess: "インポート成功！合計",
@@ -2090,7 +2043,7 @@ self.i18nSyncData = {
     restoreFromCloud: "복원 ↓",
     export: "내보내기",
     import: "가져오기",
-    lastSyncNone: "최근 동기화: 없음",
+    neverSynced: "동기화되지 않음",
     lastSync: "최근 동기화:",
     invalidConfigFile: "유효하지 않은 설정 파일: 인식 가능한 설정이나 단어 데이터가 없습니다",
     importSuccess: "가져오기 성공! 총",
@@ -2126,7 +2079,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Restaurar ↓",
     export: "Exportar",
     import: "Importar",
-    lastSyncNone: "Última sinc.: Nunca",
+    neverSynced: "Sin sincronizar",
     lastSync: "Última sinc.:",
     invalidConfigFile: "Archivo inválido: No se encontraron ajustes o vocabulario",
     importSuccess: "¡Importación exitosa! Total",
@@ -2162,7 +2115,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Restaurer ↓",
     export: "Exporter",
     import: "Importer",
-    lastSyncNone: "Dernière sync : Jamais",
+    neverSynced: "Non synchronisé",
     lastSync: "Dernière sync :",
     invalidConfigFile: "Fichier invalide : aucun paramètre ou vocabulaire trouvé",
     importSuccess: "Importation réussie ! Total",
@@ -2198,7 +2151,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Restore ↓",
     export: "Exportieren",
     import: "Importieren",
-    lastSyncNone: "Letzter Sync: Nie",
+    neverSynced: "Nicht synchronisiert",
     lastSync: "Letzter Sync:",
     invalidConfigFile: "Ungültige Datei: Keine Einstellungen oder Vokabeln gefunden",
     importSuccess: "Import erfolgreich! Gesamt",
@@ -2234,7 +2187,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Восстановить ↓",
     export: "Экспорт",
     import: "Импорт",
-    lastSyncNone: "Синхр.: Никогда",
+    neverSynced: "Не синхронизировано",
     lastSync: "Посл. синхр.:",
     invalidConfigFile: "Неверный файл: настройки или слова не найдены",
     importSuccess: "Импорт завершен! Всего",
@@ -2270,7 +2223,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Restaurar ↓",
     export: "Exportar",
     import: "Importar",
-    lastSyncNone: "Última sinc.: Nunca",
+    neverSynced: "Não sincronizado",
     lastSync: "Última sinc.:",
     invalidConfigFile: "Arquivo inválido: Configurações ou vocabulário não encontrados",
     importSuccess: "Importação concluída! Total",
@@ -2306,7 +2259,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Ripristina ↓",
     export: "Esporta",
     import: "Importa",
-    lastSyncNone: "Ultima sinc.: Mai",
+    neverSynced: "Non sincronizzato",
     lastSync: "Ultima sinc.:",
     invalidConfigFile: "File non valido: impostazioni o vocaboli non trovati",
     importSuccess: "Importazione riuscita! Totale",
@@ -2342,7 +2295,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Khôi phục ↓",
     export: "Xuất",
     import: "Nhập",
-    lastSyncNone: "Đồng bộ: Chưa có",
+    neverSynced: "Chưa đồng bộ",
     lastSync: "Đồng bộ cuối:",
     invalidConfigFile: "Tệp không hợp lệ: Không tìm thấy cài đặt hoặc từ vựng",
     importSuccess: "Nhập thành công! Tổng cộng",
@@ -2378,7 +2331,7 @@ self.i18nSyncData = {
     restoreFromCloud: "กู้คืน ↓",
     export: "ส่งออก",
     import: "นำเข้า",
-    lastSyncNone: "การซิงค์: ยังไม่มี",
+    neverSynced: "ยังไม่ได้ซิงค์",
     lastSync: "ซิงค์ล่าสุด:",
     invalidConfigFile: "ไฟล์ไม่ถูกต้อง: ไม่พบการตั้งค่าหรือคำศัพท์",
     importSuccess: "นำเข้าสำเร็จ! ทั้งหมด",
@@ -2414,7 +2367,7 @@ self.i18nSyncData = {
     restoreFromCloud: "استعادة ↓",
     export: "تصدير",
     import: "استيراد",
-    lastSyncNone: "المزامنة: أبداً",
+    neverSynced: "لم يتم المزامنة",
     lastSync: "آخر مزامنة:",
     invalidConfigFile: "ملف غير صالح: لم يتم العثور على إعدادات",
     importSuccess: "تم الاستيراد بنجاح! الإجمالي",
@@ -2450,7 +2403,7 @@ self.i18nSyncData = {
     restoreFromCloud: "بازیابی ↓",
     export: "خروجی",
     import: "ورودی",
-    lastSyncNone: "همگام‌سازی: هرگز",
+    neverSynced: "همگام‌سازی نشده",
     lastSync: "آخرین همگام‌سازی:",
     invalidConfigFile: "فایل نامعتبر: تنظیماتی یافت نشد",
     importSuccess: "ورود موفقیت‌آمیز! مجموعاً",
@@ -2486,7 +2439,7 @@ self.i18nSyncData = {
     restoreFromCloud: "Geri Yükle ↓",
     export: "Dışa Aktar",
     import: "İçe Aktar",
-    lastSyncNone: "Senk.: Hiçbir zaman",
+    neverSynced: "Eşitlenmedi",
     lastSync: "Son senk.:",
     invalidConfigFile: "Geçersiz dosya: Ayar veya kelime bulunamadı",
     importSuccess: "İçe aktarma başarılı! Toplam",
@@ -2935,3 +2888,396 @@ self.i18nAttach2 = {
     getApiKey: "API Key Al ↗"
   }
 };
+self.i18nAttach3 = {
+  "zh-CN": {
+    note: "备注",
+    notePlaceholder: "四级/托福/语境...",
+    highlightVocab: "在网页高亮生词"
+  },
+  "zh-TW": {
+    note: "備註",
+    notePlaceholder: "",
+    highlightVocab: "在網頁高亮生詞"
+  },
+  "en": {
+    note: "Note",
+    notePlaceholder: "",
+    highlightVocab: "Highlight on page"
+  },
+  "ja": {
+    note: "メモ",
+    notePlaceholder: "",
+    highlightVocab: "ページ上で単語を強調"
+  },
+  "ko": {
+    note: "메모",
+    notePlaceholder: "",
+    highlightVocab: "페이지에서 단어 강조"
+  },
+  "es": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Resaltar en la página"
+  },
+  "fr": {
+    note: "Note",
+    notePlaceholder: "",
+    highlightVocab: "Surligner sur la page"
+  },
+  "de": {
+    note: "Notiz",
+    notePlaceholder: "",
+    highlightVocab: "Auf Seite hervorheben"
+  },
+  "ru": {
+    note: "Заметка",
+    notePlaceholder: "",
+    highlightVocab: "Выделить на странице"
+  },
+  "pt": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Destacar na página"
+  },
+  "it": {
+    note: "Nota",
+    notePlaceholder: "",
+    highlightVocab: "Evidenzia nella pagina"
+  },
+  "vi": {
+    note: "Ghi chú",
+    notePlaceholder: "",
+    highlightVocab: "Làm nổi bật trên trang"
+  },
+  "th": {
+    note: "บันทึก",
+    notePlaceholder: "",
+    highlightVocab: "เน้นคำบนหน้าเว็บ"
+  },
+  "ar": {
+    note: "ملاحظة",
+    notePlaceholder: "",
+    highlightVocab: "تمييز على الصفحة"
+  },
+  "fa": {
+    note: "یادداشت",
+    notePlaceholder: "",
+    highlightVocab: "برجسته در صفحه"
+  },
+  "tr": {
+    note: "Not",
+    notePlaceholder: "",
+    highlightVocab: "Sayfada vurgula"
+  }
+};
+self.i18nAttach4 = {
+  "zh-CN": {
+    welcomeTitle: "欢迎使用 Mira! 🪄",
+    setLanguage: "你想把内容翻译成什么语言？",
+    targetLang: "翻译成什么语言？",
+    uiLanguage: "界面语言",
+    restrictedNotice: "此页面受浏览器安全策略限制，Mira 无法在此运行",
+    translatePrefix: "Mira 将把网页内容与 YouTube 视频字幕翻译为",
+    translateHighlight: "你选择的语言",
+    translateSuffix: "",
+    btnGotIt: "开始使用",
+    changeSetting: "你可以随时在设置中修改目标语言"
+  },
+  "zh-TW": {
+    welcomeTitle: "歡迎使用 Mira! 🪄",
+    setLanguage: "你想把內容翻譯成什麼語言？",
+    targetLang: "翻譯成什麼語言？",
+    uiLanguage: "界面語言",
+    restrictedNotice: "此頁面受瀏覽器安全策略限制，Mira 無法在此運行",
+    translatePrefix: "Mira 將把網頁內容與 YouTube 視頻字幕翻譯為",
+    translateHighlight: "你選擇的語言",
+    translateSuffix: "",
+    btnGotIt: "開始使用",
+    changeSetting: "你可以隨時在設置中修改目標語言"
+  },
+  "en": {
+    welcomeTitle: "Welcome to Mira! 🪄",
+    setLanguage: "Which language do you want to read in?",
+    targetLang: "Translate to?",
+    uiLanguage: "App Language",
+    restrictedNotice: "This page is restricted by browser policy. Mira cannot run here.",
+    translatePrefix: "Mira will translate web pages and YouTube subtitles into",
+    translateHighlight: "the language you select.",
+    translateSuffix: "",
+    btnGotIt: "Get Started",
+    changeSetting: "You can change this anytime in settings."
+  },
+  "ja": {
+    welcomeTitle: "Mira へようこそ! 🪄",
+    setLanguage: "どの言語に翻訳しますか？",
+    targetLang: "翻訳先の言語は？",
+    uiLanguage: "表示言語",
+    restrictedNotice: "このページはブラウザのポリシーで制限されています。Mira はここでは動作しません。",
+    translatePrefix: "Miraはウェブページと YouTube の字幕を",
+    translateHighlight: "選択した言語",
+    translateSuffix: "に翻訳します。",
+    btnGotIt: "使ってみる",
+    changeSetting: "設定からいつでも変更できます。"
+  },
+  "ko": {
+    welcomeTitle: "Mira에 오신 것을 환영합니다! 🪄",
+    setLanguage: "어떤 언어로 번역하고 싶으신가요?",
+    targetLang: "어떤 언어로 번역할까요?",
+    uiLanguage: "표시 언어",
+    restrictedNotice: "이 페이지는 브라우저 정책에 의해 제한되었습니다. Mira는 여기서 작동할 수 없습니다.",
+    translatePrefix: "Mira가 웹 페이지와 YouTube 자막을",
+    translateHighlight: "선택한 언어",
+    translateSuffix: "로 번역합니다.",
+    btnGotIt: "시작하기",
+    changeSetting: "설정에서 언제든지 변경할 수 있습니다."
+  },
+  "de": {
+    welcomeTitle: "Willkommen bei Mira! 🪄",
+    setLanguage: "In welche Sprache soll übersetzt werden?",
+    targetLang: "Übersetzen in?",
+    uiLanguage: "Sprache",
+    restrictedNotice: "Diese Seite ist durch Browser-Richtlinien eingeschränkt. Mira kann hier nicht ausgeführt werden.",
+    translatePrefix: "Mira übersetzt Webseiten und YouTube-Untertitel in",
+    translateHighlight: "die gewählte Sprache.",
+    translateSuffix: "",
+    btnGotIt: "Loslegen",
+    changeSetting: "Jederzeit in den Einstellungen änderbar."
+  },
+  "ru": {
+    welcomeTitle: "Добро пожаловать в Mira! 🪄",
+    setLanguage: "На какой язык переводить контент?",
+    targetLang: "Перевести на?",
+    uiLanguage: "Язык интерфейса",
+    restrictedNotice: "Эта страница ограничена политикой браузера. Mira не может здесь работать.",
+    translatePrefix: "Mira переведет веб-страницы и субтитры YouTube на",
+    translateHighlight: "выбранный язык.",
+    translateSuffix: "",
+    btnGotIt: "Начать",
+    changeSetting: "Можно изменить в любое время в настройках."
+  },
+  "es": {
+    welcomeTitle: "¡Bienvenido a Mira! 🪄",
+    setLanguage: "¿A qué idioma quieres traducir?",
+    targetLang: "¿Traducir a?",
+    uiLanguage: "Idioma",
+    restrictedNotice: "Esta página está restringida por la política del navegador. Mira no puede funcionar aquí.",
+    translatePrefix: "Mira traducirá páginas web y subtítulos de YouTube al",
+    translateHighlight: "idioma seleccionado.",
+    translateSuffix: "",
+    btnGotIt: "¡Entendido!",
+    changeSetting: "Puedes cambiarlo en los ajustes en cualquier momento."
+  },
+  "fr": {
+    welcomeTitle: "Bienvenue sur Mira ! 🪄",
+    setLanguage: "En quelle langue voulez-vous traduire ?",
+    targetLang: "Traduire en ?",
+    uiLanguage: "Langue",
+    restrictedNotice: "Cette page est limitée par la politique du navigateur. Mira ne peut pas s'exécuter ici.",
+    translatePrefix: "Mira traduira les pages et les sous-titres YouTube en",
+    translateHighlight: "la langue choisie.",
+    translateSuffix: "",
+    btnGotIt: "C'est compris !",
+    changeSetting: "Modifiable à tout moment dans les paramètres."
+  },
+  "pt": {
+    welcomeTitle: "Bem-vindo ao Mira! 🪄",
+    setLanguage: "Para qual idioma deseja traduzir?",
+    targetLang: "Traduzir para?",
+    uiLanguage: "Idioma",
+    restrictedNotice: "Esta página é restrita pela política do navegador. O Mira não pode ser executado aqui.",
+    translatePrefix: "O Mira traduzirá páginas e legendas do YouTube para",
+    translateHighlight: "o idioma selecionado.",
+    translateSuffix: "",
+    btnGotIt: "Começar",
+    changeSetting: "Altere quando quiser nas configurações."
+  },
+  "it": {
+    welcomeTitle: "Benvenuto su Mira! 🪄",
+    setLanguage: "In quale lingua vuoi tradurre?",
+    targetLang: "Traduci in?",
+    uiLanguage: "Lingua",
+    restrictedNotice: "Questa pagina è limitata dalle norme del browser. Mira non può essere eseguito qui.",
+    translatePrefix: "Mira tradurrà le pagine e i sottotitoli di YouTube nella",
+    translateHighlight: "lingua selezionata.",
+    translateSuffix: "",
+    btnGotIt: "Inizia",
+    changeSetting: "Puoi cambiarlo in qualsiasi momento nelle impostazioni."
+  },
+  "tr": {
+    welcomeTitle: "Mira'ya Hoş Geldiniz! 🪄",
+    setLanguage: "Hangi dile çevirmek istersiniz?",
+    targetLang: "Şuna çevir?",
+    uiLanguage: "Dil",
+    restrictedNotice: "Bu sayfa tarayıcı politikası tarafından kısıtlanmıştır. Mira burada çalışamaz.",
+    translatePrefix: "Mira web sayfalarını ve YouTube altyazılarını",
+    translateHighlight: "seçtiğiniz dile",
+    translateSuffix: "çevirecektir.",
+    btnGotIt: "Başla",
+    changeSetting: "Ayarlardan istediğiniz zaman değiştirilebilir."
+  },
+  "vi": {
+    welcomeTitle: "Chào mừng đến với Mira! 🪄",
+    setLanguage: "Bạn muốn dịch sang ngôn ngữ nào?",
+    targetLang: "Dịch sang?",
+    uiLanguage: "Ngôn ngữ",
+    restrictedNotice: "Trang này bị hạn chế bởi chính sách trình duyệt. Mira không thể chạy ở đây.",
+    translatePrefix: "Mira sẽ dịch trang web và phụ đề YouTube sang",
+    translateHighlight: "ngôn ngữ bạn chọn",
+    translateSuffix: ".",
+    btnGotIt: "Bắt đầu",
+    changeSetting: "Có thể thay đổi trong phần cài đặt."
+  },
+  "th": {
+    welcomeTitle: "ยินดีต้อนรับสู่ Mira! 🪄",
+    setLanguage: "คุณต้องการแปลเป็นภาษาอะไร?",
+    targetLang: "แปลเป็นภาษา?",
+    uiLanguage: "ภาษา",
+    restrictedNotice: "หน้านี้ถูกจำกัดโดยนโยบายของเบราว์เซอร์ Mira ไม่สามารถทำงานที่นี่ได้",
+    translatePrefix: "Mira จะแปลหน้าเว็บและคำบรรยาย YouTube เป็น",
+    translateHighlight: "ภาษาที่คุณเลือก",
+    translateSuffix: "",
+    btnGotIt: "เริ่มใช้งาน",
+    changeSetting: "เปลี่ยนได้ตลอดเวลาในการตั้งค่า"
+  },
+  "ar": {
+    welcomeTitle: "مرحباً بك في Mira! 🪄",
+    setLanguage: "إلى أي لغة تريد الترجمة؟",
+    targetLang: "ترجمة إلى؟",
+    uiLanguage: "اللغة",
+    restrictedNotice: "هذه الصفحة مقيدة بسياسة المتصفح. لا يمكن لـ Mira العمل هنا.",
+    translatePrefix: "بترجمة الصفحات والترجمات إلى Mira ستعمل",
+    translateHighlight: "اللغة التي تختارها",
+    translateSuffix: "",
+    btnGotIt: "ابدأ الآن",
+    changeSetting: "يمكنك التغيير في الإعدادات."
+  },
+  "fa": {
+    welcomeTitle: "به Mira خوش آمدید! 🪄",
+    setLanguage: "می‌خواهید به چه زبانی ترجمه شود؟",
+    targetLang: "ترجمه به؟",
+    uiLanguage: "زبان",
+    restrictedNotice: "این صفحه توسط سیاست‌های مرورگر محدود شده است. Mira نمی‌تواند در اینجا اجرا شود.",
+    translatePrefix: "محتوا و زیرنویس‌ها را به Mira",
+    translateHighlight: "زبان انتخابی شما",
+    translateSuffix: "ترجمه می‌کند.",
+    btnGotIt: "شروع کنید",
+    changeSetting: "قابل تغییر در تنظیمات."
+  }
+};
+self.i18nAttach5 = {
+  "zh-CN": {
+    dlOriginal: "下载原文字幕",
+    dlBilingual: "下载双语字幕（含翻译）",
+    bilingual: "双语"
+  },
+  "zh-TW": {
+    dlOriginal: "下載原文字幕",
+    dlBilingual: "下載雙語字幕（含翻譯）",
+    bilingual: "雙語"
+  },
+  "en": {
+    dlOriginal: "Download Original Subtitles",
+    dlBilingual: "Download Bilingual (with Translation)",
+    bilingual: "Bilingual"
+  },
+  "ja": {
+    dlOriginal: "原文字幕をダウンロード",
+    dlBilingual: "2ヶ国語字幕をダウンロード（翻訳あり）",
+    bilingual: "2ヶ国語"
+  },
+  "ko": {
+    dlOriginal: "원본 자막 다운로드",
+    dlBilingual: "이중 언어 자막 다운로드 (번역 포함)",
+    bilingual: "이중 언어"
+  },
+  "es": {
+    dlOriginal: "Descargar subtítulos originales",
+    dlBilingual: "Descargar bilingües (con traducción)",
+    bilingual: "Bilingüe"
+  },
+  "fr": {
+    dlOriginal: "Télécharger les sous-titres originaux",
+    dlBilingual: "Télécharger bilingue (avec traduction)",
+    bilingual: "Bilingue"
+  },
+  "de": {
+    dlOriginal: "Original-Untertitel herunterladen",
+    dlBilingual: "Bilingual herunterladen (mit Übersetzung)",
+    bilingual: "Bilingual"
+  },
+  "ru": {
+    dlOriginal: "Скачать оригинальные субтитры",
+    dlBilingual: "Скачать двуязычные (с переводом)",
+    bilingual: "Двуязычный"
+  },
+  "pt": {
+    dlOriginal: "Baixar legendas originais",
+    dlBilingual: "Baixar bilíngue (com tradução)",
+    bilingual: "Bilíngue"
+  },
+  "it": {
+    dlOriginal: "Scarica sottotitoli originali",
+    dlBilingual: "Scarica bilingue (con traduzione)",
+    bilingual: "Bilingue"
+  },
+  "vi": {
+    dlOriginal: "Tải phụ đề gốc",
+    dlBilingual: "Tải phụ đề song ngữ (có bản dịch)",
+    bilingual: "Song ngữ"
+  },
+  "th": {
+    dlOriginal: "ดาวน์โหลดคำบรรยายต้นฉบับ",
+    dlBilingual: "ดาวน์โหลดสองภาษา (พร้อมคำแปล)",
+    bilingual: "สองภาษา"
+  },
+  "ar": {
+    dlOriginal: "تحميل الترجمة الأصلية",
+    dlBilingual: "تحميل ثنائية اللغة (مع الترجمة)",
+    bilingual: "ثنائية اللغة"
+  },
+  "fa": {
+    dlOriginal: "دانلود زیرنویس اصلی",
+    dlBilingual: "دانلود دو زبانه (همراه با ترجمه)",
+    bilingual: "دو زبانه"
+  },
+  "tr": {
+    dlOriginal: "Orijinal altyazıları indir",
+    dlBilingual: "İki dilli indir (çeviri dahil)",
+    bilingual: "İki dilli"
+  }
+};
+
+self.i18nAttach6 = {
+  "zh-CN": {
+    "dlRateLow": "当前仅翻译了 {rate}% 的字幕。\n\n由于翻译内容是随视频播放逐步生成的，建议先完整观看或等待进度条缓冲，完成后下载效果最佳。\n\n是否下载已有的 {rate}% 部分？",
+    "dlRatePartial": "已翻译 {rate}%，还有 {missing} 句未翻译。\n\n部分字幕尚未触发或完成翻译。建议继续播放视频让系统处理后再下载。\n\n是否下载已有部分？"
+  },
+  "zh-TW": {
+    "dlRateLow": "目前僅翻譯了 {rate}% 的字幕。\n\n由於翻譯內容是隨影片播放逐步生成的，建議先完整觀看或等待進度條緩衝，完成後下載效果最佳。\n\n是否下載已有的 {rate}% 部分？",
+    "dlRatePartial": "已翻譯 {rate}%，還有 {missing} 句未翻譯。\n\n部分字幕尚未觸發或完成翻譯。建議繼續播放影片讓系統處理後再下載。\n\n是否下載已有部分？"
+  },
+  "en": {
+    "dlRateLow": "Only {rate}% of subtitles translated.\n\nSubtitles are generated progressively during playback. For a complete file, please let the video play through or buffer first.\n\nDownload available {rate}% now?",
+    "dlRatePartial": "{rate}% translated, {missing} segments missing.\n\nTranslation for some parts is still in progress. Consider playing more of the video before downloading.\n\nDownload available portion now?"
+  },
+  "ja": {
+    "dlRateLow": "字幕の {rate}% のみ翻訳済みです。\n\n翻訳は再生に合わせて段階的に生成されます。完了するまで待機してからダウンロードすることをお勧めします。\n\n現在の {rate}% をダウンロードしますか？",
+    "dlRatePartial": "{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\n一部の翻訳がまだ完了していません。再生を続けてシステムが処理してからダウンロードすることをお勧めします。\n\n現在の部分をダウンロードしますか？"
+  },
+  "ko": {
+    "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것이 가장 좋습니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
+    "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n현재 부분을 다운로드하시겠습니까?"
+  },
+  "fr": {
+    "dlRateLow": "Seulement {rate}% des sous-titres traduits.\n\nLa traduction est générée progressivement durant la lecture. Pour un résultat complet, attendez la fin de la vidéo ou la mise en cache.\n\nTélécharger les {rate}% disponibles ?",
+    "dlRatePartial": "{rate}% traduit, {missing} segments manquants.\n\nLa traduction est encore en cours pour certaines parties. Continuez la lecture avant de télécharger.\n\nTélécharger la partie disponible ?"
+  },
+  "de": {
+    "dlRateLow": "Nur {rate}% der Untertitel übersetzt.\n\nUntertitel werden während der Wiedergabe schrittweise generiert. Warten Sie für ein vollständiges Ergebnis die Pufferung ab.\n\nVerfügbare {rate}% jetzt herunterladen?",
+    "dlRatePartial": "{rate}% übersetzt, {missing} Segmente fehlen.\n\nDie Übersetzung für einige Teile ist noch in Arbeit. Lassen Sie das Video weiterlaufen, bevor Sie herunterladen.\n\nVerfügbaren Teil herunterladen?"
+  },
+  "es": {
+    "dlRateLow": "Solo {rate}% de subtítulos traducidos.\n\nLos subtítulos se generan progresivamente durante la reproducción. Para un resultado completo, espera a que el video se procese.\n\n¿Descargar el {rate}% disponible?",
+    "dlRatePartial": "{rate}% traducido, {missing} segmentos sin traducir.\n\nLa traducción aún está en proceso para algunas partes. Reproduce más video antes de descargar.\n\n¿Descargar la parte disponible?"
+  }
+}

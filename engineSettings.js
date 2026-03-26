@@ -3,14 +3,14 @@ window.browser = (function () {
 })();
 let userConfig = null;
 document.addEventListener('DOMContentLoaded', async () => {
-    const res = await safeGetStorage(['targetLanguage', 'selectedEngine', 'apiKeys']);
+    const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
     window.currentConfig = {
-        targetLanguage: res.targetLanguage || (navigator.language || 'zh-CN').replace('_', '-'),
-        selectedEngine: res.selectedEngine || 'google',
+        ui_language: res.ui_language || (navigator.language || 'en').replace('_', '-'),//ui_language
+        selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
-    const testTarget = window.currentConfig.targetLanguage;
+    const ui_lang = window.currentConfig.ui_language;
     const TEMPLATES = {
         'google': {
             name: 'Google Translate', isBuiltIn: true, color: '#4285F4', meta: 'G.FREE'
@@ -136,17 +136,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
         const builtInEngines = [
-            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin")})` },
-            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin")})` }
+            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
+            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
         ];
         const customConfigs = storedConfigs.filter(c =>
             c.id !== 'google_builtin' &&
             c.id !== 'bing_builtin'
         );
         if (customConfigs.length === 0 && Object.keys(oldApiKeys).length > 0) {
-            Object.keys(TEMPLATES).forEach(engineKey => {
+            for (const engineKey of Object.keys(TEMPLATES)) {
                 const tpl = TEMPLATES[engineKey];
-                if (tpl.isBuiltIn) return;
+                if (tpl.isBuiltIn) continue;
                 const hasKey = tpl.fields?.some(f => oldApiKeys[f.k]);
                 if (hasKey) {
                     const newId = `inst_migration_${engineKey}`;
@@ -160,14 +160,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         tpl.fields.forEach(f => {
                             if (oldApiKeys[f.k]) instanceSpecificData[f.k] = oldApiKeys[f.k];
                         });
-                        chrome.storage.local.set({ [`data_${newId}`]: instanceSpecificData });
+                        await safeSetStorage({ [`data_${newId}`]: instanceSpecificData });
                     }
                 }
-            });
+            }
         }
         userConfigs = [...builtInEngines, ...customConfigs];
         if (JSON.stringify(data.userConfigs) !== JSON.stringify(userConfigs)) {
-            await chrome.storage.local.set({ userConfigs });
+            await safeSetStorage({ userConfigs });
         }
         renderSidebar();
         let startId = data.lastActiveId && userConfigs.find(c => c.id === data.lastActiveId)
@@ -176,7 +176,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const match = userConfigs.find(c => c.engine === data.selectedEngine);
             if (match) startId = match.id;
         }
-        if (!startId) startId = userConfigs[0].id;
+
+        if (!startId) {
+            const defaultMatch = userConfigs.find(c => c.engine === _defaultEngine);
+            startId = defaultMatch ? defaultMatch.id : userConfigs[0].id;
+        }
         await switchInstance(startId);
         bindEvents();
     }
@@ -184,11 +188,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const list = document.getElementById('engine-sidebar-list');
         const data = await safeGetStorage('lastActiveId');
         if (!data) return;
-        const lastActiveId = data?.lastActiveId ?? 'google_builtin';
+        const defaultId = userConfigs.find(c => c.engine === _defaultEngine)?.id ?? userConfigs[0].id;
+        const lastActiveId = data?.lastActiveId ?? defaultId;//默认引擎
         const activeConfig = userConfigs.find(c => c.id === lastActiveId);
         const statusValueEl = document.getElementById('active-engine-name');
         if (statusValueEl) {
-            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', testTarget);
+            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', ui_lang);
         }
         list.innerHTML = userConfigs.map(c => {
             const isEditing = c.id === currentId;
@@ -196,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `
             <div class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
                 <div class="engine-info">
-                    ${isRunning ? '<span class="status-dot"></span>' : ''}
+                    ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
                     <span class="engine-name">${c.alias}</span>
                 </div>
                 ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
@@ -207,15 +212,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.querySelectorAll('.engine-item').forEach(el => {
             el.onclick = (e) => {
                 if (e.target.classList.contains('del-icon')) {
-                    e.stopPropagation(); 
+                    e.stopPropagation();
                     deleteItem(el.dataset.id, e);
                 } else {
                     switchInstance(el.dataset.id);
                 }
             };
         });
+        checkCurrentEngineStatus(lastActiveId, userConfigs);
+    }
+    async function checkCurrentEngineStatus(lastActiveId, userConfigs) {
+        const dot = document.querySelector(`.status-dot[data-id="${lastActiveId}"]`);
+        if (!dot) return;
+
+        const config = userConfigs.find(c => c.id === lastActiveId);
+        if (!config) return;
+
+        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+        const targetLang = storage?.ui_language || 'en';
+        const isTargetEn = targetLang.toLowerCase().startsWith('en');
+        const testText = isTargetEn ? '你好' : 'Good morning';
+
+        try {
+            let failed = false;
+
+            if (config.engine === 'google') {
+                // 复用 checkConnectivity 的方式
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), 3000);
+                try {
+                    await fetch('https://www.google.com/generate_204', {
+                        mode: 'no-cors', signal: controller.signal
+                    });
+                    clearTimeout(timer);
+                } catch (e) {
+                    clearTimeout(timer);
+                    failed = true;
+                }
+            } else if (config.engine === 'bing') {
+                // bing 默认可用，不检测
+                failed = false;
+            } else {
+                // AI 引擎：复用 testApiConfig 的判断逻辑
+                const instanceData = await safeGetStorage(`data_${lastActiveId}`);
+                const tempKeys = instanceData?.[`data_${lastActiveId}`] || {};
+
+                const res = await Promise.race([
+                    safeSendMessage({
+                        type: 'TRANSLATE',
+                        text: testText,
+                        targetLang,
+                        isTest: true,
+                        engine: config.engine,
+                        tempKeys
+                    }),
+                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                ]);
+
+                if (!res || res.error) {
+                    failed = true;
+                } else {
+                    const data = res.currentTranslationResponse;
+                    if (!data || data.error) {
+                        failed = true;
+                    } else {
+                        const translatedText = (typeof data === 'string'
+                            ? data
+                            : (data.translatedText || data.basic || "")
+                        ).trim();
+                        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+                        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+                        if (!hasContent || !isNotOriginal) failed = true;
+                    }
+                }
+            }
+
+            dot.classList.remove('checking');
+            dot.classList.add(failed ? 'error' : 'success');
+            dot.title = failed ? 'Engine not working' : 'Engine working';
+
+        } catch (e) {
+            dot.classList.remove('checking');
+            dot.classList.add('error');
+        }
     }
     async function switchInstance(id) {
+        const uiLanguage = window.currentConfig?.ui_language || 'en';
         currentId = id;
         const config = userConfigs.find(c => c.id === id) || userConfigs[0];
         const container = document.getElementById('dynamic-form-container');
@@ -229,55 +311,90 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (saved.geminiKey && activeEngine === 'google') {
             activeEngine = 'gemini';
         }
-        const tpl = TEMPLATES[activeEngine] || TEMPLATES['google'];
+        const tpl = TEMPLATES[activeEngine] || TEMPLATES[_defaultEngine];
         const displayAlias = config.alias || tpl.name || activeEngine;
         const tipsDesc = document.getElementById('tips');
         const testBtn = document.getElementById('testApiConfig');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
-            testBtn.innerHTML = `⚡ ${t('testConnection', testTarget)}`;
+            testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
             testBtn.style.borderColor = "";
             testBtn.disabled = false;
         }
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-    <div class="main-header">
-        <h2 style="margin:0">${displayAlias}</h2>
-    </div>
-    <div class="form-container">
-        <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
-            <div class="notice-icon" style="color: #3fb950; font-size: 24px; margin-bottom: 10px; ">✓</div>
-            <p style="margin: 0 0 15px 0;"><strong>${displayAlias}</strong> ${t('ready')}</p>
-            <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
-            <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
-                ${t('freeInterfaceTipsInfo')}
-            </p>
-            <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
-                ✨ ${t('wantBetterExperience')} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip')}</span>
-            </p>
-        </div>
-        <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%;">
-            ${t('enableEngineNow')}
-        </button>
-    </div>
-`;
+                <div class="main-header">
+                    <h2 style="margin:0">${displayAlias}</h2>
+                </div>
+                <div class="form-container">
+                    <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
+                        <div id="statusIcon" class="notice-icon" style="color: #8b949e; font-size: 24px; margin-bottom: 10px;">⌛</div>
+                        <p style="margin: 0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                        <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
+                        <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
+                            ${t('freeInterfaceTipsInfo', uiLanguage)}
+                        </p>
+                        <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
+                            ✨ ${t('wantBetterExperience', uiLanguage)} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip', uiLanguage)}</span>
+                        </p>
+                    </div>
+                    <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%; display: none;">
+                        ${t('enableEngineNow', uiLanguage)}
+                    </button>
+                </div>
+                `;
+
+            const checkConnectivity = async () => {
+                const icon = document.getElementById('statusIcon');
+                const text = document.getElementById('statusText');
+                const btn = document.getElementById('activateBuiltIn');
+
+                let isOk = false;
+                try {
+                    if (config.engine === 'google') {
+                        const controller = new AbortController();
+                        const timeout = setTimeout(() => controller.abort(), 3000);
+                        await fetch('https://www.google.com/generate_204', { mode: 'no-cors', signal: controller.signal });
+                        clearTimeout(timeout);
+                        isOk = true;
+                    } else if (config.engine === 'bing') {
+                        isOk = true;
+                    }
+                } catch (e) {
+                    isOk = false;
+                }
+
+                if (isOk) {
+                    icon.innerText = '✓';
+                    icon.style.color = '#3fb950';
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
+                    btn.style.display = 'block';
+                } else {
+                    icon.innerText = '✕';
+                    icon.style.color = '#f85149';
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}`;
+                    btn.style.display = 'block';
+                    btn.style.opacity = '0.6';
+                }
+            };
+
+            checkConnectivity();
+
             document.getElementById('activateBuiltIn').onclick = async (e) => {
                 const btn = e.target;
-                const textEnabled = t('enabled');
-                const textEnableNow = t('enableEngineNow');
                 btn.disabled = true;
-                await chrome.storage.local.set({ lastActiveId: id });
+                await safeSetStorage({ lastActiveId: id });
                 if (typeof syncGlobalConfig === 'function') {
                     await syncGlobalConfig(id, config.engine, {});
                 }
-                btn.innerText = textEnabled;        
+                btn.innerText = t('enabled', uiLanguage);
                 btn.style.background = "#22c55e";
                 isDirty = false;
                 renderSidebar();
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerText = textEnableNow;  
+                    btn.innerText = t('enableEngineNow', uiLanguage);
                     btn.style.background = "";
                 }, 1000);
             };
@@ -293,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (opts && opts.length > 0) {
                 inputHtml = `
             <div class="custom-combobox">
-                <input type="${inputType  || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
+                <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
                 <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
                 <div class="combobox-dropdown">
                     ${opts.map(opt => `<div class="dropdown-item" data-value="${opt}">${opt}</div>`).join('')}
@@ -301,24 +418,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>`;
             } else {
                 const placeholder = (k === 'alias') ? displayAlias : (p || '');
-                inputHtml = `<input type="${inputType  || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
+                inputHtml = `<input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
             }
             return `
             <div class="form-group">
                 <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
                     <label style="margin:0">${l.toUpperCase()}</label>
-                    ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey')}</a>` : ''}
+                    ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
                 </div>
                 ${inputHtml}
             </div>`;
         };
         let html = `
         <div class="main-header">
-            <h2 style="margin:0">${t('engineConfig')}：${displayAlias}</h2>
+            <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
         </div>
         <div class="form-container">
             ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;">⚡ ${tpl.tip}</p>` : ''}
-            ${getRow({ k: 'alias', l: t('configAlias') })} 
+            ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
             ${(tpl.fields || []).map(f => getRow(f)).join('')}
         </div>`;
         container.innerHTML = html;
@@ -363,6 +480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveApiConfig').onclick = async () => {
             const saveBtn = document.getElementById('saveApiConfig');
             if (!saveBtn) return;
+            const uiLanguage = window.currentConfig?.ui_language || 'en';
             const inputs = document.querySelectorAll('#dynamic-form-container input');
             const data = {};
             inputs.forEach(i => {
@@ -392,7 +510,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const engineTemplate = TEMPLATES[finalEngine] || {};
                     userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
                 }
-                await chrome.storage.local.set({
+                await safeSetStorage({
                     [`data_${currentId}`]: data,
                     userConfigs: userConfigs,
                     lastActiveId: currentId
@@ -401,14 +519,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await syncGlobalConfig(currentId, finalEngine, data);
                 }
                 if (typeof renderSidebar === 'function') renderSidebar();
-                saveBtn.innerText = `${t('save', testTarget)}${t('success', testTarget)}`;
+                logger.log("保存成功提示: ", uiLanguage);
+                saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
                 saveBtn.style.setProperty('background-color', '#22c55e', 'important');
                 if (typeof checkEngineStatus === 'function') {
                     await checkEngineStatus();
                 }
             } catch (error) {
                 logger.error("[Mira] 保存配置失败:", error);
-                saveBtn.innerText = `${t('save', testTarget)} ${t('failed', testTarget)}`;
+                saveBtn.innerText = `${t('save', uiLanguage)} ${t('failed', uiLanguage)}`;
                 saveBtn.style.setProperty('background-color', '#ef4444', 'important');
             } finally {
                 setTimeout(() => {
@@ -443,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const color = tpl.color || '#38bdf8';
                         const rgb = hexToRgb(color);
                         const meta = tpl.meta || key.toUpperCase().substring(0, 6);
-                        const desc = tpl.url === '#' ? t('customAiInterface', testTarget) : t('accessService', testTarget).replace('{0}', tpl.name);
+                        const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
                         html += `
                     <div class="tpl-card" 
                          data-type="${key}" 
@@ -458,7 +577,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             grid.innerHTML = html;
             modal.classList.remove('hidden');
         };
-        document.getElementById('template-grid').onclick = (e) => {
+        document.getElementById('template-grid').onclick = async (e) => {
             const card = e.target.closest('.tpl-card');
             if (!card) return;
             const engineKey = card.dataset.type;
@@ -467,14 +586,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             userConfigs.push({
                 id: newId,
                 engine: engineKey,
-                alias: `${t('newBadge')} ${template.name}`
+                alias: `${t('newBadge', ui_lang)} ${template.name}`
             });
-            chrome.storage.local.set({ userConfigs }, () => {
-                modal.classList.add('hidden');
-                if (typeof renderSidebar === 'function') renderSidebar();
-                switchInstance(newId);
-                logger.log(`成功添加引擎: ${template.name}`);
-            });
+
+            await safeSetStorage({ userConfigs });
+            modal.classList.add('hidden');
+            if (typeof renderSidebar === 'function') renderSidebar();
+            switchInstance(newId);
+            logger.log(`成功添加引擎: ${template.name}`);
         };
         const closeBtn = document.getElementById('close-modal') || document.querySelector('.close-btn');
         if (closeBtn) {
@@ -503,7 +622,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (timerId) clearTimeout(parseInt(timerId));
         const item = icon.closest('.engine-item');
         if (item) {
-            item.style.pointerEvents = "none"; 
+            item.style.pointerEvents = "none";
             item.style.transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
             item.style.opacity = "0";
             item.style.transform = "translateX(-20px)";
@@ -513,7 +632,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         setTimeout(async () => {
             userConfigs = userConfigs.filter(c => String(c.id) !== String(id));
-            await chrome.storage.local.set({ userConfigs });
+            await safeSetStorage({ userConfigs });
             await chrome.storage.local.remove(`data_${id}`);
             if (currentId === id) {
                 currentId = userConfigs.length > 0 ? userConfigs[0].id : '';
@@ -532,14 +651,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         if (!btn) return;
         const i18n = {
-            testConnection: t('testConnection', testTarget),
-            testing: t('testing', testTarget),
-            success: t('success', testTarget),
-            failed: t('failed', testTarget),
-            error_no_response: t('error_no_response', testTarget),
-            error_timeout: t('error_timeout', testTarget),
-            error_same_as_original: t('error_same_as_original', testTarget),
-            error_generic: t('error_generic', testTarget),
+            testConnection: t('testConnection', ui_lang),
+            testing: t('testing', ui_lang),
+            success: t('success', ui_lang),
+            failed: t('failed', ui_lang),
+            error_no_response: t('error_no_response', ui_lang),
+            error_timeout: t('error_timeout', ui_lang),
+            error_same_as_original: t('error_same_as_original', ui_lang),
+            error_generic: t('error_generic', ui_lang),
         };
         btn.disabled = true;
         const originalHTML = `⚡ ${i18n.testConnection}`;
@@ -548,8 +667,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipsDesc.style.color = "";
             tipsDesc.innerText = "";
         }
-        const storage = await safeGetStorage(['targetLanguage']).catch(() => ({}));
-        const testTargetLang = storage?.targetLanguage || window.currentConfig?.targetLanguage || 'en';
+        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || 'en';
         const tempKeys = {};
         document.querySelectorAll('.api-input-field').forEach(input => {
             const key = input.getAttribute('data-key');
@@ -563,6 +682,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
         const testText = isTargetEn ? '你好' : 'Good morning';
+        logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
         try {
             const res = await safeSendMessage({
                 type: 'TRANSLATE',
@@ -590,8 +710,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             logger.error("[Test] Failed:", e);
             btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
             btn.style.setProperty('border-color', '#f87171', 'important');
+            btn.style.userSelect = 'text';
             if (tipsDesc) {
                 tipsDesc.style.color = "#f87171";
+                tipsDesc.style.userSelect = 'text';
+                tipsDesc.style.cursor = 'text';
                 const errorText = e.message || String(e);
                 const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
                 let displayMessage = "";
@@ -625,19 +748,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             engine: engineType,
             data: instanceData
         };
-        await chrome.storage.local.set({
+        await safeSetStorage({
             activeConfig,
             lastActiveId: instanceId
         });
         window.currentConfig = { activeConfig };
         logger.log(`[Config] 激活配置: ${instanceId}`);
     }
-    const langRes = await safeGetStorage(['targetLanguage']);
+    const langRes = await safeGetStorage(['ui_language']);
     if (!langRes) return;
-    const effectiveLang = langRes.targetLanguage ||
+    const effectiveLang = langRes.ui_language ||
         (navigator.languages && navigator.languages[0]) ||
         navigator.language ||
-        'zh-CN';
+        'en';
     const targetLang = effectiveLang.replace('_', '-');
     window.applyI18n(targetLang);
     const formatCountByLang = (num, lang) => {
@@ -645,11 +768,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (n >= 10000) {
             const wan = (n / 10000).toFixed(1).replace('.0', '');
             if (lang.startsWith('zh')) {
-                return wan + 'w'; 
+                return wan + 'w';
             } else if (lang === 'ja') {
-                return wan + '万'; 
+                return wan + '万';
             } else if (lang === 'ko') {
-                return wan + '만'; 
+                return wan + '만';
             }
         }
         if (n >= 1000) {
@@ -670,7 +793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.dataset.confirmed = "true";
             btn.dataset.originalText = btn.innerText;
             const formattedCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
-            btn.innerText = t("confirm", testTarget).replace('{0}', formattedCount);
+            btn.innerText = t("confirm", ui_lang).replace('{0}', formattedCount);
             btn.style.setProperty('background', 'rgba(248, 113, 113, 0.2)', 'important');
             btn.style.setProperty('border-color', '#f87171', 'important');
             btn.style.setProperty('color', '#f87171', 'important');
@@ -686,21 +809,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const activeTimer = btn.dataset.timer;
             if (activeTimer) clearTimeout(Number(activeTimer));
             btn.disabled = true;
-            btn.innerText = `${t("clearing")}...`;
+            btn.innerText = `${t("clearing")}`;
             await idb.clearPrefix('tr_');
-            let animationDuration = 800; 
+            let animationDuration = 800;
             if (cacheSizeEl) {
                 const currentVal = parseFloat(cacheSizeEl.innerText.replace(/[^\d.]/g, '')) || 0;
                 if (typeof animateNumber === 'function') {
                     animateNumber(cacheSizeEl, currentVal, 0, animationDuration);
                 } else {
                     cacheSizeEl.innerText = "0";
-                    animationDuration = 0; 
+                    animationDuration = 0;
                 }
             }
             setTimeout(() => {
-                btn.innerText = `${t('completed', testTarget)} ✓`;
-                btn.style.setProperty('color', '#4ade80', 'important'); 
+                btn.innerText = `${t('completed', ui_lang)} ✓`;
+                btn.style.setProperty('color', '#4ade80', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
                 if (typeof showToast === 'function') showToast(t("cacheCleared"), "success");
@@ -713,14 +836,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, animationDuration + 100);
         } catch (err) {
             logger.log("[Mira] Clear Cache Error:", err);
-            if (typeof showToast === 'function') showToast(t('failed', testTarget), "error");
+            if (typeof showToast === 'function') showToast(t('failed', ui_lang), "error");
             resetClearBtn(btn);
         }
     });
     function resetClearBtn(btn) {
         btn.dataset.confirmed = "";
         btn.disabled = false;
-        btn.innerText = btn.dataset.originalText || t('clearBtn', testTarget);
+        btn.innerText = btn.dataset.originalText || t('clearBtn', ui_lang);
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";
@@ -753,7 +876,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     const closeBtn = document.getElementById('close-engineSettingsWindow');
     if (closeBtn) {
-        closeBtn.addEventListener('click', async () => { 
+        closeBtn.addEventListener('click', async () => {
             if (isDirty) {
                 if (!confirm(window.t("confirmClose"))) {
                     return;
@@ -762,7 +885,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.remove) {
                 try {
                     chrome.tabs.getCurrent((tab) => {
-                        const err1 = chrome.runtime.lastError; 
+                        const err1 = chrome.runtime.lastError;
                         if (!err1 && tab && tab.id) {
                             chrome.tabs.remove(tab.id, () => {
                                 const err2 = chrome.runtime.lastError;

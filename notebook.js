@@ -2,14 +2,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const vocabBody = document.getElementById('vocabBody');
   const wordInp = document.getElementById('wordInp');
   const transInp = document.getElementById('transInp');
-  const storage = await safeGetStorage('targetLanguage');
+  const storage = await safeGetStorage('ui_language');
+  // 读取高亮开关状态
+  const highlightStorage = await safeGetStorage('vocabHighlight');
+  let highlightEnabled = highlightStorage?.vocabHighlight || false;
+
+  const toggle = document.getElementById('highlightToggle');
+  const thumb = document.getElementById('highlightThumb');
+
+  const updateToggleUI = (enabled) => {
+    toggle.style.background = enabled ? '#48f838' : '#334155';
+    thumb.style.left = enabled ? '18px' : '2px';
+  };
+
+  updateToggleUI(highlightEnabled);
+
+  toggle.onclick = async () => {
+    highlightEnabled = !highlightEnabled;
+    updateToggleUI(highlightEnabled);
+    await safeSetStorage({ vocabHighlight: highlightEnabled });
+  };
   if (storage === undefined) {
     if (typeof showUpdateNotice === 'function') showUpdateNotice();
-    return; 
+    return;
   }
   const targetLanguage =
-    storage?.targetLanguage ||          
-    navigator.language?.replace('_', '-') || 
+    storage?.ui_language ||
+    navigator.language?.replace('_', '-') ||
     'en';
   const _t = (key) => {
     return (typeof t === 'function') ? t(key, targetLanguage) : key;
@@ -34,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (searchInp) {
     searchInp.oninput = (e) => {
       searchQuery = e.target.value.toLowerCase().trim();
-      currentPage = 1; 
+      currentPage = 1;
       renderTable();
     };
   }
@@ -47,13 +66,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (searchQuery) {
       activeVocab = activeVocab.filter(item => {
         const wordMatch = item.word.toLowerCase().includes(searchQuery);
+
         let transText = "";
         if (typeof item.trans === 'object' && item.trans !== null) {
           transText = (item.trans.basic || "") + (item.trans.detail || "") + JSON.stringify(item.trans.dictData || "");
         } else {
           transText = item.trans || "";
         }
-        return wordMatch || transText.toLowerCase().includes(searchQuery);
+
+        const noteMatch = (item.note || "").toLowerCase().includes(searchQuery);  //  备注
+        const srcMatch = (item.src || "").toLowerCase().includes(searchQuery);    //  来源URL
+        const titleMatch = (item.title || "").toLowerCase().includes(searchQuery); // 来源标题
+
+        return wordMatch || transText.toLowerCase().includes(searchQuery) || noteMatch || srcMatch || titleMatch;
       });
     }
     activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
@@ -141,6 +166,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
           </td>
           <td style="vertical-align: top; padding: 12px 16px;">${displayTrans}</td>
+          <td style="vertical-align: top; padding: 8px 12px; max-width: 130px;">
+          ${item.note
+          ? `<span class="note-text"
+                    data-id="${item.id}"
+                    data-word="${displayWord}"
+                    data-note="${(item.note || '').replace(/"/g, '&quot;')}"
+                    style="color:#94a3b8; font-size:13px; cursor:pointer; 
+                          display:block; word-break:break-all; white-space:normal;">
+                ${item.note}
+              </span>`
+          : `<span class="note-text note-empty"
+                    data-id="${item.id}"
+                    data-word="${displayWord}"
+                    data-note="">
+                ＋ ${_t('note')}
+              </span>`
+        }
+        </td>
           <td style="vertical-align: top; padding: 12px 16px;">
             ${domain} 
           </td>
@@ -167,6 +210,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.stopPropagation();
         const word = e.currentTarget.getAttribute('data-word');
         speak(word, e.currentTarget);
+      };
+    });
+    document.querySelectorAll('.note-text').forEach(el => {
+      el.onclick = () => {
+        const id = el.getAttribute('data-id');
+        const word = el.getAttribute('data-word');
+        const current = el.getAttribute('data-note') || '';
+        const cell = el.closest('td');
+        if (!cell) return;
+
+        //最多100字符
+        cell.innerHTML = `
+        <textarea class="note-inp" maxlength="100"
+        placeholder="${targetLanguage === 'zh-CN' ? '四级/托福/语境...' : ''}"
+        style="background:#020617; 
+       border: none;
+       color:white; padding:4px 8px; border-radius:6px; 
+       width:100%; font-size:12px; box-sizing:border-box;
+       resize:none; overflow:hidden; 
+       font-family: system-ui, -apple-system, sans-serif;
+       outline: none;
+       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8),
+                   0 0 6px rgba(56, 189, 248, 0.6),
+                   0 0 12px rgba(56, 189, 248, 0.4),
+                   0 0 20px rgba(56, 189, 248, 0.2),
+                   0 0 35px rgba(56, 189, 248, 0.1);"
+        rows="1">${current}</textarea>
+      `;
+
+        const inp = cell.querySelector('.note-inp');
+        inp.focus();
+        inp.setSelectionRange(inp.value.length, inp.value.length);
+
+        // 自动撑高
+        const autoResize = () => {
+          inp.style.height = 'auto';
+          inp.style.height = inp.scrollHeight + 'px';
+        };
+        autoResize();
+        inp.oninput = autoResize;
+
+        const save = async () => {
+          const newNote = inp.value.trim();
+          const entry = await idb.vocabulary.get(word);
+          if (entry) {
+            entry.note = newNote;
+            entry.updated = Date.now();
+            await idb.vocabulary.add(word, entry);
+          }
+          renderTable();
+        };
+
+        inp.onblur = save;
+        inp.onkeydown = (e) => {
+          if (e.key === 'Enter') inp.blur();
+          if (e.key === 'Escape') renderTable();
+        };
       };
     });
   }
@@ -207,10 +307,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   `;
         cell.querySelector('.undo-link').onclick = async (e) => {
           e.preventDefault();
-          clearInterval(countdownInterval); 
+          clearInterval(countdownInterval);
           if (undoTimers[id]) {
-            clearTimeout(undoTimers[id]);   
-            delete undoTimers[id];          
+            clearTimeout(undoTimers[id]);
+            delete undoTimers[id];
           }
           const backEntry = await idb.vocabulary.get(word);
           if (backEntry) {
@@ -277,8 +377,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('exportBtn').onclick = async () => {
     const vocabulary = await idb.vocabulary.getAll();
     const activeVocab = vocabulary.filter(item => !item.deleted);
-    if (activeVocab.length === 0) return alert(_t('noExportWords') || "没有可导出的单词");
-    let csvContent = `\ufeff${_t('word')},${_t('meaning')},Source,URL,${_t('addTime')}\n`;
+    if (activeVocab.length === 0) return alert(_t('noExportWords') || "No data to export");
+
+    // 按时间倒序排列
+    activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
+
+    let csvContent = `\ufeff${_t('word')},${_t('meaning')},${_t('note')},Source,URL,${_t('addTime')}\n`;
     activeVocab.forEach(item => {
       let transText = "";
       if (typeof item.trans === 'object' && item.trans !== null) {
@@ -297,10 +401,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const safeWord = (item.word || "").replace(/"/g, '""');
       const safeTrans = transText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
+      const safeNote = (item.note || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
       const safeTitle = (item.title || "").replace(/"/g, '""');
       const safeUrl = (item.src || "").replace(/"/g, '""');
       const time = new Date(item.date).toLocaleString().replace(/,/g, ' ');
-      csvContent += `"${safeWord}","${safeTrans}","${safeTitle}","${safeUrl}","${time}"\n`;
+      csvContent += `"${safeWord}","${safeTrans}","${safeNote}","${safeTitle}","${safeUrl}","${time}"\n`;
     });
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);

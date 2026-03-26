@@ -820,6 +820,22 @@ body {
     box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
     animation: pulse-green 2s infinite ease-in-out;
 }
+.status-dot.checking {
+    background-color: #94a3b8;
+    box-shadow: none;
+    animation: none;
+}
+.status-dot.success {
+    background-color: #22c55e;
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
+    animation: pulse-green 2s infinite ease-in-out;
+}
+.status-dot.error {
+    background-color: #ef4444;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+    animation: none;
+}
+
 @keyframes pulse-green {
     0% {
         transform: scale(0.95);

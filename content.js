@@ -1,26 +1,36 @@
-window.currentTargetL = navigator.language || 'zh-CN';
+
+window.currentTargetL = navigator.language || 'en';
+
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
+
 function loadTargetLanguage() {
   if (window.__LANG_PROMISE__) return window.__LANG_PROMISE__;
   window.__LANG_PROMISE__ = chrome.storage.local
-    .get(['targetLanguage'])
+    .get(['targetLanguage', 'ui_language'])
     .then(res => {
-      window.currentTargetL = res?.targetLanguage || navigator.language || 'zh-CN';
+      window.currentTargetL = res?.targetLanguage || navigator.language || 'en';
+      window.uiLanguage = res?.ui_language || navigator.language || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     })
     .catch(() => {
-      window.currentTargetL = navigator.language || 'zh-CN';
+      window.currentTargetL = navigator.language || 'en';
+      window.uiLanguage = navigator.language || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     });
   return window.__LANG_PROMISE__;
 }
+
 loadTargetLanguage();
+
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === 'local' && changes.targetLanguage) {
-    window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'zh-CN';
+  if (area === 'local') {
+    if (changes.targetLanguage)
+      window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'en';
+    if (changes.ui_language)
+      window.uiLanguage = changes.ui_language.newValue || navigator.language || 'en';
   }
 });
 let APP_NAME = 'Mira Translator';
@@ -36,6 +46,25 @@ async function initApp() {
 
 initApp();
 logger.log(window.currentTargetL);
+
+(async () => {
+  await _defaultEngineReady; // 等缓存读完
+
+  let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
+
+  if (!res || !res.activeConfig) {
+    const finalCfg = { engine: _defaultEngine, data: {} };
+
+    window.currentConfig.activeConfig = finalCfg;
+    window.currentConfig.selectedEngine = finalCfg.engine;
+    res = {
+      activeConfig: finalCfg,
+      targetLanguage: (navigator.language || 'en').replace('_', '-').toLowerCase()
+    };
+  }
+
+  syncLocalState(res);
+})();
 
 const TRANS_STATUS = {
   LOADING: 'loading',
@@ -84,9 +113,9 @@ function getCommentFallbackSelectors(domain) {
 if (typeof fastMemoryCache === 'undefined') var fastMemoryCache = new Map();
 if (typeof pendingRequests === 'undefined') var pendingRequests = new Set();
 window.currentConfig = {
-  targetLanguage: (navigator.language || 'zh-CN').replace('_', '-'),
-  selectedEngine: 'google',
-  activeConfig: { engine: 'google', data: {} }
+  targetLanguage: (navigator.language || 'en').replace('_', '-'),
+  selectedEngine: getRuntimeDefaultEngine(),
+  activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
 async function syncLocalState(storageData) {
   if (storageData.targetLanguage) {
@@ -95,12 +124,21 @@ async function syncLocalState(storageData) {
     window.currentTargetL = lang;
     applyI18n(lang);
   }
+
   if (storageData.activeConfig) {
-    const cfg = storageData.activeConfig || { engine: 'google', data: {} };
-    window.currentConfig.selectedEngine = cfg.engine || 'google';
+    const cfg = storageData.activeConfig;
+    window.currentConfig.selectedEngine = cfg.engine || getRuntimeDefaultEngine();
     window.currentConfig.activeConfig = cfg;
-    window.currentEngine = cfg.engine || 'google';
+    window.currentEngine = cfg.engine || getRuntimeDefaultEngine();
+  } else {
+    const defEngine = getRuntimeDefaultEngine();
+    window.currentConfig.selectedEngine = defEngine;
+    window.currentEngine = defEngine;
+    if (!window.currentConfig.activeConfig) {
+      window.currentConfig.activeConfig = { engine: defEngine, data: {} };
+    }
   }
+
   if (typeof checkEngineStatus === 'function') checkEngineStatus();
 }
 (async () => {
@@ -401,6 +439,65 @@ async function runWithConcurrency(tasks, limit = 4) {
   }
   return Promise.all(results);
 }
+
+const DYNAMIC_WATCHER_SITES = [
+  'foxnews.com',
+  'grok.com',
+  'cnn.com',
+  'bbc.com',
+  'reuters.com',
+  // 按需添加白名单,动态标题扫描问题
+];
+function ensureDynamicContentWatcher() {
+  const host = location.hostname;
+  const needsWatcher = DYNAMIC_WATCHER_SITES.some(site => host.includes(site));
+  if (!needsWatcher) return;
+  if (window.__mira_dynamic_observer) return;
+  // AI 对话页面用更长的 debounce，等流式输出结束
+  const isAIChat = [
+    'grok.com',
+    'claude.ai',
+    'chatgpt.com',
+    'gemini.google.com',
+    'copilot.microsoft.com',
+    'bing.com/chat',
+    'perplexity.ai',
+    'poe.com',
+    'character.ai',
+    'huggingface.co/chat',
+    'mistral.ai',
+    'cohere.com',
+    'you.com',
+    'phind.com',
+    'deepseek.com',
+    'kimi.moonshot.cn',
+    'tongyi.aliyun.com',
+    'yiyan.baidu.com',
+    'hailuoai.com',
+    'doubao.com',
+  ].some(s => host.includes(s));
+  const debounceDelay = isAIChat ? 2000 : 800;
+
+  let debounceTimer = null;
+  window.__mira_dynamic_observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1) continue;
+        if (node.classList?.contains('kt-paragraph-translation')) continue;
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          executeReScan({ selectors: currentActiveSelectors });
+        }, debounceDelay);
+        return;
+      }
+    }
+  });
+
+  window.__mira_dynamic_observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+}
 function ensureYouTubeNavigationListener() {
   if (!location.hostname.includes('youtube.com')) return;
   try {
@@ -628,6 +725,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ status: "ok" });
   }
   else if (msg.action === 'RE_SCAN_PAGE') {
+    if (msg.lang) {
+      window.currentTargetL = msg.lang;
+    }
     if (typeof executeReScan === 'function') executeReScan(msg.config);
     sendResponse({ status: "success" });
   }
@@ -650,6 +750,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     isYTEnabled = msg.enabled;
     if (typeof refreshIcon === 'function') refreshIcon();
     if (typeof syncSubtitleDisplay === 'function') syncSubtitleDisplay();
+    const dlBtn = document.getElementById('kt-subtitle-download');
+    if (dlBtn) dlBtn.style.display = msg.enabled ? 'inline-flex' : 'none';
     sendResponse({ status: "ok" });
   }
   else if (msg.action === 'PREVIEW_YT_STYLE') {
@@ -822,6 +924,32 @@ const normalizeForCompare = (text) => {
     .replace(/[\s\p{P}\p{S}]/gu, '')
     .trim();
 };
+function shrinkHeadingIfOverflow(container, el) {
+  if (!['H1', 'H2', 'H3', 'H4'].includes(el.tagName)) return;
+
+  const originFontSize = parseFloat(container.style.fontSize);
+  if (!originFontSize || originFontSize <= 24) return;
+
+  const containerWidth = el.closest('article, main, [class*="article"], [class*="content"]')
+    ?.getBoundingClientRect()?.width ||
+    el.parentElement?.getBoundingClientRect()?.width || 0;
+
+  if (containerWidth <= 0) return;
+  if (container.scrollWidth <= containerWidth) return; // 没溢出不处理
+
+  const MIN_SIZE = 16;
+  let lo = MIN_SIZE, hi = originFontSize;
+  while (hi - lo > 0.5) {
+    const mid = (lo + hi) / 2;
+    container.style.setProperty('font-size', `${mid}px`, 'important');
+    if (container.scrollWidth > containerWidth) {
+      hi = mid;
+    } else {
+      lo = mid;
+    }
+  }
+  container.style.setProperty('font-size', `${Math.max(lo, MIN_SIZE)}px`, 'important');
+}
 const TranslationBatcher = {
   queue: [],
   timer: null,
@@ -908,8 +1036,8 @@ const TranslationBatcher = {
       this.isProcessing = false;
       return;
     }
-    const engine = (storage.activeConfig?.engine || 'google').toLowerCase();
-    const lang = (storage.targetLanguage || navigator.language || 'zh-CN').replace('_', '-').toLowerCase();
+    const engine = (storage.activeConfig?.engine || getRuntimeDefaultEngine()).toLowerCase();
+    const lang = (storage.targetLanguage || navigator.language || 'en').replace('_', '-').toLowerCase();
     let currentBatch = [];
     let currentLength = 0;
     const isAI = AI_LLM_WHITE_LIST.includes(engine);
@@ -1029,7 +1157,8 @@ const TranslationBatcher = {
               [item.singleKey]: {
                 basic: singleTrans,
                 timestamp: Date.now(),
-                isFallback: res?.isFallback || false
+                isFallback: res?.isFallback || false,
+                isBatch: true
               }
             });
           }
@@ -1053,7 +1182,31 @@ const TranslationBatcher = {
       needTranslate.forEach(item => {
         item.el.removeAttribute('data-mira-token');
         this.unlock(item.el);
-        if (item.container?.parentNode) item.container.remove();
+        if (item.container?.parentNode) {
+          const errorText = err.message || "Translation failed";
+          const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
+          let displayMessage = "";
+          if (match) {
+            let errorCode = match[0];
+            if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
+            const friendlyMsg = chrome.i18n.getMessage(`ERROR_${errorCode}`);
+            displayMessage = friendlyMsg
+              ? `${friendlyMsg} (Code: ${errorCode})`
+              : `API Error (Code: ${errorCode})`;
+          } else if (errorText.toLowerCase().includes("timeout")) {
+            displayMessage = chrome.i18n.getMessage("ERROR_TIMEOUT") || "Request Timeout";
+          } else {
+            displayMessage = errorText.length < 100 ? errorText : "Translation failed";
+          }
+          item.container.innerText = `⚠ ${displayMessage}`;
+          item.container.style.color = "#f87171";
+          item.container.style.fontStyle = "italic";
+          item.container.style.fontSize = "0.85em";
+          item.container.classList.remove('kt-loading');
+          // 标记 el，避免无限重试
+          item.el.dataset.translated = "error";
+          item.el.dataset.lastErrorTime = String(Date.now());
+        }
       });
     } finally {
       this.finishProcessing(hasError);
@@ -1150,6 +1303,7 @@ const TranslationBatcher = {
       Array.from(tempDiv.childNodes).forEach(node => {
         container.appendChild(node.cloneNode(true));
       });
+      shrinkHeadingIfOverflow(container, el);
       container.style.fontStyle = "normal";
       container.style.color = "";
       container.dataset.translated = "true";
@@ -1321,33 +1475,25 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
   return true;
 }
 function extractTextWithLinks(node, el, linkMap, textHolder) {
-  if (node.nodeType === 3) {
+  if (node.nodeType === Node.TEXT_NODE) {
     const content = node.textContent;
     const isSequenceIndicator = /^\s*[\(\[]?\d+[\.\)\]]?\s*$/.test(content);
     if (isSequenceIndicator && el.childNodes.length > 1) return;
     textHolder.text += content;
-  } else if (node.nodeName === 'A') {
-    const isCitation = node.closest('sup')
-      || /^\s*\[\d+\]\s*$/.test(node.textContent);
-    if (isCitation) return;
-    const textContent = node.textContent.trim();
-    const hasOnlyImg = textContent === '' && node.querySelector('img');
-    if (hasOnlyImg) return;
-    const idx = linkMap.length;
-    linkMap.push({
-      href: node.href,
-      className: node.className,
-      target: node.target,
-      textContent: textContent
-    });
-    textHolder.text += `(L${idx}: ${textContent})`;
-  } else if (node.nodeType === 1) {
+  } else if (node.nodeType === Node.ELEMENT_NODE) {
+    if (node.tagName === 'SCRIPT' || node.tagName === 'STYLE') return;
     if (node.tagName === 'SUP') return;
-    if (node.tagName === 'SCRIPT') return;
-    if (node.tagName === 'STYLE') return;
     if (node.classList?.contains('kt-paragraph-translation')) return;
-    const isIndependentBlock = ['UL', 'OL', 'P'].includes(node.tagName);
-    if (isIndependentBlock) return;
+    if (node.nodeName === 'A') {
+      const isCitation = node.closest('sup') || /^\s*\[\d+\]\s*$/.test(node.textContent);
+      if (isCitation) return;
+      const textContent = node.textContent.trim();
+      if (textContent === '' && node.querySelector('img')) return;
+      const idx = linkMap.length;
+      linkMap.push({ href: node.href, className: node.className, target: node.target, textContent });
+      textHolder.text += `(L${idx}: ${textContent})`;
+      return;
+    }
     if (node.tagName === 'IMG' && node.alt) {
       const alt = node.alt.trim();
       if (alt.length > 0 && alt.length < 50 && !/^\d|stars|rating/i.test(alt)) {
@@ -1355,6 +1501,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
       }
       return;
     }
+    if (['UL', 'OL', 'P'].includes(node.tagName)) return;
     Array.from(node.childNodes).forEach(child =>
       extractTextWithLinks(child, el, linkMap, textHolder)
     );
@@ -1362,6 +1509,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
+
   if (el.tagName === 'LI') {
     const rawText = el.innerText?.trim() || '';
     const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
@@ -1379,6 +1527,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
     el.closest('[contenteditable="true"]') ||
     el.closest('textarea') ||
     el.closest('input')) {
+    return;
+  }
+  if (el.querySelector('script, style')) {
+    el.dataset.translated = 'true';
+    el.removeAttribute('data-mira-processing');
+    _miraProcessingSet.delete(el);
     return;
   }
   const isYoutube = location.hostname.includes('youtube.com');
@@ -1457,7 +1611,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     ) return;
   } else if (el.dataset.translated === 'error') {
     const lastError = parseInt(el.dataset.lastErrorTime || 0);
-    if (Date.now() - lastError < 30000) return;
+    if (Date.now() - lastError < 30000) return;// 30秒内不重试
   } else {
     if (el.dataset.translating === 'true' || el.hasAttribute('data-mira-processing')) return;
   }
@@ -1777,12 +1931,18 @@ async function handleTranslateElement(el, forceRefresh = false) {
       const trendKeyword = !trendLineClamp && el.closest('[data-testid="trend"]')
         ? el.closest('[data-testid="trend"] div[dir="ltr"]:not([style*="line-clamp"])')
         : null;
-
+      const placementTrackingTitle = el.closest('[data-testid="placementTracking"] button div[style*="line-clamp"]');
       if (trendLineClamp) {
         trendLineClamp.insertAdjacentElement('afterend', transContainer);
       } else if (trendKeyword) {
         trendKeyword.insertAdjacentElement('afterend', transContainer);
-      } else if (lineClampParent) {
+      } else if (placementTrackingTitle) {
+        placementTrackingTitle.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+        placementTrackingTitle.style.setProperty('overflow', 'visible', 'important');
+        placementTrackingTitle.style.setProperty('display', 'block', 'important');
+        placementTrackingTitle.insertAdjacentElement('afterend', transContainer);
+      }
+      else if (lineClampParent) {
         lineClampParent.insertAdjacentElement('afterend', transContainer);
       } else {
         mountTarget.insertAdjacentElement('afterend', transContainer);
@@ -1839,6 +1999,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   el.removeAttribute('data-mira-container-pending');
   if (typeof applyUserStyles === 'function') {
     await applyUserStyles(transContainer);
+
     if (!existingContainer) {
       transContainer.classList.add('kt-loading');
     }
@@ -1846,6 +2007,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const originFontSize = originStyle.fontSize;
     const originFontWeight = originStyle.fontWeight;
     transContainer.style.setProperty('font-size', originFontSize, 'important');
+
     if (isYoutube && (isYoutubeCustomTag || youtubeListTitleLink)) {
       transContainer.style.setProperty('font-weight', originFontWeight, 'important');
       transContainer.style.setProperty('margin-top', youtubeListTitleLink ? '6px' : '12px', 'important');
@@ -2187,6 +2349,7 @@ async function scanContent(forcedSelectors = null) {
           }
         }
       }
+
       if (targetEl.dataset.translated === "true") return;
       if (targetEl.dataset.translating === "true" && !isAmazonReview) return;
       const textContent = (isAmazonReview || isYTComment) ? (targetEl.textContent || "") : (targetEl.innerText || targetEl.textContent || "");
@@ -2211,7 +2374,7 @@ async function scanContent(forcedSelectors = null) {
       }
       if (!isSpecialSite) {
         let parent = targetEl.parentElement;
-        let isIndependent = ['P', 'LI'].includes(targetEl.tagName);
+        const isIndependent = ['P', 'LI', 'H1', 'H2', 'H3', 'H4'].includes(targetEl.tagName);
         if (!isIndependent) {
           while (parent && parent !== document.documentElement) {
             if (typeof parent.matches === 'function' && parent.matches(finalSelectors)) {
@@ -2244,6 +2407,10 @@ async function scanContent(forcedSelectors = null) {
     });
   } catch (e) {
     logger.error("[Mira Translator] ScanContent Error:", e);
+  }
+
+  if (!window.__mira_dynamic_observer) {
+    ensureDynamicContentWatcher();
   }
 }
 /**
@@ -2282,87 +2449,7 @@ document.addEventListener('KT_CONFIG_UPDATED', (e) => {
     logger.error("[Mira] 错误：未找到 scanContent 函数");
   }
 });
-/**
- * 语音朗读函数 - 自动识别语言并播放
- * @param {string} text 需要朗读的文本
- */
-let lastUtterance = null;
-function speak(text, speakBtn) {
-  if (!window.speechSynthesis || !text) return;
-  window.speechSynthesis.cancel();
-  lastUtterance = new SpeechSynthesisUtterance(text);
-  lastUtterance.rate = 0.8;
-  lastUtterance.volume = 1.0;
-  if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text)) {
-    lastUtterance.lang = 'ja-JP';
-    lastUtterance.rate = 0.55;
-  }
-  else if (/\p{Script=Hangul}/u.test(text)) {
-    lastUtterance.lang = 'ko-KR';
-  }
-  else if (/\p{Script=Hebrew}/u.test(text)) {
-    lastUtterance.lang = 'he-IL';
-    lastUtterance.rate = 0.85;
-  }
-  else if (/\p{Script=Han}/u.test(text)) {
-    lastUtterance.lang = /[繁體國語]/.test(text) ? 'zh-TW' : 'zh-CN';
-    lastUtterance.rate = 0.9;
-  }
-  else if (/\p{Script=Thai}/u.test(text)) {
-    lastUtterance.lang = 'th-TH';
-  }
-  else if (/\p{Script=Arabic}/u.test(text)) {
-    lastUtterance.lang = 'ar-SA';
-  }
-  else if (/\p{Script=Hebrew}/u.test(text)) {
-    lastUtterance.lang = 'he-IL';
-  }
-  else if (/\p{Script=Devanagari}/u.test(text)) {
-    lastUtterance.lang = 'hi-IN';
-  }
-  else if (/\p{Script=Bengali}/u.test(text)) {
-    lastUtterance.lang = 'bn-BD';
-  }
-  else if (/\p{Script=Cyrillic}/u.test(text)) {
-    lastUtterance.lang = 'ru-RU';
-  }
-  else if (/\p{Script=Greek}/u.test(text)) {
-    lastUtterance.lang = 'el-GR';
-  }
-  else if (/[ĞğİıŞş]/.test(text)) {
-    lastUtterance.lang = 'tr-TR';
-  }
-  else if (/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(text)) {
-    lastUtterance.lang = 'pl-PL';
-  }
-  else if (/[àáảãạăâèéẻẽẹêìíỉĩịòóỏõọôơùúủũụưỳýỷỹỵĐđ]/.test(text)) {
-    lastUtterance.lang = 'vi-VN';
-  }
-  else if (/[äöüßÄÖÜ]/.test(text)) {
-    lastUtterance.lang = 'de-DE';
-  }
-  else if (/[éàèâîôûçëïüÿœæ]/.test(text)) {
-    lastUtterance.lang = 'fr-FR';
-  }
-  else if (/[ñ¿¡]/.test(text)) {
-    lastUtterance.lang = 'es-ES';
-  }
-  else {
-    lastUtterance.lang = 'en-US';
-  }
-  const forceReset = new SpeechSynthesisUtterance("");
-  window.speechSynthesis.speak(forceReset);
-  setTimeout(() => {
-    window.speechSynthesis.speak(lastUtterance);
-  }, 50);
-  if (speakBtn) {
-    speakBtn.classList.remove('is-speaking');
-    lastUtterance.onstart = () => speakBtn.classList.add('is-speaking');
-    const stop = () => speakBtn?.classList.remove('is-speaking');
-    lastUtterance.onend = stop;
-    lastUtterance.onerror = stop;
-  }
-}
+
 const getTextFragmentAnchor = (word) => {
   try {
     const selection = window.getSelection();
@@ -2465,11 +2552,12 @@ function initSelectionTranslate() {
           panel.style.height = 'auto';
           panel.style.maxHeight = finalRect.height + 'px';
           panel.style.minHeight = finalRect.height + 'px';
-          const settings = {
-            width: finalRect.width + 'px',
-            height: finalRect.height + 'px'
-          };
-          localStorage.setItem('eclipse-translator-settings', JSON.stringify(settings));
+          safeSetStorage({
+            uiConfig: {
+              width: finalRect.width + 'px',
+              height: finalRect.height + 'px'
+            }
+          });//设置窗口大小
           window.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
         }
@@ -2491,7 +2579,6 @@ function initSelectionTranslate() {
 :host {
     --p-bg: rgba(18, 18, 18, 0.95);
     --p-text-main: #ffffffb7;
-    --p-text-query: rgba(255, 255, 255, 0.85);
     --p-text-query: rgb(31 31 35 / 34%);
     --p-text-muted: rgba(255, 255, 255, 0.6);
     --p-text-detail: rgba(255, 255, 255, 0.6);
@@ -2956,7 +3043,9 @@ function initSelectionTranslate() {
     }
     .header-controls {
         position: absolute;
-        top: 1px;      
+        height: 28px;
+        top: 1px;  
+        padding-top: 10px;    
         right: 9px;    
         display: flex;
         align-items: center;
@@ -3078,6 +3167,34 @@ function initSelectionTranslate() {
     .speak-btn::after {
       pointer-events: none;
     }
+@keyframes speak-loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.speak-btn.is-loading::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+    border: 2px solid rgba(56, 189, 248, 0.2);
+    border-top-color: #38bdf8;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: speak-loading 0.7s linear infinite;
+}
+
+.speak-btn.is-loading svg {
+    opacity: 0.4;
+    stroke: #38bdf8 !important;
+}
+
     @keyframes logo-glow {
       0% {
         filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
@@ -3196,26 +3313,25 @@ function initSelectionTranslate() {
     <div class="resizer" data-dir="br" style="position:absolute; bottom:-8px; right:-8px; width:16px; height:16px; cursor:nwse-resize; z-index:2147483648;"></div>
 `;
     shadow.appendChild(popupEl);
-    const saved = localStorage.getItem('eclipse-translator-settings');
-    if (saved) {
-      try {
-        const { width, height } = JSON.parse(saved);
-        popupEl.style.display = 'flex';
-        popupEl.style.flexDirection = 'column';
-        const finalMaxW = Math.min(parseInt(width), window.innerWidth * 0.9);
-        const finalMaxH = Math.min(parseInt(height), window.innerHeight * 0.9);
-        popupEl.style.maxWidth = finalMaxW + 'px';
-        popupEl.style.maxHeight = finalMaxH + 'px';
-        popupEl.style.width = 'fit-content';
-        popupEl.style.maxWidth = width;
-        popupEl.style.minWidth = '280px';
-        popupEl.style.height = height;
-        popupEl.style.maxHeight = height;
-        popupEl.style.boxSizing = 'border-box';
-      } catch (e) {
-        logger.error('Failed to load saved settings', e);
+    safeGetStorage('uiConfig', (res) => {
+      const settings = res?.uiConfig;
+      if (settings?.width && settings?.height) {
+        try {
+          const finalMaxW = Math.min(parseInt(settings.width), window.innerWidth * 0.9);
+          const finalMaxH = Math.min(parseInt(settings.height), window.innerHeight * 0.9);
+          popupEl.style.maxWidth = finalMaxW + 'px';
+          popupEl.style.maxHeight = finalMaxH + 'px';
+          popupEl.style.width = 'fit-content';
+          popupEl.style.maxWidth = settings.width;
+          popupEl.style.minWidth = '280px';
+          popupEl.style.height = settings.height;
+          popupEl.style.maxHeight = settings.height;
+          popupEl.style.boxSizing = 'border-box';
+        } catch (e) {
+          logger.error('Failed to load uiConfig', e);
+        }
       }
-    }
+    });
     enablePanelResize(popupEl);
   }
   function setPanelGlowColor(panel) {
@@ -3470,6 +3586,7 @@ function initSelectionTranslate() {
     <div id="p-basic" class="basic" style="margin-top: 8px;">Loading...</div>
     <div id="p-detail" class="detail" style="display:none; margin-top: 10px;margin-bottom: 10px"></div>
     <div id="p-examples" style="display:none; margin-top: 12px;"></div>
+    <div id="p-source" style="display:none; margin-top:1px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;"></div>
 </div>`;
     popupEl.classList.remove('is-hidden');
     popupEl.style.display = 'flex';
@@ -3482,16 +3599,20 @@ function initSelectionTranslate() {
       saveBtnInit._miraReady = false;
       saveBtnInit._miraSnapshot = null;
     }
-    const settings = JSON.parse(localStorage.getItem('eclipse-translator-settings') || '{}');
+    const settingsRes = await safeGetStorage('uiConfig');
+    const settings = settingsRes?.uiConfig || {};
     if (settings.width) {
+      popupEl.style.width = settings.width;
       popupEl.style.maxWidth = settings.width;
     } else {
-      popupEl.style.maxWidth = '450px';
+      // 用户未设置时给合理默认宽度
+      popupEl.style.width = '360px';
+      popupEl.style.maxWidth = '360px';
     }
     if (settings.height) {
       popupEl.style.maxHeight = settings.height;
     } else {
-      popupEl.style.maxHeight = '85vh';
+      popupEl.style.maxHeight = '50vh';//默认高度
     }
     popupEl.style.visibility = 'visible';
     const pQuary = shadow.getElementById('p-query');
@@ -3560,7 +3681,7 @@ function initSelectionTranslate() {
     const speakBtn = shadow.getElementById('p-speak');
     speakBtn.onclick = (e) => {
       e.stopPropagation();
-      speak(text, speakBtn);
+      speakText(text, speakBtn);
     };
     const refreshBtn = shadow.getElementById('p-refresh');
     refreshBtn.onclick = async (e) => {
@@ -3612,6 +3733,7 @@ function initSelectionTranslate() {
     };
     function fillPopupData(res, shadow, text, targetLang) {
       if (!shadow || !res) return;
+
       const escapeHtml = (str) => {
         if (typeof str !== 'string') return '';
         return str
@@ -3625,6 +3747,25 @@ function initSelectionTranslate() {
         if (typeof str !== 'string') return str;
         return str.replace(/\[\[\d+\]\]\s*/g, '').trim();
       };
+      //合并相同 pos
+      const mergedDictData = (res.dictData || []).reduce((acc, item) => {
+        const meanings = item.meanings?.length > 0
+          ? item.meanings
+          : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+        const existing = acc.find(d => d.pos === item.pos);
+        if (existing) {
+          existing.meanings = [...existing.meanings, ...meanings];
+        } else {
+          acc.push({ ...item, meanings });
+        }
+        return acc;
+      }, []);
+      res = {
+        ...res, dictData: mergedDictData.map(item => ({
+          ...item,
+          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
+        }))
+      };
       const pPhonetic = shadow.getElementById('p-phonetic');
       if (pPhonetic) {
         pPhonetic.innerText = res.phonetic
@@ -3637,15 +3778,45 @@ function initSelectionTranslate() {
       }
       const pD = shadow.getElementById('p-detail');
       if (pD?.style) {
-        if (res.dictData?.length > 0) {
+        if (res.dictData?.length > 0 || res.wordForms?.length > 0 || res.prototype) {
           pD.style.display = 'block';
-          pD.innerHTML = res.dictData.map(i => {
+
+          let detailHtml = (res.dictData || []).map(i => {
             const localPos = escapeHtml(localizePos(i.pos, targetLang) || '');
             const cleanMeanings = (i.meanings || [])
               .map(m => escapeHtml(cleanMarker(m)))
               .join(', ');
             return `<div><b style="color:#319BCA; font-size:12px;margin-right:4px;">${localPos}</b> ${cleanMeanings}</div>`;
           }).join('');
+          const ZH_FORM_TW = {
+            '过去式': '過去式', '过去分词': '過去分詞', '现在分词': '現在分詞',
+            '第三人称单数': '第三人稱單數', '复数': '複數', '单数': '單數',
+            '比较级': '比較級', '最高级': '最高級'
+          };
+
+          const isTraditional = (targetLang || '').toLowerCase().includes('tw') || (targetLang || '').toLowerCase().includes('hk');
+          if (res.wordForms?.length > 0 || res.prototype) {
+            let formsHtml = '';
+
+            if (res.prototype && res.prototype.toLowerCase().trim() !== text.toLowerCase().trim()) {
+              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-accent) 8%, transparent);border:0.5px solid color-mix(in srgb, var(--p-accent) 40%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
+                <span style="color:var(--p-text-muted);font-size:11px;">${isTraditional ? '原型' : '原型'}</span>
+                <span style="color:var(--p-accent);font-weight:500;">${escapeHtml(res.prototype)}</span>
+            </span>`;
+            }
+
+            (res.wordForms || []).forEach(wf => {
+              const localName = isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name;
+              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-text-main) 5%, transparent);border:0.5px solid color-mix(in srgb, var(--p-border) 60%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
+                <span style="color:var(--p-text-muted);font-size:11px;">${escapeHtml(localName)}</span>
+                <span style="color:var(--p-text-main);font-weight:500;">${escapeHtml(wf.value)}</span>
+            </span>`;
+            });
+
+            detailHtml += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
+          }
+
+          pD.innerHTML = detailHtml;
         } else {
           pD.style.display = 'none';
         }
@@ -3657,7 +3828,8 @@ function initSelectionTranslate() {
           basic: res.basic || "",
           phonetic: res.phonetic || "",
           dictData: res.dictData || [],
-          examples: res.examples || []
+          examples: res.examples || [],
+          prototype: res.prototype || null
         };
         saveBtn._miraReady = true;
       }
@@ -3684,7 +3856,18 @@ function initSelectionTranslate() {
           pE.style.display = 'none';
         }
       }
+
+      const pSource = shadow.getElementById('p-source');
+      if (pSource) {
+        if (res.source) {
+          pSource.style.display = 'block';
+          pSource.innerText = `Source: ${res.source}`;
+        } else {
+          pSource.style.display = 'none';
+        }
+      }
     }
+    //收藏
     shadow.getElementById('p-save').onclick = async (e) => {
       e.stopPropagation();
       const saveBtn = shadow.getElementById('p-save');
@@ -3735,10 +3918,7 @@ function initSelectionTranslate() {
           };
         }
       }
-      let existingEntry = await idb.vocabulary.get(dbKey);
-      if (!existingEntry) {
-        existingEntry = await idb.vocabulary.get(wordText);
-      }
+      let existingEntry = await idb.vocabulary.get(wordText);
       let isActive = false;
       let entryToSave = null;
       if (existingEntry) {
@@ -3784,6 +3964,8 @@ function initSelectionTranslate() {
         star.setAttribute('fill', 'none');
         star.setAttribute('stroke', 'rgba(255,255,255,0.8)');
       }
+      // 检查高亮开关是否开启
+      await window.__vocabOnSave?.(wordText, isActive);
     };
     const dragZone = shadow.getElementById('drag-zone');
     const header = shadow.getElementById('p-header');
@@ -3914,6 +4096,10 @@ function initSelectionTranslate() {
       if (!selection) return;
       const text = selection.toString().trim();
       if (!text || text.length > 1000) return;
+      // 确保语言已加载
+      if (!window.__LANG_READY__) {
+        await window.__LANG_PROMISE__;
+      }
       const targetLang = window.currentTargetL || navigator.language || 'en';
       const isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
       if (isAlreadyTarget) {
@@ -3961,7 +4147,7 @@ function initSelectionTranslate() {
       logoBtn.onmouseenter = async () => {
         forceHideLogo();
         const storage = await safeGetStorage(['targetLanguage']);
-        const currentTarget = storage?.targetLanguage || navigator.language || 'zh-CN';
+        const currentTarget = storage?.targetLanguage || navigator.language || 'en';
         let finalQuery = text;
         const hasHan = /[\u4e00-\u9fa5]/.test(text);
         const hasEn = /[a-zA-Z]/.test(text);
@@ -4003,18 +4189,759 @@ function initSelectionTranslate() {
     }
   }, true);
   //小按钮相关逻辑结束----------
+
+  (async () => {
+    const doHighlight = (words, vocabulary) => {
+      const escaped = words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+      const isLatinWord = (w) => /^[a-zA-Z0-9_]+$/.test(w);
+      const patterns = escaped.map((w, i) =>
+        isLatinWord(words[i])
+          ? `\\b${w}\\b`
+          : `(${w})`
+      );
+      const regex = new RegExp(patterns.join('|'), 'giu');
+
+      const wordMap = {};
+      Object.values(vocabulary).forEach(item => {
+        if (item && !item.deleted && item.word) {
+          wordMap[item.word.toLowerCase()] = item;
+        }
+      });
+
+      if (!document.getElementById('vocab-highlight-style')) {
+        const style = document.createElement('style');
+        style.id = 'vocab-highlight-style';
+        style.textContent = `
+        .vocab-highlight {
+          background: linear-gradient(120deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.25) 100%);
+          color: #38bdf8;
+          border-bottom: 1px solid rgba(56,189,248,0.5);
+          border-radius: 2px;
+          cursor: pointer;
+          padding: 0 1px;
+          transition: background 0.2s;
+        }
+        .vocab-highlight:hover {
+          background: linear-gradient(120deg, rgba(56,189,248,0.3) 0%, rgba(56,189,248,0.4) 100%);
+        }
+      `;
+        document.head.appendChild(style);
+      }
+
+      const processed = new WeakSet();
+
+      const createHighlightSpan = (text, entry) => {
+        const span = document.createElement('span');
+        span.className = 'vocab-highlight';
+        span.textContent = text;
+        if (entry) {
+          // mousedown stopPropagation 阻止 document mousedown 关闭窗口
+          span.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+          });
+          span.addEventListener('click', (e) => {
+            // 如果在字幕容器里，不弹出 Shadow DOM 窗口
+            if (e.target.closest('#kt-yt-box')) return;
+            e.stopPropagation();
+            if (!shadowHost) initShadowDOM();
+            renderAndShowPopup(
+              entry.word,
+              { clientX: e.clientX, clientY: e.clientY },
+              shadowHost.shadowRoot,
+              window.currentTargetL || 'en'
+            );
+          });
+        }
+        return span;
+      };
+
+      const walkWithRegex = (node, reg, getEntry) => {
+        if (processed.has(node)) return;
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (!node.textContent.trim()) return;
+          if (!reg.test(node.textContent)) { reg.lastIndex = 0; return; }
+          reg.lastIndex = 0;
+          processed.add(node);
+
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match;
+          reg.lastIndex = 0;
+
+          while ((match = reg.exec(node.textContent)) !== null) {
+            if (match.index > lastIndex) {
+              frag.appendChild(document.createTextNode(
+                node.textContent.slice(lastIndex, match.index)
+              ));
+            }
+            const entry = getEntry(match[0]);
+            frag.appendChild(createHighlightSpan(match[0], entry));
+            lastIndex = match.index + match[0].length;
+          }
+
+          if (lastIndex < node.textContent.length) {
+            frag.appendChild(document.createTextNode(
+              node.textContent.slice(lastIndex)
+            ));
+          }
+          node.parentNode?.replaceChild(frag, node);
+
+        } else if (
+          node.nodeType === Node.ELEMENT_NODE &&
+          !['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'NOSCRIPT'].includes(node.tagName) &&
+          !node.classList.contains('vocab-highlight')
+        ) {
+          processed.add(node);
+          Array.from(node.childNodes).forEach(n => walkWithRegex(n, reg, getEntry));
+        }
+      };
+
+      const walk = (node) => walkWithRegex(node, regex,
+        (matchText) => wordMap[matchText.toLowerCase()]
+      );
+
+      const highlightWord = async (word) => {
+        const freshEntry = await idb.vocabulary.get(word);
+        if (!freshEntry || freshEntry.deleted) return;
+
+        const esc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const isLatin = /^[a-zA-Z0-9_]+$/.test(word);
+        const singleRegex = isLatin
+          ? new RegExp(`\\b(${esc})\\b`, 'giu')
+          : new RegExp(`(${esc})`, 'giu');
+        wordMap[word.toLowerCase()] = freshEntry;
+
+        // 暂停 Observer 防止触发循环
+        observer.disconnect();
+
+        // 专门遍历文本节点，不检查 processed
+        const walkForNew = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            if (!node.textContent.trim()) return;
+            singleRegex.lastIndex = 0;
+            if (!singleRegex.test(node.textContent)) return;
+            singleRegex.lastIndex = 0;
+
+            const frag = document.createDocumentFragment();
+            let lastIndex = 0;
+            let match;
+            singleRegex.lastIndex = 0;
+
+            while ((match = singleRegex.exec(node.textContent)) !== null) {
+              if (match.index > lastIndex) {
+                frag.appendChild(document.createTextNode(
+                  node.textContent.slice(lastIndex, match.index)
+                ));
+              }
+              frag.appendChild(createHighlightSpan(match[0], freshEntry));
+              lastIndex = match.index + match[0].length;
+            }
+            if (lastIndex < node.textContent.length) {
+              frag.appendChild(document.createTextNode(
+                node.textContent.slice(lastIndex)
+              ));
+            }
+            if (node.parentNode) {
+              node.parentNode.replaceChild(frag, node);
+            }
+
+          } else if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            !['SCRIPT', 'STYLE', 'TEXTAREA', 'INPUT', 'CODE', 'PRE', 'NOSCRIPT'].includes(node.tagName) &&
+            !node.classList.contains('vocab-highlight')
+          ) {
+            Array.from(node.childNodes).forEach(walkForNew);
+          }
+        };
+
+        walkForNew(document.body);
+
+        // 恢复 Observer
+        observer.observe(document.body, { childList: true, subtree: true });
+      };
+      let observer = null;
+      const removeHighlight = (word) => {
+        observer.disconnect();
+
+        const els = Array.from(document.querySelectorAll('.vocab-highlight'));
+        els.forEach(el => {
+          if (el.textContent.toLowerCase() === word.toLowerCase()) {
+            const textNode = document.createTextNode(el.textContent);
+            const parent = el.parentNode;
+            if (parent) {
+              parent.replaceChild(textNode, el);
+              processed.add(textNode);
+            }
+          }
+        });
+        delete wordMap[word.toLowerCase()];
+        observer.observe(document.body, { childList: true, subtree: true });
+      };
+
+      window.__vocabHighlightWord = highlightWord;
+      window.__vocabRemoveHighlight = removeHighlight;
+
+      // p-save 联动：监听来自 renderAndShowPopup 的收藏事件
+      window.__vocabOnSave = async (wordText, isActive) => {
+        if (!window.__vocabHighlightWord) return;
+        if (isActive) {
+          await highlightWord(wordText);
+        } else {
+          removeHighlight(wordText);
+        }
+      };
+
+      walk(document.body);
+
+      observer = new MutationObserver((mutations) => {
+        const newNodes = [];
+        mutations.forEach(mutation => {
+          mutation.addedNodes.forEach(node => {
+            if (!processed.has(node)) newNodes.push(node);
+          });
+        });
+        if (newNodes.length === 0) return;
+        requestAnimationFrame(() => newNodes.forEach(walk));
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      chrome.storage.onChanged.addListener((changes) => {
+        if (changes.vocabHighlight?.newValue === false) {
+          observer.disconnect();
+          document.querySelectorAll('.vocab-highlight').forEach(el => {
+            el.replaceWith(document.createTextNode(el.textContent));
+          });
+          const s = document.getElementById('vocab-highlight-style');
+          if (s) s.remove();
+          window.__vocabHighlightWord = null;
+          window.__vocabRemoveHighlight = null;
+          window.__vocabOnSave = null;
+        }
+      });
+    };
+
+    async function initHighlight() {
+      const vocabulary = await safeSendMessage({ type: 'IDB_GET_ALL', prefix: 'vb_' });
+      if (!vocabulary) return;
+
+      const words = Object.values(vocabulary)
+        .filter(item => item && !item.deleted && item.word)
+        .map(item => item.word.toLowerCase());
+
+      if (words.length === 0) return;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => doHighlight(words, vocabulary));
+      } else {
+        doHighlight(words, vocabulary);
+      }
+    }
+
+    const storage = await safeGetStorage('vocabHighlight');
+    if (storage?.vocabHighlight) {
+      await initHighlight();
+    }
+
+    chrome.storage.onChanged.addListener(async (changes) => {
+      if (changes.vocabHighlight?.newValue === true) {
+        await initHighlight();
+      }
+    });
+  })();
+
 }
 
 //yt
+
 let fullSubtitleData = [];
 let semanticGroups = [];
 lastSubIndex = -1;
 let lastDataLength = 0;
+
+// ===== 字幕下载功能开始 =====
+// 全局下载锁
+let isDownloading = false;
+function formatSRTTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  const ms = Math.round((seconds % 1) * 1000);
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(ms).padStart(3, '0')}`;
+}
+
+function buildSRT(groups, translationMap = null) {
+  return groups.map((g, i) => {
+    const start = formatSRTTime(g.start);
+    const end = formatSRTTime(g.end);
+    const original = g.text;
+    const translation = translationMap?.[i];
+
+    let content = original;
+    if (translation) content += `\n${translation}`;
+
+    return `${i + 1}\n${start} --> ${end}\n${content}`;
+  }).join('\n\n');
+}
+
+function getVideoTitle() {
+  return document.querySelector('h1.ytd-video-primary-info-renderer')?.textContent?.trim()
+    || document.title.replace(' - YouTube', '').trim()
+    || 'subtitle';
+}
+// 下载前最后做一次校验补漏
+let downloadAbortController = null;
+
+async function fillMissingTranslations(translationMap, engine, lang, isAI, signal) {
+  const stillMissing = [];
+  semanticGroups.forEach((g, i) => {
+    if (!translationMap[i]) stillMissing.push(i);
+  });
+
+  if (stillMissing.length === 0) return;
+
+  logger.log(`[Download] 最终补漏 ${stillMissing.length} 句`);
+  const btn = document.getElementById('kt-download-btn');
+
+  function sleep(ms) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(resolve, ms);
+      signal?.addEventListener('abort', () => {
+        clearTimeout(timer);
+        reject(new Error('ABORTED'));
+      });
+    });
+  }
+
+  for (const idx of stillMissing) {
+    if (signal?.aborted) throw new Error('ABORTED');
+
+    const text = semanticGroups[idx].text;
+    const key = getCacheKey(text, engine, lang);
+
+    let success = false;
+    for (let retry = 0; retry < 5; retry++) {
+      if (signal?.aborted) throw new Error('ABORTED');
+      try {
+        const res = await getDetailedTranslation(text);
+        if (res?.basic) {
+          translationMap[idx] = res.basic;
+          fastMemoryCache.set(key, { basic: res.basic });
+          success = true;
+          break;
+        }
+      } catch (e) {
+        if (e.message === 'ABORTED') throw e;
+        const isRateLimit = e?.message?.includes('429') ||
+          e?.message?.toLowerCase().includes('rate limit');
+        if (isRateLimit) {
+          const delay = 5000 * Math.pow(2, retry);
+          if (btn) {
+            btn._savedText = `⏸ ${Math.round(delay / 1000)}s`;
+            if (btn.textContent !== '✕ Cancel') btn.textContent = btn._savedText;
+          }
+          await sleep(delay);
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (success) {
+      const done = Object.keys(translationMap).filter(k => translationMap[k]).length;
+      if (btn) {
+        btn._savedText = `⏳ ${done}/${semanticGroups.length}`;
+        if (btn.textContent !== '✕ Cancel') btn.textContent = btn._savedText;
+      }
+    }
+
+    await sleep(isAI ? 2000 : 500);
+  }
+}
+// 自定义confirm弹窗
+function showMiraConfirm(msg) {
+  return new Promise(resolve => {
+    // 防止重复
+    document.getElementById('mira-confirm-modal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'mira-confirm-modal';
+    modal.style.cssText = `
+      position: fixed; inset: 0; z-index: 2147483647;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    `;
+
+    modal.innerHTML = `
+  <div style="
+    background: #1e293b; border: 1px solid #334155;
+    border-radius: 12px; padding: 24px 28px;
+    max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    font-family: system-ui, sans-serif; color: white;
+  ">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
+      <img src="${ASSETS.logoBase64}" style="width:20px; height:20px; border-radius:4px;" />
+      <span style="font-weight:700; font-size:15px; color:#38bdf8;">Mira Translator</span>
+    </div>
+    <div style="font-size:14px; line-height:1.7; color:#cbd5e1; white-space:pre-line;">${msg}</div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button id="mira-confirm-cancel" style="
+        padding: 8px 20px; border-radius: 8px; border: 1px solid #475569;
+        background: transparent; color: #94a3b8; cursor: pointer; font-size: 13px;
+        transition: all 0.25s ease; position: relative; overflow: hidden;
+      ">${t('cancel', window.uiLanguage) || 'Cancel'}</button>
+      <button id="mira-confirm-ok" style="
+        padding: 8px 20px; border-radius: 8px; border: none;
+        background: linear-gradient(135deg, #38bdf8, #818cf8);
+        color: #0f172a; cursor: pointer; font-size: 13px;
+        font-weight: 600; transition: all 0.25s ease;
+        position: relative; overflow: hidden;
+        box-shadow: 0 0 0 rgba(56,189,248,0);
+      ">OK</button>
+    </div>
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    const okBtn = modal.querySelector('#mira-confirm-ok');
+    const cancelBtn = modal.querySelector('#mira-confirm-cancel');
+
+    // 提前下载提示框的 OK 按钮
+    okBtn.onmouseenter = () => {
+      okBtn.style.transform = 'translateY(-2px) scale(1.03)';
+      okBtn.style.boxShadow = '0 0 16px rgba(56,189,248,0.6), 0 0 32px rgba(129,140,248,0.3)';
+      okBtn.style.background = 'linear-gradient(135deg, #7dd3fc, #a5b4fc)';
+    };
+    okBtn.onmouseleave = () => {
+      okBtn.style.transform = 'translateY(0) scale(1)';
+      okBtn.style.boxShadow = '0 0 0 rgba(56,189,248,0)';
+      okBtn.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
+    };
+    okBtn.onmousedown = () => {
+      okBtn.style.transform = 'translateY(1px) scale(0.97)';
+      okBtn.style.boxShadow = '0 0 8px rgba(56,189,248,0.3)';
+    };
+    okBtn.onmouseup = () => {
+      okBtn.style.transform = 'translateY(-2px) scale(1.03)';
+    };
+
+    cancelBtn.onmouseenter = () => {
+      cancelBtn.style.borderColor = '#64748b';
+      cancelBtn.style.color = '#e2e8f0';
+      cancelBtn.style.background = 'rgba(255,255,255,0.05)';
+      cancelBtn.style.transform = 'translateY(-1px)';
+    };
+    cancelBtn.onmouseleave = () => {
+      cancelBtn.style.borderColor = '#475569';
+      cancelBtn.style.color = '#94a3b8';
+      cancelBtn.style.background = 'transparent';
+      cancelBtn.style.transform = 'translateY(0)';
+    };
+    cancelBtn.onmousedown = () => {
+      cancelBtn.style.transform = 'translateY(1px)';
+      cancelBtn.style.background = 'rgba(255,255,255,0.03)';
+    };
+    cancelBtn.onmouseup = () => {
+      cancelBtn.style.transform = 'translateY(-1px)';
+    };
+
+    okBtn.onclick = () => { modal.remove(); resolve(true); };
+    cancelBtn.onclick = () => { modal.remove(); resolve(false); };
+    modal.onclick = (e) => {
+      if (e.target === modal) { modal.remove(); resolve(false); }
+    };
+  });
+}
+
+async function downloadSubtitles(withTranslation = false) {
+  if (!semanticGroups?.length) return;
+
+  // 正在下载时点击 = 取消
+  if (isDownloading) {
+    downloadAbortController?.abort();
+    return;
+  }
+
+  downloadAbortController = new AbortController();
+  const signal = downloadAbortController.signal;
+
+  function checkAborted() {
+    if (signal.aborted) throw new Error('ABORTED');
+  }
+
+  const activeCfg = window.currentConfig?.activeConfig || {};
+  const engine = activeCfg.engine ||
+    window.currentConfig?.selectedEngine ||
+    getRuntimeDefaultEngine();
+  const lang = window.currentConfig?.targetLanguage ||
+    window.currentTargetL ||
+    navigator.language || 'en';
+  const uiLang = window.uiLanguage || lang;
+  const isAI = AI_LLM_WHITE_LIST.includes(engine);
+
+  let translationMap = null;
+
+  if (withTranslation) {
+    translationMap = {};
+    const missing = [];
+    let hitCount = 0;
+
+    semanticGroups.forEach((g, i) => {
+      const key = getCacheKey(g.text, engine, lang);
+      const cached = fastMemoryCache.get(key);
+      if (cached?.basic) {
+        translationMap[i] = cached.basic;
+        hitCount++;
+      } else {
+        const fingerprint = key.substring(key.indexOf('_', 3));
+        const aiHit = AI_LLM_WHITE_LIST.find(ai =>
+          fastMemoryCache.has(`tr_${ai}${fingerprint}`)
+        );
+        if (aiHit) {
+          const fallback = fastMemoryCache.get(`tr_${aiHit}${fingerprint}`);
+          if (fallback?.basic) {
+            translationMap[i] = fallback.basic;
+            fastMemoryCache.set(key, fallback);
+            hitCount++;
+            return;
+          }
+        }
+        missing.push(i);
+      }
+    });
+
+    logger.log(`[Download] 缓存命中 ${hitCount}/${semanticGroups.length}，缺失 ${missing.length} 句`);
+
+    const total = semanticGroups.length;
+    const cacheRate = Math.round((hitCount / total) * 100);
+
+    if (isAI && missing.length > 10) {
+      const msg = (cacheRate < 30
+        ? t('dlRateLow', uiLang)
+        : t('dlRatePartial', uiLang)
+      ).replaceAll('{rate}', cacheRate)
+        .replaceAll('{missing}', missing.length);
+
+      const confirmed = await showMiraConfirm(msg);
+      if (!confirmed) return;
+
+      const content = buildSRT(semanticGroups, translationMap);
+      triggerDownload(content, `[Mira] ${getVideoTitle()}_bilingual_${cacheRate}pct.txt`);
+      return;
+    }
+
+    if (missing.length > 0) {
+      isDownloading = true;
+
+      const btn = document.getElementById('kt-download-btn');
+
+      function setBtnCancel() {
+        if (!btn) return;
+        btn._savedText = `⏳ 0/${total}`;
+        btn.textContent = btn._savedText;
+        btn.style.background = 'rgba(34, 197, 94, 0.15)';
+        btn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        btn.style.color = '#4ade80';
+
+        btn.disabled = false;
+
+        btn.onmouseenter = () => {
+          if (!isDownloading) return;
+          btn._savedText = btn._savedText || btn.textContent;
+          btn.textContent = '✕ Cancel';
+          btn.style.background = 'rgba(239, 68, 68, 0.2)';
+          btn.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+          btn.style.color = '#ff8080';
+        };
+        btn.onmouseleave = () => {
+          btn.textContent = btn._savedText || btn.textContent;
+          btn.style.background = 'rgba(34, 197, 94, 0.15)';
+          btn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+          btn.style.color = '#4ade80';
+        };
+      }
+
+      function resetBtn() {
+        if (!btn) return;
+        btn.textContent = `⬇ ${t('bilingual', uiLang)} TXT`;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+        btn.disabled = false;
+        btn.onmouseenter = null;
+        btn.onmouseleave = null;
+        btn._savedText = null;
+      }
+
+      function updateProgress(extra = '') {
+        if (signal.aborted || !btn) return;
+        const done = Object.keys(translationMap).length;
+        const text = extra || `⏳ ${done}/${total}`;
+        btn._savedText = text;
+        // hover 中不打断显示
+        if (btn.textContent !== '✕ Cancel') btn.textContent = text;
+      }
+
+      function sleep(ms) {
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(resolve, ms);
+          signal.addEventListener('abort', () => {
+            clearTimeout(timer);
+            reject(new Error('ABORTED'));
+          });
+        });
+      }
+
+      async function translateChunkWithRetry(chunk, retryCount = 0) {
+        checkAborted();
+        const MAX_RETRIES = 4;
+        const BASE_DELAY = 3000;
+        const payload = chunk
+          .map(item => `⟦KT_${item.absoluteIndex}⟧ ${item.text}`)
+          .join('\n');
+        try {
+          const res = await getDetailedTranslation(payload);
+          checkAborted();
+          if (res?.basic) {
+            const split = splitBatchTranslation(res.basic);
+            chunk.forEach(item => {
+              if (split[item.absoluteIndex]) {
+                translationMap[item.absoluteIndex] = split[item.absoluteIndex];
+                fastMemoryCache.set(item.key, { basic: split[item.absoluteIndex] });
+              }
+            });
+            updateProgress();
+          }
+        } catch (e) {
+          if (e.message === 'ABORTED') throw e;
+          const isRateLimit =
+            e?.status === 429 ||
+            e?.message?.includes('429') ||
+            e?.message?.toLowerCase().includes('rate limit') ||
+            e?.message?.toLowerCase().includes('too many');
+          if (isRateLimit && retryCount < MAX_RETRIES) {
+            const delay = BASE_DELAY * Math.pow(2, retryCount);
+            logger.warn(`Rate limited, retry ${retryCount + 1}/${MAX_RETRIES} after ${delay}ms`);
+            updateProgress(`⏸ ${Math.round(delay / 1000)}s`);
+            await sleep(delay);
+            updateProgress();
+            return translateChunkWithRetry(chunk, retryCount + 1);
+          }
+          logger.warn('Chunk failed after retries:', e);
+        }
+      }
+
+      const CHUNK_SIZE = isAI ? 3 : 5;
+      const CHUNK_INTERVAL = isAI ? 2000 : 800;
+
+      const chunks = [];
+      for (let i = 0; i < missing.length; i += CHUNK_SIZE) {
+        chunks.push(
+          missing.slice(i, i + CHUNK_SIZE).map(idx => ({
+            absoluteIndex: idx,
+            text: semanticGroups[idx].text,
+            key: getCacheKey(semanticGroups[idx].text, engine, lang)
+          }))
+        );
+      }
+
+      setBtnCancel();
+
+      try {
+        for (let i = 0; i < chunks.length; i++) {
+          await translateChunkWithRetry(chunks[i]);
+          if (i < chunks.length - 1) await sleep(CHUNK_INTERVAL);
+        }
+        await fillMissingTranslations(translationMap, engine, lang, isAI, signal);
+      } catch (e) {
+        if (e.message === 'ABORTED') {
+          logger.log('[Download] 用户取消下载');
+          isDownloading = false;
+          downloadAbortController = null;
+          resetBtn();
+          return;
+        }
+      }
+
+      isDownloading = false;
+      downloadAbortController = null;
+      resetBtn();
+    }
+  }
+
+  const content = buildSRT(semanticGroups, translationMap);
+  const filename = `[Mira] ${getVideoTitle()}${withTranslation ? '_bilingual' : ''}.txt`;
+  triggerDownload(content, filename);
+}
+
+function triggerDownload(content, filename) {
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function injectDownloadButton() {
+  if (document.getElementById('kt-subtitle-download')) return;
+  // 挂载到 YT 右下角工具栏区域
+  const target = document.querySelector('.ytp-right-controls');
+  if (!target) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'kt-subtitle-download';
+  wrapper.style.cssText = `
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-right: 8px; margin-left: 12px; opacity: 0;
+    animation: ktFadeIn 0.3s ease forwards;
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ktFadeIn { to { opacity: 1; } }
+    .kt-dl-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white; border-radius: 6px;
+      padding: 3px 10px; font-size: 13px;
+      cursor: pointer; transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .kt-dl-btn:hover { background: rgba(255,255,255,0.25); }
+  `;
+  document.head.appendChild(style);
+
+  const btnOriginal = document.createElement('button');
+  btnOriginal.className = 'kt-dl-btn';
+  btnOriginal.textContent = '⬇ TXT';
+  btnOriginal.title = t('dlOriginal', window.uiLanguage);//下载原文字幕
+  btnOriginal.onclick = () => downloadSubtitles(false);
+
+  const btnBilingual = document.createElement('button');
+  btnBilingual.id = 'kt-download-btn';
+  btnBilingual.className = 'kt-dl-btn';
+  btnBilingual.textContent = `⬇ ${t('bilingual', window.uiLanguage)} TXT`;//双语
+  btnBilingual.title = t('dlBilingual', window.uiLanguage);//下载双语字幕（含翻译）
+  btnBilingual.onclick = () => downloadSubtitles(true);
+
+  wrapper.appendChild(btnOriginal);
+  wrapper.appendChild(btnBilingual);
+  target.prepend(wrapper);
+}
+
+function removeDownloadButton() {
+  document.getElementById('kt-subtitle-download')?.remove();
+}
+//字幕下载功能结束--------
+
 window.addEventListener('KT_DATA_READY', (e) => {
   fullSubtitleData = e.detail;
   if (typeof fastMemoryCache !== 'undefined') fastMemoryCache.clear();
   if (typeof pendingRequests !== 'undefined') pendingRequests.clear();
-  const engine = window.currentConfig?.selectedEngine || 'google';
+  const engine = window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   semanticGroups = mergeToSemantic(fullSubtitleData, isAI);
   lastDataLength = fullSubtitleData.length;
@@ -4023,6 +4950,10 @@ window.addEventListener('KT_DATA_READY', (e) => {
       batchPrefetch(0);
     }, 200);
   }
+  injectDownloadButton();
+  const dlBtn = document.getElementById('kt-subtitle-download');
+  if (dlBtn) dlBtn.style.display =
+    (typeof isYTEnabled === 'undefined' || isYTEnabled) ? 'inline-flex' : 'none';
 });
 (function initVideoResetListener() {
   const video = document.querySelector('video');
@@ -4047,6 +4978,7 @@ window.addEventListener('KT_DATA_READY', (e) => {
     if (oEl) oEl.innerHTML = '';
     if (tEl) tEl.innerText = '';
     if (tEl) tEl.classList.remove('kt-loading');
+    removeDownloadButton();
   });
 })();
 
@@ -4218,7 +5150,12 @@ if (!document.getElementById('mira-global-style')) {
         color: #94a3b8 !important;     
         text-shadow: none !important;  
         font-size: 20px !important;   
-    }
+        }
+        #kt-yt-box.kt-settings-open {
+        z-index: 100 !important;
+        opacity: 0.25 !important;
+        transition: opacity 0.2s ease;
+       }
     `;
   document.head.appendChild(style);
 }
@@ -4240,7 +5177,9 @@ function splitBatchTranslation(translatedText) {
   }
   return map;
 }
+
 async function batchPrefetch(startIndex) {
+  if (isDownloading) return;
   const now = Date.now();
   if (now - lastBatchTime < BATCH_GAP) return;
   lastBatchTime = now;
@@ -4249,8 +5188,8 @@ async function batchPrefetch(startIndex) {
   const slice = semanticGroups.slice(windowStart, windowEnd);
   if (!slice.length) return;
   const activeCfg = window.currentConfig?.activeConfig || {};
-  const engine = activeCfg.engine || window.currentConfig?.selectedEngine || 'google';
-  let lang = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
+  const engine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
+  let lang = getCurrentLang();
   lang = lang.replace('_', '-').toLowerCase();
   const isTraditional = !AI_LLM_WHITE_LIST.includes(engine);
   const itemsToTranslate = [];
@@ -4360,8 +5299,8 @@ function syncSubtitleDisplay() {
     const tEl = document.getElementById('yt-t');
     const oEl = document.getElementById('yt-o');
     const activeCfg = window.currentConfig?.activeConfig || {};
-    const currentEngine = activeCfg.engine || window.currentConfig?.selectedEngine || 'google';
-    const currentTargetL = window.currentConfig?.targetLanguage || navigator.language || 'zh-CN';
+    const currentEngine = activeCfg.engine || window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
+    const currentTargetL = getCurrentLang();
     const cacheKey = getCacheKey(group.text, currentEngine, currentTargetL);
     const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
     const isBing = currentEngine === 'bing';
@@ -4499,7 +5438,7 @@ function enableYtBoxDrag(box) {
       isDragging = false;
       box.classList.remove('dragging');
       document.body.style.cursor = 'default';
-      chrome.storage.local.set({ ytBoxBottom: box.style.bottom });
+      safeSetStorage({ ytBoxBottom: box.style.bottom });
     }
   });
 }
@@ -4544,6 +5483,29 @@ function initSubtitleAvoidance() {
     });
   });
 }
+function initSettingsAvoidance() {
+  const player = document.querySelector('.html5-video-player');
+  if (!player) return;
+
+  function checkSettingsOpen() {
+    const settingsMenu = document.querySelector('.ytp-popup.ytp-settings-menu');
+    const box = document.getElementById('kt-yt-box');
+    if (!box) return;
+
+    const isOpen = settingsMenu && settingsMenu.offsetHeight > 0;
+    box.classList.toggle('kt-settings-open', isOpen);
+  }
+
+  // 同时监听 style 和 class 变化
+  new MutationObserver(checkSettingsOpen).observe(player, {
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class'],
+    childList: true
+  });
+}
+
+setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 function renderWords(text, container) {
   if (!container) return;
@@ -4559,20 +5521,28 @@ function renderWords(text, container) {
   words.forEach(word => {
     const trimmed = word.trim();
     if (trimmed.length > 0) {
+      const cleanWord = trimmed.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」]/g, "");
+
       const span = document.createElement('span');
       span.className = 'kt-word';
       span.innerText = word;
+
+      // 高亮判断
+      if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
+        span.style.color = '#facc15';
+        span.style.borderBottom = '1px solid rgba(250, 204, 21, 0.6)';
+      }
+
       if (isCJK) {
         span.style.margin = '0 0.5px';
         span.style.display = 'inline-block';
       }
       span.onmouseenter = (e) => { if (typeof handleWordMouseEnter === 'function') handleWordMouseEnter(e, trimmed); };
       span.onmouseleave = (e) => { if (typeof handleWordMouseLeave === 'function') handleWordMouseLeave(e); };
-      span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, trimmed); };
+      span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, cleanWord); };
       span.onclick = (e) => {
         e.preventDefault(); e.stopPropagation();
-        const cleanWord = trimmed.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」]/g, "");
-        if (typeof speak === 'function') speak(cleanWord, span);
+        if (typeof speakText === 'function') speakText(cleanWord, span);
         const originalColor = span.style.color;
         span.style.color = '#facc15';
         setTimeout(() => span.style.color = originalColor || '', 200);
@@ -4612,72 +5582,103 @@ async function handleWordMouseEnter(e, word) {
   }
   e.target.style.background = 'rgba(56, 189, 248, 0.4)';
   e.target.style.borderRadius = '4px';
-  const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").trim();
-  if (!cleanWord) return;
+  const cleanWord = word.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」『』【】…—～・]/g, "").trim();
+  if (!cleanWord || cleanWord.length === 0) return;
+  if (/^\d+$/.test(cleanWord)) return;
+  if (/^[\p{P}\p{S}]$/u.test(cleanWord)) return;
+  if (/^\s+$/.test(cleanWord)) return;
+  if (/^[a-zA-Z]$/.test(cleanWord)) return;
+  if (/^[\p{P}\p{S}\s]+$/u.test(cleanWord)) return;
+
   const [entry, storage] = await Promise.all([
     idb.vocabulary.get(cleanWord),
     safeGetStorage(['targetLanguage'])
   ]);
-  const currentLang = storage?.targetLanguage || navigator.language || 'zh-CN';
+  const currentLang = storage?.targetLanguage || navigator.language || 'en';
   const isCollected = !!(entry && entry.deleted === false);
+
   let tooltip = document.getElementById('kt-word-tooltip');
   if (!tooltip) {
     tooltip = document.createElement('div');
     tooltip.id = 'kt-word-tooltip';
     tooltip.style.cssText = `
-            position: fixed; z-index: 2147483647; background: #1e293b !important; 
-            color: white !important; padding: 10px 14px; border-radius: 8px; 
-            font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            pointer-events: none; max-width: 240px; line-height: 1.5;
-            display: none; flex-direction: column;
-            box-sizing: border-box;
-            transition: top 0.15s ease-out;
-            border: 1px solid #334155;
-        `;
+      position: fixed; z-index: 2147483647; background: #1e293b !important;
+      color: white !important; padding: 10px 14px; border-radius: 8px;
+      font-size: 14px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      pointer-events: none; min-width: 160px; max-width: 260px; width: fit-content;
+      line-height: 1.5; display: none; flex-direction: column;
+      box-sizing: border-box; transition: top 0.15s ease-out;
+      border: 1px solid #334155;
+    `;
     const moviePlayer = document.querySelector('.html5-video-player') || document.body;
     moviePlayer.appendChild(tooltip);
   }
+
   tooltip.style.border = isCollected ? '2px solid #facc15' : '1px solid #334155';
-  const tipText = isCollected ? t('alreadyAddedFeedback') : t('hintAddAction');
+  const tipText = isCollected ? t('alreadyAddedFeedback', currentLang) : t('hintAddAction', currentLang);
   const tipColor = isCollected ? '#facc15' : '#94a3b8';
   tooltip.innerHTML = `
-        <div id="kt-word-def" data-status="loading" style="color:#94a3b8">Loading...</div>
-        <div id="kt-word-tip" style="font-size: 11px; color: ${tipColor}; border-top: 1px solid #334155; padding-top: 4px; margin-top: 4px; white-space: normal; word-break: break-word;">
-            ${tipText}
-        </div>
-    `;
+    <div id="kt-word-def" data-status="loading" style="color:#94a3b8">Loading...</div>
+    <div id="kt-word-tip" style="font-size: 11px; color: ${tipColor}; border-top: 1px solid #334155; padding-top: 4px; margin-top: 4px; white-space: normal; word-break: break-word;">
+      ${tipText}
+    </div>
+  `;
   tooltip.style.display = 'flex';
   tooltip.style.visibility = 'visible';
   repositionTooltip(tooltip, e.target);
+
   try {
-    const res = await getDetailedTranslation(cleanWord, false, currentLang);
+    const res = await getDetailedTranslation(cleanWord, false, currentLang, { lightweight: true });
     const defEl = tooltip.querySelector('#kt-word-def');
     if (res && defEl) {
-      const phoneticStr = res.phonetic ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; margin-left: 8px;">[${res.phonetic}]</span>` : '';
+      const phoneticStr = res.phonetic
+        ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; width: 100%;">[${res.phonetic}]</span>`
+        : '';
+
       let dictHtml = '';
       if (res.dictData && res.dictData.length > 0) {
-        dictHtml = res.dictData.map(i => {
-          const meaningsStr = Array.isArray(i.meanings) ? i.meanings.join(', ') : (i.meanings || "");
+        dictHtml = res.dictData.map((i, index) => {
+          const meaning = typeof i.definition === 'string' && i.definition
+            ? i.definition
+            : Array.isArray(i.definition)
+              ? i.definition.join(', ')
+              : Array.isArray(i.meanings)
+                ? i.meanings.join(', ')
+                : typeof i.meanings === 'string'
+                  ? i.meanings
+                  : '';
+
+          if (!meaning) return '';
+
           const localizedPos = localizePos(i.pos, currentLang);
+          // 第一条显示3行，其余2行
+          const maxH = index === 0 ? '4.2em' : '2.8em';
           return `
-                        <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
-                            <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px;">${localizedPos}</b>
-                            <span style="color:#E2E8F0; font-size:13px; line-height:1.4;">${meaningsStr}</span>
-                        </div>
-                    `;
-        }).join('');
+            <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
+              <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">${localizedPos}</b>
+              <div style="position:relative; flex:1; min-width:0;">
+                <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block;
+                  max-height:${maxH}; overflow:hidden; white-space:normal; word-break:break-word;">${meaning}</span>
+                <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em;
+                  background:linear-gradient(to right, transparent, #1e293b);"></div>
+              </div>
+            </div>
+          `;
+        }).filter(Boolean).join('');
       } else {
         dictHtml = `<div style="color: #e2e8f0; font-size: 13px; margin-top: 4px;">${res.basic}</div>`;
       }
+
       defEl.innerHTML = `
-                <div style="display: flex; align-items: baseline; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px;">
-                    <span style="font-size: 16px; font-weight: 700; color: #ffffff;">${cleanWord}</span>
-                    ${phoneticStr}
-                </div>
-                <div style="overflow-y: auto; scrollbar-width: none;">
-                    ${dictHtml}
-                </div>
-            `;
+      <div style="display: flex; align-items: baseline; gap: 6px; border-bottom: 1px solid #334155; padding-bottom: 4px; margin-bottom: 4px; flex-wrap: wrap;">
+        <span style="font-size: 16px; font-weight: 700; color: #ffffff;">${cleanWord}</span>
+        <span style="font-size: 18px; color: #38bdf8; margin-left: 4px;">${res.basic}</span>
+        ${phoneticStr}
+      </div>
+      <div style="width: 100%;">
+        ${dictHtml}
+      </div>
+    `;
       defEl.setAttribute('data-status', 'success');
       repositionTooltip(tooltip, e.target);
     }
@@ -4717,28 +5718,40 @@ function repositionTooltip(tipEl, targetEl) {
   const realHeight = tipEl.offsetHeight || 0;
   const realWidth = tipEl.offsetWidth || 0;
   const spacing = 10;
+
+  // 用播放器边界而不是 window 宽度
+  const player = document.querySelector('.html5-video-player');
+  const playerRect = player ? player.getBoundingClientRect() : null;
+  const rightBoundary = playerRect
+    ? Math.min(playerRect.right - 10, window.innerWidth - 10)
+    : window.innerWidth - 10;
+  const leftBoundary = playerRect ? playerRect.left + 10 : 10;
+
+  // 垂直：优先显示在单词上方，不够则显示下方
   let topPos = rect.top - realHeight - spacing;
   if (topPos < 10) {
     topPos = rect.bottom + spacing;
   }
+
+  // 水平：优先左对齐单词，超出播放器右边界则向左推
   let leftPos = rect.left;
-  const viewportWidth = window.innerWidth;
-  if (leftPos + realWidth > viewportWidth - 10) {
-    leftPos = viewportWidth - realWidth - 10;
+  if (leftPos + realWidth > rightBoundary) {
+    leftPos = rightBoundary - realWidth;
   }
-  if (leftPos < 10) leftPos = 10;
+  if (leftPos < leftBoundary) leftPos = leftBoundary;
+
   tipEl.style.left = `${leftPos}px`;
   tipEl.style.top = `${topPos}px`;
   tipEl.style.visibility = 'visible';
 }
 async function handleWordDblClick(e, word) {
   e.stopPropagation();
-  const cleanWord = word.trim().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, "");
+  const cleanWord = word;
   if (!cleanWord) return;
   const wordLower = cleanWord.toLowerCase();
   let fullTranslation = null;
   const storage = await safeGetStorage(['targetLanguage']);
-  const currentLang = storage?.targetLanguage || navigator.language || 'zh-CN';
+  const currentLang = storage?.targetLanguage || navigator.language || 'en';
   const res = await getDetailedTranslation(cleanWord, false, currentLang);
   if (res && !res.isError) {
     fullTranslation = {
@@ -4802,7 +5815,7 @@ async function handleWordDblClick(e, word) {
     tooltip.style.border = isAddedNow ? '2px solid #facc15' : '1px solid #334155';
     const tipLine = tooltip.querySelector('#kt-word-tip');
     if (tipLine) {
-      tipLine.innerText = isAddedNow ? t('addedFeedback') : t('hintAddAction');
+      tipLine.innerText = isAddedNow ? t('addedFeedback', currentLang) : t('hintAddAction', currentLang);
       tipLine.style.color = isAddedNow ? '#facc15' : '#94a3b8';
     }
   }
@@ -4812,27 +5825,7 @@ async function handleWordDblClick(e, word) {
       isAddedNow ? `⭐ ${t('alreadyInVocabulary')}` : `🗑️ ${t('removed')}`
     );
   }
-}
-function showCollectFeedback(target, text) {
-  try {
-    const rect = target.getBoundingClientRect();
-    const fb = document.createElement('div');
-    fb.innerText = text;
-    fb.style.cssText = `
-            position: fixed; z-index: 2147483647; color: #facc15; font-size: 12px;
-            font-weight: bold; pointer-events: none; transition: all 0.5s;
-            left: ${rect.left}px; top: ${rect.top - 20}px;
-            text-shadow: 1px 1px 2px black;
-        `;
-    document.body.appendChild(fb);
-    setTimeout(() => {
-      fb.style.top = `${rect.top - 40}px`;
-      fb.style.opacity = '0';
-      setTimeout(() => fb.remove(), 500);
-    }, 10);
-  } catch (e) {
-    logger.error('Failed to show collect feedback', e);
-  }
+  await window.__vocabOnSave?.(cleanWord, isAddedNow);
 }
 function showCollectFeedback(target, text) {
   try {
@@ -4874,3 +5867,4 @@ function closeTooltipAndResume() {
     }
   }
 }
+
