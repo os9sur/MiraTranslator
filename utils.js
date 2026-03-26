@@ -716,7 +716,7 @@ const POS_MAP = {
     'en': 'adv.', 'fr': 'adv.', 'de': 'Adv.'
   },
   '介词': {
-    'zh-cn': '介词', 'zh-tw': '前置詞', 'ja': '前置詞', 'ko': '전치사',
+    'zh-cn': '介词', 'zh-tw': '介系詞', 'ja': '前置詞', 'ko': '전치사',
     'en': 'prep.', 'fr': 'prép.', 'de': 'Präp.'
   },
   '连词': {
@@ -745,10 +745,38 @@ const POS_MAP = {
  * @param {string} pos - 原始词性名称（通常为简体中文）
  * @param {string} targetLang - 目标语言代码（如 "zh-CN", "zh-TW", "ja-JP", "en"）
  */
+// 建立反向查找表：所有语言的词性表达 → 简体中文 key
+const POS_REVERSE_MAP = (() => {
+  const map = {};
+  for (const [cnKey, translations] of Object.entries(POS_MAP)) {
+    map[cnKey] = cnKey; // 自身
+    for (const val of Object.values(translations)) {
+      if (val) map[val.toLowerCase()] = cnKey;
+    }
+  }
+  // 补充 AI 常见的缩写/变体
+  const extra = {
+    'n': '名词', 'noun': '名词',
+    'v': '动词', 'verb': '动词',
+    'adj': '形容词', 'adjective': '形容词',
+    'adv': '副词', 'adverb': '副词',
+    'prep': '介词', 'preposition': '介词',
+    'conj': '连词', 'conjunction': '连词',
+    'pron': '代词', 'pronoun': '代词',
+    'art': '冠词', 'article': '冠词',
+    'interj': '感叹词', 'interjection': '感叹词',
+    'num': '数词', 'numeral': '数词', '介系词': '介词',
+    '介系詞': '介词',
+  };
+  return { ...map, ...extra };
+})();
+
 function localizePos(pos, targetLang) {
   if (!pos || !targetLang) return pos;
-  const entry = POS_MAP[pos.trim()];
-  if (!entry) return pos;
+  const normalized = pos.trim().replace(/\.$/, ''); // 去掉末尾的点
+  const cnKey = POS_REVERSE_MAP[normalized] || POS_REVERSE_MAP[normalized.toLowerCase()];
+  if (!cnKey) return pos; // 完全未知的词性，原样返回
+  const entry = POS_MAP[cnKey];
   const langFull = targetLang.toLowerCase();
   const langShort = langFull.split('-')[0];
   return entry[langFull] || entry[langShort] || pos;
@@ -936,7 +964,7 @@ function speakText(text, speakBtn, forcedLang) {
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
-  logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang||'').split('-')[0]);
+  logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang || '').split('-')[0]);
   if (!text) return null;
   const query = text.trim();
   if (!query) return null;
@@ -945,15 +973,15 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
   const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!storage) return;
-  const { 
-    skipCache = false, 
-    isBatch = false, 
-    lightweight = false, 
-    needPhonetic = false, 
+  const {
+    skipCache = false,
+    isBatch = false,
+    lightweight = false,
+    needPhonetic = false,
     hintInputLang = null,
     hintLangA = null,
     hintLangB = null
-} = options;
+  } = options;
   let engine = (
     storage.activeConfig?.engine ||
     (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
@@ -964,7 +992,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     navigator.language ||
     'en'
   ).replace('_', '-').toLowerCase();
-  
+
   lang = lang.replace('_', '-').toLowerCase();
   const targetBase = lang.split('-')[0];
   const hasHan = LANGUAGE_PATTERNS['zh']?.test(query) || false;
@@ -973,52 +1001,52 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const hasLatinEx = LANGUAGE_PATTERNS['latinEx']?.test(query) || false;
   const isPureEnglish = LANGUAGE_PATTERNS['en']?.test(query) || false;
 
-//logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
+  //logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
   if (!isBatch) {
     let isSame = false;
 
     // 如果外部明确传入了输入语言，且与目标语言不同，跳过所有isSame检测
     if (hintInputLang && hintInputLang !== targetBase) {
-        isSame = false;
+      isSame = false;
     } else {
-        if (targetBase === 'en' && isPureEnglish) {
-            isSame = true;
-        } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
-            const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
-            isSame = !targetIsTraditional;
-        } else if (targetBase === 'ja' && hasJa) {
-            isSame = true;
-        } else if (targetBase === 'ko' && hasKo) {
-            isSame = true;
-        } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
-            isSame = true;
-        } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
-            isSame = true;
-        } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
-            isSame = true;
-        }
+      if (targetBase === 'en' && isPureEnglish) {
+        isSame = true;
+      } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
+        const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
+        isSame = !targetIsTraditional;
+      } else if (targetBase === 'ja' && hasJa) {
+        isSame = true;
+      } else if (targetBase === 'ko' && hasKo) {
+        isSame = true;
+      } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
+        isSame = true;
+      } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
+        isSame = true;
+      } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
+        isSame = true;
+      }
     }
 
     if (isSame) {
-        const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
-        wordTranslationCache.set(query.toLowerCase(), result);
-        return result;
+      const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
+      wordTranslationCache.set(query.toLowerCase(), result);
+      return result;
     }
     // chrome.i18n检测同理
     try {
-        const detection = await new Promise((resolve) => {
-            if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
-            chrome.i18n.detectLanguage(query, resolve);
-        });
-        if (detection && detection.isReliable) {
-            const detected = detection.languages[0].language.toLowerCase();
-            // 外部有hint时，不信任chrome检测结果
-            if (!hintInputLang && detected === targetBase) {
-                return { basic: query, isSameLang: true, timestamp: Date.now() };
-            }
+      const detection = await new Promise((resolve) => {
+        if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
+        chrome.i18n.detectLanguage(query, resolve);
+      });
+      if (detection && detection.isReliable) {
+        const detected = detection.languages[0].language.toLowerCase();
+        // 外部有hint时，不信任chrome检测结果
+        if (!hintInputLang && detected === targetBase) {
+          return { basic: query, isSameLang: true, timestamp: Date.now() };
         }
+      }
     } catch (e) { }
-}
+  }
   const cacheKey = getCacheKey(query, engine, lang);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
@@ -1050,19 +1078,19 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     let response;
     try {
       response = await Promise.race([
-    safeSendMessage({
-        type: 'TRANSLATE',
-        text: query,
-        targetLang: lang,
-        lightweight,
-        needPhonetic,
-        hintInputLang,    
-        hintLangA,        
-        hintLangB,        
-        isSubtitle: query.includes('⟦KT_') && isAI
-    }),
-    new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
-]);
+        safeSendMessage({
+          type: 'TRANSLATE',
+          text: query,
+          targetLang: lang,
+          lightweight,
+          needPhonetic,
+          hintInputLang,
+          hintLangA,
+          hintLangB,
+          isSubtitle: query.includes('⟦KT_') && isAI
+        }),
+        new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
+      ]);
       if (response === null) {
         return;
       }
