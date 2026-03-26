@@ -6,11 +6,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
     window.currentConfig = {
-        targetLanguage: res.ui_language || (navigator.language || 'en').replace('_', '-'),//ui_language
+        ui_language: res.ui_language || (navigator.language || 'en').replace('_', '-'),//ui_language
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
-    const testTarget = window.currentConfig.ui_language;
+    const ui_lang = window.currentConfig.ui_language;
     const TEMPLATES = {
         'google': {
             name: 'Google Translate', isBuiltIn: true, color: '#4285F4', meta: 'G.FREE'
@@ -136,8 +136,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
         const builtInEngines = [
-            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin")})` },
-            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin")})` }
+            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
+            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
         ];
         const customConfigs = storedConfigs.filter(c =>
             c.id !== 'google_builtin' &&
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (customConfigs.length === 0 && Object.keys(oldApiKeys).length > 0) {
             for (const engineKey of Object.keys(TEMPLATES)) {
                 const tpl = TEMPLATES[engineKey];
-                if (tpl.isBuiltIn) continue;  
+                if (tpl.isBuiltIn) continue;
                 const hasKey = tpl.fields?.some(f => oldApiKeys[f.k]);
                 if (hasKey) {
                     const newId = `inst_migration_${engineKey}`;
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const instanceSpecificData = {};
                         tpl.fields.forEach(f => {
                             if (oldApiKeys[f.k]) instanceSpecificData[f.k] = oldApiKeys[f.k];
-                        }); 
+                        });
                         await safeSetStorage({ [`data_${newId}`]: instanceSpecificData });
                     }
                 }
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const activeConfig = userConfigs.find(c => c.id === lastActiveId);
         const statusValueEl = document.getElementById('active-engine-name');
         if (statusValueEl) {
-            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', testTarget);
+            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', ui_lang);
         }
         list.innerHTML = userConfigs.map(c => {
             const isEditing = c.id === currentId;
@@ -297,6 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     async function switchInstance(id) {
+        const uiLanguage = window.currentConfig?.ui_language || 'en';
         currentId = id;
         const config = userConfigs.find(c => c.id === id) || userConfigs[0];
         const container = document.getElementById('dynamic-form-container');
@@ -316,33 +317,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         const testBtn = document.getElementById('testApiConfig');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
-            testBtn.innerHTML = `⚡ ${t('testConnection', testTarget)}`;
+            testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
             testBtn.style.borderColor = "";
             testBtn.disabled = false;
         }
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-        <div class="main-header">
-            <h2 style="margin:0">${displayAlias}</h2>
-        </div>
-        <div class="form-container">
-            <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
-                <div id="statusIcon" class="notice-icon" style="color: #8b949e; font-size: 24px; margin-bottom: 10px;">⌛</div>
-                <p style="margin: 0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing')}</strong></p>
-                <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
-                <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
-                    ${t('freeInterfaceTipsInfo')}
-                </p>
-                <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
-                    ✨ ${t('wantBetterExperience')} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip')}</span>
-                </p>
-            </div>
-            <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%; display: none;">
-                ${t('enableEngineNow')}
-            </button>
-        </div>
-    `;
+                <div class="main-header">
+                    <h2 style="margin:0">${displayAlias}</h2>
+                </div>
+                <div class="form-container">
+                    <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
+                        <div id="statusIcon" class="notice-icon" style="color: #8b949e; font-size: 24px; margin-bottom: 10px;">⌛</div>
+                        <p style="margin: 0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                        <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
+                        <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
+                            ${t('freeInterfaceTipsInfo', uiLanguage)}
+                        </p>
+                        <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
+                            ✨ ${t('wantBetterExperience', uiLanguage)} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip', uiLanguage)}</span>
+                        </p>
+                    </div>
+                    <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%; display: none;">
+                        ${t('enableEngineNow', uiLanguage)}
+                    </button>
+                </div>
+                `;
 
             const checkConnectivity = async () => {
                 const icon = document.getElementById('statusIcon');
@@ -367,12 +368,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isOk) {
                     icon.innerText = '✓';
                     icon.style.color = '#3fb950';
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready')}`;
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
                     btn.style.display = 'block';
                 } else {
                     icon.innerText = '✕';
                     icon.style.color = '#f85149';
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed')}`;
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}`;
                     btn.style.display = 'block';
                     btn.style.opacity = '0.6';
                 }
@@ -387,13 +388,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (typeof syncGlobalConfig === 'function') {
                     await syncGlobalConfig(id, config.engine, {});
                 }
-                btn.innerText = t('enabled');
+                btn.innerText = t('enabled', uiLanguage);
                 btn.style.background = "#22c55e";
                 isDirty = false;
                 renderSidebar();
                 setTimeout(() => {
                     btn.disabled = false;
-                    btn.innerText = t('enableEngineNow');
+                    btn.innerText = t('enableEngineNow', uiLanguage);
                     btn.style.background = "";
                 }, 1000);
             };
@@ -423,18 +424,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="form-group">
                 <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
                     <label style="margin:0">${l.toUpperCase()}</label>
-                    ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey')}</a>` : ''}
+                    ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
                 </div>
                 ${inputHtml}
             </div>`;
         };
         let html = `
         <div class="main-header">
-            <h2 style="margin:0">${t('engineConfig')}：${displayAlias}</h2>
+            <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
         </div>
         <div class="form-container">
             ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;">⚡ ${tpl.tip}</p>` : ''}
-            ${getRow({ k: 'alias', l: t('configAlias') })} 
+            ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
             ${(tpl.fields || []).map(f => getRow(f)).join('')}
         </div>`;
         container.innerHTML = html;
@@ -479,6 +480,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveApiConfig').onclick = async () => {
             const saveBtn = document.getElementById('saveApiConfig');
             if (!saveBtn) return;
+            const uiLanguage = window.currentConfig?.ui_language || 'en';
             const inputs = document.querySelectorAll('#dynamic-form-container input');
             const data = {};
             inputs.forEach(i => {
@@ -517,14 +519,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await syncGlobalConfig(currentId, finalEngine, data);
                 }
                 if (typeof renderSidebar === 'function') renderSidebar();
-                saveBtn.innerText = `${t('save', testTarget)}${t('success', testTarget)}`;
+                logger.log("保存成功提示: ", uiLanguage);
+                saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
                 saveBtn.style.setProperty('background-color', '#22c55e', 'important');
                 if (typeof checkEngineStatus === 'function') {
                     await checkEngineStatus();
                 }
             } catch (error) {
                 logger.error("[Mira] 保存配置失败:", error);
-                saveBtn.innerText = `${t('save', testTarget)} ${t('failed', testTarget)}`;
+                saveBtn.innerText = `${t('save', uiLanguage)} ${t('failed', uiLanguage)}`;
                 saveBtn.style.setProperty('background-color', '#ef4444', 'important');
             } finally {
                 setTimeout(() => {
@@ -559,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const color = tpl.color || '#38bdf8';
                         const rgb = hexToRgb(color);
                         const meta = tpl.meta || key.toUpperCase().substring(0, 6);
-                        const desc = tpl.url === '#' ? t('customAiInterface', testTarget) : t('accessService', testTarget).replace('{0}', tpl.name);
+                        const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
                         html += `
                     <div class="tpl-card" 
                          data-type="${key}" 
@@ -583,7 +586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userConfigs.push({
                 id: newId,
                 engine: engineKey,
-                alias: `${t('newBadge')} ${template.name}`
+                alias: `${t('newBadge', ui_lang)} ${template.name}`
             });
 
             await safeSetStorage({ userConfigs });
@@ -648,14 +651,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         if (!btn) return;
         const i18n = {
-            testConnection: t('testConnection', testTarget),
-            testing: t('testing', testTarget),
-            success: t('success', testTarget),
-            failed: t('failed', testTarget),
-            error_no_response: t('error_no_response', testTarget),
-            error_timeout: t('error_timeout', testTarget),
-            error_same_as_original: t('error_same_as_original', testTarget),
-            error_generic: t('error_generic', testTarget),
+            testConnection: t('testConnection', ui_lang),
+            testing: t('testing', ui_lang),
+            success: t('success', ui_lang),
+            failed: t('failed', ui_lang),
+            error_no_response: t('error_no_response', ui_lang),
+            error_timeout: t('error_timeout', ui_lang),
+            error_same_as_original: t('error_same_as_original', ui_lang),
+            error_generic: t('error_generic', ui_lang),
         };
         btn.disabled = true;
         const originalHTML = `⚡ ${i18n.testConnection}`;
@@ -679,6 +682,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
         const testText = isTargetEn ? '你好' : 'Good morning';
+        logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
         try {
             const res = await safeSendMessage({
                 type: 'TRANSLATE',
@@ -706,8 +710,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             logger.error("[Test] Failed:", e);
             btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
             btn.style.setProperty('border-color', '#f87171', 'important');
+            btn.style.userSelect = 'text';
             if (tipsDesc) {
                 tipsDesc.style.color = "#f87171";
+                tipsDesc.style.userSelect = 'text';
+                tipsDesc.style.cursor = 'text';
                 const errorText = e.message || String(e);
                 const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
                 let displayMessage = "";
@@ -786,7 +793,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.dataset.confirmed = "true";
             btn.dataset.originalText = btn.innerText;
             const formattedCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
-            btn.innerText = t("confirm", testTarget).replace('{0}', formattedCount);
+            btn.innerText = t("confirm", ui_lang).replace('{0}', formattedCount);
             btn.style.setProperty('background', 'rgba(248, 113, 113, 0.2)', 'important');
             btn.style.setProperty('border-color', '#f87171', 'important');
             btn.style.setProperty('color', '#f87171', 'important');
@@ -815,7 +822,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             setTimeout(() => {
-                btn.innerText = `${t('completed', testTarget)} ✓`;
+                btn.innerText = `${t('completed', ui_lang)} ✓`;
                 btn.style.setProperty('color', '#4ade80', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
@@ -829,14 +836,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, animationDuration + 100);
         } catch (err) {
             logger.log("[Mira] Clear Cache Error:", err);
-            if (typeof showToast === 'function') showToast(t('failed', testTarget), "error");
+            if (typeof showToast === 'function') showToast(t('failed', ui_lang), "error");
             resetClearBtn(btn);
         }
     });
     function resetClearBtn(btn) {
         btn.dataset.confirmed = "";
         btn.disabled = false;
-        btn.innerText = btn.dataset.originalText || t('clearBtn', testTarget);
+        btn.innerText = btn.dataset.originalText || t('clearBtn', ui_lang);
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";

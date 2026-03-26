@@ -1,5 +1,5 @@
 
-window.currentTargetL = navigator.language || 'en'; 
+window.currentTargetL = navigator.language || 'en';
 
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
@@ -2449,97 +2449,7 @@ document.addEventListener('KT_CONFIG_UPDATED', (e) => {
     logger.error("[Mira] 错误：未找到 scanContent 函数");
   }
 });
-/**
- * 语音朗读函数 - 自动识别语言并播放
- * @param {string} text 需要朗读的文本
- */
-let lastUtterance = null;
-function speak(text, speakBtn) {
-  if (!window.speechSynthesis || !text) return;
-  window.speechSynthesis.cancel();
-  if (speakBtn) {
-    speakBtn.classList.remove('is-speaking');
-    speakBtn.classList.add('is-loading');
-  }
 
-  lastUtterance = new SpeechSynthesisUtterance(text);
-  lastUtterance.rate = 0.8;
-  lastUtterance.volume = 1.0;
-  if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text)) {
-    lastUtterance.lang = 'ja-JP';
-    lastUtterance.rate = 0.55;
-  }
-  else if (/\p{Script=Hangul}/u.test(text)) {
-    lastUtterance.lang = 'ko-KR';
-  }
-  else if (/\p{Script=Hebrew}/u.test(text)) {
-    lastUtterance.lang = 'he-IL';
-    lastUtterance.rate = 0.85;
-  }
-  else if (/\p{Script=Han}/u.test(text)) {
-    lastUtterance.lang = /[繁體國語]/.test(text) ? 'zh-TW' : 'zh-CN';
-    lastUtterance.rate = 0.9;
-  }
-  else if (/\p{Script=Thai}/u.test(text)) {
-    lastUtterance.lang = 'th-TH';
-  }
-  else if (/\p{Script=Arabic}/u.test(text)) {
-    lastUtterance.lang = 'ar-SA';
-  }
-  else if (/\p{Script=Hebrew}/u.test(text)) {
-    lastUtterance.lang = 'he-IL';
-  }
-  else if (/\p{Script=Devanagari}/u.test(text)) {
-    lastUtterance.lang = 'hi-IN';
-  }
-  else if (/\p{Script=Bengali}/u.test(text)) {
-    lastUtterance.lang = 'bn-BD';
-  }
-  else if (/\p{Script=Cyrillic}/u.test(text)) {
-    lastUtterance.lang = 'ru-RU';
-  }
-  else if (/\p{Script=Greek}/u.test(text)) {
-    lastUtterance.lang = 'el-GR';
-  }
-  else if (/[ĞğİıŞş]/.test(text)) {
-    lastUtterance.lang = 'tr-TR';
-  }
-  else if (/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/.test(text)) {
-    lastUtterance.lang = 'pl-PL';
-  }
-  else if (/[àáảãạăâèéẻẽẹêìíỉĩịòóỏõọôơùúủũụưỳýỷỹỵĐđ]/.test(text)) {
-    lastUtterance.lang = 'vi-VN';
-  }
-  else if (/[äöüßÄÖÜ]/.test(text)) {
-    lastUtterance.lang = 'de-DE';
-  }
-  else if (/[éàèâîôûçëïüÿœæ]/.test(text)) {
-    lastUtterance.lang = 'fr-FR';
-  }
-  else if (/[ñ¿¡]/.test(text)) {
-    lastUtterance.lang = 'es-ES';
-  }
-  else {
-    lastUtterance.lang = 'en-US';
-  }
-  const forceReset = new SpeechSynthesisUtterance("");
-  window.speechSynthesis.speak(forceReset);
-  setTimeout(() => {
-    window.speechSynthesis.speak(lastUtterance);
-  }, 50);
-  if (speakBtn) {
-    lastUtterance.onstart = () => {
-      speakBtn.classList.remove('is-loading');
-      speakBtn.classList.add('is-speaking');
-    };
-    const stop = () => {
-      speakBtn?.classList.remove('is-speaking');
-      speakBtn?.classList.remove('is-loading');
-    };
-    lastUtterance.onend = stop;
-    lastUtterance.onerror = stop;
-  }
-}
 const getTextFragmentAnchor = (word) => {
   try {
     const selection = window.getSelection();
@@ -3771,7 +3681,7 @@ function initSelectionTranslate() {
     const speakBtn = shadow.getElementById('p-speak');
     speakBtn.onclick = (e) => {
       e.stopPropagation();
-      speak(text, speakBtn);
+      speakText(text, speakBtn);
     };
     const refreshBtn = shadow.getElementById('p-refresh');
     refreshBtn.onclick = async (e) => {
@@ -4697,7 +4607,7 @@ function showMiraConfirm(msg) {
     const okBtn = modal.querySelector('#mira-confirm-ok');
     const cancelBtn = modal.querySelector('#mira-confirm-cancel');
 
-    // OK 按钮：发光 + 上浮 + 渐变位移
+    // 提前下载提示框的 OK 按钮
     okBtn.onmouseenter = () => {
       okBtn.style.transform = 'translateY(-2px) scale(1.03)';
       okBtn.style.boxShadow = '0 0 16px rgba(56,189,248,0.6), 0 0 32px rgba(129,140,248,0.3)';
@@ -4810,8 +4720,8 @@ async function downloadSubtitles(withTranslation = false) {
       const msg = (cacheRate < 30
         ? t('dlRateLow', uiLang)
         : t('dlRatePartial', uiLang)
-      ).replace('{rate}', cacheRate)
-        .replace('{missing}', missing.length);
+      ).replaceAll('{rate}', cacheRate)
+        .replaceAll('{missing}', missing.length);
 
       const confirmed = await showMiraConfirm(msg);
       if (!confirmed) return;
@@ -4830,21 +4740,25 @@ async function downloadSubtitles(withTranslation = false) {
         if (!btn) return;
         btn._savedText = `⏳ 0/${total}`;
         btn.textContent = btn._savedText;
-        btn.style.background = 'rgba(239,68,68,0.15)';
-        btn.style.borderColor = 'rgba(239,68,68,0.4)';
-        btn.style.color = '#f87171';
+        btn.style.background = 'rgba(34, 197, 94, 0.15)';
+        btn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        btn.style.color = '#4ade80';
+
         btn.disabled = false;
 
         btn.onmouseenter = () => {
           if (!isDownloading) return;
           btn._savedText = btn._savedText || btn.textContent;
           btn.textContent = '✕ Cancel';
-          btn.style.background = 'rgba(239,68,68,0.35)';
+          btn.style.background = 'rgba(239, 68, 68, 0.2)';
+          btn.style.borderColor = 'rgba(239, 68, 68, 0.5)';
+          btn.style.color = '#ff8080';
         };
         btn.onmouseleave = () => {
-          if (!isDownloading) return;
           btn.textContent = btn._savedText || btn.textContent;
-          btn.style.background = 'rgba(239,68,68,0.15)';
+          btn.style.background = 'rgba(34, 197, 94, 0.15)';
+          btn.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+          btn.style.color = '#4ade80';
         };
       }
 
@@ -5628,7 +5542,7 @@ function renderWords(text, container) {
       span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, cleanWord); };
       span.onclick = (e) => {
         e.preventDefault(); e.stopPropagation();
-        if (typeof speak === 'function') speak(cleanWord, span);
+        if (typeof speakText === 'function') speakText(cleanWord, span);
         const originalColor = span.style.color;
         span.style.color = '#facc15';
         setTimeout(() => span.style.color = originalColor || '', 200);

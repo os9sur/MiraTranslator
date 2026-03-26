@@ -54,7 +54,7 @@ self.i18nData = {
     completeContent: "請填寫完整內容",
     noExportWords: "沒有可導出的數據",
     currentSite: "當前網站",
-    globalSetting: "全局默認",
+    globalSetting: "全局預設",
     personalizedScan: "自定義翻譯區域 (修改即生效)",
     smartPicker: "點此拾取頁面區域\n(ESC/右鍵 退出)",
     matchSelector: "生效列表 (CSS 選擇器)",
@@ -3248,37 +3248,36 @@ self.i18nAttach5 = {
 };
 
 self.i18nAttach6 = {
-  'zh-CN': {
-    // 新增下载相关
-    'dlRateLow': '当前仅翻译了 {rate}% 的字幕。\n\nAI 翻译有每分钟请求限制，建议先观看视频让字幕自动翻译，看完后再下载效果最佳。\n\n是否下载已有的 {rate}% 部分？',
-    'dlRatePartial': '已翻译 {rate}%，还有 {missing} 句未翻译。\n\nAI 翻译有速率限制，建议继续观看视频后再下载。\n\n是否下载已有部分？',
+  "zh-CN": {
+    "dlRateLow": "当前仅翻译了 {rate}% 的字幕。\n\n由于翻译内容是随视频播放逐步生成的，建议先完整观看或等待进度条缓冲，完成后下载效果最佳。\n\n是否下载已有的 {rate}% 部分？",
+    "dlRatePartial": "已翻译 {rate}%，还有 {missing} 句未翻译。\n\n部分字幕尚未触发或完成翻译。建议继续播放视频让系统处理后再下载。\n\n是否下载已有部分？"
   },
-  'zh-TW': {
-    'dlRateLow': '目前僅翻譯了 {rate}% 的字幕。\n\nAI 翻譯有每分鐘請求限制，建議先觀看影片讓字幕自動翻譯，看完後再下載效果最佳。\n\n是否下載已有的 {rate}% 部分？',
-    'dlRatePartial': '已翻譯 {rate}%，還有 {missing} 句未翻譯。\n\nAI 翻譯有速率限制，建議繼續觀看影片後再下載。\n\n是否下載已有部分？',
+  "zh-TW": {
+    "dlRateLow": "目前僅翻譯了 {rate}% 的字幕。\n\n由於翻譯內容是隨影片播放逐步生成的，建議先完整觀看或等待進度條緩衝，完成後下載效果最佳。\n\n是否下載已有的 {rate}% 部分？",
+    "dlRatePartial": "已翻譯 {rate}%，還有 {missing} 句未翻譯。\n\n部分字幕尚未觸發或完成翻譯。建議繼續播放影片讓系統處理後再下載。\n\n是否下載已有部分？"
   },
-  'en': {
-    'dlRateLow': 'Only {rate}% of subtitles translated.\n\nAI translation has per-minute rate limits. Watch the video first to let subtitles auto-translate, then download for best results.\n\nDownload available {rate}% now?',
-    'dlRatePartial': '{rate}% translated, {missing} segments missing.\n\nAI translation has rate limits. Consider watching more before downloading.\n\nDownload available portion now?',
+  "en": {
+    "dlRateLow": "Only {rate}% of subtitles translated.\n\nSubtitles are generated progressively during playback. For a complete file, please let the video play through or buffer first.\n\nDownload available {rate}% now?",
+    "dlRatePartial": "{rate}% translated, {missing} segments missing.\n\nTranslation for some parts is still in progress. Consider playing more of the video before downloading.\n\nDownload available portion now?"
   },
-  'ja': {
-    'dlRateLow': '字幕の {rate}% のみ翻訳済みです。\n\nAI翻訳には毎分のリクエスト制限があります。動画を視聴してから再ダウンロードをお勧めします。\n\n現在の {rate}% をダウンロードしますか？',
-    'dlRatePartial': '{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\nAI翻訳にはレート制限があります。動画をもう少し視聴してからダウンロードをお勧めします。\n\n現在の部分をダウンロードしますか？',
+  "ja": {
+    "dlRateLow": "字幕の {rate}% のみ翻訳済みです。\n\n翻訳は再生に合わせて段階的に生成されます。完了するまで待機してからダウンロードすることをお勧めします。\n\n現在の {rate}% をダウンロードしますか？",
+    "dlRatePartial": "{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\n一部の翻訳がまだ完了していません。再生を続けてシステムが処理してからダウンロードすることをお勧めします。\n\n現在の部分をダウンロードしますか？"
   },
-  'ko': {
-    'dlRateLow': '자막의 {rate}%만 번역되었습니다.\n\nAI 번역은 분당 요청 제한이 있습니다. 동영상을 시청하여 자막을 자동 번역한 후 다운로드하는 것을 권장합니다.\n\n현재 {rate}%를 다운로드하시겠습니까?',
-    'dlRatePartial': '{rate}% 번역됨, {missing}개 미번역.\n\nAI 번역은 속도 제한이 있습니다. 동영상을 더 시청한 후 다운로드하는 것을 권장합니다.\n\n현재 부분을 다운로드하시겠습니까?',
+  "ko": {
+    "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것이 가장 좋습니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
+    "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n현재 부분을 다운로드하시겠습니까?"
   },
-  'fr': {
-    'dlRateLow': 'Seulement {rate}% des sous-titres traduits.\n\nLa traduction IA a des limites par minute. Regardez la vidéo pour laisser les sous-titres se traduire automatiquement, puis téléchargez.\n\nTélécharger les {rate}% disponibles ?',
-    'dlRatePartial': '{rate}% traduit, {missing} segments manquants.\n\nLa traduction IA a des limites de débit. Continuez à regarder avant de télécharger.\n\nTélécharger la partie disponible ?',
+  "fr": {
+    "dlRateLow": "Seulement {rate}% des sous-titres traduits.\n\nLa traduction est générée progressivement durant la lecture. Pour un résultat complet, attendez la fin de la vidéo ou la mise en cache.\n\nTélécharger les {rate}% disponibles ?",
+    "dlRatePartial": "{rate}% traduit, {missing} segments manquants.\n\nLa traduction est encore en cours pour certaines parties. Continuez la lecture avant de télécharger.\n\nTélécharger la partie disponible ?"
   },
-  'de': {
-    'dlRateLow': 'Nur {rate}% der Untertitel übersetzt.\n\nKI-Übersetzung hat minutenbasierte Anfragelimits. Schauen Sie das Video zuerst, damit die Untertitel automatisch übersetzt werden.\n\nVerfügbare {rate}% jetzt herunterladen?',
-    'dlRatePartial': '{rate}% übersetzt, {missing} Segmente fehlen.\n\nKI-Übersetzung hat Ratenlimits. Schauen Sie mehr vom Video, bevor Sie herunterladen.\n\nVerfügbaren Teil herunterladen?',
+  "de": {
+    "dlRateLow": "Nur {rate}% der Untertitel übersetzt.\n\nUntertitel werden während der Wiedergabe schrittweise generiert. Warten Sie für ein vollständiges Ergebnis die Pufferung ab.\n\nVerfügbare {rate}% jetzt herunterladen?",
+    "dlRatePartial": "{rate}% übersetzt, {missing} Segmente fehlen.\n\nDie Übersetzung für einige Teile ist noch in Arbeit. Lassen Sie das Video weiterlaufen, bevor Sie herunterladen.\n\nVerfügbaren Teil herunterladen?"
   },
-  'es': {
-    'dlRateLow': 'Solo {rate}% de subtítulos traducidos.\n\nLa traducción IA tiene límites por minuto. Mira el video primero para que los subtítulos se traduzcan automáticamente.\n\n¿Descargar el {rate}% disponible?',
-    'dlRatePartial': '{rate}% traducido, {missing} segmentos sin traducir.\n\nLa traducción IA tiene límites de velocidad. Considera ver más antes de descargar.\n\n¿Descargar la parte disponible?',
+  "es": {
+    "dlRateLow": "Solo {rate}% de subtítulos traducidos.\n\nLos subtítulos se generan progresivamente durante la reproducción. Para un resultado completo, espera a que el video se procese.\n\n¿Descargar el {rate}% disponible?",
+    "dlRatePartial": "{rate}% traducido, {missing} segmentos sin traducir.\n\nLa traducción aún está en proceso para algunas partes. Reproduce más video antes de descargar.\n\n¿Descargar la parte disponible?"
   }
 }

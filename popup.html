@@ -201,6 +201,144 @@
       <span id="closeSearchPanel" class="close-btn-common"
         style="cursor: pointer; font-size: 16px;font-weight:bold; color: #94a3b8; line-height: 1;">✕</span>
     </div>
+
+    <!-- 语言对选择：折叠态 -->
+    <div id="langPairTag" style="display:flex; align-items:center; gap:6px; margin-bottom:8px; min-height:24px;">
+      <span id="langPairToggle"
+        style="display:flex; align-items:center; gap:5px; font-size:11px; color:#64748b; cursor:pointer; user-select:none;">
+        <span id="lpBadgeA"
+          style="font-size:11px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:1px 6px;">EN</span>
+        <span id="lpArrow" style="color: #627186;font-size:12px;">→</span>
+        <span id="lpBadgeB"
+          style="font-size:11px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:1px 6px;">JA</span>
+        <span style="font-size:11px; color:#627186;">✎</span>
+      </span>
+    </div>
+
+    <!-- 语言对选择：展开态 -->
+    <div id="langPairEdit" style="display:none; align-items:center; gap:6px; margin-bottom:8px;">
+      <select id="lpSelA"
+        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;">
+        <option value="en">English</option>
+        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
+        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
+        <option value="ja">日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Southeast Asia ──</option>
+        <option value="id">Bahasa Indonesia (Indonesian)</option>
+        <option value="ms">Bahasa Melayu (Malay)</option>
+        <option value="th">ไทย (Thai)</option>
+        <option value="vi">Tiếng Việt (Vietnamese)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Middle East & South Asia ──</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="fa">فارسی (Persian)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="he">עברית (Hebrew)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Americas & Europe ──</option>
+        <option value="bg">Български (Bulgarian)</option>
+        <option value="cs">Čeština (Czech)</option>
+        <option value="da">Dansk (Danish)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="et">Eesti (Estonian)</option>
+        <option value="el">Ελληνικά (Greek)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="ga">Gaeilge (Irish)</option>
+        <option value="hr">Hrvatski (Croatian)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="lv">Latviešu (Latvian)</option>
+        <option value="lt">Lietuvių (Lithuanian)</option>
+        <option value="hu">Magyar (Hungarian)</option>
+        <option value="nl">Nederlands (Dutch)</option>
+        <option value="no">Norsk (Norwegian)</option>
+        <option value="pl">Polski (Polish)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="ro">Română (Romanian)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="sk">Slovenčina (Slovak)</option>
+        <option value="sl">Slovenščina (Slovenian)</option>
+        <option value="fi">Suomi (Finnish)</option>
+        <option value="sv">Svenska (Swedish)</option>
+        <option value="uk">Українська (Ukrainian)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Africa ──</option>
+        <option value="af">Afrikaans</option>
+        <option value="am">አማርኛ (Amharic)</option>
+        <option value="ha">Hausa</option>
+        <option value="zu">IsiZulu (Zulu)</option>
+        <option value="sw">Kiswahili (Swahili)</option>
+        <option value="yo">Yorùbá (Yoruba)</option>
+      </select>
+
+      <button id="lpSwapBtn"
+        style="flex:0 0 auto; font-size:13px; color:#94a3b8; background:none; border:none; cursor:pointer; padding:0 2px;">⇄</button>
+
+      <select id="lpSelB"
+        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;">
+        <option value="en">English</option>
+        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
+        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
+        <option value="ja" selected>日本語 (Japanese)</option>
+        <option value="ko">한국어 (Korean)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Southeast Asia ──</option>
+        <option value="id">Bahasa Indonesia (Indonesian)</option>
+        <option value="ms">Bahasa Melayu (Malay)</option>
+        <option value="th">ไทย (Thai)</option>
+        <option value="vi">Tiếng Việt (Vietnamese)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Middle East & South Asia ──</option>
+        <option value="ar">العربية (Arabic)</option>
+        <option value="bn">বাংলা (Bengali)</option>
+        <option value="fa">فارسی (Persian)</option>
+        <option value="hi">हिन्दी (Hindi)</option>
+        <option value="he">עברית (Hebrew)</option>
+        <option value="tr">Türkçe (Turkish)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Americas & Europe ──</option>
+        <option value="bg">Български (Bulgarian)</option>
+        <option value="cs">Čeština (Czech)</option>
+        <option value="da">Dansk (Danish)</option>
+        <option value="de">Deutsch (German)</option>
+        <option value="et">Eesti (Estonian)</option>
+        <option value="el">Ελληνικά (Greek)</option>
+        <option value="es">Español (Spanish)</option>
+        <option value="fr">Français (French)</option>
+        <option value="ga">Gaeilge (Irish)</option>
+        <option value="hr">Hrvatski (Croatian)</option>
+        <option value="it">Italiano (Italian)</option>
+        <option value="lv">Latviešu (Latvian)</option>
+        <option value="lt">Lietuvių (Lithuanian)</option>
+        <option value="hu">Magyar (Hungarian)</option>
+        <option value="nl">Nederlands (Dutch)</option>
+        <option value="no">Norsk (Norwegian)</option>
+        <option value="pl">Polski (Polish)</option>
+        <option value="pt">Português (Portuguese)</option>
+        <option value="ro">Română (Romanian)</option>
+        <option value="ru">Русский (Russian)</option>
+        <option value="sk">Slovenčina (Slovak)</option>
+        <option value="sl">Slovenščina (Slovenian)</option>
+        <option value="fi">Suomi (Finnish)</option>
+        <option value="sv">Svenska (Swedish)</option>
+        <option value="uk">Українська (Ukrainian)</option>
+
+        <option disabled style="background: #21262d; color: #8b949e;">── Africa ──</option>
+        <option value="af">Afrikaans</option>
+        <option value="am">አማርኛ (Amharic)</option>
+        <option value="ha">Hausa</option>
+        <option value="zu">IsiZulu (Zulu)</option>
+        <option value="sw">Kiswahili (Swahili)</option>
+        <option value="yo">Yorùbá (Yoruba)</option>
+      </select>
+      <button id="lpDoneBtn"
+        style="font-size:12px; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:2px 7px; cursor:pointer; white-space:nowrap;">OK</button>
+    </div>
+
     <textarea id="searchTextInput" data-i18n="inputAndEnter" rows="1" placeholder="Word or sentence..."
       class="mira-input-terminal"
       style="min-height: 36px; max-height: 80px;height: auto;white-space:pre-wrap; padding-top: 10px; margin-bottom: 8px; overflow-y: auto !important;"></textarea>
@@ -212,37 +350,45 @@
             scrollbar-width: thin; 
             scrollbar-color: rgba(56, 189, 248, 0.3) transparent;">
       <div id="resVoiceHeader"
-        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px solid rgba(56, 189, 248, 0.1); padding-bottom: 6px;">
-        <div style="flex: 1; min-width: 0; margin-right: 8px;">
-          <div id="resSourceText" class="allow-select"
-            style="color: #ffffffd4; font-size: 14px; font-weight: bold; word-break: break-all;">
-          </div>
-          <div id="resPhonetic" class="allow-select"
-            style="color: #94a3b8; font-size: 11px; font-family: sans-serif; margin-top: 2px;">
-          </div>
-        </div>
-        <div style="display: flex; gap: 4px; align-items: center; flex-shrink: 0;">
-          <button id="ttsBtn" class="icon-btn" data-i18n="pronunciation" data-i18n-title title="Pronounce">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-            </svg>
-          </button>
-          <button id="resSaveBtn" class="icon-btn" data-i18n="collect" data-i18n-title title="Collect">
-            <svg id="res-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon
-                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-              </polygon>
-            </svg>
-          </button>
-          <button id="resRefreshBtn" class="icon-btn" data-i18n="retranslate" data-i18n-title title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
-            </svg>
-          </button>
-        </div>
-      </div>
+  style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; border-bottom: 1px solid rgba(56, 189, 248, 0.1); padding-bottom: 6px;">
+  
+  <div style="flex: 1; min-width: 0;">
+    
+    <div id="resSourceText" class="allow-select"
+      style="color: #ffffffd4; font-size: 14px; font-weight: bold; word-break: break-all;">
+    </div>
+    <!-- 第二行：罗马音 -->
+    <div id="resPhonetic" class="allow-select"
+      style="color: #94a3b8; font-size: 11px; font-family: sans-serif; margin-top: 2px; margin-bottom: 6px;">
+    </div>
+    <!-- 第三行：按钮组 -->
+    <div style="display: flex; gap: 4px; align-items: center;">
+      <button id="ttsBtn" class="icon-btn" data-i18n="pronunciation" data-i18n-title title="Pronounce">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+      </button>
+      <button id="ttsBtnTarget" class="icon-btn" title="Pronounce translation" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+      </button>
+      <button id="resSaveBtn" class="icon-btn" data-i18n="collect" data-i18n-title title="Collect">
+        <svg id="res-star-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+      </button>
+      <button id="resRefreshBtn" class="icon-btn" data-i18n="retranslate" data-i18n-title title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
+        </svg>
+      </button>
+    </div>
+
+  </div>
+</div>
       <div id="resContent" class="allow-select"
         style="color: #38bdf8; font-size: 12px; line-height: 1.6;user-select: auto !important;"></div>
     </div>
@@ -390,7 +536,7 @@
         </div>
       </div>
     </div>
-    <div style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 0 3px 0; width: 100%;"></div>
+    <div id="seperateLine" style="height: 1px; background: rgba(255, 255, 255, 0.08); margin: 4px 0 3px 0; width: 100%;"></div>
 
     <div id="targetLangCombox"
       style="display: flex; flex-direction: column; align-items: stretch; gap: 4px;padding: 5px;">
@@ -625,9 +771,9 @@
         <span data-i18n="uiLanguage">界面语言</span>
       </div>
       <select id="uiLangSelect" class="ui-select-tiny">
+        <option value="en">English</option>
         <option value="zh-CN">简体中文 (Chinese Simplified)</option>
         <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
-        <option value="en">English</option>
         <option value="ja">日本語 (Japanese)</option>
         <option value="ko">한국어 (Korean)</option>
         <option value="de">Deutsch (German)</option>

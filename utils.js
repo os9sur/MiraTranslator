@@ -179,7 +179,7 @@ function getCurrentLang() {
   return window.currentConfig?.targetLanguage ||
     window.currentTargetL ||
     navigator.language ||
-    'en'; 
+    'en';
 }
 
 let cachedSiteSettings = {};
@@ -849,10 +849,94 @@ async function lookupCache(text, engine, lang) {
   }
   return { result: actualResult, hitKey, singleKey };
 }
+
+function getPhoneticLabel(langCode) {
+  const base = (langCode || 'en').split('-')[0].toLowerCase();
+  const labels = {
+    'ja': 'あ/a',
+    'zh': '拼',
+    'ko': '한',
+    'ar': 'ع',
+    'hi': 'अ', // 印地语
+    'th': 'ก',
+    'el': 'Ω',
+    'ru': 'Я'
+  };
+  return labels[base] || 'Ph';
+}
+
+let lastUtterance = null;
+
+function speakText(text, speakBtn, forcedLang) {
+  if (!window.speechSynthesis || !text) return;
+
+  window.speechSynthesis.cancel();
+
+  if (speakBtn) {
+    speakBtn.classList.remove('is-speaking', 'speaking-wave');
+    speakBtn.classList.add('is-loading', 'tts-loading');
+  }
+
+  lastUtterance = new SpeechSynthesisUtterance(text);
+  lastUtterance.volume = 1.0;
+
+  const langMap = {
+    'ja': 'ja-JP', 'zh': 'zh-CN', 'en': 'en-US', 'ko': 'ko-KR',
+    'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU'
+  };
+
+  let targetLang = '';
+  if (forcedLang) {
+    const base = forcedLang.split('-')[0].toLowerCase();
+    targetLang = langMap[base] || forcedLang;
+  }
+
+  // 如果没有强制指定语言，走正则识别
+  if (!targetLang) {
+    if (/[\u3040-\u30ff]/.test(text)) targetLang = 'ja-JP';
+    else if (/\p{Script=Hangul}/u.test(text)) targetLang = 'ko-KR';
+    else if (/\p{Script=Han}/u.test(text)) targetLang = /[繁體國語]/.test(text) ? 'zh-TW' : 'zh-CN';
+    else if (/[äöüßÄÖÜ]/.test(text)) targetLang = 'de-DE';
+    else if (/[éàèâîôûçëïüÿœæ]/.test(text)) targetLang = 'fr-FR';
+    else if (/[ñ¿¡]/.test(text)) targetLang = 'es-ES';
+    else if (/\p{Script=Cyrillic}/u.test(text)) targetLang = 'ru-RU';
+    else targetLang = 'en-US'; // 默认
+  }
+
+  lastUtterance.lang = targetLang;
+
+  if (targetLang.startsWith('ja')) lastUtterance.rate = 0.6;
+  else if (targetLang.startsWith('zh')) lastUtterance.rate = 0.85;
+  else lastUtterance.rate = 0.8;
+
+  const forceReset = new SpeechSynthesisUtterance("");
+  window.speechSynthesis.speak(forceReset);
+
+  setTimeout(() => {
+    window.speechSynthesis.speak(lastUtterance);
+  }, 50);
+
+  if (speakBtn) {
+    lastUtterance.onstart = () => {
+      speakBtn.classList.remove('is-loading', 'tts-loading');
+      speakBtn.classList.add('is-speaking', 'speaking-wave');
+      speakBtn.querySelector('svg')?.classList.add('icon-active');
+    };
+
+    const stop = () => {
+      speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+      speakBtn.querySelector('svg')?.classList.remove('icon-active');
+    };
+
+    lastUtterance.onend = stop;
+    lastUtterance.onerror = stop;
+  }
+}
 //通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
+  logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang||'').split('-')[0]);
   if (!text) return null;
   const query = text.trim();
   if (!query) return null;
@@ -861,7 +945,15 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
   const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!storage) return;
-  const { skipCache = false, isBatch = false, lightweight = false } = options;
+  const { 
+    skipCache = false, 
+    isBatch = false, 
+    lightweight = false, 
+    needPhonetic = false, 
+    hintInputLang = null,
+    hintLangA = null,
+    hintLangB = null
+} = options;
   let engine = (
     storage.activeConfig?.engine ||
     (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
@@ -872,6 +964,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     navigator.language ||
     'en'
   ).replace('_', '-').toLowerCase();
+  
   lang = lang.replace('_', '-').toLowerCase();
   const targetBase = lang.split('-')[0];
   const hasHan = LANGUAGE_PATTERNS['zh']?.test(query) || false;
@@ -879,82 +972,97 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const hasKo = LANGUAGE_PATTERNS['ko']?.test(query) || false;
   const hasLatinEx = LANGUAGE_PATTERNS['latinEx']?.test(query) || false;
   const isPureEnglish = LANGUAGE_PATTERNS['en']?.test(query) || false;
+
+//logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
   if (!isBatch) {
     let isSame = false;
-    if (targetBase === 'en' && isPureEnglish) {
-      isSame = true;
-    } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
-      const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
-      isSame = !targetIsTraditional;
-    } else if (targetBase === 'ja' && hasJa) {
-      isSame = true;
-    } else if (targetBase === 'ko' && hasKo) {
-      isSame = true;
-    } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
-      isSame = true;
-    } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
-      isSame = true;
-    } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
-      isSame = true;
-    }
-    if (isSame) {
-      const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
-      wordTranslationCache.set(query.toLowerCase(), result);
-      return result;
-    }
-    try {
-      const detection = await new Promise((resolve) => {
-        if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
-        chrome.i18n.detectLanguage(query, resolve);
-      });
-      if (detection && detection.isReliable) {
-        const detected = detection.languages[0].language.toLowerCase();
-        if (detected === targetBase) {
-          return { basic: query, isSameLang: true, timestamp: Date.now() };
+
+    // 如果外部明确传入了输入语言，且与目标语言不同，跳过所有isSame检测
+    if (hintInputLang && hintInputLang !== targetBase) {
+        isSame = false;
+    } else {
+        if (targetBase === 'en' && isPureEnglish) {
+            isSame = true;
+        } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
+            const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
+            isSame = !targetIsTraditional;
+        } else if (targetBase === 'ja' && hasJa) {
+            isSame = true;
+        } else if (targetBase === 'ko' && hasKo) {
+            isSame = true;
+        } else if (targetBase === 'he' && LANGUAGE_PATTERNS['he']?.test(query)) {
+            isSame = true;
+        } else if (LATIN_BASED_LANGS.has(targetBase) && hasLatinEx) {
+            isSame = true;
+        } else if (LANGUAGE_PATTERNS[targetBase]?.test(query)) {
+            isSame = true;
         }
-      }
+    }
+
+    if (isSame) {
+        const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
+        wordTranslationCache.set(query.toLowerCase(), result);
+        return result;
+    }
+    // chrome.i18n检测同理
+    try {
+        const detection = await new Promise((resolve) => {
+            if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
+            chrome.i18n.detectLanguage(query, resolve);
+        });
+        if (detection && detection.isReliable) {
+            const detected = detection.languages[0].language.toLowerCase();
+            // 外部有hint时，不信任chrome检测结果
+            if (!hintInputLang && detected === targetBase) {
+                return { basic: query, isSameLang: true, timestamp: Date.now() };
+            }
+        }
     } catch (e) { }
-  } else {
-  }
+}
   const cacheKey = getCacheKey(query, engine, lang);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
-    // lookupCache 返回结果后，加一层校验
-if (!forceRefresh && !isBatch) {
-  const hit = await lookupCache(query, engine, lang);
-  if (hit && !hit.result.isBatch) {
-    const cached = hit.result;
+    // lookupCache 返回结果后，校验
+    if (!forceRefresh && !isBatch) {
+      const hit = await lookupCache(query, engine, lang);
+      if (hit && !hit.result.isBatch) {
+        const cached = hit.result;
 
-    // 检测缓存是否是脏数据（basic是JSON字符串）
-    if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
-      try {
-        const parsed = JSON.parse(cached.basic);
-        // 是脏数据，修复并重写缓存
-        cached.basic = parsed.basic || cached.basic;
-        cached.phonetic = parsed.phonetic || cached.phonetic || "";
-        cached.dictData = parsed.dictData || cached.dictData || [];
-        cached.examples = parsed.examples || cached.examples || [];
-        await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
-      } catch { /* 不是JSON，正常数据 */ }
+        // 检测缓存是否是脏数据（basic是JSON字符串）
+        if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(cached.basic);
+            // 是脏数据，修复并重写缓存
+            cached.basic = parsed.basic || cached.basic;
+            cached.phonetic = parsed.phonetic || cached.phonetic || "";
+            cached.dictData = parsed.dictData || cached.dictData || [];
+            cached.examples = parsed.examples || cached.examples || [];
+            await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
+          } catch { /* 不是JSON，正常数据 */ }
+        }
+
+        wordTranslationCache.set(query.toLowerCase(), cached);
+        return cached;
+      }
     }
-
-    wordTranslationCache.set(query.toLowerCase(), cached);
-    return cached;
-  }
-}
     pendingRequests.add(cacheKey);
+    //logger.log("[发送请求] query:", query, "lang:", lang, "needPhonetic:", needPhonetic);
     let response;
     try {
       response = await Promise.race([
-        safeSendMessage({
-          type: 'TRANSLATE',
-          text: query,
-          targetLang: lang,
-          lightweight,
-          isSubtitle: query.includes('⟦KT_') && isAI
-        }),
-        new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
-      ]);
+    safeSendMessage({
+        type: 'TRANSLATE',
+        text: query,
+        targetLang: lang,
+        lightweight,
+        needPhonetic,
+        hintInputLang,    
+        hintLangA,        
+        hintLangB,        
+        isSubtitle: query.includes('⟦KT_') && isAI
+    }),
+    new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
+]);
       if (response === null) {
         return;
       }
@@ -977,6 +1085,7 @@ if (!forceRefresh && !isBatch) {
     let result = {
       basic: "",
       phonetic: "",
+      sourcePhonetic: "",
       dictData: [],
       examples: [],
       wordForms: [],
@@ -991,6 +1100,7 @@ if (!forceRefresh && !isBatch) {
         const parsed = JSON.parse(data);
         result.basic = parsed.basic || parsed.result || data;
         result.phonetic = parsed.phonetic || "";
+        result.sourcePhonetic = parsed.sourcePhonetic || "";
         result.dictData = parsed.dictData || [];
         result.examples = parsed.examples || [];
         result.wordForms = parsed.wordForms || [];
@@ -1009,6 +1119,8 @@ if (!forceRefresh && !isBatch) {
       result.prototype = data.prototype || null;
       result.isFallback = data.isFallback || false;
       result.source = data.source || "";
+      result.targetPhonetic = data.targetPhonetic || data.romaji || data.pinyin || data.transliteration || "";
+      result.sourcePhonetic = data.sourcePhonetic || "";
     }
     if (result.basic && (!result.dictData || result.dictData.length === 0)) {
       if (isAI && !isBatch) {
@@ -1018,39 +1130,39 @@ if (!forceRefresh && !isBatch) {
       }
     }
     // 归并重复pos的dictData
-if (result.dictData && result.dictData.length > 0) {
-    
-  const merged = {};
-  result.dictData.forEach(item => {
-    const pos = item.pos || '';
-    
-    // 兼容多种结构
-    let def = '';
-    if (typeof item.definition === 'string') {
-      def = item.definition;
-    } else if (Array.isArray(item.definition)) {
-      def = item.definition.join(', ');
-    } else if (Array.isArray(item.meanings)) {
-      def = item.meanings.join(', ');
-    } else if (typeof item.meanings === 'string') {
-      def = item.meanings;
-    }
+    if (result.dictData && result.dictData.length > 0) {
 
-    if (!def) return; // 没有内容的跳过，不生成空行
-    
-    if (!merged[pos]) {
-      merged[pos] = def;
-    } else {
-      merged[pos] += ', ' + def;
-    }
-  });
+      const merged = {};
+      result.dictData.forEach(item => {
+        const pos = item.pos || '';
 
-  result.dictData = Object.entries(merged).map(([pos, definition]) => ({
-    pos, definition
-  }));
-  
-  logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
-}
+        // 兼容多种结构
+        let def = '';
+        if (typeof item.definition === 'string') {
+          def = item.definition;
+        } else if (Array.isArray(item.definition)) {
+          def = item.definition.join(', ');
+        } else if (Array.isArray(item.meanings)) {
+          def = item.meanings.join(', ');
+        } else if (typeof item.meanings === 'string') {
+          def = item.meanings;
+        }
+
+        if (!def) return; // 没有内容的跳过，不生成空行
+
+        if (!merged[pos]) {
+          merged[pos] = def;
+        } else {
+          merged[pos] += ', ' + def;
+        }
+      });
+
+      result.dictData = Object.entries(merged).map(([pos, definition]) => ({
+        pos, definition
+      }));
+
+      logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
+    }
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
         await idb.set({ [cacheKey]: result });

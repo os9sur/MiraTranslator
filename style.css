@@ -1500,6 +1500,12 @@ input:-ms-input-placeholder {
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
   transform: scale(1.1);
 }
+#ttsBtnTarget:hover {
+  background: rgba(168, 85, 247, 0.2) !important; 
+  color: #a855f7 !important;                 
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+  transform: scale(1.1);
+}
 #resSaveBtn:hover {
   background: rgba(250, 204, 21, 0.15) !important;
   color: #facc15 !important;
@@ -1741,4 +1747,37 @@ yt-attributed-string+.kt-paragraph-translation {
 #uiLangSelect:hover,
 #uiLangSelect:focus {
   border-color: #09518b;
+}
+
+#togglePhoneticBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 4px;
+  font-family: "Segoe UI", "Hiragino Sans", "Microsoft YaHei", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+#togglePhoneticBtn:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+#togglePhoneticBtn.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #38bdf8;
 }
