@@ -1172,49 +1172,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   input.onkeydown = function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      const text = this.value.trim();
-      if (!text) {
-        resultArea.style.display = 'none';
-        if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
-        const actionArea = document.getElementById('actionArea');
-        if (actionArea) actionArea.style.display = 'none';
-        return;
-      }
-      //即时翻译
-      executeTranslation(text);
-    }
-  };
-  function formatPosToEnglish(pos) {
-    if (!pos) return "";
-    const p = pos.toLowerCase().trim().replace(/\.$/, '');
-    const posMapping = {
-      'n': 'n.', 'noun': 'n.', '名词': 'n.', '名': 'n.', '名詞': 'n.',
-      'v': 'v.', 'verb': 'v.', '动词': 'v.', '动': 'v.', '動詞': 'v.', 'vi': 'v.', 'vt': 'v.',
-      'adj': 'adj.', 'adjective': 'adj.', '形容词': 'adj.', '形': 'adj.', '形容詞': 'adj.',
-      'adv': 'adv.', 'adverb': 'adv.', '副词': 'adv.', '副': 'adv.', '副詞': 'adv.',
-      'prep': 'prep.', 'preposition': 'prep.', '介词': 'prep.',
-      'conj': 'conj.', 'conjunction': 'conj.', '连词': 'conj.',
-      'pron': 'pron.', 'pronoun': 'pron.', '代词': 'pron.',
-      'num': 'num.', 'numeral': 'num.', '数词': 'num.',
-      'art': 'art.', 'article': 'art.', '冠词': 'art.',
-      'int': 'int.', 'interjection': 'int.', '叹词': 'int.'
-    };
-    return posMapping[p] || (p.length <= 3 ? `${p}.` : p);
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    triggerSearch(this.value.trim());
   }
-  async function executeTranslation(text, forceRefresh = false) {
-    resultArea.style.display = 'flex';
-    resultArea.style.userSelect = 'text';
-    resContent.innerHTML = `<span style="color: #64748b; font-size: 11px;">${t('loading')}</span>`;
-    resPhonetic.innerText = '';
-    resVoiceHeader.style.display = 'none';
-    if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+};
 
+document.getElementById('searchSubmitBtn').onclick = () => {
+  triggerSearch(input.value.trim());
+};
+
+// 即时翻译
+function triggerSearch(text) {
+  if (!text) {
+    resultArea.style.display = 'none';
+    if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+    const actionArea = document.getElementById('actionArea');
+    if (actionArea) actionArea.style.display = 'none';
+    return;
+  }
+  executeTranslation(text);
+}
+
+  async function executeTranslation(text, forceRefresh = false) {
+    if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+    let ui_lang = 'en';
     try {
-      const res = await safeGetStorage('activeConfig');
+      const res = await safeGetStorage(['ui_language', 'activeConfig']);
       if (!res) return;
 
+      ui_lang = res.ui_language || navigator.language || 'en'
+      resultArea.style.display = 'flex';
+      resultArea.style.userSelect = 'text';
+      resContent.innerHTML = `<span style="color: #64748b; font-size: 11px;">${t('loading', ui_lang)}</span>`;
+      resPhonetic.innerText = '';
+      resVoiceHeader.style.display = 'none';
       // ── 读取语言对 
       const langA = (document.getElementById('lpSelA').value || 'en').replace('_', '-');
       const langB = (document.getElementById('lpSelB').value || 'ja').replace('_', '-');
@@ -1231,7 +1223,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // ── 通用语言检测  
       function detectInputLang(str) {
-        // 平假名/片假名优先判断：可区分汉字日语混合文本
         if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(str)) return 'ja';
         if (/\p{Script=Hangul}/u.test(str)) return 'ko';
         if (/\p{Script=Han}/u.test(str)) return 'zh';
@@ -1240,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (/\p{Script=Thai}/u.test(str)) return 'th';
         if (/\p{Script=Hebrew}/u.test(str)) return 'he';
         if (/\p{Script=Devanagari}/u.test(str)) return 'hi';
-        if (/^[a-zA-Z\s.,!?'"()\-]+$/.test(str.trim())) return 'en';
+        if (/^[a-zA-Z\u00C0-\u024F\s.,!?'"()\-¿¡«»]+$/.test(str.trim())) return 'latin';
         return 'unknown';
       }
 
@@ -1331,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (basic) {
           const hasPhonetic = !!targetPhonetic;
-          const phoneticLabel = getPhoneticLabel(targetL);
+          const phoneticLabel = getPhoneticLabel(ui_lang);
           html += `
             <div style="margin-bottom:10px;">
               <div style="display:flex; align-items:center; gap:8px;">
@@ -1367,14 +1358,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (mergedDicts.length > 0) {
           html += mergedDicts.map(item => {
-            const englishPos = (typeof formatPosToEnglish === 'function')
-              ? formatPosToEnglish(item.pos)
-              : (item.pos || '');
+            const rawPos = (item.pos || '').toLowerCase().trim().replace(/\.$/, '');
+            const cnKey = POS_REVERSE_MAP[rawPos] || rawPos;
+
+            const targetLangCode = (langA || 'en').toLowerCase();
+
+            let displayPos = cnKey;
+            if (POS_MAP[cnKey]) {
+              displayPos = POS_MAP[cnKey][targetLangCode] || POS_MAP[cnKey]['en'] || cnKey;
+            }
+
             return `
-            <div style="margin-bottom:6px; display:flex; align-items:baseline; line-height:1.4;">
-              <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:8px; min-width:32px;">${englishPos}.</span>
-              <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
-            </div>`;
+    <div style="margin-bottom:6px; display:flex; align-items:baseline; line-height:1.4;">
+      <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:8px; min-width:32px;">${displayPos}</span>
+      <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
+    </div>`;
           }).join('');
         }
 

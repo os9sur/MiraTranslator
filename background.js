@@ -644,7 +644,7 @@ const Translators = {
     },
 
     _fetchDictDetail: async function (query) {
-        const HOST = atob('ZGljdC55b3VkYW8uY29t');
+        const HOST = 'dict.youdao.com';
         try {
             const params = new URLSearchParams({
                 q: query,
@@ -700,7 +700,7 @@ const Translators = {
         } catch (e) {
             // 接口1 失败，降级到 suggest
             try {
-                const HOST2 = atob('ZGljdC55b3VkYW8uY29t');
+                const HOST2 = 'dict.youdao.com';
                 const url = `https://${HOST2}/suggest?q=${encodeURIComponent(query)}&num=1&doctype=json`;
                 const res = await fetch(url);
                 const data = await res.json();
@@ -736,8 +736,8 @@ const Translators = {
             hangul: /\p{Script=Hangul}/u,
         };
         let sl = 'auto';
-        if (hintSourceLang && hintSourceLang !== 'zh') {
-            sl = hintSourceLang;  // 只有明确非中文才强制指定，避免Google拒绝
+        if (hintSourceLang && hintSourceLang !== 'zh' && hintSourceLang !== 'latin') {
+            sl = hintSourceLang;
         } else if (PATTERNS.kana.test(query)) sl = 'ja';
         else if (PATTERNS.hangul.test(query)) sl = 'ko';
         else if (/\p{Script=Thai}/u.test(query)) sl = 'th';
@@ -1189,7 +1189,7 @@ async function processTranslate(req) {
             greek: /[\u0370-\u03FF]/.test(trimmedText),
             cyrillic: /[\u0400-\u04FF]/.test(trimmedText),
         };
-        let finalModel = ''; 
+        let finalModel = '';
         let isWord = false;
         const hasPunctuation = /[，。！？；：,.;:!?\n\r]/.test(trimmedText);
         if (!hasPunctuation) {
@@ -1270,7 +1270,11 @@ async function processTranslate(req) {
             const isLatinInput = !hintInputLang || ['en', 'fr', 'de', 'es', 'pt', 'it', 'nl', 'ru', 'ar', 'th', 'he', 'hi'].includes(hintInputLang) === false
                 ? /^[a-zA-Z]/.test(req.text.trim())  // 没有hint时靠字符判断
                 : !['ja', 'zh', 'ko', 'ar', 'th', 'he', 'hi', 'ru'].includes(hintInputLang);
-            const isLatinTarget = !targetLanguageName.includes('Japanese') && !targetLanguageName.includes('Chinese') && !targetLanguageName.includes('Korean') && !targetLanguageName.includes('Arabic') && !targetLanguageName.includes('Thai');
+            // 定义哪些语言是“非拉丁语系”，需要额外的罗马化标注
+            const requiresRomanization = /Japanese|Chinese|Korean|Arabic|Thai|Russian|Greek|Hindi|Hebrew/i.test(targetLanguageName);
+
+            //  是否是拉丁语系（或不需要注音的语言）：
+            const isLatinTarget = !requiresRomanization;
 
             const sourcePhoneticInstruction = isLatinInput
                 ? `"sourcePhonetic": "",`  // 拉丁输入直接锁死为空
@@ -1288,52 +1292,26 @@ async function processTranslate(req) {
 
 
             if (isWord) {
+                const isChineseTarget = targetLanguageName.includes('Chinese') || targetLanguageName.includes('中文');
 
                 const sourcePhoneticDesc = (() => {
                     if (!req.needPhonetic) return '';
-                    if (isLatinInput) return `  "sourcePhonetic": ""`;  // 直接锁死，不给模型解释空间
+                    if (isLatinInput) return `  "sourcePhonetic": ""`;
                     if (hintInputLang === 'ja') return `  "sourcePhonetic": "<Hepburn Romaji of input, e.g. nihon>"`;
                     if (hintInputLang === 'zh') return `  "sourcePhonetic": "<Pinyin with tones, e.g. zhōng guó>"`;
                     if (hintInputLang === 'ko') return `  "sourcePhonetic": "<Revised Romanization, e.g. annyeong>"`;
                     return `  "sourcePhonetic": ""`;
                 })();
+                const phoneticField = req.needPhonetic ? [sourcePhoneticDesc].filter(Boolean).join('\n') : '';
+                const examplesPrompt = [
+                    `Input: "hello" → Japanese: {"basic":"こんにちは"}`,
+                    `Input: "apple" → Chinese: {"basic":"苹果"}`,
+                    `Input: "drive" → Chinese: {"basic":"驱动, 驾驶"}`
+                ].join('\n');
 
-                const targetPhoneticDesc = !req.needPhonetic ? '' :
-                    targetLangBase === 'ja' ? `  "targetPhonetic": "<Hepburn Romaji of translation, e.g. zen'in, youkoso>",` :
-                        targetLangBase === 'zh' ? `  "targetPhonetic": "<Pinyin with tones of translation, e.g. nǐ hǎo>",` :
-                            targetLangBase === 'ko' ? `  "targetPhonetic": "<Revised Romanization of translation, e.g. annyeong>",` :
-                                `  "targetPhonetic": "<IPA of translation, e.g. /dʒəˈpæn/>",`;
-
-                const phoneticField = req.needPhonetic
-                    ? [
-                        targetPhoneticDesc,
-                        sourcePhoneticDesc
-                    ].join('\n')
-                    : '';
-                // 在 Constraints 中增加硬性要求
-                const phoneticConstraint = req.needPhonetic
-                    ? [
-                        `9. 'targetPhonetic' MUST cover ALL words in 'basic' without exception.`,
-                        `   "basic":"全て, それぞれ" → "targetPhonetic":"subete, sorezore" ← BOTH words romanized`,
-                        `   "basic":"力強い" → "targetPhonetic":"chikara zuyoi"`,
-                        `   WRONG: "basic":"全て, それぞれ" + "targetPhonetic":"subete" ← missing sorezore`,
-                        `10. 'sourcePhonetic': if input is Latin/English → MUST be empty string "". NEVER fill with IPA of the input.`,
-                        `11. 'sourcePhonetic' MUST be plain romanization. FORBIDDEN: /.../ notation, ɴ ɾ ɯ ə ʊ n̪ or ANY IPA symbol. ONLY a-z and ā ī ū ē ō allowed.`,  // 只限制source
-                        `12. 'targetPhonetic' is the phonetic of the TRANSLATED TEXT ("basic"), NOT the input.`,
-                        `    - If target language is Japanese → Hepburn Romaji (e.g. "puratto foomu"). NEVER IPA.`,
-                        `    - If target language is Chinese → Pinyin with tones. NEVER IPA.`,
-                        `    - If target language is Korean → Revised Romanization. NEVER IPA.`,
-                        `    - If target language is English or other Latin-script language → IPA wrapped in /.../`,
-                        `13. 'targetPhonetic' and 'sourcePhonetic' MUST NOT be identical.`,
-                        `14. 'targetPhonetic' MUST be the romanization of the exact characters in "basic".`,
-                        `    e.g. "basic":"ようこそ" → "targetPhonetic":"youkoso". NEVER transliterate the source input word.`,
-                        `    WRONG: "basic":"ようこそ" + "targetPhonetic":"welkamu" ← this is the input's sound, not the translation's.`
-                    ].join('\n')
-                    : '';
-                const isChineseTarget = targetLanguageName.includes('Chinese') || targetLanguageName.includes('中文');
                 systemPrompt = [
-                    `You are a professional multilingual dictionary.`,
-                    hintInputLang ? `Source Language: ${getFriendlyLanguageName(hintInputLang)}.` : '',
+                    `# ROLE: You are a professional ${targetLanguageName} dictionary.`,
+                    `# TARGET LANGUAGE: ${targetLanguageName} (CRITICAL: Do not output other languages).`, hintInputLang ? `Source Language: ${getFriendlyLanguageName(hintInputLang)}.` : '',
                     `For the input "${req.text}", detect its source language and provide its definition in ${targetLanguageName}.`,
                     `IMPORTANT: The "basic" and "dictData.definition" fields MUST be written in ${targetLanguageName}. If ${targetLanguageName} is Traditional Chinese, use 繁體字 exclusively.`,
                     `Return a JSON object:`,
@@ -1347,29 +1325,17 @@ async function processTranslate(req) {
                     `  "examples": ["Original sentence in source language | ${targetLanguageName} translation"],`,
                     ...(isChineseTarget ? [
                         `  "wordForms": [{"name": "past tense / 复数 / 活用形 etc.", "value": "the form"}],`,
-                        `  "prototype": "base/root form if input is inflected, otherwise null"`,
+                        `  "prototype": "base/root form if input is inflected, otherwise null"`
                     ] : []),
                     `}`,
                     `EXAMPLES (follow these output formats exactly):`,
-                    `Input: "日本" (Japanese) → English: {"phonetic":"","targetPhonetic":"/dʒəˈpæn/","sourcePhonetic":"nihon","basic":"Japan"}`,
-                    `Input: "中国" (Chinese) → English: {"phonetic":"","targetPhonetic":"/ˈtʃaɪnə/","sourcePhonetic":"zhōng guó","basic":"China"}`,
-                    `Input: "생일" (Korean) → English: {"phonetic":"","targetPhonetic":"/ˈbɜːrθdeɪ/","sourcePhonetic":"saengil","basic":"birthday"}`,
-                    `Input: "Japan" (English) → Japanese: {"phonetic":"","targetPhonetic":"nihon","sourcePhonetic":"","basic":"日本"}`,
-                    `Input: "powerful" (English) → Japanese: {"phonetic":"/ˈpaʊərfl/","targetPhonetic":"chikara zuyoi","sourcePhonetic":"","basic":"力強い"}`,
-                    `Input: "platform" (English) → Japanese: {"phonetic":"","targetPhonetic":"puratto foomu","sourcePhonetic":"","basic":"プラットフォーム"}`,
-                    `Input: "welcome" (English) → Japanese: {"phonetic":"","targetPhonetic":"youkoso","sourcePhonetic":"","basic":"ようこそ"}`,
-                    `Input: "every" (English) → Japanese: {"phonetic":"","targetPhonetic":"subete, sorezore","sourcePhonetic":"","basic":"全て, それぞれ"}`,
-                    `Input: "hello" (English) → Chinese: {"phonetic":"","targetPhonetic":"nǐ hǎo","sourcePhonetic":"","basic":"你好"}`,
-                    `Input: "miss" (English) → Chinese: {"phonetic":"","targetPhonetic":"cuò guò, diū shī","sourcePhonetic":"","basic":"错过, 丢失"}`,
-                    `Input: "hello" (English) → Korean: {"phonetic":"","targetPhonetic":"annyeonghaseyo","sourcePhonetic":"","basic":"안녕하세요"}`,
+                    examplesPrompt,
                     `NOTE: 'sourcePhonetic' uses ONLY plain letters like "nihon", "zhōng guó" — NEVER IPA like "/n̪ihoɴ/" or "/tʂʊŋ/"`,
                     `Constraints:`,
                     `1. MUST GROUP definitions by part of speech. Each unique 'pos' (e.g., 'n.') should appear ONLY ONCE in the 'dictData' array.`,
                     `2. Combine multiple meanings of the same 'pos' into a single comma-separated string in the 'definition' field.`,
                     `3. 'dictData' must contain AT MOST 6 high-quality definitions in total.`,
                     `4. If the word is very common, provide only the most essential meanings.`,
-                    phoneticConstraint,
-                    // --- 动态添加规则 ---
                     ...(isChineseTarget ? [
                         `5. For 'wordForms': provide ONLY the morphological forms OF THE EXACT INPUT WORD "${req.text}" itself. For example, if input is "forward": wordForms should be [过去式:forwarded, 过去分词:forwarded, 现在分词:forwarding, 第三人称单数:forwards]. NEVER use forms of a different word. Use EXACTLY these name values (do not translate or rephrase):`,
                         `   - verb: "过去式", "过去分词", "现在分词", "第三人称单数"`,
@@ -1384,7 +1350,7 @@ async function processTranslate(req) {
                     // 强制性的 JSON 格式规则（无论什么语言都执行）
                     `7. Respond with PURE JSON ONLY. Absolutely no Markdown, no code fences, no backticks, no explanations. The response must start with '{' and end with '}'.`,
                     `8. CRITICAL: Your entire response must be a single valid JSON object. If you output anything other than raw JSON, it will cause a system error. Do not add any text before '{' or after '}'.`
-                ].join('\n');
+                ].filter(Boolean).join('\n'); // 增加 filter(Boolean) 确保没有空行干扰
             } else if (isSubtitle) {
                 systemPrompt = [
                     `Role: World-class translator for TED and Netflix.`,
@@ -1472,12 +1438,12 @@ async function processTranslate(req) {
                     ].filter(Boolean).join('\n');
                 } else {
                     systemPrompt = `You are a professional translator. Translate the user's text literally into ${targetLanguageName}.
-                Output ONLY the translation. Never explain or expand.
+                    Output ONLY the translation. Never explain or expand.
 
-                Examples:
-                Input: "YouTube字幕翻译"  →  Output: "YouTube Subtitle Translation"
-                Input: "设置"  →  Output: "Settings"
-                Input: "点击这里了解更多"  →  Output: "Click here to learn more"`;
+                    Examples:
+                    Input: "YouTube字幕翻译"  →  Output: "YouTube Subtitle Translation"
+                    Input: "设置"  →  Output: "Settings"
+                    Input: "点击这里了解更多"  →  Output: "Click here to learn more"`;
                 }
             }
             else {

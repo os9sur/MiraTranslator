@@ -210,6 +210,13 @@ function isCurrentSiteActive() {
     return false;
   }
 }
+function getSafeMessage(key, defaultMsg) {
+  try {
+    return (chrome.i18n && chrome.runtime?.id) ? chrome.i18n.getMessage(key) : defaultMsg;
+  } catch (e) {
+    return defaultMsg;
+  }
+}
 async function safeSendMessage(message) {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
     if (isCurrentSiteActive()) showUpdateNotice();
@@ -630,7 +637,7 @@ const LANGUAGE_PATTERNS = {
   'nl': /[éëïóöüÉËÏÓÖÜ]/,
 };
 const LATIN_BASED_LANGS = new Set([
-  'fr', 'de', 'es', 'it', 'nl', 'pt', 'sv', 'da', 'no', 'fi',
+  'en', 'fr', 'de', 'es', 'it', 'nl', 'pt', 'sv', 'da', 'no', 'fi', 
   'tr', 'pl', 'cs', 'sk', 'hu', 'ro', 'sl', 'hr', 'lv', 'lt', 'et', 'vi'
 ]);
 function detectLatinLanguage(cleanText, cleanChars, targetPrefix) {
@@ -881,15 +888,17 @@ async function lookupCache(text, engine, lang) {
 function getPhoneticLabel(langCode) {
   const base = (langCode || 'en').split('-')[0].toLowerCase();
   const labels = {
-    'ja': 'あ/a',
-    'zh': '拼',
-    'ko': '한',
+    'ja': 'あ',      
+    'zh': '音',      
+    'ko': '가',      // 常用首字母
     'ar': 'ع',
-    'hi': 'अ', // 印地语
+    'hi': 'अ',
     'th': 'ก',
     'el': 'Ω',
-    'ru': 'Я'
+    'ru': 'Я',
+    'en': 'Ph.'     
   };
+  
   return labels[base] || 'Ph';
 }
 
@@ -1224,12 +1233,12 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       if (errorCode === "400" && errorText.toLowerCase().includes("balance")) {
         errorCode = "402";
       }
-      const i18nMsg = chrome.i18n.getMessage(`ERROR_${errorCode}`);
+      const i18nMsg = getSafeMessage(`ERROR_${errorCode}`);
       displayMessage = `${i18nMsg || 'API Error'} (Code: ${match[0]})`;
     } else if (errorText.toLowerCase().includes("timeout")) {
-      displayMessage = chrome.i18n.getMessage("ERROR_TIMEOUT") || "Request Timeout";
+      displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
     } else {
-      displayMessage = chrome.i18n.getMessage("ERROR_GENERIC") || "Translation failed";
+      displayMessage = getSafeMessage("ERROR_GENERIC") || "Translation failed";
     }
     return { basic: displayMessage, isError: true };
   } finally {
