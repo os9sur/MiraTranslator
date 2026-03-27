@@ -1189,12 +1189,12 @@ const TranslationBatcher = {
           if (match) {
             let errorCode = match[0];
             if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
-            const friendlyMsg = chrome.i18n.getMessage(`ERROR_${errorCode}`);
+            const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
             displayMessage = friendlyMsg
               ? `${friendlyMsg} (Code: ${errorCode})`
               : `API Error (Code: ${errorCode})`;
           } else if (errorText.toLowerCase().includes("timeout")) {
-            displayMessage = chrome.i18n.getMessage("ERROR_TIMEOUT") || "Request Timeout";
+            displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
           } else {
             displayMessage = errorText.length < 100 ? errorText : "Translation failed";
           }
