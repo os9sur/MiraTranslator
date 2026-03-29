@@ -1781,3 +1781,14 @@ yt-attributed-string+.kt-paragraph-translation {
   border-color: #38bdf8;
   color: #38bdf8;
 }
+
+#yt-hint {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+
+#yt-hint.show {
+  display: block;
+  opacity: 1;
+}

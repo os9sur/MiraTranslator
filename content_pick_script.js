@@ -37,13 +37,16 @@ window.browser = (function () {
             color: #f1f5f9 !important;
             font-size: 12px !important;
             line-height: 1.5 !important;
-            padding: 6px 10px !important;
+            padding: 8px 12px !important;  
             border-radius: 6px !important;
-            white-space: pre !important;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+            
+            white-space: pre-wrap !important;  
+            word-break: break-word !important; 
+            max-width: 260px !important;    
+            width: auto !important;    
+            
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
             border: 1px solid rgba(56, 189, 248, 0.5) !important;
-            width: max-content !important;
-            max-width: 280px !important;
         `;
         hoverTooltip.textContent = t('smartPicker', lang);
         document.body.appendChild(hoverTooltip);
@@ -72,16 +75,29 @@ window.browser = (function () {
         hoverOverlay.style.height = rect.height + "px";
     }
     window.startInspector = function (lang) {
-        logger.log("拾取器激活...");
-        isInspecting = true;
-        createOverlay();
-        if (hoverTooltip) hoverTooltip.textContent = t('smartPicker', lang);
-        hoverOverlay.style.display = "block";
-        hoverOverlay.style.borderColor = "#38bdf8";
-        document.body.style.cursor = "crosshair";
-        hoverTooltip.style.display = "block";
-        window.addEventListener('scroll', syncOverlayPosition, { passive: true });
-    };
+    logger.log("拾取器激活...");
+    isInspecting = true;
+    createOverlay();
+
+    if (hoverTooltip) {
+        const mainText = t('smartPicker', lang);
+        const hintText = t('smartPickerHint', lang);
+        hoverTooltip.innerHTML = `${mainText.replace(/\n/g, '<br>')}<br><span style="color: #fbbf24 !important; opacity: 0.9;">${hintText}</span>`;
+        if (lang === 'ar' || lang === 'fa') {
+            hoverTooltip.dir = "rtl";
+            hoverTooltip.style.textAlign = "right";
+        } else {
+            hoverTooltip.dir = "ltr";
+            hoverTooltip.style.textAlign = "left";
+        }
+    }
+
+    hoverOverlay.style.display = "block";
+    hoverOverlay.style.borderColor = "#38bdf8";
+    document.body.style.cursor = "crosshair";
+    hoverTooltip.style.display = "block";
+    window.addEventListener('scroll', syncOverlayPosition, { passive: true });
+};
     function stopInspecting() {
         isInspecting = false;
         if (hoverOverlay) hoverOverlay.style.display = "none";

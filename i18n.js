@@ -440,7 +440,7 @@ self.i18nData = {
     currentSite: "الموقع الحالي",
     globalSetting: "الإعداد العام",
     personalizedScan: "تخصيص مناطق الترجمة (حفظ تلقائي)",
-    smartPicker: "انقر لاختيار مناطق الترجمة\n(ESC/نقرة يمين للخروج)",
+    smartPicker: "انقر لاختيار مناطق الترجمة\n\u200F(ESC / نقرة يمين للخروج)",
     matchSelector: "العناصر النشطة (محددات CSS)",
     minChars: "تخطي الجمل القصيرة (أدنى حروف)",
     loading: "جاري الترجمة...",
@@ -472,7 +472,7 @@ self.i18nData = {
     currentSite: "سایت فعلی",
     globalSetting: "تنظیمات کلی",
     personalizedScan: "سفارشی‌سازی مناطق ترجمه (ذخیره خودکار)",
-    smartPicker: "برای انتخاب منطقه کلیک کنید\n(ESC/راست‌کلیک برای خروج)",
+    smartPicker: "برای انتخاب منطقه کلیک کنید\n\u200F(ESC / راست‌کلیک برای خروج)",
     matchSelector: "عناصر فعال (انتخابگرهای CSS)",
     minChars: "نادیده گرفتن جملات کوتاه (حداقل حروف)",
     loading: "در حال ترجمه...",
@@ -3280,4 +3280,137 @@ self.i18nAttach6 = {
     "dlRateLow": "Solo {rate}% de subtítulos traducidos.\n\nLos subtítulos se generan progresivamente durante la reproducción. Para un resultado completo, espera a que el video se procese.\n\n¿Descargar el {rate}% disponible?",
     "dlRatePartial": "{rate}% traducido, {missing} segmentos sin traducir.\n\nLa traducción aún está en proceso para algunas partes. Reproduce más video antes de descargar.\n\n¿Descargar la parte disponible?"
   }
-}
+};
+self.i18nAttach7 = {
+  "zh-CN": {
+    "ytHint.prefix": "💡 开启视频右下角 ",
+    "ytHint.middle": "，并在播放器 ",
+    "ytHint.suffix": " 中选择原始视频语言",
+    "common.youtube.settings": "[设定]",
+    "common.youtube.subtitles": "[字幕]"
+  },
+  "zh-TW": {
+    "ytHint.prefix": "💡 開啟影片右下角 ",
+    "ytHint.middle": "，並在播放器 ",
+    "ytHint.suffix": " 中選擇原始影片語言",
+    "common.youtube.settings": "[設定]",
+    "common.youtube.subtitles": "[字幕]"
+  },
+  "en": {
+    "ytHint.prefix": "💡 Turn on ",
+    "ytHint.middle": " in the bottom right of the video, then go to ",
+    "ytHint.suffix": " and select the original video language",
+    "common.youtube.settings": "Settings",
+    "common.youtube.subtitles": "Subtitles"
+  },
+  "ja": {
+    "ytHint.prefix": "💡 動画の右下にある ",
+    "ytHint.middle": " をオンにし、プレイヤーの ",
+    "ytHint.suffix": " で元の動画言語を選択してください",
+    "common.youtube.settings": "設定",
+    "common.youtube.subtitles": "字幕"
+  },
+  "ko": {
+    "ytHint.prefix": "💡 영상 오른쪽 아래의 ",
+    "ytHint.middle": " 를 켜고, 플레이어의 ",
+    "ytHint.suffix": " 에서 원본 영상 언어를 선택하세요",
+    "common.youtube.settings": "설정",
+    "common.youtube.subtitles": "자막"
+  },
+  "es": {
+    "ytHint.prefix": "💡 Activa el ",
+    "ytHint.middle": " en la parte inferior derecha del video, luego ve a ",
+    "ytHint.suffix": " y selecciona el idioma original del video",
+    "common.youtube.settings": "Ajustes",
+    "common.youtube.subtitles": "Subtítulos"
+  },
+  "fr": {
+    "ytHint.prefix": "💡 Activez le ",
+    "ytHint.middle": " en bas à droite de la vidéo, puis allez dans ",
+    "ytHint.suffix": " et sélectionnez la langue originale de la vidéo",
+    "common.youtube.settings": "Paramètres",
+    "common.youtube.subtitles": "Sous-titres"
+  },
+  "de": {
+    "ytHint.prefix": "💡 Schalten Sie das ",
+    "ytHint.middle": " unten rechts im Video ein, dann gehen Sie zu ",
+    "ytHint.suffix": " und wählen Sie die Originalsprache des Videos",
+    "common.youtube.settings": "Einstellungen",
+    "common.youtube.subtitles": "Untertitel"
+  },
+  "ru": {
+    "ytHint.prefix": "💡 Включите ",
+    "ytHint.middle": " в правом нижнем углу видео, затем перейдите в ",
+    "ytHint.suffix": " и выберите оригинальный язык видео",
+    "common.youtube.settings": "Настройки",
+    "common.youtube.subtitles": "Субтитры"
+  },
+  "pt": {
+    "ytHint.prefix": "💡 Ative o ",
+    "ytHint.middle": " no canto inferior direito do vídeo, depois vá em ",
+    "ytHint.suffix": " e selecione o idioma original do vídeo",
+    "common.youtube.settings": "Configurações",
+    "common.youtube.subtitles": "Legendas"
+  },
+  "it": {
+    "ytHint.prefix": "💡 Attiva il ",
+    "ytHint.middle": " nell'angolo in basso a destra del video, poi vai su ",
+    "ytHint.suffix": " e seleziona la lingua originale del video",
+    "common.youtube.settings": "Impostazioni",
+    "common.youtube.subtitles": "Sottotitoli"
+  },
+  "vi": {
+    "ytHint.prefix": "💡 Bật ",
+    "ytHint.middle": " ở góc dưới bên phải video, sau đó vào ",
+    "ytHint.suffix": " và chọn ngôn ngữ video gốc",
+    "common.youtube.settings": "Cài đặt",
+    "common.youtube.subtitles": "Phụ đề"
+  },
+  "th": {
+    "ytHint.prefix": "💡 เปิด ",
+    "ytHint.middle": " ที่มุมล่างขวาของวิดีโอ แล้วไปที่ ",
+    "ytHint.suffix": " และเลือกภาษาวิดีโอต้นฉบับ",
+    "common.youtube.settings": "การตั้งค่า",
+    "common.youtube.subtitles": "คำบรรยาย"
+  },
+  "tr": {
+    "ytHint.prefix": "💡 Videonun sağ alt köşesindeki ",
+    "ytHint.middle": " düğmesini açın, ardından oynatıcının ",
+    "ytHint.suffix": " bölümünden orijinal video dilini seçin",
+    "common.youtube.settings": "Ayarlar",
+    "common.youtube.subtitles": "Altyazılar"
+  },
+  "ar": {
+    "ytHint.prefix": "💡 شغّل ",
+    "ytHint.middle": " في أسفل يمين الفيديو، ثم اذهب إلى ",
+    "ytHint.suffix": " واختر لغة الفيديو الأصلية",
+    "common.youtube.settings": "الإعدادات",
+    "common.youtube.subtitles": "الترجمة"
+  },
+
+  "fa": {
+    "ytHint.prefix": "💡 دکمه ",
+    "ytHint.middle": " را در پایین سمت راست ویدیو روشن کنید، سپس به بخش ",
+    "ytHint.suffix": " بروید و زبان اصلی ویدیو را انتخاب کنید",
+    "common.youtube.settings": "تنظیمات",
+    "common.youtube.subtitles": "زیرنویس"
+  }
+};
+self.i18nAttach8 = {
+  "zh_CN": { "smartPickerHint": "⚠ 提示：由于网页限制，部分区域可能无法识别" },
+  "zh_TW": { "smartPickerHint": "⚠ 提示：由於網頁限制，部分區域可能無法識別" },
+  "en": { "smartPickerHint": "⚠ Note: Some areas may be restricted by the web page" },
+  "ja": { "smartPickerHint": "⚠ 注：ページの制限により選択できない場合があります" },
+  "ko": { "smartPickerHint": "⚠ 참고: 웹페이지 제한으로 인해 일부 선택이 불가할 수 있습니다" },
+  "fr": { "smartPickerHint": "⚠ Note : Certaines zones sont restreintes par la page web" },
+  "de": { "smartPickerHint": "⚠ Hinweis: Einige Bereiche sind seitenbedingt nicht wählbar" },
+  "es": { "smartPickerHint": "⚠ Nota: Algunas áreas están restringidas por la página" },
+  "it": { "smartPickerHint": "⚠ Nota: Alcune aree sono limitate dalla pagina web" },
+  "ru": { "smartPickerHint": "⚠ Прим.: Некоторые области могут быть недоступны" },
+  "pt": { "smartPickerHint": "⚠ Nota: Algumas áreas podem estar restritas pela página" },
+  "vi": { "smartPickerHint": "⚠ Lưu ý: Một số vùng có thể bị hạn chế do trang web" },
+  "th": { "smartPickerHint": "⚠ หมายเหตุ: พื้นที่บางส่วนอาจถูกจำกัดโดยหน้าเว็บ" },
+  "tr": { "smartPickerHint": "⚠ Not: Bazı alanlar sayfa kısıtlamaları nedeniyle seçilemeyebilir" },
+  "ar": { "smartPickerHint": "⚠ ملاحظة: قد تكون بعض المناطق مقيدة بسبب صفحة الويب" },
+  "fa": { "smartPickerHint": "⚠ توجه: برخی نواحی ممکن است به دلیل محدودیت صفحه محدود شده باشند" }
+};
