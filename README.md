@@ -76,7 +76,6 @@ Edit `private_config.js` and fill in your `CLIENT_ID`, `MANIFEST_KEY`.
 ### 3. Build Commands
 
 | Command | Target Browser |
-| --- | --- | --- |
+| --- | --- |
 | `pnpm dev` | **Chrome** |
 | `pnpm dev:edge` | **Edge** |
----
