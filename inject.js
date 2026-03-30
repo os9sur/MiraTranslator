@@ -31,6 +31,20 @@ window.browser = (function () {
                             }))
                             .filter(s => s.text.length > 0);
                         window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
+
+                        const urlLang = (() => {
+                            try {
+                                const u = new URL(this._ktUrl, location.href);
+                                return u.searchParams.get('lang') || u.searchParams.get('tlang') || null;
+                            } catch { return null; }
+                        })();
+                        if (urlLang) {
+                            window.dispatchEvent(new CustomEvent('KT_SOURCE_LANG_READY', {
+                                detail: { lang: urlLang.split('-')[0].toLowerCase() }
+                            }));
+                            logger.log('[KT] XHR 源语言:', urlLang);
+                        }
+
                         retryHistory.delete(url);
                     } else {
                         handleRetry(this._ktUrl, "JSON有效但无字幕数据");
@@ -81,12 +95,9 @@ window.browser = (function () {
             logger.log('[KT] 发现字幕轨道:', captionTracks.map(t => t.languageCode));
 
             // 优先选英文，其次第一条
-            const track = captionTracks.find(t => t.languageCode === 'en')
-                || captionTracks.find(t => t.kind !== 'asr')  // 非自动生成优先
-                || captionTracks[0];
+            const track = captionTracks.find(t => t.kind !== 'asr') || captionTracks[0];
 
             if (!track?.baseUrl) return;
-
             // 转成 json3 格式请求
             const url = track.baseUrl + '&fmt=json3';
             logger.log('[KT] 主动请求字幕:', url);
@@ -107,6 +118,15 @@ window.browser = (function () {
                 if (cleanSubs.length > 0) {
                     logger.log('[KT] 主动获取字幕成功:', cleanSubs.length, '条');
                     window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
+
+                    //  取第一条轨道作为源语言（最原始的语言）
+                    const sourceLang = captionTracks[0]?.languageCode?.split('-')[0].toLowerCase();
+                    if (sourceLang) {
+                        window.dispatchEvent(new CustomEvent('KT_SOURCE_LANG_READY', {
+                            detail: { lang: sourceLang }
+                        }));
+                        logger.log('[KT] fetchManual 源语言:', sourceLang);
+                    }
                 }
             }
         } catch (e) {
@@ -128,10 +148,24 @@ window.browser = (function () {
         // 同时尝试主动获取
         fetchManualCaptions();
     }
+ 
 
-    setTimeout(pokePlayer, 3000);  // 3秒重试
+    function initCCButtonObserver() {
+        const player = document.querySelector('.html5-video-player');
+        if (!player) {
+            setTimeout(initCCButtonObserver, 1000);
+            return;
+        }
+        player.addEventListener('click', (e) => {
+            const ccBtn = e.target.closest('.ytp-subtitles-button');
+            if (!ccBtn) return;
+            setTimeout(() => {
+                const isOn = ccBtn.getAttribute('aria-pressed') === 'true';
+                if (isOn) fetchManualCaptions();
+            }, 500);
+        });
+    }
 
-    // URL变化时（切换视频）重新触发
     function initUrlObserver() {
         if (!document.body) {
             setTimeout(initUrlObserver, 500);
@@ -145,6 +179,11 @@ window.browser = (function () {
             }
         }).observe(document.body, { childList: true, subtree: true });
     }
+
+    setTimeout(() => {
+        pokePlayer();
+        initCCButtonObserver();
+    }, 3000);
 
     initUrlObserver();
 })();

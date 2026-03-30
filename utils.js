@@ -334,7 +334,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -363,7 +363,7 @@ function t(key, forcedLang) {
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
-  return dict[key] || key;
+  return dict[key] || i18nDict["en"]?.[key] || key;
 }
 
 function applyI18n(forcedLang) {
@@ -637,7 +637,7 @@ const LANGUAGE_PATTERNS = {
   'nl': /[éëïóöüÉËÏÓÖÜ]/,
 };
 const LATIN_BASED_LANGS = new Set([
-  'en', 'fr', 'de', 'es', 'it', 'nl', 'pt', 'sv', 'da', 'no', 'fi', 
+  'en', 'fr', 'de', 'es', 'it', 'nl', 'pt', 'sv', 'da', 'no', 'fi',
   'tr', 'pl', 'cs', 'sk', 'hu', 'ro', 'sl', 'hr', 'lv', 'lt', 'et', 'vi'
 ]);
 function detectLatinLanguage(cleanText, cleanChars, targetPrefix) {
@@ -888,17 +888,17 @@ async function lookupCache(text, engine, lang) {
 function getPhoneticLabel(langCode) {
   const base = (langCode || 'en').split('-')[0].toLowerCase();
   const labels = {
-    'ja': 'あ',      
-    'zh': '音',      
+    'ja': 'あ',
+    'zh': '音',
     'ko': '가',      // 常用首字母
     'ar': 'ع',
     'hi': 'अ',
     'th': 'ก',
     'el': 'Ω',
     'ru': 'Я',
-    'en': 'Ph.'     
+    'en': 'Ph.'
   };
-  
+
   return labels[base] || 'Ph';
 }
 
@@ -973,7 +973,7 @@ function speakText(text, speakBtn, forcedLang) {
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
-  logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang || '').split('-')[0]);
+  //logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang || '').split('-')[0]);
   if (!text) return null;
   const query = text.trim();
   if (!query) return null;

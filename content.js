@@ -4723,6 +4723,12 @@ async function downloadSubtitles(withTranslation = false) {
       ).replaceAll('{rate}', cacheRate)
         .replaceAll('{missing}', missing.length);
 
+      if (cacheRate === 0) {
+        const fullMsg = t('dlRateLow', uiLang).replaceAll('{rate}', cacheRate);
+        const hint = fullMsg.split('\n\n').slice(0, 2).join('\n\n');
+        await showMiraConfirm(hint);
+        return;
+      }
       const confirmed = await showMiraConfirm(msg);
       if (!confirmed) return;
 
@@ -4955,6 +4961,7 @@ window.addEventListener('KT_DATA_READY', (e) => {
   if (dlBtn) dlBtn.style.display =
     (typeof isYTEnabled === 'undefined' || isYTEnabled) ? 'inline-flex' : 'none';
 });
+
 (function initVideoResetListener() {
   const video = document.querySelector('video');
   if (!video) {
@@ -5244,6 +5251,17 @@ async function batchPrefetch(startIndex) {
     await processChunk(currentChunk);
   }
 }
+
+let __ktSourceLang = null;
+
+window.addEventListener('KT_SOURCE_LANG_READY', (e) => {
+  __ktSourceLang = e.detail?.lang || null;
+  logger.log('[Mira] 收到源语言:', __ktSourceLang);
+});
+
+function getVideoSourceLang() {
+  return __ktSourceLang;
+}
 function syncSubtitleDisplay() {
   const video = document.querySelector('video');
   const player = document.querySelector('.html5-video-player');
@@ -5262,7 +5280,34 @@ function syncSubtitleDisplay() {
     if (player) player.classList.remove('kt-enabled');
     return;
   }
-  if (player && !document.getElementById('kt-yt-box')) createSubtitleBox(player);
+  //  等 box 创建好再继续，没有就显示 hint 并返回
+  if (player && !document.getElementById('kt-yt-box')) {
+    createSubtitleBox(player);
+
+    const tempHint = document.createElement('div');
+    tempHint.id = 'kt-loading-hint';
+    tempHint.style.cssText = `
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 20px;
+        z-index: 2147483647;
+        color: #94a3b8;
+        font-size: 14px;
+        padding: 8px 16px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 8px;
+        pointer-events: none;
+    `;
+    tempHint.innerText = 'Loading subtitles...';
+    player.appendChild(tempHint);
+    return;
+  }
+
+  if (!semanticGroups || semanticGroups.length === 0) {
+    // hint 存在就保持显示，不做任何操作
+    return;
+  }
   if (player) {
     const shouldBeEnabled = (typeof isYTEnabled !== 'undefined' ? isYTEnabled : true) && ccOn;
     const box = document.getElementById('kt-yt-box');
@@ -5282,7 +5327,10 @@ function syncSubtitleDisplay() {
     }
   }
   if (!video || !semanticGroups || semanticGroups.length === 0) {
-    if (box) { box.style.opacity = '0'; box.style.visibility = 'hidden'; }
+    if (box) {
+      box.style.opacity = '0';
+      box.style.visibility = 'hidden';
+    }
     return;
   }
   const now = video.currentTime;
@@ -5295,6 +5343,9 @@ function syncSubtitleDisplay() {
     }
   }
   if (currentIndex !== -1) {
+    // 第一次匹配到字幕时，清除 loading hint
+    const hintEl = document.getElementById('kt-loading-hint');
+    if (hintEl) hintEl.remove();
     const group = semanticGroups[currentIndex];
     const tEl = document.getElementById('yt-t');
     const oEl = document.getElementById('yt-o');
@@ -5317,8 +5368,22 @@ function syncSubtitleDisplay() {
           fastMemoryCache.set(cacheKey, cached);
         }
       }
-      if (oEl) renderWords(group.text, oEl);
+      //源语言 === 目标语言时，隐藏翻译行
+      const sourceLang = getVideoSourceLang();
+      if (oEl) renderWords(group.text, oEl, sourceLang);
       if (tEl) {
+        logger.log(`[Subtitle Display] Source Lang: ${sourceLang}, Target Lang: ${currentTargetL}`);
+        const targetLang = getCurrentLang()?.split('-')[0].toLowerCase();
+        const isSameLang = sourceLang && targetLang && sourceLang === targetLang;
+
+        if (isSameLang) {
+          tEl.style.display = 'none';
+          tEl.innerText = '';
+          tEl.classList.remove('kt-loading');
+        } else {
+          tEl.style.display = ''; // 恢复显示
+        }
+
         if (cached && cached.basic) {
           tEl.innerText = cached.basic;
           tEl.classList.remove('kt-loading');
@@ -5382,9 +5447,9 @@ async function createSubtitleBox(player) {
   const box = document.createElement('div');
   box.id = 'kt-yt-box';
   box.innerHTML = `
-      <div id="yt-o">Loading...</div>
-      <div id="yt-t"></div>
-  `;
+    <div id="yt-o"></div>
+    <div id="yt-t"></div>
+`;
   player.appendChild(box);
   try {
     const data = await safeGetStorage(['ytBoxBottom', 'ytStyleSettings']);
@@ -5467,6 +5532,17 @@ function initSubtitleAvoidance() {
   function removeAvoidance() {
     const box = getBox();
     if (!box || !isAvoiding) return;
+    // hover 期间不复位，等 hover 结束再做
+    if (window.__ktIsHovering) {
+      const onHoverEnd = () => {
+        box.removeEventListener('kt-hover-end', onHoverEnd);
+        isAvoiding = false;
+        box.style.transform = `translateX(-50%) translateY(0px)`;
+      };
+      box.addEventListener('kt-hover-end', onHoverEnd);
+      return;
+    }
+
     isAvoiding = false;
     box.style.transform = `translateX(-50%) translateY(0px)`;
   }
@@ -5507,7 +5583,8 @@ function initSettingsAvoidance() {
 
 setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
-function renderWords(text, container) {
+//卡片
+function renderWords(text, container, sourceLang = null) {
   if (!container) return;
   container.innerHTML = '';
   const cjkRegex = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
@@ -5542,7 +5619,7 @@ function renderWords(text, container) {
       span.ondblclick = (e) => { if (typeof handleWordDblClick === 'function') handleWordDblClick(e, cleanWord); };
       span.onclick = (e) => {
         e.preventDefault(); e.stopPropagation();
-        if (typeof speakText === 'function') speakText(cleanWord, span);
+        if (typeof speakText === 'function') speakText(cleanWord, span, sourceLang);
         const originalColor = span.style.color;
         span.style.color = '#facc15';
         setTimeout(() => span.style.color = originalColor || '', 200);
@@ -5571,7 +5648,12 @@ function applySubtitleSettings(settings) {
 }
 let isVideoManuallyPaused = false;
 let currentHoveredElement = null;
+let __currentHoverToken = null;
 async function handleWordMouseEnter(e, word) {
+  const myToken = Symbol();
+  __currentHoverToken = myToken;
+  window.__ktIsHovering = true;
+
   currentHoveredElement = e.target;
   const oldTooltip = document.getElementById('kt-word-tooltip');
   if (oldTooltip) oldTooltip.style.display = 'none';
@@ -5594,6 +5676,7 @@ async function handleWordMouseEnter(e, word) {
     idb.vocabulary.get(cleanWord),
     safeGetStorage(['targetLanguage'])
   ]);
+  if (__currentHoverToken !== myToken) return;
   const currentLang = storage?.targetLanguage || navigator.language || 'en';
   const isCollected = !!(entry && entry.deleted === false);
 
@@ -5628,7 +5711,15 @@ async function handleWordMouseEnter(e, word) {
   repositionTooltip(tooltip, e.target);
 
   try {
-    const res = await getDetailedTranslation(cleanWord, false, currentLang, { lightweight: true });
+    const res = await getDetailedTranslation(cleanWord, false, currentLang, {
+      lightweight: true,
+      hintInputLang: getVideoSourceLang()
+    });
+    if (__currentHoverToken !== myToken) {
+      const t2 = document.getElementById('kt-word-tooltip');
+      if (t2) t2.style.display = 'none';
+      return;
+    }
     const defEl = tooltip.querySelector('#kt-word-def');
     if (res && defEl) {
       const phoneticStr = res.phonetic
@@ -5689,6 +5780,9 @@ async function handleWordMouseEnter(e, word) {
   }
 }
 function handleWordMouseLeave(e) {
+  __currentHoverToken = null;
+  window.__ktIsHovering = false;
+
   const tooltip = document.getElementById('kt-word-tooltip');
   if (tooltip) tooltip.style.display = 'none';
   e.target.style.background = 'transparent';
@@ -5700,6 +5794,8 @@ function handleWordMouseLeave(e) {
   if (currentHoveredElement === e.target) {
     currentHoveredElement = null;
   }
+  const box = document.getElementById('kt-yt-box');
+  if (box) box.dispatchEvent(new CustomEvent('kt-hover-end'));
 }
 window.addEventListener('scroll', () => {
   if (currentHoveredElement) {

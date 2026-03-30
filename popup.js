@@ -797,13 +797,50 @@ document.addEventListener('DOMContentLoaded', async () => {
   activeTab = tab;
   let domain = "unknown";
   try { domain = new URL(tab.url).hostname.replace('www.', ''); } catch (e) { }
+
+  const ytSwitch = document.getElementById('autoSwitchYT');
+  const btnYT = document.getElementById('btnRefreshYT');
+  const ytHint = document.getElementById('yt-hint');
+
+  function showYtHintWithFade(ui_lang = 'en') {
+    if (!ytHint || !ytRow) return;
+    // ---显示逻辑 ---
+    const currentLang = ui_lang || 'en';
+    const isRTL = ['ar', 'fa', 'he'].includes(currentLang);
+
+    if (isRTL) {
+      ytHint.setAttribute('dir', 'rtl');
+      ytHint.style.textAlign = 'right';
+    } else {
+      ytHint.removeAttribute('dir');
+      ytHint.style.textAlign = 'left';
+    }
+
+    ytHint.style.display = 'block';
+    requestAnimationFrame(() => {
+      ytHint.classList.add('show');
+    });
+  }
+  function hideYtHintWithFade() {
+    if (!ytHint) return;
+    ytHint.classList.remove('show');
+    setTimeout(() => {
+      if (!ytHint.classList.contains('show')) {
+        ytHint.style.display = 'none';
+        ytHint.removeAttribute('dir');
+        ytHint.style.textAlign = '';
+      }
+    }, 300);
+  }
+
   document.getElementById('currentDomain').innerText = domain;
   async function initPopupUI() {
     const tab = await getActiveTab();
     const url = tab?.url || "";
     const isYouTube = MiraUtils.isYouTubeUrl(url);
     const isRestricted = MiraUtils.isRestrictedUrl(url);
-
+    window.isRestricted = isRestricted;
+    window.isYouTube = isYouTube;
     const hintEl = document.getElementById('restrictedHint');
     const seperateLine = document.getElementById('seperateLine');
     //  受限页面：严格互斥，只做隐藏和显示提示
@@ -814,7 +851,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         tabCurrentGlobal,
         webTranslationOptionContainer,
         targetLangCombox,
-        selectTextOptionContainer
+        selectTextOptionContainer,
+        ytHint
       ].forEach(el => {
         if (el) el.style.display = 'none';
       });
@@ -832,6 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (ytRow) {
         ytRow.classList.remove('disabled');
         ytRow.style.display = 'flex';
+        showYtHintWithFade();
       }
       if (inspectContainer) inspectContainer.style.display = 'none';
       if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
@@ -848,6 +887,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (ytRow) {
         ytRow.classList.add('disabled');
         ytRow.style.display = 'none';
+        hideYtHintWithFade();
       }
 
       if (tabCurrentGlobal) tabCurrentGlobal.style.display = 'flex';
@@ -1172,27 +1212,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
   input.onkeydown = function (e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    triggerSearch(this.value.trim());
-  }
-};
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      triggerSearch(this.value.trim());
+    }
+  };
 
-document.getElementById('searchSubmitBtn').onclick = () => {
-  triggerSearch(input.value.trim());
-};
+  document.getElementById('searchSubmitBtn').onclick = () => {
+    triggerSearch(input.value.trim());
+  };
 
-// 即时翻译
-function triggerSearch(text) {
-  if (!text) {
-    resultArea.style.display = 'none';
-    if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
-    const actionArea = document.getElementById('actionArea');
-    if (actionArea) actionArea.style.display = 'none';
-    return;
+  // 即时翻译
+  function triggerSearch(text) {
+    if (!text) {
+      resultArea.style.display = 'none';
+      if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
+      const actionArea = document.getElementById('actionArea');
+      if (actionArea) actionArea.style.display = 'none';
+      return;
+    }
+    executeTranslation(text);
   }
-  executeTranslation(text);
-}
 
   async function executeTranslation(text, forceRefresh = false) {
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
@@ -1684,20 +1724,31 @@ function triggerSearch(text) {
         btnPage.style.setProperty('display', conf.page ? 'flex' : 'none', 'important');
         btnPage.title = t('retranslate') || "Retranslate this page";
       }
-      const ytSwitch = document.getElementById('autoSwitchYT');
-      const btnYT = document.getElementById('btnRefreshYT');
+
+      // 控制显隐youtube操作提示
       if (ytSwitch && btnYT) {
         const ytRow = ytSwitch.closest('.row');
-        const isYTDisabled = ytRow && ytRow.classList.contains('disabled');
-        btnYT.title = t('retranslate') || "Retranslate subtitle";
-        if (isYTDisabled) {
-          ytSwitch.classList.remove('on');
-          btnYT.style.setProperty('display', 'none', 'important');
-        } else {
-          ytSwitch.classList.toggle('on', !!conf.yt);
-          btnYT.style.setProperty('display', conf.yt ? 'flex' : 'none', 'important');
+        // 获取当前实时状态
+        const isYTDisabled = ytRow && (ytRow.classList.contains('disabled') || ytRow.style.display === 'none');
+        const isYTOn = !!conf.yt;
+
+        // 更新开关 UI,确保按钮状态正确)
+        ytSwitch.classList.toggle('on', isYTOn);
+        btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
+
+        if (ytHint) {
+          // 只有 开启状态 + 非禁用 + YouTube页面 + 非受限页面 才准显示
+          const finalShouldShow = isYTOn && !isYTDisabled && isYouTube && !window.isRestricted;
+
+          if (finalShouldShow) {
+            showYtHintWithFade(storage.ui_language);
+          } else {
+            ytHint.classList.remove('show');
+            ytHint.style.display = 'none';
+          }
         }
       }
+
       const autoSyncEl = document.getElementById('autoSyncToggle');
       if (autoSyncEl) {
         const isActive = !!storage.autoSync;
