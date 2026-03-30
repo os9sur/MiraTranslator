@@ -148,10 +148,24 @@ window.browser = (function () {
         // 同时尝试主动获取
         fetchManualCaptions();
     }
+ 
 
-    setTimeout(pokePlayer, 3000);  // 3秒重试
+    function initCCButtonObserver() {
+        const player = document.querySelector('.html5-video-player');
+        if (!player) {
+            setTimeout(initCCButtonObserver, 1000);
+            return;
+        }
+        player.addEventListener('click', (e) => {
+            const ccBtn = e.target.closest('.ytp-subtitles-button');
+            if (!ccBtn) return;
+            setTimeout(() => {
+                const isOn = ccBtn.getAttribute('aria-pressed') === 'true';
+                if (isOn) fetchManualCaptions();
+            }, 500);
+        });
+    }
 
-    // URL变化时（切换视频）重新触发
     function initUrlObserver() {
         if (!document.body) {
             setTimeout(initUrlObserver, 500);
@@ -165,6 +179,11 @@ window.browser = (function () {
             }
         }).observe(document.body, { childList: true, subtree: true });
     }
+
+    setTimeout(() => {
+        pokePlayer();
+        initCCButtonObserver();
+    }, 3000);
 
     initUrlObserver();
 })();

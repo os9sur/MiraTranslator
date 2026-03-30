@@ -4723,6 +4723,12 @@ async function downloadSubtitles(withTranslation = false) {
       ).replaceAll('{rate}', cacheRate)
         .replaceAll('{missing}', missing.length);
 
+      if (cacheRate === 0) {
+        const fullMsg = t('dlRateLow', uiLang).replaceAll('{rate}', cacheRate);
+        const hint = fullMsg.split('\n\n').slice(0, 2).join('\n\n');
+        await showMiraConfirm(hint);
+        return;
+      }
       const confirmed = await showMiraConfirm(msg);
       if (!confirmed) return;
 
@@ -5274,7 +5280,34 @@ function syncSubtitleDisplay() {
     if (player) player.classList.remove('kt-enabled');
     return;
   }
-  if (player && !document.getElementById('kt-yt-box')) createSubtitleBox(player);
+  //  等 box 创建好再继续，没有就显示 hint 并返回
+  if (player && !document.getElementById('kt-yt-box')) {
+    createSubtitleBox(player);
+
+    const tempHint = document.createElement('div');
+    tempHint.id = 'kt-loading-hint';
+    tempHint.style.cssText = `
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 20px;
+        z-index: 2147483647;
+        color: #94a3b8;
+        font-size: 14px;
+        padding: 8px 16px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 8px;
+        pointer-events: none;
+    `;
+    tempHint.innerText = 'Loading subtitles...';
+    player.appendChild(tempHint);
+    return;
+  }
+
+  if (!semanticGroups || semanticGroups.length === 0) {
+    // hint 存在就保持显示，不做任何操作
+    return;
+  }
   if (player) {
     const shouldBeEnabled = (typeof isYTEnabled !== 'undefined' ? isYTEnabled : true) && ccOn;
     const box = document.getElementById('kt-yt-box');
@@ -5294,7 +5327,10 @@ function syncSubtitleDisplay() {
     }
   }
   if (!video || !semanticGroups || semanticGroups.length === 0) {
-    if (box) { box.style.opacity = '0'; box.style.visibility = 'hidden'; }
+    if (box) {
+      box.style.opacity = '0';
+      box.style.visibility = 'hidden';
+    }
     return;
   }
   const now = video.currentTime;
@@ -5307,6 +5343,9 @@ function syncSubtitleDisplay() {
     }
   }
   if (currentIndex !== -1) {
+    // 第一次匹配到字幕时，清除 loading hint
+    const hintEl = document.getElementById('kt-loading-hint');
+    if (hintEl) hintEl.remove();
     const group = semanticGroups[currentIndex];
     const tEl = document.getElementById('yt-t');
     const oEl = document.getElementById('yt-o');
@@ -5408,9 +5447,9 @@ async function createSubtitleBox(player) {
   const box = document.createElement('div');
   box.id = 'kt-yt-box';
   box.innerHTML = `
-      <div id="yt-o">Loading...</div>
-      <div id="yt-t"></div>
-  `;
+    <div id="yt-o"></div>
+    <div id="yt-t"></div>
+`;
   player.appendChild(box);
   try {
     const data = await safeGetStorage(['ytBoxBottom', 'ytStyleSettings']);
