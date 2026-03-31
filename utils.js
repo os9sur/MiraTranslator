@@ -1198,7 +1198,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         pos, definition
       }));
 
-      logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
+      //logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
     }
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
