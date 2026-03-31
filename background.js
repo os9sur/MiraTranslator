@@ -452,45 +452,139 @@ function mergeVocabulary(local, remote) {
 chrome.runtime.onInstalled.addListener(() => {
     logger.log("Mira Translator Service Worker 已经就绪");
 });
-class V4Signer {
+
+//tencent cloud signature helper
+class TC3Signer {
     static async hmacSha256(key, message) {
         const encoder = new TextEncoder();
         const keyData = typeof key === 'string' ? encoder.encode(key) : key;
         const messageData = encoder.encode(message);
-        const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+        const cryptoKey = await crypto.subtle.importKey(
+            'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+        );
         const sig = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
         return new Uint8Array(sig);
     }
+
     static async hashSha256(message) {
         const encoder = new TextEncoder();
         const hash = await crypto.subtle.digest('SHA-256', encoder.encode(message));
         return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
+
     static getHex(uint8Array) {
         return Array.from(uint8Array).map(b => b.toString(16).padStart(2, '0')).join('');
     }
+
     static async sign(config) {
-        const { ak, sk, region, service, host, method, path, payload, contentType } = config;
-        const datetime = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
-        const date = datetime.substring(0, 8);
-        const hashedPayload = await this.hashSha256(JSON.stringify(payload));
-        const canonicalHeaders = `content-type:${contentType}\nhost:${host}\nx-content-sha256:${hashedPayload}\nx-date:${datetime}\n`;
-        const signedHeaders = "content-type;host;x-content-sha256;x-date";
-        const canonicalRequest = [method, path, "", canonicalHeaders, signedHeaders, hashedPayload].join('\n');
-        const credentialScope = `${date}/${region}/${service}/request`;
+        const { ak, sk, region, service, host, action, version, payload } = config;
+
+        const now = Math.floor(Date.now() / 1000);
+        const date = new Date(now * 1000).toISOString().substring(0, 10); // YYYY-MM-DD
+
+        const contentType = "application/json; charset=utf-8";
+        const bodyStr = JSON.stringify(payload);
+        const hashedPayload = await this.hashSha256(bodyStr);
+
+        const canonicalHeaders =
+            `content-type:${contentType}\n` +
+            `host:${host}\n` +
+            `x-tc-action:${action.toLowerCase()}\n`;
+        const signedHeaders = "content-type;host;x-tc-action";
+
+        const canonicalRequest = [
+            "POST",
+            "/",
+            "",
+            canonicalHeaders,
+            signedHeaders,
+            hashedPayload
+        ].join('\n');
+
+        const credentialScope = `${date}/${service}/tc3_request`;
         const hashedCanonicalRequest = await this.hashSha256(canonicalRequest);
-        const stringToSign = `HMAC-SHA256\n${datetime}\n${credentialScope}\n${hashedCanonicalRequest}`;
-        const kDate = await this.hmacSha256(sk, date);
-        const kRegion = await this.hmacSha256(kDate, region);
-        const kService = await this.hmacSha256(kRegion, service);
-        const kSigning = await this.hmacSha256(kService, "request");
+        const stringToSign = [
+            "TC3-HMAC-SHA256",
+            String(now),
+            credentialScope,
+            hashedCanonicalRequest
+        ].join('\n');
+
+        const kDate = await this.hmacSha256("TC3" + sk, date);
+        const kService = await this.hmacSha256(kDate, service);
+        const kSigning = await this.hmacSha256(kService, "tc3_request");
         const signature = this.getHex(await this.hmacSha256(kSigning, stringToSign));
+
+        const authorization =
+            `TC3-HMAC-SHA256 Credential=${ak}/${credentialScope}, ` +
+            `SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
         return {
-            'Authorization': `HMAC-SHA256 Credential=${ak}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
-            'X-Date': datetime, 'X-Content-Sha256': hashedPayload, 'Content-Type': contentType
+            'Authorization': authorization,
+            'Content-Type': contentType,
+            'Host': host,
+            'X-TC-Action': action,
+            'X-TC-Version': version,
+            'X-TC-Region': region,
+            'X-TC-Timestamp': String(now),
         };
     }
 }
+// 火山引擎签名器
+// class VolcSigner {
+//     static async hmacSha256(key, message) {
+//         const encoder = new TextEncoder();
+//         const keyData = typeof key === 'string' ? encoder.encode(key) : key;
+//         const messageData = encoder.encode(message);
+//         const cryptoKey = await crypto.subtle.importKey(
+//             'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+//         );
+//         const sig = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+//         return new Uint8Array(sig);
+//     }
+
+//     static async hashSha256(message) {
+//         const encoder = new TextEncoder();
+//         const hash = await crypto.subtle.digest('SHA-256', encoder.encode(message));
+//         return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+//     }
+
+//     static getHex(uint8Array) {
+//         return Array.from(uint8Array).map(b => b.toString(16).padStart(2, '0')).join('');
+//     }
+
+//     static async sign(config) {
+//         const { ak, sk, region, service, host, method, path, queryString, payload, contentType } = config;
+
+//         const datetime = new Date().toISOString().replace(/[:-]|\.\d{3}/g, ''); // 20210618T092822Z
+//         const date = datetime.substring(0, 8);
+
+//         const bodyStr = JSON.stringify(payload);
+//         const hashedPayload = await this.hashSha256(bodyStr);
+
+//         const canonicalHeaders = `content-type:${contentType}\nhost:${host}\nx-content-sha256:${hashedPayload}\nx-date:${datetime}\n`;
+//         const signedHeaders = 'content-type;host;x-content-sha256;x-date';
+
+//         const canonicalRequest = [method, path, queryString, canonicalHeaders, signedHeaders, hashedPayload].join('\n');
+
+//         const credentialScope = `${date}/${region}/${service}/request`;
+//         const hashedCanonicalRequest = await this.hashSha256(canonicalRequest);
+//         const stringToSign = `HMAC-SHA256\n${datetime}\n${credentialScope}\n${hashedCanonicalRequest}`;
+
+//         const kDate    = await this.hmacSha256(sk, date);
+//         const kRegion  = await this.hmacSha256(kDate, region);
+//         const kService = await this.hmacSha256(kRegion, service);
+//         const kSigning = await this.hmacSha256(kService, 'request');
+//         const signature = this.getHex(await this.hmacSha256(kSigning, stringToSign));
+
+//         return {
+//             'Authorization': `HMAC-SHA256 Credential=${ak}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`,
+//             'X-Date': datetime,
+//             'X-Content-Sha256': hashedPayload,
+//             'Content-Type': contentType,
+//         };
+//     }
+// }
 function formatPosToEnglish(pos) {
     if (!pos) return "";
     const map = {
@@ -569,7 +663,7 @@ const Translators = {
                     };
                 }
             } catch {
-                //静默忽略，fallback 到基本释义
+                //静默忽略
             }
         }
 
@@ -645,7 +739,7 @@ const Translators = {
             });
             clearTimeout(timer);
             const data = await res.json();
-            logger.log("bing 返回值:\n", JSON.stringify(data, null, 2));
+            //logger.log("bing 返回值:\n", JSON.stringify(data, null, 2));
             if (!data[0] || !data[0].translations) throw new Error('Invalid Bing Response');
             const bingBasic = data[0].translations[0].text;
             const targetPhonetic = data[0].translations[0].transliteration?.text ?? "";
@@ -660,13 +754,12 @@ const Translators = {
     },
 
     _fetchDictDetail: async function (query) {
-        const HOST = 'dict.youdao.com';
         try {
             const params = new URLSearchParams({
                 q: query,
                 dicts: JSON.stringify({ count: 99, dicts: [["ec"], ["blng_sents_part"]] })
             });
-            const res = await fetch(`https://${HOST}/jsonapi?${params}`);
+            const res = await fetch(`https://dict.youdao.com/jsonapi?${params}`);
             const data = await res.json();
 
             const ec = data?.ec?.word?.[0];
@@ -716,8 +809,7 @@ const Translators = {
         } catch (e) {
             // 接口1 失败，降级到 suggest
             try {
-                const HOST2 = 'dict.youdao.com';
-                const url = `https://${HOST2}/suggest?q=${encodeURIComponent(query)}&num=1&doctype=json`;
+                const url = `https://dict.youdao.com/suggest?q=${encodeURIComponent(query)}&num=1&doctype=json`;
                 const res = await fetch(url);
                 const data = await res.json();
                 const explain = data?.data?.entries?.[0]?.explain;
@@ -865,7 +957,8 @@ const Translators = {
     },
     ai_family: async (text, target, config) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000);
+        const timeoutMs = 15000;
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         const isWord = text.trim().split(/\s+/).length === 1;
         const isSubtitle = !!(config.systemPrompt && config.systemPrompt.toLowerCase().includes('subtitle'));
         const activeTemperature = isSubtitle ? 0.4 : (isWord ? 0.1 : 0.3);
@@ -1029,7 +1122,7 @@ const Translators = {
             }
         } catch (e) {
             clearTimeout(timeoutId);
-            logger.error("🔥 请求失败:", e);
+            logger.error("AI 翻译请求失败:", e);
             if (e.name === 'AbortError') throw new Error("Request timeout (15s).");
             throw e;
         }
@@ -1075,17 +1168,91 @@ const Translators = {
         }
     },
     tencent: async (text, target, keys) => {
-        const host = "tmt.tencentcloudapi.com";
-        const payload = { Source: "auto", Target: target, Text: text, ProjectId: 0 };
-        const headers = await V4Signer.sign({
-            ak: keys.tenId, sk: keys.tenKey, region: "ap-guangzhou", service: "tmt",
-            host, method: "POST", path: "/", payload, contentType: "application/json"
-        });
-        const res = await fetch(`https://${host}`, { method: "POST", headers, body: JSON.stringify(payload) });
-        const data = await res.json();
-        const tencentBasic = data.Response.TargetText;
-        return await Translators._withDictDetail(tencentBasic, text, target, 'Tencent');
+        try {
+            const { tenId, tenKey } = keys;
+            if (!tenId || !tenKey) throw new Error("缺少腾讯 SecretId 或 SecretKey");
+
+            // 腾讯语言代码映射
+            const langMap = {
+                'zh-CN': 'zh',
+                'zh-TW': 'zh-TW',
+                'zh-HK': 'zh-HK'
+            };
+            const tencentTarget = langMap[target] || target.split('-')[0] || target;
+
+            const host = "tmt.tencentcloudapi.com";
+            const payload = { Source: "auto", Target: tencentTarget, SourceText: text, ProjectId: 0 };
+
+            const headers = await TC3Signer.sign({
+                ak: tenId, sk: tenKey, region: "ap-guangzhou", service: "tmt",
+                host, action: "TextTranslate", version: "2018-03-21", payload
+            });
+
+            const res = await fetch(`https://${host}`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            // 仿照百度样式的报错处理
+            if (data.Response.Error) {
+                throw new Error(`Tencent [${data.Response.Error.Code}]: ${data.Response.Error.Message}`);
+            }
+
+            const tencentBasic = data.Response.TargetText;
+            if (!tencentBasic) throw new Error("未获取到腾讯翻译内容");
+
+            return await Translators._withDictDetail(tencentBasic, text, target, 'Tencent');
+
+        } catch (e) {
+            logger.error("腾讯翻译链路异常:", e.message);
+            // 报错时兜底返回原文 
+            throw e;
+        }
     },
+    // volc: async (text, target, keys) => {
+    //     const host = 'translate.volcengineapi.com';
+    //     const path = '/';
+    //     const queryString = 'Action=TranslateText&Version=2020-06-01'; // 字母排序，固定值
+    //     const contentType = 'application/json';
+
+    //     const payload = {
+    //         TargetLanguage: target,
+    //         TextList: [text],
+    //         // SourceLanguage 不填则自动检测
+    //     };
+
+    //     const headers = await VolcSigner.sign({
+    //         ak: keys.volcId,
+    //         sk: keys.volcKey,
+    //         region: 'cn-north-1',
+    //         service: 'translate',
+    //         host,
+    //         method: 'POST',
+    //         path,
+    //         queryString,
+    //         payload,
+    //         contentType,
+    //     });
+
+    //     const res = await fetch(`https://${host}${path}?${queryString}`, {
+    //         method: 'POST',
+    //         headers,
+    //         body: JSON.stringify(payload),
+    //     });
+
+    //     const data = await res.json();
+    //     logger.log('Volc full response:', JSON.stringify(data));
+
+    //     if (data.ResponseMetadata?.Error) {
+    //         throw new Error(data.ResponseMetadata.Error.Message);
+    //     }
+
+    //     const volcBasic = data.TranslationList[0].Translation;
+    //     return await Translators._withDictDetail(volcBasic, text, target, 'Volc');
+    // },
     deepl: async (text, target, keys) => {
         const { deeplKey } = keys;
         const url = deeplKey.endsWith(':fx')
@@ -1094,7 +1261,7 @@ const Translators = {
         let targetLang = target.toUpperCase();
         if (targetLang === 'ZH' || targetLang === 'ZH-CN') targetLang = 'ZH-HANS';
         if (targetLang === 'ZH-TW' || targetLang === 'ZH-HK') targetLang = 'ZH-HANT';
-        if (targetLang === 'EN') targetLang = 'EN-US';
+        if (targetLang.startsWith('EN') && !['EN-US', 'EN-GB'].includes(targetLang)) targetLang = 'EN-US';
         const res = await fetch(url, {
             method: 'POST',
             headers: {
@@ -1238,7 +1405,7 @@ async function processTranslate(req) {
                 return null;
             }
         }
-
+        //fallback 顺序：Bing->FreeDict->Google，或 Google->FreeDict->Bing，增加一个免费词典接口作为兜底，提升单词翻译的成功率
         if (engine === 'bing') {
             try {
                 rawResult = await Translators.bing(req.text, req.targetLang);
@@ -1321,7 +1488,6 @@ async function processTranslate(req) {
                 const phoneticField = req.needPhonetic ? [sourcePhoneticDesc].filter(Boolean).join('\n') : '';
                 const examplesPrompt = [
                     `Input: "hello" → Japanese: {"basic":"こんにちは"}`,
-                    `Input: "apple" → Chinese: {"basic":"苹果"}`,
                     `Input: "drive" → Chinese: {"basic":"驱动, 驾驶"}`
                 ].join('\n');
 

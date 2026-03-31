@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     async function switchInstance(id) {
-        const uiLanguage = window.currentConfig?.ui_language || 'en';
+        const uiLanguage = window.currentConfig?.ui_language || navigator.language || 'en';
         currentId = id;
         const config = userConfigs.find(c => c.id === id) || userConfigs[0];
         const container = document.getElementById('dynamic-form-container');
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ✨ ${t('wantBetterExperience', uiLanguage)} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip', uiLanguage)}</span>
                         </p>
                     </div>
-                    <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; width: 100%; display: none;">
+                    <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; margin-left: 155px;width: 100%; display: none;">
                         ${t('enableEngineNow', uiLanguage)}
                     </button>
                 </div>
@@ -359,7 +359,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                         clearTimeout(timeout);
                         isOk = true;
                     } else if (config.engine === 'bing') {
-                        isOk = true;
+                        // 使用通用翻译接口进行真实测试
+                        // 参数说明：
+                        // "Hi": 测试文本
+                        // true: forceRefresh, 强制跳过 IndexedDB 缓存，确保发起网络请求
+                        // null: 使用默认目标语言
+                        // options: 开启轻量模式，减少不必要的数据处理
+                        const testResult = await getDetailedTranslation("Hi", true, null, {
+                            lightweight: true,
+                            skipCache: true
+                        });
+
+                        // 判断标准：只要有 basic 结果且不是错误提示，就认为接口通了
+                        if (testResult && testResult.basic && !testResult.isError) {
+                            isOk = true;
+                        } else {
+                            isOk = false;
+                        }
                     }
                 } catch (e) {
                     isOk = false;
@@ -480,7 +496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveApiConfig').onclick = async () => {
             const saveBtn = document.getElementById('saveApiConfig');
             if (!saveBtn) return;
-            const uiLanguage = window.currentConfig?.ui_language || 'en';
+            const uiLanguage = window.currentConfig?.ui_language || navigator.language || 'en';
             const inputs = document.querySelectorAll('#dynamic-form-container input');
             const data = {};
             inputs.forEach(i => {
@@ -668,7 +684,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipsDesc.innerText = "";
         }
         const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || 'en';
+        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || navigator.language || 'en';
         const tempKeys = {};
         document.querySelectorAll('.api-input-field').forEach(input => {
             const key = input.getAttribute('data-key');

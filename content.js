@@ -2566,1091 +2566,695 @@ function initSelectionTranslate() {
       });
     });
   }
+  // ─── Shadow DOM 初始化 ───────────────────────────────────────────────────────
+
   function initShadowDOM() {
     if (shadowHost) return;
+
     shadowHost = document.createElement('div');
     shadowHost.id = 'eclipse-translator-host';
     shadowHost.setAttribute('data-pinned', 'false');
-    shadowHost.style.cssText = "position:absolute; top:0; left:0; width:0; height:0; z-index:2147483647;pointer-events: none;";
+    shadowHost.style.cssText =
+      'position:absolute;top:0;left:0;width:0;height:0;z-index:2147483647;pointer-events:none;';
     document.documentElement.appendChild(shadowHost);
+
     const shadow = shadowHost.attachShadow({ mode: 'open' });
-    const style = document.createElement('style');
-    style.textContent = `
-:host {
-    --p-bg: rgba(18, 18, 18, 0.95);
-    --p-text-main: #ffffffb7;
-    --p-text-query: rgb(31 31 35 / 34%);
-    --p-text-muted: rgba(255, 255, 255, 0.6);
-    --p-text-detail: rgba(255, 255, 255, 0.6);
-    --p-accent: #38bdf8;
-    --p-border: rgba(255, 255, 255, 0.1);
-    --p-shadow: rgba(0, 0, 0, 0.5);
-    --p-glow-opacity: 0.8;   
-    --p-content-container: rgba(39, 39, 50 ,0.39);  
-    --p-header-wrapper: rgba(31, 31, 35 ,0.34);
-    --p-header-wrapper-shadow:0 2px 8px rgba(235, 215, 215, 0.09);
-    --p-phonetic: #38bdf8;
-}
-:host([theme="light"]) {
-    --p-bg: #ffffffb7; 
-    --p-text-main: #1a202c;           
-    --p-text-query: #2d3748;          
-    --p-text-muted: #718096;          
-    --p-text-detail: #4f5a6a;
-    --p-accent: #0284c7;              
-    --p-border: rgba(0, 0, 0, 0.1);   
-    --p-shadow: rgba(0, 0, 0, 0.1);
-    --p-glow-opacity: 0.3;            
-    --p-content-container: rgba(245, 249, 249 ,0.79); 
-    --p-header-wrapper: rgba(177, 178, 191, 0.23);
-    --p-header-wrapper-shadow:0 2px 8px rgba(0, 0, 0, 0.3);
-    --p-phonetic: #07a457;
-}
-@media (prefers-color-scheme: light) {
-    :host(:not([theme="dark"])) {
-        --p-bg: #ffffffb7; 
-        --p-text-main: #1a202c;
-        --p-text-query: #2d3748;
-        --p-text-muted: #718096;
-        --p-text-detail: rgba(255, 255, 255, 0.6);
-        --p-accent: #0284c7;
-        --p-border: rgba(0, 0, 0, 0.1);
-        --p-shadow: rgba(0, 0, 0, 0.1);
-        --p-content-container: rgba(245, 249, 249 ,0.79); 
-        --p-header-wrapper: rgba(177, 178, 191, 0.23);
-    --p-header-wrapper-shadow:0 2px 8px rgba(0, 0, 0, 0.3);
-    --p-phonetic: #07a457;
-    }
-}
-:host([theme="dark"]) {
-    --p-bg: rgba(18, 18, 18, 0.95);
-    --p-text-main: #ffffffb7;
-    --p-text-muted: rgba(255, 255, 255, 0.6);
-    --p-text-detail: rgba(255, 255, 255, 0.6);
-    --p-border: rgba(255, 255, 255, 0.1);
-    --p-shadow: rgba(0, 0, 0, 0.5);
-    --p-accent: #38bdf8;
-    --p-glow-opacity: 0.8;
-    --p-content-container: rgba(39, 39, 50 ,0.39);  
-    --p-header-wrapper: rgba(31, 31, 35 ,0.34);
-    --p-header-wrapper-shadow:0 2px 8px rgba(235, 215, 215, 0.09);
-    --p-phonetic: #38bdf8;
-}
-:host([theme="light"]) {
-    --p-bg: #ffffffb7;
-    --p-text-main: #1a202c;
-    --p-text-muted: #718096;
-    --p-text-detail: #4f5a6a;
-    --p-border: rgba(0, 0, 0, 0.1);
-    --p-shadow: rgba(0, 0, 0, 0.1);
-    --p-accent: #0284c7;
-    --p-glow-opacity: 0.3;
-    --p-content-container: rgba(245, 249, 249 ,0.79); 
-    --p-header-wrapper: rgba(177, 178, 191, 0.23);
-    --p-header-wrapper-shadow:0 2px 8px rgba(0, 0, 0, 0.3);
-    --p-phonetic: #07a457;
-}
-:host([data-detected="dark"]) {
-    --p-bg: rgba(18, 18, 18, 0.95);
-    --p-text-main: #ffffffb7;
-    --p-text-muted: rgba(255, 255, 255, 0.6);
-    --p-text-detail: rgba(255, 255, 255, 0.6);
-    --p-border: rgba(255, 255, 255, 0.1);
-    --p-shadow: rgba(0, 0, 0, 0.5);
-    --p-accent: #38bdf8;
-    --p-glow-opacity: 0.8;
-    --p-content-container: rgba(39, 39, 50 ,0.39);  
-    --p-header-wrapper: rgba(31, 31, 35 ,0.34);
-    --p-header-wrapper-shadow:0 2px 8px rgba(235, 215, 215, 0.09);
-    --p-phonetic: #38bdf8;
-}
-@keyframes eclipseHalo {
-  0%, 100% {
-    box-shadow: 
-      0 0 8px 2px rgba(56, 189, 248, 0.25),  
-      0 0 20px 4px rgba(124, 222, 255, 0.15),  
-      0 0 35px 6px rgba(186, 230, 253, 0.08),  
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.5));
-  }
-  50% {
-    box-shadow: 
-      0 0 15px 4px rgba(56, 189, 248, 0.5),
-      0 0 30px 8px rgba(124, 222, 255, 0.3),  
-      0 0 50px 12px rgba(186, 230, 253, 0.15),
-      0 0 80px 20px rgba(219, 239, 255, 0.05),  
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.5));
-  }
-}
-@keyframes eclipseHaloLight {
-  0%, 100% {
-    box-shadow: 
-      0 0 8px 2px rgba(168, 85, 247, 0.25),
-      0 0 20px 4px rgba(192, 132, 252, 0.2),  
-      0 0 35px 6px rgba(233, 213, 255, 0.15),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-  50% {
-    box-shadow: 
-      0 0 15px 4px rgba(168, 85, 247, 0.5),
-      0 0 30px 8px rgba(192, 132, 252, 0.4),
-      0 0 50px 12px rgba(233, 213, 255, 0.25),
-      0 0 80px 20px rgba(245, 228, 255, 0.1),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-}
-@keyframes eclipseHaloLightAlt {
-  0%, 100% {
-    box-shadow: 
-      0 0 8px 2px rgba(74, 222, 128, 0.3),
-      0 0 20px 4px rgba(134, 239, 172, 0.2),
-      0 0 35px 6px rgba(187, 247, 208, 0.15),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-  50% {
-    box-shadow: 
-      0 0 15px 4px rgba(74, 222, 128, 0.6),
-      0 0 30px 8px rgba(134, 239, 172, 0.4),
-      0 0 50px 12px rgba(187, 247, 208, 0.25),
-      0 0 80px 20px rgba(220, 252, 231, 0.1),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-}
-@keyframes eclipseHaloLightWarm {
-  0%, 100% {
-    box-shadow: 
-      0 0 8px 2px rgba(245, 158, 11, 0.3),
-      0 0 20px 4px rgba(251, 191, 36, 0.25),
-      0 0 35px 6px rgba(253, 230, 138, 0.2),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-  50% {
-    box-shadow: 
-      0 0 15px 4px rgba(245, 158, 11, 0.6),
-      0 0 30px 8px rgba(251, 191, 36, 0.4),
-      0 0 50px 12px rgba(253, 230, 138, 0.25),
-      0 0 80px 20px rgba(254, 243, 199, 0.15),
-      0 10px 30px var(--p-shadow, rgba(0, 0, 0, 0.1));
-  }
-}
-    .resizer {
-            background: transparent; 
-            pointer-events: auto !important;
-            z-index: 2147483648 !important; 
-            position: absolute;
-        }
-    .resizer:hover {
-      background: rgba(56, 189, 248, 0.05);
-    }
-    #eclipse-translator-host {
-      pointer-events: none;
-    }
-    #drag-zone {
-      position: absolute;
-      top: 5px;
-      left: 0;
-      right: 0;
-      height: 22px;
-      cursor: grab;
-      z-index: 5;
-    }
-    .eclipse-logo-btn {
-      position: fixed;
-      width: 22px;
-      height: 22px;
-      background: transparent !important;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 2147483647;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.2s;
-      opacity: 0;
-      transform: scale(0.5);
-      pointer-events: auto;
-    }
-    .eclipse-logo-btn.show {
-      display: flex !important;
-      opacity: 1 !important;
-      transform: scale(1) !important;
-    }
-    .eclipse-logo-btn img {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.3));
-    }
-    .panel {
-    pointer-events: auto;
-    color: var(--p-text-main);
-    position: fixed;
-    background: var(--p-bg, rgba(20, 20, 25, 0.85)) !important;
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
-    border-left: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 
-        0 8px 30px rgba(0, 0, 0, 0.4),
-        0 1px 0 rgba(255, 255, 255, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    border-radius: 16px !important;
-    padding: 0 !important;
-    z-index: 2147483647;
-    box-sizing: border-box;
-    min-height: 150px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    transition: 
-        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
-        max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        width 0.3s ease;
-    overflow: hidden !important;
-    resize: none;
-    cursor: default;
-    min-width: 280px;
-    max-width: 450px;
-    width: fit-content;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    word-break: break-word;
-    align-items: flex-start !important;
-    animation: eclipseHalo 6s ease-in-out infinite;
-}
-    /* 浅色模式光晕效果 
-    eclipseHaloLight 蓝色
-    eclipseHaloLightAlt 绿色
-    eclipseHaloLightWarm 橙色
-    */
-    :host([theme="light"]) .panel {
-        animation: eclipseHaloLightWarm 8s ease-in-out infinite;
-    }
-    .panel:hover {
-      animation-duration: 3s !important;
-    }
-    :host([theme="light"]) .panel:hover {
-      animation-duration: 4s !important;
-    }
-    .panel::-webkit-resizer {
-      background-image: linear-gradient(135deg, transparent 50%, var(--p-accent) 50%);
-      background-size: 10px 10px;
-      background-repeat: no-repeat;
-      background-position: bottom right;
-    }
-    #p-content-container {
-      flex: 1;
-      padding-top: 6px !important;
-      overflow-y: auto !important;
-      overflow-x: hidden;
-      word-break: break-word;
-      padding-top: 5px;
-      will-change: transform;
-      margin-top: 0px;
-      min-height: 0;
-      position: relative;
-      z-index: 5;
-      contain: nosize;
-      display: block;
-      background-color: var(--p-content-container, rgba(31, 31, 35 ,0.34)) !important;
-    }
-    #p-main-container {
-    flex: 1; 
-    display: flex; 
-    flex-direction: column; 
-    min-height: 0; 
-    min-width: 0; 
-    width: 100%;
-    overflow: visible !important;
-    background-color: transparent !important; 
-    color: var(--p-text-main);
-}
-    #p-header-wrapper {
-    position: relative;
-    z-index: 1000;
-    width: 100%;
-    display: flex;
-    box-sizing: border-box;
-    padding: 10px 16px 0px 16px;
-    pointer-events: none;
-    background: rgba(30, 30, 35, 0.85) !important;
-    background: var(--p-header-wrapper, rgba(30, 30, 35, 0.85)) !important;
-    backdrop-filter: blur(20px) saturate(180%);
-    box-shadow:var(--p-header-wrapper-shadow);
-}
-    .close-btn, #p-pin, #p-save, .speak-btn {
-        -webkit-user-select: none; 
-        -moz-user-select: none;    
-        -ms-user-select: none;     
-        user-select: none;         
-        cursor: pointer;
-    }
-#p-content-container::-webkit-scrollbar {
-    width: 10px;
-    background: transparent !important;
-}
-#p-content-container::-webkit-scrollbar-track {
-    background: transparent !important;
-}
-#p-content-container::-webkit-scrollbar-thumb {
-    background-color: var(--p-text-muted) !important;
-    border-radius: 20px !important;
-    border: 3px solid transparent !important;
-    background-clip: padding-box !important;
-    transition: background-color 0.2s ease; 
-}
-#p-content-container::-webkit-scrollbar-thumb:hover {
-    background-color: var(--p-accent) !important;
-    background-clip: padding-box !important; 
-}
-    .is-hidden {
-      opacity: 0 !important;
-      pointer-events: none !important;
-      transform: scale(0.8) translateY(8px) !important;
-    }
-    #p-header {
-      height: 20px;
-      cursor: grab;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      pointer-events: none;
-    }
-    .word-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 4px;
-    }
-    #p-query {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--p-text-query);
-      line-height: 1.2;
-      display: block;      
-        width: 100%;
-        word-break: break-all; 
-        overflow-wrap: break-word;
-        white-space: normal;   
-    }
-    #p-phonetic {
-      color: var(--p-text-main);
-      font-size: 14px;
-      margin-top: 4px;
-      opacity: 0.8;
-      font-family: "Lucida Sans Unicode", sans-serif;
-      display: inline-block;
-      padding: 2px 0;
-    }
-    .icon-btn {
-      cursor: pointer;
-      opacity: 0.8;
-      display: flex;
-      align-items: center;
-      transition: 0.2s;
-    }
-    .icon-btn:hover {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-    .basic {
-      font-size: 17px;
-      color: var(--p-accent);
-      margin: 12px 0 8px 0;
-      font-weight: 500;
-    }
-    .detail {
-      font-size: 13.5px;
-      color: var(--p-text-detail);
-      line-height: 1.6;
-      border-top: 1px solid var(--p-border);
-      padding-top: 7px;
-    }
-    #p-examples {
-      margin-top: 15px;
-      border-top: 1px dotted var(--p-border);
-      padding-top: 12px;
-      width: 100%;           
-      box-sizing: border-box; 
-      overflow: hidden;      
-    }
-    .ex-item {
-      margin-bottom: 10px;
-      border-left: 3px solid #25cbf6ab;
-      padding-left: 10px;
-      padding-right: 5px;
-      border-radius: 2px;
-      display: block;
-      word-wrap: break-word;       
-      overflow-wrap: break-word;   
-      word-break: break-all;       
-      max-width: 100%;             
-      box-sizing: border-box;      
-    } 
-    .ex-en {
-      font-size: 13px;
-      color: var(--p-text-muted) !important;
-      line-height: 1.4;
-      white-space: normal;
-      overflow-wrap: break-word; 
-      word-break: normal;        
-    }
-    .ex-cn {
-      font-size: 12px;
-      color: var(--p-text-muted) !important;
-      margin-top: 2px;
-      white-space: normal;
-      word-break: break-all;     
-    }
-    #p-pin {
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      width: 32px;  
-      height: 46px; 
-      overflow: visible !important;
-      transform: translateY(-6px); 
-      cursor: pointer;
-      pointer-events: auto !important;
-    }
-    #pin-icon {
-      display: block !important;
-      transform: rotate(-45deg);
-      transition:
-        transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-        stroke 0.4s ease;
-      !important;
-    }
-    #p-pin:hover #pin-icon {
-      stroke: #38bdf8 !important;
-      opacity: 1 !important;
-      transform: scale(1.2) !important;
-    }
-    #p-pin.is-pinned #pin-icon {
-      stroke: #38bdf8 !important;
-      fill: rgba(56, 189, 248, 0.3) !important; 
-      transform: rotate(0deg) scale(1.1) !important; 
-      opacity: 1 !important;
-    }
-    #p-pin.is-pinned:not(:hover) #pin-icon {
-      stroke: #38bdf8 !important;
-      fill:#38bdf8 !important;
-    }
-    #p-pin, #p-save, .close-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .header-controls {
-        position: absolute;
-        height: 28px;
-        top: 1px;  
-        padding-top: 10px;    
-        right: 9px;    
-        display: flex;
-        align-items: center;
-        gap: 3px;      
-        z-index: 10001; 
-        pointer-events: auto !important; 
-    }
-    .save-btn  {
-      transition: all 0.2s ease;
-    }
-    .save-btn:hover {
-      transform: scale(1.1);
-      filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.4));
-    }
-    .save-btn:active {
-      transform: scale(0.85) translateY(1px) !important;
-      filter: brightness(0.9);
-      transition: all 0.05s !important; 
-    }
-    .refresh-btn {
-        transition: all 0.2s ease;
-    }
-    .refresh-btn:hover {
-        transform: scale(1.2) !important;
-    }
-    #p-save:hover #star-icon {
-      stroke: #facc15 !important;
-      fill: rgba(250, 204, 21, 0.2) !important;
-      transform: scale(1.1);
-    }
-    #star-icon {
-      transition: all 0.2s ease !important;
-      transform-origin: center;
-    }
-    @keyframes speak-jump-fancy {
-      0% {
-        transform: scale(1.15) rotate(0deg);
-        filter: drop-shadow(0 0 2px #38bdf8);
-      }
-      25% {
-        transform: scale(1.3) rotate(-5deg);
-        filter: drop-shadow(0 0 12px #38bdf8);
-      }
-      50% {
-        transform: scale(1.1) rotate(5deg);
-        filter: drop-shadow(0 0 5px #38bdf8);
-      }
-      75% {
-        transform: scale(1.25) rotate(-3deg);
-        filter: drop-shadow(0 0 10px #38bdf8);
-      }
-      100% {
-        transform: scale(1.15) rotate(0deg);
-        filter: drop-shadow(0 0 2px #38bdf8);
-      }
-    }
-    @keyframes wave-ripple {
-      0% {
-        transform: translate(-50%, -50%) scale(0.8);
-        opacity: 0.8;
-        border-width: 2px;
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(2.5);
-        opacity: 0;
-        border-width: 1px;
-      }
-    }
-    .speak-btn {
-      position: relative;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      margin-top: 4px;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      overflow: visible !important;
-      vertical-align: sub;
-    }
-    .speak-btn svg {
-      position: relative;
-      z-index: 2;
-      transition: stroke 0.3s ease;
-    }
-    .speak-btn.is-speaking {
-      z-index: 101;
-    }
-    .speak-btn.is-speaking svg {
-      animation: speak-jump-fancy 0.5s ease-in-out infinite;
-      stroke: #ffffff !important; 
-      filter: drop-shadow(0 0 5px #38bdf8);
-    }
-    .speak-btn.is-speaking::before,
-    .speak-btn.is-speaking::after {
-      content: "";
-      position: absolute;
-      top: 50%;transform: translate(-50%, -50%);
-      left: 50%;
-      width: 100%;
-      height: 100%;
-      border: 2px solid #38bdf8;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 1;
-    }
-    .speak-btn.is-speaking::before {
-      animation: wave-ripple 1s cubic-bezier(0, 0, 0.2, 1) infinite;
-    }
-    .speak-btn.is-speaking::after {
-      animation: wave-ripple 1s cubic-bezier(0, 0, 0.2, 1) infinite 0.5s;
-    }
-    .speak-btn:hover:not(.is-speaking) svg {
-      filter: drop-shadow(0 0 8px #38bdf8);
-      transform: scale(1.2);
-    }
-    .speak-btn::before,
-    .speak-btn::after {
-      pointer-events: none;
-    }
-@keyframes speak-loading {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
+    shadow.appendChild(buildStyle());
 
-.speak-btn.is-loading::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: auto;
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(56, 189, 248, 0.2);
-    border-top-color: #38bdf8;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    animation: speak-loading 0.7s linear infinite;
-}
-
-.speak-btn.is-loading svg {
-    opacity: 0.4;
-    stroke: #38bdf8 !important;
-}
-
-    @keyframes logo-glow {
-      0% {
-        filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
-      }
-      50% {
-        filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.9));
-      }
-      100% {
-        filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.5));
-      }
-    }
-    #p-header img {
-      animation: logo-glow 3s ease-in-out infinite;
-    }
-    .close-btn {
-      padding: 8px; 
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      color: #94a3b8;
-      line-height: 1;
-      transform: translateY(-2px);
-      pointer-events: auto !important;
-    }
-    .close-btn:hover {
-      filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
-      opacity: 1 !important;
-      color: #f87171 !important;
-      transform: rotate(90deg);
-      transition: all 0.3s;
-    }
-    .close-btn:active {
-      transform: scale(0.9);
-    }
-      `;
-    shadow.appendChild(style);
+    // Logo 按钮
     logoBtn = document.createElement('div');
-    shadow.appendChild(logoBtn);
     logoBtn.className = 'eclipse-logo-btn';
-    logoBtn.innerHTML = `<div class="glowing-icon" style="
-  display: inline-block;
-  width: 21px; 
-  height: 21px; 
-  border-radius: 4px;
-  position: relative;
-  box-shadow: 0 0 6px rgba(100, 180, 255, 0.7);
-  animation: icon-glow 2s ease-in-out infinite;
-  background: rgba(100, 180, 255, 0.1);
-">
-  <style>
-    @keyframes icon-glow {
-      0%, 100% { 
-        box-shadow: 0 0 6px rgba(100, 180, 255, 0.7),
-                    0 0 10px rgba(100, 180, 255, 0.4);
-      }
-      50% { 
-        box-shadow: 0 0 10px rgba(120, 220, 255, 0.9),
-                    0 0 16px rgba(100, 200, 255, 0.6);
-      }
-    }
-  </style>
-  <img src="${logoBase64}" style="
-    width: 100%; 
-    height: 100%; 
-    border-radius: 2px;
-    position: relative;
-    z-index: 2;
-    filter: brightness(1.2);  
-  ">
-</div>`;
+    logoBtn.innerHTML = `
+    <div class="glowing-icon">
+      <img src="${logoBase64}">
+    </div>`;
     shadow.appendChild(logoBtn);
-    const handleHide = () => {
-      if (logoBtn && logoBtn.classList.contains('show')) {
-        forceHideLogo();
-      }
-    };
-    window.addEventListener('contextmenu', handleHide, true);
+
+    window.addEventListener('contextmenu', () => {
+      if (logoBtn?.classList.contains('show')) forceHideLogo();
+    }, true);
+
+    // 主面板
     popupEl = document.createElement('div');
     popupEl.className = 'panel';
-    popupEl.style.cssText = "display:none; position:fixed; visibility:hidden; width:0; height:0;";
-    popupEl.innerHTML = `
-<div id="drag-zone" style="
-        position: absolute; 
-        top: 0; left: 0; right: 0; 
-        height: 46px; 
-        width: calc(100% - 110px);
-        z-index: 1000000000; 
-        cursor: grab;
-    "></div>
-    <div id="p-main-container">
-<div class="header-controls">
-<div id="p-theme-toggle" class="icon-btn theme" title="" style="margin-right: 0px;top: -6px;">
-                <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round">
-                    </svg>
-            </div>
-    <div id="p-pin" class="icon-btn" title="${t('pinUnpin')}">
-        <svg id="pin-icon" width="18" height="18" viewBox="0 0 24 28" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="transition: all 0.2s ease; display: block;">
-      <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path>
-      <path d="M7 10v4a2 2 0 0 1-2 2 2 2 0 0 0 0 4h14a2 2 0 0 0 0-4 2 2 0 0 1-2-2v-4"></path>
-      <line x1="12" y1="22" x2="12" y2="28"></line>
-    </svg>
-        </div>
-        <div id="close-p" class="close-btn"
-            style="cursor: pointer; font-size: 16px;font-weight:500px; color: #94a3b8; line-height: 1;margin-top:-9px">✕</div>
-            </div>
-        <div id="p-header-wrapper" style="pointer-events: auto;"></div>
-        <div id="p-content-container" style="pointer-events: auto;"></div>
-    </div>
-    <div class="resizer" data-dir="t" style="position:absolute; top:-5px; left:10px; right:10px; height:10px; cursor:ns-resize; z-index:2147483647;"></div>
-    <div class="resizer" data-dir="b" style="position:absolute; bottom:-5px; left:10px; right:10px; height:10px; cursor:ns-resize; z-index:2147483647;"></div>
-    <div class="resizer" data-dir="l" style="position:absolute; left:-5px; top:10px; bottom:10px; width:10px; cursor:ew-resize; z-index:2147483647;"></div>
-    <div class="resizer" data-dir="r" style="position:absolute; right:-7px; top:10px; bottom:10px; width:10px; cursor:ew-resize; z-index:2147483647;"></div>
-    <div class="resizer" data-dir="tl" style="position:absolute; top:-8px; left:-8px; width:16px; height:16px; cursor:nwse-resize; z-index:2147483648;"></div>
-    <div class="resizer" data-dir="tr" style="position:absolute; top:-8px; right:-8px; width:16px; height:16px; cursor:nesw-resize; z-index:2147483648;"></div>
-    <div class="resizer" data-dir="bl" style="position:absolute; bottom:-8px; left:-8px; width:16px; height:16px; cursor:nesw-resize; z-index:2147483648;"></div>
-    <div class="resizer" data-dir="br" style="position:absolute; bottom:-8px; right:-8px; width:16px; height:16px; cursor:nwse-resize; z-index:2147483648;"></div>
-`;
+    popupEl.style.cssText = 'display:none;position:fixed;visibility:hidden;width:0;height:0;';
+    popupEl.innerHTML = buildPanelHTML();
     shadow.appendChild(popupEl);
+
+    // 恢复用户尺寸设置
     safeGetStorage('uiConfig', (res) => {
-      const settings = res?.uiConfig;
-      if (settings?.width && settings?.height) {
-        try {
-          const finalMaxW = Math.min(parseInt(settings.width), window.innerWidth * 0.9);
-          const finalMaxH = Math.min(parseInt(settings.height), window.innerHeight * 0.9);
-          popupEl.style.maxWidth = finalMaxW + 'px';
-          popupEl.style.maxHeight = finalMaxH + 'px';
-          popupEl.style.width = 'fit-content';
-          popupEl.style.maxWidth = settings.width;
-          popupEl.style.minWidth = '280px';
-          popupEl.style.height = settings.height;
-          popupEl.style.maxHeight = settings.height;
-          popupEl.style.boxSizing = 'border-box';
-        } catch (e) {
-          logger.error('Failed to load uiConfig', e);
-        }
+      const s = res?.uiConfig;
+      if (!s?.width || !s?.height) return;
+      try {
+        popupEl.style.width = s.width;
+        popupEl.style.maxWidth = s.width;
+        popupEl.style.minWidth = '280px';
+        popupEl.style.height = s.height;
+        popupEl.style.maxHeight = s.height;
+        popupEl.style.boxSizing = 'border-box';
+      } catch (e) {
+        logger.error('Failed to load uiConfig', e);
       }
     });
+
     enablePanelResize(popupEl);
   }
-  function setPanelGlowColor(panel) {
-    if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-      return;
-    }
-    const bodyBg = window.getComputedStyle(document.body).backgroundColor;
-    function getBrightness(rgb) {
-      const match = rgb.match(/\d+/g);
-      if (!match) return 0;
-      const [r, g, b] = match.map(Number);
-      return (r * 299 + g * 587 + b * 114) / 1000;
-    }
-    const brightness = getBrightness(bodyBg);
-    if (brightness > 200) {
-      panel?.style.setProperty('--glow-color', 'rgba(0, 150, 255, 1)');
-    } else {
-      panel?.style.setProperty('--glow-color', 'rgba(56,220,255,1)');
-    }
+
+  // ─── 样式表构建 ──────────────────────────────────────────────────────────────
+
+  function buildStyle() {
+    const style = document.createElement('style');
+    style.textContent = `
+      /* ── CSS 变量（暗色默认）── */
+      :host {
+        --p-bg:               rgba(18,18,18,0.95);
+        --p-text-main:        #ffffffb7;
+        --p-text-query:       rgb(31 31 35 / 34%);
+        --p-text-muted:       rgba(255,255,255,0.6);
+        --p-text-detail:      rgba(255,255,255,0.6);
+        --p-accent:           #38bdf8;
+        --p-border:           rgba(255,255,255,0.1);
+        --p-shadow:           rgba(0,0,0,0.5);
+        --p-content-bg:       rgba(39,39,50,0.39);
+        --p-header-bg:        rgba(31,31,35,0.34);
+        --p-header-shadow:    0 2px 8px rgba(235,215,215,0.09);
+        --p-phonetic:         #38bdf8;
+        --p-glow-opacity:     0.8;
+        --p-panel-anim:       eclipseHalo;
+      }
+
+      /* ── 亮色变量（统一定义，避免重复）── */
+      :host([theme="light"]),
+      :host(:not([theme="dark"])) {
+        --p-bg:               #ffffffb7;
+        --p-text-main:        #1a202c;
+        --p-text-query:       #2d3748;
+        --p-text-muted:       #718096;
+        --p-text-detail:      #4f5a6a;
+        --p-accent:           #0284c7;
+        --p-border:           rgba(0,0,0,0.1);
+        --p-shadow:           rgba(0,0,0,0.1);
+        --p-content-bg:       rgba(245,249,249,0.79);
+        --p-header-bg:        rgba(177,178,191,0.23);
+        --p-header-shadow:    0 2px 8px rgba(0,0,0,0.3);
+        --p-phonetic:         #07a457;
+        --p-glow-opacity:     0.3;
+        --p-panel-anim:       eclipseHaloLightWarm;
+      }
+
+      /* 仅在系统偏好亮色且未手动设置 dark 时生效 */
+      @media (prefers-color-scheme: light) {
+        :host(:not([theme="dark"])) {
+          --p-bg:            #ffffffb7;
+          --p-text-main:     #1a202c;
+          --p-text-query:    #2d3748;
+          --p-text-muted:    #718096;
+          --p-text-detail:   #4f5a6a;
+          --p-accent:        #0284c7;
+          --p-border:        rgba(0,0,0,0.1);
+          --p-shadow:        rgba(0,0,0,0.1);
+          --p-content-bg:    rgba(245,249,249,0.79);
+          --p-header-bg:     rgba(177,178,191,0.23);
+          --p-header-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          --p-phonetic:      #07a457;
+          --p-panel-anim:    eclipseHaloLightWarm;
+        }
+      }
+
+      /* 页面背景检测（JS 写入 data-detected）*/
+      :host([data-detected="dark"]) {
+        --p-bg:            rgba(18,18,18,0.95);
+        --p-text-main:     #ffffffb7;
+        --p-text-muted:    rgba(255,255,255,0.6);
+        --p-text-detail:   rgba(255,255,255,0.6);
+        --p-border:        rgba(255,255,255,0.1);
+        --p-shadow:        rgba(0,0,0,0.5);
+        --p-accent:        #38bdf8;
+        --p-content-bg:    rgba(39,39,50,0.39);
+        --p-header-bg:     rgba(31,31,35,0.34);
+        --p-header-shadow: 0 2px 8px rgba(235,215,215,0.09);
+        --p-phonetic:      #38bdf8;
+        --p-panel-anim:    eclipseHalo;
+      }
+
+      /* ── 光晕动画 ── */
+      @keyframes eclipseHalo {
+        0%,100% { box-shadow: 0 0 8px 2px rgba(56,189,248,0.25), 0 0 20px 4px rgba(124,222,255,0.15), 0 0 35px 6px rgba(186,230,253,0.08), 0 10px 30px var(--p-shadow); }
+        50%     { box-shadow: 0 0 15px 4px rgba(56,189,248,0.5), 0 0 30px 8px rgba(124,222,255,0.3), 0 0 50px 12px rgba(186,230,253,0.15), 0 0 80px 20px rgba(219,239,255,0.05), 0 10px 30px var(--p-shadow); }
+      }
+      @keyframes eclipseHaloLightWarm {
+        0%,100% { box-shadow: 0 0 8px 2px rgba(245,158,11,0.3), 0 0 20px 4px rgba(251,191,36,0.25), 0 0 35px 6px rgba(253,230,138,0.2), 0 10px 30px var(--p-shadow); }
+        50%     { box-shadow: 0 0 15px 4px rgba(245,158,11,0.6), 0 0 30px 8px rgba(251,191,36,0.4), 0 0 50px 12px rgba(253,230,138,0.25), 0 0 80px 20px rgba(254,243,199,0.15), 0 10px 30px var(--p-shadow); }
+      }
+      /* 备用光晕（紫色/绿色，按需启用）*/
+      @keyframes eclipseHaloLight {
+        0%,100% { box-shadow: 0 0 8px 2px rgba(168,85,247,0.25), 0 0 20px 4px rgba(192,132,252,0.2), 0 10px 30px var(--p-shadow); }
+        50%     { box-shadow: 0 0 15px 4px rgba(168,85,247,0.5), 0 0 30px 8px rgba(192,132,252,0.4), 0 10px 30px var(--p-shadow); }
+      }
+      @keyframes eclipseHaloLightAlt {
+        0%,100% { box-shadow: 0 0 8px 2px rgba(74,222,128,0.3), 0 0 20px 4px rgba(134,239,172,0.2), 0 10px 30px var(--p-shadow); }
+        50%     { box-shadow: 0 0 15px 4px rgba(74,222,128,0.6), 0 0 30px 8px rgba(134,239,172,0.4), 0 10px 30px var(--p-shadow); }
+      }
+
+      /* ── 主面板 ── */
+      .panel {
+        pointer-events:   auto;
+        position:         fixed;
+        color:            var(--p-text-main);
+        background:       var(--p-bg) !important;
+        backdrop-filter:  blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border-top:       1px solid rgba(255,255,255,0.12) !important;
+        border-left:      1px solid rgba(255,255,255,0.12) !important;
+        box-shadow:       0 8px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+        border-radius:    16px !important;
+        padding:          0 !important;
+        z-index:          2147483647;
+        box-sizing:       border-box;
+        min-height:       150px;
+        max-height:       85vh;
+        min-width:        280px;
+        max-width:        450px;
+        width:            fit-content;
+        display:          flex;
+        flex-direction:   column;
+        align-items:      flex-start !important;
+        overflow:         hidden !important;
+        resize:           none;
+        word-wrap:        break-word;
+        overflow-wrap:    break-word;
+        word-break:       break-word;
+        transition:       opacity .2s cubic-bezier(.4,0,.2,1), transform .2s cubic-bezier(.34,1.56,.64,1);
+        animation:        var(--p-panel-anim, eclipseHalo) 6s ease-in-out infinite;
+      }
+      :host([theme="light"]) .panel { animation-name: eclipseHaloLightWarm; animation-duration: 8s; }
+      .panel:hover                  { animation-duration: 3s !important; }
+      :host([theme="light"]) .panel:hover { animation-duration: 4s !important; }
+
+      .is-hidden {
+        opacity:          0 !important;
+        pointer-events:   none !important;
+        transform:        scale(0.8) translateY(8px) !important;
+      }
+
+      /* ── 拖拽区 ── */
+      #drag-zone {
+        position:   absolute;
+        top:        0;
+        left:       0;
+        right:      0;
+        height:     46px;
+        width:      calc(100% - 110px);
+        cursor:     grab;
+        z-index:    1000000000;
+      }
+
+      /* ── 头部 ── */
+      #p-header-wrapper {
+        position:         relative;
+        z-index:          1000;
+        width:            100%;
+        box-sizing:       border-box;
+        padding:          8px 16px 0;
+        background:       var(--p-header-bg) !important;
+        backdrop-filter:  blur(20px) saturate(180%);
+        box-shadow:       var(--p-header-shadow);
+        display:          flex;
+        pointer-events:   none;
+      }
+
+      #p-header {
+        height:         20px;
+        cursor:         grab;
+        display:        flex;
+        justify-content: space-between;
+        align-items:    center;
+        margin-bottom:  6px;
+        pointer-events: none;
+      }
+
+      /* Logo 动画 */
+      @keyframes logo-glow {
+        0%,100% { filter: drop-shadow(0 0 2px rgba(56,189,248,0.5)); }
+        50%     { filter: drop-shadow(0 0 6px rgba(56,189,248,0.9)); }
+      }
+      #p-header img { animation: logo-glow 3s ease-in-out infinite; }
+
+      /* ── 主容器 ── */
+      #p-main-container {
+        flex:       1;
+        display:    flex;
+        flex-direction: column;
+        min-height: 0;
+        min-width:  0;
+        width:      100%;
+        background: transparent !important;
+        color:      var(--p-text-main);
+        overflow:   visible !important;
+      }
+
+      /* ── 内容区 ── */
+      #p-content-container {
+        flex:         1;
+        padding-top:  6px !important;
+        overflow-y:   auto !important;
+        overflow-x:   hidden;
+        word-break:   break-word;
+        min-height:   0;
+        position:     relative;
+        z-index:      5;
+        display:      block;
+        background:   var(--p-content-bg) !important;
+        contain:      nosize;
+        will-change:  transform;
+      }
+      #p-content-container::-webkit-scrollbar       { width: 10px; background: transparent !important; }
+      #p-content-container::-webkit-scrollbar-track { background: transparent !important; }
+      #p-content-container::-webkit-scrollbar-thumb {
+        background-color: var(--p-text-muted) !important;
+        border-radius:    20px !important;
+        border:           3px solid transparent !important;
+        background-clip:  padding-box !important;
+        transition:       background-color .2s ease;
+      }
+      #p-content-container::-webkit-scrollbar-thumb:hover {
+        background-color: var(--p-accent) !important;
+        background-clip:  padding-box !important;
+      }
+
+      /* ── 控制栏（右上角按钮组）── */
+      .header-controls {
+        position:      absolute;
+        top:           1px;
+        right:         9px;
+        height:        28px;
+        display:       flex;
+        align-items:   center;
+        gap:           3px;
+        z-index:       10001;
+        pointer-events: auto !important;
+      }
+
+      /* ── 通用图标按钮 ── */
+      .icon-btn {
+        display:        inline-flex;
+        align-items:    center;
+        justify-content: center;
+        width:          30px;
+        height:         30px;
+        background:     transparent;
+        border:         none;
+        border-radius:  8px;
+        color:          #94a3b8;
+        cursor:         pointer;
+        padding:        0;
+        flex-shrink:    0;
+        overflow:       visible;
+        outline:        none;
+        transition:     all .3s cubic-bezier(.4,0,.2,1);
+        transform:      scale(1);
+        -webkit-user-select: none;
+        user-select:    none;
+      }
+      .icon-btn svg {
+        display:        block;
+        pointer-events: none;
+        stroke:         var(--p-text-muted) !important;
+        fill:           none;
+        z-index:        1;
+      }
+      .icon-btn:hover       { transform: scale(1.1); }
+      .icon-btn:hover svg   { transform: scale(1.1); }
+
+      /* 主题切换 */
+      .icon-btn.theme svg#theme-icon {
+        width:      15px !important;
+        height:     15px !important;
+        fill:       none !important;
+        transition: stroke .3s ease, filter .3s ease, transform .3s ease !important;
+      }
+      .icon-btn.theme:hover            { transform: scale(1.1) !important; }
+      .icon-btn.theme:hover svg        { stroke: #ffaa00a7 !important; filter: drop-shadow(0 0 3px #ff7b00af) !important; }
+      .icon-btn.theme:active           { transform: scale(0.92) !important; }
+
+      /* 发音按钮 */
+      #p-speak:hover     { background: rgba(56,189,248,0.2) !important; box-shadow: 0 0 8px rgba(56,189,248,0.4); }
+      #p-speak:hover svg { stroke: #38bdf8 !important; }
+
+      /* 收藏按钮 */
+      #p-save:hover     { background: rgba(250,204,21,0.2) !important; box-shadow: 0 0 8px rgba(250,204,21,0.4); }
+      #p-save:hover svg { filter: drop-shadow(0 0 5px rgba(250,204,21,0.4)); }
+      #star-icon        { transition: all .2s ease !important; transform-origin: center; }
+      .is-saved         { color: #facc15 !important; }
+      .is-saved svg     { fill: #facc15 !important; stroke: #facc15 !important; }
+
+      /* 刷新按钮 */
+      #p-refresh:hover     { background: rgba(34,197,94,0.2) !important; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+      #p-refresh:hover svg { stroke: #4ade80 !important; }
+      @keyframes res-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      .spinning svg        { animation: res-rotate .6s linear infinite; }
+
+      /* 固定按钮 */
+      #p-pin {
+        display:    flex !important;
+        align-items: center;
+        justify-content: center;
+        width:      32px;
+        height:     32px;
+        overflow:   visible !important;
+        pointer-events: auto !important;
+      }
+      #pin-icon {
+        display:    block !important;
+        transform:  rotate(-45deg);
+        transition: transform .4s cubic-bezier(.4,0,.2,1), stroke .4s ease !important;
+      }
+      #p-pin:hover #pin-icon          { stroke: #38bdf8 !important; opacity: 1 !important; transform: scale(1.1) !important; }
+      #p-pin.is-pinned #pin-icon      { stroke: #38bdf8 !important; fill: #38bdf8 !important; transform: rotate(0deg) scale(1.05) !important; opacity: 1 !important; }
+
+      /* 关闭按钮 */
+      .close-btn {
+        padding: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        color: #7889a1;
+        line-height: 1;
+        pointer-events: auto !important;
+        -webkit-user-select: none; /* Chrome, Safari, Opera */
+        -moz-user-select: none;    /* Firefox */
+        user-select: none;         /* 标准语法 */
+      }
+      .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
+      .close-btn:active { transform: scale(0.9); }
+
+      /* ── Resize 手柄 ── */
+      .resizer {
+        background:     transparent;
+        pointer-events: auto !important;
+        z-index:        2147483648 !important;
+        position:       absolute;
+      }
+      .resizer:hover { background: rgba(56,189,248,0.05); }
+
+      /* ── Logo 浮动按钮 ── */
+      .eclipse-logo-btn {
+        position:     fixed;
+        width:        22px;
+        height:       22px;
+        background:   transparent !important;
+        display:      none;
+        align-items:  center;
+        justify-content: center;
+        cursor:       pointer;
+        z-index:      2147483647;
+        transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
+        opacity:      0;
+        transform:    scale(0.5);
+        pointer-events: auto;
+      }
+      .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
+      .eclipse-logo-btn img  { width: 18px; height: 18px; border-radius: 4px; filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }
+
+      .glowing-icon {
+        display:      inline-block;
+        width:        21px;
+        height:       21px;
+        border-radius: 4px;
+        position:     relative;
+        background:   rgba(100,180,255,0.1);
+        animation:    icon-glow 2s ease-in-out infinite;
+      }
+      .glowing-icon img {
+        width:      100%;
+        height:     100%;
+        border-radius: 2px;
+        position:   relative;
+        z-index:    2;
+        filter:     brightness(1.2);
+      }
+      @keyframes icon-glow {
+        0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
+        50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
+      }
+
+      /* ── 发音动画 ── */
+      @keyframes speak-jump-fancy {
+        0%,100% { transform: scale(1.15) rotate(0deg);  filter: drop-shadow(0 0 2px #38bdf8); }
+        25%     { transform: scale(1.3)  rotate(-5deg); filter: drop-shadow(0 0 12px #38bdf8); }
+        50%     { transform: scale(1.1)  rotate(5deg);  filter: drop-shadow(0 0 5px #38bdf8); }
+        75%     { transform: scale(1.25) rotate(-3deg); filter: drop-shadow(0 0 10px #38bdf8); }
+      }
+      @keyframes wave-ripple {
+        0%   { transform: translate(-50%,-50%) scale(0.8); opacity: 0.8; border-width: 2px; }
+        100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0;   border-width: 1px; }
+      }
+      @keyframes speak-loading {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+      }
+
+      .speak-btn {
+        position:   relative;
+        width:      32px;
+        height:     32px;
+        display:    flex;
+        margin-top: 4px;
+        align-items: center;
+        justify-content: center;
+        z-index:    100;
+        overflow:   visible !important;
+        vertical-align: sub;
+        transition: all .3s cubic-bezier(.175,.885,.32,1.275);
+      }
+      .speak-btn svg            { position: relative; z-index: 2; transition: stroke .3s ease; }
+      .speak-btn:hover:not(.is-speaking) svg { filter: drop-shadow(0 0 8px #38bdf8); transform: scale(1.05); }
+      .speak-btn::before,
+      .speak-btn::after         { pointer-events: none; }
+
+      /* 播放中状态 */
+      .speak-btn.is-speaking svg {
+        animation: speak-jump-fancy .5s ease-in-out infinite;
+        stroke:    #ffffffdc !important;
+        filter:    drop-shadow(0 0 5px #38bdf8);
+      }
+      .speak-btn.is-speaking::before,
+      .speak-btn.is-speaking::after {
+        content:       "";
+        position:      absolute;
+        top:   50%; left: 50%;
+        transform:     translate(-50%,-50%);
+        width:  100%; height: 100%;
+        border:        2px solid #38bdf8;
+        border-radius: 50%;
+        z-index:       1;
+      }
+      .speak-btn.is-speaking::before { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite; }
+      .speak-btn.is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
+
+      /* 加载中状态 */
+      .speak-btn.is-loading::before {
+        content:       "";
+        position:      absolute;
+        inset:         0;
+        margin:        auto;
+        width:  24px; height: 24px;
+        border:        2px solid rgba(56,189,248,0.2);
+        border-top-color: #38bdf8;
+        border-radius: 50%;
+        z-index:       1;
+        animation:     speak-loading .7s linear infinite;
+      }
+      .speak-btn.is-loading svg { opacity: 0.4; stroke: #38bdf8 !important; }
+
+      /* ── 内容区文字样式 ── */
+      .basic {
+        font-size:   17px;
+        color:       var(--p-accent);
+        margin:      12px 0 8px;
+        font-weight: 500;
+      }
+      .detail {
+        font-size:   13.5px;
+        color:       var(--p-text-detail);
+        line-height: 1.6;
+        border-top:  1px solid var(--p-border);
+        padding-top: 7px;
+      }
+      `;
+
+    return style;
   }
+
+  // ─── 面板 HTML 模板 ──────────────────────────────────────────────────────────
+
+  function buildPanelHTML() {
+    return `
+    <div id="drag-zone"></div>
+    <div id="p-main-container">
+      <div class="header-controls">
+        <div id="p-theme-toggle" class="icon-btn theme" title="">
+          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.8"
+              stroke-linecap="round" stroke-linejoin="round"></svg>
+        </div>
+        <div id="p-pin" class="icon-btn" title="${t('pinUnpin')}">
+          <svg id="pin-icon" width="16" height="16" viewBox="0 0 24 28"
+              fill="none" stroke="currentColor" stroke-width="2.8"
+              stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path>
+            <path d="M7 10v4a2 2 0 0 1-2 2 2 2 0 0 0 0 4h14a2 2 0 0 0 0-4 2 2 0 0 1-2-2v-4"></path>
+            <line x1="12" y1="22" x2="12" y2="28"></line>
+          </svg>
+        </div>
+        <div id="close-p" class="close-btn">✕</div>
+      </div>
+      <div id="p-header-wrapper" style="pointer-events:auto;"></div>
+      <div id="p-content-container" style="pointer-events:auto;"></div>
+    </div>
+
+    <!-- Resize 手柄 -->
+    <div class="resizer" data-dir="t"  style="top:-5px;  left:10px;  right:10px; height:10px; cursor:ns-resize;"></div>
+    <div class="resizer" data-dir="b"  style="bottom:-5px;left:10px; right:10px; height:10px; cursor:ns-resize;"></div>
+    <div class="resizer" data-dir="l"  style="left:-5px; top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
+    <div class="resizer" data-dir="r"  style="right:-7px;top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
+    <div class="resizer" data-dir="tl" style="top:-8px;  left:-8px; width:16px; height:16px; cursor:nwse-resize;"></div>
+    <div class="resizer" data-dir="tr" style="top:-8px;  right:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
+    <div class="resizer" data-dir="bl" style="bottom:-8px;left:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
+    <div class="resizer" data-dir="br" style="bottom:-8px;right:-8px;width:16px;height:16px; cursor:nwse-resize;"></div>`;
+  }
+
+  // ─── 辅助函数 ────────────────────────────────────────────────────────────────
+
+  function setPanelGlowColor(panel) {
+    if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
+    const rgb = window.getComputedStyle(document.body).backgroundColor.match(/\d+/g);
+    if (!rgb) return;
+    const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+    panel?.style.setProperty('--glow-color',
+      brightness > 200 ? 'rgba(0,150,255,1)' : 'rgba(56,220,255,1)');
+  }
+
   const themeIcons = {
-    auto: `<circle cx="12" cy="12" r="10" stroke-width="2.0"></circle>
-       <path d="M12 2v20M2 12h20" stroke-opacity="0.3"></path>
-       <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path>`,
-    light: `<circle cx="12" cy="12" r="5.5" stroke-width="2.0"></circle>
-          <!-- 垂直光线  -->
-          <path d="M12 1.5v2.5"></path>  <!-- 上 -->
-          <path d="M12 20v2.5"></path>   <!-- 下 -->
-          <!-- 水平光线  -->
-          <path d="M1.5 12h2.5"></path>  <!-- 左 -->
-          <path d="M20 12h2.5"></path>   <!-- 右 -->
-          <!-- 对角线光线  -->
-          <path d="m4.5 4.5 1.8 1.8"></path>    <!-- 左上↖-->
-          <path d="m19.5 4.5-1.8 1.8"></path>   <!-- 右上↗ -->
-          <path d="m4.5 19.5 1.8-1.8"></path>   <!-- 左下↙ -->
-          <path d="m19.5 19.5-1.8-1.8"></path>  <!-- 右下↘ -->`,
-    dark: `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" stroke-width="2.0"></path>`
+    auto: `<circle cx="12" cy="12" r="10" stroke-width="2"></circle>
+          <path d="M12 2v20M2 12h20" stroke-opacity="0.3"></path>
+          <path d="M12 2a10 10 0 0 1 0 20z" fill="currentColor"></path>`,
+    light: `<circle cx="12" cy="12" r="5.5" stroke-width="2"></circle>
+          <path d="M12 1.5v2.5"></path>
+          <path d="M12 20v2.5"></path>
+          <path d="M1.5 12h2.5"></path>
+          <path d="M20 12h2.5"></path>
+          <path d="m4.5 4.5 1.8 1.8"></path>
+          <path d="m19.5 4.5-1.8 1.8"></path>
+          <path d="m4.5 19.5 1.8-1.8"></path>
+          <path d="m19.5 19.5-1.8-1.8"></path>`,
+    dark: `<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" stroke-width="2"></path>`
   };
+
   const getWebPageBrightness = () => {
-    const bodyStyle = window.getComputedStyle(document.body);
-    const htmlStyle = window.getComputedStyle(document.documentElement);
-    let color = bodyStyle.backgroundColor;
-    let source = "body";
-    if (color === 'rgba(0, 0, 0, 0)' || color === 'transparent') {
-      color = htmlStyle.backgroundColor;
-      source = "html";
-    }
+    const tryColor = (el) => window.getComputedStyle(el).backgroundColor;
+    let color = tryColor(document.body);
+    if (color === 'rgba(0, 0, 0, 0)' || color === 'transparent')
+      color = tryColor(document.documentElement);
     const rgb = color.match(/\d+/g);
-    if (!rgb || rgb.length < 3) {
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return systemDark ? 'dark' : 'light';
-    }
-    const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
-    const result = brightness < 128 ? 'dark' : 'light';
-    return result;
+    if (!rgb || rgb.length < 3)
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000 < 128 ? 'dark' : 'light';
   };
+
   const updateThemeUI = (mode, shadow, shadowHost) => {
     localStorage.setItem('eclipse-theme', mode);
-    let appliedTheme = mode === 'auto' ? getWebPageBrightness() : mode;
-    shadowHost.setAttribute('theme', appliedTheme);
-    const themeBtn = shadow.getElementById('p-theme-toggle');
-    const themeIconSvg = shadow.getElementById('theme-icon');
-    if (themeBtn && themeIconSvg) {
-      themeIconSvg.innerHTML = themeIcons[mode];
-      const modeNames = {
-        auto: t('autoTheme'),
-        light: t('lightTheme'),
-        dark: t('darkTheme')
-      };
-      themeBtn.title = modeNames[mode];
-    }
+    const applied = mode === 'auto' ? getWebPageBrightness() : mode;
+    shadowHost.setAttribute('theme', applied);
+    const icon = shadow.getElementById('theme-icon');
+    if (icon) icon.innerHTML = themeIcons[mode];
+    const btn = shadow.getElementById('p-theme-toggle');
+    if (btn) btn.title = { auto: t('autoTheme'), light: t('lightTheme'), dark: t('darkTheme') }[mode];
   };
+
+  // ─── 渲染并展示翻译面板 ───────────────────────────────────────────────────────
+
   async function renderAndShowPopup(text, pos, shadow, manualLang = 'auto') {
     const isPinnedNow = shadowHost.getAttribute('data-pinned') === 'true';
     const wordText = text.trim();
-    const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
+    const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
     const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
     const entry = await idb.vocabulary.get(wordText);
     const isSaved = !!(entry && !entry.deleted);
-    popupEl.querySelector('#p-header-wrapper').innerHTML =
-      `<div id="p-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-    <div style="display: flex; align-items: center; gap: 5px; user-select: none;">
-        <img src="${logoBase64}"
-            style="width: 23px; height: 23px; border-radius: 2px; filter: drop-shadow(0 0 4px var(--p-accent));">
-        <div style="opacity: 0.6; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--p-text-main);font-style: italic;">${APP_NAME}
+
+    // 头部 HTML
+    popupEl.querySelector('#p-header-wrapper').innerHTML = `
+    <div id="p-header">
+      <div style="display:flex;align-items:center;gap:5px;user-select:none;">
+        <img src="${logoBase64}" style="width:23px;height:23px;border-radius:2px;filter:drop-shadow(0 0 4px var(--p-accent));">
+        <span style="opacity:0.6;font-size:11px;font-weight:bold;letter-spacing:2px;color:var(--p-text-main);font-style:italic;">${t('appName', window.uiLanguage) || APP_NAME}</span>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center;height:40px;position:relative;z-index:30;right:-15px;">
+        <div id="p-theme-toggle" class="icon-btn theme" title="">
+          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"></svg>
         </div>
-    </div>
-    <div style="display: flex; gap: 4px; align-items: center; height: 40px; position: relative; z-index: 30; right: -15px;">
-        <div id="p-theme-toggle" class="icon-btn" title="">
-            <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            </svg>
-        </div>
-    </div>
-   <div style="
-    display: flex; 
-    gap: 4px; 
-    align-items: center; 
-    height: 40px;      
-    position: relative; 
-    z-index: 30;       
-    right: -15px;
-">
-    </div>
-</div>`;
+      </div>
+    </div>`;
+
+    // 内容区
     const contentContainer = popupEl.querySelector('#p-content-container');
-    const styleTag = document.createElement('style');
-    styleTag.textContent = `
-  .icon-btn {
-    position: relative !important;
-    width: 30px ;
-    height: 30px ;
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none ;
-    border-radius: 8px !important;  
-    color: #94a3b8;
-    cursor: pointer;
-    padding: 0 !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: scale(1.05);
-    outline: none;
-    flex-shrink: 0; 
-    overflow: visible; 
-  }
-.icon-btn:not(.is-saved) svg {
-    fill: none ;
-    stroke: rgba(255,255,255,0.8) !important;
-  }
-  .icon-btn svg {
-    display: block;
-    pointer-events: none;
-    stroke: var(--p-text-muted) !important;
-    z-index: 1;
-  }
- .icon-btn:hover svg {
-  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5)); 
-  transform: scale(1.2);
-}
-  .icon-btn:hover {
-    transform: scale(1.2);
-  }
- .icon-btn:not(.is-saved) svg {
-    fill: none;
-    stroke: var(--p-text-muted) !important;
-}
-    .icon-btn.theme svg#theme-icon {
-    width: 16px !important;  
-    height: 16px !important;
-    stroke: var(--p-text-muted) !important; 
-    fill: none !important;
-    transition: stroke 0.3s ease, filter 0.3s ease, transform 0.3s ease !important;
-    display: block !important;
-    pointer-events: none;
-}
-.icon-btn.theme:hover {
-    transform: scale(1.1) !important;
-}
-.icon-btn.theme:hover svg#theme-icon {
-    stroke: #ffaa00a7 !important; 
-    filter: drop-shadow(0 0 3px #ff7b00af) !important; 
-    transform: scale(1.1) !important;
-}
-.icon-btn.theme:active {
-    transform: scale(0.92) !important;
-}
-  #p-speak { color: #38bdf8; }
-  #p-speak:hover {
-    background: rgba(56, 189, 248, 0.2) !important;
-    color: #38bdf8 !important; 
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); 
-  }
-    #p-speak:hover svg {
-    stroke: #38bdf8 !important;  
-  }
-  #p-save:hover { 
-    background: rgba(250, 204, 21, 0.2) !important;
-    color: #facc15 !important;
-    box-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
-  }
-  .is-saved { color: #facc15 !important; }
-  .is-saved svg { fill: #facc15 !important; stroke: #facc15 !important; }
-  #p-refresh:hover {
-    background: rgba(34, 197, 94, 0.2) !important;
-    color: #4ade80 !important;
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-  }
-    #p-refresh:hover svg {
-    stroke: #4ade80 !important; 
-  }
-  .spinning svg {
-    animation: res-rotate 0.6s linear infinite;
-}
-@keyframes res-rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-`;
-    if (!shadow.querySelector('style#p-style')) {
-      styleTag.id = 'p-style';
-      shadow.appendChild(styleTag);
-    }
     contentContainer.style.cssText = `
-    display: block; 
-    width: 100%; 
-    box-sizing: border-box; 
-    overflow-y: auto; 
-    padding: 0 20px 15px 24px;
-    direction: ${isRTL ? 'rtl' : 'ltr'};
-    text-align: ${isRTL ? 'right' : 'left'};
-`;
-    contentContainer.innerHTML = `
-<div style="line-height: 1.2;">
-    <div style="display: block; line-height: 1.2;">
-        <span id="p-query" style="
-                font-size: 24px; 
-                font-weight: 700; 
-                color: var(--p-text-main);; 
-                line-height: 1.2; 
-                word-break: break-word; 
-                overflow-wrap: break-word;
-                display: inline; 
-                vertical-align: middle;
-            ">${text}</span>
-        <div
-            style="display: inline-flex; align-items: center; gap: 8px; margin-left: 10px;padding-top:6px; vertical-align: middle; white-space: nowrap;">
-            <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="margin:0;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-            </div>
-            <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}" title="${isSaved ? t('uncollect') : t('collect')}" style="margin:0;">
-    <svg id="star-icon" width="20" height="20" viewBox="0 0 24 24" 
-         fill="${isSaved ? '#facc15' : 'none'}"
-         stroke="${isSaved ? '#facc15' : 'rgba(255,255,255,0.8)'}" 
-         stroke-width="1.5" stroke-linejoin="round">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-    </svg>
-</div>
-            <div id="p-refresh" class="icon-btn refresh-btn" title="${t('retranslate')}" style="margin:0;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-                </svg>
-            </div>
-        </div>
-    </div>
-    <div id="p-phonetic"
-        style="margin-top:6px; margin-left: 2px; color:var(--p-phonetic) ; font-size: 14px; opacity: 0.8; font-family: 'Lucida Sans Unicode', sans-serif;">
-    </div>
-    <div id="p-basic" class="basic" style="margin-top: 8px;">Loading...</div>
-    <div id="p-detail" class="detail" style="display:none; margin-top: 10px;margin-bottom: 10px"></div>
-    <div id="p-examples" style="display:none; margin-top: 12px;"></div>
-    <div id="p-source" style="display:none; margin-top:1px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;"></div>
-</div>`;
+    display:block;width:100%;box-sizing:border-box;
+    overflow-y:auto;padding:0 20px 15px 24px;
+    direction:${isRTL ? 'rtl' : 'ltr'};
+    text-align:${isRTL ? 'right' : 'left'};`;
+
+    contentContainer.innerHTML = buildContentHTML(text, isSaved);
+
+    // 面板可见
     popupEl.classList.remove('is-hidden');
-    popupEl.style.display = 'flex';
-    popupEl.style.width = 'fit-content';
-    popupEl.style.height = 'auto';
-    popupEl.style.minWidth = '280px';
-    popupEl.style.minHeight = '100px';
+    Object.assign(popupEl.style, {
+      display: 'flex',
+      width: 'fit-content',
+      height: 'auto',
+      minWidth: '280px',
+      minHeight: '100px',
+      visibility: 'visible',
+    });
+
+    // 初始化 saveBtn 状态
     const saveBtnInit = shadow.getElementById('p-save');
-    if (saveBtnInit) {
-      saveBtnInit._miraReady = false;
-      saveBtnInit._miraSnapshot = null;
-    }
-    const settingsRes = await safeGetStorage('uiConfig');
-    const settings = settingsRes?.uiConfig || {};
-    if (settings.width) {
-      popupEl.style.width = settings.width;
-      popupEl.style.maxWidth = settings.width;
-    } else {
-      // 用户未设置时给合理默认宽度
-      popupEl.style.width = '360px';
-      popupEl.style.maxWidth = '360px';
-    }
-    if (settings.height) {
-      popupEl.style.maxHeight = settings.height;
-    } else {
-      popupEl.style.maxHeight = '50vh';//默认高度
-    }
-    popupEl.style.visibility = 'visible';
-    const pQuary = shadow.getElementById('p-query');
-    if (!pQuary?.style) return;
-    if (text.length > 100) {
-      pQuary.style.fontSize = '12px';
-      pQuary.style.lineHeight = '1.4';
-    } else if (text.length > 40) {
-      pQuary.style.fontSize = '14px';
-      pQuary.style.lineHeight = '1.4';
-    } else if (text.length > 10) {
-      pQuary.style.fontSize = '16px';
-      pQuary.style.lineHeight = '1.2';
-    } else {
-      pQuary.style.fontSize = '22px';
-      pQuary.style.lineHeight = '1.2';
-    }
+    if (saveBtnInit) { saveBtnInit._miraReady = false; saveBtnInit._miraSnapshot = null; }
+
+    // 应用用户尺寸配置
+    const settings = (await safeGetStorage('uiConfig'))?.uiConfig || {};
+    popupEl.style.width = settings.width || '360px';
+    popupEl.style.maxWidth = settings.width || '360px';
+    popupEl.style.maxHeight = settings.height || '50vh';
+
+    // 调整查询词字号
+    const pQuery = shadow.getElementById('p-query');
+    if (!pQuery?.style) return;
+    const len = text.length;
+    pQuery.style.fontSize = len > 100 ? '12px' : len > 40 ? '14px' : len > 10 ? '16px' : '22px';
+    pQuery.style.lineHeight = len > 10 ? '1.4' : '1.2';
+
     setPanelGlowColor(popupEl);
+
+    // 定位
     if (!isPinnedNow) {
-      const pWidth = popupEl.offsetWidth || 300;
-      const pHeight = popupEl.offsetHeight || 200;
-      let left = pos.clientX + 10;
-      if (left + pWidth > window.innerWidth - 20) {
-        left = window.innerWidth - pWidth - 20;
-      }
-      left = Math.max(10, left);
-      let top = pos.clientY + 15;
-      if (top + pHeight > window.innerHeight - 20) {
-        top = pos.clientY - pHeight - 15;
-      }
+      const pw = popupEl.offsetWidth || 300;
+      const ph = popupEl.offsetHeight || 200;
+      let left = Math.max(10, Math.min(pos.clientX + 10, window.innerWidth - pw - 20));
+      let top = pos.clientY + ph + 15 > window.innerHeight - 20
+        ? pos.clientY - ph - 15
+        : pos.clientY + 15;
       top = Math.max(10, top);
       popupEl.style.left = left + 'px';
       popupEl.style.top = top + 'px';
-      requestAnimationFrame(() => {
-        clampPopupToViewport(popupEl);
-      });
+      requestAnimationFrame(() => clampPopupToViewport(popupEl));
     }
-    popupEl.style.visibility = 'visible';
+
+    // ── 事件绑定 ─────────────────────────────────────────────────────────────
+
+    // 关闭
     shadow.getElementById('close-p').onclick = (e) => {
       e.stopPropagation();
       shadowHost.setAttribute('data-pinned', 'false');
@@ -3658,317 +3262,131 @@ function initSelectionTranslate() {
       setTimeout(() => {
         if (shadowHost.getAttribute('data-pinned') !== 'true') popupEl.style.display = 'none';
       }, 200);
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-      }
+      window.speechSynthesis?.cancel();
     };
+
+    // 固定
     const pinBtn = shadow.getElementById('p-pin');
     if (!pinBtn) return;
     const updatePinUI = (state) => {
       shadowHost.setAttribute('data-pinned', state ? 'true' : 'false');
-      if (state) {
-        pinBtn.classList.add('is-pinned');
-      } else {
-        pinBtn.classList.remove('is-pinned');
-      }
+      pinBtn.classList.toggle('is-pinned', state);
     };
     updatePinUI(isPinnedNow);
     pinBtn.onclick = (e) => {
       e.stopPropagation();
-      const isNowPinned = shadowHost.getAttribute('data-pinned') === 'true';
-      updatePinUI(!isNowPinned);
+      updatePinUI(shadowHost.getAttribute('data-pinned') !== 'true');
     };
-    const speakBtn = shadow.getElementById('p-speak');
-    speakBtn.onclick = (e) => {
+
+    // 发音
+    shadow.getElementById('p-speak').onclick = (e) => {
       e.stopPropagation();
-      speakText(text, speakBtn);
+      speakText(text, shadow.getElementById('p-speak'));
     };
-    const refreshBtn = shadow.getElementById('p-refresh');
-    refreshBtn.onclick = async (e) => {
+
+    // 刷新翻译
+    shadow.getElementById('p-refresh').onclick = async (e) => {
       e?.stopPropagation();
+      const refreshBtn = shadow.getElementById('p-refresh');
       if (refreshBtn?.classList.contains('spinning')) return;
 
-      const coreText = text.trim()
-        .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
-        .toLowerCase();
-      const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+      const fingerprint = typeof hash === 'function'
+        ? hash(text.trim().replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, '').toLowerCase())
+        : text.trim().substring(0, 50);
       const allCache = await idb.getAll('tr_');
-      const keysToRemove = Object.keys(allCache).filter(k => k.includes(textFingerprint));
-      if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
+      await Promise.all(
+        Object.keys(allCache).filter(k => k.includes(fingerprint)).map(k => idb.remove(k))
+      );
 
-      const saveBtnRef = shadow.getElementById('p-save');
-      if (saveBtnRef) saveBtnRef._miraReady = false;
+      const saveBtn = shadow.getElementById('p-save');
+      if (saveBtn) saveBtn._miraReady = false;
       const basicEl = shadow.getElementById('p-basic');
       const phoneticEl = shadow.getElementById('p-phonetic');
       const detailEl = shadow.getElementById('p-detail');
       const examplesEl = shadow.getElementById('p-examples');
       if (!basicEl?.style) return;
+
       refreshBtn.classList.add('spinning');
-      const originalBasic = basicEl.innerText;
-      basicEl.innerHTML = `<span style="opacity:0.6; font-size:13px; font-style:italic;">${t('retranslate')}...</span>`;
-      if (phoneticEl) phoneticEl.innerText = "";
+      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t('retranslate')}...</span>`;
+      if (phoneticEl) phoneticEl.innerText = '';
       if (detailEl?.style) detailEl.style.display = 'none';
       if (examplesEl?.style) examplesEl.style.display = 'none';
+
       try {
-        const newRes = await getDetailedTranslation(text, true, manualLang, {});
-        if (newRes && !newRes.isError) {
-          basicEl.style.color = "";
-          basicEl.style.fontStyle = "normal";
-          fillPopupData(newRes, shadow, text, manualLang);
+        const res = await getDetailedTranslation(text, true, manualLang, {});
+        if (res && !res.isError) {
+          basicEl.style.color = '';
+          basicEl.style.fontStyle = 'normal';
+          fillPopupData(res, shadow, text, manualLang, isRTL);
         } else {
-          const errorMsg = newRes?.basic || t('unknown_error');
-          basicEl.innerText = `[${t('translate_failed')}: ${errorMsg}]`;
-          basicEl.style.color = "#ff4d4f";
-          basicEl.style.fontStyle = "italic";
+          setBasicError(basicEl, res?.basic || t('unknown_error'));
         }
       } catch (err) {
-        basicEl.innerText = `[${t('translate_failed')}: ${err.message || 'Network Error'}]`;
-        basicEl.style.color = "#ff4d4f";
-        basicEl.style.fontStyle = "italic";
+        setBasicError(basicEl, err.message || 'Network Error');
       } finally {
-        setTimeout(() => {
-          refreshBtn?.classList.remove('spinning');
-        }, 600);
+        setTimeout(() => refreshBtn?.classList.remove('spinning'), 600);
       }
     };
-    function fillPopupData(res, shadow, text, targetLang) {
-      if (!shadow || !res) return;
 
-      const escapeHtml = (str) => {
-        if (typeof str !== 'string') return '';
-        return str
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#39;');
-      };
-      const cleanMarker = (str) => {
-        if (typeof str !== 'string') return str;
-        return str.replace(/\[\[\d+\]\]\s*/g, '').trim();
-      };
-      //合并相同 pos
-      const mergedDictData = (res.dictData || []).reduce((acc, item) => {
-        const meanings = item.meanings?.length > 0
-          ? item.meanings
-          : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
-        const existing = acc.find(d => d.pos === item.pos);
-        if (existing) {
-          existing.meanings = [...existing.meanings, ...meanings];
-        } else {
-          acc.push({ ...item, meanings });
-        }
-        return acc;
-      }, []);
-      res = {
-        ...res, dictData: mergedDictData.map(item => ({
-          ...item,
-          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
-        }))
-      };
-      const pPhonetic = shadow.getElementById('p-phonetic');
-      if (pPhonetic) {
-        pPhonetic.innerText = res.phonetic
-          ? `/${res.phonetic.replace(/[\[\]\/]/g, '')}/`
-          : "";
-      }
-      const pBasic = shadow.getElementById('p-basic');
-      if (pBasic) {
-        pBasic.innerText = cleanMarker(res.basic) || "";
-      }
-      const pD = shadow.getElementById('p-detail');
-      if (pD?.style) {
-        if (res.dictData?.length > 0 || res.wordForms?.length > 0 || res.prototype) {
-          pD.style.display = 'block';
-
-          let detailHtml = (res.dictData || []).map(i => {
-            const localPos = escapeHtml(localizePos(i.pos, targetLang) || '');
-            const cleanMeanings = (i.meanings || [])
-              .map(m => escapeHtml(cleanMarker(m)))
-              .join(', ');
-            return `<div><b style="color:#319BCA; font-size:12px;margin-right:4px;">${localPos}</b> ${cleanMeanings}</div>`;
-          }).join('');
-          const ZH_FORM_TW = {
-            '过去式': '過去式', '过去分词': '過去分詞', '现在分词': '現在分詞',
-            '第三人称单数': '第三人稱單數', '复数': '複數', '单数': '單數',
-            '比较级': '比較級', '最高级': '最高級'
-          };
-
-          const isTraditional = (targetLang || '').toLowerCase().includes('tw') || (targetLang || '').toLowerCase().includes('hk');
-          if (res.wordForms?.length > 0 || res.prototype) {
-            let formsHtml = '';
-
-            if (res.prototype && res.prototype.toLowerCase().trim() !== text.toLowerCase().trim()) {
-              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-accent) 8%, transparent);border:0.5px solid color-mix(in srgb, var(--p-accent) 40%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
-                <span style="color:var(--p-text-muted);font-size:11px;">${isTraditional ? '原型' : '原型'}</span>
-                <span style="color:var(--p-accent);font-weight:500;">${escapeHtml(res.prototype)}</span>
-            </span>`;
-            }
-
-            (res.wordForms || []).forEach(wf => {
-              const localName = isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name;
-              formsHtml += `<span style="display:inline-flex;align-items:center;gap:4px;background:color-mix(in srgb, var(--p-text-main) 5%, transparent);border:0.5px solid color-mix(in srgb, var(--p-border) 60%, transparent);border-radius:6px;padding:3px 8px;font-size:12px;">
-                <span style="color:var(--p-text-muted);font-size:11px;">${escapeHtml(localName)}</span>
-                <span style="color:var(--p-text-main);font-weight:500;">${escapeHtml(wf.value)}</span>
-            </span>`;
-            });
-
-            detailHtml += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${formsHtml}</div>`;
-          }
-
-          pD.innerHTML = detailHtml;
-        } else {
-          pD.style.display = 'none';
-        }
-      }
-      const saveBtn = shadow.getElementById('p-save');
-      if (saveBtn) {
-        saveBtn._miraSnapshot = {
-          word: text,
-          basic: res.basic || "",
-          phonetic: res.phonetic || "",
-          dictData: res.dictData || [],
-          examples: res.examples || [],
-          prototype: res.prototype || null
-        };
-        saveBtn._miraReady = true;
-      }
-      const pE = shadow.getElementById('p-examples');
-      if (pE?.style) {
-        if (res.examples?.length > 0) {
-          pE.style.display = 'block';
-          const safeText = (text || "").replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const regex = new RegExp(`\\b(${safeText})\\b`, 'gi');
-          const rtl = typeof isRTL !== 'undefined' ? isRTL : false;
-          pE.innerHTML = `<div style="font-size:9px; opacity:0.5; margin-bottom:10px; font-weight:bold; letter-spacing:1px;">EXAMPLES</div>` +
-            res.examples.slice(0, 3).map(s => {
-              let en = typeof s === 'string' ? s : (s.en || s.sentence || "");
-              let cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
-              en = escapeHtml(cleanMarker(en));
-              cn = escapeHtml(cleanMarker(cn));
-              const highlightedEn = en.replace(regex, `<span style="color: #38BDF8; font-weight: 600;">$1</span>`);
-              return `<div class="ex-item" style="margin-bottom: 10px; direction: ${rtl ? 'rtl' : 'ltr'}; text-align: ${rtl ? 'right' : 'left'};">
-            <div class="ex-en" style="font-style: italic; line-height: 1.4;">${highlightedEn}</div>
-            <div class="ex-cn" style="font-style: italic; opacity: 0.9; font-size: 12px;">${cn}</div>
-          </div>`;
-            }).join('');
-        } else {
-          pE.style.display = 'none';
-        }
-      }
-
-      const pSource = shadow.getElementById('p-source');
-      if (pSource) {
-        if (res.source) {
-          pSource.style.display = 'block';
-          pSource.innerText = `Source: ${res.source}`;
-        } else {
-          pSource.style.display = 'none';
-        }
-      }
-    }
-    //收藏
+    // 收藏
     shadow.getElementById('p-save').onclick = async (e) => {
       e.stopPropagation();
       const saveBtn = shadow.getElementById('p-save');
-      if (!saveBtn) return;
-      if (!saveBtn._miraReady) {
-        saveBtn.style.animation = 'none';
+      if (!saveBtn?._miraReady) {
         saveBtn.title = typeof t === 'function' ? t('loading') : 'Loading...';
-        setTimeout(() => {
-          saveBtn.title = typeof t === 'function' ? t('collect') : 'Collect';
-        }, 1000);
+        setTimeout(() => { saveBtn.title = t('collect'); }, 1000);
         return;
       }
+
       const star = shadow.getElementById('star-icon');
-      const wordText = text.trim();
       const wordLower = wordText.toLowerCase();
       const dbKey = `vb_${wordLower}`;
       const now = Date.now();
-      const currentUrl = window.location.href;
-      const currentTitle = document.title;
-      const cleanText = (str) => {
-        if (!str) return "";
-        return str.replace(/\[\[\d+\]\]/g, '').trim();
-      };
-      let fullTranslation = null;
       const snapshot = saveBtn._miraSnapshot;
-      const isSnapshotMatched = snapshot && snapshot.word?.toLowerCase().trim() === wordLower;
-      if (isSnapshotMatched) {
-        fullTranslation = {
-          basic: cleanText(snapshot.basic),
-          phonetic: snapshot.phonetic,
-          dictData: snapshot.dictData
-        };
+
+      const cleanText = (s) => s ? s.replace(/\[\[\d+\]\]/g, '').trim() : '';
+
+      let fullTranslation;
+      if (snapshot?.word?.toLowerCase().trim() === wordLower) {
+        fullTranslation = { basic: cleanText(snapshot.basic), phonetic: snapshot.phonetic, dictData: snapshot.dictData };
+      } else if (lastTranslationResult?.word?.toLowerCase().trim() === wordLower) {
+        fullTranslation = { basic: cleanText(lastTranslationResult.basic || ''), phonetic: lastTranslationResult.phonetic || '', dictData: lastTranslationResult.dictData || [] };
+      } else {
+        fullTranslation = { basic: cleanText(shadow.getElementById('p-basic')?.innerText || ''), phonetic: shadow.getElementById('p-phonetic')?.innerText || '', dictData: [] };
       }
-      else {
-        const lastWordMatched = lastTranslationResult &&
-          lastTranslationResult.word?.toLowerCase().trim() === wordLower;
-        if (lastWordMatched) {
-          fullTranslation = {
-            basic: cleanText(lastTranslationResult.basic || ""),
-            phonetic: lastTranslationResult.phonetic || "",
-            dictData: lastTranslationResult.dictData || []
-          };
-        } else {
-          fullTranslation = {
-            basic: cleanText(shadow.getElementById('p-basic')?.innerText || ""),
-            phonetic: shadow.getElementById('p-phonetic')?.innerText || "",
-            dictData: []
-          };
-        }
-      }
-      let existingEntry = await idb.vocabulary.get(wordText);
-      let isActive = false;
-      let entryToSave = null;
-      if (existingEntry) {
-        if (!existingEntry.deleted) {
-          entryToSave = { ...existingEntry, deleted: true, updated: now };
+
+      const existing = await idb.vocabulary.get(wordText);
+      let isActive, entry;
+      if (existing) {
+        if (!existing.deleted) {
+          entry = { ...existing, deleted: true, updated: now };
           isActive = false;
         } else {
-          entryToSave = {
-            ...existingEntry,
-            word: wordText,
-            trans: fullTranslation,
-            src: currentUrl,
-            title: currentTitle,
-            deleted: false,
-            updated: now,
-            date: now
-          };
+          entry = { ...existing, word: wordText, trans: fullTranslation, src: window.location.href, title: document.title, deleted: false, updated: now, date: now };
           isActive = true;
         }
       } else {
-        entryToSave = {
-          id: crypto.randomUUID(),
-          word: wordText,
-          trans: fullTranslation,
-          src: currentUrl,
-          title: currentTitle,
-          date: now,
-          updated: now,
-          deleted: false,
-          lv: 0
-        };
+        entry = { id: crypto.randomUUID(), word: wordText, trans: fullTranslation, src: window.location.href, title: document.title, date: now, updated: now, deleted: false, lv: 0 };
         isActive = true;
       }
-      await idb.set({ [dbKey]: entryToSave });
+
+      await idb.set({ [dbKey]: entry });
+
       if (isActive) {
         saveBtn.classList.add('is-saved');
-        saveBtn.title = (typeof t === 'function' ? t('uncollect') : "Uncollect");
+        saveBtn.title = t('uncollect');
         star.setAttribute('fill', '#facc15');
         star.setAttribute('stroke', '#facc15');
       } else {
         saveBtn.classList.remove('is-saved');
-        saveBtn.title = (typeof t === 'function' ? t('collect') : "Collect");
+        saveBtn.title = t('collect');
         star.setAttribute('fill', 'none');
         star.setAttribute('stroke', 'rgba(255,255,255,0.8)');
       }
-      // 检查高亮开关是否开启
       await window.__vocabOnSave?.(wordText, isActive);
     };
-    const dragZone = shadow.getElementById('drag-zone');
-    const header = shadow.getElementById('p-header');
+
+    // 拖拽
     const startDrag = (e) => {
       if (e.target.closest('.icon-btn')) return;
       isDragging = true;
@@ -3979,49 +3397,213 @@ function initSelectionTranslate() {
       initialY = r.top;
       e.preventDefault();
     };
-    dragZone.onmousedown = startDrag;
-    header.onmousedown = startDrag;
+    shadow.getElementById('drag-zone').onmousedown = startDrag;
+    shadow.getElementById('p-header').onmousedown = startDrag;
+
+    // 主题切换
     const themeBtn = shadow.getElementById('p-theme-toggle');
     themeBtn.onclick = (e) => {
       e.stopPropagation();
-      let nextMode;
-      const currentStored = localStorage.getItem('eclipse-theme') || 'auto';
-      if (currentStored === 'light') nextMode = 'auto';
-      else if (currentStored === 'auto') nextMode = 'dark';
-      else if (currentStored === 'dark') nextMode = 'light';
-      else nextMode = 'auto';
-      updateThemeUI(nextMode, shadow, shadowHost);
+      const cur = localStorage.getItem('eclipse-theme') || 'auto';
+      const next = { light: 'auto', auto: 'dark', dark: 'light' }[cur] ?? 'auto';
+      updateThemeUI(next, shadow, shadowHost);
     };
-    const initialMode = localStorage.getItem('eclipse-theme') || 'auto';
-    updateThemeUI(initialMode, shadow, shadowHost);
+    updateThemeUI(localStorage.getItem('eclipse-theme') || 'auto', shadow, shadowHost);
+
+    // ── 加载翻译数据 ──────────────────────────────────────────────────────────
     const basicEl = shadow?.getElementById('p-basic');
     if (!basicEl?.style) return;
+
     try {
       const res = await getDetailedTranslation(text, false, manualLang, {});
       if (res && !res.isError) {
-        basicEl.style.color = "";
-        basicEl.style.fontStyle = "normal";
-        fillPopupData(res, shadow, text, manualLang);
+        basicEl.style.color = '';
+        basicEl.style.fontStyle = 'normal';
+        fillPopupData(res, shadow, text, manualLang, isRTL);
       } else {
-        const errorMsg = res?.basic || "未知错误";
-        basicEl.innerText = `[Error: ${errorMsg}]`;
-        basicEl.style.color = "#ff4d4f";
-        basicEl.style.fontStyle = "italic";
+        setBasicError(basicEl, res?.basic || '未知错误');
       }
     } catch (err) {
-      basicEl.innerText = `[Error: ${err.message || '网络异常'}]`;
-      basicEl.style.color = "#ff4d4f";
-      basicEl.style.fontStyle = "italic";
+      setBasicError(basicEl, err.message || '网络异常');
     } finally {
-      if (typeof popupEl !== 'undefined' && popupEl) {
-        requestAnimationFrame(() => {
-          if (typeof clampPopupToViewport === 'function') {
-            clampPopupToViewport(popupEl);
-          }
-        });
-      }
+      requestAnimationFrame(() => clampPopupToViewport?.(popupEl));
     }
   }
+
+  // ─── 内容 HTML 模板 ──────────────────────────────────────────────────────────
+
+  function buildContentHTML(text, isSaved) {
+    return `
+      <div style="line-height:1.2;">
+        <div style="display:block;line-height:1.2;">
+          <span id="p-query" style="font-size:22px;font-weight:700;color:var(--p-text-main);
+                word-break:break-word;overflow-wrap:break-word;display:inline;vertical-align:middle;">
+            ${text}
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:8px;margin-left:10px;
+                      padding-top:6px;vertical-align:middle;white-space:nowrap;">
+            <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="margin:0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </div>
+            <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}"
+                title="${isSaved ? t('uncollect') : t('collect')}" style="margin:0;">
+              <svg id="star-icon" width="20" height="20" viewBox="0 0 24 24"
+                  fill="${isSaved ? '#facc15' : 'none'}"
+                  stroke="${isSaved ? '#facc15' : 'rgba(255,255,255,0.8)'}"
+                  stroke-width="1.5" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <div id="p-refresh" class="icon-btn refresh-btn" title="${t('retranslate')}" style="margin:0;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+              </svg>
+            </div>
+          </span>
+        </div>
+        <div id="p-phonetic" style="margin-top:6px;margin-left:2px;color:var(--p-phonetic);
+            font-size:14px;opacity:0.8;font-family:'Lucida Sans Unicode',sans-serif;"></div>
+        <div id="p-basic" class="basic" style="margin-top:8px;">Loading...</div>
+        <div id="p-detail" class="detail" style="display:none;margin-top:10px;margin-bottom:10px;"></div>
+        <div id="p-examples" style="display:none;margin-top:12px;"></div>
+        <div id="p-source"   style="display:none;margin-top:1px;font-size:10px;opacity:0.35;text-align:right;letter-spacing:0.5px;"></div>
+      </div>`;
+  }
+
+  // ─── 填充翻译数据 ─────────────────────────────────────────────────────────────
+
+  function fillPopupData(res, shadow, text, targetLang, isRTL = false) {
+    if (!shadow || !res) return;
+
+    const esc = (s) => typeof s !== 'string' ? '' :
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+    const cleanMarker = (s) => typeof s === 'string' ? s.replace(/\[\[\d+\]\]\s*/g, '').trim() : s;
+
+    // 合并相同词性
+    const mergedDict = (res.dictData || []).reduce((acc, item) => {
+      const meanings = item.meanings?.length
+        ? item.meanings
+        : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+      const found = acc.find(d => d.pos === item.pos);
+      if (found) found.meanings.push(...meanings);
+      else acc.push({ ...item, meanings });
+      return acc;
+    }, []).map(i => ({ ...i, meanings: [...new Set(i.meanings.map(m => m.trim()).filter(Boolean))] }));
+
+    res = { ...res, dictData: mergedDict };
+
+    // 音标
+    const pPhonetic = shadow.getElementById('p-phonetic');
+    if (pPhonetic) pPhonetic.innerText = res.phonetic
+      ? `/${res.phonetic.replace(/[\[\]\/]/g, '')}/` : '';
+
+    // 基本释义
+    const pBasic = shadow.getElementById('p-basic');
+    if (pBasic) pBasic.innerText = cleanMarker(res.basic) || '';
+
+    // 词典详情
+    const pD = shadow.getElementById('p-detail');
+    if (pD?.style) {
+      if (res.dictData?.length || res.wordForms?.length || res.prototype) {
+        const isTraditional = /tw|hk/i.test(targetLang || '');
+        const ZH_FORM_TW = {
+          '过去式': '過去式', '过去分词': '過去分詞', '现在分词': '現在分詞',
+          '第三人称单数': '第三人稱單數', '复数': '複數', '单数': '單數',
+          '比较级': '比較級', '最高级': '最高級'
+        };
+
+        let html = res.dictData.map(i => {
+          const pos = esc(localizePos(i.pos, targetLang) || '');
+          const meanings = (i.meanings || []).map(m => esc(cleanMarker(m))).join(', ');
+          return `<div><b style="color:#319BCA;font-size:12px;margin-right:4px;">${pos}</b>${meanings}</div>`;
+        }).join('');
+
+        let forms = '';
+        if (res.prototype && res.prototype.toLowerCase().trim() !== text.toLowerCase().trim()) {
+          forms += `<span style="display:inline-flex;align-items:center;gap:4px;
+            background:color-mix(in srgb,var(--p-accent) 8%,transparent);
+            border:0.5px solid color-mix(in srgb,var(--p-accent) 40%,transparent);
+            border-radius:6px;padding:3px 8px;font-size:12px;">
+          <span style="color:var(--p-text-muted);font-size:11px;">原型</span>
+          <span style="color:var(--p-accent);font-weight:500;">${esc(res.prototype)}</span>
+        </span>`;
+        }
+        (res.wordForms || []).forEach(wf => {
+          const name = esc(isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name);
+          forms += `<span style="display:inline-flex;align-items:center;gap:4px;
+            background:color-mix(in srgb,var(--p-text-main) 5%,transparent);
+            border:0.5px solid color-mix(in srgb,var(--p-border) 60%,transparent);
+            border-radius:6px;padding:3px 8px;font-size:12px;">
+          <span style="color:var(--p-text-muted);font-size:11px;">${name}</span>
+          <span style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
+        </span>`;
+        });
+        if (forms) html += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${forms}</div>`;
+
+        pD.innerHTML = html;
+        pD.style.display = 'block';
+      } else {
+        pD.style.display = 'none';
+      }
+    }
+
+    // 保存快照
+    const saveBtn = shadow.getElementById('p-save');
+    if (saveBtn) {
+      saveBtn._miraSnapshot = {
+        word: text, basic: res.basic || '', phonetic: res.phonetic || '',
+        dictData: res.dictData || [], examples: res.examples || [], prototype: res.prototype || null
+      };
+      saveBtn._miraReady = true;
+    }
+
+    // 例句
+    const pE = shadow.getElementById('p-examples');
+    if (pE?.style) {
+      if (res.examples?.length) {
+        const safeText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b(${safeText})\\b`, 'gi');
+        pE.innerHTML = `<div style="font-size:9px;opacity:0.5;margin-bottom:10px;font-weight:bold;letter-spacing:1px;">EXAMPLES</div>` +
+          res.examples.slice(0, 3).map(s => {
+            const en = esc(cleanMarker(typeof s === 'string' ? s : (s.en || s.sentence || '')));
+            const cn = esc(cleanMarker(typeof s === 'object' ? (s.cn || s.translation || '') : ''));
+            const dir = isRTL ? 'rtl' : 'ltr';
+            return `<div style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
+                       border-radius:2px;word-break:break-word;direction:${dir};text-align:${dir === 'rtl' ? 'right' : 'left'};">
+            <div style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
+              ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
+            </div>
+            <div style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:2px;">${cn}</div>
+          </div>`;
+          }).join('');
+        pE.style.display = 'block';
+      } else {
+        pE.style.display = 'none';
+      }
+    }
+
+    // 来源
+    const pSource = shadow.getElementById('p-source');
+    if (pSource) {
+      pSource.style.display = res.source ? 'block' : 'none';
+      if (res.source) pSource.innerText = `Source: ${res.source}`;
+    }
+  }
+
+  // ─── 工具函数 ────────────────────────────────────────────────────────────────
+
+  function setBasicError(el, msg) {
+    el.innerText = `[${t('translate_failed')}: ${msg}]`;
+    el.style.color = '#ff4d4f';
+    el.style.fontStyle = 'italic';
+  }
+
   //小按钮
   let logoCenter = null;
   const setImportantStyle = (el, props) => {

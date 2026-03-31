@@ -11,7 +11,8 @@
     --text-dim: #94a3b8;
     --glow-blue: 0 0 15px rgba(56, 189, 248, 0.3);
     --radius-m: 10px;
-    --radius-s: 8px;
+    --radius-s: 7px;
+    --radius-L: 50px;
 }
 * {
     box-sizing: border-box;
@@ -61,7 +62,7 @@ body {
         0 0 1px rgba(56, 189, 248, 0.5),
         0 30px 60px rgba(0, 0, 0, 0.7),
         0 0 40px rgba(56, 189, 248, 0.1);
-    border-radius: 18px;
+    border-radius: 14px;
     position: relative;
     overflow: hidden;
     z-index: 1000;
@@ -133,7 +134,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.2s ease, background 0.2s ease;
     color: var(--text-primary);
 }
 .engine-item span:first-child {
@@ -143,7 +144,8 @@ body {
 .engine-item:hover {
     background: rgba(56, 189, 248, 0.08);
     border-color: rgba(56, 189, 248, 0.4);
-    transform: translateX(6px);
+    /* transform: translateX(6px); */
+    transform: scale(1.07);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 .engine-item.active {
@@ -151,6 +153,7 @@ body {
     color: var(--neon-blue);
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     font-weight: 600;
+    transform: scale(1.05);
 }
 .del-icon {
     width: 24px;
@@ -342,7 +345,7 @@ body {
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
     color: rgba(255, 255, 255, 0.9) !important;    
-    border-radius: var(--radius-m) !important;
+    border-radius: var(--radius-s) !important;
 }
 .btn-test::before {
     content: "";
@@ -374,7 +377,7 @@ body {
     color: #000 !important;
     border: none !important;
     box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4) !important;
-    border-radius: var(--radius-m) !important;
+    border-radius: var(--radius-s) !important;
     padding: 10px 30px !important;
 }
 .btn-save:hover {
@@ -390,7 +393,7 @@ body {
     height: 44px;
     background: rgba(59, 130, 246, 0.08) !important; 
     border: 1px solid rgba(59, 130, 246, 0.6) !important; 
-    border-radius: var(--radius-m) !important;
+    border-radius: var(--radius-L) !important;
     color: rgba(59, 130, 246, 1) !important; 
     font-weight: 700;
     letter-spacing: 1.5px; 
@@ -498,7 +501,7 @@ body {
     color: #ffd700 !important;
     text-decoration: none;
     padding: 3px 10px;
-    border-radius: var(--radius-m);
+    border-radius: var(--radius-s);
     background: rgba(255, 215, 0, 0.05);
     border: 1px solid rgba(255, 215, 0, 0.2);
     transition: 0.3s;
