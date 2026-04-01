@@ -33,6 +33,7 @@
   },
   "host_permissions": [
     "<all_urls>",
+    "https://raw.githubusercontent.com/os9sur/MiraTranslator/*",
     "https://www.bing.com/*",
     "https://cn.bing.com/*",
     "https://*.bing.com/*",
