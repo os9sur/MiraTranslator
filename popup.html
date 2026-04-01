@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="style.css">
   <style>
     html {
-      overflow: hidden;
+      overflow-y: auto;
     }
 
     body {
@@ -19,17 +19,17 @@
       max-width: 580px;
       min-height: fit-content;
       border-radius: 20px;
-      padding: 5px 12px;
-      margin: 0;
+      padding: 5px 8px;
+      margin-bottom: 10px;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 14px;
       background: #0f172a;
       color: #e5e7eb;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      overflow-y: auto;
       transition: width 0.2s ease-in-out;
     }
 
@@ -90,47 +90,6 @@
       font-weight: bold;
     }
 
-    html.full-screen-mode {
-      width: 100% !important;
-      height: 100% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background-color: #02040a !important;
-      overflow: hidden !important;
-    }
-
-    body.full-screen-mode {
-      width: 100vw !important;
-      height: 100vh !important;
-      min-width: 100vw !important;
-      min-height: 100vh !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      background-color: #02040a !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-      overflow: visible !important;
-    }
-
-    body.full-screen-mode #syncSettingsPanel,
-    body.full-screen-mode #settingsPanel {
-      position: relative !important;
-      left: auto !important;
-      top: auto !important;
-      display: none;
-      flex-direction: column !important;
-      width: 400px !important;
-      max-height: 85vh !important;
-      background: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
-      padding: 40px !important;
-      border-radius: 24px !important;
-      border: none !important;
-      overflow-y: auto !important;
-      overflow-x: visible !important;
-      animation: eclipse-glow-refined 5s ease-in-out infinite alternate;
-    }
-
     @keyframes eclipse-glow-refined {
       0% {
         box-shadow:
@@ -146,11 +105,6 @@
           0 0 100px rgba(56, 189, 248, 0.35),
           0 0 150px rgba(56, 189, 248, 0.15);
       }
-    }
-
-    body.full-screen-mode #mainContainer,
-    body.full-screen-mode .main-header {
-      display: none !important;
     }
   </style>
 </head>
@@ -443,8 +397,8 @@
   <!-- 查单词结束 -->
   <div id="mainContainer">
     <!-- 设置 -->
-    <div class="main-header" style="margin-bottom: 8px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <div class="main-header" style="margin-bottom: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
         <div style="display: flex; align-items: center; gap: 8px;">
           <div style="width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; 
                 filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.6));">
@@ -452,70 +406,6 @@
           </div>
           <span id="app-name-label" data-i18n="appName"
             style="font-weight: 900; font-size: 12px; letter-spacing: 1.5px; color: #ffffffeb; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-style: italic;"></span>
-
-<div id="noticeBar" style="
-  display: none;
-  position: relative;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 1px solid rgba(56,189,248,0.4);
-  background: rgba(15,23,42,0.9);
-  transition: opacity 0.3s ease;
-">
-  <div id="noticeCollapsedRow" style="
-    display: flex; align-items: center; gap: 6px;
-    padding: 5px 8px; height: 28px;
-  ">
-    <div style="
-      width: 6px; height: 6px; border-radius: 50%;
-      background: #38bdf8; flex-shrink: 0;
-      animation: miraDotBlink 1.8s ease-in-out infinite;
-    "></div>
-    <div id="noticeTitleClip" style="
-      flex: 1; overflow: hidden;
-      font-size: 11px; font-weight: 600; color: #7dd3fc;
-      letter-spacing: 0.4px; white-space: nowrap;
-      mask-image: linear-gradient(to right, black 60%, transparent 95%);
-      -webkit-mask-image: linear-gradient(to right, black 60%, transparent 95%);
-    "></div>
-    <div id="noticeChevron" style="
-      flex-shrink: 0; color: rgba(56,189,248,0.6);
-      font-size: 10px; transition: transform 0.25s ease;
-    ">&#9660;</div>
-  </div>
-  <div id="noticeExpandedBody" style="
-    display: none;
-    padding: 8px 10px 10px;
-    border-top: 1px solid rgba(56,189,248,0.15);
-  ">
-    <div id="noticeContentText" style="
-      font-size: 11.5px; color: #cbd5e1; line-height: 1.55;
-      margin-bottom: 8px;
-    "></div>
-    <span id="noticeGotItBtn" style="
-      display: inline-block; font-size: 11px; font-weight: 600;
-      color: #38bdf8;
-      border: 1px solid rgba(56,189,248,0.45);
-      background: rgba(56,189,248,0.08);
-      border-radius: 12px; padding: 3px 12px; cursor: pointer;
-    "></span>
-  </div>
-</div>
-
-<style>
-@keyframes miraBorderPulse {
-  0%,100% { border-color: rgba(56,189,248,0.25); }
-  50%      { border-color: rgba(56,189,248,0.9); }
-}
-@keyframes miraDotBlink {
-  0%,100% { opacity: 1; } 50% { opacity: 0.25; }
-}
-#noticeBar.mira-pulsing {
-  animation: miraBorderPulse 1.8s ease-in-out infinite;
-}
-</style>
         </div>
         <div id="advancedSettingsBtn" data-i18n="moreSettings" class="icon-action-btn"
           style="padding: 4px; color: rgba(255,255,255,0.5); cursor: pointer;" data-i18n-title
@@ -531,6 +421,59 @@
             <circle class="slider-knob k2" cx="15" cy="12" r="1.8" />
             <circle class="slider-knob k3" cx="11" cy="18" r="1.8" />
           </svg>
+        </div>
+      </div>
+
+      <div id="noticeBar" style="
+          display: none;
+          position: relative;
+          margin-bottom: 3px;
+          border-radius: 20px;
+          overflow: hidden;
+          padding: 1px 5px 1px 5px;
+          cursor: pointer;
+          border: 0.3px solid rgba(234, 179, 8, 0.4);
+          background: rgba(15,23,42,0.9);
+          transition: opacity 0.3s ease;
+        ">
+        <div id="noticeCollapsedRow" style="
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 8px; height: 28px;
+          ">
+          <div style="
+              width: 6px; height: 6px; border-radius: 50%;
+              background: #eab308; flex-shrink: 0;
+              animation: miraDotBlink 1.8s ease-in-out infinite;
+            "></div>
+          <div id="noticeTitleClip" style="
+              flex: 1; overflow: hidden;
+              font-size: 11px; font-weight: 600; color: #fbbf24;
+              letter-spacing: 0.4px; white-space: nowrap;
+              mask-image: linear-gradient(to right, black 60%, transparent 95%);
+              -webkit-mask-image: linear-gradient(to right, black 60%, transparent 95%);
+            "></div>
+          <div id="noticeChevron" style="
+              flex-shrink: 0; color: rgb(70 235 179);
+              font-size: 10px; transition: transform 0.25s ease;
+            ">&#9660;</div>
+        </div>
+        <div id="noticeExpandedBody" style="
+    display: none;
+    padding: 8px 10px 10px;
+    border-top: 1px solid rgba(234, 179, 8, 0.15);
+  ">
+          <div id="noticeContentText" style="
+      font-size: 11.5px; color: #cbd5e1; line-height: 1.55;
+      margin-bottom: 8px;
+    "></div>
+          <div style="display: flex; justify-content: flex-end;">
+            <span id="noticeGotItBtn" style="
+        display: inline-block; font-size: 11px; font-weight: 600;
+        color: #fbbf24;
+        border: 0.3px solid rgba(234, 179, 8, 0.6);
+        background: rgba(234, 179, 8, 0.08);
+        border-radius: 12px; padding: 3px 12px; cursor: pointer;"></span>
+          </div>
         </div>
       </div>
       <div
@@ -729,7 +672,7 @@
       </select>
     </div>
     <div id="inspectContainer" class="row-group"
-      style="margin-top: 6px; border-top: 1px solid #334155; padding-top: 8px;">
+      style="margin-top: 1px; border-top: 1px solid #334155; padding-top: 8px;">
       <div id="inspectElementLabel" data-i18n="personalizedScan"
         style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">个性化扫描配置 (失去焦点自动保存)
       </div>
@@ -799,7 +742,7 @@
   </div>
   <!-- 设置 -->
   <div id="settingsPanel"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 100; display: none; padding: 20px; box-sizing: border-box; flex-direction: column;">
+    style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 100; display: none; padding: 20px; box-sizing: border-box; flex-direction: column;">
     <div class="row" style="margin-bottom: 11px;">
       <h3 data-i18n="translationEngineConfig" style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">
         ENGINE CONFIG</h3>
@@ -953,13 +896,13 @@
   </div>
   <!-- 云同步panel开始 -->
   <div id="syncSettingsPanel"
-    style="position: fixed; top: 0; left: 0; width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 125; display: none; padding: 20px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 125; display: none; padding: 6px 6px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
     <div class="settings-card-wrapper">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <h3 style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">CLOUD SYNC</h3>
         <span id="closeSyncPanel" class="close-btn-common">✕</span>
       </div>
-      <div style="margin-bottom: 20px;">
+      <div style="margin-bottom: 10px;">
         <label
           style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">STORAGE
           PROVIDER</label>
@@ -979,7 +922,7 @@
         </div>
       </div>
       <div id="webdavConfigArea"
-        style="display: none; background: rgba(15, 23, 42, 0.5); padding: 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 15px;">
+        style="display: none; background: rgba(15, 23, 42, 0.5); padding: 10px 12px 3px 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 7px;">
         <input type="text" id="webdavUrl" placeholder="Server URL (e.g. https://...)"
           style="width: 100%; margin-bottom: 8px;" class="api-input-field">
         <input type="text" id="webdavUser" placeholder="Username" style="width: 100%; margin-bottom: 8px;"
@@ -1006,7 +949,7 @@
           </select>
         </div>
       </div>
-      <div id="syncSettingsPanel">
+      <div>
         <div class="sync-config-section">
         </div>
         <div class="sync-actions-footer" style="margin-top: auto; padding-top: 15px;">
@@ -1030,7 +973,8 @@
               style="flex: 1; background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 6px; border-radius: 4px;">导入
               JSON</button>
           </div>
-          <div id="syncStatus" style="margin-top: 12px; font-size: 10px; color: #64748b; text-align: center;">
+          <div id="syncStatus"
+            style="margin-top: 12px; margin-bottom: 3px; font-size: 10px; color: #64748b; text-align: center;">
             上次同步: 尚未同步
           </div>
         </div>
@@ -1039,7 +983,7 @@
   </div>
   <!-- 风格设置panel开始 -->
   <div id="styleSettingsPanel"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 15px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
     <div
       style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
       <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">STYLE
@@ -1171,7 +1115,7 @@
       </div>
     </div>
     <button id="saveStyleConfig" data-i18n="applyAndSync" class="cool-btn"
-      style="margin-top: auto; flex-shrink: 0;">应用并同步到网页</button>
+      style="margin-top: 30px; flex-shrink: 0;">应用并同步到网页</button>
   </div>
   <!-- donate -->
   <!-- <div id="donateOverlay"
