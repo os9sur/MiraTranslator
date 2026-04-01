@@ -1,0 +1,27 @@
+{
+    "enabled": false,
+    "zh-CN": {
+        "id": "notice_2025_v1",
+        "title": "新功能：智能拾取器 2.0 已上线",
+        "content": "智能拾取器 2.0 支持实时预览 CSS 选择器匹配结果，点击放大镜按钮即可体验。",
+        "gotIt": "知道了"
+    },
+    "zh-TW": {
+        "id": "notice_2025_v1",
+        "title": "新功能：智慧選取器 2.0 已上線",
+        "content": "智慧選取器 2.0 支援即時預覽 CSS 選擇器比對結果。",
+        "gotIt": "知道了"
+    },
+    "en": {
+        "id": "notice_2025_v1",
+        "title": "New: Smart Picker 2.0 is here",
+        "content": "Smart Picker 2.0 lets you preview CSS selector matches in real time. Click the magnifier button to try it.",
+        "gotIt": "Got it"
+    },
+    "ja": {
+        "id": "notice_2025_v1",
+        "title": "新機能：スマートピッカー 2.0 リリース",
+        "content": "CSSセレクターのリアルタイムプレビューが可能になりました。",
+        "gotIt": "わかりました"
+    }
+}

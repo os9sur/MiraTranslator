@@ -2886,6 +2886,8 @@ function initSelectionTranslate() {
       .icon-btn:hover       { transform: scale(1.1); }
       .icon-btn:hover svg   { transform: scale(1.1); }
 
+      .save-btn:hover svg {stroke: #ffaa00a7 !important;}
+
       /* 主题切换 */
       .icon-btn.theme svg#theme-icon {
         width:      15px !important;

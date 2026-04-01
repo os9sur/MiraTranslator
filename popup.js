@@ -62,9 +62,79 @@ async function initOnboarding() {
   }
 }
 
+const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
+async function initNoticeBar() {
+  const GITHUB_NOTICE_URL =
+    'https://raw.githubusercontent.com/os9sur/MiraTranslator/refs/heads/main/assets/notice.json';
+
+  let noticeData = null;
+
+  try {
+    const resp = await fetch(`${GITHUB_NOTICE_URL}?t=${Date.now()}`, {
+      cache: 'no-cache'
+    });
+    if (!resp.ok) return;
+    const json = await resp.json();
+    if (!json.enabled) return; 
+
+    const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
+    const langShort = uiLang.split('-')[0];
+
+    noticeData =
+      json[uiLang] ||
+      json[langShort] ||
+      json['en'] ||
+      Object.values(json)[0] ||
+      null;
+  } catch (e) {
+    return;
+  }
+
+  if (!noticeData?.id || !noticeData?.title) return;
+
+  const dismissedKey = NOTICE_DISMISSED_KEY + noticeData.id;
+  const stored = await safeGetStorage(dismissedKey);
+  if (stored?.[dismissedKey]) return;
+
+  const bar = document.getElementById('noticeBar');
+  const titleEl = document.getElementById('noticeTitleClip');
+  const contentEl = document.getElementById('noticeContentText');
+  const gotItBtn = document.getElementById('noticeGotItBtn');
+  const expandBody = document.getElementById('noticeExpandedBody');
+  const chevron = document.getElementById('noticeChevron');
+
+  if (!bar) return;
+
+  titleEl.textContent = noticeData.title;
+  contentEl.textContent = noticeData.content || '';
+
+  gotItBtn.textContent = noticeData.gotIt;
+
+  bar.style.display = 'block';
+  bar.classList.add('mira-pulsing');
+
+  document.getElementById('noticeCollapsedRow').addEventListener('click', () => {
+    const isExpanded = expandBody.style.display === 'block';
+    expandBody.style.display = isExpanded ? 'none' : 'block';
+    chevron.style.transform = isExpanded ? '' : 'rotate(180deg)';
+    titleEl.style.maskImage = isExpanded
+      ? 'linear-gradient(to right, black 60%, transparent 95%)'
+      : 'none';
+    titleEl.style.webkitMaskImage = titleEl.style.maskImage;
+    if (!isExpanded) bar.classList.remove('mira-pulsing');
+  });
+
+  gotItBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await chrome.storage.local.set({ [dismissedKey]: true });
+    bar.style.opacity = '0';
+    setTimeout(() => { bar.style.display = 'none'; }, 300);
+  });
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initNoticeBar();
   safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
   await initOnboarding();
   const res_uiLanguage = await safeGetStorage('ui_language');

@@ -779,14 +779,23 @@ const POS_REVERSE_MAP = (() => {
 })();
 
 function localizePos(pos, targetLang) {
-  if (!pos || !targetLang) return pos;
-  const normalized = pos.trim().replace(/\.$/, ''); // 去掉末尾的点
-  const cnKey = POS_REVERSE_MAP[normalized] || POS_REVERSE_MAP[normalized.toLowerCase()];
-  if (!cnKey) return pos; // 完全未知的词性，原样返回
+  if (!pos) return '';
+
+  const normalized = pos.trim().toLowerCase().replace(/\.$/, '');
+  const cnKey = POS_REVERSE_MAP[normalized];
+
+  // 找不到映射则原样返回
+  if (!cnKey) return pos;
+
   const entry = POS_MAP[cnKey];
-  const langFull = targetLang.toLowerCase();
+  const langFull = (targetLang || 'en').toLowerCase().replace('_', '-');
   const langShort = langFull.split('-')[0];
-  return entry[langFull] || entry[langShort] || pos;
+
+  // 优先级：目标全称 > 目标简称 > 英文保底 > 原始输入
+  return entry[langFull] ||
+    entry[langShort] ||
+    entry['en'] ||
+    pos;
 }
 const AI_LLM_WHITE_LIST = [
   'openai',
@@ -969,6 +978,39 @@ function speakText(text, speakBtn, forcedLang) {
     lastUtterance.onerror = stop;
   }
 }
+
+// 校验翻译结果是否有效
+function isValidTranslationResult(res) {
+  if (!res) return false;
+
+  // basic 字段不应该是 JSON 字符串
+  if (res.basic && (res.basic.trim().startsWith('{') || res.basic.trim().startsWith('['))) {
+    return false;
+  }
+  if (!res.basic || res.basic.trim().length === 0) return false;
+  // dictData 里的 definition 不应该是大量重复词
+  if (res.dictData && res.dictData.length > 0) {
+    for (const item of res.dictData) {
+      const meaning = Array.isArray(item.definition)
+        ? item.definition.join(', ')
+        : typeof item.definition === 'string'
+          ? item.definition
+          : '';
+
+      if (meaning) {
+        const words = meaning.split(/[,\s]+/).filter(Boolean);
+        // 超过10个词且都相同，判定为异常
+        if (words.length > 10) {
+          const unique = new Set(words.map(w => w.toLowerCase()));
+          if (unique.size <= 2) return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 //通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
@@ -1202,7 +1244,25 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     }
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
-        await idb.set({ [cacheKey]: result });
+
+        // 脏数据检测：basic 是 JSON 字符串或大量重复词，跳过缓存写入
+        const isJsonString = typeof result.basic === 'string'
+          && result.basic.trimStart().startsWith('{')
+          && result.basic.trimEnd().endsWith('}')
+          && result.basic.includes('"basic"');
+        const isRepetitive = (() => {
+          if (!result.basic) return false;
+          const words = result.basic.split(/[,\s]+/).filter(Boolean);
+          if (words.length <= 10) return false;
+          const unique = new Set(words.map(w => w.toLowerCase()));
+          return unique.size <= 2;
+        })();
+
+        if (!isJsonString && !isRepetitive) {
+          await idb.set({ [cacheKey]: result });
+        } else {
+          logger.warn('[Cache] 脏数据跳过写入:', result.basic?.substring(0, 60));
+        }
 
         if (forceRefresh) {
           const coreText = query
