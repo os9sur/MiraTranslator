@@ -1347,3 +1347,40 @@ const MiraUtils = {
     return url.includes('youtube.com') || url.includes('youtu.be');
   }
 };
+
+//通知主题色配置
+const NOTICE_THEMES = {
+  info: {
+    border: 'rgba(34, 197, 94, 0.4)',
+    dot: '#22c55e',
+    title: '#86efac',
+    chevron: 'rgba(34, 197, 94, 0.7)',
+    gotItBorder: 'rgba(34, 197, 94, 0.6)',
+    gotItBg: 'rgba(34, 197, 94, 0.08)',
+    gotItColor: '#86efac',
+    divider: 'rgba(34, 197, 94, 0.15)',
+    pulse: ['rgba(34,197,94,0.25)', 'rgba(34,197,94,0.9)'],
+  },
+  warning: {
+    border: 'rgba(234, 179, 8, 0.4)',
+    dot: '#eab308',
+    title: '#fbbf24',
+    chevron: 'rgba(235, 219, 70, 0.8)',
+    gotItBorder: 'rgba(234, 179, 8, 0.6)',
+    gotItBg: 'rgba(234, 179, 8, 0.08)',
+    gotItColor: '#fbbf24',
+    divider: 'rgba(234, 179, 8, 0.15)',
+    pulse: ['rgba(234,179,8,0.25)', 'rgba(234,179,8,0.9)'],
+  },
+  urgent: {
+    border: 'rgba(239, 68, 68, 0.4)',
+    dot: '#ef4444',
+    title: '#fca5a5',
+    chevron: 'rgba(239, 68, 68, 0.8)',
+    gotItBorder: 'rgba(239, 68, 68, 0.6)',
+    gotItBg: 'rgba(239, 68, 68, 0.08)',
+    gotItColor: '#fca5a5',
+    divider: 'rgba(239, 68, 68, 0.15)',
+    pulse: ['rgba(239,68,68,0.25)', 'rgba(239,68,68,0.9)'],
+  }
+};

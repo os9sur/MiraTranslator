@@ -76,7 +76,7 @@ async function initNoticeBar() {
     });
     if (!resp.ok) return;
     const json = await resp.json();
-    if (!json.enabled) return; 
+    if (!json.enabled) return;
 
     const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
     const langShort = uiLang.split('-')[0];
@@ -85,7 +85,6 @@ async function initNoticeBar() {
       json[uiLang] ||
       json[langShort] ||
       json['en'] ||
-      Object.values(json)[0] ||
       null;
   } catch (e) {
     return;
@@ -103,31 +102,58 @@ async function initNoticeBar() {
   const gotItBtn = document.getElementById('noticeGotItBtn');
   const expandBody = document.getElementById('noticeExpandedBody');
   const chevron = document.getElementById('noticeChevron');
+  const dotEl = bar?.querySelector('[style*="border-radius: 50%"]');
 
   if (!bar) return;
 
+  // 应用主题配色
+  const theme = NOTICE_THEMES[noticeData.level] || NOTICE_THEMES.warning;
+  bar.style.borderColor = theme.border;
+  if (dotEl) dotEl.style.background = theme.dot;
+  titleEl.style.color = theme.title;
+  chevron.style.color = theme.chevron;
+  gotItBtn.style.color = theme.gotItColor;
+  gotItBtn.style.borderColor = theme.gotItBorder;
+  gotItBtn.style.background = theme.gotItBg;
+  expandBody.style.borderTopColor = theme.divider;
+  bar.style.setProperty('--notice-glow', theme.dot);
+  
+  const styleId = 'mira-notice-pulse-style';
+  let styleEl = document.getElementById(styleId);
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = styleId;
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `
+    @keyframes miraBorderPulse {
+      0%,100% { border-color: ${theme.pulse[0]}; }
+      50%      { border-color: ${theme.pulse[1]}; }
+    }
+  `;
+
+  // 填入内容
   titleEl.textContent = noticeData.title;
   contentEl.textContent = noticeData.content || '';
-
-  gotItBtn.textContent = noticeData.gotIt;
+  gotItBtn.textContent = noticeData.gotIt || t('btnGotIt', navigator.language || 'en');
 
   bar.style.display = 'block';
   bar.classList.add('mira-pulsing');
 
+  // 折叠行点击：展开 / 收起
   document.getElementById('noticeCollapsedRow').addEventListener('click', () => {
     const isExpanded = expandBody.style.display === 'block';
     expandBody.style.display = isExpanded ? 'none' : 'block';
     chevron.style.transform = isExpanded ? '' : 'rotate(180deg)';
-    titleEl.style.maskImage = isExpanded
-      ? 'linear-gradient(to right, black 60%, transparent 95%)'
-      : 'none';
-    titleEl.style.webkitMaskImage = titleEl.style.maskImage;
+    titleEl.classList.toggle('notice-title-expanded', !isExpanded);
     if (!isExpanded) bar.classList.remove('mira-pulsing');
   });
 
+  // 知道了：持久化 + 淡出
   gotItBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
     await chrome.storage.local.set({ [dismissedKey]: true });
+    bar.style.transition = 'opacity 0.3s ease';
     bar.style.opacity = '0';
     setTimeout(() => { bar.style.display = 'none'; }, 300);
   });
@@ -137,6 +163,59 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNoticeBar();
   safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
   await initOnboarding();
+  function showPanel(panelId) {
+    const allPanels = [
+      'mainContainer',
+      'syncSettingsPanel',
+      'settingsPanel',
+      'styleSettingsPanel',
+      'advancedMenu'
+    ];
+    allPanels.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (id === 'styleSettingsPanel') {
+        el.classList.remove('active');
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    const target = document.getElementById(panelId);
+    if (!target) return;
+    if (panelId === 'styleSettingsPanel') {
+      target.classList.add('active');
+    } else {
+      target.style.display = 'flex';
+    }
+
+    document.body.style.height = '';
+    document.body.style.minHeight = 'fit-content';
+    document.body.style.maxHeight = '';
+    window.scrollTo(0, 0);
+  }
+
+  function showMain() {
+    const allPanels = [
+      'syncSettingsPanel',
+      'settingsPanel',
+      'advancedMenu'
+    ];
+    allPanels.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.getElementById('styleSettingsPanel')?.classList.remove('active');
+
+    const main = document.getElementById('mainContainer');
+    if (main) main.style.display = 'block';
+
+    document.body.style.height = '';
+    document.body.style.minHeight = 'fit-content';
+    document.body.style.maxHeight = '';
+    window.scrollTo(0, 0);
+  }
+
   const res_uiLanguage = await safeGetStorage('ui_language');
   if (res_uiLanguage) {
     window.currentConfig = {
@@ -375,45 +454,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     input.click();
   };
-  document.getElementById('openSyncPanel').onclick = () => {
-    const syncPanel = document.getElementById('syncSettingsPanel');
-    const advMenu = document.getElementById('advancedMenu');
-    if (advMenu) advMenu.style.display = 'none';
-    if (syncPanel) syncPanel.style.display = 'flex';
+  document.getElementById('openSyncPanel').onclick = (e) => {
+    e.stopPropagation();
+    showPanel('syncSettingsPanel');
     if (typeof refreshUI === 'function') refreshUI();
-    document.body.style.height = 'auto';
-    document.body.style.minHeight = 'auto';
-    requestAnimationFrame(() => {
-      let realHeight = syncPanel.scrollHeight;
-      const finalHeight = Math.max(150, Math.min(realHeight, 600));
-      document.body.style.height = `${finalHeight}px`;
-      document.body.style.minHeight = `${finalHeight}px`;
-      if (realHeight > 600) {
-        document.body.style.overflowY = 'auto';
-      } else {
-        document.body.style.overflowY = 'hidden';
-      }
-    });
   };
+
   document.getElementById('closeSyncPanel').onclick = () => {
-    const syncPanel = document.getElementById('syncSettingsPanel');
-    const advMenu = document.getElementById('advancedMenu');
-    if (syncPanel) syncPanel.style.display = 'none';
-    if (advMenu?.style) {
-      advMenu.style.display = 'flex';
-      document.body.style.height = 'auto';
-      document.body.style.minHeight = 'auto';
-      requestAnimationFrame(() => {
-        const targetHeight = advMenu.scrollHeight;
-        if (targetHeight > 0) {
-          const safeHeight = Math.min(targetHeight, 600) + 'px';
-          document.body.style.minHeight = safeHeight;
-          document.body.style.height = safeHeight;
-        }
-        window.scrollTo(0, 0);
-      });
-    }
+    showMain();
   };
+
   document.getElementById('syncFrequency').onchange = async function () {
     const newFreq = parseInt(this.value);
     const data = await safeGetStorage('syncConfig');
@@ -1181,9 +1231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
   }
   document.getElementById('btnGoStyle').addEventListener('click', async () => {
-    advMenu.style.display = 'none';
-    stylePanel.style.display = 'flex';
-    document.body.style.minHeight = 'auto';
+    showPanel('styleSettingsPanel');
     let defaultTab = 'web';
     try {
       const tab = await getActiveTab();
@@ -1194,21 +1242,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       logger.error("URL判断失败:", e);
     }
     toggleStyleTab(defaultTab);
-    requestAnimationFrame(() => {
-      const targetHeight = stylePanel.scrollHeight;
-      document.body.style.minHeight = targetHeight + 'px';
-      document.body.style.height = targetHeight + 'px';
-    });
     initAndLoadStyles();
   });
+
   document.getElementById('closeStylePanel').addEventListener('click', () => {
-    document.getElementById('styleSettingsPanel').style.display = 'none';
-    advMenu.style.display = 'flex';
-    document.body.style.minHeight = 'auto';
-    document.body.style.height = 'auto';
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-    }, 0);
+    showMain();
   });
   document.addEventListener('click', () => {
     advMenu.style.display = 'none';
