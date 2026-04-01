@@ -1,7 +1,7 @@
 {
-    "enabled": false,
+    "enabled": true,
     "zh-CN": {
-        "id": "notice_2025_v1",
+        "id": "notice_2026_v1",
         "title": "新功能：智能拾取器 2.0 已上线",
         "content": "智能拾取器 2.0 支持实时预览 CSS 选择器匹配结果，点击放大镜按钮即可体验。",
         "gotIt": "知道了"
