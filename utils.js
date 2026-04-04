@@ -65,6 +65,28 @@ const getCleanDomain = (url) => {
   }
 };
 
+const getBrowserLang = () => {
+  try {
+    let chromeAvailable = false;
+    try {
+      chromeAvailable = typeof chrome !== 'undefined' && !!chrome.runtime?.id;
+    } catch (_) {
+      chromeAvailable = false;
+    }
+
+    if (!chromeAvailable) {
+      return navigator.language || 'en';
+    }
+
+    return chrome.i18n?.getUILanguage?.() ||
+      (navigator.languages && navigator.languages[0]) ||
+      navigator.language ||
+      'en';
+  } catch (e) {
+    return navigator.language || 'en';
+  }
+};
+
 async function safeSendToTab(tabId, message) {
   if (!tabId || typeof tabId !== 'number' || !chrome.runtime?.id) return null;
   return new Promise((resolve) => {
@@ -178,7 +200,7 @@ function getRuntimeDefaultEngine() {
 function getCurrentLang() {
   return window.currentConfig?.targetLanguage ||
     window.currentTargetL ||
-    navigator.language ||
+    getBrowserLang() ||
     'en';
 }
 
@@ -358,7 +380,7 @@ function t(key, forcedLang) {
     || root.currentTargetL
     || langEl?.value
     || root.currentConfig?.targetLanguage
-    || navigator.language
+    || getBrowserLang()
     || 'en';
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
@@ -387,10 +409,7 @@ function applyI18n(forcedLang) {
   });
 }
 
-const i18nAPI = typeof chrome !== 'undefined' && chrome.i18n ? chrome.i18n : null;
-let globalUiLang = i18nAPI
-  ? i18nAPI.getUILanguage().replace('_', '-')
-  : navigator.language.replace('_', '-');
+let globalUiLang = getBrowserLang();
 
 async function initUILanguage() {
   const uiSelect = document.getElementById('uiLangSelect');
@@ -670,7 +689,15 @@ function detectIsAlreadyTarget(text, targetLang) {
   const cleanText = cleanChars.join('');
   const prefix = (targetLang || 'en').toLowerCase().slice(0, 2);
   if (prefix === 'en') {
-    return cleanChars.every(char => /[a-zA-Z]/.test(char));
+    // 含非英文拉丁字符，肯定不是英文
+    const hasNonEnglishLatin = cleanChars.some(char =>
+      /[äöüßÄÖÜàâæçéèêëîïôœùûüÿáéíóúñãõîêôû]/i.test(char)
+    );
+    if (hasNonEnglishLatin) return false;
+
+    // 纯 a-z 的词：结合 hintSourceLang 或上下文判断
+    // 无法区分 "aus" 是德语还是英语缩写，直接放行让翻译引擎处理
+    return false; // 宁可多翻译，不neng漏掉
   }
   if (prefix === 'ja') {
     const hasKana = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(cleanText);
@@ -826,15 +853,23 @@ const STORAGE_KEYS = {
 };
 
 async function safeGetStorage(keys, silent = false) {
-  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+  try {
+    if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+      if (!silent) showUpdateNotice();
+      return null;
+    }
+  } catch (_) {
     if (!silent) showUpdateNotice();
     return null;
   }
+
   if (IS_MAIN_WORLD) return null;
+
   try {
     return await chrome.storage.local.get(keys);
   } catch (e) {
-    if (e.message.includes("context invalidated")) {
+    if (e.message?.includes('context invalidated') ||
+      e.message?.includes('Extension context')) {
       if (!silent) showUpdateNotice();
     }
     return null;
@@ -857,6 +892,18 @@ async function safeSetStorage(items) {
     }
     return false;
   }
+}
+async function safeRemoveStorage(keys) {
+    try {
+        if (typeof chrome === 'undefined' || !chrome.runtime?.id) return null;
+        return await chrome.storage.local.remove(keys);
+    } catch (e) {
+        if (e.message?.includes('context invalidated') ||
+            e.message?.includes('Extension context')) {
+            // 静默处理，环境已失效
+        }
+        return null;
+    }
 }
 async function lookupCache(text, engine, lang) {
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
@@ -891,6 +938,7 @@ async function lookupCache(text, engine, lang) {
     if (hitKey !== singleKey) updates[hitKey] = actualResult;
     await idb.set(updates);
   }
+  logger.log('[lookupCache] 查询 key:', singleKey, 'cachedData:', !!cachedData);
   return { result: actualResult, hitKey, singleKey };
 }
 
@@ -1011,11 +1059,28 @@ function isValidTranslationResult(res) {
   return true;
 }
 
+
+function mergeDictData(dictData) {
+  if (!dictData || dictData.length === 0) return dictData;
+  const merged = {};
+  dictData.forEach(item => {
+    const pos = item.pos || '';
+    let def = '';
+    if (typeof item.definition === 'string') def = item.definition;
+    else if (Array.isArray(item.definition)) def = item.definition.join(', ');
+    else if (Array.isArray(item.meanings)) def = item.meanings.join(', ');
+    else if (typeof item.meanings === 'string') def = item.meanings;
+    if (!def) return;
+    merged[pos] = merged[pos] ? merged[pos] + ', ' + def : def;
+  });
+  return Object.entries(merged).map(([pos, definition]) => ({ pos, definition }));
+}
+
+
 //通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
-async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}) {
-  //logger.log("[getDetailedTranslation入口] text:", text, "manualLang:", manualLang, "targetBase将是:", (manualLang || '').split('-')[0]);
+async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}, hintSourceLang = null) {
   if (!text) return null;
   const query = text.trim();
   if (!query) return null;
@@ -1031,7 +1096,8 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     needPhonetic = false,
     hintInputLang = null,
     hintLangA = null,
-    hintLangB = null
+    hintLangB = null,
+    fromPopup = false
   } = options;
   let engine = (
     storage.activeConfig?.engine ||
@@ -1040,7 +1106,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   let lang = (
     manualLang ||
     storage.targetLanguage ||
-    navigator.language ||
+    getBrowserLang() ||
     'en'
   ).replace('_', '-').toLowerCase();
 
@@ -1098,15 +1164,16 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       }
     } catch (e) { }
   }
+
+  //缓存
   const cacheKey = getCacheKey(query, engine, lang);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
-    // lookupCache 返回结果后，校验
     if (!forceRefresh && !isBatch) {
+      logger.log('[lookupCache] query:', JSON.stringify(query));
       const hit = await lookupCache(query, engine, lang);
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
-
         // 检测缓存是否是脏数据（basic是JSON字符串）
         if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
           try {
@@ -1119,13 +1186,13 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
             await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
           } catch { /* 不是JSON，正常数据 */ }
         }
-
+        cached.dictData = mergeDictData(cached.dictData);
+        logger.log('[Cache] 返回缓存数据 basic:', cached.basic, 'dictData:', cached.dictData?.length, 'examples:', cached.examples?.length);
         wordTranslationCache.set(query.toLowerCase(), cached);
         return cached;
       }
     }
     pendingRequests.add(cacheKey);
-    //logger.log("[发送请求] query:", query, "lang:", lang, "needPhonetic:", needPhonetic);
     let response;
     try {
       response = await Promise.race([
@@ -1138,7 +1205,10 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           hintInputLang,
           hintLangA,
           hintLangB,
-          isSubtitle: query.includes('⟦KT_') && isAI
+          hintSourceLang,
+          cacheKey,
+          isSubtitle: query.includes('⟦KT_') && isAI,
+          fromPopup: fromPopup || false,
         }),
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
       ]);
@@ -1160,16 +1230,19 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     if (response && response.error && typeof response.error === 'string') {
       throw new Error(response.error);
     }
+    //透传
     const data = response.currentTranslationResponse || response.result || response;
     let result = {
       basic: "",
       phonetic: "",
       sourcePhonetic: "",
       dictData: [],
+      originalDictData: null,
       examples: [],
       wordForms: [],
       prototype: null,
       source: "",
+      sourceUrl: "",
       isFallback: false,
       timestamp: Date.now()
     };
@@ -1181,11 +1254,14 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         result.phonetic = parsed.phonetic || "";
         result.sourcePhonetic = parsed.sourcePhonetic || "";
         result.dictData = parsed.dictData || [];
+        result.originalDictData = parsed.originalDictData || null;
         result.examples = parsed.examples || [];
         result.wordForms = parsed.wordForms || [];
         result.prototype = parsed.prototype || null;
         result.isFallback = parsed.isFallback || false;
         result.source = parsed.source || "";
+        result.sourceUrl = parsed.sourceUrl || "";
+        result.isPartial = parsed.isPartial || false;
       } catch {
         result.basic = data;
       }
@@ -1193,13 +1269,16 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       result.basic = data.basic || data.result || "";
       result.phonetic = data.phonetic || "";
       result.dictData = data.dictData || [];
+      result.originalDictData = data.originalDictData || null;
       result.examples = data.examples || [];
       result.wordForms = data.wordForms || [];
       result.prototype = data.prototype || null;
       result.isFallback = data.isFallback || false;
       result.source = data.source || "";
+      result.sourceUrl = data.sourceUrl || "";
       result.targetPhonetic = data.targetPhonetic || data.romaji || data.pinyin || data.transliteration || "";
       result.sourcePhonetic = data.sourcePhonetic || "";
+      result.isPartial = data.isPartial || false;
     }
     if (result.basic && (!result.dictData || result.dictData.length === 0)) {
       if (isAI && !isBatch) {
@@ -1209,39 +1288,8 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       }
     }
     // 归并重复pos的dictData
-    if (result.dictData && result.dictData.length > 0) {
+    result.dictData = mergeDictData(result.dictData);
 
-      const merged = {};
-      result.dictData.forEach(item => {
-        const pos = item.pos || '';
-
-        // 兼容多种结构
-        let def = '';
-        if (typeof item.definition === 'string') {
-          def = item.definition;
-        } else if (Array.isArray(item.definition)) {
-          def = item.definition.join(', ');
-        } else if (Array.isArray(item.meanings)) {
-          def = item.meanings.join(', ');
-        } else if (typeof item.meanings === 'string') {
-          def = item.meanings;
-        }
-
-        if (!def) return; // 没有内容的跳过，不生成空行
-
-        if (!merged[pos]) {
-          merged[pos] = def;
-        } else {
-          merged[pos] += ', ' + def;
-        }
-      });
-
-      result.dictData = Object.entries(merged).map(([pos, definition]) => ({
-        pos, definition
-      }));
-
-      //logger.log('[DictData merged]', JSON.stringify(result.dictData)); // 归并后结构
-    }
     if (!skipCache) {
       if (result.basic || result.phonetic || result.dictData.length > 0 || result.isFallback) {
 
@@ -1384,3 +1432,84 @@ const NOTICE_THEMES = {
     pulse: ['rgba(239,68,68,0.25)', 'rgba(239,68,68,0.9)'],
   }
 };
+
+function detectSourceLang(text) {
+  if (!text) return null;
+  // 已有的非拉丁脚本检测
+  if (/\p{Script=Han}/u.test(text)) return 'zh';
+  if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text)) return 'ja';
+  if (/\p{Script=Hangul}/u.test(text)) return 'ko';
+  if (/\p{Script=Thai}/u.test(text)) return 'th';
+  if (/\p{Script=Cyrillic}/u.test(text)) return 'ru';
+  if (/\p{Script=Arabic}/u.test(text)) return 'ar';
+
+  // 拉丁语系：通过特征字符区分
+  if (/[äöüßÄÖÜ]/.test(text)) return 'de';           // 德语
+  if (/[àâæçéèêëîïôœùûüÿ]/i.test(text)) return 'fr'; // 法语
+  if (/[áéíóúüñ¿¡]/i.test(text)) return 'es';         // 西班牙语
+  if (/[àèéìíîòóùú]/i.test(text)) return 'it';        // 意大利语
+  if (/[ãõáéíóúâêô]/i.test(text)) return 'pt';        // 葡萄牙语
+  if (/[åäöÅÄÖ]/.test(text)) return 'sv';             // 瑞典语/芬兰语
+
+  // 纯拉丁字母，默认英语
+  if (/^[a-zA-Z\s'-]+$/.test(text)) return 'en';
+
+  return null; // 无法判断
+}
+
+
+const LANGS = [
+  { value: 'auto', label: 'AUTO', en: 'Auto Detect' },
+  { value: 'en', label: 'English', en: 'English' },
+  { value: 'zh-CN', label: '简体中文 (Chinese Simplified)', en: 'Chinese Simplified' },
+  { value: 'zh-TW', label: '繁體中文 (Chinese Traditional)', en: 'Chinese Traditional' },
+  { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
+  { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
+  { type: 'sep', label: '—— Southeast Asia ——' },
+  { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
+  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
+  { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
+  { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
+  { type: 'sep', label: '—— Middle East & South Asia ——' },
+  { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
+  { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
+  { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
+  { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
+  { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
+  { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
+  { type: 'sep', label: '—— Europe ——' },
+  { value: 'de', label: 'Deutsch (German)', en: 'German' },
+  { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
+  { value: 'fr', label: 'Français (French)', en: 'French' },
+  { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
+  { value: 'pt', label: 'Português (Portuguese)', en: 'Portuguese' },
+  { value: 'ru', label: 'Русский (Russian)', en: 'Russian' },
+  { value: 'nl', label: 'Nederlands (Dutch)', en: 'Dutch' },
+  { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
+  { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
+  { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
+  { value: 'bg', label: 'Български (Bulgarian)', en: 'Bulgarian' },
+  { value: 'cs', label: 'Čeština (Czech)', en: 'Czech' },
+  { value: 'da', label: 'Dansk (Danish)', en: 'Danish' },
+  { value: 'et', label: 'Eesti (Estonian)', en: 'Estonian' },
+  { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
+  { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
+  { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
+  { value: 'hu', label: 'Magyar (Hungarian)', en: 'Hungarian' },
+  { value: 'lv', label: 'Latviešu (Latvian)', en: 'Latvian' },
+  { value: 'lt', label: 'Lietuvių (Lithuanian)', en: 'Lithuanian' },
+  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
+  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
+  { value: 'sk', label: 'Slovenčina (Slovak)', en: 'Slovak' },
+  { value: 'sl', label: 'Slovenščina (Slovenian)', en: 'Slovenian' },
+  { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
+  { type: 'sep', label: '—— Africa ——' },
+  { value: 'af', label: 'Afrikaans (Afrikaans)', en: 'Afrikaans' },
+  { value: 'am', label: 'አማርኛ (Amharic)', en: 'Amharic' },
+  { value: 'ha', label: 'Hausa (Hausa)', en: 'Hausa' },
+  { value: 'sw', label: 'Kiswahili (Swahili)', en: 'Swahili' },
+  { value: 'yo', label: 'Yorùbá (Yoruba)', en: 'Yoruba' },
+  { value: 'zu', label: 'IsiZulu (Zulu)', en: 'Zulu' },
+];
+
+

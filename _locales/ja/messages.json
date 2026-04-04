@@ -29,6 +29,9 @@
   "ERROR_TIMEOUT": {
     "message": "タイムアウト：ネットワーク設定を確認してください。"
   },
+  "ERROR_NETWORK": {
+    "message": "接続失敗：ネットワーク制限（VPNまたは地域制限）。"
+  },
   "ERROR_GENERIC": {
     "message": "翻訳失敗：API設定を確認してください。"
   }

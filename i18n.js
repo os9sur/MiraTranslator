@@ -3397,20 +3397,100 @@ self.i18nAttach7 = {
   }
 };
 self.i18nAttach8 = {
-  "zh_CN": { "smartPickerHint": "⚠ 提示：由于网页限制，部分区域可能无法识别" },
-  "zh_TW": { "smartPickerHint": "⚠ 提示：由於網頁限制，部分區域可能無法識別" },
-  "en": { "smartPickerHint": "⚠ Note: Some areas may be restricted by the web page" },
-  "ja": { "smartPickerHint": "⚠ 注：ページの制限により選択できない場合があります" },
-  "ko": { "smartPickerHint": "⚠ 참고: 웹페이지 제한으로 인해 일부 선택이 불가할 수 있습니다" },
-  "fr": { "smartPickerHint": "⚠ Note : Certaines zones sont restreintes par la page web" },
-  "de": { "smartPickerHint": "⚠ Hinweis: Einige Bereiche sind seitenbedingt nicht wählbar" },
-  "es": { "smartPickerHint": "⚠ Nota: Algunas áreas están restringidas por la página" },
-  "it": { "smartPickerHint": "⚠ Nota: Alcune aree sono limitate dalla pagina web" },
-  "ru": { "smartPickerHint": "⚠ Прим.: Некоторые области могут быть недоступны" },
-  "pt": { "smartPickerHint": "⚠ Nota: Algumas áreas podem estar restritas pela página" },
-  "vi": { "smartPickerHint": "⚠ Lưu ý: Một số vùng có thể bị hạn chế do trang web" },
-  "th": { "smartPickerHint": "⚠ หมายเหตุ: พื้นที่บางส่วนอาจถูกจำกัดโดยหน้าเว็บ" },
-  "tr": { "smartPickerHint": "⚠ Not: Bazı alanlar sayfa kısıtlamaları nedeniyle seçilemeyebilir" },
-  "ar": { "smartPickerHint": "⚠ ملاحظة: قد تكون بعض المناطق مقيدة بسبب صفحة الويب" },
-  "fa": { "smartPickerHint": "⚠ توجه: برخی نواحی ممکن است به دلیل محدودیت صفحه محدود شده باشند" }
+  "zh_CN": { 
+    "smartPickerHint": "⚠ 提示：由于网页限制，部分区域可能无法识别",
+    "loadingMore": "正在加载更多...",
+    "loadingSlow": "接口响应速度较慢",
+    "retry": "重试"
+  },
+  "zh_TW": { 
+    "smartPickerHint": "⚠ 提示：由於網頁限制，部分區域可能無法識別",
+    "loadingMore": "正在載入更多...",
+    "loadingSlow": "介面響應速度較慢",
+    "retry": "重試"
+  },
+  "en": { 
+    "smartPickerHint": "⚠ Note: Some areas may be restricted by the web page",
+    "loadingMore": "Loading more...",  
+    "loadingSlow": "Interface is responding slowly",
+    "retry": "Retry"
+  },
+  "ja": { 
+    "smartPickerHint": "⚠ 注：ページの制限により選択できない場合があります",
+    "loadingMore": "さらに読み込んでいます...",  
+    "loadingSlow": "応答に時間がかかっています",
+    "retry": "再試行"
+  },
+  "ko": { 
+    "smartPickerHint": "⚠ 참고: 웹페이지 제한으로 인해 일부 선택이 불가할 수 있습니다",
+    "loadingMore": "더 불러오는 중...",  
+    "loadingSlow": "응답 속도가 느립니다",
+    "retry": "재시도"
+  },
+  "fr": { 
+    "smartPickerHint": "⚠ Note : Certaines zones sont restreintes par la page web",
+    "loadingMore": "Chargement en cours...", 
+    "loadingSlow": "La réponse est lente",
+    "retry": "Réessayer"
+  },
+  "de": { 
+    "smartPickerHint": "⚠ Hinweis: Einige Bereiche sind seitenbedingt nicht wählbar",
+    "loadingMore": "Wird geladen...", 
+    "loadingSlow": "Langsamer Server-Antwort",
+    "retry": "Wiederholen"
+  },
+  "es": { 
+    "smartPickerHint": "⚠ Nota: Algunas áreas están restringidas por la página",
+    "loadingMore": "Cargando más...", 
+    "loadingSlow": "La respuesta est lenta",
+    "retry": "Reintentar"
+  },
+  "it": { 
+    "smartPickerHint": "⚠ Nota: Alcune aree sono limitate dalla pagina web",
+    "loadingMore": "Caricamento in corso...", 
+    "loadingSlow": "Risposta del server lenta",
+    "retry": "Riprova"
+  },
+  "ru": { 
+    "smartPickerHint": "⚠ Прим.: Некоторые области могут быть недоступны",
+    "loadingMore": "Загрузка...", 
+    "loadingSlow": "Низкая скорость ответа",
+    "retry": "Повторить"
+  },
+  "pt": { 
+    "smartPickerHint": "⚠ Nota: Algumas áreas podem estar restritas pela página",
+    "loadingMore": "Carregando mais...", 
+    "loadingSlow": "Resposta lenta do servidor",
+    "retry": "Repetir"
+  },
+  "vi": { 
+    "smartPickerHint": "⚠ Lưu ý: Một số vùng có thể bị hạn chế do trang web",
+    "loadingMore": "Đang tải thêm...", 
+    "loadingSlow": "Phản hồi chậm",
+    "retry": "Thử lại"
+  },
+  "th": { 
+    "smartPickerHint": "⚠ หมายเหตุ: พื้นที่บางส่วนอาจถูกจำกัดโดยหน้าเว็บ",
+    "loadingMore": "กำลังโหลดเพิ่มเติม...",  
+    "loadingSlow": "การตอบสนองช้า",
+    "retry": "ลองใหม่"
+  },
+  "tr": { 
+    "smartPickerHint": "⚠ Not: Bazı alanlar sayfa kısıtlamaları nedeniyle seçilemeyebilir",
+    "loadingMore": "Daha fazla yükleniyor...", 
+    "loadingSlow": "Yanıt hızı yavaş",
+    "retry": "Tekrar dene"
+  },
+  "ar": { 
+    "smartPickerHint": "⚠ ملاحظة: قد تكون بعض المناطق مقيدة بسبب صفحة الويب",
+    "loadingMore": "جاري تحميل المزيد...",  
+    "loadingSlow": "الاستجابة بطيئة",
+    "retry": "إعادة المحاولة"
+  },
+  "fa": { 
+    "smartPickerHint": "⚠ توجه: برخی نواحی ممکن است به دلیل محدودیت صفحه محدود شده باشند",
+    "loadingMore": "در حال بارگذاری...", 
+    "loadingSlow": "سرعت پاسخگویی کم است",
+    "retry": "تلاش مجدد"
+  }
 };

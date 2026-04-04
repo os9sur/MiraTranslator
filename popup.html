@@ -19,7 +19,7 @@
       max-width: 580px;
       min-height: fit-content;
       border-radius: 20px;
-      padding: 5px 8px;
+      padding: 3px 3px;
       margin-bottom: 10px;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -174,6 +174,7 @@
     <div id="langPairEdit" style="display:none; align-items:center; gap:6px; margin-bottom:8px;">
       <select id="lpSelA"
         style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;">
+        <option value="auto">AUTO</option>
         <option value="en">English</option>
         <option value="zh-CN">简体中文 (Chinese Simplified)</option>
         <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
@@ -370,27 +371,13 @@
         style="color: #38bdf8; font-size: 12px; line-height: 1.6;user-select: auto !important;"></div>
     </div>
     <div id="actionArea" style="margin-top: 12px; display: none; flex-shrink: 0;">
-      <button id="openNotebookSecondary" class="openNotebook" style="
-            width: 100%;
-            height: 35px;
-            background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: opacity 0.2s;
-          ">
+      <button id="openNotebookSecondary" class="openNotebook"
+        style="height: 35px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #3b82f6; color: white; border-radius: 20px; padding: 0 16px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
         </svg>
-        <span data-i18n="wordBook">生词本</span>
+        <span data-i18n="wordBook" style="line-height: 1;">生词本</span>
       </button>
     </div>
   </div>
@@ -408,7 +395,7 @@
             style="font-weight: 900; font-size: 12px; letter-spacing: 1.5px; color: #ffffffeb; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-style: italic;"></span>
         </div>
         <div id="advancedSettingsBtn" data-i18n="moreSettings" class="icon-action-btn"
-          style="padding: 4px; color: rgba(255,255,255,0.5); cursor: pointer;" data-i18n-title
+          style="padding: 4px; color: rgba(255,255,255,0.5); cursor: pointer;margin-right: 10px;" data-i18n-title
           title="Advanced settings">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
             stroke-linecap="round" stroke-linejoin="round">
@@ -716,22 +703,7 @@
       </div>
     </div>
     <div class="row" style="margin-top: 3px; border-top: 1px solid #334155; padding-top: 8px;">
-      <button id="openNotebook" class="openNotebook" style="
-      width: 100%;
-      height: 35px;
-      background: linear-gradient(135deg, #38bdf8 0%, #1d4ed8 100%);
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: opacity 0.2s;
-    ">
+      <button id="openNotebook" class="openNotebook" style="height: 35px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -909,6 +881,7 @@
         <select id="syncMethod" class="select"
           style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #e5e7eb; padding: 8px; border-radius: 6px;">
           <option value="googleDrive">Google Drive</option>
+          <option value="oneDrive">OneDrive</option>
           <option value="webdav">WebDAV (NAS...)</option>
           <option data-i18n="manualExportImport" value="local">手动导出/导入 (JSON)</option>
         </select>

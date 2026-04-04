@@ -3,31 +3,34 @@
     "message": "Mira 翻译 - 沉浸式全文与 YouTube 双语字幕"
   },
   "appDesc": {
-    "message": "不到 0.5MB：开源安全、零追踪。内置公共引擎，支持私有 AI API (自备 Key) 接入。沉浸式全文、划词及 YouTube 双语翻译，支持 Google Drive/WebDAV 云同步。"
+    "message": "不到 0.5MB：开源安全、零追踪。内置公共引擎，支持私有 AI API (自备 Key) 接入。沉浸式翻译、划词及 YouTube 双语翻译，支持 Google Drive/WebDAV 云同步。"
   },
   "ERROR_400": {
-    "message": "翻译接口提示：请求无效或账户余额不足。"
+    "message": "接口提示：请求无效或账户余额不足。"
   },
   "ERROR_401": {
-    "message": "翻译接口提示：API Key 无效，请检查插件设置。"
+    "message": "接口提示：API Key 无效，请检查插件设置。"
   },
   "ERROR_402": {
-    "message": "翻译接口提示：配额不足或账户余额不足。"
+    "message": "接口提示：配额不足或账户余额不足。"
   },
   "ERROR_403": {
-    "message": "翻译接口提示：权限不足，API Key 无权访问该模型或受 IP 限制。"
+    "message": "接口提示：权限不足，API Key 无权访问该模型或受 IP 限制。"
   },
   "ERROR_404": {
-    "message": "翻译接口提示：模型名称不存在或 API 路径错误。"
+    "message": "接口提示：模型不存在或 API 路径错误。"
   },
   "ERROR_429": {
-    "message": "翻译接口提示：额度用尽或请求过快。"
+    "message": "接口提示：额度用尽或请求过快。"
   },
   "ERROR_500": {
-    "message": "翻译接口提示：服务器暂时不可用（500 错误）。"
+    "message": "接口提示：服务器暂时不可用（500 错误）。"
   },
   "ERROR_TIMEOUT": {
-    "message": "翻译请求超时：请检查网络或代理设置。"
+    "message": "请求超时：请检查网络或代理设置。"
+  },
+  "ERROR_NETWORK": {
+    "message": "连接失败：翻译接口受网络限制（VPN 或地区限制）。"
   },
   "ERROR_GENERIC": {
     "message": "翻译失败：请检查网络连接或 API 配置。"

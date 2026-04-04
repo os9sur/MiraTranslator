@@ -6,13 +6,13 @@
     "message": "<0.5Mo : Open-source, sans tracking. Moteurs publics + AI API (Propre Key). Traduction Web/YouTube et synchro WebDAV/GDrive."
   },
   "ERROR_400": {
-    "message": "Erreur API : Requête invalide ou solde insuffisant."
+    "message": "Erreur API : Requête invalide."
   },
   "ERROR_401": {
-    "message": "Erreur API : Clé API invalide."
+    "message": "Erreur API : Clé invalide."
   },
   "ERROR_402": {
-    "message": "Erreur API : Quota ou solde insuffisant."
+    "message": "Erreur API : Quota insuffisant."
   },
   "ERROR_403": {
     "message": "Erreur API : Accès refusé."
@@ -28,6 +28,9 @@
   },
   "ERROR_TIMEOUT": {
     "message": "Délai expiré : Vérifiez votre réseau."
+  },
+  "ERROR_NETWORK": {
+    "message": "Erreur réseau : API restreinte (VPN ou blocage régional)."
   },
   "ERROR_GENERIC": {
     "message": "Échec : Vérifiez la config API."

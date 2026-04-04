@@ -1,22 +1,21 @@
 
-window.currentTargetL = navigator.language || 'en';
+window.currentTargetL = getBrowserLang() || 'en';
 
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
 
 function loadTargetLanguage() {
   if (window.__LANG_PROMISE__) return window.__LANG_PROMISE__;
-  window.__LANG_PROMISE__ = chrome.storage.local
-    .get(['targetLanguage', 'ui_language'])
+  window.__LANG_PROMISE__ = safeGetStorage(['targetLanguage', 'ui_language'])
     .then(res => {
-      window.currentTargetL = res?.targetLanguage || navigator.language || 'en';
-      window.uiLanguage = res?.ui_language || navigator.language || 'en';
+      window.currentTargetL = res?.targetLanguage || getBrowserLang() || 'en';
+      window.uiLanguage = res?.ui_language || getBrowserLang() || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     })
     .catch(() => {
-      window.currentTargetL = navigator.language || 'en';
-      window.uiLanguage = navigator.language || 'en';
+      window.currentTargetL = getBrowserLang() || 'en';
+      window.uiLanguage = getBrowserLang() || 'en';
       window.__LANG_READY__ = true;
       return window.currentTargetL;
     });
@@ -28,9 +27,9 @@ loadTargetLanguage();
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
     if (changes.targetLanguage)
-      window.currentTargetL = changes.targetLanguage.newValue || navigator.language || 'en';
+      window.currentTargetL = changes.targetLanguage.newValue || getBrowserLang() || 'en';
     if (changes.ui_language)
-      window.uiLanguage = changes.ui_language.newValue || navigator.language || 'en';
+      window.uiLanguage = changes.ui_language.newValue || getBrowserLang() || 'en';
   }
 });
 let APP_NAME = 'Mira Translator';
@@ -45,7 +44,7 @@ async function initApp() {
 }
 
 initApp();
-logger.log(window.currentTargetL);
+logger.log('Content script - Current target language:', window.currentTargetL);
 
 (async () => {
   await _defaultEngineReady; // 等缓存读完
@@ -59,7 +58,7 @@ logger.log(window.currentTargetL);
     window.currentConfig.selectedEngine = finalCfg.engine;
     res = {
       activeConfig: finalCfg,
-      targetLanguage: (navigator.language || 'en').replace('_', '-').toLowerCase()
+      targetLanguage: (getBrowserLang() || 'en').replace('_', '-').toLowerCase()
     };
   }
 
@@ -113,7 +112,7 @@ function getCommentFallbackSelectors(domain) {
 if (typeof fastMemoryCache === 'undefined') var fastMemoryCache = new Map();
 if (typeof pendingRequests === 'undefined') var pendingRequests = new Set();
 window.currentConfig = {
-  targetLanguage: (navigator.language || 'en').replace('_', '-'),
+  targetLanguage: (getBrowserLang() || 'en').replace('_', '-'),
   selectedEngine: getRuntimeDefaultEngine(),
   activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
@@ -791,13 +790,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     sendResponse({ status: "ok" });
   }
-  else if (msg.action === 'previewStyle') {
-    if (typeof applySubtitleSettings === 'function') applySubtitleSettings(msg.settings);
-    if (msg.save) {
-      chrome.storage.sync.set({ ytStyleSettings: msg.settings });
-    }
-    sendResponse({ status: "ok" });
-  }
   else {
     sendResponse({ status: "ignored" });
   }
@@ -1037,7 +1029,7 @@ const TranslationBatcher = {
       return;
     }
     const engine = (storage.activeConfig?.engine || getRuntimeDefaultEngine()).toLowerCase();
-    const lang = (storage.targetLanguage || navigator.language || 'en').replace('_', '-').toLowerCase();
+    const lang = (storage.targetLanguage || getBrowserLang() || 'en').replace('_', '-').toLowerCase();
     let currentBatch = [];
     let currentLength = 0;
     const isAI = AI_LLM_WHITE_LIST.includes(engine);
@@ -1337,7 +1329,7 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
       .replace(/[（）\(\)]/g, '')
       .trim();
     if (cleanText.length < 1) return true;
-    return detectIsAlreadyTarget(cleanText, window.currentTargetL || navigator.language || 'en');
+    return detectIsAlreadyTarget(cleanText, window.currentTargetL || getBrowserLang() || 'en');
   };
   const atoms = [];
   function processNode(node) {
@@ -1596,7 +1588,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     }
   }
   if (!forceRefresh) {
-    if (detectIsAlreadyTarget(fastRawText, window.currentTargetL || navigator.language)) {
+    if (detectIsAlreadyTarget(fastRawText, window.currentTargetL || getBrowserLang())) {
       el.dataset.translated = 'true';
       return;
     }
@@ -1716,7 +1708,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     return;
   }
   if (!forceRefresh) {
-    if (detectIsAlreadyTarget(originalText, window.currentTargetL || navigator.language)) {
+    if (detectIsAlreadyTarget(originalText, window.currentTargetL || getBrowserLang())) {
       el.dataset.translated = "true";
       el.removeAttribute('data-translating');
       el.removeAttribute('data-mira-processing');
@@ -2509,9 +2501,16 @@ function initSelectionTranslate() {
         e.preventDefault();
         e.stopPropagation();
         const dir = this.getAttribute('data-dir');
+
+        const rect = panel.getBoundingClientRect();
+        panel.style.width = rect.width + 'px';
+        panel.style.height = rect.height + 'px';
+        panel.style.maxWidth = window.innerWidth * 0.9 + 'px';
+        panel.style.maxHeight = window.innerHeight * 0.85 + 'px';
+        panel.style.minHeight = '150px';
+
         const startX = e.clientX;
         const startY = e.clientY;
-        const rect = panel.getBoundingClientRect();
         const startW = rect.width;
         const startH = rect.height;
         const startL = rect.left;
@@ -2520,24 +2519,25 @@ function initSelectionTranslate() {
         function onMouseMove(ev) {
           const dx = ev.clientX - startX;
           const dy = ev.clientY - startY;
+
           if (dir.includes('r') || dir.includes('l')) {
             let newW = dir.includes('r') ? startW + dx : startW - dx;
             const maxWidthLimit = window.innerWidth * 0.9;
-            if (newW > 280 && newW < maxWidthLimit) {
+            if (newW >= 280 && newW <= maxWidthLimit) {
               panel.style.width = newW + 'px';
-              panel.style.maxWidth = newW + 'px';
               if (dir.includes('l')) {
                 panel.style.left = (startL + dx) + 'px';
               }
             }
           }
+
           let newH = startH;
           if (dir.includes('b')) { newH = startH + dy; }
           else if (dir.includes('t')) { newH = startH - dy; }
+
           const maxHeightLimit = window.innerHeight * 0.85;
-          if (newH > 150 && newH < maxHeightLimit) {
+          if (newH >= 150 && newH <= maxHeightLimit) {
             panel.style.height = newH + 'px';
-            panel.style.maxHeight = newH + 'px';
             if (dir.includes('t')) {
               panel.style.top = (startT + dy) + 'px';
             }
@@ -2546,18 +2546,22 @@ function initSelectionTranslate() {
         function onMouseUp() {
           panel.style.transition = 'opacity 0.2s, transform 0.2s';
           const finalRect = panel.getBoundingClientRect();
+
           panel.style.width = finalRect.width + 'px';
-          panel.style.maxWidth = finalRect.width + 'px';
           panel.style.minWidth = '280px';
-          panel.style.height = 'auto';
-          panel.style.maxHeight = finalRect.height + 'px';
-          panel.style.minHeight = finalRect.height + 'px';
+          panel.style.maxWidth = window.innerWidth * 0.9 + 'px';
+
+          panel.style.height = finalRect.height + 'px';
+          panel.style.minHeight = '150px';
+          panel.style.maxHeight = window.innerHeight * 0.85 + 'px';
+
           safeSetStorage({
             uiConfig: {
               width: finalRect.width + 'px',
               height: finalRect.height + 'px'
             }
-          });//设置窗口大小
+          });
+
           window.removeEventListener('mousemove', onMouseMove);
           window.removeEventListener('mouseup', onMouseUp);
         }
@@ -2641,9 +2645,10 @@ function initSelectionTranslate() {
         --p-phonetic:         #38bdf8;
         --p-glow-opacity:     0.8;
         --p-panel-anim:       eclipseHalo;
+        --p-link-hover-bg:   rgba(56, 189, 248, 0.15);
       }
 
-      /* ── 亮色变量（统一定义，避免重复）── */
+      /* ── 亮色变量── */
       :host([theme="light"]),
       :host(:not([theme="dark"])) {
         --p-bg:               #ffffffb7;
@@ -2660,6 +2665,7 @@ function initSelectionTranslate() {
         --p-phonetic:         #07a457;
         --p-glow-opacity:     0.3;
         --p-panel-anim:       eclipseHaloLightWarm;
+        --p-link-hover-bg:    rgba(2, 132, 199, 0.1);
       }
 
       /* 仅在系统偏好亮色且未手动设置 dark 时生效 */
@@ -2944,7 +2950,7 @@ function initSelectionTranslate() {
         line-height: 1;
         pointer-events: auto !important;
         -webkit-user-select: none; /* Chrome, Safari, Opera */
-        -moz-user-select: none;    /* Firefox */
+        -moz-user-select: none;   
         user-select: none;         /* 标准语法 */
       }
       .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
@@ -3073,7 +3079,7 @@ function initSelectionTranslate() {
       .basic {
         font-size:   17px;
         color:       var(--p-accent);
-        margin:      12px 0 8px;
+        margin:      2px 0 2px;
         font-weight: 500;
       }
       .detail {
@@ -3083,6 +3089,141 @@ function initSelectionTranslate() {
         border-top:  1px solid var(--p-border);
         padding-top: 7px;
       }
+        #p-source {  
+  color: var(--p-text-main); 
+  font-size: 11px;
+  margin-top: 12px;
+  opacity: 0.7; 
+}
+
+#p-source a {  
+  color: var(--p-accent);
+  text-decoration: none;
+  font-weight: 600;
+   
+  border-bottom: 1.5px solid rgba(var(--p-accent-rgb), 0.4);
+  
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1px 4px;
+  margin-left: 2px;
+}
+
+#p-source a:hover { 
+  opacity: 1;  
+  background: rgba(var(--p-accent-rgb), 0.25);  
+  filter: brightness(1.3);  
+  text-shadow: 0 0 5px rgba(var(--p-accent-rgb), 0.4);  
+  border-bottom-color: var(--p-accent);
+  color: var(--p-accent);
+}
+
+@keyframes neon-click-spread {
+  0% {
+    box-shadow: 0 0 0 0px color-mix(in srgb, var(--p-accent) 60%, transparent);
+    transform: scale(0.96);
+  }
+  100% {
+    box-shadow: 0 0 4px 20px color-mix(in srgb, var(--p-accent) 0%, transparent);
+    transform: scale(1);
+  }
+}
+
+.lang-tag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 20px;
+  padding: 0 16px;
+  cursor: pointer;
+  border-radius: 20px;
+  color: white;
+  border: none !important;
+  outline: none;
+  transition: all 0.3s ease;
+  background: radial-gradient(
+    circle at center, 
+    color-mix(in srgb, var(--p-accent) 25%, transparent) 0%, 
+    color-mix(in srgb, var(--p-accent) 10%, transparent) 70%, 
+    transparent 100%
+  ) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 20%, transparent);
+}
+
+.lang-tag-btn:hover {
+  background: radial-gradient(
+    circle at center, 
+    color-mix(in srgb, var(--p-accent) 35%, transparent) 0%, 
+    color-mix(in srgb, var(--p-accent) 15%, transparent) 80%, 
+    transparent 100%
+  ) !important;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--p-accent) 40%, transparent);
+}
+
+.lang-tag-btn:active {
+  animation: neon-click-spread 0.4s ease-out;
+  background: color-mix(in srgb, var(--p-accent) 50%, transparent) !important;
+}
+
+.lang-tag-btn svg {
+  flex-shrink: 0;
+  display: block;
+  fill: currentColor;  
+}
+
+.lang-tag-btn span {
+  line-height: 1;
+  white-space: nowrap;
+  margin-top: -1px;
+}
+  /* ── 原文展开按钮 ── */
+.p-orig-toggle {
+  display:        inline-flex;
+  align-items:    center;
+  font-size:      9px;
+  font-weight:    700;
+  color:          var(--p-accent);
+  opacity:        0.5;
+  cursor:         pointer;
+  margin-left:    6px;
+  border:         1px solid var(--p-accent);
+  border-radius:  3px;
+  padding:        1px 4px;
+  vertical-align: middle;
+  user-select:    none;
+  flex-shrink:    0;
+  transition:     opacity 0.2s, background 0.2s;
+  line-height:    1.4;
+}
+.p-orig-toggle:hover {
+  opacity:    1 !important;
+  background: color-mix(in srgb, var(--p-accent) 15%, transparent);
+}
+.p-orig-toggle.is-open {
+  opacity:    1;
+  background: color-mix(in srgb, var(--p-accent) 20%, transparent);
+}
+
+/* ── 原文展开内容 ── */
+.p-orig-text {
+  display:       none;
+  margin-top:    4px;
+  padding:       4px 8px;
+  border-left:   2px solid var(--p-accent);
+  border-radius: 2px;
+  font-size:     11px;
+  color:         var(--p-text-muted);
+  font-style:    italic;
+  line-height:   1.5;
+  opacity:       0.8;
+  background:    color-mix(in srgb, var(--p-accent) 5%, transparent);
+  word-break:    break-word;
+  transition:    opacity 0.2s;
+}
+.p-orig-text.is-visible {
+  display: block;
+}
       `;
 
     return style;
@@ -3176,13 +3317,19 @@ function initSelectionTranslate() {
 
   // ─── 渲染并展示翻译面板 ───────────────────────────────────────────────────────
 
-  async function renderAndShowPopup(text, pos, shadow, manualLang = 'auto') {
+  async function renderAndShowPopup(text, pos, shadow, manualLang = 'auto', hintSourceLang = null) {
+    const state = {
+      sourceLang: hintSourceLang || 'auto',
+      targetLang: window.currentTargetL || manualLang || getBrowserLang() || 'en',
+    };
     const isPinnedNow = shadowHost.getAttribute('data-pinned') === 'true';
     const wordText = text.trim();
+    shadowHost.setAttribute('data-current-word', wordText);
     const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
     const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
     const entry = await idb.vocabulary.get(wordText);
     const isSaved = !!(entry && !entry.deleted);
+    let hintSourceLangNew = hintSourceLang;
 
     // 头部 HTML
     popupEl.querySelector('#p-header-wrapper').innerHTML = `
@@ -3204,12 +3351,24 @@ function initSelectionTranslate() {
     const contentContainer = popupEl.querySelector('#p-content-container');
     contentContainer.style.cssText = `
     display:block;width:100%;box-sizing:border-box;
-    overflow-y:auto;padding:0 20px 15px 24px;
+    overflow-y:auto;padding:0 15px 15px 24px;
     direction:${isRTL ? 'rtl' : 'ltr'};
     text-align:${isRTL ? 'right' : 'left'};`;
 
     contentContainer.innerHTML = buildContentHTML(text, isSaved);
-
+    // 异步读取上次保存的源语言并更新显示
+    safeGetStorage('lpLangA').then(res => {
+      const saved = res?.lpLangA;
+      const srcSpan = shadow.getElementById('p-lang-src');
+      if (srcSpan && saved && saved !== 'auto') {
+        // 从 LANGS 找短标签，fallback 到 code 前两位
+        const match = LANGS.find(l => l?.value === saved);
+        srcSpan.textContent = match
+          ? match.value.toUpperCase().slice(0, 2)
+          : saved.toUpperCase().slice(0, 2);
+        hintSourceLangNew = saved;
+      }
+    });
     // 面板可见
     popupEl.classList.remove('is-hidden');
     Object.assign(popupEl.style, {
@@ -3259,6 +3418,10 @@ function initSelectionTranslate() {
     // 关闭
     shadow.getElementById('close-p').onclick = (e) => {
       e.stopPropagation();
+
+      const existingDropdown = shadowHost.shadowRoot.getElementById('p-lang-dropdown');
+      if (existingDropdown) existingDropdown.remove();
+
       shadowHost.setAttribute('data-pinned', 'false');
       popupEl.classList.add('is-hidden');
       setTimeout(() => {
@@ -3283,51 +3446,62 @@ function initSelectionTranslate() {
     // 发音
     shadow.getElementById('p-speak').onclick = (e) => {
       e.stopPropagation();
-      speakText(text, shadow.getElementById('p-speak'));
+      logger.log('TTS', { text, lang: hintSourceLangNew });
+      speakText(text, shadow.getElementById('p-speak'), hintSourceLangNew);
     };
 
     // 刷新翻译
-    shadow.getElementById('p-refresh').onclick = async (e) => {
-      e?.stopPropagation();
+    function triggerRefresh() {
       const refreshBtn = shadow.getElementById('p-refresh');
       if (refreshBtn?.classList.contains('spinning')) return;
+
+      const currentTargetLang = window.currentTargetL || state.targetLang;
+      const currentSourceLang = state.sourceLang === 'auto' ? null : state.sourceLang;
 
       const fingerprint = typeof hash === 'function'
         ? hash(text.trim().replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, '').toLowerCase())
         : text.trim().substring(0, 50);
-      const allCache = await idb.getAll('tr_');
-      await Promise.all(
-        Object.keys(allCache).filter(k => k.includes(fingerprint)).map(k => idb.remove(k))
-      );
 
-      const saveBtn = shadow.getElementById('p-save');
-      if (saveBtn) saveBtn._miraReady = false;
-      const basicEl = shadow.getElementById('p-basic');
-      const phoneticEl = shadow.getElementById('p-phonetic');
-      const detailEl = shadow.getElementById('p-detail');
-      const examplesEl = shadow.getElementById('p-examples');
-      if (!basicEl?.style) return;
+      idb.getAll('tr_').then(allCache => {
+        return Promise.all(
+          Object.keys(allCache).filter(k => k.includes(fingerprint)).map(k => idb.remove(k))
+        );
+      }).then(() => {
+        const saveBtn = shadow.getElementById('p-save');
+        if (saveBtn) saveBtn._miraReady = false;
 
-      refreshBtn.classList.add('spinning');
-      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t('retranslate')}...</span>`;
-      if (phoneticEl) phoneticEl.innerText = '';
-      if (detailEl?.style) detailEl.style.display = 'none';
-      if (examplesEl?.style) examplesEl.style.display = 'none';
+        const basicEl = shadow.getElementById('p-basic');
+        const phoneticEl = shadow.getElementById('p-phonetic');
+        const pDetail = shadow.getElementById('p-detail');
+        const pExamples = shadow.getElementById('p-examples');
+        if (!basicEl?.style) return;
 
-      try {
-        const res = await getDetailedTranslation(text, true, manualLang, {});
-        if (res && !res.isError) {
-          basicEl.style.color = '';
-          basicEl.style.fontStyle = 'normal';
-          fillPopupData(res, shadow, text, manualLang, isRTL);
-        } else {
-          setBasicError(basicEl, res?.basic || t('unknown_error'));
+        if (refreshBtn) refreshBtn.classList.add('spinning');
+        basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t('retranslate')}...</span>`;
+        if (phoneticEl) phoneticEl.innerText = '';
+        if (pDetail) pDetail.style.display = 'none';
+        if (pExamples) pExamples.style.display = 'none';
+        if (shadowHost) {
+          shadowHost._detailFullyRendered = false;
+          clearTimeout(shadowHost._slowTimer);
+          shadowHost._slowTimer = null;
         }
-      } catch (err) {
-        setBasicError(basicEl, err.message || 'Network Error');
-      } finally {
-        setTimeout(() => refreshBtn?.classList.remove('spinning'), 600);
-      }
+        getDetailedTranslation(text, true, currentTargetLang, {
+          hintInputLang: currentSourceLang  //  源语言不为 auto 时传入，避免误判 isSame
+        }, currentSourceLang)
+          .catch(err => {
+            setBasicError(basicEl, err.message || 'Network Error');
+          })
+          .finally(() => {
+            setTimeout(() => refreshBtn?.classList.remove('spinning'), 600);
+          });
+      });
+    }
+
+    //  p-refresh 按钮绑定
+    shadow.getElementById('p-refresh').onclick = async (e) => {
+      e?.stopPropagation();
+      triggerRefresh();
     };
 
     // 收藏
@@ -3388,6 +3562,209 @@ function initSelectionTranslate() {
       await window.__vocabOnSave?.(wordText, isActive);
     };
 
+    // ─── 公共函数 ────────────────────────────────────────────────────────────────
+
+    function getLangDropdownColors() {
+      const isDark = shadowHost.getAttribute('theme') === 'dark' ||
+        (shadowHost.getAttribute('theme') !== 'light' &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+      return isDark ? {
+        bg: 'rgba(18,18,18,0.4)', border: 'rgba(255,255,255,0.27)',
+        shadow: '0 8px 24px rgba(0,0,0,0.6)', text: '#ffffffb7',
+        textMuted: 'rgba(255,255,255,0.50)', sepBorder: 'rgba(255,255,255,0.08)',
+        hoverBg: 'rgba(56,189,248,0.15)', accent: '#38bdf8',
+      } : {
+        bg: 'rgba(255,255,255,0.97)', border: 'rgba(0,0,0,0.1)',
+        shadow: '0 8px 24px rgba(0,0,0,0.15)', text: '#1a202c',
+        textMuted: '#718096', sepBorder: 'rgba(0,0,0,0.06)',
+        hoverBg: 'rgba(2,132,199,0.1)', accent: '#0284c7',
+      };
+    }
+
+    function createLangDropdown(anchorEl) {
+      const shadowRoot = shadowHost.shadowRoot;
+
+      // 已存在则关闭
+      const existing = shadowRoot.getElementById('p-lang-dropdown');
+      if (existing) { existing.remove(); return null; }
+
+      anchorEl.classList.add('is-open');
+      const colors = getLangDropdownColors();
+
+      const dropdown = document.createElement('div');
+      dropdown.id = 'p-lang-dropdown';
+      dropdown.style.cssText = `
+        position:fixed; z-index:2147483647;
+        background:${colors.bg}; border:1px solid ${colors.border};
+        border-radius:8px; box-shadow:${colors.shadow};
+        max-height:380px; overflow-y:auto; min-width:220px;
+        padding:4px 0; font-size:12px; color:${colors.text};
+        pointer-events:auto;
+        backdrop-filter:blur(20px) saturate(180%);
+        -webkit-backdrop-filter:blur(20px) saturate(180%);
+      `;
+
+      dropdown.addEventListener('wheel', (ev) => {
+        ev.stopPropagation();
+        dropdown.scrollTop += ev.deltaY;
+      }, { passive: false });
+
+      // 定位
+      const btnRect = anchorEl.getBoundingClientRect();
+      const gap = 4;
+      const dropW = 380;
+      const dropH = 380;
+      let left = btnRect.left;
+      let top = btnRect.bottom + gap;
+      if (left + dropW > window.innerWidth) left = window.innerWidth - dropW - gap;
+      if (left < gap) left = gap;
+      if (top + dropH > window.innerHeight) top = btnRect.top - dropH - gap;
+      dropdown.style.top = `${top}px`;
+      dropdown.style.left = `${left}px`;
+
+      // 挂载
+      const scrollStyle = document.createElement('style');
+      scrollStyle.textContent = `
+        #p-lang-dropdown::-webkit-scrollbar {
+          width: 6px;
+        }
+        #p-lang-dropdown::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        #p-lang-dropdown::-webkit-scrollbar-thumb {
+          background: ${colors.textMuted};
+          border-radius: 10px;
+          transition: background 0.2s;
+        }
+        #p-lang-dropdown::-webkit-scrollbar-thumb:hover {
+          background: ${colors.accent};
+        }
+      `;
+      dropdown.appendChild(scrollStyle);
+
+      shadowRoot.appendChild(dropdown);
+      shadowHost.style.pointerEvents = 'auto';
+
+      // 覆写 remove，恢复 pointerEvents
+      const origRemove = dropdown.remove.bind(dropdown);
+      dropdown.remove = () => { origRemove(); anchorEl.classList.remove('is-open'); shadowHost.style.pointerEvents = 'none'; };
+
+      // 点击外部关闭
+      const closeDropdown = (ev) => {
+        const path = ev.composedPath();
+        if (!path.includes(dropdown) && !path.includes(anchorEl)) {
+          dropdown.remove();
+          shadowRoot.removeEventListener('click', closeDropdown, true);
+          document.removeEventListener('click', closeDropdown, true);
+        }
+      };
+
+      setTimeout(() => {
+        shadowRoot.addEventListener('click', closeDropdown, true);
+        document.addEventListener('click', closeDropdown, true); // ← 加这行
+      }, 0);
+
+      return { dropdown, colors };
+    }
+
+    function buildLangItem(lang, colors, onClick) {
+      if (lang.type === 'sep') {
+        const sep = document.createElement('div');
+        sep.style.cssText = `
+      padding:5px 14px 3px; font-size:11px; color:${colors.textMuted};
+      letter-spacing:0.5px; border-top:1px solid ${colors.sepBorder};
+      margin-top:2px; user-select:none;font-style:italic;
+    `;
+        sep.textContent = lang.label;
+        return sep;
+      }
+
+      const item = document.createElement('div');
+      item.textContent = lang.label;
+      item.style.cssText = `
+    padding:6px 14px; cursor:pointer; color:${colors.text};
+    transition:background 0.15s; border-radius:4px;
+    margin:0 4px; white-space:nowrap;
+  `;
+      item.onmouseenter = () => item.style.background = colors.hoverBg;
+      item.onmouseleave = () => item.style.background = '';
+      item.onclick = onClick;
+      return item;
+    }
+
+    // 语言切换,源语言
+    shadow.getElementById('p-lang-select').onclick = (e) => {
+      e.stopPropagation();
+      const btn = shadow.getElementById('p-lang-select');
+      const result = createLangDropdown(btn);
+      if (!result) return;
+      const { dropdown, colors } = result;
+
+      LANGS.forEach(lang => {
+        const isCurrent = lang.value?.toLowerCase() === (window.hintSourceLang || 'auto');
+        const el = buildLangItem(lang, colors, async (ev) => {
+          ev.stopPropagation();
+          dropdown.remove();
+
+          state.sourceLang = lang.value;
+          await safeSetStorage({ lpLangA: lang.value });
+          window.hintSourceLang = lang.value;
+
+          const srcSpan = shadow.getElementById('p-lang-src');
+          if (srcSpan) srcSpan.textContent = lang.value === 'auto'
+            ? 'AUTO' : lang.value.toUpperCase().slice(0, 2);
+
+          shadow.getElementById('p-refresh')?.onclick({ stopPropagation: () => { } });
+        });
+        if (isCurrent && lang.type !== 'sep') {
+          el.style.color = colors.accent;
+          el.style.fontWeight = '600';
+        }
+        dropdown.appendChild(el);
+      });
+    };
+
+    // 目标语言
+    shadow.getElementById('p-lang-tgt-btn').onclick = (e) => {
+      e.stopPropagation();
+      const btn = shadow.getElementById('p-lang-tgt-btn');
+      const result = createLangDropdown(btn);
+      if (!result) return;
+      const { dropdown, colors } = result;
+
+      LANGS.filter(l => l?.value !== 'auto').forEach(lang => {
+        const isCurrent = lang.value?.toLowerCase() === (window.currentTargetL || '');
+        logger.log('语言列表项', { lang: lang.value, current: window.currentTargetL });
+        const el = buildLangItem(lang, colors, async (ev) => {
+          ev.stopPropagation();
+          dropdown.remove();
+
+          state.targetLang = lang.value;
+          window.currentTargetL = lang.value;
+          await safeSetStorage({ targetLanguage: lang.value });
+
+          const tgtSpan = shadow.getElementById('p-lang-tgt-btn');
+          if (tgtSpan) tgtSpan.textContent = lang.value.toUpperCase().slice(0, 2);
+
+          const newIsRTL = ['he', 'ar', 'fa'].includes(lang.value.toLowerCase().slice(0, 2));
+          const contentContainer = shadow.getElementById('p-content-container');
+          if (contentContainer) {
+            contentContainer.style.direction = newIsRTL ? 'rtl' : 'ltr';
+            contentContainer.style.textAlign = newIsRTL ? 'right' : 'left';
+          }
+
+          shadow.getElementById('p-refresh')?.onclick({ stopPropagation: () => { } });
+        });
+
+        if (isCurrent && lang.type !== 'sep') {
+          el.style.color = colors.accent;
+          el.style.fontWeight = '600';
+        }
+
+        dropdown.appendChild(el);
+      });
+    };
+
     // 拖拽
     const startDrag = (e) => {
       if (e.target.closest('.icon-btn')) return;
@@ -3412,73 +3789,209 @@ function initSelectionTranslate() {
     };
     updateThemeUI(localStorage.getItem('eclipse-theme') || 'auto', shadow, shadowHost);
 
-    // ── 加载翻译数据 ──────────────────────────────────────────────────────────
+    // ── 加载翻译数据 ───────────────────
     const basicEl = shadow?.getElementById('p-basic');
     if (!basicEl?.style) return;
 
-    try {
-      const res = await getDetailedTranslation(text, false, manualLang, {});
-      if (res && !res.isError) {
-        basicEl.style.color = '';
-        basicEl.style.fontStyle = 'normal';
-        fillPopupData(res, shadow, text, manualLang, isRTL);
-      } else {
-        setBasicError(basicEl, res?.basic || '未知错误');
-      }
-    } catch (err) {
-      setBasicError(basicEl, err.message || '网络异常');
-    } finally {
-      requestAnimationFrame(() => clampPopupToViewport?.(popupEl));
+    //  刷新时重置状态，允许新的 partial/完整消息正常处理
+    if (shadowHost) {
+      shadowHost._detailFullyRendered = false;
+      clearTimeout(shadowHost._slowTimer);
+      shadowHost._slowTimer = null;
     }
+    // 显示 loading 状态
+    basicEl.innerHTML = `<span style="opacity:0.5;font-size:13px;font-style:italic;">${t('loading')}...</span>`;
+
+    const pDetail = shadow.getElementById('p-detail');
+    if (pDetail) {
+      pDetail.style.display = 'none';
+    }
+
+    // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
+    getDetailedTranslation(text, false, manualLang, {
+      hintInputLang: hintSourceLangNew !== 'auto' ? hintSourceLangNew : null
+    }, hintSourceLangNew !== 'auto' ? hintSourceLangNew : null)
+      .then(result => {
+        if (!result) return;
+        const currentWord = shadowHost?.getAttribute('data-current-word');
+        if (text.trim() !== currentWord) return;
+
+        const isRTL = ['he', 'ar', 'fa'].includes(
+          (window.currentTargetL || '').toLowerCase().slice(0, 2)
+        );
+
+        logger.log('前端渲染', result);
+        if (result.isPartial) {
+          const pBasic = shadow.getElementById('p-basic');
+          const pPhonetic = shadow.getElementById('p-phonetic');
+          const pDetail = shadow.getElementById('p-detail');
+          if (pBasic) {
+            pBasic.innerText = result.basic || '';
+            pBasic.style.color = '';
+            pBasic.style.fontStyle = 'normal';
+          }
+          if (pPhonetic) {
+            pPhonetic.innerText = result.sourcePhonetic
+              ? `/${result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
+          }
+          if (pDetail) {
+            pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
+            pDetail.style.display = 'block';
+          }
+
+          //  超时后显示刷新按钮
+          const TIMEOUT_MS = 8000; // 超过 8 秒视为"慢"
+          const slowTimer = setTimeout(() => {
+            // 再次确认用户还在看同一个词，且 pDetail 还是 loading 状态
+            const currentWord2 = shadowHost?.getAttribute('data-current-word');
+            if (text.trim() !== currentWord2) return;
+            if (!pDetail) return;
+
+            // 替换为刷新按钮
+            pDetail.innerHTML = `
+                    <span style="opacity:0.5;font-size:12px;">
+                        ${t('loadingSlow', window.uiLanguage) || 'API loading slow'}
+                        <button id="p-detail-retry" style="
+                            margin-left:6px;
+                            font-size:12px;
+                            cursor:pointer;
+                            border:1px solid currentColor;
+                            border-radius:4px;
+                            padding:1px 7px;
+                            background:transparent;
+                            color:inherit;
+                            opacity:0.7;
+                        ">↺ ${t('retry', window.uiLanguage) || 'Retry'}</button>
+                    </span>`;
+
+            // 绑定点击，复用 p-refresh 的逻辑
+            const retryBtn = pDetail.querySelector('#p-detail-retry');
+            if (retryBtn) {
+              retryBtn.onclick = (e) => {
+                e?.stopPropagation();
+                triggerRefresh(); // 不再用 .click()
+              };
+            }
+          }, TIMEOUT_MS);
+
+          //  如果后续 TRANSLATE_DETAIL_UPDATE 正常填充了，需要取消计时器
+          // 在 fillPopupData 里或 TRANSLATE_DETAIL_UPDATE 的 handler 里清除：
+          // clearTimeout(slowTimer)
+          //  通过给 shadow host 挂一个取消句柄来实现，因为无论是 fillPopupData 还是 handler 里都能访问到 shadowHost，但不一定能访问到 slowTimer
+          if (shadowHost) {
+            shadowHost._slowTimer && clearTimeout(shadowHost._slowTimer);
+            shadowHost._slowTimer = slowTimer;
+            shadowHost._detailFullyRendered = false;
+          }
+
+        } else {
+          logger.log('result.isPartial 为 false', result);
+          // 缓存命中时清掉可能残留的计时器
+          if (shadowHost) {
+            clearTimeout(shadowHost._slowTimer);
+            shadowHost._slowTimer = null;
+            shadowHost._detailFullyRendered = true;
+          }
+          fillPopupData(result, shadow, text.trim(), window.currentTargetL, isRTL);
+        }
+      })
+      .catch(err => {
+        setBasicError(basicEl, err.message || '网络异常');
+      });
+
+    requestAnimationFrame(() => clampPopupToViewport?.(popupEl));
   }
 
-  // ─── 内容 HTML 模板 ──────────────────────────────────────────────────────────
+  // ─── 内容 HTML 模板 ──
 
   function buildContentHTML(text, isSaved) {
+    const isMultiline = text.length > 40 || text.includes('\n');
+    const targetLang = (window.currentTargetL || getBrowserLang() || 'EN').toUpperCase().slice(0, 2);
+
     return `
-      <div style="line-height:1.2;">
-        <div style="display:block;line-height:1.2;">
-          <span id="p-query" style="font-size:22px;font-weight:700;color:var(--p-text-main);
-                word-break:break-word;overflow-wrap:break-word;display:inline;vertical-align:middle;">
-            ${text}
-          </span>
-          <span style="display:inline-flex;align-items:center;gap:8px;margin-left:10px;
-                      padding-top:6px;vertical-align:middle;white-space:nowrap;">
-            <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="margin:0;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              </svg>
-            </div>
-            <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}"
-                title="${isSaved ? t('uncollect') : t('collect')}" style="margin:0;">
-              <svg id="star-icon" width="20" height="20" viewBox="0 0 24 24"
-                  fill="${isSaved ? '#facc15' : 'none'}"
-                  stroke="${isSaved ? '#facc15' : 'rgba(255,255,255,0.8)'}"
-                  stroke-width="1.5" stroke-linejoin="round">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            </div>
-            <div id="p-refresh" class="icon-btn refresh-btn" title="${t('retranslate')}" style="margin:0;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-              </svg>
-            </div>
-          </span>
+    <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
+      <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
+  
+        <div style="display:flex; align-items:center; gap:4px;">
+  
+  <!-- 源语言 -->
+  <div id="p-lang-select" class="lang-tag-btn" 
+       style="font-size:11px; font-weight:700; color:var(--p-accent); cursor:pointer;
+              user-select:none; -webkit-user-select:none;
+              padding:4px 10px; border-radius:10px;
+              padding:2px 6px;
+              background:var(--p-header-bg); transition:all 0.2s; white-space:nowrap;
+              display:flex; align-items:center; min-width:44px; justify-content:center;">
+    <span id="p-lang-src" style="opacity:0.9; pointer-events:none;">AUTO</span>
+  </div>
+
+  <!-- 箭头 -->
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+       stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
+    <path d="M5 12h14m-7-7 7 7-7 7"/>
+  </svg>
+
+  <!-- 目标语言 -->
+  <div id="p-lang-tgt-btn" class="lang-tag-btn"
+       style="font-size:11px; font-weight:700; color:var(--p-accent); cursor:pointer;
+              user-select:none; -webkit-user-select:none;
+              padding:4px 10px;  border-radius:10px;
+              padding:2px 6px;
+              background:var(--p-header-bg); transition:all 0.2s; white-space:nowrap;
+              display:flex; align-items:center; min-width:44px; justify-content:center;">
+    <span id="p-lang-tgt" style="opacity:0.9; pointer-events:none;">${targetLang}</span>
+  </div>
+
+</div>
+
+        <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+          <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block;">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </div>
+
+          <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}" 
+               title="${isSaved ? t('uncollect') : t('collect')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
+            <svg id="star-icon" width="18" height="18" viewBox="0 0 24 24"
+                 fill="${isSaved ? '#facc15' : 'none'}"
+                 stroke="${isSaved ? '#facc15' : 'currentColor'}"
+                 stroke-width="2" stroke-linejoin="round" style="display:block;">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+
+          <div id="p-refresh" class="icon-btn refresh-btn" title="${t('retranslate')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+            </svg>
+          </div>
         </div>
-        <div id="p-phonetic" style="margin-top:6px;margin-left:2px;color:var(--p-phonetic);
-            font-size:14px;opacity:0.8;font-family:'Lucida Sans Unicode',sans-serif;"></div>
-        <div id="p-basic" class="basic" style="margin-top:8px;">Loading...</div>
-        <div id="p-detail" class="detail" style="display:none;margin-top:10px;margin-bottom:10px;"></div>
-        <div id="p-examples" style="display:none;margin-top:12px;"></div>
-        <div id="p-source"   style="display:none;margin-top:1px;font-size:10px;opacity:0.35;text-align:right;letter-spacing:0.5px;"></div>
-      </div>`;
+      </div>
+
+      <div id="p-query-container" style="padding: 4px 2px 0;">
+        <div id="p-query" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); 
+             word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
+          ${text}
+        </div>
+        <div id="p-phonetic" style="margin-top:4px; color:var(--p-phonetic); font-size:13px; opacity:0.8; font-family:sans-serif;"></div>
+      </div>
+
+      <div id="p-result-container" style="display:flex; flex-direction:column; gap:6px;">
+        <div id="p-basic" class="basic" style="font-size:18px; color:var(--p-accent); font-weight:500;">Loading...</div>
+        <div id="p-detail" class="detail" style="display:none; margin-top:2px;"></div>
+        <div id="p-examples" style="display:none; margin-top:4px;"></div>
+      </div>
+
+      <div id="p-source" style="display:none; margin-top:8px; font-size:10px; opacity:0.5; text-align:right; font-style:italic;"></div>
+    </div>`;
   }
 
-  // ─── 填充翻译数据 ─────────────────────────────────────────────────────────────
+  // ─── 填充翻译数据 ──────────────
 
-  function fillPopupData(res, shadow, text, targetLang, isRTL = false) {
+  function fillPopupData(res, shadow, text, targetLang, isRTL = false, state = null) {
     if (!shadow || !res) return;
 
     const esc = (s) => typeof s !== 'string' ? '' :
@@ -3498,7 +4011,18 @@ function initSelectionTranslate() {
       return acc;
     }, []).map(i => ({ ...i, meanings: [...new Set(i.meanings.map(m => m.trim()).filter(Boolean))] }));
 
-    res = { ...res, dictData: mergedDict };
+    // 同步合并 originalDictData，保持和 dictData 相同的 pos 顺序
+    const mergedOriginal = (res.originalDictData || []).reduce((acc, item) => {
+      const meanings = item.meanings?.length
+        ? item.meanings
+        : (item.definition ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))] : []);
+      const found = acc.find(d => d.pos === item.pos);
+      if (found) found.meanings.push(...meanings);
+      else acc.push({ ...item, meanings });
+      return acc;
+    }, []).map(i => ({ ...i, meanings: [...new Set(i.meanings.map(m => m.trim()).filter(Boolean))] }));
+
+    res = { ...res, dictData: mergedDict, originalDictData: mergedOriginal.length > 0 ? mergedOriginal : res.originalDictData };
 
     // 音标
     const pPhonetic = shadow.getElementById('p-phonetic');
@@ -3520,36 +4044,86 @@ function initSelectionTranslate() {
           '比较级': '比較級', '最高级': '最高級'
         };
 
-        let html = res.dictData.map(i => {
-          const pos = esc(localizePos(i.pos, targetLang) || '');
-          const meanings = (i.meanings || []).map(m => esc(cleanMarker(m))).join(', ');
-          return `<div><b style="color:#319BCA;font-size:12px;margin-right:4px;">${pos}</b>${meanings}</div>`;
+        const hasOriginal = res.originalDictData?.length > 0;
+
+        let html = res.dictData.map((item, posIdx) => {
+          const pos = esc(localizePos(item.pos, targetLang) || '');
+          const meanings = (item.meanings || []).map(m => esc(cleanMarker(m))).join(', ');
+
+          // 原文 meanings（同一词性）
+          const origItem = hasOriginal ? res.originalDictData[posIdx] : null;
+          const origMeanings = origItem
+            ? (origItem.meanings || []).map(m => esc(cleanMarker(m))).join(', ')
+            : '';
+
+          const enToggle = (hasOriginal && origMeanings && origMeanings !== meanings)
+            ? `<span class="p-orig-toggle" data-posidx="${posIdx}"
+                style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;
+                       color:var(--p-accent);opacity:0.5;cursor:pointer;margin-left:6px;
+                       border:1px solid var(--p-accent);border-radius:7px;padding:1px 4px;
+                       vertical-align:middle;user-select:none;flex-shrink:0;
+                       transition:opacity 0.2s;">EN</span>`
+            : '';
+
+          const origBlock = (hasOriginal && origMeanings && origMeanings !== meanings)
+            ? `<div class="p-orig-text" data-posidx="${posIdx}">${origMeanings}</div>`
+            : '';
+
+          return `<div style="margin-bottom:4px;">
+        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
+          <b style="color:#319BCA;font-size:12px;margin-right:4px;flex-shrink:0;">${pos}</b>
+          <span>${meanings}</span>
+          ${enToggle}
+        </div>
+        ${origBlock}
+      </div>`;
         }).join('');
 
         let forms = '';
         if (res.prototype && res.prototype.toLowerCase().trim() !== text.toLowerCase().trim()) {
           forms += `<span style="display:inline-flex;align-items:center;gap:4px;
-            background:color-mix(in srgb,var(--p-accent) 8%,transparent);
-            border:0.5px solid color-mix(in srgb,var(--p-accent) 40%,transparent);
-            border-radius:6px;padding:3px 8px;font-size:12px;">
-          <span style="color:var(--p-text-muted);font-size:11px;">原型</span>
-          <span style="color:var(--p-accent);font-weight:500;">${esc(res.prototype)}</span>
-        </span>`;
+          background:color-mix(in srgb,var(--p-accent) 8%,transparent);
+          border:0.5px solid color-mix(in srgb,var(--p-accent) 40%,transparent);
+          border-radius:6px;padding:3px 8px;font-size:12px;">
+        <span style="color:var(--p-text-muted);font-size:11px;">Prototype</span>
+        <span style="color:var(--p-accent);font-weight:500;">${esc(res.prototype)}</span>
+      </span>`;
         }
         (res.wordForms || []).forEach(wf => {
           const name = esc(isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name);
           forms += `<span style="display:inline-flex;align-items:center;gap:4px;
-            background:color-mix(in srgb,var(--p-text-main) 5%,transparent);
-            border:0.5px solid color-mix(in srgb,var(--p-border) 60%,transparent);
-            border-radius:6px;padding:3px 8px;font-size:12px;">
-          <span style="color:var(--p-text-muted);font-size:11px;">${name}</span>
-          <span style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
-        </span>`;
+          background:color-mix(in srgb,var(--p-text-main) 5%,transparent);
+          border:0.5px solid color-mix(in srgb,var(--p-border) 60%,transparent);
+          border-radius:6px;padding:3px 8px;font-size:12px;">
+        <span style="color:var(--p-text-muted);font-size:11px;">${name}</span>
+        <span style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
+      </span>`;
         });
         if (forms) html += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${forms}</div>`;
 
         pD.innerHTML = html;
         pD.style.display = 'block';
+
+        // 绑定 EN 展开/收起事件
+        pD.querySelectorAll('.p-orig-toggle').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = btn.getAttribute('data-posidx');
+            const origText = pD.querySelector(`.p-orig-text[data-posidx="${idx}"]`);
+            if (!origText) return;
+            const isOpen = btn.classList.contains('is-open');
+            if (isOpen) {
+              btn.classList.remove('is-open');
+              btn.textContent = 'EN';
+              origText.classList.remove('is-visible');
+            } else {
+              btn.classList.add('is-open');
+              btn.textContent = 'EN ▲';
+              origText.classList.add('is-visible');
+            }
+          });
+        });
+
       } else {
         pD.style.display = 'none';
       }
@@ -3594,7 +4168,26 @@ function initSelectionTranslate() {
     const pSource = shadow.getElementById('p-source');
     if (pSource) {
       pSource.style.display = res.source ? 'block' : 'none';
-      if (res.source) pSource.innerText = `Source: ${res.source}`;
+      if (res.source) {
+        if (res.sourceUrl) {
+          pSource.innerHTML = `Source: <a href="${res.sourceUrl}" target="_blank" rel="noopener noreferrer">${res.source}</a>`;
+        } else {
+          pSource.innerText = `Source: ${res.source}`;
+        }
+      }
+    }
+
+    const srcSpan = shadow.getElementById('p-lang-src');
+    const tgtSpan = shadow.getElementById('p-lang-tgt-btn');
+    if (srcSpan) {
+      if (state && state.sourceLang === 'auto' && res.langInfo?.code) {
+        srcSpan.textContent = res.langInfo.code.toUpperCase().slice(0, 2);
+      } else if (!state && res.langInfo?.code) {
+        srcSpan.textContent = res.langInfo.code.toUpperCase().slice(0, 2);
+      }
+    }
+    if (tgtSpan) {
+      tgtSpan.textContent = (window.currentTargetL || getBrowserLang() || 'EN').toUpperCase().slice(0, 2);
     }
   }
 
@@ -3684,12 +4277,26 @@ function initSelectionTranslate() {
       if (!window.__LANG_READY__) {
         await window.__LANG_PROMISE__;
       }
-      const targetLang = window.currentTargetL || navigator.language || 'en';
-      const isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+      const targetLang = window.currentTargetL || getBrowserLang() || 'en';
+
+      //  读取源语言：优先用已缓存的全局变量，避免重复请求 storage
+      const storage = await safeGetStorage(['targetLanguage', 'lpLangA']);
+      const sourceLang = storage?.lpLangA || 'auto';
+      const targetPrefix = targetLang.toLowerCase().slice(0, 2);
+      const sourcePrefix = sourceLang.toLowerCase().slice(0, 2);
+
+      if (sourceLang !== 'auto' && sourcePrefix === 'ja' && targetPrefix === 'zh') {
+        // 源语言明确是日语，目标是中文，直接信任用户设置放行
+        isAlreadyTarget = false;
+      } else {
+        isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+      }
+
       if (isAlreadyTarget) {
         forceHideLogo();
         return;
       }
+
       if (!shadowHost) initShadowDOM();
       if (!logoBtn) return;
       let rect = null;
@@ -3728,32 +4335,49 @@ function initSelectionTranslate() {
       window.logoAutoTimer = setTimeout(() => {
         forceHideLogo();
       }, 3000);
+
+      // 鼠标移上按钮显示翻译划词翻译窗口
       logoBtn.onmouseenter = async () => {
+        try { if (!chrome.runtime?.id) { showUpdateNotice(); return; } }
+        catch (_) { showUpdateNotice(); return; }
         forceHideLogo();
-        const storage = await safeGetStorage(['targetLanguage']);
-        const currentTarget = storage?.targetLanguage || navigator.language || 'en';
-        let finalQuery = text;
-        const hasHan = /[\u4e00-\u9fa5]/.test(text);
-        const hasEn = /[a-zA-Z]/.test(text);
-        const hasJa = LANGUAGE_PATTERNS['ja']?.test(text);
-        if (hasHan && hasEn && !hasJa) {
-          const zhChars = text.match(/[\u4e00-\u9fa5]/g) || [];
-          const enChars = text.match(/[a-zA-Z]/g) || [];
-          if (enChars.length > zhChars.length) {
-            finalQuery = text.replace(/[\u4e00-\u9fa5]/g, '').trim();
+        try {
+          // 复用已读取的 storage，不再重复请求
+          const currentTarget = storage?.targetLanguage || getBrowserLang() || 'en';
+          const currentSource = storage?.lpLangA || 'auto';
+          let finalQuery = text;
+          const hasHan = /[\u4e00-\u9fa5]/.test(text);
+          const hasEn = /[a-zA-Z]/.test(text);
+          const hasJa = LANGUAGE_PATTERNS['ja']?.test(text);
+          if (hasHan && hasEn && !hasJa) {
+            const zhChars = text.match(/[\u4e00-\u9fa5]/g) || [];
+            const enChars = text.match(/[a-zA-Z]/g) || [];
+            if (enChars.length > zhChars.length) {
+              finalQuery = text.replace(/[\u4e00-\u9fa5]/g, '').trim();
+            }
           }
+          const detectedSourceLang = currentSource || detectSourceLang(finalQuery) || 'auto';
+          await renderAndShowPopup(
+            finalQuery,
+            { clientX: mouseX, clientY: mouseY },
+            shadowHost.shadowRoot,
+            currentTarget,
+            detectedSourceLang
+          );
+        } catch (e) {
+          if (e.message?.includes('context invalidated')) {
+            showUpdateNotice();
+            return;
+          }
+          logger.error('显示翻译窗口失败:', e);
         }
-        await renderAndShowPopup(
-          finalQuery,
-          { clientX: mouseX, clientY: mouseY },
-          shadowHost.shadowRoot,
-          currentTarget
-        );
       };
     }, 150);
   });
   document.addEventListener('mousedown', (e) => {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
+    const existingDropdown = shadowHost?.shadowRoot?.getElementById('p-lang-dropdown');
+    if (existingDropdown) existingDropdown.remove();
     forceHideLogo();
     if (shadowHost && shadowHost.getAttribute('data-pinned') !== 'true' && typeof popupEl !== 'undefined') {
       window.speechSynthesis?.cancel();
@@ -4034,6 +4658,63 @@ function initSelectionTranslate() {
     });
   })();
 
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.action === 'TRANSLATE_DETAIL_UPDATE') {
+      const currentWord = shadowHost?.getAttribute('data-current-word');
+      if (msg.originalText !== currentWord) {
+        sendResponse({ status: 'ignored' });
+        return;
+      }
+      const shadow = shadowHost?.shadowRoot;
+      if (!shadow || popupEl?.style?.display === 'none') {
+        sendResponse({ status: 'ignored' });
+        return;
+      }
+
+      if (msg.result?.isPartial) {
+        //  已经渲染完整结果了，忽略 partial 消息，避免闪烁
+        if (shadowHost?._detailFullyRendered) {
+          sendResponse({ status: 'ignored' });
+          return;
+        }
+
+        const pBasic = shadow.getElementById('p-basic');
+        const pPhonetic = shadow.getElementById('p-phonetic');
+        const pDetail = shadow.getElementById('p-detail');
+        const pExamples = shadow.getElementById('p-examples');
+
+        if (pBasic) {
+          pBasic.innerText = msg.result.basic || '';
+          pBasic.style.color = '';
+          pBasic.style.fontStyle = 'normal';
+        }
+        if (pPhonetic) {
+          pPhonetic.innerText = msg.result.sourcePhonetic
+            ? `/${msg.result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
+        }
+        if (pDetail) {
+          pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
+          pDetail.style.display = 'block';
+        }
+        if (pExamples) pExamples.style.display = 'none';
+
+      } else {
+        //  已经渲染完整结果了，清 timer，标记已渲染
+        if (shadowHost) {
+          clearTimeout(shadowHost._slowTimer);
+          shadowHost._slowTimer = null;
+          shadowHost._detailFullyRendered = true;
+        }
+        const isRTL = ['he', 'ar', 'fa'].includes(
+          (window.currentTargetL || '').toLowerCase().slice(0, 2)
+        );
+        fillPopupData(msg.result, shadow, msg.originalText, window.currentTargetL, isRTL);
+      }
+
+      sendResponse({ status: 'ok' });
+    }
+    return true;
+  });
 }
 
 //yt
@@ -4260,7 +4941,7 @@ async function downloadSubtitles(withTranslation = false) {
     getRuntimeDefaultEngine();
   const lang = window.currentConfig?.targetLanguage ||
     window.currentTargetL ||
-    navigator.language || 'en';
+    getBrowserLang() || 'en';
   const uiLang = window.uiLanguage || lang;
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
 
@@ -4973,7 +5654,7 @@ function syncSubtitleDisplay() {
           tEl.classList.remove('kt-loading');
         } else {
           if (isBatchEngine) {
-            tEl.innerText = '...';
+            tEl.innerText = t('loading') || 'Translating...';
             tEl.classList.add('kt-loading');
             const thisRequestIndex = currentIndex;
             setTimeout(async () => {
@@ -5261,7 +5942,7 @@ async function handleWordMouseEnter(e, word) {
     safeGetStorage(['targetLanguage'])
   ]);
   if (__currentHoverToken !== myToken) return;
-  const currentLang = storage?.targetLanguage || navigator.language || 'en';
+  const currentLang = storage?.targetLanguage || getBrowserLang() || 'en';
   const isCollected = !!(entry && entry.deleted === false);
 
   let tooltip = document.getElementById('kt-word-tooltip');
@@ -5431,7 +6112,7 @@ async function handleWordDblClick(e, word) {
   const wordLower = cleanWord.toLowerCase();
   let fullTranslation = null;
   const storage = await safeGetStorage(['targetLanguage']);
-  const currentLang = storage?.targetLanguage || navigator.language || 'en';
+  const currentLang = storage?.targetLanguage || getBrowserLang() || 'en';
   const res = await getDetailedTranslation(cleanWord, false, currentLang);
   if (res && !res.isError) {
     fullTranslation = {
