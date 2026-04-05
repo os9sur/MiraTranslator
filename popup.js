@@ -1467,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         html += `
             <div style="margin-bottom:10px;">
               <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-weight:bold; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
+                <span style="font-weight:bold; word-break:break-all; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
                 ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
               </div>
               ${hasPhonetic ? `
@@ -1496,12 +1496,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         ...item,
         meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
       }));
+      logger.log('[DEBUG] isPartial:', response.isPartial, '| dicts:', dicts.length, '| basic:', basic.slice(0, 20));
+      if (response.isPartial && basic && dicts.length === 0) {
+        // 区分：是真的在等词典，还是句子翻译
+        // 用文本判断：有空格=句子，无空格=单词（接受中日韩的小误差）
+        const isWordMode = !text.trim().includes(' ') ||
+          /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/.test(text.trim()) && text.trim().length <= 6;
 
-      if (response.isPartial) {
-        // basic 已经显示，dict 区域显示 loading
-        html += `<div style="color:#64748b; font-size:11px; margin-top:8px;">
+        if (isWordMode) {
+          html += `<div style="color:#64748b; font-size:11px; margin-top:8px;">
                 ${t('loadingMore', ui_lang)}
             </div>`;
+        }
       } else if (mergedDicts.length > 0) {
         html += mergedDicts.map((item, posIdx) => {
           const rawPos = (item.pos || '').toLowerCase().trim().replace(/\.$/, '');

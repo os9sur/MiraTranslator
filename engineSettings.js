@@ -103,10 +103,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         'custom_ai': {
             name: 'Custom API', url: '#', default_url: 'https://api.openai.com/v1', color: '#a855f7', meta: 'ANY.API',
+            tip: t('customApiTip', ui_lang),
             fields: [
                 { k: 'customKey', l: 'API Key', t: 'password' },
                 { k: 'customHost', l: 'Base URL', t: 'text', d: 'https://api.your-provider.com/v1' },
-                { k: 'customModel', l: 'Model Name', t: 'text', d: 'gpt-4o', opts: ['gpt-4o', 'gpt-4o-mini', 'claude-3-5-sonnet'] }
+                {
+                    k: 'customModel', l: 'Model Name', t: 'text', d: 'gpt-4o',
+                    opts: [
+                        // 代理/中转场景
+                        'gpt-4o', 'gpt-4o-mini', 'deepseek-chat',
+                        '───── Local Models ─────',
+                        // 低配 
+                        'gemma3:1b', 'qwen2.5:1.5b', 'phi4-mini', 'llama3.2:3b',
+                        // 中配 
+                        'gemma3:4b', 'qwen2.5:7b', 'qwen3:8b', 'llama3.3:8b', 'mistral:7b',
+                        // 高配 
+                        'deepseek-r1:8b', 'llama4:8b',
+                    ]
+                }
             ]
         }
     };
@@ -444,7 +458,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
                 <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
                 <div class="combobox-dropdown">
-                    ${opts.map(opt => `<div class="dropdown-item" data-value="${opt}">${opt}</div>`).join('')}
+                    ${opts.map(opt =>
+                    opt.startsWith('─')
+                        ? `<div class="dropdown-divider" style="color:#666;font-size:10px;padding:4px 8px;cursor:default;pointer-events:none;">${opt}</div>`
+                        : `<div class="dropdown-item" data-value="${opt}">${opt}</div>`
+                ).join('')}
                 </div>
             </div>`;
             } else {
@@ -477,33 +495,76 @@ document.addEventListener('DOMContentLoaded', async () => {
             toggle.onclick = (e) => {
                 e.stopPropagation();
                 const container = toggle.parentElement;
-                const dropdown = container.querySelector('.combobox-dropdown');
+
+                // ↓ dropdown 可能已经在 body 里，用 _dropdown 引用追踪
+                const dropdown = container._dropdown || container.querySelector('.combobox-dropdown');
+                if (!dropdown) return;
+                container._dropdown = dropdown; // 缓存引用
+
                 const isOpen = dropdown.classList.contains('show');
+
+                // 关闭所有
                 document.querySelectorAll('.combobox-dropdown.show').forEach(d => {
                     d.classList.remove('show');
-                    d.parentElement.classList.remove('open');
+                    if (d._originalParent) {
+                        d._originalParent.classList.remove('open');
+                        d._originalParent._dropdown = null;
+                        d._originalParent.appendChild(d);
+                        d._originalParent = null;
+                    }
+                    d.style.cssText = '';
                 });
+
                 if (!isOpen) {
+                    const rect = container.getBoundingClientRect();
+                    dropdown._originalParent = container;
+                    document.body.appendChild(dropdown);
+
+                    dropdown.style.position = 'fixed';
+                    dropdown.style.top = (rect.bottom + 2) + 'px';
+                    dropdown.style.left = rect.left + 'px';
+                    dropdown.style.width = rect.width + 'px';
+                    dropdown.style.maxHeight = '180px';
+                    dropdown.style.overflowY = 'auto'; // ← 加这个
+                    dropdown.style.zIndex = '999999';
                     dropdown.classList.add('show');
                     container.classList.add('open');
                 }
             };
         });
+
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.onclick = (e) => {
+                e.stopPropagation();
                 const val = item.dataset.value;
-                const container = item.closest('.custom-combobox');
-                const input = container.querySelector('input');
-                input.value = val;
-                item.parentElement.classList.remove('show');
-                container.classList.remove('open');
-                input.dispatchEvent(new Event('input', { bubbles: true }));
+                const dropdown = item.closest('.combobox-dropdown');
+                const originalParent = dropdown._originalParent;
+                const input = originalParent?.querySelector('input');
+                if (input) {
+                    input.value = val;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                dropdown.classList.remove('show');
+                if (originalParent) {
+                    originalParent.classList.remove('open');
+                    originalParent._dropdown = null;
+                    originalParent.appendChild(dropdown);
+                    dropdown._originalParent = null;
+                }
+                dropdown.style.cssText = '';
             };
         });
+
         document.addEventListener('click', () => {
             document.querySelectorAll('.combobox-dropdown.show').forEach(d => {
                 d.classList.remove('show');
-                d.parentElement.classList.remove('open');
+                if (d._originalParent) {
+                    d._originalParent.classList.remove('open');
+                    d._originalParent._dropdown = null;
+                    d._originalParent.appendChild(d);
+                    d._originalParent = null;
+                }
+                d.style.cssText = '';
             });
         });
     }
@@ -755,7 +816,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
                     displayMessage = friendlyMsg ? `${friendlyMsg} (Code: ${errorCode})` : `API Error: ${errorCode}`;
                 } else if (errorText.toLowerCase().includes("timeout")) {
-                    displayMessage = i18n.error_timeout || "Timeout ⌛";
+                    const isLocalModel = (tempKeys?.baseUrl || '').includes('localhost') ||
+                        (tempKeys?.baseUrl || '').includes('127.0.0.1');
+                    displayMessage = isLocalModel
+                        ? t('timeoutLocalModel')
+                        : (i18n.error_timeout || "Timeout ⌛");
                 } else if (errorText === "Same as Original") {
                     displayMessage = i18n.error_same_as_original || "API returned original text";
                 } else {
