@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof showUpdateNotice === 'function') showUpdateNotice();
     return;
   }
-  const targetLanguage =
-    storage?.ui_language ||
-    navigator.language?.replace('_', '-') ||
+  const targetLanguage = 
+    storage?.ui_language || 
+    getBrowserLang() || 
     'en';
   const _t = (key) => {
     return (typeof t === 'function') ? t(key, targetLanguage) : key;

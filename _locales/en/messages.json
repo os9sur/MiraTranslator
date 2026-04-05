@@ -29,6 +29,9 @@
   "ERROR_TIMEOUT": {
     "message": "Request timeout: Check network or proxy."
   },
+  "ERROR_NETWORK": {
+    "message": "Network Error: API restricted (VPN or regional block)."
+  },
   "ERROR_GENERIC": {
     "message": "Translation Failed: Check API configuration."
   }

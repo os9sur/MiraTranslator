@@ -3,31 +3,34 @@
     "message": "Mira 翻譯 - 沉浸式全文與 YouTube 雙語字幕"
   },
   "appDesc": {
-    "message": "不到 0.5MB：開源安全、零追蹤。內置公共引擎，支持私有 AI API (自備 Key) 接入。沉浸式全文、劃詞及 YouTube 雙語翻譯，支援 Google Drive/WebDAV 雲端同步。"
+    "message": "不到 0.5MB：開源安全、零追蹤。內置公共引擎，支持私有 AI API (自備 Key) 接入。沉浸式翻译、劃詞及 YouTube 雙語翻譯，支援 Google Drive/WebDAV 雲端同步。"
   },
   "ERROR_400": {
-    "message": "翻譯介面提示：請求無效或帳戶餘額不足。"
+    "message": "介面提示：請求無效或帳戶餘額不足。"
   },
   "ERROR_401": {
-    "message": "翻譯介面提示：API Key 無效，請檢查擴充功能設定。"
+    "message": "介面提示：API Key 無效，請檢查擴充功能設定。"
   },
   "ERROR_402": {
-    "message": "翻譯介面提示：配額不足或帳戶餘額不足。"
+    "message": "介面提示：配額不足或帳戶餘額不足。"
   },
   "ERROR_403": {
-    "message": "翻譯介面提示：權限不足，API Key 無權存取該模型或受 IP 限制。"
+    "message": "介面提示：權限不足，API Key 無權存取該模型或受 IP 限制。"
   },
   "ERROR_404": {
-    "message": "翻譯介面提示：模型名稱不存在或 API 路徑錯誤。"
+    "message": "介面提示：模型不存在或 API 路徑錯誤。"
   },
   "ERROR_429": {
-    "message": "翻譯介面提示：額度用盡或請求過快。"
+    "message": "介面提示：額度用盡或請求過快。"
   },
   "ERROR_500": {
-    "message": "翻譯介面提示：伺服器暫時不可用（500 錯誤）。"
+    "message": "介面提示：伺服器暫時不可用（500 錯誤）。"
   },
   "ERROR_TIMEOUT": {
-    "message": "翻譯請求超時：請檢查網路或代理設定。"
+    "message": "請求超時：請檢查網路或代理設定。"
+  },
+  "ERROR_NETWORK": {
+    "message": "連線失敗：翻譯介面受網路限制（VPN 或地區限制）。"
   },
   "ERROR_GENERIC": {
     "message": "翻譯失敗：請檢查網路連線或 API 設定。"

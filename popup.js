@@ -117,7 +117,7 @@ async function initNoticeBar() {
   gotItBtn.style.background = theme.gotItBg;
   expandBody.style.borderTopColor = theme.divider;
   bar.style.setProperty('--notice-glow', theme.dot);
-  
+
   const styleId = 'mira-notice-pulse-style';
   let styleEl = document.getElementById(styleId);
   if (!styleEl) {
@@ -135,7 +135,7 @@ async function initNoticeBar() {
   // 填入内容
   titleEl.textContent = noticeData.title;
   contentEl.textContent = noticeData.content || '';
-  gotItBtn.textContent = noticeData.gotIt || t('btnGotIt', navigator.language || 'en');
+  gotItBtn.textContent = noticeData.gotIt || t('btnGotIt', getBrowserLang() || 'en');
 
   bar.style.display = 'block';
   bar.classList.add('mira-pulsing');
@@ -152,7 +152,7 @@ async function initNoticeBar() {
   // 知道了：持久化 + 淡出
   gotItBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    await chrome.storage.local.set({ [dismissedKey]: true });
+    await safeSetStorage({ [dismissedKey]: true });
     bar.style.transition = 'opacity 0.3s ease';
     bar.style.opacity = '0';
     setTimeout(() => { bar.style.display = 'none'; }, 300);
@@ -219,14 +219,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const res_uiLanguage = await safeGetStorage('ui_language');
   if (res_uiLanguage) {
     window.currentConfig = {
-      ui_language: res_uiLanguage.ui_language || (navigator.language || 'en').replace('_', '-')
+      ui_language: res_uiLanguage.ui_language || (getBrowserLang() || 'en').replace('_', '-')
     };
   }
   // ── 语言对初始化
   async function initLangPair() {
     const r = await safeGetStorage(['lpLangA', 'lpLangB']);
-    const langA = r?.lpLangA || 'en';
-    const langB = r?.lpLangB || navigator.language || 'ja';
+    const langA = r?.lpLangA || 'auto';
+    const langB = r?.lpLangB || getBrowserLang() || 'ja';
 
     const selA = document.getElementById('lpSelA');
     const selB = document.getElementById('lpSelB');
@@ -244,8 +244,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const labelA = selA.options[selA.selectedIndex]?.text || '';
     const labelB = selB.options[selB.selectedIndex]?.text || '';
-    badgeA.textContent = labelA.slice(0, 2).toUpperCase();
-    badgeB.textContent = labelB.slice(0, 2).toUpperCase();
+    badgeA.textContent = selA.value === 'auto' ? 'AUTO' : labelA.slice(0, 2).toUpperCase();
+    window.hintSourceLang = selA.value;
+    badgeB.textContent = selB.value === 'auto' ? 'AUTO' : labelB.slice(0, 2).toUpperCase();
   }
 
   // 语言对 UI 事件绑定
@@ -261,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('langPairEdit').style.display = 'none';
       document.getElementById('langPairTag').style.display = 'flex';
       document.getElementById('lpArrow').textContent = '→';
-      await chrome.storage.local.set({
+      await safeSetStorage({
         lpLangA: document.getElementById('lpSelA').value,
         lpLangB: document.getElementById('lpSelB').value,
       });
@@ -270,6 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('lpSwapBtn')?.addEventListener('click', () => {
       const a = document.getElementById('lpSelA');
       const b = document.getElementById('lpSelB');
+      if (a.value === 'auto') return;
       [a.value, b.value] = [b.value, a.value];
       updateLpBadges();
     });
@@ -540,6 +542,24 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       }
+    } else if (selectedMethod === 'oneDrive') {
+      //  OneDrive 授权分支
+      logger.log("🔍 正在验证 OneDrive 授权...");
+      const data = await safeGetStorage('onedrive_token');
+      if (!data?.onedrive_token) {
+        logger.log("🔑 OneDrive 需要用户手动授权...");
+        safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((response) => {
+          if (response?.success) {
+            logger.log("✅ OneDrive 授权成功");
+            saveSyncConfig();
+          } else {
+            logger.error("❌ OneDrive 授权失败或取消");
+          }
+        });
+      } else {
+        logger.log("✅ OneDrive 缓存 Token 存在");
+        saveSyncConfig();
+      }
     } else {
       saveSyncConfig();
     }
@@ -567,24 +587,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     await performUnifiedSync('manualSyncPull', 'pull');
   };
   async function performUnifiedSync(btnId, direction) {
-    logger.log('[DEBUG] 进入 performUnifiedSync, direction:', direction);
+    //logger.log('[DEBUG] IS_MAIN_WORLD:', IS_MAIN_WORLD);
     const btn = document.getElementById(btnId);
     const originalText = btn.innerText;
     updateSyncProgressUI(btnId, 'initializing', true);
     await saveSyncConfig();
-    const data = await safeGetStorage(['syncConfig', 'google_drive_token']);
-    logger.log('[DEBUG] storage data:', data);
+    const data = await safeGetStorage(['syncConfig', 'google_drive_token', 'ui_language', 'onedrive_token']);
+    // logger.log('[DEBUG] onedrive_token 存在:', !!data?.onedrive_token);
     if (!data) return;
+    window.uiLanguage = data.ui_language || (getBrowserLang() || 'en').replace('_', '-');
     const config = data.syncConfig || {};
     const method = config.method || 'local';
     if (method === 'local') {
-      showToast(t('manualModeNoSync'), 'info');
+      showToast(t('manualModeNoSync', window.uiLanguage), 'info');
       updateSyncProgressUI(btnId, '', false);
       return;
     }
     if (method === 'webdav') {
       if (!config.webdavUrl || !config.webdavUser || !config.webdavPass) {
-        showToast(t('webdavConfigIncomplete'), 'error');
+        showToast(t('webdavConfigIncomplete', window.uiLanguage), 'error');
         updateSyncProgressUI(btnId, '', false);
         return;
       }
@@ -610,11 +631,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       return;
     }
+    //  OneDrive 无 token 时先授权
+    if (method === 'oneDrive' && !data.onedrive_token) {
+      updateSyncProgressUI(btnId, 'authorizing', true);
+      safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((response) => {
+        if (!response) { updateSyncProgressUI(btnId, '', false); return; }
+        if (response.success) {
+          executeSyncDataAction(btn, originalText, direction);
+        } else {
+          updateSyncProgressUI(btnId, '', false);
+        }
+      });
+      return;
+    }
     executeSyncDataAction(btn, originalText, direction);
   }
   async function executeSyncDataAction(btn, originalText, direction) {
     const btnId = btn.id;
-    const baseKeys = ['userConfigs', 'activeConfig', 'lastActiveId', 'siteSettings', 'customRules', 'userStyleConfig', 'scanConfig', 'ytStyleSettings'];
+    const baseKeys = ['userConfigs', 'activeConfig', 'lastActiveId', 'siteSettings', 'customRules', 'userStyleConfig', 'scanConfig', 'ytStyleSettings', 'ui_language'];
     const visualDelay = () => new Promise(r => setTimeout(r, 60));
     try {
       updateSyncProgressUI(btnId, direction === 'push' ? 'preparing_data' : 'checking_cloud', true);
@@ -633,6 +667,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           localData = { ...localData, ...dynamicData };
         }
       }
+      window.uiLanguage = localData.ui_language || (getBrowserLang() || 'en').replace('_', '-');
       updateSyncProgressUI(btnId, direction === 'push' ? 'uploading_keys' : 'fetching_remote', true);
       btn.disabled = true;
       const response = await safeSendMessage({
@@ -665,7 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         updateSyncProgressUI(btnId, 'done_success ✓', true);
         updateSyncStatusUI(now);
-        showToast(direction === 'push' ? t('backupSuccess') : t('restoreSuccess'), 'success');
+        showToast(direction === 'push' ? t('backupSuccess', window.uiLanguage) : t('restoreSuccess', window.uiLanguage), 'success');
         if (direction === 'pull') {
           setTimeout(async () => {
             if (typeof renderTable === 'function') await renderTable();
@@ -675,13 +710,35 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         if (response.error?.includes('401') || response.error?.includes('Unauthorized')) {
           updateSyncProgressUI(btnId, 'Reauthorizing...', true);
-          await chrome.storage.local.remove("google_drive_token");
-          if (typeof getGoogleTokenForFirefox === 'function') {
-            return getGoogleTokenForFirefox(btn, originalText, direction);
+          const syncData = await safeGetStorage('syncConfig');
+          const currentMethod = syncData?.syncConfig?.method || 'googleDrive';
+
+          if (currentMethod === 'oneDrive') {
+            // 先尝试静默刷新，不弹窗
+            safeSendMessage({ type: 'ONEDRIVE_SILENT_REFRESH' }).then(async (refreshRes) => {
+              if (refreshRes?.success) {
+                // 静默刷新成功，直接重试同步
+                logger.log('[DEBUG] OneDrive 静默刷新成功，重试同步');
+                executeSyncDataAction(btn, originalText, direction);
+              } else {
+                // 静默刷新失败，才清除 token 并弹窗重新授权
+                logger.warn('[DEBUG] OneDrive 静默刷新失败，需要重新登录');
+                await safeRemoveStorage('onedrive_token');
+                safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((authRes) => {
+                  if (authRes?.success) executeSyncDataAction(btn, originalText, direction);
+                  else updateSyncProgressUI(btnId, '', false);
+                });
+              }
+            });
+          } else {
+            await safeRemoveStorage('google_drive_token');
+            if (typeof getGoogleTokenForFirefox === 'function') {
+              return getGoogleTokenForFirefox(btn, originalText, direction);
+            }
           }
         } else {
           updateSyncProgressUI(btnId, 'sync_failed ✕', true);
-          showToast(`${t('syncFailed')} ` + (response.error || t('unknownError')), 'error');
+          showToast(`${t('syncFailed', window.uiLanguage)} ` + (response.error || t('unknownError', window.uiLanguage)), 'error');
         }
       }
       setTimeout(() => {
@@ -757,10 +814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   const langRes = await safeGetStorage(['targetLanguage']);
   if (!langRes) return;
-  const effectiveLang = langRes.targetLanguage ||
-    (navigator.languages && navigator.languages[0]) ||
-    navigator.language ||
-    'en';
+  const effectiveLang = langRes.targetLanguage || getBrowserLang();
   const targetLang = effectiveLang.replace('_', '-');
   if (!langRes.targetLanguage) {
     await safeSetStorage({ targetLanguage: targetLang });
@@ -1341,6 +1395,291 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     executeTranslation(text);
   }
+  //shuaxin
+  async function triggerResRefresh() {
+    const queryInput = document.getElementById('searchTextInput');
+    const text = queryInput ? queryInput.value.trim() : "";
+    if (!text) return;
+
+    if (resRefreshBtn) resRefreshBtn.classList.add('spinning');
+    if (resContent) resContent.style.opacity = '0.5';
+
+    try {
+      const coreText = text
+        .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+        .toLowerCase();
+      const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+      const allCache = await idb.getAll('tr_');
+      const keysToRemove = Object.keys(allCache).filter(k => k.includes(textFingerprint));
+      if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
+
+      await executeTranslation(text, true);
+    } finally {
+      setTimeout(() => {
+        if (resRefreshBtn) resRefreshBtn.classList.remove('spinning');
+        if (resContent) resContent.style.opacity = '1';
+      }, 600);
+    }
+  }
+
+  if (resRefreshBtn) {
+    resRefreshBtn.onclick = triggerResRefresh;
+  }
+  async function renderTranslationResult(response, text, ui_lang, langA, langB) {
+    if (response && !response.isError) {
+      currentTranslationResponse = response;
+      resVoiceHeader.style.display = 'flex';
+      resSource.innerText = text;
+      const actionArea = document.getElementById('actionArea');
+      if (actionArea) actionArea.style.display = 'block';
+      if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'flex';
+      resultArea.style.display = 'flex';
+      resultArea.style.userSelect = 'text';
+
+      const basic = response.basic || '';
+      const phonetic = response.phonetic || '';
+      const dicts = response.dictData || [];
+      const examples = response.examples || [];
+      const targetPhonetic =
+        response.targetPhonetic ||   // API 直接返回译文音标
+        response.romaji ||            // 日语 romaji
+        response.pinyin ||            // 中文拼音
+        response.transliteration ||   // 通用转写
+        '';
+      logger.log('basic:', response.basic);
+      logger.log('targetPhonetic:', response.targetPhonetic);
+      window._lastTranslationBasic = basic || '';
+      const ttsBtnTarget = document.getElementById('ttsBtnTarget');
+      if (ttsBtnTarget) ttsBtnTarget.style.display = basic ? 'inline-flex' : 'none';
+      const sourcePhonetic = response.sourcePhonetic || '';
+      logger.log("sourcePhonetic: ", sourcePhonetic);
+      if (resPhonetic) {
+        resPhonetic.innerText = sourcePhonetic
+          ? `[${sourcePhonetic}]`
+          : '';
+      }
+
+      let html = '';
+
+      if (basic) {
+        const hasPhonetic = !!targetPhonetic;
+        const phoneticLabel = getPhoneticLabel(ui_lang);
+        html += `
+            <div style="margin-bottom:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:bold; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
+                ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
+              </div>
+              ${hasPhonetic ? `
+                <div id="targetPhoneticRow" style="
+                  display:none; color:#64748b; font-size:11px;
+                  margin-top:3px; user-select:text;
+                ">${targetPhonetic}</div>` : ''}
+            </div>`;
+      }
+
+      // 合并相同 pos
+      const mergedDicts = dicts.reduce((acc, item) => {
+        const meanings = item.meanings?.length > 0
+          ? item.meanings
+          : (item.definition
+            ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))]
+            : []);
+        const existing = acc.find(d => d.pos === item.pos);
+        if (existing) {
+          existing.meanings = [...existing.meanings, ...meanings];
+        } else {
+          acc.push({ ...item, meanings });
+        }
+        return acc;
+      }, []).map(item => ({
+        ...item,
+        meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
+      }));
+
+      if (response.isPartial) {
+        // basic 已经显示，dict 区域显示 loading
+        html += `<div style="color:#64748b; font-size:11px; margin-top:8px;">
+                ${t('loadingMore', ui_lang)}
+            </div>`;
+      } else if (mergedDicts.length > 0) {
+        html += mergedDicts.map((item, posIdx) => {
+          const rawPos = (item.pos || '').toLowerCase().trim().replace(/\.$/, '');
+          const cnKey = POS_REVERSE_MAP[rawPos] || rawPos;
+          const targetLangCode = (langA || 'en').toLowerCase();
+          let displayPos = cnKey;
+          if (POS_MAP[cnKey]) {
+            displayPos = POS_MAP[cnKey][targetLangCode] || POS_MAP[cnKey]['en'] || cnKey;
+          }
+
+          const origItem = response.originalDictData?.[posIdx];
+          const origMeanings = origItem?.meanings?.join(', ') || '';
+          const hasOrig = origMeanings && origMeanings !== item.meanings.join(', ');
+
+          return `
+          <div style="margin-bottom:6px;">
+            <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:4px; line-height:1.4;">
+              <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:4px; min-width:32px; flex-shrink:0;">${displayPos}</span>
+              <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
+              ${hasOrig ? `
+                <span class="ql-orig-toggle" data-posidx="${posIdx}"
+                      style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;
+                            color:#38bdf8;opacity:0.5;cursor:pointer;margin-left:4px;
+                            border:1px solid #38bdf8;border-radius:3px;padding:1px 4px;
+                            vertical-align:middle;user-select:none;flex-shrink:0;
+                            transition:opacity 0.2s,background 0.2s;">EN</span>
+              ` : ''}
+            </div>
+            ${hasOrig ? `
+              <div class="ql-orig-text" data-posidx="${posIdx}"
+                  style="display:none;margin-top:4px;padding:4px 8px;
+                          border-left:2px solid #38bdf8;border-radius:2px 4px 4px 2px;
+                          font-size:11px;color:#94a3b8;font-style:italic;
+                          line-height:1.5;background:rgba(56,189,248,0.05);">
+                ${origMeanings}
+              </div>
+            ` : ''}
+          </div>`;
+        }).join('');
+      }
+
+      // 词形/时态
+      const wordForms = response.wordForms || [];
+      const prototype = response.prototype;
+      const protoLower = (prototype || '').toLowerCase().trim();
+      const textLower = text.toLowerCase().trim();
+
+      if ((prototype && protoLower !== textLower) || wordForms.length > 0) {
+        let formsHtml = '';
+        if (prototype && protoLower !== textLower) {
+          formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,179,237,0.1); border:0.5px solid rgba(99,179,237,0.4); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">原型</span>
+              <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
+            </span>`;
+        }
+        wordForms.forEach(wf => {
+          formsHtml += `
+            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
+              <span style="color:#94a3b8; font-size:11px;">${wf.name}</span>
+              <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
+            </span>`;
+        });
+        html += `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${formsHtml}</div>`;
+      }
+
+      // 例句
+      if (examples.length > 0) {
+        html += `
+          <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
+            <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
+            ${examples.map(ex => {
+          const src = typeof ex === 'string' ? ex : (ex.en || '');
+          const tgt = typeof ex === 'object' ? (ex.cn || '') : '';
+          return `
+                <div style="margin-bottom:8px;">
+                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic;">"${src}"</div>
+                  ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
+                </div>`;
+        }).join('')}
+          </div>`;
+      }
+
+      // source 部分不拼入 html，先占位
+      if (response.source) {
+        html += `<div id="wiki-source-placeholder" 
+              style="margin-top:10px; font-size:11px; opacity:0.8; 
+                     text-align:right; color:#64748b;">
+           Source:
+         </div>`;
+      }
+
+      resContent.innerHTML = html || 'No translation found.';
+
+      // 绑定 EN 展开按钮
+      resContent.querySelectorAll('.ql-orig-toggle').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = btn.getAttribute('data-posidx');
+          const origText = resContent.querySelector(`.ql-orig-text[data-posidx="${idx}"]`);
+          if (!origText) return;
+          const isOpen = btn.getAttribute('data-open') === 'true';
+          if (isOpen) {
+            btn.setAttribute('data-open', 'false');
+            btn.textContent = 'EN';
+            btn.style.opacity = '0.5';
+            btn.style.background = '';
+            origText.style.display = 'none';
+          } else {
+            btn.setAttribute('data-open', 'true');
+            btn.textContent = 'EN ▲';
+            btn.style.opacity = '1';
+            btn.style.background = 'rgba(56,189,248,0.15)';
+            origText.style.display = 'block';
+          }
+        });
+      });
+
+      // 再单独处理 source 链接，用 DOM API 绑定事件
+      if (response.source) {
+        const placeholder = resContent.querySelector('#wiki-source-placeholder');
+        if (placeholder) {
+          //placeholder.appendChild(document.createTextNode('Source: '));
+          if (response.sourceUrl) {
+            const a = document.createElement('a');
+            a.href = response.sourceUrl;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = response.source;
+            a.style.cssText = `
+                color: #38bdf8;
+                text-decoration: none;
+                font-weight: 500;
+                font-size: 10px;
+                font-style: italic;
+                padding: 2px 6px;
+                /*border: 1px solid rgba(56,189,248,0.4);*/
+                border-radius: 4px;
+                background: rgba(56,189,248,0.08);
+                transition: all 0.2s ease;
+                margin-left: 4px;
+              `;
+            a.addEventListener('mouseover', () => {
+              a.style.background = 'rgba(56,189,248,0.2)';
+              // a.style.borderColor = '#38bdf8';
+              a.style.color = '#7dd3fc';
+            });
+            a.addEventListener('mouseout', () => {
+              a.style.background = 'rgba(56,189,248,0.08)';
+              // a.style.borderColor = 'rgba(56,189,248,0.4)';
+              a.style.color = '#38bdf8';
+            });
+            placeholder.appendChild(a);
+          } else {
+            placeholder.appendChild(document.createTextNode(response.source));
+          }
+        }
+      }
+
+      // 绑定音标切换
+      const toggleBtn = document.getElementById('togglePhoneticBtn');
+      const phoneticRow = document.getElementById('targetPhoneticRow');
+
+      if (toggleBtn && phoneticRow) {
+        toggleBtn.onclick = () => {
+          const isHidden = phoneticRow.style.display === 'none';
+          phoneticRow.style.display = isHidden ? 'block' : 'none';
+          toggleBtn.classList.toggle('active', isHidden);
+        };
+      }
+      if (typeof updateSaveBtnStatus === 'function') {
+        await updateSaveBtnStatus(text);
+      }
+    } else {
+      const errorMsg = response?.basic || response?.error || 'No response';
+      resContent.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
+    }
+  }
 
   async function executeTranslation(text, forceRefresh = false) {
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
@@ -1349,14 +1688,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       const res = await safeGetStorage(['ui_language', 'activeConfig']);
       if (!res) return;
 
-      ui_lang = res.ui_language || navigator.language || 'en'
+      ui_lang = res.ui_language || getBrowserLang() || 'en'
       resultArea.style.display = 'flex';
       resultArea.style.userSelect = 'text';
       resContent.innerHTML = `<span style="color: #64748b; font-size: 11px;">${t('loading', ui_lang)}</span>`;
       resPhonetic.innerText = '';
       resVoiceHeader.style.display = 'none';
       // ── 读取语言对 
-      const langA = (document.getElementById('lpSelA').value || 'en').replace('_', '-');
+      const langA = (document.getElementById('lpSelA').value || 'auto').replace('_', '-');
       const langB = (document.getElementById('lpSelB').value || 'ja').replace('_', '-');
       const baseA = langA.split('-')[0].toLowerCase();
       const baseB = langB.split('-')[0].toLowerCase();
@@ -1424,173 +1763,60 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", inputLang="${inputLang}", langA="${langA}", langB="${langB}", targetL="${targetL}", engine="${engine}"`);
+      //  启动超时计时器
+      const TIMEOUT_MS = 8000;
+      let timeoutTriggered = false;
+      const slowTimer = setTimeout(() => {
+        timeoutTriggered = true;
+        if (!resContent) return;
+        resContent.innerHTML = `
+      <span style="opacity:0.5; font-size:12px;">
+        ${t('loadingSlow', ui_lang) || 'API loading slow'}
+        <button id="res-content-retry" style="
+          margin-left:6px;
+          font-size:12px;
+          cursor:pointer;
+          border:1px solid currentColor;
+          border-radius:4px;
+          padding:1px 7px;
+          background:transparent;
+          color:inherit;
+          opacity:0.7;
+        ">↺ ${t('retry', ui_lang) || 'Retry'}</button>
+      </span>`;
 
+        const retryBtn = resContent.querySelector('#res-content-retry');
+        if (retryBtn) {
+          retryBtn.onclick = (e) => {
+            e?.stopPropagation();
+            triggerResRefresh();
+          };
+        }
+      }, TIMEOUT_MS);
       // 翻译 
       const response = await getDetailedTranslation(text, false, targetL, {
         needPhonetic: true,
         hintInputLang: resolvedLang,
         hintLangA: langA,
-        hintLangB: langB
+        hintLangB: langB,
+        fromPopup: true
       });
 
-      if (response && !response.isError) {
-        currentTranslationResponse = response;
-        resVoiceHeader.style.display = 'flex';
-        resSource.innerText = text;
-        const actionArea = document.getElementById('actionArea');
-        if (actionArea) actionArea.style.display = 'block';
-        if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'block';
-        resultArea.style.display = 'flex';
-        resultArea.style.userSelect = 'text';
 
-        const basic = response.basic || '';
-        const phonetic = response.phonetic || '';
-        const dicts = response.dictData || [];
-        const examples = response.examples || [];
-        const targetPhonetic =
-          response.targetPhonetic ||   // API 直接返回译文音标
-          response.romaji ||            // 日语 romaji
-          response.pinyin ||            // 中文拼音
-          response.transliteration ||   // 通用转写
-          '';
-        logger.log('basic:', response.basic);
-        logger.log('targetPhonetic:', response.targetPhonetic);
-        window._lastTranslationBasic = basic || '';
-        const ttsBtnTarget = document.getElementById('ttsBtnTarget');
-        if (ttsBtnTarget) ttsBtnTarget.style.display = basic ? 'inline-flex' : 'none';
-        const sourcePhonetic = response.sourcePhonetic || '';
-        logger.log("sourcePhonetic: ", sourcePhonetic);
-        if (resPhonetic) {
-          resPhonetic.innerText = sourcePhonetic
-            ? `[${sourcePhonetic}]`
-            : '';
+      clearTimeout(slowTimer);
+
+      if (response) renderTranslationResult(response, text, ui_lang, langA, langB);
+
+      const detailUpdateListener = (msg) => {
+        if (msg.action === 'TRANSLATE_DETAIL_UPDATE' && !msg.result?.isPartial) {
+          clearTimeout(slowTimer);
+          renderTranslationResult(msg.result, text, ui_lang, langA, langB);
+          chrome.runtime.onMessage.removeListener(detailUpdateListener);
         }
-
-        let html = '';
-
-        if (basic) {
-          const hasPhonetic = !!targetPhonetic;
-          const phoneticLabel = getPhoneticLabel(ui_lang);
-          html += `
-            <div style="margin-bottom:10px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-weight:bold; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
-                ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
-              </div>
-              ${hasPhonetic ? `
-                <div id="targetPhoneticRow" style="
-                  display:none; color:#64748b; font-size:11px;
-                  margin-top:3px; user-select:text;
-                ">${targetPhonetic}</div>` : ''}
-            </div>`;
-        }
-
-        // 合并相同 pos
-        const mergedDicts = dicts.reduce((acc, item) => {
-          const meanings = item.meanings?.length > 0
-            ? item.meanings
-            : (item.definition
-              ? [...new Set(item.definition.split(',').map(s => s.trim()).filter(Boolean))]
-              : []);
-          const existing = acc.find(d => d.pos === item.pos);
-          if (existing) {
-            existing.meanings = [...existing.meanings, ...meanings];
-          } else {
-            acc.push({ ...item, meanings });
-          }
-          return acc;
-        }, []).map(item => ({
-          ...item,
-          meanings: [...new Set(item.meanings.map(m => m.trim()).filter(Boolean))]
-        }));
-
-        if (mergedDicts.length > 0) {
-          html += mergedDicts.map(item => {
-            const rawPos = (item.pos || '').toLowerCase().trim().replace(/\.$/, '');
-            const cnKey = POS_REVERSE_MAP[rawPos] || rawPos;
-
-            const targetLangCode = (langA || 'en').toLowerCase();
-
-            let displayPos = cnKey;
-            if (POS_MAP[cnKey]) {
-              displayPos = POS_MAP[cnKey][targetLangCode] || POS_MAP[cnKey]['en'] || cnKey;
-            }
-
-            return `
-    <div style="margin-bottom:6px; display:flex; align-items:baseline; line-height:1.4;">
-      <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:8px; min-width:32px;">${displayPos}</span>
-      <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
-    </div>`;
-          }).join('');
-        }
-
-        // 词形/时态
-        const wordForms = response.wordForms || [];
-        const prototype = response.prototype;
-        const protoLower = (prototype || '').toLowerCase().trim();
-        const textLower = text.toLowerCase().trim();
-
-        if ((prototype && protoLower !== textLower) || wordForms.length > 0) {
-          let formsHtml = '';
-          if (prototype && protoLower !== textLower) {
-            formsHtml += `
-            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,179,237,0.1); border:0.5px solid rgba(99,179,237,0.4); border-radius:6px; padding:3px 8px; font-size:12px;">
-              <span style="color:#94a3b8; font-size:11px;">原型</span>
-              <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
-            </span>`;
-          }
-          wordForms.forEach(wf => {
-            formsHtml += `
-            <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
-              <span style="color:#94a3b8; font-size:11px;">${wf.name}</span>
-              <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
-            </span>`;
-          });
-          html += `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${formsHtml}</div>`;
-        }
-
-        // 例句
-        if (examples.length > 0) {
-          html += `
-          <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
-            <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
-            ${examples.map(ex => {
-            const src = typeof ex === 'string' ? ex : (ex.en || '');
-            const tgt = typeof ex === 'object' ? (ex.cn || '') : '';
-            return `
-                <div style="margin-bottom:8px;">
-                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic;">"${src}"</div>
-                  ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
-                </div>`;
-          }).join('')}
-          </div>`;
-        }
-
-        if (response.source) {
-          html += `<div style="margin-top:2px; font-size:10px; opacity:0.35; text-align:right; letter-spacing:0.5px;">Source: ${response.source}</div>`;
-        }
-
-        resContent.innerHTML = html || 'No translation found.';
-
-        // 绑定音标切换
-        const toggleBtn = document.getElementById('togglePhoneticBtn');
-        const phoneticRow = document.getElementById('targetPhoneticRow');
-
-        if (toggleBtn && phoneticRow) {
-          toggleBtn.onclick = () => {
-            const isHidden = phoneticRow.style.display === 'none';
-            phoneticRow.style.display = isHidden ? 'block' : 'none';
-            toggleBtn.classList.toggle('active', isHidden);
-          };
-        }
-        if (typeof updateSaveBtnStatus === 'function') {
-          await updateSaveBtnStatus(text);
-        }
-      } else {
-        const errorMsg = response?.basic || response?.error || 'No response';
-        resContent.innerHTML = `<span style="color:#ef4444;">${errorMsg}</span>`;
-      }
+      };
+      chrome.runtime.onMessage.addListener(detailUpdateListener);
     } catch (err) {
+      clearTimeout(slowTimer);
       logger.error('Popup Logic Error:', err);
       resContent.innerHTML = `<span style="color:#ef4444;">Error: ${err.message}</span>`;
     }
@@ -1731,31 +1957,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     speakText(text, this, langB);
   };
-  if (resRefreshBtn) {
-    resRefreshBtn.onclick = async function () {
-      const queryInput = document.getElementById('searchTextInput');
-      const text = queryInput ? queryInput.value.trim() : "";
-      if (!text) return;
-      resRefreshBtn.classList.add('spinning');
-      if (resContent) resContent.style.opacity = '0.5';
-      try {
-        const coreText = text
-          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
-          .toLowerCase();
-        const textFingerprint = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
-        const allCache = await idb.getAll('tr_');
-        const keysToRemove = Object.keys(allCache).filter(k => k.includes(textFingerprint));
-        if (keysToRemove.length > 0) await Promise.all(keysToRemove.map(k => idb.remove(k)));
 
-        await executeTranslation(text, true);
-      } finally {
-        setTimeout(() => {
-          resRefreshBtn.classList.remove('spinning');
-          if (resContent) resContent.style.opacity = '1';
-        }, 600);
-      }
-    };
-  }
   async function triggerRefresh(btnElement, actionName) {
     btnElement.classList.add('loading');
     try {
@@ -1802,7 +2004,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         logger.error("[Mira-Trace] refreshUI 无法获取 storage");
         return;
       }
-      const currentUiLang = storage.ui_language || navigator.language || 'en';
+      const currentUiLang = storage.ui_language || getBrowserLang() || 'en';
       if (!window.currentConfig) window.currentConfig = {};
       Object.assign(window.currentConfig, storage);
       if (!window.currentConfig.scanConfig) {
@@ -1892,7 +2094,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setVal('webdavPass', scSync.webdavPass);
         setVal('syncFrequency', scSync.frequency);
       }
-      let targetL = targetLang || window.currentConfig.targetLanguage || navigator.language || 'en';
+      let targetL = targetLang || window.currentConfig.targetLanguage || getBrowserLang() || 'en';
       targetL = targetL.replace('_', '-');
       const targetLangEl = document.getElementById('targetLang');
       if (targetLangEl) targetLangEl.value = targetL;

@@ -29,6 +29,9 @@
   "ERROR_TIMEOUT": {
     "message": "요청 시간 초과: 네트워크를 확인하세요."
   },
+  "ERROR_NETWORK": {
+    "message": "연결 실패: 네트워크 제한 (VPN 또는 지역 제한)."
+  },
   "ERROR_GENERIC": {
     "message": "번역 실패: API 설정을 확인하세요."
   }

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
     window.currentConfig = {
-        ui_language: res.ui_language || (navigator.language || 'en').replace('_', '-'),//ui_language
+        ui_language: res.ui_language || (getBrowserLang() || 'en').replace('_', '-'),//ui_language
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
@@ -236,54 +236,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             let failed = false;
 
-            if (config.engine === 'google') {
-                // 复用 checkConnectivity 的方式
-                const controller = new AbortController();
-                const timer = setTimeout(() => controller.abort(), 3000);
-                try {
-                    await fetch('https://www.google.com/generate_204', {
-                        mode: 'no-cors', signal: controller.signal
-                    });
-                    clearTimeout(timer);
-                } catch (e) {
-                    clearTimeout(timer);
-                    failed = true;
-                }
-            } else if (config.engine === 'bing') {
-                // bing 默认可用，不检测
-                failed = false;
+            //  google/bing/AI 统一走 TRANSLATE 消息，isTest=true 跳过降级逻辑
+            const instanceData = ['google', 'bing'].includes(config.engine)
+                ? {}
+                : (await safeGetStorage(`data_${lastActiveId}`))?.[`data_${lastActiveId}`] || {};
+
+            const res = await Promise.race([
+                safeSendMessage({
+                    type: 'TRANSLATE',
+                    text: testText,
+                    targetLang,
+                    isTest: true,
+                    engine: config.engine,
+                    tempKeys: instanceData
+                }),
+                new Promise(resolve => setTimeout(() => resolve(null), 8000))
+            ]);
+
+            if (!res || res.error) {
+                failed = true;
             } else {
-                // AI 引擎：复用 testApiConfig 的判断逻辑
-                const instanceData = await safeGetStorage(`data_${lastActiveId}`);
-                const tempKeys = instanceData?.[`data_${lastActiveId}`] || {};
-
-                const res = await Promise.race([
-                    safeSendMessage({
-                        type: 'TRANSLATE',
-                        text: testText,
-                        targetLang,
-                        isTest: true,
-                        engine: config.engine,
-                        tempKeys
-                    }),
-                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
-                ]);
-
-                if (!res || res.error) {
+                const data = res.currentTranslationResponse;
+                if (!data || data.error) {
                     failed = true;
                 } else {
-                    const data = res.currentTranslationResponse;
-                    if (!data || data.error) {
-                        failed = true;
-                    } else {
-                        const translatedText = (typeof data === 'string'
-                            ? data
-                            : (data.translatedText || data.basic || "")
-                        ).trim();
-                        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
-                        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
-                        if (!hasContent || !isNotOriginal) failed = true;
-                    }
+                    const translatedText = (typeof data === 'string'
+                        ? data
+                        : (data.translatedText || data.basic || '')
+                    ).trim();
+                    const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+                    const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+                    if (!hasContent || !isNotOriginal) failed = true;
                 }
             }
 
@@ -296,8 +279,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             dot.classList.add('error');
         }
     }
+    function getFriendlyEngineError(engine, errorMsg) {
+        if (!errorMsg) return '';
+
+        if (errorMsg.includes('Google Blocked') || errorMsg.includes('Invalid Bing Response')) {
+            return getSafeMessage('ERROR_NETWORK', 'Network Error: API restricted (VPN or regional block).');
+        }
+        if (errorMsg.includes('429')) {
+            return getSafeMessage('ERROR_429', 'API Error: Rate limited or quota exceeded.');
+        }
+        if (errorMsg.includes('abort') || errorMsg.toLowerCase().includes('timeout')) {
+            return getSafeMessage('ERROR_TIMEOUT', 'Request timeout: Check network or proxy.');
+        }
+
+        // 其他错误直接显示原始 message
+        return errorMsg;
+    }
     async function switchInstance(id) {
-        const uiLanguage = window.currentConfig?.ui_language || navigator.language || 'en';
+        const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
         currentId = id;
         const config = userConfigs.find(c => c.id === id) || userConfigs[0];
         const container = document.getElementById('dynamic-form-container');
@@ -351,34 +350,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const btn = document.getElementById('activateBuiltIn');
 
                 let isOk = false;
+                let errorMsg = '';
                 try {
-                    if (config.engine === 'google') {
-                        const controller = new AbortController();
-                        const timeout = setTimeout(() => controller.abort(), 3000);
-                        await fetch('https://www.google.com/generate_204', { mode: 'no-cors', signal: controller.signal });
-                        clearTimeout(timeout);
-                        isOk = true;
-                    } else if (config.engine === 'bing') {
-                        // 使用通用翻译接口进行真实测试
-                        // 参数说明：
-                        // "Hi": 测试文本
-                        // true: forceRefresh, 强制跳过 IndexedDB 缓存，确保发起网络请求
-                        // null: 使用默认目标语言
-                        // options: 开启轻量模式，减少不必要的数据处理
-                        const testResult = await getDetailedTranslation("Hi", true, null, {
-                            lightweight: true,
-                            skipCache: true
-                        });
+                    if (config.engine === 'google' || config.engine === 'bing') {
+                        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+                        const targetLang = storage?.ui_language || 'en';
+                        const isTargetEn = targetLang.toLowerCase().startsWith('en');
+                        const testText = isTargetEn ? '你好' : 'Good morning';
 
-                        // 判断标准：只要有 basic 结果且不是错误提示，就认为接口通了
-                        if (testResult && testResult.basic && !testResult.isError) {
-                            isOk = true;
+                        const res = await Promise.race([
+                            safeSendMessage({
+                                type: 'TRANSLATE',
+                                text: testText,
+                                targetLang,
+                                isTest: true,
+                                engine: config.engine,
+                            }),
+                            new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                        ]);
+
+                        if (!res) {
+                            errorMsg = 'Timeout';
+                        } else if (res.error) {
+                            errorMsg = res.error;
+                            errorCode = res.errorCode || '';
                         } else {
-                            isOk = false;
+                            const data = res.currentTranslationResponse;
+                            if (!data || data.error) {
+                                errorMsg = data?.error || 'No response';
+                                errorCode = data?.errorCode || '';
+                            } else {
+                                const translatedText = (typeof data === 'string'
+                                    ? data
+                                    : (data?.translatedText || data?.basic || '')
+                                ).trim();
+                                isOk = translatedText.length > 0
+                                    && translatedText.toLowerCase() !== testText.toLowerCase()
+                                    && !data?.isError;
+                                if (!isOk) errorMsg = 'Invalid result';
+                            }
                         }
                     }
                 } catch (e) {
-                    isOk = false;
+                    errorMsg = e.message;
                 }
 
                 if (isOk) {
@@ -389,7 +403,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     icon.innerText = '✕';
                     icon.style.color = '#f85149';
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}`;
+                    const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<br><span style="font-size:11px;opacity:0.7">${friendlyError}</span>` : ''}`;
                     btn.style.display = 'block';
                     btn.style.opacity = '0.6';
                 }
@@ -496,7 +511,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveApiConfig').onclick = async () => {
             const saveBtn = document.getElementById('saveApiConfig');
             if (!saveBtn) return;
-            const uiLanguage = window.currentConfig?.ui_language || navigator.language || 'en';
+            const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
             const inputs = document.querySelectorAll('#dynamic-form-container input');
             const data = {};
             inputs.forEach(i => {
@@ -649,7 +664,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(async () => {
             userConfigs = userConfigs.filter(c => String(c.id) !== String(id));
             await safeSetStorage({ userConfigs });
-            await chrome.storage.local.remove(`data_${id}`);
+            await safeRemoveStorage(`data_${id}`);
             if (currentId === id) {
                 currentId = userConfigs.length > 0 ? userConfigs[0].id : '';
             }
@@ -684,7 +699,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipsDesc.innerText = "";
         }
         const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || navigator.language || 'en';
+        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
         const tempKeys = {};
         document.querySelectorAll('.api-input-field').forEach(input => {
             const key = input.getAttribute('data-key');
@@ -773,10 +788,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const langRes = await safeGetStorage(['ui_language']);
     if (!langRes) return;
-    const effectiveLang = langRes.ui_language ||
-        (navigator.languages && navigator.languages[0]) ||
-        navigator.language ||
-        'en';
+    const effectiveLang = langRes.ui_language || getBrowserLang() || 'en';
     const targetLang = effectiveLang.replace('_', '-');
     window.applyI18n(targetLang);
     const formatCountByLang = (num, lang) => {

@@ -6,13 +6,13 @@
     "message": "<0.5MB: Open-source, sicuro. Motori pubblici + AI API (Propria Key). Traduzione Web/YouTube e sincro WebDAV/GDrive."
   },
   "ERROR_400": {
-    "message": "Errore API: Richiesta non valida o credito esaurito."
+    "message": "Errore API: Richiesta non valida."
   },
   "ERROR_401": {
-    "message": "Errore API: Chiave API non valida."
+    "message": "Errore API: Chiave non valida."
   },
   "ERROR_402": {
-    "message": "Errore API: Quota o credito esaurito."
+    "message": "Errore API: Quota esaurita."
   },
   "ERROR_403": {
     "message": "Errore API: Accesso negato."
@@ -28,6 +28,9 @@
   },
   "ERROR_TIMEOUT": {
     "message": "Tempo scaduto: Controlla la rete."
+  },
+  "ERROR_NETWORK": {
+    "message": "Errore di rete: API limitata (VPN o blocco regionale)."
   },
   "ERROR_GENERIC": {
     "message": "Traduzione fallita: Controlla la config API."

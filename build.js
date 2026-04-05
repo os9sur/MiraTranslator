@@ -28,7 +28,7 @@ async function build() {
             'dists', '.git', '.vscode', '.gitignore', 'node_modules',
             'private_config.js', 'build.js', 'package.json',
             'package-lock.json', 'pnpm-lock.yaml', 'README.md',
-            'tools', 'LICENSE', 'img', 'images'
+            'tools', 'LICENSE', 'img', 'images','.gitattributes'
         ];
 
         items.forEach(item => {
@@ -55,6 +55,7 @@ async function build() {
 
             content = content.replace(/{{MY_ID}}/g, finalClientId || '');
             content = content.replace(/{{MY_KEY}}/g, config.MANIFEST_KEY || '');
+            content = content.replace(/{{ONEDRIVE_CLIENT_ID}}/g, config.ONEDRIVE_CLIENT_ID || '');
             content = content.replace(/IS_DEV\s*=\s*(true|false)/g, `IS_DEV = ${IS_DEV_MODE}`);
 
             // --- Smart Version Update ---

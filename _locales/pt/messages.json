@@ -3,16 +3,16 @@
     "message": "Mira Translator - Tradução imersiva e legendas do YouTube"
   },
   "appDesc": {
-    "message": "<0.5MB: Código aberto, seguro. Motores públicos + AI API (Chave própria). Tradução Web/YouTube e sincro WebDAV/GDrive."
+    "message": "<0.5MB: Código Aberto. IA Própria (BYOK). Tradução Imersiva/YouTube. Sincronização Drive/WebDAV."
   },
   "ERROR_400": {
-    "message": "Erro de API: Solicitação inválida ou saldo insuficiente."
+    "message": "Erro de API: Solicitação inválida."
   },
   "ERROR_401": {
-    "message": "Erro de API: Chave API inválida."
+    "message": "Erro de API: Chave inválida."
   },
   "ERROR_402": {
-    "message": "Erro de API: Cota ou saldo insuficiente."
+    "message": "Erro de API: Cota insuficiente."
   },
   "ERROR_403": {
     "message": "Erro de API: Acesso negado."
@@ -28,6 +28,9 @@
   },
   "ERROR_TIMEOUT": {
     "message": "Tempo esgotado: Verifique a conexão."
+  },
+  "ERROR_NETWORK": {
+    "message": "Erro de Rede: API restrita (VPN ou bloqueio regional)."
   },
   "ERROR_GENERIC": {
     "message": "Falha: Verifique a configuração da API."

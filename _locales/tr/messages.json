@@ -6,19 +6,19 @@
     "message": "<0.5MB: Açık kaynak, güvenli. Standart motorlar + AI API (Kendi Key'iniz). Web/YouTube çeviri ve WebDAV/GDrive senk."
   },
   "ERROR_400": {
-    "message": "API Hatası: Geçersiz istek veya yetersiz bakiye."
+    "message": "API Hatası: Geçersiz istek."
   },
   "ERROR_401": {
-    "message": "API Hatası: Geçersiz API anahtarı."
+    "message": "API Hatası: Anahtar geçersiz."
   },
   "ERROR_402": {
-    "message": "API Hatası: Kota veya bakiye yetersiz."
+    "message": "API Hatası: Kota yetersiz."
   },
   "ERROR_403": {
     "message": "API Hatası: Erişim engellendi."
   },
   "ERROR_404": {
-    "message": "API Hatası: Model bulunamadى."
+    "message": "API Hatası: Model bulunamadı."
   },
   "ERROR_429": {
     "message": "API Hatası: Kota aşıldı."
@@ -28,6 +28,9 @@
   },
   "ERROR_TIMEOUT": {
     "message": "Zaman aşımı: Bağlantıyı kontrol edin."
+  },
+  "ERROR_NETWORK": {
+    "message": "Ağ Hatası: API kısıtlı (VPN veya bölgesel engel)."
   },
   "ERROR_GENERIC": {
     "message": "Çeviri başarısız: API ayarlarını kontrol edin."

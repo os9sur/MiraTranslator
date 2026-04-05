@@ -29,6 +29,9 @@
   "ERROR_TIMEOUT": {
     "message": "Hết thời gian chờ: Kiểm tra mạng."
   },
+  "ERROR_NETWORK": {
+    "message": "Lỗi mạng: API bị hạn chế (VPN hoặc chặn vùng)."
+  },
   "ERROR_GENERIC": {
     "message": "Dịch thất bại: Kiểm tra cấu hình API."
   }

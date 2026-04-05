@@ -6,13 +6,13 @@
     "message": "<0.5MB: Código abierto, seguro. Motores públicos + AI API (Key propia). Traducción Web/YouTube y sincronización WebDAV/GDrive."
   },
   "ERROR_400": {
-    "message": "Error de API: Solicitud inválida o saldo insuficiente."
+    "message": "Error de API: Solicitud inválida."
   },
   "ERROR_401": {
-    "message": "Error de API: Clave API inválida."
+    "message": "Error de API: Clave inválida."
   },
   "ERROR_402": {
-    "message": "Error de API: Cuota o saldo insuficiente."
+    "message": "Error de API: Saldo insuficiente."
   },
   "ERROR_403": {
     "message": "Error de API: Acceso denegado."
@@ -28,6 +28,9 @@
   },
   "ERROR_TIMEOUT": {
     "message": "Tiempo agotado: Revise su red."
+  },
+  "ERROR_NETWORK": {
+    "message": "Error de red: API restringida (VPN o bloqueo regional)."
   },
   "ERROR_GENERIC": {
     "message": "Error: Verifique la configuración de la API."
