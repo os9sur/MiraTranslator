@@ -260,23 +260,11 @@ async function handleSyncFlow(message, sendResponse) {
             if (!token) throw new Error("未授权，请先连接 Google 账号");
             logger.log("[Mira-TRACE] 3. 执行 Google Drive 同步...");
             resultData = await syncWithGoogleDrive(token, direction);
-        } else if (method === 'oneDrive') { 
+        } else if (method === 'oneDrive') {
             let token = data.onedrive_token;
             if (!token) throw new Error("未授权，请先连接 Microsoft 账号");
             logger.log("[Mira-TRACE] 3. 执行 OneDrive 同步...");
-            // token 过期时静默刷新，避免每次弹窗
-            try {
-                resultData = await syncWithOneDrive(token, direction);
-            } catch (e) {
-                if (e.message?.includes('401') || e.message?.includes('Unauthorized')) {
-                    logger.log("[Mira-TRACE] OneDrive token 过期，尝试静默刷新...");
-                    token = await getOneDriveTokenSilent(); // 先静默刷新
-                    await safeSetStorage({ onedrive_token: token });
-                    resultData = await syncWithOneDrive(token, direction); // 用新 token 重试
-                } else {
-                    throw e;
-                }
-            }
+            resultData = await syncWithOneDrive(token, direction);
         } else if (method === 'webdav') {
             logger.log("[Mira-TRACE] 3. 执行 WebDAV 同步...");
             resultData = await syncWithWebDAV(config, direction);
@@ -295,14 +283,24 @@ async function handleSyncFlow(message, sendResponse) {
             const method = config.method || 'googleDrive';
 
             if (method === 'oneDrive' && checkData?.onedrive_token) {
-                // 先尝试静默刷新，成功就更新 token，失败才清除
+                // 先尝试静默刷新
                 try {
                     const newToken = await getOneDriveTokenSilent();
                     await safeSetStorage({ onedrive_token: newToken });
-                    logger.log("[Mira-TRACE] OneDrive token 静默刷新成功");
-                } catch (e) {
-                    logger.warn("[Mira-TRACE] OneDrive 静默刷新失败，清除 token 等待下次手动授权");
+                    logger.log("[Mira-TRACE] OneDrive token 静默刷新成功，重试同步");
+                    // 用新 token 重试一次
+                    const retryResult = await syncWithOneDrive(newToken, direction);
+                    if (chrome.runtime?.id) {
+                        sendResponse({ success: true, mergedData: retryResult });
+                    }
+                    return;
+                } catch (silentErr) {
+                    // 静默刷新失败，清除 token，让前端触发交互授权
+                    logger.warn("[Mira-TRACE] 静默刷新失败，清除 token 等待重新授权");
                     await safeRemoveStorage("onedrive_token");
+                    // 返回特定错误码，前端识别后触发交互授权
+                    try { sendResponse({ success: false, error: 'onedrive_reauth_required' }); } catch (e) { }
+                    return;
                 }
             } else if (checkData?.google_drive_token && chrome.runtime?.id) {
                 await safeRemoveStorage("google_drive_token");
@@ -420,7 +418,7 @@ async function syncWithGoogleDrive(token, direction) {
         logger.log("[Mira-TRACE] S10. Google Drive 同步流程结束");
         return finalPayload;
     } catch (err) {
-        logger.error("[Mira-TRACE] Google Drive 同bs致命错误:", err);
+        logger.error("[Mira-TRACE] Google Drive 同步致命错误:", err);
         throw err;
     }
 }
@@ -439,9 +437,26 @@ async function findGoogleDriveFile(token) {
     return (data.files && data.files.length > 0) ? data.files[0].id : null;
 }
 
-const ONEDRIVE_CLIENT_ID = '{{ONEDRIVE_CLIENT_ID}}'; // Azure 概述页的「应用程序(客户端) ID」
+const ONEDRIVE_CLIENT_ID = '{{ONEDRIVE_CLIENT_ID}}'; 
 const ONEDRIVE_SYNC_FILE_NAME = SYNC_FILE_NAME; // 复用同一个文件名常量
 
+async function ensureOneDriveAppRoot(token) {
+    for (let i = 0; i < 3; i++) {
+        const res = await fetch(
+            'https://graph.microsoft.com/v1.0/me/drive/special/approot',
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) return await res.json();
+        if (res.status === 401) throw new Error('Unauthorized');
+        if (res.status === 503 || res.status === 502) {
+            logger.warn(`[OneDrive] approot 初始化 ${res.status}，第 ${i+1} 次重试...`);
+            await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+            continue;
+        }
+        throw new Error(`初始化 approot 失败: ${res.status}`);
+    }
+    throw new Error('初始化 approot 失败: 多次重试后仍然 503');
+}
 // =========================
 // 对应 findGoogleDriveFile
 async function findOneDriveFile(token) {
@@ -449,8 +464,8 @@ async function findOneDriveFile(token) {
     const response = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
     });
-    if (response.status === 404) return null; // 文件不存在，正常情况
-    if (response.status === 401) throw new Error("Unauthorized");
+    if (response.status === 404) return null;
+    if (response.status === 401) throw new Error('Unauthorized');  
     if (!response.ok) throw new Error(`OneDrive API Error: ${response.status} ${response.statusText}`);
     const data = await response.json();
     return data.id || null;
@@ -470,7 +485,7 @@ async function getOneDriveToken() {
             + `&redirect_uri=${encodeURIComponent(redirectUri)}`
             + `&scope=${encodeURIComponent('Files.ReadWrite.AppFolder')}`;
 
-        logger.log("[OneDrive Auth] authUrl:", authUrl); 
+        logger.log("[OneDrive Auth] authUrl:", authUrl);
 
         chrome.identity.launchWebAuthFlow(
             { url: authUrl, interactive: true },
@@ -481,8 +496,8 @@ async function getOneDriveToken() {
                 }
                 const hash = new URL(responseUrl).hash;
                 const params = new URLSearchParams(hash.slice(1));
-                logger.log("[OneDrive Auth] hash:", hash);  
-                logger.log("[OneDrive Auth] all params:", Object.fromEntries(params)); 
+                logger.log("[OneDrive Auth] hash:", hash);
+                logger.log("[OneDrive Auth] all params:", Object.fromEntries(params));
                 const token = params.get('access_token');
                 token ? resolve(token) : reject(new Error('未能获取 OneDrive access_token'));
             }
@@ -496,6 +511,7 @@ async function getOneDriveToken() {
 async function syncWithOneDrive(token, direction) {
     logger.log("[Mira-TRACE] S1. 开始 OneDrive 同步, 方向:", direction);
     try {
+         await ensureOneDriveAppRoot(token);
         const safeLocalData = await prepareLocalPayload();
         const localVocabulary = safeLocalData.vocabulary || [];
         logger.log(`[Mira-TRACE] S2. 本地待同步生词数: ${localVocabulary.length}`);
@@ -567,7 +583,6 @@ async function syncWithOneDrive(token, direction) {
 
         // 写回云端
         // OneDrive PUT approot路径 = upsert，文件存在则更新，不存在则创建
-        // 不区分 POST(新建) / PATCH(更新) 两个分支
         const uploadResponse = await fetch(
             `https://graph.microsoft.com/v1.0/me/drive/special/approot:/${ONEDRIVE_SYNC_FILE_NAME}:/content`,
             {
@@ -2013,7 +2028,7 @@ const Translators = {
                 tabId,
                 '',
                 '',
-                cacheKey 
+                cacheKey
             );
         } catch (e) {
             logger.error("百度翻译链路异常:", e.message);
