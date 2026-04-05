@@ -708,6 +708,21 @@ document.addEventListener('DOMContentLoaded', async () => {
           }, 100);
         }
       } else {
+        if (response.error === 'onedrive_reauth_required') {
+          updateSyncProgressUI(btnId, 'Reauthorizing...', true);
+          safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((authRes) => {
+            if (authRes?.success) {
+              executeSyncDataAction(btn, originalText, direction);
+            } else {
+              updateSyncProgressUI(btnId, 'sync_failed ✕', true);
+              setTimeout(() => {
+                btn.disabled = false;
+                updateSyncProgressUI(btnId, '', false);
+              }, 1500);
+            }
+          });
+          return;
+        }
         if (response.error?.includes('401') || response.error?.includes('Unauthorized')) {
           updateSyncProgressUI(btnId, 'Reauthorizing...', true);
           const syncData = await safeGetStorage('syncConfig');
