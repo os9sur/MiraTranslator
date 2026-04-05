@@ -371,8 +371,33 @@ function syncI18nDict(force = false) {
   });
   if (foundAny) isSynced = true;
 }
+
 function t(key, forcedLang) {
   syncI18nDict();
+
+  // 本地模型/自定义API相关提示
+  const localModelTips = {
+    'timeoutLocalModel': {
+      'zh': '本地模型响应超时，无独立显卡时速度会非常慢，建议改用云端服务',
+      'zh-tw': '本地模型回應逾時，建議使用獨立顯卡或雲端服務',
+      'ja': 'ローカルモデルがタイムアウトしました。専用GPU（独立グラフィックカード）がない場合、速度が非常に遅くなります。クラウドサービスの利用をお勧めします。',
+      'default': 'Local model timeout. A dedicated GPU is required. Consider using a cloud API instead.'
+    },
+    'customApiTip': {
+      'zh': '兼容 OpenAI API 格式的服务均可使用（云端或本地）。使用本地模型（Ollama / LM Studio 等）需注意：① 需独立显卡，核显/CPU 会严重超时 ② 需开启跨域：Ollama 设置环境变量 OLLAMA_ORIGINS=*，LM Studio / Jan 在设置页开启 CORS 选项',
+      'zh-tw': '相容 OpenAI API 格式的服務均可使用。本地模型需注意：① 需獨立顯卡，核顯/CPU 會嚴重逾時 ② 需開啟 CORS：Ollama 設定 OLLAMA_ORIGINS=*，LM Studio / Jan 在設定頁開啟 CORS',
+      'ja': 'OpenAI API形式に対応したサービスであれば利用可能です（クラウド・ローカル問わず）。ローカルモデル（Ollama / LM Studio など）をご利用の場合：① 専用GPUが必要です。内蔵GPU/CPUのみではタイムアウトが頻発します ② CORSの有効化が必要です：OllamaはOLLAMA_ORIGINS=*を環境変数に設定、LM Studio / JanはCORSオプションをオンにしてください',
+      'default': 'Compatible with any OpenAI API format (cloud or local). For local models (Ollama / LM Studio etc.): ① Dedicated GPU required, CPU/iGPU causes severe timeouts ② Enable CORS: set OLLAMA_ORIGINS=* for Ollama, or enable CORS in settings for LM Studio / Jan'
+    },
+  };
+
+  if (localModelTips[key]) {
+    const target = (forcedLang || globalUiLang || 'en').replace('_', '-').toLowerCase();
+    const short = target.split('-')[0];
+    const tips = localModelTips[key];
+    return tips[target] || tips[short] || tips['default'];
+  }
+
   if (!i18nDict || Object.keys(i18nDict).length === 0) return key;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
@@ -894,16 +919,16 @@ async function safeSetStorage(items) {
   }
 }
 async function safeRemoveStorage(keys) {
-    try {
-        if (typeof chrome === 'undefined' || !chrome.runtime?.id) return null;
-        return await chrome.storage.local.remove(keys);
-    } catch (e) {
-        if (e.message?.includes('context invalidated') ||
-            e.message?.includes('Extension context')) {
-            // 静默处理，环境已失效
-        }
-        return null;
+  try {
+    if (typeof chrome === 'undefined' || !chrome.runtime?.id) return null;
+    return await chrome.storage.local.remove(keys);
+  } catch (e) {
+    if (e.message?.includes('context invalidated') ||
+      e.message?.includes('Extension context')) {
+      // 静默处理，环境已失效
     }
+    return null;
+  }
 }
 async function lookupCache(text, engine, lang) {
   const isAI = AI_LLM_WHITE_LIST.includes(engine);

@@ -3401,16 +3401,20 @@ function initSelectionTranslate() {
 
     // 定位
     if (!isPinnedNow) {
-      const pw = popupEl.offsetWidth || 300;
-      const ph = popupEl.offsetHeight || 200;
-      let left = Math.max(10, Math.min(pos.clientX + 10, window.innerWidth - pw - 20));
-      let top = pos.clientY + ph + 15 > window.innerHeight - 20
-        ? pos.clientY - ph - 15
-        : pos.clientY + 15;
-      top = Math.max(10, top);
-      popupEl.style.left = left + 'px';
-      popupEl.style.top = top + 'px';
-      requestAnimationFrame(() => clampPopupToViewport(popupEl));
+      popupEl.style.visibility = 'hidden'; // 先隐藏，避免左上角闪烁
+      requestAnimationFrame(() => {
+        const pw = popupEl.offsetWidth || 300;
+        const ph = popupEl.offsetHeight || 200;
+        let left = Math.max(10, Math.min(pos.clientX + 10, window.innerWidth - pw - 20));
+        let top = pos.clientY + ph + 15 > window.innerHeight - 20
+          ? pos.clientY - ph - 15
+          : pos.clientY + 15;
+        top = Math.max(10, top);
+        popupEl.style.left = left + 'px';
+        popupEl.style.top = top + 'px';
+        clampPopupToViewport(popupEl);
+        popupEl.style.visibility = 'visible'; //  定位完成后再显示
+      });
     }
 
     // ── 事件绑定 ─────────────────────────────────────────────────────────────
@@ -3661,7 +3665,7 @@ function initSelectionTranslate() {
 
       setTimeout(() => {
         shadowRoot.addEventListener('click', closeDropdown, true);
-        document.addEventListener('click', closeDropdown, true); // ← 加这行
+        document.addEventListener('click', closeDropdown, true); 
       }, 0);
 
       return { dropdown, colors };
@@ -3701,7 +3705,7 @@ function initSelectionTranslate() {
       const { dropdown, colors } = result;
 
       LANGS.forEach(lang => {
-        const isCurrent = lang.value?.toLowerCase() === (window.hintSourceLang || 'auto');
+        const isCurrent = lang.value?.toLowerCase() === (window.hintSourceLang?.toLowerCase() || 'auto');
         const el = buildLangItem(lang, colors, async (ev) => {
           ev.stopPropagation();
           dropdown.remove();
@@ -3733,8 +3737,8 @@ function initSelectionTranslate() {
       const { dropdown, colors } = result;
 
       LANGS.filter(l => l?.value !== 'auto').forEach(lang => {
-        const isCurrent = lang.value?.toLowerCase() === (window.currentTargetL || '');
-        logger.log('语言列表项', { lang: lang.value, current: window.currentTargetL });
+        const isCurrent = lang.value?.toLowerCase() === (window.currentTargetL?.toLowerCase() || '');
+        logger.log('语言列表项', {"isCurrent": isCurrent, "lang": lang.value, "current": window.currentTargetL });
         const el = buildLangItem(lang, colors, async (ev) => {
           ev.stopPropagation();
           dropdown.remove();

@@ -901,11 +901,11 @@ input:-ms-input-placeholder {
 }
 
 .combobox-dropdown {
-  position: absolute;
+  position: fixed;
   top: 38px;
   left: 0;
   width: 100%;
-  max-height: 50vh !important;
+  max-height: 230px !important;
   overflow-y: auto;
   overflow-x: hidden;
   background: #0f172a;

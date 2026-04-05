@@ -2310,9 +2310,9 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             const apiKey = data[mapping.k];
             finalModel = data[mapping.m] || aiConf.model;
             const finalHost = (mapping.h && data[mapping.h]) ? data[mapping.h] : aiConf.host;
-            if (!apiKey && !aiConf.isBuiltIn) {
-                throw new Error(`API Key is missing for ${engine}`);
-            }
+            // if (!apiKey && !aiConf.isBuiltIn) {
+            //     throw new Error(`API Key is missing for ${engine}`);
+            // }
             let systemPrompt = "";
             const targetLanguageName = getFriendlyLanguageName(req.targetLang);
             const hintInputLang = req.hintInputLang || null;

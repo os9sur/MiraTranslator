@@ -28,7 +28,7 @@ async function build() {
             'dists', '.git', '.vscode', '.gitignore', 'node_modules',
             'private_config.js', 'build.js', 'package.json',
             'package-lock.json', 'pnpm-lock.yaml', 'README.md',
-            'tools', 'LICENSE', 'img', 'images','.gitattributes'
+            'tools', 'LICENSE', 'img', 'images', '.gitattributes'
         ];
 
         items.forEach(item => {
@@ -87,6 +87,17 @@ async function build() {
                     delete manifest.browser_specific_settings;
                     delete manifest.oauth2;
                     delete manifest.key;
+
+                    const localesDir = path.join(browserDistDir, '_locales');
+                    if (fs.existsSync(localesDir)) {
+                        const edgeWhitespaces = ['en', 'zh_CN', 'zh_TW', 'ja', 'ko'];
+                        fs.readdirSync(localesDir).forEach(lang => {
+                            if (!edgeWhitespaces.includes(lang)) {
+                                fs.removeSync(path.join(localesDir, lang));
+                            }
+                        });
+                        logger.log(` 🧹 Edge build: 已裁剪语言包，仅保留 [${edgeWhitespaces.join(', ')}]`);
+                    }
                 } else {
                     // Chrome
                     manifest.background = { "service_worker": "background.js" };
