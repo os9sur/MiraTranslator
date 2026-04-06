@@ -1815,7 +1815,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }, TIMEOUT_MS);
       // 翻译 
-      const response = await getDetailedTranslation(text, false, targetL, {
+      const response = await getDetailedTranslation(text, forceRefresh, targetL, {
         needPhonetic: true,
         hintInputLang: resolvedLang,
         hintLangA: langA,

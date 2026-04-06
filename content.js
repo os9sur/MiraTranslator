@@ -3450,10 +3450,35 @@ function initSelectionTranslate() {
     // 发音
     shadow.getElementById('p-speak').onclick = (e) => {
       e.stopPropagation();
-      logger.log('TTS', { text, lang: hintSourceLangNew });
-      speakText(text, shadow.getElementById('p-speak'), hintSourceLangNew);
+      speakText(text, shadow.getElementById('p-speak'), window.hintSourceLang || hintSourceLangNew);
     };
-
+    function handleTranslationResult(result, text, shadow) {
+      if (!result) return;
+      const currentWord = shadowHost?.getAttribute('data-current-word');
+      if (text.trim() !== currentWord) return;
+      const isRTL = ['he', 'ar', 'fa'].includes(
+        (window.currentTargetL || '').toLowerCase().slice(0, 2)
+      );
+      if (result.isPartial) {
+        const pBasic = shadow.getElementById('p-basic');
+        const pPhonetic = shadow.getElementById('p-phonetic');
+        const pDetail = shadow.getElementById('p-detail');
+        if (pBasic) {
+          pBasic.innerText = result.basic || '';
+          pBasic.style.fontStyle = 'normal';
+        }
+        if (pPhonetic) {
+          pPhonetic.innerText = result.sourcePhonetic
+            ? `/${result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
+        }
+        if (pDetail) {
+          pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loading')}...</span>`;
+          pDetail.style.display = 'block';
+        }
+      } else {
+        fillPopupData(result, shadow, text.trim(), window.currentTargetL, isRTL);
+      }
+    }
     // 刷新翻译
     function triggerRefresh() {
       const refreshBtn = shadow.getElementById('p-refresh');
@@ -3491,8 +3516,9 @@ function initSelectionTranslate() {
           shadowHost._slowTimer = null;
         }
         getDetailedTranslation(text, true, currentTargetLang, {
-          hintInputLang: currentSourceLang  //  源语言不为 auto 时传入，避免误判 isSame
+          hintInputLang: currentSourceLang
         }, currentSourceLang)
+          .then(result => handleTranslationResult(result, text, shadow))
           .catch(err => {
             setBasicError(basicEl, err.message || 'Network Error');
           })
@@ -3665,7 +3691,7 @@ function initSelectionTranslate() {
 
       setTimeout(() => {
         shadowRoot.addEventListener('click', closeDropdown, true);
-        document.addEventListener('click', closeDropdown, true); 
+        document.addEventListener('click', closeDropdown, true);
       }, 0);
 
       return { dropdown, colors };
@@ -3713,7 +3739,7 @@ function initSelectionTranslate() {
           state.sourceLang = lang.value;
           await safeSetStorage({ lpLangA: lang.value });
           window.hintSourceLang = lang.value;
-
+          
           const srcSpan = shadow.getElementById('p-lang-src');
           if (srcSpan) srcSpan.textContent = lang.value === 'auto'
             ? 'AUTO' : lang.value.toUpperCase().slice(0, 2);
@@ -3738,7 +3764,7 @@ function initSelectionTranslate() {
 
       LANGS.filter(l => l?.value !== 'auto').forEach(lang => {
         const isCurrent = lang.value?.toLowerCase() === (window.currentTargetL?.toLowerCase() || '');
-        logger.log('语言列表项', {"isCurrent": isCurrent, "lang": lang.value, "current": window.currentTargetL });
+        logger.log('语言列表项', { "isCurrent": isCurrent, "lang": lang.value, "current": window.currentTargetL });
         const el = buildLangItem(lang, colors, async (ev) => {
           ev.stopPropagation();
           dropdown.remove();

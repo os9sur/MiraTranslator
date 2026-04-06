@@ -437,7 +437,7 @@ async function findGoogleDriveFile(token) {
     return (data.files && data.files.length > 0) ? data.files[0].id : null;
 }
 
-const ONEDRIVE_CLIENT_ID = '{{ONEDRIVE_CLIENT_ID}}'; 
+const ONEDRIVE_CLIENT_ID = '{{ONEDRIVE_CLIENT_ID}}';
 const ONEDRIVE_SYNC_FILE_NAME = SYNC_FILE_NAME; // 复用同一个文件名常量
 
 async function ensureOneDriveAppRoot(token) {
@@ -449,7 +449,7 @@ async function ensureOneDriveAppRoot(token) {
         if (res.ok) return await res.json();
         if (res.status === 401) throw new Error('Unauthorized');
         if (res.status === 503 || res.status === 502) {
-            logger.warn(`[OneDrive] approot 初始化 ${res.status}，第 ${i+1} 次重试...`);
+            logger.warn(`[OneDrive] approot 初始化 ${res.status}，第 ${i + 1} 次重试...`);
             await new Promise(r => setTimeout(r, 1000 * (i + 1)));
             continue;
         }
@@ -465,7 +465,7 @@ async function findOneDriveFile(token) {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (response.status === 404) return null;
-    if (response.status === 401) throw new Error('Unauthorized');  
+    if (response.status === 401) throw new Error('Unauthorized');
     if (!response.ok) throw new Error(`OneDrive API Error: ${response.status} ${response.statusText}`);
     const data = await response.json();
     return data.id || null;
@@ -511,7 +511,7 @@ async function getOneDriveToken() {
 async function syncWithOneDrive(token, direction) {
     logger.log("[Mira-TRACE] S1. 开始 OneDrive 同步, 方向:", direction);
     try {
-         await ensureOneDriveAppRoot(token);
+        await ensureOneDriveAppRoot(token);
         const safeLocalData = await prepareLocalPayload();
         const localVocabulary = safeLocalData.vocabulary || [];
         logger.log(`[Mira-TRACE] S2. 本地待同步生词数: ${localVocabulary.length}`);
@@ -1382,7 +1382,7 @@ async function _buildDetailData(
     if (detailData) {
         return {
             basic: basicText,
-            phonetic: detailData.phonetic || '',
+            phonetic: sourcePhonetic || detailData.phonetic || "",
             dictData: detailData.dictData || [],
             originalDictData: detailData.originalDictData || null,
             examples: detailData.examples || [],
@@ -1453,7 +1453,7 @@ const Translators = {
         logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
         if (tabId || fromPopup) {
             const partialResult = {
-                basic: basicText, phonetic: '',
+                basic: basicText, phonetic: sourcePhonetic || '',
                 dictData: [], examples: [], wordForms: [],
                 sourcePhonetic, targetPhonetic,
                 source: sourceName, isPartial: true
@@ -2229,7 +2229,10 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         const hasPunctuation = /[，。！？；：,.;:!?\n\r]/.test(trimmedText);
         if (!hasPunctuation) {
             if (_s.cjk || _s.thai) {
-                isWord = trimmedText.length <= 2;
+                const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(trimmedText);
+                isWord = hasKana
+                    ? trimmedText.length <= 6   // 含假名，是日语，放宽到6
+                    : trimmedText.length <= 2;  // 纯汉字，中文，保持2
             } else if (_s.korean) {
                 isWord = !hasSpace && trimmedText.length <= 4;
             } else if (_s.arabic || _s.hebrew) {
@@ -2277,33 +2280,33 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }
             } catch (e) {
                 logger.warn('[主翻译] Bing 失败，降级 Google:', e.message);
-                if (!req.isTest) {  // 非测试时才修改降级状态
+                if (!req.isTest) {
                     _runtimeEngine = 'google';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
                 } else {
-                    throw e; // 测试模式下直接抛出错误，方便测试捕获
+                    throw e;
                 }
                 rawResult = await Translators.google(req.text, req.targetLang, false, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
             }
         } else if (effectiveEngine === 'google') {
             try {
                 rawResult = await Translators.google(req.text, req.targetLang, req.lightweight, req.hintSourceLang, tabId, cacheKey, req.fromPopup);
-                if (!req.isTest) {  // 非测试时才修改降级状态
+                if (!req.isTest) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
                 }
             } catch (e) {
                 logger.warn('[主翻译] Google 失败，降级 Bing:', e.message);
-                if (!req.isTest) {  // 非测试时才修改降级状态
+                if (!req.isTest) {
                     _runtimeEngine = 'bing';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
                 } else {
-                    throw e; // 测试模式下直接抛出错误，方便测试捕获
+                    throw e;
                 }
                 rawResult = await Translators.bing(req.text, req.targetLang, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
             }
@@ -2325,23 +2328,17 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             const apiKey = data[mapping.k];
             finalModel = data[mapping.m] || aiConf.model;
             const finalHost = (mapping.h && data[mapping.h]) ? data[mapping.h] : aiConf.host;
-            // if (!apiKey && !aiConf.isBuiltIn) {
-            //     throw new Error(`API Key is missing for ${engine}`);
-            // }
             let systemPrompt = "";
             const targetLanguageName = getFriendlyLanguageName(req.targetLang);
             const hintInputLang = req.hintInputLang || null;
             const isLatinInput = !hintInputLang || ['en', 'fr', 'de', 'es', 'pt', 'it', 'nl', 'ru', 'ar', 'th', 'he', 'hi'].includes(hintInputLang) === false
-                ? /^[a-zA-Z]/.test(req.text.trim())  // 没有hint时靠字符判断
+                ? /^[a-zA-Z]/.test(req.text.trim())
                 : !['ja', 'zh', 'ko', 'ar', 'th', 'he', 'hi', 'ru'].includes(hintInputLang);
-            // 定义哪些语言是“非拉丁语系”，需要额外的罗马化标注
             const requiresRomanization = /Japanese|Chinese|Korean|Arabic|Thai|Russian|Greek|Hindi|Hebrew/i.test(targetLanguageName);
-
-            //  是否是拉丁语系（或不需要注音的语言）：
             const isLatinTarget = !requiresRomanization;
 
             const sourcePhoneticInstruction = isLatinInput
-                ? `"sourcePhonetic": "",`  // 拉丁输入直接锁死为空
+                ? `"sourcePhonetic": "",`
                 : hintInputLang === 'ja' ? `"sourcePhonetic": "<Hepburn Romaji of input>"`
                     : hintInputLang === 'zh' ? `"sourcePhonetic": "<Pinyin with tones of input>"`
                         : hintInputLang === 'ko' ? `"sourcePhonetic": "<Revised Romanization of input>"`
@@ -2357,62 +2354,148 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
 
             if (isWord) {
                 const isChineseTarget = targetLanguageName.includes('Chinese') || targetLanguageName.includes('中文');
+                const needsWordForms = isChineseTarget || targetLangBase === 'ja' || targetLangBase === 'ko';
 
+                // ── sourcePhoneticDesc  
                 const sourcePhoneticDesc = (() => {
                     if (!req.needPhonetic) return '';
                     if (isLatinInput) return `  "sourcePhonetic": ""`;
-                    if (hintInputLang === 'ja') return `  "sourcePhonetic": "<Hepburn Romaji of input, e.g. nihon>"`;
+                    if (hintInputLang === 'ja') return `  "sourcePhonetic": "<Hepburn Romaji, e.g. nihon>"`;
                     if (hintInputLang === 'zh') return `  "sourcePhonetic": "<Pinyin with tones, e.g. zhōng guó>"`;
                     if (hintInputLang === 'ko') return `  "sourcePhonetic": "<Revised Romanization, e.g. annyeong>"`;
-                    return `  "sourcePhonetic": ""`;
+                    if (hintInputLang === 'ar') return `  "sourcePhonetic": "<Arabic Romanization, e.g. marhaba>"`;
+                    if (hintInputLang === 'th') return `  "sourcePhonetic": "<Thai Romanization, e.g. sawadee>"`;
+                    if (hintInputLang === 'hi') return `  "sourcePhonetic": "<Devanagari Romanization, e.g. namaste>"`;
+                    if (hintInputLang === 'ru') return `  "sourcePhonetic": "<Russian Romanization, e.g. privet>"`;
+                    return `  "sourcePhonetic": "<Romanization of input>"`;
                 })();
-                const phoneticField = req.needPhonetic ? [sourcePhoneticDesc].filter(Boolean).join('\n') : '';
+
+                // ── wordForms instruction（按源语言适配） 
+                const wordFormsInstruction = (() => {
+                    if (!needsWordForms) return '';
+                    if (hintInputLang === 'ja')
+                        return `  "wordForms": [{"name": "た形/て形/ます形/ない形/可能形 etc.", "value": "conjugated form"}],`;
+                    if (hintInputLang === 'ko')
+                        return `  "wordForms": [{"name": "과거형/현재형/존댓말 etc.", "value": "conjugated form"}],`;
+                    if (hintInputLang === 'de')
+                        return `  "wordForms": [{"name": "Präteritum/Partizip II/Plural etc.", "value": "the form"}],`;
+                    if (hintInputLang === 'fr')
+                        return `  "wordForms": [{"name": "passé composé/imparfait/pluriel etc.", "value": "the form"}],`;
+                    if (hintInputLang === 'es')
+                        return `  "wordForms": [{"name": "pretérito/participio/plural etc.", "value": "the form"}],`;
+                    if (hintInputLang === 'ru')
+                        return `  "wordForms": [{"name": "прошедшее/множественное etc.", "value": "the form"}],`;
+                    // 默认英语及其他拉丁语系
+                    return `  "wordForms": [{"name": "过去式/过去分词/现在分词/第三人称单数/复数/比较级/最高级 etc.", "value": "the form"}],`;
+                })();
+
+                // ── wordForms rules（按源语言适配） ──── 
+                const wordFormsRule = (() => {
+                    if (!needsWordForms) return '';
+                    if (hintInputLang === 'ja')
+                        return `- wordForms: provide Japanese verb/adjective conjugations (た形,て形,ます形,ない形,可能形). Return [] for nouns, particles, conjunctions. NEVER fabricate forms.`;
+                    if (hintInputLang === 'ko')
+                        return `- wordForms: provide Korean verb/adjective conjugations (과거형,현재형,존댓말 etc.). Return [] for nouns, particles. NEVER fabricate forms.`;
+                    if (hintInputLang === 'de')
+                        return `- wordForms: provide German morphological forms (Präteritum, Partizip II, Plural etc.). Return [] for prepositions, conjunctions, articles. NEVER fabricate forms.`;
+                    if (hintInputLang === 'fr')
+                        return `- wordForms: provide French morphological forms (passé composé, imparfait, pluriel etc.). Return [] for prepositions, conjunctions. NEVER fabricate forms.`;
+                    // 默认
+                    return `- wordForms: return [] for Chinese/Thai/Vietnamese input, and for determiners/pronouns/prepositions/conjunctions/articles (e.g. "every", "the", "and"). NEVER fabricate non-existent forms.`;
+                })();
+
+                // ── Examples ──────────────────────────────────────────────
+                const sourceLangLabel = hintInputLang
+                    ? getFriendlyLanguageName(hintInputLang)
+                    : 'source language';
+
+                // baseExample 按源语言适配
+                const baseExample = (() => {
+                    if (!needsWordForms) {
+                        return `{"basic":"run, operate","phonetic":"rʌn","dictData":[{"pos":"v.","definition":"run, operate, manage"},{"pos":"n.","definition":"a run, running"}],"examples":["<A natural sentence in ${sourceLangLabel}> | <${targetLanguageName} translation>"]}`;
+                    }
+                    if (hintInputLang === 'ja') {
+                        return `{"basic":"走る, 動く","phonetic":"hashiru","dictData":[{"pos":"動詞","definition":"走る, 動く, 機能する"}],"examples":["毎日走っています。| 我每天跑步。"],"wordForms":[{"name":"た形","value":"走った"},{"name":"て形","value":"走って"},{"name":"ます形","value":"走ります"},{"name":"ない形","value":"走らない"}],"prototype":null}`;
+                    }
+                    if (hintInputLang === 'ko') {
+                        return `{"basic":"달리다, 뛰다","phonetic":"dallida","dictData":[{"pos":"동사","definition":"달리다, 뛰다, 작동하다"}],"examples":["나는 매일 달린다。| 我每天跑步。"],"wordForms":[{"name":"과거형","value":"달렸다"},{"name":"존댓말","value":"달립니다"}],"prototype":null}`;
+                    }
+                    // 默认英语源
+                    return `{"basic":"跑, 运行","phonetic":"rʌn","dictData":[{"pos":"v.","definition":"跑步, 运行, 管理"},{"pos":"n.","definition":"跑步, 运行"}],"examples":["I run every day | 我每天跑步"],"wordForms":[{"name":"过去式","value":"ran"},{"name":"过去分词","value":"run"},{"name":"现在分词","value":"running"},{"name":"第三人称单数","value":"runs"}],"prototype":null}`;
+                })();
+
+                // inflectedExample 按源语言适配
+                const inflectedExample = (() => {
+                    if (!needsWordForms) {
+                        return `{"basic":"to eat, eating","phonetic":"ˈiːtɪŋ","dictData":[{"pos":"v.","definition":"consuming food, ingesting"}],"examples":[],"prototype":"eat"}`;
+                    }
+                    if (hintInputLang === 'ja') {
+                        return `{"basic":"食べた (过去)","phonetic":"tabeta","dictData":[{"pos":"動詞","definition":"食べる的过去形"}],"examples":[],"wordForms":[],"prototype":"食べる"}`;
+                    }
+                    if (hintInputLang === 'ko') {
+                        return `{"basic":"먹었다 (과거)","phonetic":"meogeotda","dictData":[{"pos":"동사","definition":"먹다의 과거형"}],"examples":[],"wordForms":[],"prototype":"먹다"}`;
+                    }
+                    return `{"basic":"跑步, 运行","phonetic":"ˈrʌnɪŋ","dictData":[{"pos":"v.","definition":"正在跑, 运转"},{"pos":"adj.","definition":"运行中的"}],"examples":[],"wordForms":[],"prototype":"run"}`;
+                })();
+
+                // funcWordExample 按源语言适配
+                const funcWordExample = (() => {
+                    if (!needsWordForms) {
+                        return `{"basic":"every, each","phonetic":"ˈɛvri","dictData":[{"pos":"det.","definition":"each one of a group"}],"examples":[],"prototype":null}`;
+                    }
+                    if (hintInputLang === 'ja') {
+                        return `{"basic":"的, 的地方","phonetic":"no","dictData":[{"pos":"助詞","definition":"表示所属或修饰关系"}],"examples":[],"wordForms":[],"prototype":null}`;
+                    }
+                    if (hintInputLang === 'ko') {
+                        return `{"basic":"의 (所属标记)","phonetic":"ui","dictData":[{"pos":"조사","definition":"表示所属关系的助词"}],"examples":[],"wordForms":[],"prototype":null}`;
+                    }
+                    return `{"basic":"每个, 每一","phonetic":"ˈɛvri","dictData":[{"pos":"det.","definition":"每个, 所有"}],"examples":[],"wordForms":[],"prototype":null}`;
+                })();
+
                 const examplesPrompt = [
-                    `Input: "hello" → Japanese: {"basic":"こんにちは"}`,
-                    `Input: "drive" → Chinese: {"basic":"驱动, 驾驶"}`
+                    `Input: "run" → ${targetLanguageName}: ${baseExample}`,
+                    `Input: "running" → ${targetLanguageName}: ${inflectedExample}`,
+                    `Input: "every" → ${targetLanguageName}: ${funcWordExample}`,
                 ].join('\n');
 
-                systemPrompt = [
-                    `# ROLE: You are a professional ${targetLanguageName} dictionary.`,
-                    `# TARGET LANGUAGE: ${targetLanguageName} (CRITICAL: Do not output other languages).`, hintInputLang ? `Source Language: ${getFriendlyLanguageName(hintInputLang)}.` : '',
-                    `For the input "${req.text}", detect its source language and provide its definition in ${targetLanguageName}.`,
-                    `IMPORTANT: The "basic" and "dictData.definition" fields MUST be written in ${targetLanguageName}. If ${targetLanguageName} is Traditional Chinese, use 繁體字 exclusively.`,
-                    `Return a JSON object:`,
+                // ── JSON shape ────────────────────────────────────────────
+                const jsonShape = [
                     `{`,
                     `  "phonetic": "IPA phonetics (if applicable)",`,
-                    phoneticField,
+                    req.needPhonetic ? sourcePhoneticDesc : '',
                     `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
-                    `  "dictData": [`,
-                    `    {"pos": "n./v./adj.", "definition": "A comma-separated list of meanings for this specific part of speech (e.g., '平台, 基础, 位置')"}`,
-                    `  ],`,
-                    `  "examples": ["Original sentence in source language | ${targetLanguageName} translation"],`,
-                    ...(isChineseTarget ? [
-                        `  "wordForms": [{"name": "past tense / 复数 / 活用形 etc.", "value": "the form"}],`,
-                        `  "prototype": "base/root form if input is inflected, otherwise null"`
-                    ] : []),
+                    `  "dictData": [{"pos": "n./v./adj.", "definition": "comma-separated meanings"}],`,
+                    `  "examples": ["<sentence in ${sourceLangLabel}> | <${targetLanguageName} translation>"],`,
+                    needsWordForms ? wordFormsInstruction : '',
+                    needsWordForms ? `  "prototype": "base form if input is inflected, otherwise null"` : '',
                     `}`,
-                    `EXAMPLES (follow these output formats exactly):`,
-                    examplesPrompt,
-                    `NOTE: 'sourcePhonetic' uses ONLY plain letters like "nihon", "zhōng guó" — NEVER IPA like "/n̪ihoɴ/" or "/tʂʊŋ/"`,
-                    `Constraints:`,
-                    `1. MUST GROUP definitions by part of speech. Each unique 'pos' (e.g., 'n.') should appear ONLY ONCE in the 'dictData' array.`,
-                    `2. Combine multiple meanings of the same 'pos' into a single comma-separated string in the 'definition' field.`,
-                    `3. 'dictData' must contain AT MOST 6 high-quality definitions in total.`,
-                    `4. If the word is very common, provide only the most essential meanings.`,
-                    ...(isChineseTarget ? [
-                        `5. For 'wordForms': provide ONLY the morphological forms OF THE EXACT INPUT WORD "${req.text}" itself. For example, if input is "forward": wordForms should be [过去式:forwarded, 过去分词:forwarded, 现在分词:forwarding, 第三人称单数:forwards]. NEVER use forms of a different word. Use EXACTLY these name values (do not translate or rephrase):`,
-                        `   - verb: "过去式", "过去分词", "现在分词", "第三人称单数"`,
-                        `   - noun: "复数"`,
-                        `   - adjective: "比较级", "最高级"`,
-                        `   Only include forms applicable to the input word's actual part of speech. Return [] for Chinese, Thai, Vietnamese.`,
-                        `   CRITICAL: If "${req.text}" is a determiner, pronoun, conjunction, preposition, or article (e.g. "every", "the", "and", "but", "each"), it has NO morphological forms. Return wordForms: [].`,
-                        `   NEVER fabricate non-existent forms like "evered", "evering". If unsure, return [].`,
-                        `6. For 'prototype': ONLY return a value if "${req.text}" is itself a clearly inflected form. "running" → "run", "helpers" → "helper", "forwarded" → "forward". If "${req.text}" is already a base form, return null. NEVER return a semantically related word like "go" for "forward", or "ever" for "every". When in doubt, return null.`
-                    ] : []),
+                ].filter(Boolean).join('\n');
 
-                    // 强制性的 JSON 格式规则（无论什么语言都执行）
-                    `7. Respond with PURE JSON ONLY. Absolutely no Markdown, no code fences, no backticks, no explanations. The response must start with '{' and end with '}'.`,
-                    `8. CRITICAL: Your entire response must be a single valid JSON object. If you output anything other than raw JSON, it will cause a system error. Do not add any text before '{' or after '}'.`
+                // ── System Prompt ─────────────────────────────────────────
+                systemPrompt = [
+                    `You are a professional ${targetLanguageName} dictionary. Output PURE JSON only — no markdown, no backticks, no explanation.`,
+                    `TARGET LANGUAGE: ${targetLanguageName}. All "basic" and "definition" values MUST be in ${targetLanguageName}.${targetLanguageName.includes('Traditional Chinese') ? ' Use 繁體字 exclusively.' : ''}`,
+                    `CRITICAL: Every single value in "definition" and "basic" fields MUST be written in ${targetLanguageName}. NEVER output source language text (${sourceLangLabel}) as definitions.`,
+                    hintInputLang ? `Source Language: ${sourceLangLabel}.` : '',
+
+                    `OUTPUT SHAPE:`,
+                    jsonShape,
+
+                    `EXAMPLES (follow these exactly):`,
+                    examplesPrompt,
+
+                    `INPUT: "${req.text}"`,
+
+                    `RULES:`,
+                    `- Max 6 dictData entries total. Group by pos — each pos appears ONLY ONCE.`,
+                    `- definition: MAX 5 meanings per pos, each meaning must be UNIQUE. Never repeat the same word. ALL definitions MUST be in ${targetLanguageName}.`,
+                    `- phonetic: MUST be IPA (e.g. /dʑoːhoː/) or Hepburn Romaji (e.g. jōhō). NEVER use Hiragana or Katakana as phonetic.`,
+                    `- prototype: set ONLY if input is a clearly inflected form (e.g. "running"→"run", "走った"→"走る"). If input equals the prototype value, return null. When in doubt, return null.`,
+                    wordFormsRule,
+                    `- wordForms: provide ONLY morphological forms that naturally belong to "${req.text}" itself. Do NOT combine with auxiliary verbs (e.g. "になる", "する"). If "${req.text}" is a noun, pronoun, particle, or conjunction, return []. NEVER fabricate forms.`,
+                    req.needPhonetic ? `- sourcePhonetic: plain romanization only (e.g. "nihon", "zhōng guó") — NEVER IPA symbols, NEVER Hiragana/Katakana.` : '',
+                    `- examples: provide EXACTLY 2 DIFFERENT examples. Each must use a completely different sentence. NEVER repeat the same sentence twice.`,
+                    `- Response MUST start with '{' and end with '}'. Any other output will cause a system error.`,
                 ].filter(Boolean).join('\n');
             } else if (isSubtitle) {
                 systemPrompt = [
@@ -2546,23 +2629,51 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         };
         if (typeof rawResult === 'string') {
             let cleanedResult = rawResult.trim();
+
+            // 清理 markdown 代码块
             if (cleanedResult.startsWith('```')) {
                 cleanedResult = cleanedResult.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
             }
+
+            // 提取 JSON 部分
+            const jsonStart = cleanedResult.indexOf('{');
+            const jsonEnd = cleanedResult.lastIndexOf('}');
+            if (jsonStart !== -1 && jsonEnd !== -1) {
+                cleanedResult = cleanedResult.slice(jsonStart, jsonEnd + 1);
+            }
+
             if (cleanedResult.startsWith('{') && cleanedResult.endsWith('}')) {
                 try {
                     const parsed = JSON.parse(cleanedResult);
-                    //logger.log('[processTranslate] parsed:', JSON.stringify(parsed));
+
+                    // basic 去重
+                    let basic = parsed.basic || "";
+                    if (basic) {
+                        const parts = basic.split(',').map(s => s.trim()).filter(Boolean);
+                        basic = [...new Set(parts)].join(', ');
+                    }
+
+                    // definition 
+                    const dictData = (parsed.dictData || []).map(item => {
+                        let def = Array.isArray(item.definition)
+                            ? item.definition.join(', ')
+                            : (item.definition || '');
+                        // 去重并截断
+                        const defParts = def.split(',').map(s => s.trim()).filter(Boolean);
+                        const uniqueDefs = [...new Set(defParts)].slice(0, 5);
+                        return {
+                            pos: item.pos,
+                            meanings: [uniqueDefs.join(', ')]
+                        };
+                    });
+
                     finalData = {
                         ...finalData,
-                        basic: parsed.basic || "",
+                        basic,
                         phonetic: parsed.phonetic || "",
                         sourcePhonetic: parsed.sourcePhonetic || "",
                         targetPhonetic: parsed.targetPhonetic || "",
-                        dictData: (parsed.dictData || []).map(item => ({
-                            pos: item.pos,
-                            meanings: Array.isArray(item.definition) ? item.definition : [item.definition]
-                        })),
+                        dictData,
                         wordForms: parsed.wordForms || [],
                         prototype: parsed.prototype || null,
                         examples: (parsed.examples || []).map(ex => {
@@ -2572,6 +2683,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                         })
                     };
                 } catch (e) {
+                    logger.warn('[processTranslate] JSON 解析失败:', e.message, cleanedResult.substring(0, 100));
                     finalData.basic = cleanedResult.replace(/\n+/g, '\n');
                 }
             } else {

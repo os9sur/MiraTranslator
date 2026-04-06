@@ -1199,22 +1199,15 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       const hit = await lookupCache(query, engine, lang);
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
-        // 检测缓存是否是脏数据（basic是JSON字符串）
-        if (typeof cached.basic === 'string' && cached.basic.trimStart().startsWith('{')) {
-          try {
-            const parsed = JSON.parse(cached.basic);
-            // 是脏数据，修复并重写缓存
-            cached.basic = parsed.basic || cached.basic;
-            cached.phonetic = parsed.phonetic || cached.phonetic || "";
-            cached.dictData = parsed.dictData || cached.dictData || [];
-            cached.examples = parsed.examples || cached.examples || [];
-            await idb.set({ [cacheKey]: cached }); // 覆盖脏数据
-          } catch { /* 不是JSON，正常数据 */ }
+        const basicStr = typeof cached.basic === 'string' ? cached.basic.trim() : '';
+        if (basicStr.startsWith('{')) { 
+          await idb.remove(hit.hitKey);
+          if (hit.singleKey && hit.singleKey !== hit.hitKey) await idb.remove(hit.singleKey); 
+        } else { 
+          cached.dictData = mergeDictData(cached.dictData);
+          wordTranslationCache.set(query.toLowerCase(), cached);
+          return cached;
         }
-        cached.dictData = mergeDictData(cached.dictData);
-        logger.log('[Cache] 返回缓存数据 basic:', cached.basic, 'dictData:', cached.dictData?.length, 'examples:', cached.examples?.length);
-        wordTranslationCache.set(query.toLowerCase(), cached);
-        return cached;
       }
     }
     pendingRequests.add(cacheKey);
@@ -1320,9 +1313,12 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
 
         // 脏数据检测：basic 是 JSON 字符串或大量重复词，跳过缓存写入
         const isJsonString = typeof result.basic === 'string'
-          && result.basic.trimStart().startsWith('{')
-          && result.basic.trimEnd().endsWith('}')
-          && result.basic.includes('"basic"');
+          && (
+            (result.basic.trimStart().startsWith('{')
+              && result.basic.trimEnd().endsWith('}')
+              && result.basic.includes('"basic"'))
+            || result.basic.includes('"dictData"')
+          );
         const isRepetitive = (() => {
           if (!result.basic) return false;
           const words = result.basic.split(/[,\s]+/).filter(Boolean);
