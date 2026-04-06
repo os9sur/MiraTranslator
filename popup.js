@@ -1475,22 +1475,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       let html = '';
+      const src = (langA || 'en').toLowerCase();
+      const tgt = (langB || 'zh').toLowerCase();
+      let cambridgeHref = '';
 
       if (basic) {
         const hasPhonetic = !!targetPhonetic;
         const phoneticLabel = getPhoneticLabel(ui_lang);
+
+        // 剑桥词典链接逻辑：仅单词模式
+        const isWord = !text.trim().includes(' ');
+        if (isWord) {
+          const encoded = encodeURIComponent(text.trim().toLowerCase());
+
+
+
+          let dictPath;
+          if (src === 'en') {
+            dictPath = FORWARD[tgt] || null;
+          } else if (tgt === 'en') {
+            dictPath = REVERSE[src] || null;
+          } else {
+            dictPath = null;
+          }
+
+          if (dictPath) {
+            cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
+          }
+        }
+
         html += `
-            <div style="margin-bottom:10px;">
-              <div style="display:flex; align-items:center; gap:8px;">
-                <span style="font-weight:bold; word-break:break-all; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
-                ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
-              </div>
-              ${hasPhonetic ? `
-                <div id="targetPhoneticRow" style="
-                  display:none; color:#64748b; font-size:11px;
-                  margin-top:3px; user-select:text;
-                ">${targetPhonetic}</div>` : ''}
-            </div>`;
+    <div style="margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-weight:bold; word-break:break-all; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
+        ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
+      </div>
+      ${hasPhonetic ? `
+        <div id="targetPhoneticRow" style="
+          display:none; color:#64748b; font-size:11px;
+          margin-top:3px; user-select:text;
+        ">${targetPhonetic}</div>` : ''}
+        ${(cambridgeHref && tgt === 'zh-tw') ? `
+          <div style="margin-top:5px;">
+            <a id="cambridgeLink" href="${cambridgeHref}" target="_blank" rel="noopener noreferrer"
+              style="color:#64748b; font-size:10px; text-decoration:none; opacity:0.7; transition:opacity 0.2s;">
+              💡 繁體釋義 → Cambridge Dictionary ↗
+            </a>
+          </div>` : ''}
+    </div>`;
       }
 
       // 合并相同 pos
@@ -1606,13 +1638,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>`;
       }
 
-      // source 部分不拼入 html，先占位
-      if (response.source) {
+      // source 和 Cambridge 
+      if (response.source || cambridgeHref) {
         html += `<div id="wiki-source-placeholder" 
-              style="margin-top:10px; font-size:11px; opacity:0.8; 
-                     text-align:right; color:#64748b;">
-           Source:
-         </div>`;
+            style="margin-top:10px; font-size:11px;
+                  display:flex; justify-content:flex-end; align-items:center; gap:4px;
+                  color:#64748b;">
+        <span>Source:</span>
+      </div>`;
       }
 
       resContent.innerHTML = html || 'No translation found.';
@@ -1642,50 +1675,92 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       // 再单独处理 source 链接，用 DOM API 绑定事件
-      if (response.source) {
+      if (response.source || cambridgeHref) {
         const placeholder = resContent.querySelector('#wiki-source-placeholder');
         if (placeholder) {
-          //placeholder.appendChild(document.createTextNode('Source: '));
-          if (response.sourceUrl) {
-            const a = document.createElement('a');
-            a.href = response.sourceUrl;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.textContent = response.source;
-            a.style.cssText = `
-                color: #38bdf8;
-                text-decoration: none;
-                font-weight: 500;
-                font-size: 10px;
-                font-style: italic;
-                padding: 2px 6px;
-                /*border: 1px solid rgba(56,189,248,0.4);*/
-                border-radius: 4px;
-                background: rgba(56,189,248,0.08);
-                transition: all 0.2s ease;
-                margin-left: 4px;
-              `;
-            a.addEventListener('mouseover', () => {
-              a.style.background = 'rgba(56,189,248,0.2)';
-              // a.style.borderColor = '#38bdf8';
-              a.style.color = '#7dd3fc';
+          // Google+Dict 链接
+          if (response.source) {
+            if (response.sourceUrl) {
+              const a = document.createElement('a');
+              a.href = response.sourceUrl;
+              a.target = '_blank';
+              a.rel = 'noopener noreferrer';
+              a.textContent = response.source;
+              a.style.cssText = `
+              color: #38bdf8;
+              text-decoration: none;
+              font-weight: 500;
+              font-size: 10px;
+              font-style: italic;
+              padding: 2px 6px;
+              border-radius: 4px;
+              background: rgba(56,189,248,0.08);
+              transition: all 0.2s ease;
+              margin-left: 4px;
+            `;
+              a.addEventListener('mouseover', () => {
+                a.style.background = 'rgba(56,189,248,0.2)';
+                a.style.color = '#7dd3fc';
+              });
+              a.addEventListener('mouseout', () => {
+                a.style.background = 'rgba(56,189,248,0.08)';
+                a.style.color = '#38bdf8';
+              });
+              placeholder.appendChild(a);
+            } else {
+              placeholder.appendChild(document.createTextNode(response.source));
+            }
+          }
+
+          // Cambridge 链接，追加在 Google+Dict 后面
+          if (cambridgeHref) {
+            const sep = document.createTextNode(' · ');
+            placeholder.appendChild(sep);
+            const ca = document.createElement('a');
+            ca.href = cambridgeHref;
+            ca.target = '_blank';
+            ca.rel = 'noopener noreferrer';
+            ca.textContent = 'Cambridge ↗';
+            ca.style.cssText = `
+              color: #94a3b8;
+              text-decoration: none;
+              font-weight: 500;
+              font-size: 10px;
+              font-style: italic;
+              padding: 2px 6px;
+              border-radius: 4px;
+              background: rgba(148,163,184,0.08);
+              transition: all 0.2s ease;
+            `;
+            ca.addEventListener('mouseover', () => {
+              ca.style.background = 'rgba(148,163,184,0.2)';
+              ca.style.color = '#cbd5e1';
             });
-            a.addEventListener('mouseout', () => {
-              a.style.background = 'rgba(56,189,248,0.08)';
-              // a.style.borderColor = 'rgba(56,189,248,0.4)';
-              a.style.color = '#38bdf8';
+            ca.addEventListener('mouseout', () => {
+              ca.style.background = 'rgba(148,163,184,0.08)';
+              ca.style.color = '#94a3b8';
             });
-            placeholder.appendChild(a);
-          } else {
-            placeholder.appendChild(document.createTextNode(response.source));
+            placeholder.appendChild(ca);
           }
         }
+      }
+
+      // 绑定基本释义下方剑桥链接 hover（仅 zh-tw）
+      const cambridgeLink = resContent.querySelector('#cambridgeLink');
+      if (cambridgeLink) {
+        cambridgeLink.addEventListener('mouseover', () => {
+          cambridgeLink.style.opacity = '1';
+          cambridgeLink.style.color = '#38bdf8';
+        });
+        cambridgeLink.addEventListener('mouseout', () => {
+          cambridgeLink.style.opacity = '0.8';
+          cambridgeLink.style.color = '#7dd3fc';
+        });
       }
 
       // 绑定音标切换
       const toggleBtn = document.getElementById('togglePhoneticBtn');
       const phoneticRow = document.getElementById('targetPhoneticRow');
-
       if (toggleBtn && phoneticRow) {
         toggleBtn.onclick = () => {
           const isHidden = phoneticRow.style.display === 'none';
@@ -1693,6 +1768,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           toggleBtn.classList.toggle('active', isHidden);
         };
       }
+
       if (typeof updateSaveBtnStatus === 'function') {
         await updateSaveBtnStatus(text);
       }
@@ -1823,9 +1899,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         fromPopup: true
       });
 
-
       clearTimeout(slowTimer);
 
+      //基本释义
       if (response) renderTranslationResult(response, text, ui_lang, langA, langB);
 
       const detailUpdateListener = (msg) => {

@@ -3739,7 +3739,7 @@ function initSelectionTranslate() {
           state.sourceLang = lang.value;
           await safeSetStorage({ lpLangA: lang.value });
           window.hintSourceLang = lang.value;
-          
+
           const srcSpan = shadow.getElementById('p-lang-src');
           if (srcSpan) srcSpan.textContent = lang.value === 'auto'
             ? 'AUTO' : lang.value.toUpperCase().slice(0, 2);
@@ -3774,7 +3774,10 @@ function initSelectionTranslate() {
           await safeSetStorage({ targetLanguage: lang.value });
 
           const tgtSpan = shadow.getElementById('p-lang-tgt-btn');
-          if (tgtSpan) tgtSpan.textContent = lang.value.toUpperCase().slice(0, 2);
+          if (tgtSpan) {
+            const langVal = lang.value.toLowerCase();
+            tgtSpan.textContent = LANG_DISPLAY[langVal] || lang.value.toUpperCase().slice(0, 2);
+          }
 
           const newIsRTL = ['he', 'ar', 'fa'].includes(lang.value.toLowerCase().slice(0, 2));
           const contentContainer = shadow.getElementById('p-content-container');
@@ -3936,7 +3939,8 @@ function initSelectionTranslate() {
 
   function buildContentHTML(text, isSaved) {
     const isMultiline = text.length > 40 || text.includes('\n');
-    const targetLang = (window.currentTargetL || getBrowserLang() || 'EN').toUpperCase().slice(0, 2);
+    const targetLang = (window.currentTargetL || getBrowserLang() || 'EN').toLowerCase();
+    const targetLangDisplay = LANG_DISPLAY[targetLang] || targetLang.toUpperCase().slice(0, 2);
 
     return `
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
@@ -3969,7 +3973,7 @@ function initSelectionTranslate() {
               padding:2px 6px;
               background:var(--p-header-bg); transition:all 0.2s; white-space:nowrap;
               display:flex; align-items:center; min-width:44px; justify-content:center;">
-    <span id="p-lang-tgt" style="opacity:0.9; pointer-events:none;">${targetLang}</span>
+    <span id="p-lang-tgt" style="opacity:0.9; pointer-events:none;">${targetLangDisplay}</span>
   </div>
 
 </div>
@@ -4197,18 +4201,113 @@ function initSelectionTranslate() {
     // 来源
     const pSource = shadow.getElementById('p-source');
     if (pSource) {
-      pSource.style.display = res.source ? 'block' : 'none';
-      if (res.source) {
-        if (res.sourceUrl) {
-          pSource.innerHTML = `Source: <a href="${res.sourceUrl}" target="_blank" rel="noopener noreferrer">${res.source}</a>`;
-        } else {
-          pSource.innerText = `Source: ${res.source}`;
+      const isWord = !text.trim().includes(' ');
+      let cambridgeHref = '';
+      let isZhTw = false;
+
+      if (isWord) {
+        const encoded = encodeURIComponent(text.trim().toLowerCase());
+        const tgt = (window.currentTargetL || getBrowserLang() || 'en').toLowerCase();
+        const src = (res.langInfo?.code || state?.sourceLang || 'en').toLowerCase();
+        isZhTw = tgt === 'zh-tw';
+
+        let dictPath = null;
+        if (src === 'en') {
+          dictPath = FORWARD[tgt === 'tw' ? 'zh-tw' : tgt] || null;
+        } else if (tgt === 'en') {
+          dictPath = REVERSE[src] || null;
         }
+
+        if (dictPath) {
+          cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
+        }
+      }
+
+      // 基本释义下方（仅 zh-tw）
+      const pBasic = shadow.getElementById('p-basic');
+      const existingTop = shadow.getElementById('p-cambridge-top');
+      if (existingTop) existingTop.remove();
+
+      if (isZhTw && cambridgeHref && pBasic) {
+        const div = document.createElement('div');
+        div.id = 'p-cambridge-top';
+        div.style.cssText = 'margin-top:4px;';
+        const a = document.createElement('a');
+        a.href = cambridgeHref;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = '💡 繁體釋義 → Cambridge Dictionary ↗';
+        a.style.cssText = `
+      color: #7dd3fc;
+      font-size: 10px;
+      text-decoration: none;
+      opacity: 0.9;
+      transition: all 0.2s ease;
+    `;
+        a.addEventListener('mouseover', () => { a.style.color = '#38bdf8'; a.style.opacity = '1'; });
+        a.addEventListener('mouseout', () => { a.style.color = '#7dd3fc'; a.style.opacity = '0.9'; });
+        div.appendChild(a);
+        pBasic.after(div);
+      }
+
+      // 底部 source
+      pSource.style.display = (res.source || cambridgeHref) ? 'block' : 'none';
+      pSource.innerHTML = '';
+
+      if (res.source) {
+        pSource.appendChild(document.createTextNode('Source: '));
+        if (res.sourceUrl) {
+          const a = document.createElement('a');
+          a.href = res.sourceUrl;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+          a.textContent = res.source;
+          a.style.cssText = `
+        color: #38bdf8;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 10px;
+        font-style: italic;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(56,189,248,0.08);
+        transition: all 0.2s ease;
+        margin-left: 4px;
+      `;
+          a.addEventListener('mouseover', () => { a.style.background = 'rgba(56,189,248,0.2)'; a.style.color = '#7dd3fc'; });
+          a.addEventListener('mouseout', () => { a.style.background = 'rgba(56,189,248,0.08)'; a.style.color = '#38bdf8'; });
+          pSource.appendChild(a);
+        } else {
+          pSource.appendChild(document.createTextNode(res.source));
+        }
+      }
+
+      if (cambridgeHref) {
+        if (res.source) pSource.appendChild(document.createTextNode(' · '));
+        const ca = document.createElement('a');
+        ca.href = cambridgeHref;
+        ca.target = '_blank';
+        ca.rel = 'noopener noreferrer';
+        ca.textContent = 'Cambridge ↗';
+        ca.style.cssText = `
+      color: #94a3b8;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 10px;
+      font-style: italic;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(148,163,184,0.08);
+      transition: all 0.2s ease;
+    `;
+        ca.addEventListener('mouseover', () => { ca.style.background = 'rgba(148,163,184,0.2)'; ca.style.color = '#cbd5e1'; });
+        ca.addEventListener('mouseout', () => { ca.style.background = 'rgba(148,163,184,0.08)'; ca.style.color = '#94a3b8'; });
+        pSource.appendChild(ca);
       }
     }
 
     const srcSpan = shadow.getElementById('p-lang-src');
-    const tgtSpan = shadow.getElementById('p-lang-tgt-btn');
+    const tgtSpan = shadow.getElementById('p-lang-tgt');
     if (srcSpan) {
       if (state && state.sourceLang === 'auto' && res.langInfo?.code) {
         srcSpan.textContent = res.langInfo.code.toUpperCase().slice(0, 2);
@@ -4217,7 +4316,8 @@ function initSelectionTranslate() {
       }
     }
     if (tgtSpan) {
-      tgtSpan.textContent = (window.currentTargetL || getBrowserLang() || 'EN').toUpperCase().slice(0, 2);
+      const langVal = (window.currentTargetL || getBrowserLang() || 'EN').toLowerCase();
+      tgtSpan.textContent = LANG_DISPLAY[langVal] || langVal.toUpperCase().slice(0, 2);
     }
   }
 

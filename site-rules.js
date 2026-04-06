@@ -9,9 +9,9 @@ const SiteRules = {
             minLen: 10
         },
         "youtube.com": {
-            selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *)",
-            minLen: 10
-        },
+  selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *):not(yt-content-metadata-view-model *):not(.yt-spec-button-shape-next *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *):not(ytd-metadata-line-renderer *)",
+  minLen: 10
+},
         "news.ycombinator.com": {
             selectors: "p, li, td.title, div.commtext.c00",
             minLen: 3

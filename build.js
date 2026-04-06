@@ -129,7 +129,14 @@ async function build() {
                         compress: {
                             dead_code: true,
                             drop_console: true,
-                            passes: 2
+                            passes: 2,
+                            pure_funcs: [
+                                'logger.log',
+                                'logger.warn',
+                                'logger.group',
+                                'logger.groupCollapsed',
+                                'logger.groupEnd'
+                            ]
                         },
                         mangle: true,
                         sourceMap: false
