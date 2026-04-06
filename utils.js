@@ -1200,10 +1200,10 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
         const basicStr = typeof cached.basic === 'string' ? cached.basic.trim() : '';
-        if (basicStr.startsWith('{')) { 
+        if (basicStr.startsWith('{')) {
           await idb.remove(hit.hitKey);
-          if (hit.singleKey && hit.singleKey !== hit.hitKey) await idb.remove(hit.singleKey); 
-        } else { 
+          if (hit.singleKey && hit.singleKey !== hit.hitKey) await idb.remove(hit.singleKey);
+        } else {
           cached.dictData = mergeDictData(cached.dictData);
           wordTranslationCache.set(query.toLowerCase(), cached);
           return cached;
@@ -1533,4 +1533,64 @@ const LANGS = [
   { value: 'zu', label: 'IsiZulu (Zulu)', en: 'Zulu' },
 ];
 
+
+//剑桥词典URL 模板
+const FORWARD = {
+  // 双语词典 (Bilingual)
+  'zh': 'english-chinese-simplified',
+  'zh-cn': 'english-chinese-simplified',
+  'zh-tw': 'english-chinese-traditional',
+  'da': 'english-danish',
+  'nl': 'english-dutch',
+  'fr': 'english-french',
+  'de': 'english-german',
+  'id': 'english-indonesian',
+  'it': 'english-italian',
+  'ja': 'english-japanese',
+  'no': 'english-norwegian',
+  'pl': 'english-polish',
+  'es': 'english-spanish',
+  'pt': 'english-portuguese',
+  // 半双语词典 (Semi-bilingual)
+  'ar': 'english-arabic',
+  'bn': 'english-bengali',
+  'ca': 'english-catalan',
+  'cs': 'english-czech',
+  'gu': 'english-gujarati',
+  'hi': 'english-hindi',
+  'ko': 'english-korean',
+  'ms': 'english-malay',
+  'mr': 'english-marathi',
+  'ru': 'english-russian',
+  'ta': 'english-tamil',
+  'te': 'english-telugu',
+  'th': 'english-thai',
+  'tr': 'english-turkish',
+  'uk': 'english-ukrainian',
+  'ur': 'english-urdu',
+  'vi': 'english-vietnamese',
+};
+
+const REVERSE = {
+  'zh': 'chinese-simplified-english',
+  'zh-cn': 'chinese-simplified-english',
+  'zh-tw': 'chinese-traditional-english',
+  'ja': 'japanese-english',
+  'ko': 'korean-english',
+  'fr': 'french-english',
+  'de': 'german-english',
+  'es': 'spanish-english',
+  'pt': 'portuguese-english',
+  'it': 'italian-english',
+  'nl': 'dutch-english',
+  'da': 'danish-english',
+  'no': 'norwegian-english',
+  'pl': 'polish-english',
+  'id': 'indonesian-english',
+};
+const LANG_DISPLAY = {
+  'zh-tw': 'TW',
+  'zh-hk': 'HK',
+  'zh-cn': 'ZH',
+};
 
