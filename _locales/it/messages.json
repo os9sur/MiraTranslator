@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "Mira Translator - Traduzione immersiva e sottotitoli YouTube"
+    "message": "Mira Translator - Traduzione immersiva e sottotitoli bilingui per YouTube"
   },
   "appDesc": {
     "message": "<0.5MB: Open-source, sicuro. Motori pubblici + AI API (Propria Key). Traduzione Web/YouTube e sincro WebDAV/GDrive."
@@ -30,7 +30,7 @@
     "message": "Tempo scaduto: Controlla la rete."
   },
   "ERROR_NETWORK": {
-    "message": "Errore di rete: API limitata (VPN o blocco regionale)."
+    "message": "API bloccata: L'IP attuale ha attivato restrizioni di sicurezza o limiti di richiesta. Prova a cambiare VPN o a cambiare servizio di traduzione."
   },
   "ERROR_GENERIC": {
     "message": "Traduzione fallita: Controlla la config API."

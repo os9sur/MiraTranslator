@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "Mira 번역 - 몰입형 전체 웹 및 YouTube 이중 자막"
+    "message": "Mira 번역 - 몰입형 웹 번역 및 YouTube 이중 자막"
   },
   "appDesc": {
     "message": "0.5MB 미만: 오픈 소스, 추적 없음. 기본 엔진 + 개인 AI API (자체 Key). 몰입형 번역, YouTube 자막, WebDAV/GDrive 동기화 지원."
@@ -30,7 +30,7 @@
     "message": "요청 시간 초과: 네트워크를 확인하세요."
   },
   "ERROR_NETWORK": {
-    "message": "연결 실패: 네트워크 제한 (VPN 또는 지역 제한)."
+    "message": "API 차단: 현재 IP가 보안 위험 또는 요청 제한에 걸렸습니다. VPN 노드 교체 또는 번역 서비스 전환을 권장합니다."
   },
   "ERROR_GENERIC": {
     "message": "번역 실패: API 설정을 확인하세요."

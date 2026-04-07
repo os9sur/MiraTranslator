@@ -973,7 +973,7 @@ async function lookupCache(text, engine, lang) {
     if (hitKey !== singleKey) updates[hitKey] = actualResult;
     await idb.set(updates);
   }
-  logger.log('[lookupCache] 查询 key:', singleKey, 'cachedData:', !!cachedData);
+  //logger.log('[lookupCache] 查询 key:', singleKey, 'cachedData:', !!cachedData);
   return { result: actualResult, hitKey, singleKey };
 }
 
@@ -1205,7 +1205,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
     if (!forceRefresh && !isBatch) {
-      logger.log('[lookupCache] query:', JSON.stringify(query));
+     // logger.log('[lookupCache] query:', JSON.stringify(query));
       const hit = await lookupCache(query, engine, lang);
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
@@ -1290,6 +1290,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         result.source = parsed.source || "";
         result.sourceUrl = parsed.sourceUrl || "";
         result.isPartial = parsed.isPartial || false;
+        result.isWord = parsed.isWord ?? false; 
       } catch {
         result.basic = data;
       }
@@ -1307,6 +1308,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       result.targetPhonetic = data.targetPhonetic || data.romaji || data.pinyin || data.transliteration || "";
       result.sourcePhonetic = data.sourcePhonetic || "";
       result.isPartial = data.isPartial || false;
+      result.isWord = data.isWord ?? false;
     }
     if (result.basic && (!result.dictData || result.dictData.length === 0)) {
       if (isAI && !isBatch) {

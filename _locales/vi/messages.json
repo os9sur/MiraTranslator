@@ -30,7 +30,7 @@
     "message": "Hết thời gian chờ: Kiểm tra mạng."
   },
   "ERROR_NETWORK": {
-    "message": "Lỗi mạng: API bị hạn chế (VPN hoặc chặn vùng)."
+    "message": "API bị chặn: IP hiện tại bị hạn chế bảo mật hoặc giới hạn yêu cầu. Hãy thử đổi VPN hoặc chuyển sang dịch vụ dịch thuật khác."
   },
   "ERROR_GENERIC": {
     "message": "Dịch thất bại: Kiểm tra cấu hình API."

@@ -1,6 +1,4 @@
-
 window.currentTargetL = getBrowserLang() || 'en';
-
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
 
@@ -22,8 +20,6 @@ function loadTargetLanguage() {
   return window.__LANG_PROMISE__;
 }
 
-loadTargetLanguage();
-
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local') {
     if (changes.targetLanguage)
@@ -32,38 +28,27 @@ chrome.storage.onChanged.addListener((changes, area) => {
       window.uiLanguage = changes.ui_language.newValue || getBrowserLang() || 'en';
   }
 });
+
 let APP_NAME = 'Mira Translator';
-async function initApp() {
-  try {
-    loadTargetLanguage().then(() => {
-      APP_NAME = t('appName') || 'Mira Translator';
-    });
-  } catch (error) {
-    logger.error("Failed to initialize app:", error);
-  }
-}
 
-initApp();
-logger.log('Content script - Current target language:', window.currentTargetL);
+loadTargetLanguage().then(async () => {
+  APP_NAME = t('appName') || 'Mira Translator';
+  logger.log('Content script - Current target language:', window.currentTargetL);
 
-(async () => {
-  await _defaultEngineReady; // 等缓存读完
+  await _defaultEngineReady;
 
   let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
-
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
-
     window.currentConfig.activeConfig = finalCfg;
     window.currentConfig.selectedEngine = finalCfg.engine;
     res = {
       activeConfig: finalCfg,
-      targetLanguage: (getBrowserLang() || 'en').replace('_', '-').toLowerCase()
+      targetLanguage: window.currentTargetL
     };
   }
-
   syncLocalState(res);
-})();
+});
 
 const TRANS_STATUS = {
   LOADING: 'loading',
@@ -117,9 +102,9 @@ window.currentConfig = {
   activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
 async function syncLocalState(storageData) {
+  // console.trace('syncLocalState called', storageData);
   if (storageData.targetLanguage) {
     const lang = storageData.targetLanguage.replace('_', '-');
-    window.currentConfig.targetLanguage = lang;
     window.currentTargetL = lang;
     applyI18n(lang);
   }
@@ -3090,140 +3075,141 @@ function initSelectionTranslate() {
         padding-top: 7px;
       }
         #p-source {  
-  color: var(--p-text-main); 
-  font-size: 11px;
-  margin-top: 12px;
-  opacity: 0.7; 
-}
+        color: var(--p-text-main); 
+        font-size: 11px;
+        margin-top: 12px;
+        opacity: 0.7; 
+      }
 
-#p-source a {  
-  color: var(--p-accent);
-  text-decoration: none;
-  font-weight: 600;
-   
-  border-bottom: 1.5px solid rgba(var(--p-accent-rgb), 0.4);
-  
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 1px 4px;
-  margin-left: 2px;
-}
+    #p-source a {  
+      color: var(--p-accent);
+      text-decoration: none;
+      font-weight: 600;
+      
+      border-bottom: 1.5px solid rgba(var(--p-accent-rgb), 0.4);
+      
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 1px 4px;
+      margin-left: 2px;
+    }
 
-#p-source a:hover { 
-  opacity: 1;  
-  background: rgba(var(--p-accent-rgb), 0.25);  
-  filter: brightness(1.3);  
-  text-shadow: 0 0 5px rgba(var(--p-accent-rgb), 0.4);  
-  border-bottom-color: var(--p-accent);
-  color: var(--p-accent);
-}
+    #p-source a:hover { 
+      opacity: 1;  
+      background: rgba(var(--p-accent-rgb), 0.25);  
+      filter: brightness(1.3);  
+      text-shadow: 0 0 5px rgba(var(--p-accent-rgb), 0.4);  
+      border-bottom-color: var(--p-accent);
+      color: var(--p-accent);
+    }
 
-@keyframes neon-click-spread {
-  0% {
-    box-shadow: 0 0 0 0px color-mix(in srgb, var(--p-accent) 60%, transparent);
-    transform: scale(0.96);
-  }
-  100% {
-    box-shadow: 0 0 4px 20px color-mix(in srgb, var(--p-accent) 0%, transparent);
-    transform: scale(1);
-  }
-}
+    @keyframes neon-click-spread {
+      0% {
+        box-shadow: 0 0 0 0px color-mix(in srgb, var(--p-accent) 60%, transparent);
+        transform: scale(0.96);
+      }
+      100% {
+        box-shadow: 0 0 4px 20px color-mix(in srgb, var(--p-accent) 0%, transparent);
+        transform: scale(1);
+      }
+    }
 
-.lang-tag-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 20px;
-  padding: 0 16px;
-  cursor: pointer;
-  border-radius: 20px;
-  color: white;
-  border: none !important;
-  outline: none;
-  transition: all 0.3s ease;
-  background: radial-gradient(
-    circle at center, 
-    color-mix(in srgb, var(--p-accent) 25%, transparent) 0%, 
-    color-mix(in srgb, var(--p-accent) 10%, transparent) 70%, 
-    transparent 100%
-  ) !important;
-  box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 20%, transparent);
-}
+      .lang-tag-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 50%;
+        color: white;
+        border: none !important;
+        outline: none;
+        transition: all 0.3s ease;
+        background: radial-gradient(
+          circle at center, 
+          color-mix(in srgb, var(--p-accent) 25%, transparent) 0%, 
+          color-mix(in srgb, var(--p-accent) 10%, transparent) 70%, 
+          transparent 100%
+        ) !important;
+        box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 20%, transparent);
+      }
+      .lang-tag-btn:hover {
+        background: radial-gradient(
+          circle at center, 
+          color-mix(in srgb, var(--p-accent) 35%, transparent) 0%, 
+          color-mix(in srgb, var(--p-accent) 15%, transparent) 80%, 
+          transparent 100%
+        ) !important;
+        transform: scale(1.05);
+        box-shadow: 0 0 15px color-mix(in srgb, var(--p-accent) 40%, transparent);
+      }
 
-.lang-tag-btn:hover {
-  background: radial-gradient(
-    circle at center, 
-    color-mix(in srgb, var(--p-accent) 35%, transparent) 0%, 
-    color-mix(in srgb, var(--p-accent) 15%, transparent) 80%, 
-    transparent 100%
-  ) !important;
-  transform: scale(1.05);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--p-accent) 40%, transparent);
-}
+      .lang-tag-btn:active {
+        animation: neon-click-spread 0.4s ease-out;
+        background: color-mix(in srgb, var(--p-accent) 50%, transparent) !important;
+      }
 
-.lang-tag-btn:active {
-  animation: neon-click-spread 0.4s ease-out;
-  background: color-mix(in srgb, var(--p-accent) 50%, transparent) !important;
-}
+      .lang-tag-btn svg {
+        flex-shrink: 0;
+        display: block;
+        fill: currentColor;  
+      }
 
-.lang-tag-btn svg {
-  flex-shrink: 0;
-  display: block;
-  fill: currentColor;  
-}
+      .lang-tag-btn span {
+        line-height: 1;
+        white-space: nowrap;
+        margin-top: -1px;
+      }
+        /* ── 原文展开按钮 ── */
+      .p-orig-toggle {
+        display:        inline-flex;
+        align-items:    center;
+        font-size:      9px;
+        font-weight:    700;
+        color:          var(--p-accent);
+        opacity:        0.5;
+        cursor:         pointer;
+        margin-left:    6px;
+        border:         1px solid var(--p-accent);
+        border-radius:  3px;
+        padding:        1px 4px;
+        vertical-align: middle;
+        user-select:    none;
+        flex-shrink:    0;
+        transition:     opacity 0.2s, background 0.2s;
+        line-height:    1.4;
+      }
+      .p-orig-toggle:hover {
+        opacity:    1 !important;
+        background: color-mix(in srgb, var(--p-accent) 15%, transparent);
+      }
+      .p-orig-toggle.is-open {
+        opacity:    1;
+        background: color-mix(in srgb, var(--p-accent) 20%, transparent);
+      }
 
-.lang-tag-btn span {
-  line-height: 1;
-  white-space: nowrap;
-  margin-top: -1px;
-}
-  /* ── 原文展开按钮 ── */
-.p-orig-toggle {
-  display:        inline-flex;
-  align-items:    center;
-  font-size:      9px;
-  font-weight:    700;
-  color:          var(--p-accent);
-  opacity:        0.5;
-  cursor:         pointer;
-  margin-left:    6px;
-  border:         1px solid var(--p-accent);
-  border-radius:  3px;
-  padding:        1px 4px;
-  vertical-align: middle;
-  user-select:    none;
-  flex-shrink:    0;
-  transition:     opacity 0.2s, background 0.2s;
-  line-height:    1.4;
-}
-.p-orig-toggle:hover {
-  opacity:    1 !important;
-  background: color-mix(in srgb, var(--p-accent) 15%, transparent);
-}
-.p-orig-toggle.is-open {
-  opacity:    1;
-  background: color-mix(in srgb, var(--p-accent) 20%, transparent);
-}
-
-/* ── 原文展开内容 ── */
-.p-orig-text {
-  display:       none;
-  margin-top:    4px;
-  padding:       4px 8px;
-  border-left:   2px solid var(--p-accent);
-  border-radius: 2px;
-  font-size:     11px;
-  color:         var(--p-text-muted);
-  font-style:    italic;
-  line-height:   1.5;
-  opacity:       0.8;
-  background:    color-mix(in srgb, var(--p-accent) 5%, transparent);
-  word-break:    break-word;
-  transition:    opacity 0.2s;
-}
-.p-orig-text.is-visible {
-  display: block;
-}
+      /* ── 原文展开内容 ── */
+      .p-orig-text {
+        display:       none;
+        margin-top:    4px;
+        padding:       4px 8px;
+        border-left:   2px solid var(--p-accent);
+        border-radius: 2px;
+        font-size:     11px;
+        color:         var(--p-text-muted);
+        font-style:    italic;
+        line-height:   1.5;
+        opacity:       0.8;
+        background:    color-mix(in srgb, var(--p-accent) 5%, transparent);
+        word-break:    break-word;
+        transition:    opacity 0.2s;
+      }
+      .p-orig-text.is-visible {
+        display: block;
+      }
       `;
 
     return style;
@@ -3313,6 +3299,45 @@ function initSelectionTranslate() {
     if (icon) icon.innerHTML = themeIcons[mode];
     const btn = shadow.getElementById('p-theme-toggle');
     if (btn) btn.title = { auto: t('autoTheme'), light: t('lightTheme'), dark: t('darkTheme') }[mode];
+
+    // 切换主题时同步更新链接颜色
+    const isDark = applied === 'dark';
+
+    // 更新 source 链接
+    const sourceA = shadow.querySelector('#p-source a');
+    if (sourceA) {
+      const normalColor = isDark ? '#7dd3fc' : '#0369a1';
+      const hoverColor = isDark ? '#bae6fd' : '#01478a';
+      const normalBg = isDark ? 'rgba(56,189,248,0.15)' : 'rgba(3,105,161,0.08)';
+      const hoverBg = isDark ? 'rgba(56,189,248,0.28)' : 'rgba(3,105,161,0.15)';
+      sourceA.style.color = normalColor;
+      sourceA.style.background = normalBg;
+      sourceA.onmouseover = () => { sourceA.style.color = hoverColor; sourceA.style.background = hoverBg; };
+      sourceA.onmouseout = () => { sourceA.style.color = normalColor; sourceA.style.background = normalBg; };
+    }
+
+    // 更新 cambridge 链接
+    const cambridgeA = shadow.querySelector('#p-source a:last-of-type');
+    if (cambridgeA) {
+      const caNormalColor = isDark ? '#cbd5e1' : '#475569';
+      const caHoverColor = isDark ? '#f1f5f9' : '#1e293b';
+      const caNormalBg = isDark ? 'rgba(148,163,184,0.15)' : 'rgba(71,85,105,0.08)';
+      const caHoverBg = isDark ? 'rgba(148,163,184,0.28)' : 'rgba(71,85,105,0.15)';
+      cambridgeA.style.color = caNormalColor;
+      cambridgeA.style.background = caNormalBg;
+      cambridgeA.onmouseover = () => { cambridgeA.style.color = caHoverColor; cambridgeA.style.background = caHoverBg; };
+      cambridgeA.onmouseout = () => { cambridgeA.style.color = caNormalColor; cambridgeA.style.background = caNormalBg; };
+    }
+
+    // 更新 cambridge top 链接 
+    const cambridgeTopA = shadow.querySelector('#p-cambridge-top a');
+    if (cambridgeTopA) {
+      const normalColor = isDark ? '#7dd3fc' : '#0369a1';
+      const hoverColor = isDark ? '#38bdf8' : '#01478a';
+      cambridgeTopA.style.color = normalColor;
+      cambridgeTopA.onmouseover = () => { cambridgeTopA.style.color = hoverColor; cambridgeTopA.style.opacity = '1'; };
+      cambridgeTopA.onmouseout = () => { cambridgeTopA.style.color = normalColor; cambridgeTopA.style.opacity = '0.9'; };
+    }
   };
 
   // ─── 渲染并展示翻译面板 ───────────────────────────────────────────────────────
@@ -3325,6 +3350,7 @@ function initSelectionTranslate() {
     const isPinnedNow = shadowHost.getAttribute('data-pinned') === 'true';
     const wordText = text.trim();
     shadowHost.setAttribute('data-current-word', wordText);
+
     const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
     const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
     const entry = await idb.vocabulary.get(wordText);
@@ -3484,8 +3510,19 @@ function initSelectionTranslate() {
       const refreshBtn = shadow.getElementById('p-refresh');
       if (refreshBtn?.classList.contains('spinning')) return;
 
+      if (shadowHost) {
+        clearTimeout(shadowHost._slowTimer);
+        clearTimeout(shadowHost._detailTimer);
+        shadowHost._slowTimer = null;
+        shadowHost._detailTimer = null;
+        shadowHost._detailFullyRendered = false;
+      }
+
       const currentTargetLang = window.currentTargetL || state.targetLang;
       const currentSourceLang = state.sourceLang === 'auto' ? null : state.sourceLang;
+
+      // 判断是单词还是句子（单词：无空格且长度<=30）
+      const isWord = !text.trim().includes(' ') && text.trim().length <= 30;
 
       const fingerprint = typeof hash === 'function'
         ? hash(text.trim().replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, '').toLowerCase())
@@ -3508,13 +3545,30 @@ function initSelectionTranslate() {
         if (refreshBtn) refreshBtn.classList.add('spinning');
         basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t('retranslate')}...</span>`;
         if (phoneticEl) phoneticEl.innerText = '';
-        if (pDetail) pDetail.style.display = 'none';
         if (pExamples) pExamples.style.display = 'none';
-        if (shadowHost) {
-          shadowHost._detailFullyRendered = false;
-          clearTimeout(shadowHost._slowTimer);
-          shadowHost._slowTimer = null;
+
+        if (isWord) {
+          if (pDetail) {
+            pDetail.style.display = 'block';
+            pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
+          }
+          // 8秒超时显示刷新按钮
+          shadowHost._detailTimer = setTimeout(() => {
+            if (shadowHost?._detailFullyRendered) return;
+            const pDetail = shadow.getElementById('p-detail');
+            if (pDetail) {
+              pDetail.style.display = 'block';
+              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || '刷新重试'}</span>`;
+              shadow.getElementById('p-detail-retry')?.addEventListener('click', () => {
+                shadow.getElementById('p-refresh')?.click();
+              });
+            }
+          }, 8000);
+        } else {
+          //  句子：直接隐藏 pDetail，不启动定时器
+          if (pDetail) pDetail.style.display = 'none';
         }
+
         getDetailedTranslation(text, true, currentTargetLang, {
           hintInputLang: currentSourceLang
         }, currentSourceLang)
@@ -3730,6 +3784,8 @@ function initSelectionTranslate() {
       if (!result) return;
       const { dropdown, colors } = result;
 
+      let currentEl = null; // 记录当前项
+
       LANGS.forEach(lang => {
         const isCurrent = lang.value?.toLowerCase() === (window.hintSourceLang?.toLowerCase() || 'auto');
         const el = buildLangItem(lang, colors, async (ev) => {
@@ -3749,9 +3805,17 @@ function initSelectionTranslate() {
         if (isCurrent && lang.type !== 'sep') {
           el.style.color = colors.accent;
           el.style.fontWeight = '600';
+          currentEl = el; // 记录当前项
         }
         dropdown.appendChild(el);
       });
+
+      // 滚动到当前选中项
+      if (currentEl) {
+        setTimeout(() => {
+          currentEl.scrollIntoView({ block: 'center' });
+        }, 0);
+      }
     };
 
     // 目标语言
@@ -3762,9 +3826,11 @@ function initSelectionTranslate() {
       if (!result) return;
       const { dropdown, colors } = result;
 
+      let currentEl = null; // 记录当前项
+
       LANGS.filter(l => l?.value !== 'auto').forEach(lang => {
         const isCurrent = lang.value?.toLowerCase() === (window.currentTargetL?.toLowerCase() || '');
-        logger.log('语言列表项', { "isCurrent": isCurrent, "lang": lang.value, "current": window.currentTargetL });
+        //logger.log('语言列表项', { "isCurrent": isCurrent, "lang": lang.value, "current": window.currentTargetL });
         const el = buildLangItem(lang, colors, async (ev) => {
           ev.stopPropagation();
           dropdown.remove();
@@ -3792,10 +3858,18 @@ function initSelectionTranslate() {
         if (isCurrent && lang.type !== 'sep') {
           el.style.color = colors.accent;
           el.style.fontWeight = '600';
+          currentEl = el; // 记录当前项
         }
 
         dropdown.appendChild(el);
       });
+
+      // 滚动到当前选中项
+      if (currentEl) {
+        setTimeout(() => {
+          currentEl.scrollIntoView({ block: 'center' });
+        }, 0);
+      }
     };
 
     // 拖拽
@@ -3853,7 +3927,7 @@ function initSelectionTranslate() {
           (window.currentTargetL || '').toLowerCase().slice(0, 2)
         );
 
-        logger.log('前端渲染', result);
+        //logger.log('前端渲染', result);
         if (result.isPartial) {
           const pBasic = shadow.getElementById('p-basic');
           const pPhonetic = shadow.getElementById('p-phonetic');
@@ -3868,55 +3942,11 @@ function initSelectionTranslate() {
               ? `/${result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
           }
           if (pDetail) {
-            pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
-            pDetail.style.display = 'block';
-          }
-
-          //  超时后显示刷新按钮
-          const TIMEOUT_MS = 8000; // 超过 8 秒视为"慢"
-          const slowTimer = setTimeout(() => {
-            // 再次确认用户还在看同一个词，且 pDetail 还是 loading 状态
-            const currentWord2 = shadowHost?.getAttribute('data-current-word');
-            if (text.trim() !== currentWord2) return;
-            if (!pDetail) return;
-
-            // 替换为刷新按钮
-            pDetail.innerHTML = `
-                    <span style="opacity:0.5;font-size:12px;">
-                        ${t('loadingSlow', window.uiLanguage) || 'API loading slow'}
-                        <button id="p-detail-retry" style="
-                            margin-left:6px;
-                            font-size:12px;
-                            cursor:pointer;
-                            border:1px solid currentColor;
-                            border-radius:4px;
-                            padding:1px 7px;
-                            background:transparent;
-                            color:inherit;
-                            opacity:0.7;
-                        ">↺ ${t('retry', window.uiLanguage) || 'Retry'}</button>
-                    </span>`;
-
-            // 绑定点击，复用 p-refresh 的逻辑
-            const retryBtn = pDetail.querySelector('#p-detail-retry');
-            if (retryBtn) {
-              retryBtn.onclick = (e) => {
-                e?.stopPropagation();
-                triggerRefresh(); // 不再用 .click()
-              };
+            if (result.isWord) {
+              pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
+              pDetail.style.display = 'block';
             }
-          }, TIMEOUT_MS);
-
-          //  如果后续 TRANSLATE_DETAIL_UPDATE 正常填充了，需要取消计时器
-          // 在 fillPopupData 里或 TRANSLATE_DETAIL_UPDATE 的 handler 里清除：
-          // clearTimeout(slowTimer)
-          //  通过给 shadow host 挂一个取消句柄来实现，因为无论是 fillPopupData 还是 handler 里都能访问到 shadowHost，但不一定能访问到 slowTimer
-          if (shadowHost) {
-            shadowHost._slowTimer && clearTimeout(shadowHost._slowTimer);
-            shadowHost._slowTimer = slowTimer;
-            shadowHost._detailFullyRendered = false;
           }
-
         } else {
           logger.log('result.isPartial 为 false', result);
           // 缓存命中时清掉可能残留的计时器
@@ -3929,6 +3959,7 @@ function initSelectionTranslate() {
         }
       })
       .catch(err => {
+        logger.log('❌ getDetailedTranslation 报错', err);
         setBasicError(basicEl, err.message || '网络异常');
       });
 
@@ -3948,33 +3979,23 @@ function initSelectionTranslate() {
   
         <div style="display:flex; align-items:center; gap:4px;">
   
-  <!-- 源语言 -->
-  <div id="p-lang-select" class="lang-tag-btn" 
-       style="font-size:11px; font-weight:700; color:var(--p-accent); cursor:pointer;
-              user-select:none; -webkit-user-select:none;
-              padding:4px 10px; border-radius:10px;
-              padding:2px 6px;
-              background:var(--p-header-bg); transition:all 0.2s; white-space:nowrap;
-              display:flex; align-items:center; min-width:44px; justify-content:center;">
-    <span id="p-lang-src" style="opacity:0.9; pointer-events:none;">AUTO</span>
-  </div>
+ <!-- 源语言 -->
+<div id="p-lang-select" class="lang-tag-btn"
+     style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+  <span id="p-lang-src" style="opacity:0.9; pointer-events:none;">AUTO</span>
+</div>
 
-  <!-- 箭头 -->
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-       stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
-    <path d="M5 12h14m-7-7 7 7-7 7"/>
-  </svg>
+<!-- 箭头 -->
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+     stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
+  <path d="M5 12h14m-7-7 7 7-7 7"/>
+</svg>
 
-  <!-- 目标语言 -->
-  <div id="p-lang-tgt-btn" class="lang-tag-btn"
-       style="font-size:11px; font-weight:700; color:var(--p-accent); cursor:pointer;
-              user-select:none; -webkit-user-select:none;
-              padding:4px 10px;  border-radius:10px;
-              padding:2px 6px;
-              background:var(--p-header-bg); transition:all 0.2s; white-space:nowrap;
-              display:flex; align-items:center; min-width:44px; justify-content:center;">
-    <span id="p-lang-tgt" style="opacity:0.9; pointer-events:none;">${targetLangDisplay}</span>
-  </div>
+<!-- 目标语言 -->
+<div id="p-lang-tgt-btn" class="lang-tag-btn"
+     style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+  <span id="p-lang-tgt" style="pointer-events:none;">${targetLangDisplay}</span>
+</div>
 
 </div>
 
@@ -4189,7 +4210,7 @@ function initSelectionTranslate() {
             <div style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
               ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
             </div>
-            <div style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:2px;">${cn}</div>
+           <div style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.55;">${cn}</div>
           </div>`;
           }).join('');
         pE.style.display = 'block';
@@ -4238,21 +4259,25 @@ function initSelectionTranslate() {
         a.rel = 'noopener noreferrer';
         a.textContent = '💡 繁體釋義 → Cambridge Dictionary ↗';
         a.style.cssText = `
-      color: #7dd3fc;
-      font-size: 10px;
-      text-decoration: none;
-      opacity: 0.9;
-      transition: all 0.2s ease;
-    `;
+          color: #7dd3fc;
+          font-size: 10px;
+          text-decoration: none;
+          opacity: 0.9;
+          transition: all 0.2s ease;
+        `;
         a.addEventListener('mouseover', () => { a.style.color = '#38bdf8'; a.style.opacity = '1'; });
         a.addEventListener('mouseout', () => { a.style.color = '#7dd3fc'; a.style.opacity = '0.9'; });
         div.appendChild(a);
         pBasic.after(div);
       }
-
       // 底部 source
       pSource.style.display = (res.source || cambridgeHref) ? 'block' : 'none';
       pSource.innerHTML = '';
+
+      // 主题判断 
+      const curMode = localStorage.getItem('eclipse-theme') || 'auto';
+      const appliedTheme = curMode === 'auto' ? getWebPageBrightness() : curMode;
+      const isDark = appliedTheme === 'dark';
 
       if (res.source) {
         pSource.appendChild(document.createTextNode('Source: '));
@@ -4262,20 +4287,26 @@ function initSelectionTranslate() {
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
           a.textContent = res.source;
+
+          const normalColor = isDark ? '#38bdf8' : '#0369a1';
+          const hoverColor = isDark ? '#7dd3fc' : '#01478a';
+          const normalBg = isDark ? 'rgba(56,189,248,0.08)' : 'rgba(3,105,161,0.08)';
+          const hoverBg = isDark ? 'rgba(56,189,248,0.2)' : 'rgba(3,105,161,0.15)';
+
           a.style.cssText = `
-        color: #38bdf8;
-        text-decoration: none;
-        font-weight: 500;
-        font-size: 10px;
-        font-style: italic;
-        padding: 2px 6px;
-        border-radius: 4px;
-        background: rgba(56,189,248,0.08);
-        transition: all 0.2s ease;
-        margin-left: 4px;
-      `;
-          a.addEventListener('mouseover', () => { a.style.background = 'rgba(56,189,248,0.2)'; a.style.color = '#7dd3fc'; });
-          a.addEventListener('mouseout', () => { a.style.background = 'rgba(56,189,248,0.08)'; a.style.color = '#38bdf8'; });
+            color: ${normalColor};
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 10px;
+            font-style: italic;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: ${normalBg};
+            transition: all 0.2s ease;
+            margin-left: 4px;
+          `;
+          a.addEventListener('mouseover', () => { a.style.background = hoverBg; a.style.color = hoverColor; });
+          a.addEventListener('mouseout', () => { a.style.background = normalBg; a.style.color = normalColor; });
           pSource.appendChild(a);
         } else {
           pSource.appendChild(document.createTextNode(res.source));
@@ -4289,19 +4320,25 @@ function initSelectionTranslate() {
         ca.target = '_blank';
         ca.rel = 'noopener noreferrer';
         ca.textContent = 'Cambridge ↗';
+
+        const caNormalColor = isDark ? '#cbd5e1' : '#475569';
+        const caHoverColor = isDark ? '#f1f5f9' : '#1e293b';
+        const caNormalBg = isDark ? 'rgba(148,163,184,0.15)' : 'rgba(71,85,105,0.08)';
+        const caHoverBg = isDark ? 'rgba(148,163,184,0.28)' : 'rgba(71,85,105,0.15)';
+
         ca.style.cssText = `
-      color: #94a3b8;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 10px;
-      font-style: italic;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(148,163,184,0.08);
-      transition: all 0.2s ease;
-    `;
-        ca.addEventListener('mouseover', () => { ca.style.background = 'rgba(148,163,184,0.2)'; ca.style.color = '#cbd5e1'; });
-        ca.addEventListener('mouseout', () => { ca.style.background = 'rgba(148,163,184,0.08)'; ca.style.color = '#94a3b8'; });
+          color: ${caNormalColor};
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 10px;
+          font-style: italic;
+          padding: 2px 6px;
+          border-radius: 4px;
+          background: ${caNormalBg};
+          transition: all 0.2s ease;
+        `;
+        ca.addEventListener('mouseover', () => { ca.style.background = caHoverBg; ca.style.color = caHoverColor; });
+        ca.addEventListener('mouseout', () => { ca.style.background = caNormalBg; ca.style.color = caNormalColor; });
         pSource.appendChild(ca);
       }
     }
@@ -4792,6 +4829,14 @@ function initSelectionTranslate() {
     if (msg.action === 'TRANSLATE_DETAIL_UPDATE') {
       const currentWord = shadowHost?.getAttribute('data-current-word');
       if (msg.originalText !== currentWord) {
+        if (shadowHost?._detailTimer) {
+          clearTimeout(shadowHost._detailTimer);
+          shadowHost._detailTimer = null;
+        }
+        sendResponse({ status: 'ignored' });
+        return;
+      }
+      if (msg.originalText !== currentWord) {
         sendResponse({ status: 'ignored' });
         return;
       }
@@ -4801,16 +4846,23 @@ function initSelectionTranslate() {
         return;
       }
 
+      const isWord = msg.result?.isWord ?? false;
+
       if (msg.result?.isPartial) {
-        //  已经渲染完整结果了，忽略 partial 消息，避免闪烁
         if (shadowHost?._detailFullyRendered) {
           sendResponse({ status: 'ignored' });
           return;
         }
 
+        const pDetail = shadow.getElementById('p-detail');
+
+        if (pDetail?.querySelector('#p-detail-retry')) {
+          sendResponse({ status: 'ok' });
+          return;
+        }
+
         const pBasic = shadow.getElementById('p-basic');
         const pPhonetic = shadow.getElementById('p-phonetic');
-        const pDetail = shadow.getElementById('p-detail');
         const pExamples = shadow.getElementById('p-examples');
 
         if (pBasic) {
@@ -4822,17 +4874,39 @@ function initSelectionTranslate() {
           pPhonetic.innerText = msg.result.sourcePhonetic
             ? `/${msg.result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
         }
-        if (pDetail) {
-          pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
-          pDetail.style.display = 'block';
+
+        if (isWord) {
+          shadowHost._detailFullyRendered = false;
+          if (pDetail) {
+            pDetail.innerHTML = '';
+            pDetail.style.display = 'block';
+          }
+          if (pExamples) pExamples.style.display = 'none';
+
+          if (shadowHost._detailTimer) {
+            clearTimeout(shadowHost._detailTimer);
+            shadowHost._detailTimer = null;
+          }
+
+          shadowHost._detailTimer = setTimeout(() => {
+            if (shadowHost?._detailFullyRendered) return;
+            const pDetail = shadow.getElementById('p-detail');
+            if (pDetail) {
+              pDetail.style.display = 'block';
+              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || '刷新重试'}</span>`;
+              shadow.getElementById('p-detail-retry')?.addEventListener('click', () => {
+                shadow.getElementById('p-refresh')?.click();
+              });
+            }
+          }, 8000);
         }
-        if (pExamples) pExamples.style.display = 'none';
 
       } else {
-        //  已经渲染完整结果了，清 timer，标记已渲染
         if (shadowHost) {
           clearTimeout(shadowHost._slowTimer);
+          clearTimeout(shadowHost._detailTimer);
           shadowHost._slowTimer = null;
+          shadowHost._detailTimer = null;
           shadowHost._detailFullyRendered = true;
         }
         const isRTL = ['he', 'ar', 'fa'].includes(

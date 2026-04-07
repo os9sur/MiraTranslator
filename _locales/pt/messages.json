@@ -1,6 +1,6 @@
 {
   "appName": {
-    "message": "Mira Translator - Tradução imersiva e legendas do YouTube"
+    "message": "Mira Translator - Tradução imersiva e legendas bilíngues no YouTube"
   },
   "appDesc": {
     "message": "<0.5MB: Código Aberto. IA Própria (BYOK). Tradução Imersiva/YouTube. Sincronização Drive/WebDAV."
@@ -30,7 +30,7 @@
     "message": "Tempo esgotado: Verifique a conexão."
   },
   "ERROR_NETWORK": {
-    "message": "Erro de Rede: API restrita (VPN ou bloqueio regional)."
+    "message": "API Bloqueada: IP atual acionou restrições de segurança ou limite de requisições. Tente mudar o VPN ou trocar o serviço de tradução."
   },
   "ERROR_GENERIC": {
     "message": "Falha: Verifique a configuração da API."

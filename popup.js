@@ -242,11 +242,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     const badgeB = document.getElementById('lpBadgeB');
     if (!selA || !selB || !badgeA || !badgeB) return;
 
-    const labelA = selA.options[selA.selectedIndex]?.text || '';
-    const labelB = selB.options[selB.selectedIndex]?.text || '';
-    badgeA.textContent = selA.value === 'auto' ? 'AUTO' : labelA.slice(0, 2).toUpperCase();
+    const getShortEn = (val) => {
+      if (val === 'auto') return 'AUTO';
+
+      const key = val.toLowerCase();
+      if (LANG_DISPLAY[key]) {
+        return LANG_DISPLAY[key];
+      }
+
+      if (key === 'ja') return 'JA';
+      if (key === 'en') return 'EN';
+      if (key === 'ko') return 'KO';
+
+      const lang = LANGS.find(item => item.value === val);
+      if (lang) {
+        return lang.en.slice(0, 2).toUpperCase();
+      }
+
+      return val.slice(0, 2).toUpperCase();
+    };
+
+    badgeA.textContent = getShortEn(selA.value);
+    badgeB.textContent = getShortEn(selB.value);
+
     window.hintSourceLang = selA.value;
-    badgeB.textContent = selB.value === 'auto' ? 'AUTO' : labelB.slice(0, 2).toUpperCase();
   }
 
   // 语言对 UI 事件绑定
@@ -1097,6 +1116,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     activeConfig: res.activeConfig || { engine: _defaultEngine, data: {} },
     userConfigs: res.userConfigs || []
   };
+  window.currentTargetL = normalizeLang(window.currentTargetL || getBrowserLang() || 'en');
+
   const langEl = document.getElementById('targetLang');
   if (langEl) {
     const raw = currentConfig.targetLanguage || getBrowserLang() || 'en';
@@ -1495,8 +1516,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isWord) {
           const encoded = encodeURIComponent(text.trim().toLowerCase());
 
-
-
           let dictPath;
           if (src === 'en') {
             dictPath = FORWARD[tgt] || null;
@@ -1552,15 +1571,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }));
       logger.log('[DEBUG] isPartial:', response.isPartial, '| dicts:', dicts.length, '| basic:', basic.slice(0, 20));
       if (response.isPartial && basic && dicts.length === 0) {
-        // 区分：是真的在等词典，还是句子翻译
-        // 用文本判断：有空格=句子，无空格=单词（接受中日韩的小误差）
-        const isWordMode = !text.trim().includes(' ') ||
-          /[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]/.test(text.trim()) && text.trim().length <= 6;
 
-        if (isWordMode) {
+        if (response.isWord) {
           html += `<div style="color:#64748b; font-size:11px; margin-top:8px;">
-                ${t('loadingMore', ui_lang)}
-            </div>`;
+          ${t('loadingMore', ui_lang)}
+        </div>`;
         }
       } else if (mergedDicts.length > 0) {
         html += mergedDicts.map((item, posIdx) => {
@@ -1699,7 +1714,6 @@ document.addEventListener('DOMContentLoaded', async () => {
               font-weight: 500;
               font-size: 10px;
               font-style: italic;
-              padding: 2px 6px;
               border-radius: 4px;
               background: rgba(56,189,248,0.08);
               transition: all 0.2s ease;
@@ -1825,34 +1839,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (/^[a-zA-Z\u00C0-\u024F\s.,!?'"()\-¿¡«»]+$/.test(str.trim())) return 'latin';
         return 'unknown';
       }
-
       const inputLang = detectInputLang(text);
 
-      // 纯汉字时（inputLang==='zh'），看语言对里有没有ja
-      // 如果有ja，则优先认为是ja
-      function resolveInputLang(detectedLang, baseA, baseB) {
+      function resolveInputLang(detectedLang, bA) {
         if (detectedLang !== 'zh') return detectedLang;
-        // 纯汉字：语言对里有ja就归为ja
-        if (baseA === 'ja' || baseB === 'ja') return 'ja';
-        // 语言对里有zh就归为zh
-        if (baseA === 'zh' || baseB === 'zh') return 'zh';
-        // 都不是，保持zh
+        if (bA.startsWith('ja')) return 'ja';
         return 'zh';
       }
 
-      const resolvedLang = resolveInputLang(inputLang, baseA, baseB);
+      const resolvedLang = resolveInputLang(inputLang, baseA);
+      const isZhBase = (l) => l.startsWith('zh');
 
       const matchesA = resolvedLang === baseA
-        || (resolvedLang === 'zh' && baseA === 'zh')
-        || (resolvedLang === 'latin' && LATIN_BASED_LANGS.has(baseA));
+        || (resolvedLang === 'zh' && isZhBase(baseA))
+        || (resolvedLang === 'latin' && (typeof LATIN_BASED_LANGS !== 'undefined' && LATIN_BASED_LANGS.has(baseA)));
 
       const matchesB = resolvedLang === baseB
-        || (resolvedLang === 'zh' && baseB === 'zh')
-        || (resolvedLang === 'latin' && LATIN_BASED_LANGS.has(baseB));
+        || (resolvedLang === 'zh' && isZhBase(baseB))
+        || (resolvedLang === 'latin' && (typeof LATIN_BASED_LANGS !== 'undefined' && LATIN_BASED_LANGS.has(baseB)));
 
       let targetL;
       if (matchesB && !matchesA) {
-        targetL = langA;
+        targetL = langA === 'auto' ? (isZhBase(langB) ? 'en' : 'zh-CN') : langA;
       } else {
         targetL = langB;
       }
@@ -1862,9 +1870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // 若 A=ja 且 inputLang=zh → 实为日语，译成 B
       // 若 B=ja 且 inputLang=zh → 实为日语，译成 A
       // 由于无法确定，保持 fallback 到 B，但更新 currentConfig 中的 targetLanguage
-      if (window.currentConfig) {
-        window.currentConfig.targetLanguage = targetL;
-      }
+      window.currentTargetL = targetL;
 
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", inputLang="${inputLang}", langA="${langA}", langB="${langB}", targetL="${targetL}", engine="${engine}"`);
       //  启动超时计时器
@@ -2198,7 +2204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setVal('webdavPass', scSync.webdavPass);
         setVal('syncFrequency', scSync.frequency);
       }
-      let targetL = targetLang || window.currentConfig.targetLanguage || getBrowserLang() || 'en';
+      let targetL = targetLang || window.currentTargetL || getBrowserLang() || 'en';
       targetL = targetL.replace('_', '-');
       const targetLangEl = document.getElementById('targetLang');
       if (targetLangEl) targetLangEl.value = normalizeLang(targetL);
@@ -2465,6 +2471,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       langSelect.disabled = true;
       const lang = langSelect.value;
       currentConfig.targetLanguage = lang;
+      window.currentTargetL = lang;
       await safeSetStorage({ targetLanguage: lang });
       const response = await safeSendToTab(activeTab.id, {
         action: 'RE_SCAN_PAGE',

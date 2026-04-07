@@ -30,7 +30,7 @@
     "message": "Request timeout: Check network or proxy."
   },
   "ERROR_NETWORK": {
-    "message": "Network Error: API restricted (VPN or regional block)."
+    "message": "API Blocked: Current IP triggered security risk or rate limit (common with public VPNs). Please try switching VPN nodes or translation services."
   },
   "ERROR_GENERIC": {
     "message": "Translation Failed: Check API configuration."
