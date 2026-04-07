@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻訳 - 没入型全文翻訳と YouTube 2ヶ国語字幕"
+    "message": "Mira 翻訳 - 没入型全文翻訳と YouTube 2言語字幕"
   },
   "appDesc": {
-    "message": "0.5MB未満：オープンソース、追跡なし。標準エンジン＋私用AI API (自前Key)。全文翻訳、YouTube字幕、WebDAV/GDrive同期対応。"
+    "message": "0.5MB未満：オープンソース、追跡なし。標準エンジン＋プライベートAI API (自前Key)。全文翻訳、YouTube字幕、WebDAV/GDrive同期対応。"
   },
   "ERROR_400": {
     "message": "APIエラー：無効なリクエストまたは残高不足。"
@@ -30,7 +30,7 @@
     "message": "タイムアウト：ネットワーク設定を確認してください。"
   },
   "ERROR_NETWORK": {
-    "message": "接続失敗：ネットワーク制限（VPNまたは地域制限）。"
+    "message": "API制限：現在のIPがセキュリティ制限またはリクエスト制限に抵触しました。VPNノードを変更するか、翻訳サービスを切り替えてください。"
   },
   "ERROR_GENERIC": {
     "message": "翻訳失敗：API設定を確認してください。"

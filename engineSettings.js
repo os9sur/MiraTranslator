@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!errorMsg) return '';
 
         if (errorMsg.includes('Google Blocked') || errorMsg.includes('Invalid Bing Response')) {
-            return getSafeMessage('ERROR_NETWORK', 'Network Error: API restricted (VPN or regional block).');
+            return getSafeMessage('ERROR_NETWORK', 'API Blocked: Current IP triggered security risk or rate limit (common with public VPNs). Please try switching VPN nodes or translation services.');
         }
         if (errorMsg.includes('429')) {
             return getSafeMessage('ERROR_429', 'API Error: Rate limited or quota exceeded.');
@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 其他错误直接显示原始 message
         return errorMsg;
     }
+
     async function switchInstance(id) {
         const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
         currentId = id;
@@ -418,7 +419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     icon.innerText = '✕';
                     icon.style.color = '#f85149';
                     const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<br><span style="font-size:11px;opacity:0.7">${friendlyError}</span>` : ''}`;
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px; opacity:0.7; display:block; margin-top:11px; line-height:1.4;">${friendlyError}</span>` : ''}`;
                     btn.style.display = 'block';
                     btn.style.opacity = '0.6';
                 }

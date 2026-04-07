@@ -30,7 +30,7 @@
     "message": "Zaman aşımı: Bağlantıyı kontrol edin."
   },
   "ERROR_NETWORK": {
-    "message": "Ağ Hatası: API kısıtlı (VPN veya bölgesel engel)."
+    "message": "API Engellendi: Mevcut IP güvenlik veya istek sınırına takıldı. VPN değiştirmeyi veya çeviri servisini değiştirmeyi deneyin."
   },
   "ERROR_GENERIC": {
     "message": "Çeviri başarısız: API ayarlarını kontrol edin."

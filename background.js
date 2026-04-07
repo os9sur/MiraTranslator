@@ -1452,17 +1452,27 @@ const Translators = {
     ) {
         logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
         if (tabId || fromPopup) {
+            const isWord = existingDictData?.length > 0 || (
+                !!sourcePhonetic && originalText.trim().length <= 30
+            );
             const partialResult = {
                 basic: basicText, phonetic: sourcePhonetic || '',
                 dictData: [], examples: [], wordForms: [],
                 sourcePhonetic, targetPhonetic,
-                source: sourceName, isPartial: true
+                source: sourceName, isPartial: true,
+                isWord
             };
-
             if (tabId) {
                 pushDetailUpdate(tabId, partialResult, originalText);
             }
-            // fromPopup 不需要推送 partial，因为 getDetailedTranslation 的 response 就是 partial，popup 直接渲染了
+            //  fromPopup 也推送 partial，让 content 启动 _detailTimer
+            if (fromPopup) {
+                chrome.runtime.sendMessage({
+                    action: 'TRANSLATE_DETAIL_UPDATE',
+                    result: partialResult, // isPartial: true
+                    originalText
+                }).catch(() => { });
+            }
 
             (async () => {
                 try {
