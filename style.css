@@ -1906,6 +1906,8 @@ yt-attributed-string+.kt-paragraph-translation {
   padding: 3px 2px !important;
   /* border: 2px dashed #007bff !important; */
   border-radius: 8px;
+  margin-left: 8px !important;
+  margin-right: 8px !important;
   animation: border-blink-blue 1.0s ease-in-out 6;
   box-sizing: border-box;
 }

@@ -1098,8 +1098,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     userConfigs: res.userConfigs || []
   };
   const langEl = document.getElementById('targetLang');
-  if (langEl && currentConfig.targetLanguage) {
-    langEl.value = currentConfig.targetLanguage;
+  if (langEl) {
+    const raw = currentConfig.targetLanguage || getBrowserLang() || 'en';
+
+    let value = raw.startsWith('zh')
+      ? (raw === 'zh-TW' || raw === 'zh-HK' ? 'zh-TW' : 'zh-CN')
+      : raw.split('-')[0];
+
+    langEl.value = value;
+    if (!langEl.value) langEl.value = 'en';
   }
 
   initAllComboboxes();
@@ -2194,7 +2201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       let targetL = targetLang || window.currentConfig.targetLanguage || getBrowserLang() || 'en';
       targetL = targetL.replace('_', '-');
       const targetLangEl = document.getElementById('targetLang');
-      if (targetLangEl) targetLangEl.value = targetL;
+      if (targetLangEl) targetLangEl.value = normalizeLang(targetL);
       if (typeof updateEngineTips === 'function') {
         const engineSelect = document.getElementById('engineSelect');
         const currentEngine = engineSelect ? engineSelect.value : _defaultEngine;
@@ -2205,7 +2212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const uiLangSelect = document.getElementById('uiLangSelect');
       if (uiLangSelect) {
         const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'en';
-        uiLangSelect.value = savedUiLang;
+        uiLangSelect.value = normalizeLang(savedUiLang);
       }
 
       const domainLabel = document.getElementById('domainIndicator');

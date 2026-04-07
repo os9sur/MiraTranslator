@@ -64,6 +64,14 @@ const getCleanDomain = (url) => {
     return "unknown";
   }
 };
+//浏览器语言
+const normalizeLang = (lang) => {
+  if (!lang) return 'en';
+  if (lang.startsWith('zh')) {
+    return (lang === 'zh-TW' || lang === 'zh-HK') ? 'zh-TW' : 'zh-CN';
+  }
+  return lang.split('-')[0];
+};
 
 const getBrowserLang = () => {
   try {
@@ -75,15 +83,17 @@ const getBrowserLang = () => {
     }
 
     if (!chromeAvailable) {
-      return navigator.language || 'en';
+      return normalizeLang(navigator.language) || 'en';
     }
 
-    return chrome.i18n?.getUILanguage?.() ||
+    const raw = chrome.i18n?.getUILanguage?.() ||
       (navigator.languages && navigator.languages[0]) ||
       navigator.language ||
       'en';
+
+    return normalizeLang(raw);
   } catch (e) {
-    return navigator.language || 'en';
+    return normalizeLang(navigator.language) || 'en';
   }
 };
 
