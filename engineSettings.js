@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 isTest: true,
                                 engine: config.engine,
                             }),
-                            new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                            new Promise(resolve => setTimeout(() => resolve(null), 5000))
                         ]);
 
                         if (!res) {
@@ -415,6 +415,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     icon.style.color = '#3fb950';
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
                     btn.style.display = 'block';
+
+                    //  更新缓存，popup 下次打开直接读到最新结果
+                    if (config.engine === 'google' || config.engine === 'bing') {
+                        await safeSetStorage({
+                            _engineAvailable: true,
+                            _engineCheckTime: Date.now()
+                        });
+                    }
                 } else {
                     icon.innerText = '✕';
                     icon.style.color = '#f85149';
@@ -422,6 +430,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px; opacity:0.7; display:block; margin-top:11px; line-height:1.4;">${friendlyError}</span>` : ''}`;
                     btn.style.display = 'block';
                     btn.style.opacity = '0.6';
+
+                    //  失败也更新缓存，让 popup 能马上显示警告
+                    if (config.engine === 'google' || config.engine === 'bing') {
+                        await safeSetStorage({
+                            _engineAvailable: false,
+                            _engineCheckTime: Date.now()
+                        });
+                    }
                 }
             };
 

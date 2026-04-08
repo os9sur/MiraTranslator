@@ -133,6 +133,7 @@ async function build() {
                             pure_funcs: [
                                 'logger.log',
                                 'logger.warn',
+                                'logger.error',
                                 'logger.group',
                                 'logger.groupCollapsed',
                                 'logger.groupEnd'
