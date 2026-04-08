@@ -664,9 +664,6 @@ function mergeVocabulary(local, remote) {
     logger.groupEnd();
     return result;
 }
-chrome.runtime.onInstalled.addListener(() => {
-    logger.log("Mira Translator Service Worker 已经就绪");
-});
 
 //tencent cloud signature helper
 class TC3Signer {
@@ -1062,7 +1059,7 @@ async function probeDictTranslateEngine() {
         return _dictEngineCache;
     }
 
-    // 直接复用 detectAndCacheDefaultEngine 的结果
+    // 直接复用 启动时候引擎检测 的结果
     const res = await safeGetStorage(['_defaultEngine']);
     const result = res?._defaultEngine || 'bing';
 
@@ -2283,10 +2280,12 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         if (effectiveEngine === 'bing') {
             try {
                 rawResult = await Translators.bing(req.text, req.targetLang, req.hintSourceLang, tabId, cacheKey, req.fromPopup);
-                if (!req.isTest) {  // 非测试时才修改降级状态
+                if (!req.isTest) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
+                    //  翻译成功，更新可用性缓存
+                    safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Bing 失败，降级 Google:', e.message);
@@ -2295,6 +2294,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
+                    //  翻译失败，标记不可用
+                    safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 } else {
                     throw e;
                 }
@@ -2307,6 +2308,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
+                    //  翻译成功，更新可用性缓存
+                    safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Google 失败，降级 Bing:', e.message);
@@ -2315,6 +2318,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
+                    //  翻译失败，标记不可用
+                    safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 } else {
                     throw e;
                 }
@@ -3099,8 +3104,24 @@ function drawText(ctx, text, x, y, color) {
     ctx.fillText(text, x, y + 10);
 }
 
-// 安装或浏览器启动时检测一次
-chrome.runtime.onInstalled.addListener(() => detectAndCacheDefaultEngine(false));
+// 初始安装时设置默认翻译引擎，并进行预检测
+chrome.runtime.onInstalled.addListener(async (details) => {
+    if (details.reason === "install") {
+        const lang = getBrowserLang();
+        const safeDefault = (lang === 'zh-CN') ? 'bing' : 'google';
+        await safeSetStorage({
+            _defaultEngine: safeDefault,
+            selectedEngine: safeDefault,
+            _defaultEngineTime: Date.now(),
+            _engineCheckTime: Date.now(),
+            _engineAvailable: true
+        });
+
+        // 异步真实检测来修正，不阻塞安装
+        detectAndCacheDefaultEngine(true);
+    }
+});
+
 chrome.runtime.onStartup.addListener(() => detectAndCacheDefaultEngine(false));
 
 async function detectAndCacheDefaultEngine(force = false) {
@@ -3110,16 +3131,45 @@ async function detectAndCacheDefaultEngine(force = false) {
         const age = Date.now() - (res._defaultEngineTime || 0);
         if (res._defaultEngine && age < 24 * 60 * 60 * 1000) return;
     }
+
     try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 3000);
-        await fetch('https://www.google.com/generate_204', {
-            mode: 'no-cors', cache: 'no-cache', signal: controller.signal
-        });
+        const timeout = setTimeout(() => controller.abort(), 4000);
+
+        const res = await fetch(
+            'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
+            { signal: controller.signal, cache: 'no-cache' }
+        );
         clearTimeout(timeout);
-        await safeSetStorage({ _defaultEngine: 'google', _defaultEngineTime: Date.now() });
+
+        const data = await res.json();
+        const translated = data?.[0]?.[0]?.[0];
+
+        if (res.ok && translated && translated !== 'hello') {
+            await safeSetStorage({
+                _defaultEngine: 'google',
+                selectedEngine: 'google',
+                _defaultEngineTime: Date.now(),
+                _engineCheckTime: Date.now(),
+                _engineAvailable: true
+            });
+        } else {
+            await safeSetStorage({
+                _defaultEngine: 'bing',
+                selectedEngine: 'bing',
+                _defaultEngineTime: Date.now(),
+                _engineCheckTime: Date.now(),
+                _engineAvailable: true
+            });
+        }
     } catch (e) {
-        await safeSetStorage({ _defaultEngine: 'bing', _defaultEngineTime: Date.now() });
+        await safeSetStorage({
+            _defaultEngine: 'bing',
+            selectedEngine: 'bing',
+            _defaultEngineTime: Date.now(),
+            _engineCheckTime: Date.now(),
+            _engineAvailable: true
+        });
     }
 }
 // 预热函数
@@ -3138,23 +3188,13 @@ async function detectAndCacheDefaultEngine(force = false) {
 //     });
 // }
 
-chrome.runtime.onInstalled.addListener(() => {
-    detectAndCacheDefaultEngine(false);
-    // warmupInBackground();  //  预热
-});
-
-chrome.runtime.onStartup.addListener(() => {
-    detectAndCacheDefaultEngine(false);
-    //warmupInBackground();
-});
-
-// 监听来自 content script 和 popup 的消息
+// 监听来自 content script 和 popup 的消息,接收消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!chrome.runtime || !chrome.runtime.id) return;
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
-    if (request.type === 'CHECK_DEFAULT_ENGINE') {
+    if (request.type === 'RECHECK_ENGINE') {
         detectAndCacheDefaultEngine(true);
         safeSendResponse({ ok: true });
         return false;

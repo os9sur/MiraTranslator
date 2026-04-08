@@ -256,7 +256,7 @@ select:hover {
   background-size: 200% 100%;
   background-position: 0% center;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: none;
   padding: 12px;
   border-radius: 20px;
   cursor: pointer;

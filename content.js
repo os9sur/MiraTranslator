@@ -1516,7 +1516,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isTwitter = location.hostname.includes('x.com');
   const isAmazon = location.hostname.includes('amazon.com');
   const parentH1 = isYoutube ? el.closest('h1') : null;
-  const youtubeListTitleLink = isYoutube ? el.closest('.yt-lockup-metadata-view-model__title') : null;
+  //youtube的 yt-lockup-metadata-view-model__title 改成 ytLockupMetadataViewModelTitle 或 ytLockupMetadataViewModelHeadingReset了，先兼容一下
+  const youtubeListTitleLink = isYoutube ? (
+    el.closest('.yt-lockup-metadata-view-model__title') ||
+    el.closest('.ytLockupMetadataViewModelTitle') ||
+    el.closest('.ytLockupMetadataViewModelHeadingReset')
+  ) : null;
   const isHN = location.hostname.includes('news.ycombinator.com');
   const isGitHub = location.hostname.includes('github.com');
   const fastRawText = Array.from(el.childNodes)
@@ -1752,9 +1757,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
       }
     }
     if (isYoutube && (parentH1 || youtubeListTitleLink)) {
+      //youtube 的linkedList的标题改了, 兼容
       applyLayoutFix('youtube-layout-fix', `
         ytd-watch-metadata h1.style-scope.ytd-watch-metadata { height: auto !important; max-height: none !important; display: block !important; }
         .yt-lockup-metadata-view-model__title-container, 
+        .ytLockupMetadataViewModelTitle,  
+        .ytLockupMetadataViewModelHeadingReset,    
         .yt-lockup-view-model__metadata,
         .yt-lockup-metadata-view-model__heading-reset { 
           height: auto !important; 

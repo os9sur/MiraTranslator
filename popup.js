@@ -161,7 +161,6 @@ async function initNoticeBar() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   initNoticeBar();
-  safeSendMessage({ type: 'CHECK_DEFAULT_ENGINE' });
   await initOnboarding();
   function showPanel(panelId) {
     const allPanels = [
@@ -2504,73 +2503,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   initUILanguage();
   refreshUI();
 
-  // 测试当前引擎是否可用
-  async function checkEngineStatus() {
+  // 检测当前引擎是否可用
+async function checkEngineStatus() {
     const settingsBtn = document.getElementById('openSettings');
     if (!settingsBtn) return;
 
-    const engine = currentConfig?.activeConfig?.engine || currentConfig?.selectedEngine || _defaultEngine;
-    const targetLang = currentConfig?.targetLanguage || 'zh-CN';
+    const engine = currentConfig?.activeConfig?.engine 
+                || currentConfig?.selectedEngine 
+                || _defaultEngine;
 
-    try {
-      if (engine === 'google') {
-        // Google 直接 ping 接口验证数据结构
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 5000);
-        try {
-          const res = await fetch(
-            'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=hello',
-            { signal: controller.signal }
-          );
-          clearTimeout(timer);
-          const data = await res.json();
-          const translated = data?.[0]?.[0]?.[0];
-          if (!res.ok || !translated || translated === 'hello') {
+    if (engine === 'google' || engine === 'bing') {
+        const stored = await safeGetStorage(['_engineAvailable', '_engineCheckTime']);
+        const age = Date.now() - (stored?._engineCheckTime || 0);
+        const cacheValid = age < 15 * 60 * 1000;//可用性缓存15分钟
+
+        if (!cacheValid) {
+            // 缓存过期，通知 background 重新检测，但不等结果
+            // 本次 popup 先用上次的结果展示，下次打开就是新结果了
+            safeSendMessage({ type: 'RECHECK_ENGINE' });
+        }
+
+        if (stored?._engineAvailable === false) {
             showEngineWarning(settingsBtn);
-          }
-        } catch (e) {
-          clearTimeout(timer);
-          showEngineWarning(settingsBtn);
         }
         return;
-      }
-
-      // 非 Google：复用设置页的测试逻辑
-      const isTargetEn = targetLang.toLowerCase().startsWith('en');
-      const testText = isTargetEn ? '你好' : 'Good morning';
-
-      const res = await Promise.race([
-        safeSendMessage({
-          type: 'TRANSLATE',
-          text: testText,
-          targetLang: targetLang,
-        }),
-        new Promise(resolve => setTimeout(() => resolve(null), 8000))
-      ]);
-
-      if (!res) { showEngineWarning(settingsBtn); return; }
-      if (res.error) { showEngineWarning(settingsBtn); return; }
-
-      const data = res.currentTranslationResponse || res.result;
-      if (!data) { showEngineWarning(settingsBtn); return; }
-      if (data.error) { showEngineWarning(settingsBtn); return; }
-
-      const translatedText = (typeof data === 'string'
-        ? data
-        : (data.basic || data.translatedText || "")
-      ).trim();
-
-      const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
-      const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
-
-      if (!hasContent || !isNotOriginal) {
-        showEngineWarning(settingsBtn);
-      }
-
-    } catch (e) {
-      showEngineWarning(settingsBtn);
     }
-  }
+
+    // AI 引擎：必须实时检测，因为 API Key 随时可能失效
+    const targetLang = currentConfig?.targetLanguage || 'zh-CN';
+    const isTargetEn = targetLang.toLowerCase().startsWith('en');
+    const testText = isTargetEn ? '你好' : 'Good morning';
+
+    const res = await Promise.race([
+        safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang }),
+        new Promise(resolve => setTimeout(() => resolve(null), 8000))
+    ]);
+
+    if (!res || res.error) { showEngineWarning(settingsBtn); return; }
+
+    const data = res.currentTranslationResponse || res.result;
+    if (!data || data.error) { showEngineWarning(settingsBtn); return; }
+
+    const translatedText = (typeof data === 'string'
+        ? data
+        : (data.basic || data.translatedText || '')
+    ).trim();
+
+    if (!translatedText || translatedText.toLowerCase() === testText.toLowerCase()) {
+        showEngineWarning(settingsBtn);
+    }
+}
 
   function showEngineWarning(settingsBtn) {
     if (settingsBtn.querySelector('.engine-warning')) return;
