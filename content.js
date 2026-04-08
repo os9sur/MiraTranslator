@@ -6318,6 +6318,7 @@ async function handleWordDblClick(e, word) {
   const storage = await safeGetStorage(['targetLanguage']);
   const currentLang = storage?.targetLanguage || getBrowserLang() || 'en';
   const res = await getDetailedTranslation(cleanWord, false, currentLang);
+  logger.log('[debug] translation res:', res);
   if (res && !res.isError) {
     fullTranslation = {
       basic: res.basic || "",

@@ -1123,7 +1123,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     return { basic: query, isSameLang: true };
   }
   const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
-  if (!storage) return;
+  if (!storage) return null;
   const {
     skipCache = false,
     isBatch = false,
@@ -1241,7 +1241,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
       ]);
       if (response === null) {
-        return;
+        return null;
       }
       if (response.error) {
         if (response.error === 'TIMEOUT') {

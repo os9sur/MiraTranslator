@@ -26,9 +26,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof showUpdateNotice === 'function') showUpdateNotice();
     return;
   }
-  const targetLanguage = 
-    storage?.ui_language || 
-    getBrowserLang() || 
+  const targetLanguage =
+    storage?.ui_language ||
+    getBrowserLang() ||
     'en';
   const _t = (key) => {
     return (typeof t === 'function') ? t(key, targetLanguage) : key;
@@ -40,7 +40,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!Array.isArray(dictData) || dictData.length === 0) return "";
     return dictData.map(item => {
       const pos = localizePos(item.pos, targetLanguage) || item.pos || "";
-      const meanings = Array.isArray(item.meanings) ? item.meanings.join(', ') : (item.meanings || "");
+
+      // 兼容 meanings（数组）和 definition（字符串）两种格式
+      let meanings = "";
+      if (Array.isArray(item.meanings)) {
+        meanings = item.meanings.join(', ');
+      } else if (item.meanings) {
+        meanings = item.meanings;
+      } else if (item.definition) {
+        meanings = item.definition;
+      }
+
       return `
       <div class="v-detail-line" style="margin-top: 2px; display: flex; gap: 6px;">
         <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
@@ -391,7 +401,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (Array.isArray(item.trans.dictData)) {
           detail = item.trans.dictData.map(d => {
             const pos = d.pos ? `${d.pos} ` : "";
-            const meanings = Array.isArray(d.meanings) ? d.meanings.join(' ') : d.meanings;
+            const meanings = Array.isArray(d.meanings)
+              ? d.meanings.join(' ')
+              : (d.meanings || d.definition || "");
             return `${pos}${meanings}`;
           }).join(' | ');
         }
