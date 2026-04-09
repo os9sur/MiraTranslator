@@ -7,7 +7,7 @@
 <h1 align="center">Mira Translate</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.3.9.2-blue?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.3.9.3-blue?style=flat-square" alt="Version">
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange?style=flat-square" alt="License">
   <img src="https://img.shields.io/badge/Platform-Chrome-blue?style=flat-square" alt="Platform">
   <a href="https://os9sur.github.io/mira-translator-home/">
