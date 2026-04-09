@@ -725,13 +725,15 @@ select:hover {
   color: #f1f5f9;
   padding: 8px;
   border-radius: 8px;
-  resize: none !important;
+  resize: vertical;  
   outline: none;
-  flex-shrink: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: auto !important;
-  white-space: pre;
-  word-break: normal;
+  white-space: pre-wrap;  
+  word-break: break-word;
+  
+  height: 36px;
+  max-height: 80px;
+  overflow-y: auto;  
+  line-height: 1.4;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -2133,3 +2135,11 @@ yt-attributed-string+.kt-paragraph-translation {
   transform: scale(0.96);
   filter: brightness(0.9);
 }
+ #searchSubmitBtn:hover {
+    color: #38bdf8;
+    transform: scale(1.15);
+  }
+  
+  #searchSubmitBtn:active {
+    transform: scale(0.95);
+  }

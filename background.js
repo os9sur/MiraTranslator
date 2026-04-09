@@ -1089,25 +1089,6 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
     if (meaningTexts.length === 0 && exampleTexts.length === 0) {
         return { dictData, originalDictData: null, examples };
     }
-
-    const CHUNK_SIZE = { google: 1500, bing: 900 };
-
-    const splitIntoChunks = (lines, chunkSize) => {
-        const chunks = [];
-        let current = [], len = 0;
-        for (const line of lines) {
-            if (len + line.length + 1 > chunkSize && current.length > 0) {
-                chunks.push(current);
-                current = [];
-                len = 0;
-            }
-            current.push(line);
-            len += line.length + 1;
-        }
-        if (current.length > 0) chunks.push(current);
-        return chunks;
-    };
-
     // ── 单块翻译：Google ─────────────────────────────────────────
     const googleTranslateChunk = async (text) => {
         const controller = new AbortController();
@@ -1162,50 +1143,6 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
         }
     };
 
-    // ── 分块并发翻译 ─────────────────────────────────────────────
-    // const translateAllChunks = async (translateFn) => {
-    //     const MAX_LINES_PER_CHUNK = 8;
-    //     const allLines = [...meaningTexts, ...exampleTexts];
-    //     const allChunks = splitIntoChunks(allLines, MAX_LINES_PER_CHUNK);
-
-    //     let globalIdx = 0;
-    //     const chunkMeta = allChunks.map(chunk => {
-    //         const start = globalIdx;
-    //         globalIdx += chunk.length;
-    //         return { chunk, start };
-    //     });
-
-    //     const resultLines = new Array(allLines.length).fill(null);
-    //     const CONCURRENCY = 2;
-
-    //     for (let i = 0; i < chunkMeta.length; i += CONCURRENCY) {
-    //         const batch = chunkMeta.slice(i, i + CONCURRENCY);
-    //         await Promise.allSettled(
-    //             batch.map(async ({ chunk, start }) => {
-    //                 const numbered = chunk.map((line, j) => `${start + j + 1}. ${line}`);
-    //                 const chunkText = numbered.join('\n');
-    //                 try {
-    //                     const translated = await translateFn(chunkText);
-    //                     const lines = translated.split('\n').map(t => t.trim()).filter(Boolean);
-    //                     for (const line of lines) {
-    //                         const match = line.match(/^(\d+)[.\s、。]/);
-    //                         if (match) {
-    //                             const idx = parseInt(match[1]) - 1;
-    //                             if (idx >= 0 && idx < resultLines.length) {
-    //                                 resultLines[idx] = line.replace(/^\d+[.\s、。]+/, '').trim();
-    //                             }
-    //                         }
-    //                     }
-    //                 } catch (e) {
-    //                     logger.warn('[translateAllChunks] 块翻译失败，跳过:', e.message);
-    //                 }
-    //             })
-    //         );
-    //     }
-
-    //     // 未翻译的保留原文
-    //     return resultLines.map((r, i) => r ?? allLines[i]);
-    // };
     const translateAllAtOnce = async (translateFn) => {
         const allLines = [...meaningTexts, ...exampleTexts];
         if (allLines.length === 0) return [];
@@ -1449,9 +1386,7 @@ const Translators = {
     ) {
         logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
         if (tabId || fromPopup) {
-            const isWord = existingDictData?.length > 0 || (
-                !!sourcePhonetic && originalText.trim().length <= 30
-            );
+            const isWord = isWordText(originalText);
             const partialResult = {
                 basic: basicText, phonetic: sourcePhonetic || '',
                 dictData: [], examples: [], wordForms: [],
@@ -1749,6 +1684,22 @@ const Translators = {
                 ? hintSourceLang
                 : (detectedLang ?? (sl !== 'auto' ? sl : 'en'));
 
+            const isEnToTw = detectedLang.startsWith('en') &&
+                (target.toLowerCase() === 'zh-tw' || target.toLowerCase() === 'zh-hk');
+            if (isEnToTw) {
+                lightweight = true;
+                // 如果有例句，立即进行二次翻译
+                if (examples.length > 0) {
+                    const { examples: translatedExamples } = await translateDictContent(
+                        [], // 不翻译词典
+                        examples, // 只翻译例句
+                        target,
+                        '', 
+                        ''
+                    );
+                    examples = translatedExamples;
+                }
+            }
             // lightweight 模式直接返回，不走词典补充
             if (lightweight) {
                 return {
