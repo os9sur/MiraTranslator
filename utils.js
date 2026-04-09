@@ -1606,3 +1606,65 @@ const LANG_DISPLAY = {
   'zh-cn': 'ZH',
 };
 
+/**
+ * 判断文本是否为单词（而非短语或句子）
+ */
+function isWordText(text) {
+  const trimmed = text?.trim() || '';
+  if (!trimmed) return false;
+  
+  // 含有空格 → 不是单词
+  if (trimmed.includes(' ')) return false;
+  
+  // 检测是否为日语
+  const isJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(trimmed);
+  if (isJapanese) {
+    return trimmed.length <= 10;
+  }
+  
+  // 检测是否为汉语（纯汉字）
+  const isChinese = /^\p{Script=Han}+$/u.test(trimmed);
+  if (isChinese) {
+    return trimmed.length <= 4;
+  }
+  
+  // 检测是否为韩语
+  const isKorean = /\p{Script=Hangul}/u.test(trimmed);
+  if (isKorean) {
+    return trimmed.length <= 15;
+  }
+  
+  // 检测是否为阿拉伯语
+  const isArabic = /\p{Script=Arabic}/u.test(trimmed);
+  if (isArabic) {
+    return trimmed.length <= 20;
+  }
+  
+  // 检测是否为俄语（西里尔字母）
+  const isRussian = /\p{Script=Cyrillic}/u.test(trimmed);
+  if (isRussian) {
+    return trimmed.length <= 25;
+  }
+  
+  // 检测是否为泰语
+  const isThai = /\p{Script=Thai}/u.test(trimmed);
+  if (isThai) {
+    return trimmed.length <= 20;
+  }
+  
+  // 检测是否为希伯来语
+  const isHebrew = /\p{Script=Hebrew}/u.test(trimmed);
+  if (isHebrew) {
+    return trimmed.length <= 20;
+  }
+  
+  // 检测是否为印地语（天城文）
+  const isDevanagari = /\p{Script=Devanagari}/u.test(trimmed);
+  if (isDevanagari) {
+    return trimmed.length <= 25;
+  }
+  
+  // 默认：英文及其他拉丁字母，长度 <= 30
+  return trimmed.length <= 30;
+}
+

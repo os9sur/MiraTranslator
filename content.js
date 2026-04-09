@@ -205,6 +205,7 @@ async function applyUserStyles(transEl, directConfig = null) {
     let sourceAlign = 'inherit';
     let sourceMarginLeft = '0px';
     let sourcePaddingLeft = '0px';
+    const isFacebook = location.hostname.includes('facebook.com');
     try {
       let sourceEl = transEl.previousElementSibling;
       if (sourceEl && sourceEl.offsetHeight < 5) {
@@ -254,6 +255,7 @@ async function applyUserStyles(transEl, directConfig = null) {
     const borderType = config.borderType || 'left';
     const isBlur = config.isBlur || config.isBlurEnabled || false;
     const isTwitter = location.hostname.includes('x.com');
+    const isFBC = location.hostname.includes('facebook.com');
     const isWikiUI = isWiki && (
       transEl.closest('.vector-menu-content') ||
       transEl.closest('figcaption') ||
@@ -276,7 +278,7 @@ async function applyUserStyles(transEl, directConfig = null) {
         unicode-bidi: ${isRTL ? 'plaintext' : 'normal'} !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
-        white-space: ${(isTwitter || inheritedWhiteSpace === 'pre-wrap') ? 'pre-wrap' : 'normal'} !important;
+        white-space: ${(isTwitter || isFBC || inheritedWhiteSpace === 'pre-wrap') ? 'pre-wrap' : 'normal'} !important;
         line-height: 1.5 !important;
         overflow: ${isWikiUI ? 'hidden' : 'visible'} !important;  
         color: ${color} !important;
@@ -430,6 +432,7 @@ const DYNAMIC_WATCHER_SITES = [
   'cnn.com',
   'bbc.com',
   'reuters.com',
+  'facebook.com',
   // 按需添加白名单,动态标题扫描问题
 ];
 function ensureDynamicContentWatcher() {
@@ -1515,7 +1518,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isYoutube = location.hostname.includes('youtube.com');
   const isTwitter = location.hostname.includes('x.com');
   const isAmazon = location.hostname.includes('amazon.com');
+  const isFacebook = location.hostname.includes('facebook.com');
   const parentH1 = isYoutube ? el.closest('h1') : null;
+
   //youtube的 yt-lockup-metadata-view-model__title 改成 ytLockupMetadataViewModelTitle 或 ytLockupMetadataViewModelHeadingReset了，先兼容一下
   const youtubeListTitleLink = isYoutube ? (
     el.closest('.yt-lockup-metadata-view-model__title') ||
@@ -1603,6 +1608,26 @@ async function handleTranslateElement(el, forceRefresh = false) {
       return handleTranslateElement(actualTitle, forceRefresh);
     }
     if (el.classList.contains('rank')) return;
+  }
+  if (isFacebook) {
+    const isFacebookUI =
+      el.closest('nav') ||
+      el.closest('[role="navigation"]') ||
+      el.closest('.xh8ybd') || // Facebook nav
+      el.closest('[aria-label*="menu"]') ||
+      el.closest('[aria-label*="Search"]') ||
+      el.closest('[role="menuitem"]') ||
+      el.closest('[role="button"]') ||
+      el.closest('header') ||
+      el.closest('[data-testid="side_rail_section"]') || // Facebook sidebar
+      el.closest('[data-testid="feed_stream_container"] [role="article"] .xvq74 .xjbqb8a [role="button"]') || // Like/comment buttons
+      (el.closest('[role="article"]') && el.querySelector('svg')) ||
+      el.tagName === 'BUTTON' ||
+      el.tagName === 'A' && el.getAttribute('role') === 'menuitem';
+    if (isFacebookUI) {
+      el.dataset.translated = 'true';
+      return;
+    }
   }
   if (isTwitter) {
     const isSystemUI =
@@ -1745,6 +1770,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const isReddit = location.hostname.includes('reddit.com');
     const isWiki = location.hostname.includes('wikipedia.org');
     const isGoogle = location.hostname.includes('google.com');
+    const isFB = location.hostname.includes('facebook.com');
     const finalCheckNode = isYoutube ? (parentH1 || youtubeListTitleLink || el) : mountTarget;
     if (!forceRefresh && isYoutube) {
       const ytNextSibling = finalCheckNode.nextElementSibling;
@@ -1964,6 +1990,16 @@ async function handleTranslateElement(el, forceRefresh = false) {
         el.appendChild(transContainer);
         transContainer.style.setProperty('display', 'block', 'important');
         transContainer.style.setProperty('margin-top', '4px', 'important');
+      }
+    } else if (isFB) {
+      el.appendChild(transContainer);
+      transContainer.style.setProperty('display', 'block', 'important');
+      transContainer.style.setProperty('margin-top', '4px', 'important');
+      transContainer.style.setProperty('margin-bottom', '4px', 'important');
+      transContainer.style.setProperty('padding', '6px', 'important');
+      const postContainer = el.closest('[data-testid="feed_stream_container"] [role="article"]');
+      if (postContainer) {
+        transContainer.style.setProperty('font-size', '0.95em', 'important');
       }
     }
     else {
@@ -2273,12 +2309,16 @@ async function scanContent(forcedSelectors = null) {
   try {
     const isX = location.hostname.includes('x.com');
     const isMSN = location.hostname.includes('msn.com');
+    const isFB = location.hostname.includes('facebook.com');
     let selectorsArray = [];
     const inputSelectors = (forcedSelectors !== null) ? forcedSelectors : (typeof currentActiveSelectors !== 'undefined' ? currentActiveSelectors : null);
     const finalRules = resolveActiveSelectors(inputSelectors);
     finalRules.split(',').forEach(s => { if (s.trim()) selectorsArray.push(s.trim()); });
     if (isX && !selectorsArray.includes("[data-testid='tweetText']")) {
       selectorsArray.push("[data-testid='tweetText']");
+    }
+    if (isFB && !selectorsArray.includes("[dir='auto']:not([role='button']):not([role='tab']):not([role='article'])")) {
+      selectorsArray.push("[dir='auto']:not([role='button']):not([role='tab']):not([role='article'])");
     }
     const validSelectors = [...new Set(selectorsArray)].filter(Boolean);
     if (validSelectors.length === 0) return;
@@ -3511,6 +3551,7 @@ function initSelectionTranslate() {
         }
       } else {
         fillPopupData(result, shadow, text.trim(), window.currentTargetL, isRTL);
+        if (shadowHost) shadowHost._detailFullyRendered = true;
       }
     }
     // 刷新翻译
@@ -3566,7 +3607,7 @@ function initSelectionTranslate() {
             const pDetail = shadow.getElementById('p-detail');
             if (pDetail) {
               pDetail.style.display = 'block';
-              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || '刷新重试'}</span>`;
+              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || 'retry'}</span>`;
               shadow.getElementById('p-detail-retry')?.addEventListener('click', () => {
                 shadow.getElementById('p-refresh')?.click();
               });
@@ -4230,54 +4271,52 @@ function initSelectionTranslate() {
     // 来源
     const pSource = shadow.getElementById('p-source');
     if (pSource) {
-      const isWord = !text.trim().includes(' ');
+      const isWord = isWordText(text);
       let cambridgeHref = '';
       let isZhTw = false;
 
       if (isWord) {
-        const encoded = encodeURIComponent(text.trim().toLowerCase());
-        const tgt = (window.currentTargetL || getBrowserLang() || 'en').toLowerCase();
-        const src = (res.langInfo?.code || state?.sourceLang || 'en').toLowerCase();
-        isZhTw = tgt === 'zh-tw';
+  const encoded = encodeURIComponent(text.trim().toLowerCase());
+  const tgt = (window.currentTargetL || getBrowserLang() || 'en').toLowerCase();
+  const src = (res.langInfo?.code || state?.sourceLang || 'en').toLowerCase();
+  isZhTw = tgt === 'zh-tw';
 
-        let dictPath = null;
-        if (src === 'en') {
-          dictPath = FORWARD[tgt === 'tw' ? 'zh-tw' : tgt] || null;
-        } else if (tgt === 'en') {
-          dictPath = REVERSE[src] || null;
-        }
+  let dictPath = null; 
+  if (src === 'en') {
+    dictPath = FORWARD[tgt === 'tw' ? 'zh-tw' : tgt] || null;
+  }
 
-        if (dictPath) {
-          cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
-        }
-      }
+  if (dictPath) {
+    cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
+  }
+}
 
       // 基本释义下方（仅 zh-tw）
-      const pBasic = shadow.getElementById('p-basic');
+     // const pBasic = shadow.getElementById('p-basic');
       const existingTop = shadow.getElementById('p-cambridge-top');
       if (existingTop) existingTop.remove();
 
-      if (isZhTw && cambridgeHref && pBasic) {
-        const div = document.createElement('div');
-        div.id = 'p-cambridge-top';
-        div.style.cssText = 'margin-top:4px;';
-        const a = document.createElement('a');
-        a.href = cambridgeHref;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = '💡 繁體釋義 → Cambridge Dictionary ↗';
-        a.style.cssText = `
-          color: #7dd3fc;
-          font-size: 10px;
-          text-decoration: none;
-          opacity: 0.9;
-          transition: all 0.2s ease;
-        `;
-        a.addEventListener('mouseover', () => { a.style.color = '#38bdf8'; a.style.opacity = '1'; });
-        a.addEventListener('mouseout', () => { a.style.color = '#7dd3fc'; a.style.opacity = '0.9'; });
-        div.appendChild(a);
-        pBasic.after(div);
-      }
+      // if (isZhTw && cambridgeHref && pBasic) {
+      //   const div = document.createElement('div');
+      //   div.id = 'p-cambridge-top';
+      //   div.style.cssText = 'margin-top:4px;';
+      //   const a = document.createElement('a');
+      //   a.href = cambridgeHref;
+      //   a.target = '_blank';
+      //   a.rel = 'noopener noreferrer';
+      //   a.textContent = '💡 更多釋義 → Cambridge Dictionary ↗';
+      //   a.style.cssText = `
+      //     color: #7dd3fc;
+      //     font-size: 10px;
+      //     text-decoration: none;
+      //     opacity: 0.9;
+      //     transition: all 0.2s ease;
+      //   `;
+      //   a.addEventListener('mouseover', () => { a.style.color = '#38bdf8'; a.style.opacity = '1'; });
+      //   a.addEventListener('mouseout', () => { a.style.color = '#7dd3fc'; a.style.opacity = '0.9'; });
+      //   div.appendChild(a);
+      //   pBasic.after(div);
+      // }
       // 底部 source
       pSource.style.display = (res.source || cambridgeHref) ? 'block' : 'none';
       pSource.innerHTML = '';
@@ -4901,7 +4940,7 @@ function initSelectionTranslate() {
             const pDetail = shadow.getElementById('p-detail');
             if (pDetail) {
               pDetail.style.display = 'block';
-              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || '刷新重试'}</span>`;
+              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || 'retry'}</span>`;
               shadow.getElementById('p-detail-retry')?.addEventListener('click', () => {
                 shadow.getElementById('p-refresh')?.click();
               });

@@ -1405,6 +1405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resRefreshBtn = document.getElementById('resRefreshBtn');
   input.addEventListener('input', function () {
     this.style.height = 'auto';
+    input.style.overflow = input.scrollHeight > input.clientHeight ? 'auto' : 'hidden';
     const newHeight = Math.min(this.scrollHeight, 80);
     this.style.height = newHeight + 'px';
     this.style.overflowY = this.scrollHeight > 80 ? 'auto' : 'hidden';
@@ -1482,6 +1483,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const phonetic = response.phonetic || '';
       const dicts = response.dictData || [];
       const examples = response.examples || [];
+      logger.log('[loadingMore] isPartial:', response.isPartial, 'basic:', basic, 'dicts.length:', dicts.length, 'isWord:', response.isWord);
       const targetPhonetic =
         response.targetPhonetic ||   // API 直接返回译文音标
         response.romaji ||            // 日语 romaji
@@ -1511,17 +1513,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const phoneticLabel = getPhoneticLabel(ui_lang);
 
         // 剑桥词典链接逻辑：仅单词模式
-        const isWord = !text.trim().includes(' ');
+        const isWord = isWordText(text);;
         if (isWord) {
           const encoded = encodeURIComponent(text.trim().toLowerCase());
 
-          let dictPath;
+          let dictPath = null;
+          // 只有英文源语言才给 Cambridge 链接
           if (src === 'en') {
             dictPath = FORWARD[tgt] || null;
-          } else if (tgt === 'en') {
-            dictPath = REVERSE[src] || null;
-          } else {
-            dictPath = null;
           }
 
           if (dictPath) {
@@ -1530,24 +1529,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         html += `
-    <div style="margin-bottom:10px;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <span style="font-weight:bold; word-break:break-all; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
-        ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
-      </div>
-      ${hasPhonetic ? `
-        <div id="targetPhoneticRow" style="
-          display:none; color:#64748b; font-size:11px;
-          margin-top:3px; user-select:text;
-        ">${targetPhonetic}</div>` : ''}
-        ${(cambridgeHref && tgt === 'zh-tw') ? `
-          <div style="margin-top:5px;">
-            <a id="cambridgeLink" href="${cambridgeHref}" target="_blank" rel="noopener noreferrer"
-              style="color:#64748b; font-size:10px; text-decoration:none; opacity:0.7; transition:opacity 0.2s;">
-              💡 繁體釋義 → Cambridge Dictionary ↗
-            </a>
-          </div>` : ''}
-    </div>`;
+        <div style="margin-bottom:10px;">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-weight:bold; word-break:break-all; color:#38BDF8; font-size:15px; user-select:text !important;">${basic}</span>
+            ${hasPhonetic ? `<button id="togglePhoneticBtn">${phoneticLabel}</button>` : ''}
+          </div>
+          ${hasPhonetic ? `
+            <div id="targetPhoneticRow" style="
+              display:none; color:#64748b; font-size:11px;
+              margin-top:3px; user-select:text;
+            ">${targetPhonetic}</div>` : ''}
+            ${(cambridgeHref && tgt === 'zh-tw') ? `
+              <div style="margin-top:5px;">
+                <a id="cambridgeLink" href="${cambridgeHref}" target="_blank" rel="noopener noreferrer"
+                  style="color:#64748b; font-size:10px; text-decoration:none; opacity:0.7; transition:opacity 0.2s;">
+                  💡 更多釋義 → Cambridge Dictionary ↗
+                </a>
+              </div>` : ''}
+        </div>`;
       }
 
       // 合并相同 pos
@@ -2504,29 +2503,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   refreshUI();
 
   // 检测当前引擎是否可用
-async function checkEngineStatus() {
+  async function checkEngineStatus() {
     const settingsBtn = document.getElementById('openSettings');
     if (!settingsBtn) return;
 
-    const engine = currentConfig?.activeConfig?.engine 
-                || currentConfig?.selectedEngine 
-                || _defaultEngine;
+    const engine = currentConfig?.activeConfig?.engine
+      || currentConfig?.selectedEngine
+      || _defaultEngine;
 
     if (engine === 'google' || engine === 'bing') {
-        const stored = await safeGetStorage(['_engineAvailable', '_engineCheckTime']);
-        const age = Date.now() - (stored?._engineCheckTime || 0);
-        const cacheValid = age < 15 * 60 * 1000;//可用性缓存15分钟
+      const stored = await safeGetStorage(['_engineAvailable', '_engineCheckTime']);
+      const age = Date.now() - (stored?._engineCheckTime || 0);
+      const cacheValid = age < 15 * 60 * 1000;//可用性缓存15分钟
 
-        if (!cacheValid) {
-            // 缓存过期，通知 background 重新检测，但不等结果
-            // 本次 popup 先用上次的结果展示，下次打开就是新结果了
-            safeSendMessage({ type: 'RECHECK_ENGINE' });
-        }
+      if (!cacheValid) {
+        // 缓存过期，通知 background 重新检测，但不等结果
+        // 本次 popup 先用上次的结果展示，下次打开就是新结果了
+        safeSendMessage({ type: 'RECHECK_ENGINE' });
+      }
 
-        if (stored?._engineAvailable === false) {
-            showEngineWarning(settingsBtn);
-        }
-        return;
+      if (stored?._engineAvailable === false) {
+        showEngineWarning(settingsBtn);
+      }
+      return;
     }
 
     // AI 引擎：必须实时检测，因为 API Key 随时可能失效
@@ -2535,8 +2534,8 @@ async function checkEngineStatus() {
     const testText = isTargetEn ? '你好' : 'Good morning';
 
     const res = await Promise.race([
-        safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang }),
-        new Promise(resolve => setTimeout(() => resolve(null), 8000))
+      safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang }),
+      new Promise(resolve => setTimeout(() => resolve(null), 8000))
     ]);
 
     if (!res || res.error) { showEngineWarning(settingsBtn); return; }
@@ -2545,14 +2544,14 @@ async function checkEngineStatus() {
     if (!data || data.error) { showEngineWarning(settingsBtn); return; }
 
     const translatedText = (typeof data === 'string'
-        ? data
-        : (data.basic || data.translatedText || '')
+      ? data
+      : (data.basic || data.translatedText || '')
     ).trim();
 
     if (!translatedText || translatedText.toLowerCase() === testText.toLowerCase()) {
-        showEngineWarning(settingsBtn);
+      showEngineWarning(settingsBtn);
     }
-}
+  }
 
   function showEngineWarning(settingsBtn) {
     if (settingsBtn.querySelector('.engine-warning')) return;

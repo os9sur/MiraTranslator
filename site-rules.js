@@ -4,14 +4,18 @@ const SiteRules = {
             selectors: "p, [data-testid='tweetText'], [data-testid='trend'] div[dir='ltr'][style*='line-clamp'] > span, [data-testid='trend'] div[dir='ltr']:not([style*='line-clamp']):not([style*='color: rgb(113']) > span, div[data-testid='UserDescription'] span, [data-testid^='news_sidebar_article'] div[dir='ltr']:first-of-type span, [data-testid='primaryColumn'] div[dir='auto'] > span, [data-testid='primaryColumn'] div.r-knv0ih div[dir='ltr'] > span, [data-testid='placementTracking'] button div[style*='line-clamp: 2'] > span",
             minLen: 3
         },
+        "facebook.com": {
+            selectors: "div[dir='auto']:not([role='button']):not([role='tab']):not([role='article']), span[dir='auto']:not([role='button']):not([role='tab']), h2[dir='auto'], h3[dir='auto'], h4[dir='auto']",
+            minLen: 3
+        },
         "grok.com": {
             selectors: "h1, h2, h3, h4, p, li, [class*='message'] p, [class*='response'] p, [class*='answer'] p",
             minLen: 10
         },
         "youtube.com": {
-  selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *):not(yt-content-metadata-view-model *):not(.yt-spec-button-shape-next *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *):not(ytd-metadata-line-renderer *)",
-  minLen: 10
-},
+            selectors: "p:not(ytd-active-account-header-renderer *), #content-text:not(ytd-active-account-header-renderer *), #video-title:not(ytd-active-account-header-renderer *), .yt-lockup-metadata-view-model__title:not(ytd-active-account-header-renderer *), .yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *):not(yt-content-metadata-view-model *):not(.yt-spec-button-shape-next *), yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *):not(ytd-metadata-line-renderer *)",
+            minLen: 10
+        },
         "news.ycombinator.com": {
             selectors: "p, li, td.title, div.commtext.c00",
             minLen: 3
