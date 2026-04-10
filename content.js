@@ -37,6 +37,11 @@ loadTargetLanguage().then(async () => {
 
   await _defaultEngineReady;
 
+  // Facebook特殊处理
+  if (location.hostname.includes('facebook.com')) {
+    initFacebookSeeMoreListener();
+  }
+
   let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
@@ -2062,6 +2067,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     linkMap: linkMap
   }, forceRefresh);
 }
+
 function getObserver() {
   if (!window.observer) {
     window.observer = new IntersectionObserver((entries) => {
@@ -2069,25 +2075,33 @@ function getObserver() {
       const selectors = rule.selectors;
       const host = location.hostname;
       const isYoutube = host.includes('youtube.com');
+      const isFacebook = host.includes('facebook.com');  // 添加Facebook检测
+      const isDynamic = isYoutube || isFacebook;  // YouTube和Facebook都需要动态更新
+      
       entries.forEach(async entry => {
         if (!isPageScanEnabled || !entry.isIntersecting) return;
         const el = entry.target;
         const isMatch = el.matches(selectors);
         let targetEl = el;
+        
         if (!isMatch && el.tagName === 'SPAN') {
           const parent = el.closest(selectors);
           if (parent) targetEl = parent;
         }
+        
         if (!isMatch && targetEl === el) {
-          if (!(isYoutube && el.classList?.contains('yt-core'))) {
+          if (!(isDynamic && el.classList?.contains(isYoutube ? 'yt-core' : 'x'))) {
             window.observer.unobserve(el);
             return;
           }
         }
-        if (isYoutube) {
+        
+        // 动态内容检测（YouTube + Facebook）
+        if (isDynamic) {
           const currentText = (targetEl.textContent || '').trim();
           const lastText = targetEl._miraLastText;
           if (lastText && lastText !== currentText) {
+            // 内容变化，清除旧翻译
             targetEl.removeAttribute('data-translated');
             targetEl.removeAttribute('data-translating');
             targetEl.removeAttribute('data-mira-processing');
@@ -2102,17 +2116,21 @@ function getObserver() {
           }
           targetEl._miraLastText = currentText;
         }
+        
         if (targetEl.dataset.translated === 'true') {
-          if (!isYoutube) window.observer.unobserve(el);
+          if (!isDynamic) window.observer.unobserve(el);
           return;
         }
+        
         if (targetEl.dataset.transSkipped === 'true') {
-          if (!isYoutube) window.observer.unobserve(el);
+          if (!isDynamic) window.observer.unobserve(el);
           return;
         }
+        
         if (targetEl.hasAttribute('data-translating')) return;
         if (targetEl.hasAttribute('data-mira-processing')) return;
         if (_miraProcessingSet.has(targetEl)) return;
+        
         const text = (targetEl.textContent || '').trim();
         if (text.length >= (rule.minLen || 3)) {
           try {
@@ -2123,8 +2141,8 @@ function getObserver() {
             targetEl.removeAttribute('data-mira-processing');
             targetEl.removeAttribute('data-translating');
           }
-          if (!isYoutube) window.observer.unobserve(el);
-        } else if (isYoutube) {
+          if (!isDynamic) window.observer.unobserve(el);
+        } else if (isDynamic) {
           handleYTDelayedText(targetEl);
         } else {
           window.observer.unobserve(el);
@@ -2134,6 +2152,132 @@ function getObserver() {
   }
   return window.observer;
 }
+/**
+ * 局部扫描函数：只扫描特定容器内的无翻译内容
+ */
+async function scanArticleContentOnly(article, selectors) {
+  if (!article || !selectors) return;
+  try {
+    const finalRules = resolveActiveSelectors(selectors);
+    const selectorArray = finalRules.split(',').map(s => s.trim()).filter(Boolean);
+    if (selectorArray.length === 0) return;
+    
+    // 只在当前文章容器内查询
+    const allTargets = article.querySelectorAll(selectorArray.join(', '));
+    
+    let translateCount = 0;
+    for (const el of allTargets) {
+      if (!el || el.nodeType !== 1) continue;
+      
+      // 跳过已翻译或正在翻译的元素
+      if (el.dataset.translated === 'true' || el.dataset.translating === 'true') continue;
+      if (el.hasAttribute('data-mira-processing') || _miraProcessingSet.has(el)) continue;
+      
+      // 跳过按钮元素
+      if (el.querySelector('[role="button"]') || el.getAttribute('role') === 'button') continue;
+      
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+      if (textContent.length < 2) continue;
+      
+      // 跳过已经是目标语言的内容
+      if (detectIsAlreadyTarget(textContent, window.currentTargetL || getBrowserLang())) {
+        el.dataset.translated = 'true';
+        continue;
+      }
+      
+      try {
+        await handleTranslateElement(el, false);
+        translateCount++;
+      } catch (error) {
+        logger.error('[Mira] Article scan error:', error);
+      }
+    }
+    
+    logger.log(`[Mira] Facebook article scan complete, translated ${translateCount} elements`);
+  } catch (error) {
+    logger.error('[Mira] scanArticleContentOnly error:', error);
+  }
+}
+
+/**
+ * Facebook "See More" 展开处理
+ */
+function initFacebookSeeMoreListener() {
+  if (!location.hostname.includes('facebook.com')) return;
+  if (window.__mira_fb_see_more_hooked) return;
+  
+  document.addEventListener('click', (e) => {
+    const clickTarget = e.target;
+    if (!clickTarget) return;
+    
+    // 检测"See More"按钮或其他展开按钮
+    const seeMoreBtn = clickTarget.closest('[role="button"][aria-pressed], [role="button"][tabindex="0"]');
+    if (!seeMoreBtn) return;
+    
+    const btnText = (seeMoreBtn.textContent || '').toLowerCase();
+    const isSeeMoreBtn = btnText.includes('see more') || btnText.includes('more') || 
+                         btnText.includes('查看') || btnText.includes('展开') ||
+                         btnText.includes('show more');
+    if (!isSeeMoreBtn) return;
+    
+    // 找到最近的文章容器
+    let article = seeMoreBtn.closest('[role="article"]');
+    if (!article) {
+      article = seeMoreBtn.closest('[data-ad-rendering-role="story_message"]');
+    }
+    if (!article) {
+      article = seeMoreBtn.closest('[class*="feed"], [class*="story"], [class*="post"]');
+    }
+    if (!article) return;
+    
+    logger.log('[Mira] Facebook See More detected, article found');
+    
+    // 延迟等待DOM更新完毕
+    setTimeout(() => {
+      try {
+        // 清除文章内所有已翻译标记（但保留"See More"按钮自身的标记）
+        const allDivs = article.querySelectorAll('[dir="auto"][data-translated="true"]');
+        allDivs.forEach(el => {
+          // 跳过按钮本身
+          if (el.querySelector('[role="button"]') || el.getAttribute('role') === 'button') return;
+          
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-translating');
+          el.removeAttribute('data-mira-processing');
+          delete el._miraRetryCount;
+          delete el._miraSkippedHash;
+          delete el._miraLastText;
+          _miraProcessingSet.delete(el);
+          
+          // 删除旧的翻译容器
+          const transContainer = el.nextElementSibling;
+          if (transContainer?.classList?.contains('kt-paragraph-translation')) {
+            transContainer.remove();
+          }
+          el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
+        });
+        
+        // 清除包含"查看更多"或省略号的翻译容器（只清除摘要翻译）
+        article.querySelectorAll('.kt-paragraph-translation').forEach(el => {
+          const text = el.textContent || '';
+          if (text.includes('…') || text.includes('...') || text.includes('查看更多')) {
+            el.remove();
+          }
+        });
+        
+        logger.log('[Mira] Old translations cleared, starting local rescan...');
+        
+        // 只扫描当前文章容器内的内容，不影响其他元素
+        scanArticleContentOnly(article, currentActiveSelectors);
+      } catch (error) {
+        logger.error('[Mira] Facebook See More handler error:', error);
+      }
+    }, 600);  // 等待DOM更新的时间
+  }, true);  // 使用捕获阶段以确保能捕获到点击
+  
+  window.__mira_fb_see_more_hooked = true;
+}
+
 /**
  * 穿透函数：递归搜索所有 Shadow DOM 中的目标
  */
