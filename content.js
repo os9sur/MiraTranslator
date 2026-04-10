@@ -37,11 +37,6 @@ loadTargetLanguage().then(async () => {
 
   await _defaultEngineReady;
 
-  // Facebook特殊处理
-  if (location.hostname.includes('facebook.com')) {
-    initFacebookSeeMoreListener();
-  }
-
   let res = await safeGetStorage(['activeConfig', 'targetLanguage']);
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
@@ -107,7 +102,6 @@ window.currentConfig = {
   activeConfig: { engine: getRuntimeDefaultEngine(), data: {} }
 };
 async function syncLocalState(storageData) {
-  // console.trace('syncLocalState called', storageData);
   if (storageData.targetLanguage) {
     const lang = storageData.targetLanguage.replace('_', '-');
     window.currentTargetL = lang;
@@ -188,6 +182,7 @@ async function applyUserStyles(transEl, directConfig = null) {
   const render = (config) => {
     const originalFontSize = transEl.style.fontSize;
     const isWiki = location.hostname.includes('wikipedia.org');
+    const isInstagram = location.hostname.includes('instagram.com');
     const clearStyle = isWiki ? 'none' : 'both';
     const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
     const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
@@ -228,11 +223,14 @@ async function applyUserStyles(transEl, directConfig = null) {
     if (!config) {
       const isWikiParagraph = isWiki &&
         transEl.parentElement?.className?.includes('mw-parser-output');
+
+      const verticalMargin = isInstagram ? '0px' : '6px';
+      const bottomMargin = isInstagram ? '2px' : '4px';
       let defaultCss = `
       display: block !important;
       width: auto !important;
       clear: ${clearStyle} !important;
-      margin: 6px ${sourceMarginLeft} 4px ${sourceMarginLeft} !important;
+      margin: ${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft} !important;
       padding-left: ${sourcePaddingLeft} !important;
       text-align: ${sourceAlign} !important; 
       color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
@@ -272,12 +270,14 @@ async function applyUserStyles(transEl, directConfig = null) {
         !transEl.closest('.sidebar') &&
         !transEl.closest('.navbox'))
     );
+    const finalMargin = isInstagram ? '0px 0px 2px 0px' : (isWikiUI ? '2px 0 0 0' : '6px 0 4px 0');
+    const finalOverflow = isInstagram ? 'visible' : (isWikiUI ? 'hidden' : 'visible');
     let css = `
         display: ${isWikiUI ? 'inline-block' : 'block'} !important;
         clear: ${clearStyle} !important;
         width: auto !important; 
         max-width: ${isWikiUI ? 'calc(100% - 2px)' : '100%'} !important;
-        margin: ${isWikiUI ? '2px 0 0 0' : '6px 0 4px 0'} !important;
+        margin: ${finalMargin} !important;
         direction: ${isRTL ? 'rtl' : 'ltr'} !important;
         text-align: ${sourceAlign} !important;
         unicode-bidi: ${isRTL ? 'plaintext' : 'normal'} !important;
@@ -285,7 +285,7 @@ async function applyUserStyles(transEl, directConfig = null) {
         word-break: break-word !important;
         white-space: ${(isTwitter || isFBC || inheritedWhiteSpace === 'pre-wrap') ? 'pre-wrap' : 'normal'} !important;
         line-height: 1.5 !important;
-        overflow: ${isWikiUI ? 'hidden' : 'visible'} !important;  
+        overflow: ${finalOverflow} !important;
         color: ${color} !important;
         background: transparent !important;
         font-style: normal !important;
@@ -1492,6 +1492,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
     );
   }
 }
+
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
 
@@ -1524,6 +1525,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isTwitter = location.hostname.includes('x.com');
   const isAmazon = location.hostname.includes('amazon.com');
   const isFacebook = location.hostname.includes('facebook.com');
+  const isInstagram = location.hostname.includes('instagram.com');
   const parentH1 = isYoutube ? el.closest('h1') : null;
 
   //youtube的 yt-lockup-metadata-view-model__title 改成 ytLockupMetadataViewModelTitle 或 ytLockupMetadataViewModelHeadingReset了，先兼容一下
@@ -1714,7 +1716,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
   el.childNodes.forEach(node => extractTextWithLinks(node, el, linkMap, textHolder));
   const textWithPlaceholders = textHolder.text;
   const originalText = textWithPlaceholders.replace(/[ \t]+/g, ' ').trim();
-  if (originalText.length < 2) {
+  const rule = SiteRules.getRule(location.hostname);
+  const minLen = rule?.minLen !== undefined ? rule?.minLen : 2;
+  if (originalText.length < minLen) {
     el.removeAttribute('data-translating');
     el.removeAttribute('data-mira-processing');
     _miraProcessingSet.delete(el);
@@ -2075,27 +2079,28 @@ function getObserver() {
       const selectors = rule.selectors;
       const host = location.hostname;
       const isYoutube = host.includes('youtube.com');
-      const isFacebook = host.includes('facebook.com');  // 添加Facebook检测
-      const isDynamic = isYoutube || isFacebook;  // YouTube和Facebook都需要动态更新
-      
+      const isInstagram = host.includes('instagram.com');
+      const isFacebook = host.includes('facebook.com');
+      const isDynamic = isYoutube || isFacebook || isInstagram;  // 动态更新
+
       entries.forEach(async entry => {
         if (!isPageScanEnabled || !entry.isIntersecting) return;
         const el = entry.target;
         const isMatch = el.matches(selectors);
         let targetEl = el;
-        
+
         if (!isMatch && el.tagName === 'SPAN') {
           const parent = el.closest(selectors);
           if (parent) targetEl = parent;
         }
-        
+
         if (!isMatch && targetEl === el) {
           if (!(isDynamic && el.classList?.contains(isYoutube ? 'yt-core' : 'x'))) {
             window.observer.unobserve(el);
             return;
           }
         }
-        
+
         // 动态内容检测（YouTube + Facebook）
         if (isDynamic) {
           const currentText = (targetEl.textContent || '').trim();
@@ -2116,23 +2121,26 @@ function getObserver() {
           }
           targetEl._miraLastText = currentText;
         }
-        
+
         if (targetEl.dataset.translated === 'true') {
+          if (isInstagram) return;
+
           if (!isDynamic) window.observer.unobserve(el);
           return;
         }
-        
+
         if (targetEl.dataset.transSkipped === 'true') {
           if (!isDynamic) window.observer.unobserve(el);
           return;
         }
-        
+
         if (targetEl.hasAttribute('data-translating')) return;
         if (targetEl.hasAttribute('data-mira-processing')) return;
         if (_miraProcessingSet.has(targetEl)) return;
-        
+
         const text = (targetEl.textContent || '').trim();
-        if (text.length >= (rule.minLen || 3)) {
+        const minLen = rule?.minLen !== undefined ? rule?.minLen : 3;
+        if (text.length >= minLen) {
           try {
             await handleTranslateElement(targetEl);
           } catch (error) {
@@ -2152,39 +2160,96 @@ function getObserver() {
   }
   return window.observer;
 }
+
+
+function initInstagramDeepWatcher() {
+  if (!location.hostname.includes('instagram.com')) return;
+
+  const lengthCache = new WeakMap();
+
+  const watcher = new MutationObserver((mutations) => {
+    const postSpans = document.querySelectorAll('span[dir="auto"]._ap3a');
+
+    postSpans.forEach(span => {
+      const currentText = (span.textContent || '').trim();
+      const currentLen = currentText.length;
+      const lastLen = lengthCache.get(span);
+
+      if (lastLen !== undefined && currentLen > lastLen + 5) {
+        if (span.getAttribute('data-translated') === 'true') {
+          logger.log('[Mira] 检测到文字内容膨胀，正在重置并重译...');
+
+          span.removeAttribute('data-translated');
+          span.removeAttribute('data-mira-processing');
+
+          const oldTrans = span.querySelector('.kt-paragraph-translation') ||
+            (span.nextElementSibling?.classList.contains('kt-paragraph-translation') ? span.nextElementSibling : null);
+          if (oldTrans) oldTrans.remove();
+
+          lengthCache.set(span, currentLen);
+          if (typeof handleTranslateElement === 'function') {
+            handleTranslateElement(span, true);
+          }
+        }
+      }
+
+      if (lastLen === undefined && span.getAttribute('data-translated') === 'true') {
+        lengthCache.set(span, currentLen);
+      }
+    });
+  });
+
+  watcher.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+}
+initInstagramDeepWatcher();
 /**
  * 局部扫描函数：只扫描特定容器内的无翻译内容
  */
 async function scanArticleContentOnly(article, selectors) {
   if (!article || !selectors) return;
   try {
-    const finalRules = resolveActiveSelectors(selectors);
+    const rule = SiteRules.getRule(location.hostname);
+    const finalSelectors = rule?.selectors || selectors;
+    const minLen = rule?.minLen !== undefined ? rule?.minLen : 2;
+
+    if (!finalSelectors) {
+      logger.warn('[Scan] No selectors found');
+      return;
+    }
+
+    const finalRules = resolveActiveSelectors(finalSelectors);
     const selectorArray = finalRules.split(',').map(s => s.trim()).filter(Boolean);
     if (selectorArray.length === 0) return;
-    
+
+    logger.log(`[Scan] Using ${selectorArray.length} selectors for ${location.hostname}`);
+
     // 只在当前文章容器内查询
     const allTargets = article.querySelectorAll(selectorArray.join(', '));
-    
+
     let translateCount = 0;
     for (const el of allTargets) {
       if (!el || el.nodeType !== 1) continue;
-      
+
       // 跳过已翻译或正在翻译的元素
       if (el.dataset.translated === 'true' || el.dataset.translating === 'true') continue;
       if (el.hasAttribute('data-mira-processing') || _miraProcessingSet.has(el)) continue;
-      
+
       // 跳过按钮元素
       if (el.querySelector('[role="button"]') || el.getAttribute('role') === 'button') continue;
-      
+
       const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
-      if (textContent.length < 2) continue;
-      
+      if (textContent.length < minLen) continue;
+
       // 跳过已经是目标语言的内容
       if (detectIsAlreadyTarget(textContent, window.currentTargetL || getBrowserLang())) {
         el.dataset.translated = 'true';
         continue;
       }
-      
+
       try {
         await handleTranslateElement(el, false);
         translateCount++;
@@ -2192,7 +2257,7 @@ async function scanArticleContentOnly(article, selectors) {
         logger.error('[Mira] Article scan error:', error);
       }
     }
-    
+
     logger.log(`[Mira] Facebook article scan complete, translated ${translateCount} elements`);
   } catch (error) {
     logger.error('[Mira] scanArticleContentOnly error:', error);
@@ -2202,80 +2267,302 @@ async function scanArticleContentOnly(article, selectors) {
 /**
  * Facebook "See More" 展开处理
  */
-function initFacebookSeeMoreListener() {
+function initFacebookDeepWatcher() {
   if (!location.hostname.includes('facebook.com')) return;
-  if (window.__mira_fb_see_more_hooked) return;
-  
-  document.addEventListener('click', (e) => {
-    const clickTarget = e.target;
-    if (!clickTarget) return;
-    
-    // 检测"See More"按钮或其他展开按钮
-    const seeMoreBtn = clickTarget.closest('[role="button"][aria-pressed], [role="button"][tabindex="0"]');
-    if (!seeMoreBtn) return;
-    
-    const btnText = (seeMoreBtn.textContent || '').toLowerCase();
-    const isSeeMoreBtn = btnText.includes('see more') || btnText.includes('more') || 
-                         btnText.includes('查看') || btnText.includes('展开') ||
-                         btnText.includes('show more');
-    if (!isSeeMoreBtn) return;
-    
-    // 找到最近的文章容器
-    let article = seeMoreBtn.closest('[role="article"]');
-    if (!article) {
-      article = seeMoreBtn.closest('[data-ad-rendering-role="story_message"]');
-    }
-    if (!article) {
-      article = seeMoreBtn.closest('[class*="feed"], [class*="story"], [class*="post"]');
-    }
-    if (!article) return;
-    
-    logger.log('[Mira] Facebook See More detected, article found');
-    
-    // 延迟等待DOM更新完毕
-    setTimeout(() => {
-      try {
-        // 清除文章内所有已翻译标记（但保留"See More"按钮自身的标记）
-        const allDivs = article.querySelectorAll('[dir="auto"][data-translated="true"]');
-        allDivs.forEach(el => {
-          // 跳过按钮本身
-          if (el.querySelector('[role="button"]') || el.getAttribute('role') === 'button') return;
-          
+
+  const lengthCache = new WeakMap();
+
+  const watcher = new MutationObserver((mutations) => {
+    const postElements = document.querySelectorAll('div[dir="auto"].xdj266r, div[data-ad-comet-preview="message"]');
+
+    postElements.forEach(el => {
+      const currentText = (el.textContent || '').trim();
+      const currentLen = currentText.length;
+      const lastLen = lengthCache.get(el);
+
+      //  比对内容长度 ,判断是否已经已经翻译过
+      if (lastLen !== undefined && currentLen > lastLen + 10) {
+        if (el.getAttribute('data-translated') === 'true') {
+          logger.log('[Mira] Facebook 内容膨胀检测成功，重置翻译...');
+
+          //  清除所有标记
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-mira-processing');
+          _miraProcessingSet?.delete(el);
+
+          //  移除旧的翻译框（FB 的翻译框可能在内部，也可能是相邻节点）
+          const oldBubbles = el.querySelectorAll('.kt-paragraph-translation');
+          oldBubbles.forEach(b => b.remove());
+
+          if (el.nextElementSibling?.classList.contains('kt-paragraph-translation')) {
+            el.nextElementSibling.remove();
+          }
+
+          //  记录新长度并触发翻译
+          lengthCache.set(el, currentLen);
+          if (typeof handleTranslateElement === 'function') {
+            handleTranslateElement(el, true);
+          }
+        }
+      }
+
+      // 首次扫描记录
+      if (lastLen === undefined && currentLen > 0) {
+        lengthCache.set(el, currentLen);
+      }
+    });
+  });
+
+  watcher.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  window.__mira_fb_see_more_hooked = true;
+}
+initFacebookDeepWatcher();
+
+// 扫描Instagram模态框（帖子详情、评论）
+async function scanInstagramModal(modal) {
+  if (!modal) {
+    return;
+  }
+  try {
+    const finalRules = resolveActiveSelectors(currentActiveSelectors);
+    const selectorArray = finalRules.split(',').map(s => s.trim()).filter(Boolean);
+
+    // 首先处理那些被标记为已翻译但没有容器的元素（修复错误状态）
+    const allPotentialElements = modal.querySelectorAll('h1[dir="auto"], h2[dir="auto"], h3[dir="auto"], h4[dir="auto"], span[dir="auto"]');
+
+    let fixedCount = 0;
+    const fixedElements = [];  // 跟踪被修复的元素
+
+    for (const el of allPotentialElements) {
+      if (!el.dataset.translated) continue;
+
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+      const hasInternalContainer = el.querySelector('.kt-paragraph-translation');
+      const hasSiblingContainer = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+      const parentHasSibling = el.parentElement?.querySelector(':scope > .kt-paragraph-translation');
+
+      if (!hasInternalContainer && !hasSiblingContainer && !parentHasSibling) {
+        if (textContent.length > 2) {
+          logger.log(`[Mira Modal Scan] MISMARKED: "${textContent.substring(0, 50)}" - cleared and queued for force translation`);
+
+          // 清除错误的标记
           el.removeAttribute('data-translated');
           el.removeAttribute('data-translating');
+          el.removeAttribute('data-instagram-tracked');
           el.removeAttribute('data-mira-processing');
-          delete el._miraRetryCount;
-          delete el._miraSkippedHash;
-          delete el._miraLastText;
           _miraProcessingSet.delete(el);
-          
-          // 删除旧的翻译容器
-          const transContainer = el.nextElementSibling;
-          if (transContainer?.classList?.contains('kt-paragraph-translation')) {
-            transContainer.remove();
-          }
-          el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
-        });
-        
-        // 清除包含"查看更多"或省略号的翻译容器（只清除摘要翻译）
-        article.querySelectorAll('.kt-paragraph-translation').forEach(el => {
-          const text = el.textContent || '';
-          if (text.includes('…') || text.includes('...') || text.includes('查看更多')) {
-            el.remove();
-          }
-        });
-        
-        logger.log('[Mira] Old translations cleared, starting local rescan...');
-        
-        // 只扫描当前文章容器内的内容，不影响其他元素
-        scanArticleContentOnly(article, currentActiveSelectors);
-      } catch (error) {
-        logger.error('[Mira] Facebook See More handler error:', error);
+          fixedCount++;
+          fixedElements.push(el);
+        }
       }
-    }, 600);  // 等待DOM更新的时间
-  }, true);  // 使用捕获阶段以确保能捕获到点击
-  
-  window.__mira_fb_see_more_hooked = true;
+    }
+
+    if (fixedCount > 0) {
+      // 强制这些被修复的元素进行翻译
+      for (const el of fixedElements) {
+        try {
+          await handleTranslateElement(el, true);  // 使用 forceRefresh=true
+        } catch (error) {
+          logger.error('[Mira Modal Scan] Error re-translating fixed element:', error);
+        }
+      }
+    }
+
+    // 在模态框中扫描所有需要翻译的元素
+    const allTargets = modal.querySelectorAll(selectorArray.join(', '));
+
+    let translateCount = 0;
+    for (const el of allTargets) {
+      if (!el || el.nodeType !== 1) continue;
+
+      if (el.dataset.miraFixedMismark === 'true') {
+        el.removeAttribute('data-mira-fixed-mismark');  // 清除临时标记
+        continue;
+      }
+
+      const hasTranslationContainer = el.querySelector('.kt-paragraph-translation') ||
+        el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+
+      if (el.dataset.translated === 'true') {
+        if (hasTranslationContainer) {
+          continue;
+        } else {
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-instagram-tracked');
+        }
+      }
+
+      if (el.dataset.translating === 'true') continue;
+      if (el.hasAttribute('data-mira-processing') || _miraProcessingSet.has(el)) continue;
+
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+      if (textContent.length < 2) continue;
+
+      try {
+        await handleTranslateElement(el, false);
+        translateCount++;
+      } catch (error) {
+        logger.error('[Mira] Instagram modal scan error:', error);
+      }
+    }
+
+    const nestedSpans = modal.querySelectorAll('span[dir="auto"] div[style*="display: inline"] span[dir="auto"]');
+    for (const el of nestedSpans) {
+      if (!el || el.nodeType !== 1) continue;
+
+      const hasTranslationContainer = el.querySelector('.kt-paragraph-translation') ||
+        el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+
+      if (el.dataset.translated === 'true') {
+        if (hasTranslationContainer) {
+          continue;
+        } else {
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-instagram-tracked');
+        }
+      }
+
+      if (el.dataset.translating === 'true') continue;
+      if (el.hasAttribute('data-mira-processing') || _miraProcessingSet.has(el)) continue;
+
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+      if (textContent.length < 2) continue;
+
+      try {
+        await handleTranslateElement(el, false);
+        translateCount++;
+      } catch (error) {
+        logger.error('[Mira] Instagram nested span error:', error);
+      }
+    }
+
+    logger.log(`[Mira] Instagram modal scan complete, translated ${translateCount} elements`);
+  } catch (error) {
+    logger.error('[Mira] scanInstagramModal error:', error);
+  }
+}
+
+// 扫描Instagram评论和其他内容
+async function scanInstagramComments(commentContainer) {
+  logger.log('[Mira] scanInstagramComments called');
+  if (!commentContainer) {
+    logger.log('[Mira] scanInstagramComments: container is null, returning');
+    return;
+  }
+  try {
+    const finalRules = resolveActiveSelectors(currentActiveSelectors);
+    const selectorArray = finalRules.split(',').map(s => s.trim()).filter(Boolean);
+
+    // 添加特定的评论选择器
+    const additionalSelectors = [
+      "[class*='_a9zr']",
+      "span[dir='auto']",
+      "h1[dir='auto']",
+      "h2[dir='auto']",
+      "h3[dir='auto']"
+    ];
+
+    const allSelectors = [...selectorArray, ...additionalSelectors]
+      .filter((v, i, a) => a.indexOf(v) === i); // 去重
+
+    // 先检查并修复被误标记的元素
+    logger.log('[Mira Comment Scan] Starting pre-scan for mismarked elements');
+    const allPotentialElements = commentContainer.querySelectorAll('h1[dir="auto"], h2[dir="auto"], h3[dir="auto"], h4[dir="auto"], span[dir="auto"], [class*="_a9zr"]');
+    logger.log(`[Mira Comment Scan] Found ${allPotentialElements.length} potential elements in container`);
+
+    let fixedInComments = 0;
+    const fixedCommentElements = [];  // 跟踪被修复的元素
+
+    for (const el of allPotentialElements) {
+      if (!el.dataset.translated) continue;
+
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+
+      // 检查是否有翻译容器
+      const hasInternalContainer = el.querySelector('.kt-paragraph-translation');
+      const hasSiblingContainer = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+      const parentHasSibling = el.parentElement?.querySelector(':scope > .kt-paragraph-translation');
+
+      if (!hasInternalContainer && !hasSiblingContainer && !parentHasSibling) {
+        if (textContent.length > 2) {
+          logger.log(`[Mira Comment Scan] MISMARKED: "${textContent.substring(0, 50)}" - cleared and queued for force translation`);
+
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-translating');
+          el.removeAttribute('data-instagram-tracked');
+          el.removeAttribute('data-mira-processing');
+          _miraProcessingSet.delete(el);
+          fixedInComments++;
+          fixedCommentElements.push(el);
+        }
+      }
+    }
+
+    if (fixedInComments > 0) {
+      for (const el of fixedCommentElements) {
+        try {
+          await handleTranslateElement(el, true);
+        } catch (error) {
+          logger.error('[Mira Comment Scan] Error force-translating fixed element:', error);
+        }
+      }
+    }
+
+    const allTargets = commentContainer.querySelectorAll(allSelectors.join(', '));
+
+    let translateCount = 0;
+    for (const el of allTargets) {
+      if (!el || el.nodeType !== 1) continue;
+
+      if (el.dataset.miraFixedMismark === 'true') {
+        el.removeAttribute('data-mira-fixed-mismark');
+        continue;
+      }
+
+      const hasTranslationContainer = el.querySelector('.kt-paragraph-translation') ||
+        el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+
+      if (el.dataset.translated === 'true') {
+        if (hasTranslationContainer) {
+          continue;
+        } else {
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-instagram-tracked');
+        }
+      }
+
+      if (el.dataset.translating === 'true') continue;
+      if (el.hasAttribute('data-mira-processing') || _miraProcessingSet.has(el)) continue;
+
+      const textContent = el.innerText?.trim() || el.textContent?.trim() || '';
+      if (textContent.length < 2) continue;
+
+      // 跳过用户名和时间戳 - 扩展时间格式支持
+      if (/^\d+[shdwmy]$|^now$|^\d+\s*(s|sec|seconds?|m|min|minutes?|h|hour|hours?|d|day|days?|w|week|weeks?|mo|month|months?|y|year|years?)$/i.test(textContent)) continue;
+
+      // 跳过纯emoji或纯数字
+      if (/^[\d\p{Emoji}]+$/u.test(textContent)) continue;
+
+      try {
+        await handleTranslateElement(el, false);
+        el.dataset.instagramTracked = 'true';
+        translateCount++;
+      } catch (error) {
+        logger.error('[Mira] Instagram comment scan error:', error);
+      }
+    }
+
+    if (translateCount > 0) {
+      logger.log(`[Mira] Instagram comments scanned, translated ${translateCount} elements`);
+    }
+  } catch (error) {
+    logger.error('[Mira] scanInstagramComments error:', error);
+  }
 }
 
 /**
@@ -4420,23 +4707,23 @@ function initSelectionTranslate() {
       let isZhTw = false;
 
       if (isWord) {
-  const encoded = encodeURIComponent(text.trim().toLowerCase());
-  const tgt = (window.currentTargetL || getBrowserLang() || 'en').toLowerCase();
-  const src = (res.langInfo?.code || state?.sourceLang || 'en').toLowerCase();
-  isZhTw = tgt === 'zh-tw';
+        const encoded = encodeURIComponent(text.trim().toLowerCase());
+        const tgt = (window.currentTargetL || getBrowserLang() || 'en').toLowerCase();
+        const src = (res.langInfo?.code || state?.sourceLang || 'en').toLowerCase();
+        isZhTw = tgt === 'zh-tw';
 
-  let dictPath = null; 
-  if (src === 'en') {
-    dictPath = FORWARD[tgt === 'tw' ? 'zh-tw' : tgt] || null;
-  }
+        let dictPath = null;
+        if (src === 'en') {
+          dictPath = FORWARD[tgt === 'tw' ? 'zh-tw' : tgt] || null;
+        }
 
-  if (dictPath) {
-    cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
-  }
-}
+        if (dictPath) {
+          cambridgeHref = `https://dictionary.cambridge.org/dictionary/${dictPath}/${encoded}`;
+        }
+      }
 
       // 基本释义下方（仅 zh-tw）
-     // const pBasic = shadow.getElementById('p-basic');
+      // const pBasic = shadow.getElementById('p-basic');
       const existingTop = shadow.getElementById('p-cambridge-top');
       if (existingTop) existingTop.remove();
 
@@ -5950,7 +6237,7 @@ function syncSubtitleDisplay() {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        bottom: 20px;
+        bottom: 60px;
         z-index: 2147483647;
         color: #94a3b8;
         font-size: 14px;
@@ -5959,7 +6246,7 @@ function syncSubtitleDisplay() {
         border-radius: 8px;
         pointer-events: none;
     `;
-    tempHint.innerText = 'Loading subtitles...';
+    tempHint.innerText = t('loadingSubtitles',window.uiLanguage) || 'Loading subtitles...';
     player.appendChild(tempHint);
     return;
   }
