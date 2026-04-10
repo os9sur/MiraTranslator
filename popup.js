@@ -2292,34 +2292,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  const updateScanInputs = () => {
-    if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
-    const config = window.currentConfig || {};
-    const sc = config.scanConfig || { global: {}, custom: {} };
-    const custom = sc.custom || {};
-    const global = sc.global || {};
-    let targetConfig;
-    const tabCurrentEl = document.getElementById('tabCurrent');
-    const isCurrentMode = tabCurrentEl ? tabCurrentEl.classList.contains('active') : true;
-    const tabUrl = window.domain || "";
-    if (isCurrentMode) {
-      const defaultScanRule = (typeof SiteRules !== 'undefined') ? SiteRules.getRule(tabUrl) : { selectors: '', minLen: 5 };
-      targetConfig = custom[tabUrl] || defaultScanRule;
-    } else {
-      const generic = (typeof SiteRules !== 'undefined') ? SiteRules.generic : { selectors: '', minLen: 5 };
-      targetConfig = {
-        selectors: global.selectors || generic.selectors,
-        minLen: global.minLen ?? generic.minLen
-      };
-    }
-    if (selectorInput) {
-      selectorInput.value = (targetConfig && targetConfig.selectors)
-        ? formatSelectors(targetConfig.selectors)
-        : '';
-      _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
-    }
-    if (minLenInput) minLenInput.value = (targetConfig && targetConfig.minLen) ? targetConfig.minLen : 5;
-  };
+const updateScanInputs = () => {
+  if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
+  const config = window.currentConfig || {};
+  const sc = config.scanConfig || { global: {}, custom: {} };
+  const custom = sc.custom || {};
+  const global = sc.global || {};
+  let targetConfig;
+  const tabCurrentEl = document.getElementById('tabCurrent');
+  const isCurrentMode = tabCurrentEl ? tabCurrentEl.classList.contains('active') : true;
+  const tabUrl = window.domain || "";
+  
+  if (isCurrentMode) {
+    //  当前网站模式：优先用户自定义，再用网站默认，再用fallback
+    const defaultScanRule = (typeof SiteRules !== 'undefined') ? SiteRules.getRule(tabUrl) : { selectors: '', minLen: 2 };
+    targetConfig = custom[tabUrl] || defaultScanRule;
+  } else {
+    //  全局模式：只显示全局设置，没设置过就显示generic
+    const generic = (typeof SiteRules !== 'undefined') ? SiteRules.generic : { selectors: '', minLen: 15 };
+    targetConfig = {
+      selectors: global.selectors || generic.selectors,
+      minLen: global.minLen ?? generic.minLen  // 全局没设置就用generic（15）
+    };
+  }
+  
+  if (selectorInput) {
+    selectorInput.value = (targetConfig && targetConfig.selectors)
+      ? formatSelectors(targetConfig.selectors)
+      : '';
+    _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
+  }
+  if (minLenInput) minLenInput.value = (targetConfig && targetConfig.minLen) ? targetConfig.minLen : 15;
+};
   document.getElementById('tabCurrent').onclick = () => {
     currentMode = 'current';
     refreshUI();
@@ -2375,9 +2379,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const normalizeSelectors = (str) =>
     str.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).join(', ');
   const selectorInput = document.getElementById('conf-selectors');
-  const minLenInput = document.getElementById('conf-minlen');
   const userScanConfig = currentConfig.scanConfig?.custom?.[domain];
   const defaultScanRule = SiteRules.getRule(domain);
+  const minLenInput = document.getElementById('conf-minlen');
   if (userScanConfig && userScanConfig.selectors !== undefined) {
     selectorInput.value = formatSelectors(userScanConfig.selectors);
   } else {
