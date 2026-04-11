@@ -1256,28 +1256,32 @@ const TranslationBatcher = {
       tempDiv.innerHTML = transContent;
       const markedLinks = tempDiv.querySelectorAll('a[data-mira-link]');
       markedLinks.forEach(link => {
-        const idx = link.getAttribute('data-mira-link');
-        const meta = linkMap[idx];
-        if (meta) {
-          link.href = meta.href;
-          link.target = '_blank';
-          let display = (linkMap[idx]._translatedText || meta.textContent || link.textContent || '')
-            .replace(/^https?:\/\//i, '');
-          const LIMIT = 25;
-          if (display.length > LIMIT) {
-            display = display.substring(0, LIMIT).replace(/\/$/, '') + '...';
-          }
-          link.textContent = display;
-          link.style.cssText = `
-            color: #1d9bf0 !important;
-            display: inline !important;
-            white-space: nowrap !important;
-            font-size: inherit !important;
-            letter-spacing: -0.2px !important;
-          `;
-        }
-        link.removeAttribute('data-mira-link');
-      });
+  const idx = link.getAttribute('data-mira-link');
+  const meta = linkMap[idx];
+  if (meta) {
+    link.href = meta.href;
+    link.target = '_blank';
+    let display = (linkMap[idx]._translatedText || meta.textContent || link.textContent || '')
+      .replace(/^https?:\/\//i, '');
+    
+    // 只对看起来像 URL 的内容截断，译文不截断
+    const looksLikeUrl = /^[\w\-\.\/]+$/.test(display) && !display.includes(' ');
+    const LIMIT = 25;
+    if (looksLikeUrl && display.length > LIMIT) {
+      display = display.substring(0, LIMIT).replace(/\/$/, '') + '...';
+    }
+    
+    link.textContent = display;
+    link.style.cssText = `
+      color: #1d9bf0 !important;
+      display: inline !important;
+      white-space: normal !important;
+      font-size: inherit !important;
+      letter-spacing: -0.2px !important;
+    `;
+  }
+  link.removeAttribute('data-mira-link');
+});
       if (mentionMap && Object.keys(mentionMap).length > 0) {
         tempDiv.querySelectorAll('span[data-mira-mention]').forEach(placeholder => {
           const idx = placeholder.getAttribute('data-mira-mention');
@@ -1296,8 +1300,10 @@ const TranslationBatcher = {
       container.style.color = "";
       container.dataset.translated = "true";
       if (typeof applyUserStyles === 'function') {
-        applyUserStyles(container);
-      }
+  // 从 container 上读取之前存的字体大小
+  const savedFontSize = container.dataset.inheritFontSize || null;
+  applyUserStyles(container, null, savedFontSize);  
+}
     } catch (e) {
       logger.error('[Batcher] 渲染出错:', e);
       if (container && container.parentNode) container.remove();
@@ -1498,7 +1504,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
-//logger.log('[Mira] handleTranslateElement called', el, new Error().stack.split('\n')[2]);
+  //logger.log('[Mira] handleTranslateElement called', el, new Error().stack.split('\n')[2]);
   if (el.tagName === 'LI') {
     const rawText = el.innerText?.trim() || '';
     const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
@@ -1550,25 +1556,41 @@ async function handleTranslateElement(el, forceRefresh = false) {
     .join('')
     .replace(/[ \t]+/g, ' ')
     .trim();
+    //youtube 排除列表
   if (isYoutube && el) {
- const isExcluded = el.closest(`
-  .yt-content-metadata-view-model__metadata-row, 
-  .yt-content-metadata-view-model__metadata-text,
-  ytd-video-owner-renderer #channel-name,
-  .ytd-channel-name,
-  ytd-guide-entry-renderer,
-  #guide-section-title,
-  ytd-active-account-header-renderer,
-  ytd-multi-page-menu-renderer,
-  #header-description,
-  ytd-playlist-panel-video-renderer
-`);
+     const isExcluded = el.closest(`
+    .yt-content-metadata-view-model__metadata-row, 
+    .yt-content-metadata-view-model__metadata-text,
+    ytd-video-owner-renderer #channel-name,
+    .ytd-channel-name,
+    ytd-guide-entry-renderer,
+    #guide-section-title,
+    ytd-active-account-header-renderer,
+    ytd-multi-page-menu-renderer,
+    #header-description,
+    ytd-playlist-panel-video-renderer,
+    #info-container,
+    ytd-comments-header-renderer,
+    ytd-video-owner-renderer
+  `);
     if (isExcluded) {
       el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
       el.dataset.translated = "true";
       el.removeAttribute('data-mira-processing');
       _miraProcessingSet.delete(el);
       return;
+    }
+
+    // 防止同一个标题被重复翻译（Shorts 和普通视频卡片）
+    const parentH3 = el.closest('h3');
+    if (parentH3) {
+      const h3Next = parentH3.nextElementSibling;
+      if (h3Next?.classList?.contains('kt-paragraph-translation')) {
+        el.dataset.translated = 'true';
+        el.removeAttribute('data-mira-processing');
+        _miraProcessingSet.delete(el);
+        return;
+      }
     }
   }
   if (isGitHub) {
@@ -2047,20 +2069,31 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const originFontWeight = originStyle.fontWeight;
 
     // YouTube 优先取 a 标签字体，其他直接取 el
-    let originFontSize = originStyle.fontSize;
-    if (isYoutube) {
+  let originFontSize = originStyle.fontSize;
+  if (isYoutube) {
+    const elSize = parseFloat(originFontSize);
+    // 只有当 el 本身字体异常小（h3 的 11.7px 这种情况）才往内部找 a
+    if (elSize < 12) {
       const innerA = el.querySelector('a');
-      if (innerA) originFontSize = window.getComputedStyle(innerA).fontSize;
+      if (innerA) {
+        const innerSize = parseFloat(window.getComputedStyle(innerA).fontSize);
+        if (innerSize > elSize) originFontSize = innerSize + 'px';
+      }
     }
-if (isFacebook) {
-  const size = parseFloat(originFontSize);
-  if (!size || size < 14) originFontSize = '15px';
-}
+  }
+    if (isFacebook) {
+      const size = parseFloat(originFontSize);
+      if (!size || size < 14) originFontSize = '15px';
+    }
     // 存到 dataset，供翻译完成后的回调使用
     transContainer.dataset.inheritFontSize = originFontSize;
 
     await applyUserStyles(transContainer, null, originFontSize);
-
+if (isYoutube) {
+  transContainer.querySelectorAll('a').forEach(a => {
+    a.style.setProperty('white-space', 'normal', 'important');
+  });
+}
     // 强制 font-size，防止 applyUserStyles 内部 await 期间 DOM 变化导致丢失
     if (originFontSize) {
       transContainer.style.setProperty('font-size', originFontSize, 'important');
