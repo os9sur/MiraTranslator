@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     dropdown.style.left = rect.left + 'px';
                     dropdown.style.width = rect.width + 'px';
                     dropdown.style.maxHeight = '180px';
-                    dropdown.style.overflowY = 'auto'; // ← 加这个
+                    dropdown.style.overflowY = 'auto';  
                     dropdown.style.zIndex = '999999';
                     dropdown.classList.add('show');
                     container.classList.add('open');

@@ -178,9 +178,9 @@ function smartClear(newSelectors) {
     }
   });
 }
-async function applyUserStyles(transEl, directConfig = null) {
+async function applyUserStyles(transEl, directConfig = null, inheritFontSize = null) {
   const render = (config) => {
-    const originalFontSize = transEl.style.fontSize;
+    const finalFontSize = inheritFontSize || transEl.dataset.inheritFontSize || null;
     const isWiki = location.hostname.includes('wikipedia.org');
     const isInstagram = location.hostname.includes('instagram.com');
     const clearStyle = isWiki ? 'none' : 'both';
@@ -221,36 +221,29 @@ async function applyUserStyles(transEl, directConfig = null) {
       logger.warn("无法获取原文对齐方式", e);
     }
     if (!config) {
-      const isWikiParagraph = isWiki &&
-        transEl.parentElement?.className?.includes('mw-parser-output');
-
       const verticalMargin = isInstagram ? '0px' : '6px';
       const bottomMargin = isInstagram ? '2px' : '4px';
       let defaultCss = `
-      display: block !important;
-      width: auto !important;
-      clear: ${clearStyle} !important;
-      margin: ${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft} !important;
-      padding-left: ${sourcePaddingLeft} !important;
-      text-align: ${sourceAlign} !important; 
-      color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
-      font-style: ${transEl.dataset.translated === 'true' ? 'normal' : 'italic'} !important;
-      text-decoration: underline !important;
-      text-decoration-style: dashed !important;
-      text-decoration-color: #38bdf866 !important;
-      text-decoration-thickness: 0.5px !important;
-      text-underline-offset: 5px !important;
-      background: transparent !important;
-      border: none !important;
-      padding: 0 !important;
-      animation: fadeIn 0.6s ease-out !important;
-    `;
+        display: block !important;
+        width: auto !important;
+        clear: ${clearStyle} !important;
+        margin: ${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft} !important;
+        padding-left: ${sourcePaddingLeft} !important;
+        text-align: ${sourceAlign} !important; 
+        color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
+        font-style: ${transEl.dataset.translated === 'true' ? 'normal' : 'italic'} !important;
+        text-decoration: none !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        animation: fadeIn 0.6s ease-out !important;
+        ${finalFontSize ? `font-size: ${finalFontSize} !important;` : ''}
+`;
       transEl.style.cssText = defaultCss;
       const oldWrapper = transEl.querySelector('.mira-default-wrapper');
       if (oldWrapper) {
         transEl.innerHTML = oldWrapper.innerHTML;
       }
-      if (originalFontSize) transEl.style.fontSize = originalFontSize;
       return;
     }
     const color = config.color || '#60a5fa';
@@ -270,7 +263,7 @@ async function applyUserStyles(transEl, directConfig = null) {
         !transEl.closest('.sidebar') &&
         !transEl.closest('.navbox'))
     );
-    const finalMargin = isInstagram ? '0px 0px 2px 0px' : (isWikiUI ? '2px 0 0 0' : '6px 0 4px 0');
+    const finalMargin = isInstagram ? '-5px 0px 2px 0px' : (isWikiUI ? '2px 0 0 0' : '6px 0 4px 0');
     const finalOverflow = isInstagram ? 'visible' : (isWikiUI ? 'hidden' : 'visible');
     let css = `
         display: ${isWikiUI ? 'inline-block' : 'block'} !important;
@@ -368,6 +361,11 @@ async function applyUserStyles(transEl, directConfig = null) {
         css += `opacity: 0.45 !important;`;
         break;
     }
+
+    if (finalFontSize) {
+      css += `font-size: ${finalFontSize} !important;`;
+    }
+
     css += `padding: ${finalPadding} !important;`;
     if (isBlur) {
       css += `filter: blur(5px) !important; cursor: help !important;`;
@@ -396,9 +394,9 @@ async function applyUserStyles(transEl, directConfig = null) {
           padding: 1px 5px !important;
         `;
     }
-    if (originalFontSize) {
-      transEl.style.fontSize = originalFontSize;
-    }
+    // if (originalFontSize) {
+    //   transEl.style.fontSize = originalFontSize;
+    // }
   };
   try {
     const data = await safeGetStorage('userStyleConfig');
@@ -519,8 +517,13 @@ function ensureYouTubeNavigationListener() {
       const iv = setInterval(async () => {
         attempts++;
         ensureYouTubeReadyWatcher();
-        const res = await executeReScan({ selectors: currentActiveSelectors || 'p', forceAll: false });
-        if ((res && res.triggered > 10) || attempts >= 6) clearInterval(iv);
+        try {
+          const res = await executeReScan({ selectors: currentActiveSelectors || 'p', forceAll: false });
+          if ((res && res.triggered > 10) || attempts >= 6) clearInterval(iv);
+        } catch (e) {
+          logger.error('[Mira] executeReScan error:', e.name, e.message, e); // 打印完整信息
+          if (attempts >= 6) clearInterval(iv);
+        }
       }, 800);
     };
     window.addEventListener('locationchange', () => scheduleRescanRetries('locationchange'));
@@ -1495,7 +1498,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
-
+//logger.log('[Mira] handleTranslateElement called', el, new Error().stack.split('\n')[2]);
   if (el.tagName === 'LI') {
     const rawText = el.innerText?.trim() || '';
     const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
@@ -1548,16 +1551,18 @@ async function handleTranslateElement(el, forceRefresh = false) {
     .replace(/[ \t]+/g, ' ')
     .trim();
   if (isYoutube && el) {
-    const isExcluded = el.closest(`
-      .yt-content-metadata-view-model__metadata-row, 
-      .yt-content-metadata-view-model__metadata-text,
-      ytd-video-owner-renderer #channel-name,
-      .ytd-channel-name,
-      ytd-guide-entry-renderer,
-      #guide-section-title,
-      ytd-active-account-header-renderer,
-      ytd-multi-page-menu-renderer
-    `);
+ const isExcluded = el.closest(`
+  .yt-content-metadata-view-model__metadata-row, 
+  .yt-content-metadata-view-model__metadata-text,
+  ytd-video-owner-renderer #channel-name,
+  .ytd-channel-name,
+  ytd-guide-entry-renderer,
+  #guide-section-title,
+  ytd-active-account-header-renderer,
+  ytd-multi-page-menu-renderer,
+  #header-description,
+  ytd-playlist-panel-video-renderer
+`);
     if (isExcluded) {
       el.querySelectorAll('.kt-paragraph-translation').forEach(t => t.remove());
       el.dataset.translated = "true";
@@ -1806,6 +1811,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
           display: block !important;
         }
         .kt-paragraph-translation { display: block !important; clear: both !important; width: 100% !important; position: relative !important; }
+        .kt-paragraph-translation a { text-decoration: inherit !important; color: inherit !important; }
       `);
       finalCheckNode.insertAdjacentElement('afterend', transContainer);
     } else if (el.tagName === 'LI' && (
@@ -1925,7 +1931,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
       }
       transContainer.style.setProperty('clear', 'none', 'important');
     } else if (isYoutube) {
-      finalCheckNode.insertAdjacentElement('afterend', transContainer);
+      // 找到最近的块级容器，避免插入到 <a> 内部
+      let insertTarget = finalCheckNode;
+      while (insertTarget && insertTarget.closest('a')) {
+        insertTarget = insertTarget.closest('a').parentElement;
+      }
+      (insertTarget || finalCheckNode).insertAdjacentElement('afterend', transContainer);
     } else if (el.tagName === 'P') {
       el.appendChild(transContainer);
     } else if (isHN) {
@@ -2020,7 +2031,11 @@ async function handleTranslateElement(el, forceRefresh = false) {
           el.appendChild(transContainer);
         }
       } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'SPAN') {
-        el.appendChild(transContainer);
+        if (el.tagName === 'SPAN') {
+          el.insertAdjacentElement('afterend', transContainer);
+        } else {
+          el.appendChild(transContainer);
+        }
       } else {
         mountTarget.insertAdjacentElement('afterend', transContainer);
       }
@@ -2028,15 +2043,32 @@ async function handleTranslateElement(el, forceRefresh = false) {
   }
   el.removeAttribute('data-mira-container-pending');
   if (typeof applyUserStyles === 'function') {
-    await applyUserStyles(transContainer);
+    const originStyle = window.getComputedStyle(el);
+    const originFontWeight = originStyle.fontWeight;
+
+    // YouTube 优先取 a 标签字体，其他直接取 el
+    let originFontSize = originStyle.fontSize;
+    if (isYoutube) {
+      const innerA = el.querySelector('a');
+      if (innerA) originFontSize = window.getComputedStyle(innerA).fontSize;
+    }
+if (isFacebook) {
+  const size = parseFloat(originFontSize);
+  if (!size || size < 14) originFontSize = '15px';
+}
+    // 存到 dataset，供翻译完成后的回调使用
+    transContainer.dataset.inheritFontSize = originFontSize;
+
+    await applyUserStyles(transContainer, null, originFontSize);
+
+    // 强制 font-size，防止 applyUserStyles 内部 await 期间 DOM 变化导致丢失
+    if (originFontSize) {
+      transContainer.style.setProperty('font-size', originFontSize, 'important');
+    }
 
     if (!existingContainer) {
       transContainer.classList.add('kt-loading');
     }
-    const originStyle = window.getComputedStyle(el);
-    const originFontSize = originStyle.fontSize;
-    const originFontWeight = originStyle.fontWeight;
-    transContainer.style.setProperty('font-size', originFontSize, 'important');
 
     if (isYoutube && (isYoutubeCustomTag || youtubeListTitleLink)) {
       transContainer.style.setProperty('font-weight', originFontWeight, 'important');
@@ -2053,6 +2085,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
         transContainer.style.setProperty('margin-top', '2px', 'important');
       }
     }
+
     if (isRTL) {
       transContainer.style.setProperty('direction', 'rtl', 'important');
       transContainer.style.setProperty('text-align', 'right', 'important');
@@ -2080,8 +2113,7 @@ function getObserver() {
       const host = location.hostname;
       const isYoutube = host.includes('youtube.com');
       const isInstagram = host.includes('instagram.com');
-      const isFacebook = host.includes('facebook.com');
-      const isDynamic = isYoutube || isFacebook || isInstagram;  // 动态更新
+      const isDynamic = isYoutube || isInstagram;
 
       entries.forEach(async entry => {
         if (!isPageScanEnabled || !entry.isIntersecting) return;
@@ -2095,18 +2127,22 @@ function getObserver() {
         }
 
         if (!isMatch && targetEl === el) {
-          if (!(isDynamic && el.classList?.contains(isYoutube ? 'yt-core' : 'x'))) {
+          if (!(isDynamic && (
+            isYoutube
+              ? (el.classList?.contains('yt-core-attributed-string') ||
+                el.classList?.contains('ytLockupMetadataViewModelTitle') ||
+                el.classList?.contains('ytLockupMetadataViewModelHeadingReset'))
+              : el.classList?.contains('x')
+          ))) {
             window.observer.unobserve(el);
             return;
           }
         }
 
-        // 动态内容检测（YouTube + Facebook）
         if (isDynamic) {
           const currentText = (targetEl.textContent || '').trim();
           const lastText = targetEl._miraLastText;
           if (lastText && lastText !== currentText) {
-            // 内容变化，清除旧翻译
             targetEl.removeAttribute('data-translated');
             targetEl.removeAttribute('data-translating');
             targetEl.removeAttribute('data-mira-processing');
@@ -2124,7 +2160,6 @@ function getObserver() {
 
         if (targetEl.dataset.translated === 'true') {
           if (isInstagram) return;
-
           if (!isDynamic) window.observer.unobserve(el);
           return;
         }
@@ -2160,6 +2195,58 @@ function getObserver() {
   }
   return window.observer;
 }
+
+
+function initFacebookDeepWatcher() {
+  if (!location.hostname.includes('facebook.com')) return;
+  if (window.__mira_fb_see_more_hooked) return;
+
+  const lengthCache = new WeakMap();
+
+  const watcher = new MutationObserver((mutations) => {
+    const postElements = document.querySelectorAll('div[dir="auto"].xdj266r, div[data-ad-comet-preview="message"]');
+
+    postElements.forEach(el => {
+      const currentText = (el.textContent || '').trim();
+      const currentLen = currentText.length;
+      const lastLen = lengthCache.get(el);
+
+      if (lastLen !== undefined && currentLen > lastLen + 10) {
+        if (el.getAttribute('data-translated') === 'true') {
+          logger.log('[Mira] Facebook 内容膨胀检测成功，重置翻译...');
+
+          el.removeAttribute('data-translated');
+          el.removeAttribute('data-mira-processing');
+          _miraProcessingSet?.delete(el);
+
+          el.querySelectorAll('.kt-paragraph-translation').forEach(b => b.remove());
+          if (el.nextElementSibling?.classList.contains('kt-paragraph-translation')) {
+            el.nextElementSibling.remove();
+          }
+
+          lengthCache.set(el, currentLen);
+          if (typeof handleTranslateElement === 'function') {
+            handleTranslateElement(el, true);
+          }
+        }
+      }
+
+      if (lastLen === undefined && currentLen > 0) {
+        lengthCache.set(el, currentLen);
+      }
+    });
+  });
+
+  watcher.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  window.__mira_fb_see_more_hooked = true;
+}
+
+initFacebookDeepWatcher();
 
 
 function initInstagramDeepWatcher() {
@@ -2205,6 +2292,7 @@ function initInstagramDeepWatcher() {
     characterData: true
   });
 }
+
 initInstagramDeepWatcher();
 /**
  * 局部扫描函数：只扫描特定容器内的无翻译内容
@@ -2263,65 +2351,6 @@ async function scanArticleContentOnly(article, selectors) {
     logger.error('[Mira] scanArticleContentOnly error:', error);
   }
 }
-
-/**
- * Facebook "See More" 展开处理
- */
-function initFacebookDeepWatcher() {
-  if (!location.hostname.includes('facebook.com')) return;
-
-  const lengthCache = new WeakMap();
-
-  const watcher = new MutationObserver((mutations) => {
-    const postElements = document.querySelectorAll('div[dir="auto"].xdj266r, div[data-ad-comet-preview="message"]');
-
-    postElements.forEach(el => {
-      const currentText = (el.textContent || '').trim();
-      const currentLen = currentText.length;
-      const lastLen = lengthCache.get(el);
-
-      //  比对内容长度 ,判断是否已经已经翻译过
-      if (lastLen !== undefined && currentLen > lastLen + 10) {
-        if (el.getAttribute('data-translated') === 'true') {
-          logger.log('[Mira] Facebook 内容膨胀检测成功，重置翻译...');
-
-          //  清除所有标记
-          el.removeAttribute('data-translated');
-          el.removeAttribute('data-mira-processing');
-          _miraProcessingSet?.delete(el);
-
-          //  移除旧的翻译框（FB 的翻译框可能在内部，也可能是相邻节点）
-          const oldBubbles = el.querySelectorAll('.kt-paragraph-translation');
-          oldBubbles.forEach(b => b.remove());
-
-          if (el.nextElementSibling?.classList.contains('kt-paragraph-translation')) {
-            el.nextElementSibling.remove();
-          }
-
-          //  记录新长度并触发翻译
-          lengthCache.set(el, currentLen);
-          if (typeof handleTranslateElement === 'function') {
-            handleTranslateElement(el, true);
-          }
-        }
-      }
-
-      // 首次扫描记录
-      if (lastLen === undefined && currentLen > 0) {
-        lengthCache.set(el, currentLen);
-      }
-    });
-  });
-
-  watcher.observe(document.body, {
-    childList: true,
-    subtree: true,
-    characterData: true
-  });
-
-  window.__mira_fb_see_more_hooked = true;
-}
-initFacebookDeepWatcher();
 
 // 扫描Instagram模态框（帖子详情、评论）
 async function scanInstagramModal(modal) {
@@ -3593,55 +3622,30 @@ function initSelectionTranslate() {
     }
 
       .lang-tag-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        min-height: 36px;
-        padding: 0;
-        cursor: pointer;
-        border-radius: 50%;
-        color: white;
-        border: none !important;
-        outline: none;
-        transition: all 0.3s ease;
-        background: radial-gradient(
-          circle at center, 
-          color-mix(in srgb, var(--p-accent) 25%, transparent) 0%, 
-          color-mix(in srgb, var(--p-accent) 10%, transparent) 70%, 
-          transparent 100%
-        ) !important;
-        box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 20%, transparent);
-      }
-      .lang-tag-btn:hover {
-        background: radial-gradient(
-          circle at center, 
-          color-mix(in srgb, var(--p-accent) 35%, transparent) 0%, 
-          color-mix(in srgb, var(--p-accent) 15%, transparent) 80%, 
-          transparent 100%
-        ) !important;
-        transform: scale(1.05);
-        box-shadow: 0 0 15px color-mix(in srgb, var(--p-accent) 40%, transparent);
-      }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none !important;
+  outline: none;
+  background: transparent !important;
+  box-shadow: none;
+  transition: background 0.2s ease;
+  min-width: unset;
+  width: auto;
+  height: auto;
+}
 
-      .lang-tag-btn:active {
-        animation: neon-click-spread 0.4s ease-out;
-        background: color-mix(in srgb, var(--p-accent) 50%, transparent) !important;
-      }
+.lang-tag-btn:hover {
+  background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
+  transform: none;
+}
 
-      .lang-tag-btn svg {
-        flex-shrink: 0;
-        display: block;
-        fill: currentColor;  
-      }
-
-      .lang-tag-btn span {
-        line-height: 1;
-        white-space: nowrap;
-        margin-top: -1px;
-      }
+.lang-tag-btn:active {
+  background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
+}
         /* ── 原文展开按钮 ── */
       .p-orig-toggle {
         display:        inline-flex;
@@ -4457,25 +4461,22 @@ function initSelectionTranslate() {
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
   
-        <div style="display:flex; align-items:center; gap:4px;">
-  
- <!-- 源语言 -->
-<div id="p-lang-select" class="lang-tag-btn"
-     style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
-  <span id="p-lang-src" style="opacity:0.9; pointer-events:none;">AUTO</span>
-</div>
+<div style="display:inline-flex; align-items:center; gap:2px; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
 
-<!-- 箭头 -->
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-     stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
-  <path d="M5 12h14m-7-7 7 7-7 7"/>
-</svg>
+  <div id="p-lang-select" class="lang-tag-btn"
+       style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+    <span id="p-lang-src" style="pointer-events:none;">AUTO</span>
+  </div>
 
-<!-- 目标语言 -->
-<div id="p-lang-tgt-btn" class="lang-tag-btn"
-     style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
-  <span id="p-lang-tgt" style="pointer-events:none;">${targetLangDisplay}</span>
-</div>
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--p-accent)"
+       stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none;">
+    <path d="M5 12h14m-7-7 7 7-7 7"/>
+  </svg>
+
+  <div id="p-lang-tgt-btn" class="lang-tag-btn"
+       style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+    <span id="p-lang-tgt" style="pointer-events:none;">${targetLangDisplay}</span>
+  </div>
 
 </div>
 
@@ -6246,7 +6247,7 @@ function syncSubtitleDisplay() {
         border-radius: 8px;
         pointer-events: none;
     `;
-    tempHint.innerText = t('loadingSubtitles',window.uiLanguage) || 'Loading subtitles...';
+    tempHint.innerText = t('loadingSubtitles', window.uiLanguage) || 'Loading subtitles...';
     player.appendChild(tempHint);
     return;
   }

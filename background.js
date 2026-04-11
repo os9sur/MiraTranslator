@@ -109,7 +109,8 @@ async function applySyncResultToLocal(mergedData) {
 }
 async function webdavRequest(config, method, body = null) {
     const { webdavUrl, webdavUser, webdavPass } = config;
-    const auth = btoa(unescape(encodeURIComponent(`${webdavUser}:${webdavPass}`)));
+    const credentials = `${webdavUser}:${webdavPass}`;
+    const auth = btoa(String.fromCharCode(...new TextEncoder().encode(credentials)));
     let baseUrl = webdavUrl.trim();
     if (!baseUrl.endsWith('/')) baseUrl += '/';
     const fileUrl = baseUrl + SYNC_FILE_NAME;
@@ -122,14 +123,26 @@ async function webdavRequest(config, method, body = null) {
     };
     if (body) options.body = JSON.stringify(body);
     logger.log(`[WebDAV-Req] >>> ${method}: ${fileUrl}`);
-    let response = await fetch(fileUrl, options);
+
+    let response;
+    try {
+        response = await fetch(fileUrl, options);
+    } catch (err) {
+        throw new Error(`WebDAV 网络请求失败 [${method}]: ${err.message}`);
+    }
+
     if (method === 'PUT' && response.status === 404) {
         logger.warn("[WebDAV] 404 错误，正在尝试初始化文件夹结构...");
         await ensureRemoteDir(config);
-        response = await fetch(fileUrl, options);
+        try {
+            response = await fetch(fileUrl, options);
+        } catch (err) {
+            throw new Error(`WebDAV 重试请求失败 [${method}]: ${err.message}`);
+        }
     }
+
     if (method === 'GET') {
-        if (response.status === 404) return {};
+        if (response.status === 404 || response.status === 410) return {};
         if (!response.ok) throw new Error(`云端读取失败: ${response.status}`);
         return await response.json();
     }
@@ -277,38 +290,68 @@ async function handleSyncFlow(message, sendResponse) {
         }
     } catch (error) {
         logger.error("[Mira-TRACE] 同步发生错误", error);
+
         if (error.message.includes("401") || error.message.includes("Unauthorized")) {
             const checkData = await safeGetStorage(["google_drive_token", "onedrive_token"]);
             const config = (await safeGetStorage("syncConfig"))?.syncConfig || {};
             const method = config.method || 'googleDrive';
 
             if (method === 'oneDrive' && checkData?.onedrive_token) {
-                // 先尝试静默刷新
                 try {
                     const newToken = await getOneDriveTokenSilent();
                     await safeSetStorage({ onedrive_token: newToken });
                     logger.log("[Mira-TRACE] OneDrive token 静默刷新成功，重试同步");
-                    // 用新 token 重试一次
                     const retryResult = await syncWithOneDrive(newToken, direction);
                     if (chrome.runtime?.id) {
                         sendResponse({ success: true, mergedData: retryResult });
                     }
                     return;
                 } catch (silentErr) {
-                    // 静默刷新失败，清除 token，让前端触发交互授权
                     logger.warn("[Mira-TRACE] 静默刷新失败，清除 token 等待重新授权");
                     await safeRemoveStorage("onedrive_token");
-                    // 返回特定错误码，前端识别后触发交互授权
                     try { sendResponse({ success: false, error: 'onedrive_reauth_required' }); } catch (e) { }
                     return;
                 }
-            } else if (checkData?.google_drive_token && chrome.runtime?.id) {
-                await safeRemoveStorage("google_drive_token");
-                if (chrome.identity?.removeCachedAuthToken && !/Edg\//.test(navigator.userAgent)) {
-                    chrome.identity.removeCachedAuthToken({ token: checkData.google_drive_token }, () => { });
+
+            } else if (method === 'googleDrive') {
+                // 先清除过期的缓存 token
+                if (checkData?.google_drive_token) {
+                    await safeRemoveStorage("google_drive_token");
+                    if (chrome.identity?.removeCachedAuthToken && !/Edg\//.test(navigator.userAgent)) {
+                        await new Promise(resolve =>
+                            chrome.identity.removeCachedAuthToken(
+                                { token: checkData.google_drive_token }, resolve
+                            )
+                        );
+                    }
+                }
+                // 静默获取新 token 并重试
+                try {
+                    logger.log("[Mira-TRACE] 尝试静默刷新 Google token...");
+                    const newToken = await new Promise((resolve, reject) => {
+                        chrome.identity.getAuthToken({ interactive: false }, token => {
+                            if (chrome.runtime.lastError || !token) {
+                                reject(new Error(chrome.runtime.lastError?.message || "静默刷新失败"));
+                            } else {
+                                resolve(token);
+                            }
+                        });
+                    });
+                    await safeSetStorage({ google_drive_token: newToken });
+                    logger.log("[Mira-TRACE] Google token 静默刷新成功，重试同步");
+                    const retryResult = await syncWithGoogleDrive(newToken, direction);
+                    if (chrome.runtime?.id) {
+                        sendResponse({ success: true, mergedData: retryResult });
+                    }
+                    return;
+                } catch (silentErr) {
+                    logger.warn("[Mira-TRACE] 静默刷新失败，等待重新授权:", silentErr.message);
+                    try { sendResponse({ success: false, error: 'google_reauth_required' }); } catch (e) { }
+                    return;
                 }
             }
         }
+
         try { sendResponse({ success: false, error: error.message }); } catch (e) { }
     }
 }
@@ -334,38 +377,57 @@ async function handleOneDriveAuthFlow(sendResponse) {
         sendResponse({ success: false, error: err.message });
     }
 }
+// ── Google Drive 统一请求helper ──────────────────────────────────────────────
+async function gdriveFetch(url, options) {
+    let response;
+    try {
+        response = await fetch(url, options);
+    } catch (err) {
+        throw new Error(`Google Drive 网络请求失败: ${err.message}`);
+    }
+    if (response.status === 401) throw new Error("Unauthorized");
+    if (!response.ok) throw new Error(`Google Drive API Error: ${response.status} ${response.statusText}`);
+    return response;
+}
+
 async function syncWithGoogleDrive(token, direction) {
     logger.log("[Mira-TRACE] S1. 开始 Google Drive 同步, 方向:", direction);
     try {
         const safeLocalData = await prepareLocalPayload();
         const localVocabulary = safeLocalData.vocabulary || [];
         logger.log(`[Mira-TRACE] S2. 本地待同步生词数: ${localVocabulary.length}`);
+
+        // ──查找云端文件 ──────────────────────────────────────────────────
         const fileId = await findGoogleDriveFile(token);
+
+        // ──读取云端数据 ──────────────────────────────────────────────────
         let remoteData = {};
         if (fileId) {
-            const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (response.ok) {
-                try {
-                    remoteData = await response.json();
-                    logger.group("🔍 云端数据实测分析");
-                    if (remoteData.vocabulary && remoteData.vocabulary.length > 0) {
-                        logger.log("云端生词总数:", remoteData.vocabulary.length);
-                        const first = remoteData.vocabulary[0];
-                        const wordKey = first.w ? 'w' : (first.word ? 'word' : '未知');
-                        logger.log(`检测结果: 单词字段名=[${wordKey}]`);
-                    }
-                    logger.groupEnd();
-                } catch (e) {
-                    logger.error("解析云端 JSON 失败:", e);
-                    remoteData = {};
+            const response = await gdriveFetch(
+                `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            try {
+                remoteData = await response.json();
+                logger.group("🔍 云端数据实测分析");
+                if (remoteData.vocabulary?.length > 0) {
+                    logger.log("云端生词总数:", remoteData.vocabulary.length);
+                    const first = remoteData.vocabulary[0];
+                    const wordKey = first.w ? 'w' : (first.word ? 'word' : '未知');
+                    logger.log(`检测结果: 单词字段名=[${wordKey}]`);
                 }
+                logger.groupEnd();
+            } catch (e) {
+                logger.error("解析云端 JSON 失败:", e);
+                remoteData = {};
             }
         }
+
+        // ── 合并数据 ──────────────────────────────────────────────────────
         const safeRemoteData = remoteData || {};
         const rVocab = Array.isArray(safeRemoteData.vocabulary) ? safeRemoteData.vocabulary : [];
         let mergedData = {};
+
         if (direction === 'push') {
             baseKeys.forEach(key => {
                 mergedData[key] = safeLocalData[key];
@@ -393,30 +455,47 @@ async function syncWithGoogleDrive(token, direction) {
                 mergedData[key] = safeRemoteData[key] || safeLocalData[key];
             });
         }
+
         mergedData.vocabulary = mergeVocabulary(localVocabulary, rVocab);
         const finalPayload = { ...mergedData, lastSyncTime: Date.now() };
         logger.log(`[Mira-TRACE] S6. 合并完成, 最终总生词数: ${finalPayload.vocabulary.length}`);
-        const fetchOptions = {
+
+        // ── 写入云端 ──────────────────────────────────────────────────────
+        const uploadOptions = {
             method: 'PATCH',
             headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(finalPayload)
         };
+
         if (fileId) {
-            await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, fetchOptions);
+            await gdriveFetch(
+                `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+                uploadOptions
+            );
             logger.log("[Mira-TRACE] S7. 云端文件更新完成");
         } else {
-            const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: SYNC_FILE_NAME, parents: ['appDataFolder'] })
-            });
+            const createRes = await gdriveFetch(
+                'https://www.googleapis.com/drive/v3/files',
+                {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: SYNC_FILE_NAME, parents: ['appDataFolder'] })
+                }
+            );
             const newFile = await createRes.json();
-            await fetch(`https://www.googleapis.com/upload/drive/v3/files/${newFile.id}?uploadType=media`, fetchOptions);
+            if (!newFile.id) throw new Error("Google Drive 创建文件失败: 响应中缺少 id");
+            await gdriveFetch(
+                `https://www.googleapis.com/upload/drive/v3/files/${newFile.id}?uploadType=media`,
+                uploadOptions
+            );
             logger.log("[Mira-TRACE] S7. 云端新文件创建并写入完成");
         }
+
+        // ──应用到本地 ───────────────────────────────────────────────────
         await applySyncResultToLocal(finalPayload);
         logger.log("[Mira-TRACE] S10. Google Drive 同步流程结束");
         return finalPayload;
+
     } catch (err) {
         logger.error("[Mira-TRACE] Google Drive 同步致命错误:", err);
         throw err;
@@ -426,9 +505,16 @@ async function findGoogleDriveFile(token) {
     const q = `name='${SYNC_FILE_NAME}' and trashed=false`;
     const space = "appDataFolder";
     const url = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&spaces=${space}`;
-    const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+
+    let response;
+    try {
+        response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    } catch (err) {
+        throw new Error(`Google Drive 网络请求失败: ${err.message}`);
+    }
+
     if (!response.ok) {
         if (response.status === 401) throw new Error("Unauthorized");
         throw new Error(`Google API Error: ${response.status} ${response.statusText}`);
@@ -442,10 +528,21 @@ const ONEDRIVE_SYNC_FILE_NAME = SYNC_FILE_NAME; // 复用同一个文件名常�
 
 async function ensureOneDriveAppRoot(token) {
     for (let i = 0; i < 3; i++) {
-        const res = await fetch(
-            'https://graph.microsoft.com/v1.0/me/drive/special/approot',
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
+        let res;
+        try {
+            res = await fetch(
+                'https://graph.microsoft.com/v1.0/me/drive/special/approot',
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+        } catch (err) {
+            if (i < 2) {
+                logger.warn(`[OneDrive] approot 网络错误，第 ${i + 1} 次重试... ${err.message}`);
+                await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+                continue;
+            }
+            throw new Error(`初始化 approot 网络请求失败: ${err.message}`);
+        }
+
         if (res.ok) return await res.json();
         if (res.status === 401) throw new Error('Unauthorized');
         if (res.status === 503 || res.status === 502) {
@@ -461,9 +558,16 @@ async function ensureOneDriveAppRoot(token) {
 // 对应 findGoogleDriveFile
 async function findOneDriveFile(token) {
     const url = `https://graph.microsoft.com/v1.0/me/drive/special/approot:/${ONEDRIVE_SYNC_FILE_NAME}`;
-    const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
+
+    let response;
+    try {
+        response = await fetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    } catch (err) {
+        throw new Error(`OneDrive 网络请求失败: ${err.message}`);
+    }
+
     if (response.status === 404) return null;
     if (response.status === 401) throw new Error('Unauthorized');
     if (!response.ok) throw new Error(`OneDrive API Error: ${response.status} ${response.statusText}`);
@@ -1189,7 +1293,7 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
                 logger.warn('[translateDictContent] Google 失败，降级 Bing:', e.message);
                 _dictEngineCache = 'bing';
                 _dictEngineCacheTs = 0;
-                allTranslatedLines = null; // ← 触发下面的 Bing 逻辑
+                allTranslatedLines = null;  
             }
         }
         // ── Bing（含 preferredHost） 
@@ -1346,8 +1450,8 @@ async function _buildDetailData(
 function pushDetailUpdate(tabId, result, originalText, cacheKey = null) {
     if (!tabId) return;
     if (!result.isPartial && result.basic && cacheKey) {
-        logger.log('[pushDetailUpdate] originalText:', JSON.stringify(originalText));
-        logger.log('[pushDetailUpdate] 写入缓存 key:', cacheKey, 'basic:', result.basic?.substring(0, 20));
+        // logger.log('[pushDetailUpdate] originalText:', JSON.stringify(originalText));
+        // logger.log('[pushDetailUpdate] 写入缓存 key:', cacheKey, 'basic:', result.basic?.substring(0, 20));
         handleIdbSet({ [cacheKey]: { ...result, timestamp: Date.now() } })
             .catch(e => logger.warn('[pushDetailUpdate] 缓存写入失败:', e.message));
     }
@@ -1384,7 +1488,7 @@ const Translators = {
         cacheKey = null,
         fromPopup = false
     ) {
-        logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
+        //logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
         if (tabId || fromPopup) {
             const isWord = isWordText(originalText);
             const partialResult = {
@@ -1694,7 +1798,7 @@ const Translators = {
                         [], // 不翻译词典
                         examples, // 只翻译例句
                         target,
-                        '', 
+                        '',
                         ''
                     );
                     examples = translatedExamples;

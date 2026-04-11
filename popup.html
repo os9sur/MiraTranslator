@@ -9,6 +9,11 @@
   <title>Mira Translator</title>
   <link rel="stylesheet" href="style.css">
   <style>
+    html {
+      padding-right: 0px;
+      margin-right: 0px;
+    }
+
     body {
       width: 270px;
       min-width: 250px;
@@ -295,7 +300,7 @@
 
     <div style="position: relative; margin-bottom:8px;">
       <textarea id="searchTextInput" data-i18n="inputAndEnter" placeholder="Word or sentence..."
-  class="mira-input-terminal"></textarea>
+        class="mira-input-terminal"></textarea>
       <button id="searchSubmitBtn" style="
             position: absolute;
             right: 4px;
@@ -464,6 +469,7 @@
           <span id="currentEngineName" style="
             color: #38bdf8; 
             font-weight: 600; 
+            padding: 5px 3px;
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
@@ -675,7 +681,7 @@
   box-shadow: 0 0 6px 2px rgba(59,130,246,0.8), 0 0 12px 4px rgba(59,130,246,0.4);animation: mira-pulse 2s ease-in-out infinite;">?</span>
         </div>
         <textarea id="conf-selectors" class="mira-input-terminal"
-          style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; font-family: monospace;resize: none !important;">
+          style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; white-space: nowrap !important; font-family: monospace;resize: none !important;">
       </textarea>
       </div>
       <div class="row" style="margin-bottom: 3px;margin-top: 3px;">
@@ -890,11 +896,10 @@
       </div>
       <div id="webdavConfigArea"
         style="display: none; background: rgba(15, 23, 42, 0.5); padding: 10px 12px 3px 12px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 7px;">
-        <input type="text" id="webdavUrl" placeholder="Server URL (e.g. https://...)"
-          style="width: 100%; margin-bottom: 8px;" class="api-input-field">
-        <input type="text" id="webdavUser" placeholder="Username" style="width: 100%; margin-bottom: 8px;"
+        <input type="text" id="webdavUrl" placeholder="Server URL (e.g. https://...)" style="margin-bottom: 8px;"
           class="api-input-field">
-        <input type="password" id="webdavPass" placeholder="App Password" style="width: 100%;" class="api-input-field">
+        <input type="text" id="webdavUser" placeholder="Username" style="margin-bottom: 8px;" class="api-input-field">
+        <input type="password" id="webdavPass" placeholder="App Password" class="api-input-field">
       </div>
       <div
         style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
@@ -922,22 +927,20 @@
         <div class="sync-actions-footer" style="margin-top: auto; padding-top: 15px;">
           <div style="display: flex; gap: 10px;">
             <button id="manualSyncPush" class="cool-test-btn"
-              style="flex: 1; margin: 0; font-size: 13px; padding: 10px 5px; flex-direction: column;">
+              style="flex: 1; margin: 0; font-size: 13px;border-width: 1.5px !important;border-radius: 20px; padding: 10px 5px; flex-direction: column;">
               <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
               <div class="sync-log-scroller"></div>
             </button>
             <button id="manualSyncPull" class="cool-test-btn"
-              style="flex: 1; margin: 0; font-size: 13px; background: rgba(16, 185, 129, 0.1); border-color: #10b981; color: #10b981; padding: 10px 5px; flex-direction: column;">
+              style="flex: 1; margin: 0; font-size: 13px; background: rgba(16, 185, 129, 0.1);border-width: 1.5px !important; border-radius: 20px; border-color: #10b981; color: #10b981; padding: 10px 5px; flex-direction: column;">
               <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
               <div class="sync-log-scroller"></div>
             </button>
           </div>
           <div id="localFileActions" style="margin-top: 15px; display: flex; gap: 10px;">
-            <button id="exportJson" data-i18n="export"
-              style="flex: 1; background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 6px; border-radius: 4px;">导出
+            <button id="exportJson" data-i18n="export" style="flex: 1; background: transparent; cursor: pointer;">导出
               JSON</button>
-            <button id="importJson" data-i18n="import"
-              style="flex: 1; background: transparent; border: 1px solid #475569; color: #94a3b8; font-size: 10px; padding: 6px; border-radius: 4px;">导入
+            <button id="importJson" data-i18n="import" style="flex: 1; background: transparent; cursor: pointer;">导入
               JSON</button>
           </div>
           <div id="syncStatus"

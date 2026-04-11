@@ -768,6 +768,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof getGoogleTokenForFirefox === 'function') {
               return getGoogleTokenForFirefox(btn, originalText, direction);
             }
+            //token过期之后,重新授权之后继续同步
+            safeSendMessage({ type: 'START_AUTH' }).then((authRes) => {
+              if (authRes?.success) executeSyncDataAction(btn, originalText, direction);
+              else updateSyncProgressUI(btnId, '', false);
+            });
           }
         } else {
           updateSyncProgressUI(btnId, 'sync_failed ✕', true);
@@ -2292,38 +2297,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-const updateScanInputs = () => {
-  if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
-  const config = window.currentConfig || {};
-  const sc = config.scanConfig || { global: {}, custom: {} };
-  const custom = sc.custom || {};
-  const global = sc.global || {};
-  let targetConfig;
-  const tabCurrentEl = document.getElementById('tabCurrent');
-  const isCurrentMode = tabCurrentEl ? tabCurrentEl.classList.contains('active') : true;
-  const tabUrl = window.domain || "";
-  
-  if (isCurrentMode) {
-    //  当前网站模式：优先用户自定义，再用网站默认，再用fallback
-    const defaultScanRule = (typeof SiteRules !== 'undefined') ? SiteRules.getRule(tabUrl) : { selectors: '', minLen: 2 };
-    targetConfig = custom[tabUrl] || defaultScanRule;
-  } else {
-    //  全局模式：只显示全局设置，没设置过就显示generic
-    const generic = (typeof SiteRules !== 'undefined') ? SiteRules.generic : { selectors: '', minLen: 15 };
-    targetConfig = {
-      selectors: global.selectors || generic.selectors,
-      minLen: global.minLen ?? generic.minLen  // 全局没设置就用generic（15）
-    };
-  }
-  
-  if (selectorInput) {
-    selectorInput.value = (targetConfig && targetConfig.selectors)
-      ? formatSelectors(targetConfig.selectors)
-      : '';
-    _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
-  }
-  if (minLenInput) minLenInput.value = (targetConfig && targetConfig.minLen) ? targetConfig.minLen : 15;
-};
+  const updateScanInputs = () => {
+    if (document.activeElement === selectorInput || document.activeElement === minLenInput) return;
+    const config = window.currentConfig || {};
+    const sc = config.scanConfig || { global: {}, custom: {} };
+    const custom = sc.custom || {};
+    const global = sc.global || {};
+    let targetConfig;
+    const tabCurrentEl = document.getElementById('tabCurrent');
+    const isCurrentMode = tabCurrentEl ? tabCurrentEl.classList.contains('active') : true;
+    const tabUrl = window.domain || "";
+
+    if (isCurrentMode) {
+      //  当前网站模式：优先用户自定义，再用网站默认，再用fallback
+      const defaultScanRule = (typeof SiteRules !== 'undefined') ? SiteRules.getRule(tabUrl) : { selectors: '', minLen: 2 };
+      targetConfig = custom[tabUrl] || defaultScanRule;
+    } else {
+      //  全局模式：只显示全局设置，没设置过就显示generic
+      const generic = (typeof SiteRules !== 'undefined') ? SiteRules.generic : { selectors: '', minLen: 15 };
+      targetConfig = {
+        selectors: global.selectors || generic.selectors,
+        minLen: global.minLen ?? generic.minLen  // 全局没设置就用generic（15）
+      };
+    }
+
+    if (selectorInput) {
+      selectorInput.value = (targetConfig && targetConfig.selectors)
+        ? formatSelectors(targetConfig.selectors)
+        : '';
+      _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
+    }
+    if (minLenInput) minLenInput.value = (targetConfig && targetConfig.minLen) ? targetConfig.minLen : 15;
+  };
   document.getElementById('tabCurrent').onclick = () => {
     currentMode = 'current';
     refreshUI();
