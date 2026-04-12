@@ -1256,32 +1256,32 @@ const TranslationBatcher = {
       tempDiv.innerHTML = transContent;
       const markedLinks = tempDiv.querySelectorAll('a[data-mira-link]');
       markedLinks.forEach(link => {
-  const idx = link.getAttribute('data-mira-link');
-  const meta = linkMap[idx];
-  if (meta) {
-    link.href = meta.href;
-    link.target = '_blank';
-    let display = (linkMap[idx]._translatedText || meta.textContent || link.textContent || '')
-      .replace(/^https?:\/\//i, '');
-    
-    // 只对看起来像 URL 的内容截断，译文不截断
-    const looksLikeUrl = /^[\w\-\.\/]+$/.test(display) && !display.includes(' ');
-    const LIMIT = 25;
-    if (looksLikeUrl && display.length > LIMIT) {
-      display = display.substring(0, LIMIT).replace(/\/$/, '') + '...';
-    }
-    
-    link.textContent = display;
-    link.style.cssText = `
+        const idx = link.getAttribute('data-mira-link');
+        const meta = linkMap[idx];
+        if (meta) {
+          link.href = meta.href;
+          link.target = '_blank';
+          let display = (linkMap[idx]._translatedText || meta.textContent || link.textContent || '')
+            .replace(/^https?:\/\//i, '');
+
+          // 只对看起来像 URL 的内容截断，译文不截断
+          const looksLikeUrl = /^[\w\-\.\/]+$/.test(display) && !display.includes(' ');
+          const LIMIT = 25;
+          if (looksLikeUrl && display.length > LIMIT) {
+            display = display.substring(0, LIMIT).replace(/\/$/, '') + '...';
+          }
+
+          link.textContent = display;
+          link.style.cssText = `
       color: #1d9bf0 !important;
       display: inline !important;
       white-space: normal !important;
       font-size: inherit !important;
       letter-spacing: -0.2px !important;
     `;
-  }
-  link.removeAttribute('data-mira-link');
-});
+        }
+        link.removeAttribute('data-mira-link');
+      });
       if (mentionMap && Object.keys(mentionMap).length > 0) {
         tempDiv.querySelectorAll('span[data-mira-mention]').forEach(placeholder => {
           const idx = placeholder.getAttribute('data-mira-mention');
@@ -1300,10 +1300,10 @@ const TranslationBatcher = {
       container.style.color = "";
       container.dataset.translated = "true";
       if (typeof applyUserStyles === 'function') {
-  // 从 container 上读取之前存的字体大小
-  const savedFontSize = container.dataset.inheritFontSize || null;
-  applyUserStyles(container, null, savedFontSize);  
-}
+        // 从 container 上读取之前存的字体大小
+        const savedFontSize = container.dataset.inheritFontSize || null;
+        applyUserStyles(container, null, savedFontSize);
+      }
     } catch (e) {
       logger.error('[Batcher] 渲染出错:', e);
       if (container && container.parentNode) container.remove();
@@ -1556,9 +1556,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
     .join('')
     .replace(/[ \t]+/g, ' ')
     .trim();
-    //youtube 排除列表
+  //youtube 排除列表
   if (isYoutube && el) {
-     const isExcluded = el.closest(`
+    const isExcluded = el.closest(`
     .yt-content-metadata-view-model__metadata-row, 
     .yt-content-metadata-view-model__metadata-text,
     ytd-video-owner-renderer #channel-name,
@@ -2069,18 +2069,18 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const originFontWeight = originStyle.fontWeight;
 
     // YouTube 优先取 a 标签字体，其他直接取 el
-  let originFontSize = originStyle.fontSize;
-  if (isYoutube) {
-    const elSize = parseFloat(originFontSize);
-    // 只有当 el 本身字体异常小（h3 的 11.7px 这种情况）才往内部找 a
-    if (elSize < 12) {
-      const innerA = el.querySelector('a');
-      if (innerA) {
-        const innerSize = parseFloat(window.getComputedStyle(innerA).fontSize);
-        if (innerSize > elSize) originFontSize = innerSize + 'px';
+    let originFontSize = originStyle.fontSize;
+    if (isYoutube) {
+      const elSize = parseFloat(originFontSize);
+      // 只有当 el 本身字体异常小（h3 的 11.7px 这种情况）才往内部找 a
+      if (elSize < 12) {
+        const innerA = el.querySelector('a');
+        if (innerA) {
+          const innerSize = parseFloat(window.getComputedStyle(innerA).fontSize);
+          if (innerSize > elSize) originFontSize = innerSize + 'px';
+        }
       }
     }
-  }
     if (isFacebook) {
       const size = parseFloat(originFontSize);
       if (!size || size < 14) originFontSize = '15px';
@@ -2089,11 +2089,11 @@ async function handleTranslateElement(el, forceRefresh = false) {
     transContainer.dataset.inheritFontSize = originFontSize;
 
     await applyUserStyles(transContainer, null, originFontSize);
-if (isYoutube) {
-  transContainer.querySelectorAll('a').forEach(a => {
-    a.style.setProperty('white-space', 'normal', 'important');
-  });
-}
+    if (isYoutube) {
+      transContainer.querySelectorAll('a').forEach(a => {
+        a.style.setProperty('white-space', 'normal', 'important');
+      });
+    }
     // 强制 font-size，防止 applyUserStyles 内部 await 期间 DOM 变化导致丢失
     if (originFontSize) {
       transContainer.style.setProperty('font-size', originFontSize, 'important');
@@ -4089,7 +4089,10 @@ function initSelectionTranslate() {
         getDetailedTranslation(text, true, currentTargetLang, {
           hintInputLang: currentSourceLang
         }, currentSourceLang)
-          .then(result => handleTranslationResult(result, text, shadow))
+          .then(result => {
+            if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+            handleTranslationResult(result, text, shadow);
+          })
           .catch(err => {
             setBasicError(basicEl, err.message || 'Network Error');
           })

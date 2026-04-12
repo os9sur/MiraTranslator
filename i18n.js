@@ -69,7 +69,7 @@ self.i18nData = {
   "en": {
     appName: "Mira Translator",
     pageTrans: "Web Translation",
-    selectTrans: "Selection Translation",
+    selectTrans: "Translate Selection",
     ytTrans: "YouTube Bilingual Subs",
     wordBook: "Vocabulary",
     myWordBook: "My Wordbook",
@@ -77,12 +77,12 @@ self.i18nData = {
     closeWindow: "Close Window",
     inputWord: "Input word...",
     inputMeaning: "Input meaning...",
-    manualAdd: "Manual Add",
+    manualAdd: "Add Manually",
     word: "Word/Sentence",
     meaning: "Meaning",
     addTime: "Added Time",
     operation: "Action",
-    noCollection: "No saved words",
+    noCollection: "No words saved yet",
     completeContent: "Please fill in all fields",
     noExportWords: "No data to export",
     currentSite: "Current Site",
@@ -94,7 +94,7 @@ self.i18nData = {
     loading: "Translating...",
     error: "Translation failed, please try again",
     collect: "Collect",
-    uncollect: "Uncollect",
+    uncollect: "Remove",
     pronunciation: "Pronunciation",
     retranslate: "Retranslate"
   },
@@ -126,45 +126,45 @@ self.i18nData = {
     loading: "翻訳中...",
     error: "翻訳に失敗しました",
     collect: "コレクション",
-    uncollect: "コレクション解除",
+    uncollect: "削除",
     pronunciation: "発音",
     retranslate: "再翻訳"
   },
   "ko": {
-    appName: "Mira 번역",
+    appName: "Mira Translator",
     pageTrans: "페이지 번역",
-    selectTrans: "드래그 번역",
+    selectTrans: "선택 영역 번역",
     ytTrans: "YouTube 이중 언어 자막",
     wordBook: "단어장",
     myWordBook: "나의 단어장",
     exportCSV: "CSV 내보내기",
     closeWindow: "창 닫기",
     inputWord: "단어 입력...",
-    inputMeaning: "의미 입력...",
+    inputMeaning: "뜻 입력...",
     manualAdd: "수동 추가",
     word: "단어/문장",
-    meaning: "의미",
-    addTime: "추가 시간",
+    meaning: "뜻",
+    addTime: "추가 일시",
     operation: "작업",
-    noCollection: "수집된 단어가 없습니다",
+    noCollection: "저장된 단어가 없습니다",
     completeContent: "모든 내용을 입력해주세요",
     noExportWords: "내보낼 데이터가 없습니다",
     currentSite: "현재 사이트",
     globalSetting: "전역 기본값",
-    personalizedScan: "사용자 정의 번역 영역 (자동 저장)",
-    smartPicker: "클릭하여 번역 영역 선택\n(ESC/우클릭 시 종료)",
-    matchSelector: "활성 요소 (CSS 선택기)",
+    personalizedScan: "사용자 지정 번역 영역 (자동 저장)",
+    smartPicker: "클릭해서 번역 영역 선택\n(ESC/우클릭으로 취소)",
+    matchSelector: "활성 요소 (CSS 선택자)",
     minChars: "짧은 문장 건너뛰기 (최소 글자 수)",
     loading: "번역 중...",
-    error: "번역 실패, 다시 시도하십시오",
-    collect: "수집",
-    uncollect: "수집 해제",
+    error: "번역 실패, 다시 시도해 주세요",
+    collect: "저장",
+    uncollect: "저장 취소",
     pronunciation: "발음",
     retranslate: "다시 번역"
   },
   "es": {
     appName: "Mira Translator",
-    pageTrans: "Traducción de Página",
+    pageTrans: "Traducir página",
     selectTrans: "Traducción de Selección",
     ytTrans: "Subtítulos de YouTube",
     wordBook: "Vocabulario",
@@ -252,9 +252,9 @@ self.i18nData = {
     matchSelector: "Aktive Elemente (CSS-Selektoren)",
     minChars: "Kurze Sätze überspringen (Min. Zeichen)",
     loading: "Wird übersetzt...",
-    error: "Übersetzung fehlerhaft",
+    error: "Übersetzung fehlgeschlagen",
     collect: "Sammeln",
-    uncollect: "Nicht mehr sammeln",
+    uncollect: "Entfernen",
     pronunciation: "Aussprache",
     retranslate: "Neu übersetzen"
   },
@@ -517,146 +517,82 @@ self.i18nData = {
 };
 self.i18nContent = {
   "zh-CN": {
-    appName: "Mira 翻译",
-    loading: "Translating...",
-    error: "翻译失败，请稍后重试",
-    collect: "收藏",
     uncollect: "取消收藏",
     pronunciation: "发音",
     retranslate: "重新翻译"
   },
   "zh-TW": {
-    appName: "Mira 翻譯",
-    loading: "正在翻譯...",
-    error: "翻譯失敗，請稍後重試",
-    collect: "收藏",
     uncollect: "取消收藏",
     pronunciation: "發音",
     retranslate: "重新翻譯"
   },
   "en": {
-    appName: "Mira Translator",
-    loading: "Translating...",
-    error: "Translation failed, please try again",
-    collect: "Collect",
-    uncollect: "Uncollect",
+    uncollect: "Remove",
     pronunciation: "Pronunciation",
     retranslate: "Retranslate"
   },
   "ja": {
-    appName: "Mira 翻訳",
-    loading: "翻訳中...",
-    error: "翻訳に失敗しました",
-    collect: "コレクション",
-    uncollect: "コレクション解除",
+    uncollect: "削除",
     pronunciation: "発音",
     retranslate: "再翻訳"
   },
   "ko": {
-    appName: "Mira 번역",
-    loading: "번역 중...",
-    error: "번역 실패, 다시 시도하십시오",
-    collect: "수집",
-    uncollect: "수집 해제",
+    uncollect: "저장 취소",
     pronunciation: "발음",
     retranslate: "다시 번역"
   },
   "es": {
-    appName: "Mira Translator",
-    loading: "Traduciendo...",
-    error: "Error en la traducción",
-    collect: "Coleccionar",
-    uncollect: "Descoleccionar",
+    uncollect: "Eliminar guardado",
     pronunciation: "Pronunciación",
     retranslate: "Retraducir"
   },
   "fr": {
-    appName: "Mira Translator",
-    loading: "Traduction en cours...",
-    error: "Échec de la traduction",
-    collect: "Collectionner",
-    uncollect: "Décollecter",
+    uncollect: "Supprimer l'enregistrement",
     pronunciation: "Prononciation",
     retranslate: "Retraduire"
   },
   "de": {
-    appName: "Mira Translator",
-    loading: "Wird übersetzt...",
-    error: "Übersetzung fehlerhaft",
-    collect: "Sammeln",
-    uncollect: "Nicht mehr sammeln",
+    uncollect: "Speicherung aufheben",
     pronunciation: "Aussprache",
     retranslate: "Neu übersetzen"
   },
   "ru": {
-    appName: "Mira Translator",
-    loading: "Перевод...",
-    error: "Ошибка перевода",
-    collect: "Коллекция",
-    uncollect: "Убрать из коллекции",
+    uncollect: "Удалить из сохраненного",
     pronunciation: "Произношение",
     retranslate: "Перевести снова"
   },
   "pt": {
-    appName: "Mira Translator",
-    loading: "Traduzindo...",
-    error: "Falha na tradução",
-    collect: "Colecionar",
-    uncollect: "Descolecionar",
+    uncollect: "Remover salvo",
     pronunciation: "Pronúncia",
     retranslate: "Retraduzir"
   },
   "it": {
-    appName: "Mira Translator",
-    loading: "Traduzione in corso...",
-    error: "Traduzione fallita",
-    collect: "Raccolta",
-    uncollect: "Rimuovi dalla raccolta",
+    uncollect: "Rimuovi salvataggio",
     pronunciation: "Pronuncia",
     retranslate: "Ritraduci"
   },
   "vi": {
-    appName: "Mira Translator",
-    loading: "Đang dịch...",
-    error: "Lỗi dịch thuật",
-    collect: "Sưu tập",
-    uncollect: "Bỏ sưu tập",
+    uncollect: "Bỏ lưu",
     pronunciation: "Phát âm",
     retranslate: "Dịch lại"
   },
   "th": {
-    appName: "Mira Translator",
-    loading: "กำลังแปล...",
-    error: "การแปลล้มเหลว",
-    collect: "เก็บ",
-    uncollect: "ยกเลิกการเก็บ",
+    uncollect: "ยกเลิกการบันทึก",
     pronunciation: "การออกเสียง",
     retranslate: "แปลใหม่"
   },
   "ar": {
-    appName: "Mira Translator",
-    loading: "جاري الترجمة...",
-    error: "فشلت الترجمة",
-    collect: "جمع",
-    uncollect: "إلغاء الجمع",
+    uncollect: "إلغاء الحفظ",
     pronunciation: "النطق",
     retranslate: "إعادة الترجمة"
   },
   "fa": {
-    appName: "Mira Translator",
-    loading: "در حال ترجمه...",
-    error: "ترجمه با شکست مواجه شد",
-    collect: "جمع آوری",
-    uncollect: "لغو جمع آوری",
+    uncollect: "لغو ذخیره",
     pronunciation: "تلفظ",
     retranslate: "ترجمه مجدد"
   },
   "tr": {
-    appName: "Mira Translator",
-    loading: "Çeviriliyor...",
-    error: "Çeviri başarısız",
-    collect: "Topla",
-    uncollect: "Toplamayı Bırak",
+    uncollect: "Kaydı kaldır",
     pronunciation: "Telaffuz",
     retranslate: "Yeniden Çevir"
   }
@@ -684,7 +620,7 @@ self.i18nEngineData = {
     testing: "测试中...",
     success: "成功",
     failed: "失败",
-    freeInterfaceTipsInfo: "本接口基于公共网络请求驱动，仅供个人学习及非商业用途。无需配置密钥",
+    freeInterfaceTipsInfo: "此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥",
     wantBetterExperience: "想要更好的翻译体验？",
     clickBottomTip: "点击左下角按钮，选择更多翻译服务"
   },
@@ -781,10 +717,10 @@ self.i18nEngineData = {
     save: "적용 및 저장",
     testConnection: "연결 테스트",
     confirmDelete: "삭제하시겠습니까?",
-    confirmClose: "종료하시겠습니까?",
-    customAiInterface: "사용자 정의 AI 인터페이스",
+    confirmClose: "창을 닫으시겠습니까?",
+    customAiInterface: "사용자 지정 AI 인터페이스",
     accessService: "{0} 서비스 연결",
-    newBadge: "새로움",
+    newBadge: "NEW",
     testing: "테스트 중...",
     success: "성공",
     failed: "실패",
@@ -1109,7 +1045,7 @@ self.i18nStyleData = {
     translucentDim: "黑色薄纱",
     topDivider: "上方分割线",
     borderColor: "边框颜色",
-    studyMode: "学习模式 (悬停鼠标显示内容)",
+    studyMode: "学习模式（鼠标悬停后显示译文）",
     applyAndSync: "应用并同步到网页",
     cloudSync: "云同步",
     webTranslation: "网页翻译",
@@ -1156,7 +1092,7 @@ self.i18nStyleData = {
   },
   "en": {
     pinUnpin: "Pin / Unpin",
-    instantTranslation: "Search",
+    instantTranslation: "Instant Translate",
     inputAndEnter: "Input and press Enter...↵",
     styleCustomization: "Translation Style",
     engineConfig: "Select Translator",
@@ -1180,7 +1116,7 @@ self.i18nStyleData = {
     paperShadow: "Paper Shadow",
     italicText: "Italic Text",
     boldText: "Bold Text",
-    translucentDim: "Dark Veil",
+    translucentDim: "Dark Overlay",
     topDivider: "Top Divider",
     borderColor: "Border Color",
     studyMode: "Study Mode (hover mouse to show content)",
@@ -1230,9 +1166,9 @@ self.i18nStyleData = {
     backgroundOpacity: "背景の不透明度"
   },
   "ko": {
-    pinUnpin: "고정 / 해제",
+    pinUnpin: "핀 고정 / 해제",
     instantTranslation: "빠른 번역",
-    inputAndEnter: "입력하고 Enter...↵",
+    inputAndEnter: "입력 후 Enter...↵",
     styleCustomization: "번역 스타일 설정",
     engineConfig: "번역 서비스 선택",
     stylePreview: "미리보기",
@@ -1258,7 +1194,7 @@ self.i18nStyleData = {
     translucentDim: "검은 베일",
     topDivider: "상단 구분선",
     borderColor: "테두리 색상",
-    studyMode: "학습 모드 (호버 시 표시)",
+    studyMode: "학습 모드 (마우스 오버)",
     applyAndSync: "적용 및 동기화",
     cloudSync: "클라우드 동기화",
     webTranslation: "웹 번역",
@@ -1292,7 +1228,7 @@ self.i18nStyleData = {
     paperShadow: "Sombra de Papel",
     italicText: "Texto en Cursiva",
     boldText: "Texto en Negrita",
-    translucentDim: "Velo negro",
+    translucentDim: "Fondo oscurecido",
     topDivider: "Divisor Superior",
     borderColor: "Color del Borde",
     studyMode: "Modo Estudio (Hover)",
@@ -1329,7 +1265,7 @@ self.i18nStyleData = {
     paperShadow: "Ombre de Papier",
     italicText: "Texte en Italique",
     boldText: "Texte en Gras",
-    translucentDim: "Voile sombre",
+    translucentDim: "Fond assombri",
     topDivider: "Séparateur Supérieur",
     borderColor: "Couleur de la Bordure",
     studyMode: "Mode Étude (Survol)",
@@ -1366,7 +1302,7 @@ self.i18nStyleData = {
     paperShadow: "Papierschatten",
     italicText: "Kursiver Text",
     boldText: "Fetter Text",
-    translucentDim: "Schwarzer Schleier",
+    translucentDim: "Dunkles Overlay",
     topDivider: "Oberer Trenner",
     borderColor: "Rahmenfarbe",
     studyMode: "Lernmodus (Hover für Inhalt)",
@@ -1700,7 +1636,7 @@ self.i18nYTData = {
     hintAddAction: "ダブルクリックで単語帳に保存"
   },
   "ko": {
-    removed: "제거됨",
+    removed: "삭제됨",
     addedFeedback: "⭐ 콜렉션에 추가됨, 더블클릭하여 취소",
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
     hintAddAction: "더블클릭하여 단어장에 저장"
@@ -1802,10 +1738,10 @@ self.i18nDonateData = {
     scanOrClick: "スキャンまたはクリック ↗"
   },
   "ko": {
-    buyMeACoffee: "작가에게 커피 한잔 사주기",
-    supportDeveloper: "지속적인 업데이트 지원",
+    buyMeACoffee: "개발자에게 커피 한 잔 후원하기",
+    supportDeveloper: "지속적인 업데이트 응원하기",
     devStory: "이 플러그인은 작가가 여가 시간에 독립적으로 개발하고 무료로 유지 관리합니다. 모든 응원이 업데이트의 원동력이 됩니다. ",
-    thankYou: "후원해주셔서 감사합니다! ❤️",
+    thankYou: "후원해주셔서 진심으로 감사합니다! ❤️",
     scanOrClick: "스캔 또는 클릭하여 이동 ↗"
   },
   "es": {
@@ -2043,11 +1979,11 @@ self.i18nSyncData = {
     restoreFromCloud: "복원 ↓",
     export: "내보내기",
     import: "가져오기",
-    neverSynced: "동기화되지 않음",
+    neverSynced: "동기화 기록 없음",
     lastSync: "최근 동기화:",
-    invalidConfigFile: "유효하지 않은 설정 파일: 인식 가능한 설정이나 단어 데이터가 없습니다",
-    importSuccess: "가져오기 성공! 총",
-    importSuccessCount: "개 단어(병합 항목 포함).",
+    invalidConfigFile: "올바르지 않은 설정 파일: 유효한 설정이나 단어 데이터가 없습니다",
+    importSuccess: "가져오기 성공!",
+    importSuccessCount: "총 XX개 단어가 병합되었습니다.",
     importFailed: "가져오기 실패: ",
     syncing: "동기화 중...",
     webdavAddressRequired: "WebDAV 서버 주소를 먼저 입력하세요",
@@ -2495,8 +2431,8 @@ self.i18nCacheData = {
   },
   "ko": {
     cacheTitle: "캐시",
-    clearBtn: "삭제",
-    confirm: "{0}개 삭제?",
+    clearBtn: "정리",
+    confirm: "{0}건 삭제?",
     clearing: "삭제 중...",
     completed: "완료"
   },
@@ -2604,10 +2540,10 @@ self.i18nThemeData = {
     moreSettings: "詳細設定"
   },
   "ko": {
-    autoTheme: "테마: 페이지 자동 추적",
+    autoTheme: "테마: 시스템 설정 유지",  
     lightTheme: "테마: 라이트 모드",
-    darkTheme: "테마: 다크 모ード",
-    moreSettings: "더 보기"
+    darkTheme: "테마: 다크 모드",  
+    moreSettings: "상세 설정 및 더 보기"  
   },
   "es": {
     autoTheme: "Tema: Seguir página automáticamente",
@@ -2708,7 +2644,7 @@ self.i18nAttach1 = {
   "ko": {
     source: "출처",
     delete: "삭제",
-    recall: "취소",
+    recall: "실행 취소",
     searchVocabulary: "단어장 검색",
     appliedAndSaved: "적용 및 저장됨"
   },
@@ -2810,11 +2746,11 @@ self.i18nAttach2 = {
     getApiKey: "API Key を取得 ↗"
   },
   "ko": {
-    update_notice: "Mira 번역 가 업데이트되었습니다. 계속하려면 여기를 클릭하여 페이지를 새로고침하세요.",
+    update_notice: "Mira Translator가 업데이트되었습니다. 계속하려면 여기를 클릭하여 페이지를 새로고침하세요.",
     manualModeNoSync: "수동 모드에서는 클라우드 동기화가 실행되지 않습니다",
-    builtinRuleHint: "⚡ 전용 규칙 있음：「현재 사이트」설정이 「전체 기본값」보다 우선",
-    getApiKey: "API Key 발급 ↗"
-  },
+    builtinRuleHint: "⚡ 전용 규칙: '현재 사이트' 설정이 '전역 기본값'보다 우선 적용됩니다", 
+    getApiKey: "API Key 발급 ↗"  
+},
   "en": {
     update_notice: "Mira Translator has been updated. Please click here to refresh the page.",
     manualModeNoSync: "Cloud sync is not triggered in manual mode",
@@ -3027,7 +2963,7 @@ self.i18nAttach4 = {
     restrictedNotice: "이 페이지는 브라우저 정책에 의해 제한되었습니다. Mira는 여기서 작동할 수 없습니다.",
     translatePrefix: "Mira가 웹 페이지와 YouTube 자막을",
     translateHighlight: "선택한 언어",
-    translateSuffix: "로 번역합니다.",
+    translateSuffix: "로 번역해 드립니다.",
     btnGotIt: "시작하기",
     changeSetting: "설정에서 언제든지 변경할 수 있습니다."
   },
@@ -3264,10 +3200,10 @@ self.i18nAttach6 = {
     "dlRateLow": "字幕の {rate}% のみ翻訳済みです。\n\n翻訳は再生に合わせて段階的に生成されます。完了するまで待機してからダウンロードすることをお勧めします。\n\n現在の {rate}% をダウンロードしますか？",
     "dlRatePartial": "{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\n一部の翻訳がまだ完了していません。再生を続けてシステムが処理してからダウンロードすることをお勧めします。\n\n現在の部分をダウンロードしますか？"
   },
-  "ko": {
-    "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것이 가장 좋습니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
-    "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n현재 부분을 다운로드하시겠습니까?"
-  },
+    "ko": {
+      "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것을 권장합니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
+      "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n그대로 다운로드하시겠습니까?"
+    },
   "fr": {
     "dlRateLow": "Seulement {rate}% des sous-titres traduits.\n\nLa traduction est générée progressivement durant la lecture. Pour un résultat complet, attendez la fin de la vidéo ou la mise en cache.\n\nTélécharger les {rate}% disponibles ?",
     "dlRatePartial": "{rate}% traduit, {missing} segments manquants.\n\nLa traduction est encore en cours pour certaines parties. Continuez la lecture avant de télécharger.\n\nTélécharger la partie disponible ?"
@@ -3313,7 +3249,7 @@ self.i18nAttach7 = {
   "ko": {
     "ytHint.prefix": "💡 영상 오른쪽 아래의 ",
     "ytHint.middle": " 를 켜고, 플레이어의 ",
-    "ytHint.suffix": " 에서 원본 영상 언어를 선택하세요",
+    "ytHint.suffix": " 에서 원본 자막 언어를 선택하세요",
     "common.youtube.settings": "설정",
     "common.youtube.subtitles": "자막"
   },
@@ -3428,7 +3364,7 @@ self.i18nAttach8 = {
   "ko": {
     "smartPickerHint": "⚠ 참고: 웹페이지 제한으로 인해 일부 선택이 불가할 수 있습니다",
     "loadingMore": "더 불러오는 중...",
-    "loadingSlow": "응답 속도가 느립니다",
+    "loadingSlow": "응답이 지연되고 있습니다",
     "retry": "재시도",
     "loadingSubtitles": "자막을 불러오는 중..."
   },
