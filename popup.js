@@ -2399,12 +2399,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   let _isSaving_Lock = false;
   let _originalSelectorValue = "";
+  let _originalMinLen = "";
   const saveScanConfig = async () => {
     if (_isSaving_Lock) return;
     _isSaving_Lock = true;
     const currentValue = normalizeSelectors(selectorInput.value);
-    if (currentValue === _originalSelectorValue) {
+    const currentMinLen = minLenInput.value;
+    if (currentValue === _originalSelectorValue && currentMinLen === _originalMinLen) {
       logger.log("[Popup] 内容未改变，跳过保存与重扫");
+      _isSaving_Lock = false;
       return;
     }
     try {
@@ -2416,6 +2419,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const _local_domain = new URL(_currentTab.url).hostname.replace('www.', '');
       const _local_selectors = normalizeSelectors(selectorInput.value.trim());
       const _local_minLen = parseInt(minLenInput.value) || 5;
+      logger.log(`[Mira-Trace] 保存配置: domain=${_local_domain}, selectors="${_local_selectors}", minLen=${_local_minLen}`);
       const _isCurrentMode = document.getElementById('tabCurrent').classList.contains('active');
       const _local_storage_res = await safeGetStorage('scanConfig');
       let _finalConfig = { global: {}, custom: {} };
@@ -2468,6 +2472,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   selectorInput.onfocus = () => {
     _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
+    _originalMinLen = minLenInput.value;
+  };
+  minLenInput.onfocus = () => {
+    _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
+    _originalMinLen = minLenInput.value;
   };
   selectorInput.addEventListener('blur', saveScanConfig);
   minLenInput.addEventListener('blur', saveScanConfig);

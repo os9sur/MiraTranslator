@@ -131,61 +131,22 @@ const SiteRules = {
         },
         "instagram.com": {
             selectors: [
-                // 标题元素(带dir="auto"的所有标题)- 覆盖评论区的h1
+                // 评论和帖子描述的核心 class 
+                "span._ap3a._aaco._aacu._aacx._aad7._aade",
+                "span._aacl._aaco._aacw._aacx._aad6._aade",
+
+                // 帖子标题/描述
                 "h1[dir='auto']",
                 "h2[dir='auto']",
-                "h3[dir='auto']",
-                "h4[dir='auto']",
 
-                // 主要文本容器 - 带dir="auto"的span(首页消息流主要文本)
-                "span[dir='auto']:not([role='button']):not([role='tab']):not([aria-label*='likes']):not([aria-label*='comments'])",
-
-                // 特定类名的元素
-                "span[class*='_ap3a'][dir='auto']",
-                "span[class*='_a9zr']",
-                "span[class*='_aacu']",
-                "div[class*='_a9zs'] span",
-
-                // 帖子内容
-                "article span[role='menuitem']:not([aria-label*='liked by'])",
-                "article h2 + div span",
-                "h2 + div span:not([class*='_'])",
-                "h2._ap3a",
-
-                // 帖子描述和评论
-                "span[style*='word-wrap']",
-                "span._a9zr",
-                "div._a9zs span",
-
-                // 个人介绍和头部
-                "header span:not([class*='icon']):not([aria-label])",
-                "header h2 + div span",
-                "header [class*='_aat0'] span",
-
-                // 文章内容
-                "article h1",
-                "article h2",
-                "article h3",
-                "article p",
-
-                // 动态内容区域
-                "div[role='main'] span[dir='auto']:not([role='button'])",
-                "[role='main'] div[style*='text-align'] span",
-                "[role='main'] div[style*='display: inline'] span",
-
-                // 对话框/模态框内容
+                // 个人介绍
+                "header span[dir='auto']:not([role='button'])",
+                "ul li div span[dir='auto']",
+                // 对话框内容
                 "[role='dialog'] span[dir='auto']:not([role='button'])",
                 "[role='dialog'] h1[dir='auto']",
-                "[role='dialog'] h2[dir='auto']",
-                "[role='dialog'] h3[dir='auto']",
-
-                // Instagram特定的消息流结构
-                "div[class*='xdt5ytf'] span[dir='auto']",
-                "div[class*='xt0psk2'] span[dir='auto']",
-                "div[class*='xt0psk2'] h1",
-                "div[class*='xt0psk2'] h2"
             ].join(", "),
-            minLen: 5
+            minLen: 2
         }
     },
     generic: {
