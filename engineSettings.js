@@ -48,9 +48,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         'gemini': {
             name: 'Google (Gemini)', url: 'https://aistudio.google.com/app/apikey', color: '#fbbf24', meta: 'G.PRO',
+            default_url: 'https://generativelanguage.googleapis.com/v1beta/openai',
             fields: [
                 { k: 'geminiKey', l: 'API Key', t: 'password', p: 'AIza...' },
-                { k: 'geminiModel', l: 'Model Name', t: 'text', d: 'gemini-2.0-flash', opts: ['gemini-2.5-flash', 'gemini-2.0-flash'] }
+                { k: 'geminiHost', l: 'Base URL', t: 'text', d: 'https://generativelanguage.googleapis.com/v1beta/openai' },
+                { k: 'geminiModel', l: 'Model Name', t: 'text', d: 'gemini-2.5-flash', opts: ['gemini-2.5-flash', 'gemini-2.0-flash'] }
             ]
         },
         'deepseek': {
@@ -65,6 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             name: 'xAI (Grok)', url: 'https://x.ai/api', color: '#ffffff', meta: 'GROK',
             fields: [
                 { k: 'grokKey', l: 'API Key', t: 'password', p: 'xai-...' },
+                { k: 'grokHost', l: 'Base URL', t: 'text', d: 'https://api.x.ai/v1' },
                 { k: 'grokModel', l: 'Model Name', t: 'text', d: 'grok-beta', opts: ['grok-2-1212', 'grok-beta', 'grok-vision-beta'] }
             ]
         },
@@ -98,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             name: 'SiliconFlow', url: 'https://cloud.siliconflow.cn/account/ak', color: '#6366f1', meta: 'SF.AGGR',
             fields: [
                 { k: 'siliconflowKey', l: 'API Key', t: 'password' },
+                { k: 'siliconflowHost', l: 'Base URL', t: 'text', d: 'https://api.siliconflow.cn/v1' },
                 { k: 'siliconflowModel', l: 'Model Name', t: 'text', d: 'deepseek-ai/DeepSeek-V3', opts: ['deepseek-ai/DeepSeek-V3', 'deepseek-ai/DeepSeek-R1'] }
             ]
         },
@@ -111,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     k: 'customModel', l: 'Model Name', t: 'text', d: 'gpt-4o',
                     opts: [
                         // 代理/中转场景
-                        'gpt-4o', 'gpt-4o-mini', 'deepseek-chat',
+                        'gpt-4o', 'gpt-4o-mini', 'deepseek/deepseek-v3.2',
                         '───── Local Models ─────',
                         // 低配 
                         'gemma3:1b', 'qwen2.5:1.5b', 'phi4-mini', 'llama3.2:3b',
@@ -471,39 +475,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             let inputHtml = '';
             if (opts && opts.length > 0) {
                 inputHtml = `
-            <div class="custom-combobox">
-                <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
-                <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
-                <div class="combobox-dropdown">
-                    ${opts.map(opt =>
+                <div class="custom-combobox">
+                    <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
+                    <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+                    <div class="combobox-dropdown">
+                        ${opts.map(opt =>
                     opt.startsWith('─')
                         ? `<div class="dropdown-divider" style="color:#666;font-size:10px;padding:4px 8px;cursor:default;pointer-events:none;">${opt}</div>`
                         : `<div class="dropdown-item" data-value="${opt}">${opt}</div>`
                 ).join('')}
-                </div>
-            </div>`;
+                    </div>
+                </div>`;
             } else {
                 const placeholder = (k === 'alias') ? displayAlias : (p || '');
                 inputHtml = `<input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
             }
             return `
-            <div class="form-group">
-                <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
-                    <label style="margin:0">${l.toUpperCase()}</label>
-                    ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
-                </div>
-                ${inputHtml}
-            </div>`;
+                <div class="form-group">
+                    <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
+                        <label style="margin:0">${l.toUpperCase()}</label>
+                        ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
+                    </div>
+                    ${inputHtml}
+                </div>`;
         };
         let html = `
-        <div class="main-header">
-            <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
-        </div>
-        <div class="form-container">
-            ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;">⚡ ${tpl.tip}</p>` : ''}
-            ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
-            ${(tpl.fields || []).map(f => getRow(f)).join('')}
-        </div>`;
+                <div class="main-header">
+                    <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
+                </div>
+                <div class="form-container">
+                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;">⚡ ${tpl.tip}</p>` : ''}
+                    ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
+                    ${(tpl.fields || []).map(f => getRow(f)).join('')}
+                </div>`;
         container.innerHTML = html;
         if (typeof initAllComboboxes === 'function') initAllComboboxes();
     }
@@ -542,7 +546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     dropdown.style.left = rect.left + 'px';
                     dropdown.style.width = rect.width + 'px';
                     dropdown.style.maxHeight = '180px';
-                    dropdown.style.overflowY = 'auto';  
+                    dropdown.style.overflowY = 'auto';
                     dropdown.style.zIndex = '999999';
                     dropdown.classList.add('show');
                     container.classList.add('open');
