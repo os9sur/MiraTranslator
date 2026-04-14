@@ -1293,7 +1293,7 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
                 logger.warn('[translateDictContent] Google 失败，降级 Bing:', e.message);
                 _dictEngineCache = 'bing';
                 _dictEngineCacheTs = 0;
-                allTranslatedLines = null;  
+                allTranslatedLines = null;
             }
         }
         // ── Bing（含 preferredHost） 
@@ -1874,107 +1874,24 @@ const Translators = {
         const isWord = text.trim().split(/\s+/).length === 1;
         const isSubtitle = !!(config.systemPrompt && config.systemPrompt.toLowerCase().includes('subtitle'));
         const activeTemperature = isSubtitle ? 0.4 : (isWord ? 0.1 : 0.3);
+
         try {
+            const safeKey = (config.key || "").trim();
+            const isClaude = config.engine === 'claude' && (config.host || '').includes('anthropic.com');
+            const isGemini = config.engine === 'gemini';
+
+            // Gemini 用固定的 OpenAI 兼容 host，其他引擎用用户填的 host
+            const GEMINI_DEFAULT_HOST = 'https://generativelanguage.googleapis.com/v1beta/openai';
+
+            const safeHost = isGemini
+                ? ((config.host || "").trim().replace(/\/+$/, '') || GEMINI_DEFAULT_HOST)
+                : (config.host || "").trim().replace(/\/+$/, '');
+
             let finalUrl = "";
             let headers = { 'Content-Type': 'application/json' };
             let bodyData = {};
-            const safeKey = (config.key || "").trim();
-            const safeHost = (config.host || "").trim().replace(/\/+$/, '');
-            const isGemini = config.engine === 'gemini';
-            const isClaude = config.engine === 'claude';
-            const isGrok = config.engine === 'grok';
-            if (isGemini) {
-                const key = (config.key || '').trim();
-                if (!key) throw new Error("Gemini API Key missing");
-                const rawModel = (config.model || 'gemini-1.5-flash').trim();
-                const model = rawModel.replace(/^models\//, '');
-                const textInput = String(text || '').trim();
-                if (!textInput) throw new Error("Empty input text");
-                const apiVersions = ['v1beta', 'v1'];
-                const modelAttempts = [
-                    model,
-                    `${model}-latest`,
-                    `${model}-002`,
-                    `${model}-001`
-                ];
-                let lastQuotaError = null;
-                for (const ver of apiVersions) {
-                    for (const m of modelAttempts) {
-                        const url =
-                            `https://generativelanguage.googleapis.com/${ver}` +
-                            `/models/${m}:generateContent?key=${key}`;
-                        try {
-                            const resp = await fetch(url, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    contents: [{
-                                        parts: [{
-                                            text: `${config.systemPrompt}\n\nText:\n${textInput}`
-                                        }]
-                                    }],
-                                    generationConfig: {
-                                        temperature: activeTemperature,
-                                        maxOutputTokens: 2048
-                                    }
-                                }),
-                                signal: controller.signal
-                            });
-                            if (resp.status === 429) {
-                                lastQuotaError = new Error("429: Gemini quota exceeded");
-                                continue;
-                            }
-                            if (resp.status === 404) {
-                                continue;
-                            }
-                            if (!resp.ok) {
-                                const t = await resp.text().catch(() => '');
-                                throw new Error(`Gemini HTTP ${resp.status}: ${t}`);
-                            }
-                            let data;
-                            try {
-                                data = await resp.json();
-                            } catch {
-                                continue;
-                            }
-                            const out =
-                                data?.candidates?.[0]?.content?.parts?.[0]?.text;
-                            if (!out) continue;
-                            return out.trim();
-                        } catch (e) {
-                            if (e.name === 'AbortError') throw e;
-                            continue;
-                        }
-                    }
-                }
-                if (lastQuotaError) throw lastQuotaError;
-                throw new Error("Gemini failed: no valid response from any model/version");
-            }
-            else if (isGrok) {
-                finalUrl = safeHost.includes('x.ai') ? `${safeHost}/chat/completions` : "https://api.x.ai/v1/chat/completions";
-                headers['Authorization'] = `Bearer ${safeKey}`;
-                bodyData = {
-                    model: config.model || "grok-2-latest",
-                    messages: [
-                        { role: "system", content: config.systemPrompt },
-                        { role: "user", content: text }
-                    ],
-                    temperature: activeTemperature,
-                    response_format: isWord ? { type: "json_object" } : undefined
-                };
-            } else if (config.engine?.toUpperCase === 'GROQ') {
-                finalUrl = "https://api.groq.com/openai/v1/chat/completions";
-                headers['Authorization'] = `Bearer ${safeKey}`;
-                bodyData = {
-                    model: config.model,
-                    messages: [
-                        { role: "system", content: config.systemPrompt },
-                        { role: "user", content: `<translate>\n${text}\n</translate>` }
-                    ],
-                    temperature: activeTemperature
-                };
-            }
-            else if (isClaude && safeHost.includes('anthropic.com')) {
+
+            if (isClaude) {
                 finalUrl = `${safeHost}/messages`;
                 headers['x-api-key'] = safeKey;
                 headers['anthropic-version'] = '2023-06-01';
@@ -1985,9 +1902,11 @@ const Translators = {
                     messages: [{ role: "user", content: `${config.systemPrompt}\n\nText: ${text}` }],
                     temperature: activeTemperature
                 };
-            }
-            else {
-                finalUrl = safeHost.endsWith('/chat/completions') ? safeHost : `${safeHost}/chat/completions`;
+            } else {
+                // Gemini、Grok、Groq、OpenAI、DeepSeek、OpenRouter、自定义 全部走这里
+                finalUrl = safeHost.endsWith('/chat/completions')
+                    ? safeHost
+                    : `${safeHost}/chat/completions`;
                 headers['Authorization'] = `Bearer ${safeKey}`;
                 bodyData = {
                     model: config.model,
@@ -1998,40 +1917,39 @@ const Translators = {
                     temperature: activeTemperature
                 };
             }
+
             const response = await fetch(finalUrl, {
                 method: 'POST',
-                headers: headers,
+                headers,
                 body: JSON.stringify(bodyData),
                 signal: controller.signal
             });
+
             clearTimeout(timeoutId);
-            const contentType = response.headers.get("content-type");
+
             if (!response.ok) {
                 const errText = await response.text();
                 logger.error(`❌ HTTP Error ${response.status}:`, errText);
                 throw new Error(`API Error [${response.status}]: ${errText.substring(0, 150)}`);
             }
+
+            const contentType = response.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
                 throw new Error("Server returned non-JSON response.");
             }
+
             const data = await response.json();
-            if (isGemini) {
-                const candidate = data.candidates?.[0];
-                if (candidate?.finishReason === 'SAFETY') throw new Error("Blocked by Gemini Safety Filter.");
-                const content = candidate?.content?.parts?.[0]?.text;
-                if (!content) throw new Error("Gemini empty response.");
-                return content.trim();
-            }
-            else if (isClaude && safeHost.includes('anthropic.com')) {
+
+            if (isClaude) {
                 return data.content?.[0]?.text?.trim() || "No response";
-            }
-            else {
+            } else {
                 const content = data.choices?.[0]?.message?.content;
                 if (content === undefined || content === null) {
                     throw new Error(data.error?.message || "Invalid response structure");
                 }
                 return content.trim();
             }
+
         } catch (e) {
             clearTimeout(timeoutId);
             logger.error("AI 翻译请求失败:", e);
@@ -2389,10 +2307,11 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 'openai': { k: 'oaKey', m: 'oaModel', h: 'oaApiHost' },
                 'deepseek': { k: 'dsKey', m: 'dsModel', h: 'dsHost' },
                 'custom_ai': { k: 'customKey', m: 'customModel', h: 'customHost' },
-                'siliconflow': { k: 'siliconflowKey', m: 'siliconflowModel', h: null },
-                'gemini': { k: 'geminiKey', m: 'geminiModel', h: null },
+                'siliconflow': { k: 'siliconflowKey', m: 'siliconflowModel', h: 'siliconflowHost' },
+                'gemini': { k: 'geminiKey', m: 'geminiModel', h: 'geminiHost' },
                 'claude': { k: 'claudeKey', m: 'claudeModel', h: 'claudeApiHost' },
-                'grok': { k: 'grokKey', m: 'grokModel', h: null }
+                'grok': { k: 'grokKey', m: 'grokModel', h: 'grokHost' },
+                'groq': { k: 'groqKey', m: 'groqModel', h: 'groqHost' },
             };
             const mapping = idMap[engine] || { k: `${engine}Key`, m: `${engine}Model`, h: null };
             const apiKey = data[mapping.k];
