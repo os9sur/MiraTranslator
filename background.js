@@ -1377,43 +1377,25 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
 async function _buildDetailData(
     basicText, originalText, targetLang, sourceName,
     sourcePhonetic, targetPhonetic, sourceLang, existingDictData,
-    preferredHost, preferredCache,   // 由主翻译透传，跳过重复探测
+    preferredHost, preferredCache,
     existingExamples = []
 ) {
     const isChineseTarget = targetLang.toLowerCase().includes('zh');
     const isEnglishSource = /^[a-zA-Z-]+$/.test(originalText.trim()) && (sourceLang === 'en');
     let detailData = null;
 
+    // 1. 中英互译 
     if (isEnglishSource && isChineseTarget) {
         detailData = await Translators._fetchDictDetail(originalText.trim());
-    } else {
-        const lookupLang = sourceLang || 'en';
-        detailData = await fetchFreeDictionary(originalText.trim(), lookupLang);
+    }
+    // 2. 其他所有语言，直接走目标语种 Wiktionary，跳过二次翻译！
+    else {
+        // 例如 targetLang 是 'ja'，就去查 ja.wiktionary
+        detailData = await fetchNativeWiktionaryDetail(originalText.trim(), sourceLang, targetLang);
 
+        // 如果 Wiktionary 没查到，做一个最基础的兜底（只显示基础翻译）
         if (!detailData && existingDictData?.length > 0) {
             detailData = { dictData: existingDictData, phonetic: '', examples: [], wordForms: [] };
-        }
-
-        const needsTranslation = detailData
-            && !targetLang.toLowerCase().startsWith('en')
-            && detailData.dictData?.length > 0;
-
-        //每个词性的详细释义,例句
-        if (needsTranslation) {
-            const limitedDictData = detailData.dictData.map(pos => ({
-                ...pos,
-                meanings: (pos.meanings || []).slice(0, 2)
-            }));
-            const limitedExamples = detailData.examples?.length > 0
-                ? (detailData.examples || []).slice(0, 2)
-                : (existingExamples || []).slice(0, 2);
-
-            const { dictData: newDictData, originalDictData, examples: newExamples } =
-                await translateDictContent(
-                    limitedDictData, limitedExamples, targetLang,
-                    preferredHost, preferredCache   // 透传，复用已有 token
-                );
-            detailData = { ...detailData, dictData: newDictData, originalDictData, examples: newExamples };
         }
     }
 
@@ -1422,7 +1404,7 @@ async function _buildDetailData(
             basic: basicText,
             phonetic: sourcePhonetic || detailData.phonetic || "",
             dictData: detailData.dictData || [],
-            originalDictData: detailData.originalDictData || null,
+            originalDictData: null, // 不再需要记录未翻译前的原文
             examples: detailData.examples || [],
             wordForms: detailData.wordForms || [],
             prototype: detailData.prototype || null,
@@ -1432,9 +1414,7 @@ async function _buildDetailData(
             sourceUrl: detailData.sourceUrl || null,
             meta: detailData.meta || null,
             allPronunciations: detailData.allPronunciations || [],
-            source: detailData.isFallback
-                ? `${sourceName}+Wiktionary`
-                : `${sourceName}+Dict`
+            source: isChineseTarget ? `${sourceName}+Dict` : `${sourceName}+WikiNative`
         };
     }
 
@@ -1445,7 +1425,223 @@ async function _buildDetailData(
         meta: null, allPronunciations: [], source: sourceName
     };
 }
+/**
+ * 从 Wiktionary 抓取目标语言的原生词典数据
+ */
+async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
+    try {
+        const targetPrefix = targetLang.split('-')[0].toLowerCase();
+        if (!/^[a-z]{2,3}$/.test(targetPrefix)) return null;
 
+        const url = `https://${targetPrefix}.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&titles=${encodeURIComponent(word)}&format=json&origin=*`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+
+        const data = await res.json();
+        const pages = data.query?.pages;
+        if (!pages || pages["-1"]) return null;
+
+        const content = pages[Object.keys(pages)[0]].revisions[0]['*'];
+        const dictData = [];
+        const examples = [];
+
+        const clean = (text) => {
+            if (!text) return "";
+            return text
+                .replace(/\{\{gloss\|([^}]+)\}\}/g, '($1)')   //  保留释义说明
+                .replace(/\{\{lb\|[^}]+\}\}/g, '')             // 删语言标签 {{lb|fr|...}}
+                .replace(/\{\{[^{}]*\}\}/g, '')
+                .replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, '$1')
+                .replace(/'{2,3}/g, '')
+                .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+        };
+
+        const LANG_NAMES = {
+            fr: 'French', de: 'German', es: 'Spanish', it: 'Italian',
+            pt: 'Portuguese', ja: 'Japanese', ko: 'Korean', zh: 'Chinese',
+            ru: 'Russian', ar: 'Arabic', nl: 'Dutch', pl: 'Polish',
+            sv: 'Swedish', da: 'Danish', fi: 'Finnish', no: 'Norwegian',
+            tr: 'Turkish', vi: 'Vietnamese', th: 'Thai', id: 'Indonesian',
+            la: 'Latin', el: 'Greek', he: 'Hebrew', fa: 'Persian',
+            uk: 'Ukrainian', cs: 'Czech', ro: 'Romanian', hu: 'Hungarian',
+        };
+        // ── 检测方言 ──
+        const isFrStyle = /\{\{langue\|/i.test(content);
+
+        // ── 提取目标语言块 ──
+        let targetContent = '';
+        if (isFrStyle) {
+            const re = new RegExp(`==\\s*\\{\\{langue\\|${sourceLang}\\}\\}\\s*==`, 'i');
+            const parts = content.split(/(?=\n==\s*\{\{langue)/);
+            for (const p of parts) { if (re.test(p)) { targetContent = p; break; } }
+        } else {
+            const langName = LANG_NAMES[sourceLang] || sourceLang;
+            const reEnStyle = new RegExp(`^==\\s*${langName}\\s*==$`, 'im');
+            const reGenStyle = new RegExp(`==\\s*\\{\\{${sourceLang}\\}\\}\\s*==`, 'i');
+            const parts = content.split(/(?=\n==[^=])/);
+            for (const p of parts) {
+                if (reEnStyle.test(p) || reGenStyle.test(p)) { targetContent = p; break; }
+            }
+        }
+        if (!targetContent) targetContent = content;
+
+        // ── 删除翻译表块（跨行，所以先整体处理字符串）──
+        targetContent = targetContent
+            .replace(/\{\{trans-top[\s\S]*?\{\{trans-bottom\}\}/gi, '')
+            .replace(/\{\{top\}\}[\s\S]*?\{\{bottom\}\}/gi, '')
+            .replace(/<!--[\s\S]*?-->/g, '');  
+
+        // ── 预处理：合并括号未闭合的跨行模板 ──
+        const rawLines = targetContent.split('\n');
+        const lines = [];
+        for (let i = 0; i < rawLines.length; i++) {
+            let line = rawLines[i];
+            if (/\{\{/.test(line)) {
+                let open = (line.match(/\{\{/g) || []).length;
+                let close = (line.match(/\}\}/g) || []).length;
+                while (open > close && i + 1 < rawLines.length) {
+                    i++;
+                    line += ' ' + rawLines[i].trim();
+                    open += (rawLines[i].match(/\{\{/g) || []).length;
+                    close += (rawLines[i].match(/\}\}/g) || []).length;
+                }
+            }
+            lines.push(line);
+        }
+
+        // ── 词性标题识别 ──
+        // 非词性关键词（这些标题跳过）
+        const NON_POS = /^(etym|pron|trans|rel|syn|ant|der|see|ref|hyp|coord|note|decl|conj|usage|alter|phrase|quot|abbr|suffix|prefix|infix|inter|part|det|num)/i;
+        // 已知词性关键词
+        const KNOWN_POS = /^(noun|verb|adj|adjective|adv|adverb|pron|pronoun|prep|preposition|conj|conjunction|interj|interjection|article|det|determiner|num|numeral|abbr|suffix|prefix|infix|particle|nom|ver|名詞|動詞|形容詞|副詞|代名詞|前置詞|接続詞|感嘆詞)/i;
+
+        const getPOS = (line) => {
+            // fr.wiktionary: === {{S|nom|fr}} ===
+            const frMatch = line.match(/={2,}\s*\{\{S\|([^|}]+)/i);
+            if (frMatch) {
+                const p = frMatch[1].trim();
+                return NON_POS.test(p) ? null : p;
+            }
+            // en.wiktionary 纯文字: ===Noun=== / ===Verb===
+            const plainMatch = line.match(/^={2,}\s*([A-Z][a-z]+)\s*={2,}$/);
+            if (plainMatch) {
+                const p = plainMatch[1].trim();
+                if (NON_POS.test(p)) return null;
+                if (KNOWN_POS.test(p)) return p;
+            }
+            // ja/ko 等模板风格: ==={{adj}}====
+            const genMatch = line.match(/={2,}\s*\{\{([^|}]+)\}\}\s*={2,}/);
+            if (genMatch) {
+                const p = genMatch[1].trim();
+                if (NON_POS.test(p)) return null;
+                if (KNOWN_POS.test(p)) return p;
+            }
+            return null;
+        };
+
+        // ── 主解析循环 ──
+        let currentPos = null;
+        let meanings = [];
+        const LANG_SECTION_END = /^==\s*(?:\{\{langue\|[^}]+\}\}|\{\{[a-z]{2,3}\}\}|[A-Z][a-z]+)\s*==$/;
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            if (line.match(LANG_SECTION_END) && !line.includes(sourceLang)) {
+                break;
+            }
+            // 词性标题
+            const pos = getPOS(line);
+            if (pos) {
+                if (currentPos && meanings.length > 0)
+                    dictData.push({ pos: currentPos, meanings: [...meanings] });
+                currentPos = pos;
+                meanings = [];
+                continue;
+            }
+
+            // 只处理 # 开头的行
+            if (!line.startsWith('#')) continue;
+            if (/(file:|音声|audio|IPA|Category:|\.ogg|\.mp3)/i.test(line)) continue;
+
+            // #*{{syn}}: / #*{{ant}}: 等关联词行 ,跳过
+            if (/^#\*\s*\{\{(syn|ant|hyp|coord|rel)\}\}/i.test(line)) continue;
+ 
+            const isEnWikt = targetPrefix === 'en';
+ 
+            const isQuoteMeta = isEnWikt && line.startsWith('#*') && !line.startsWith('#*:');
+            const isEnExample = isEnWikt && line.startsWith('#*:');
+            const isJaExample = !isEnWikt && line.startsWith('#*') && !line.startsWith('#*:');
+            const isJaTranslation = !isEnWikt && line.startsWith('#*:');
+            const isFrExample = /\{\{\s*exemple\s*[|}]/i.test(line);
+
+            //  先尝试提取 quote-book 的 passage
+            if (isEnWikt && line.startsWith('#*') && /\{\{quote-/.test(line)) {
+                // 提取 passage= 到行尾（或下一个 | 参数）
+                const passageMatch = line.match(/[|]passage=(.+)/i);
+                if (passageMatch) {
+                    let txt = passageMatch[1]
+                        .replace(/\}\}.*$/, '')          // 删掉末尾 }} 及之后内容
+                        .replace(/\|[a-z_]+=.*$/i, '')   // 删掉后续参数 |url=... 等
+                        .replace(/'{2,3}/g, '')           // 删粗体斜体
+                        .replace(/\{\{[\s\S]*?\}\}/g, '') // 删模板
+                        .replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, '$1')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                    if (txt && txt.length > 1) examples.push(txt);
+                }
+                continue;
+            }
+            if (isQuoteMeta) {
+                continue; // en.wiktionary 的引用来源行，跳过
+            } else if (isEnExample) {
+                // en.wiktionary: #*: 是例句正文
+                const txt = clean(line.replace(/^[#*:]+/, ''));
+                if (txt && txt.length > 1) examples.push(txt);
+            } else if (isJaTranslation) {
+                // ja.wiktionary: #*: 是日文翻译，附加到上一条例句
+                const txt = clean(line.replace(/^[#*:]+/, ''));
+                if (txt && examples.length > 0) {
+                    const last = examples[examples.length - 1];
+                    if (typeof last === 'string' && last.length > 1) {
+                        examples[examples.length - 1] = { en: last, cn: txt };
+                    }
+                }
+            } else if (isFrExample) {
+                const exMatch = line.match(/\{\{\s*exemple\s*\|([^]*?)\}\}/i);
+                if (exMatch) {
+                    const parts = exMatch[1].split('|').map(p => p.trim()).filter(Boolean);
+                    const textParts = parts.filter(p =>
+                        !p.includes('=') && !p.startsWith('{{') && p.length > 1
+                    );
+                    const sentence = clean(textParts[0] || '');
+                    const translation = clean(textParts[1] || '');
+                    if (sentence) examples.push(translation ? { en: sentence, cn: translation } : sentence);
+                }
+            } else if (isJaExample) {
+                // ja.wiktionary: #* 是英文原句
+                const txt = clean(line.replace(/^[#*]+/, ''));
+                if (txt && txt.length > 1) examples.push(txt);
+            } else if (!line.startsWith('##')) {
+                const txt = clean(line.replace(/^#+/, ''));
+                if (txt && txt.length > 1) meanings.push(txt);
+            }
+        }
+
+        if (currentPos && meanings.length > 0)
+            dictData.push({ pos: currentPos, meanings: [...meanings] });
+
+        if (dictData.length === 0) return null;
+
+        return { phonetic: '', dictData, examples, wordForms: [], source: 'Wiktionary Native' };
+
+    } catch (e) {
+        console.warn('[Wiktionary Native] Error:', e.message);
+        return null;
+    }
+}
 // ── 推送详细更新到 content script ────────
 function pushDetailUpdate(tabId, result, originalText, cacheKey = null) {
     if (!tabId) return;

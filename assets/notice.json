@@ -1,10 +1,31 @@
 {
     "enabled": false,
     "zh-CN": {
-        "id": "notice_2026_v4",
-        "title": "请忽略,这是一条测试通知信息...",
-        "level": "urgent",
-        "content": "智能拾取器 2.0 支持实时预览 CSS 选择器匹配结果，点击放大镜按钮即可体验。",
+        "id": "notice_20260408_v3392",
+        "title": "🎉 新版本 v3.3.9.6 已发布",
+        "level": "info",
+        "content": "如遇翻译异常，可在设置中临时切换到 Bing 引擎。如需立即更新：打开 chrome://extensions/，开启「开发者模式」，点击「更新」。",
         "gotIt": "知道了"
+    },
+    "zh-TW": {
+        "id": "notice_20260408_v3392",
+        "title": "🎉 新版本 v3.3.9.6 已發布",
+        "level": "info",
+        "content": "如遇翻譯異常，可在設定中暫時切換至 Bing 引擎。如需立即更新：開啟 chrome://extensions/，開啟「開發人員模式」，點按「更新」。",
+        "gotIt": "知道了"
+    },
+    "ja": {
+        "id": "notice_20260408_v3392",
+        "title": "🎉 新バージョン v3.3.9.6 リリース",
+        "level": "info",
+        "content": "翻訳が正常に動作しない場合は、設定からBingエンジンに切り替えてお試しください。今すぐ更新する場合は chrome://extensions/ を開き、「デベロッパーモード」をオンにして「更新」をクリックしてください。",
+        "gotIt": "了解"
+    },
+    "en": {
+        "id": "notice_20260408_v3392",
+        "title": "🎉 New Version v3.3.9.6 Available",
+        "level": "info",
+        "content": "If translation isn't working, switch to Bing in settings as a temporary fix. To update now: open chrome://extensions/, enable Developer Mode, then click Update.",
+        "gotIt": "Got it"
     }
 }
