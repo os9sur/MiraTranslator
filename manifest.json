@@ -28,7 +28,9 @@
   "oauth2": {
     "client_id": "{{MY_ID}}",
     "scopes": [
-      "https://www.googleapis.com/auth/drive.appdata"
+      "https://www.googleapis.com/auth/drive.appdata",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
     ]
   },
   "host_permissions": [

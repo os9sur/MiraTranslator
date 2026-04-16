@@ -2250,6 +2250,81 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         }
         const effectiveEngine = req.isTest ? engine : (_runtimeEngine || engine); //  isTest 跳过降级
 
+        // ── Mira Pro 托管翻译 ──────────────────────────────────────
+        if (effectiveEngine === 'mira_pro') {
+            //  先尝试从本地存储直接读取  (mira_jwt)
+            const storage = await chrome.storage.local.get(['mira_jwt']);
+            let token = storage.mira_jwt;
+
+            // 2. 【兼容】如果本地没有票，再尝试原来的“实名制”获取方式
+            if (!token) {
+                const tokenRes = await new Promise((resolve) => {
+                    chrome.runtime.sendMessage({ action: 'getMiraToken' }, resolve);
+                });
+                token = tokenRes?.token;
+            }
+
+            // 3. 【判定】如果两边都拿不到，才提示用户去登录
+            if (!token) {
+                return { error: '请先登录 Mira 账号' };
+            }
+
+            // 2. 读取用户选择的模型
+            const miraData = await safeGetStorage('data_mira_pro');
+            const selectedModel = miraData?.['data_mira_pro']?.model || 'deepseek_v3';
+
+            // 3. 构建 system_prompt（复用 processTranslate 里已有的逻辑）
+            const targetLanguageName = getFriendlyLanguageName(req.targetLang);
+            const systemPrompt = `You are a professional translator. Translate the user's text literally into ${targetLanguageName}. Output ONLY the translation. Never explain or expand.`;
+
+            // 4. 调用 Worker
+            let workerRes;
+            try {
+                const resp = await Promise.race([
+                    fetch(`${MIRA_WORKER_URL}/api/translate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            google_token: token,
+                            model: selectedModel,
+                            text: req.text,
+                            target_lang: req.targetLang,
+                            system_prompt: systemPrompt,
+                        })
+                    }),
+                    new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error('Request timeout (20s)')), 20000)
+                    )
+                ]);
+
+                if (resp.status === 402) {
+                    return { error: '余额不足，请充值后继续使用' };
+                }
+                if (resp.status === 401) {
+                    return { error: '登录已过期，请重新登录' };
+                }
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => ({}));
+                    throw new Error(errData.error || `Worker error ${resp.status}`);
+                }
+
+                workerRes = await resp.json();
+            } catch (e) {
+                logger.error('[Mira Pro] Worker 调用失败:', e.message);
+                return { error: e.message };
+            }
+
+            // 5. 返回结果，走和其他引擎一样的后处理
+            return {
+                result: {
+                    basic: workerRes.text || '',
+                    source: `Mira Pro (${workerRes.model || selectedModel})`,
+                    isFallback: false,
+                }
+            };
+        }
+        // ── Mira Pro 结束 ──────────────────────────────────────────
+
         if (effectiveEngine === 'bing') {
             try {
                 rawResult = await Translators.bing(req.text, req.targetLang, req.hintSourceLang, tabId, cacheKey, req.fromPopup);
@@ -2274,7 +2349,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }
                 rawResult = await Translators.google(req.text, req.targetLang, false, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
             }
-        } else if (effectiveEngine === 'google') {
+        }
+        else if (effectiveEngine === 'google') {
             try {
                 rawResult = await Translators.google(req.text, req.targetLang, req.lightweight, req.hintSourceLang, tabId, cacheKey, req.fromPopup);
                 if (!req.isTest) {
@@ -2298,9 +2374,11 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }
                 rawResult = await Translators.bing(req.text, req.targetLang, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
             }
-        } else if (Translators[engine]) {
+        }
+        else if (Translators[engine]) {
             rawResult = await Translators[engine](req.text, req.targetLang, data, req.hintSourceLang, tabId, cacheKey, req.fromPopup);
-        } else if (AI_ENGINES_CONFIG[engine]) {
+        }
+        else if (AI_ENGINES_CONFIG[engine]) {
 
             const aiConf = AI_ENGINES_CONFIG[engine];
             const idMap = {
@@ -2345,7 +2423,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 const isChineseTarget = targetLanguageName.includes('Chinese') || targetLanguageName.includes('中文');
                 const needsWordForms = isChineseTarget || targetLangBase === 'ja' || targetLangBase === 'ko';
 
-                // ── sourcePhoneticDesc  
+                // ── sourcePhoneticDesc ────────────────────────────────────────
                 const sourcePhoneticDesc = (() => {
                     if (!req.needPhonetic) return '';
                     if (isLatinInput) return `  "sourcePhonetic": ""`;
@@ -2359,46 +2437,43 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     return `  "sourcePhonetic": "<Romanization of input>"`;
                 })();
 
-                // ── wordForms instruction（按源语言适配） 
+                // ── wordForms instruction ────────────── 
                 const wordFormsInstruction = (() => {
                     if (!needsWordForms) return '';
                     if (hintInputLang === 'ja')
-                        return `  "wordForms": [{"name": "た形/て形/ます形/ない形/可能形 etc.", "value": "conjugated form"}],`;
+                        return `  "wordForms": [{"name": "た形/て形/ます形/ない形 etc.", "value": "conjugated form"}],`;
                     if (hintInputLang === 'ko')
                         return `  "wordForms": [{"name": "과거형/현재형/존댓말 etc.", "value": "conjugated form"}],`;
                     if (hintInputLang === 'de')
-                        return `  "wordForms": [{"name": "Präteritum/Partizip II/Plural etc.", "value": "the form"}],`;
+                        return `  "wordForms": [{"name": "Präteritum/Partizip II etc.", "value": "the form"}],`;
                     if (hintInputLang === 'fr')
-                        return `  "wordForms": [{"name": "passé composé/imparfait/pluriel etc.", "value": "the form"}],`;
+                        return `  "wordForms": [{"name": "passé composé/imparfait etc.", "value": "the form"}],`;
                     if (hintInputLang === 'es')
-                        return `  "wordForms": [{"name": "pretérito/participio/plural etc.", "value": "the form"}],`;
+                        return `  "wordForms": [{"name": "pretérito/participio etc.", "value": "the form"}],`;
                     if (hintInputLang === 'ru')
                         return `  "wordForms": [{"name": "прошедшее/множественное etc.", "value": "the form"}],`;
-                    // 默认英语及其他拉丁语系
-                    return `  "wordForms": [{"name": "过去式/过去分词/现在分词/第三人称单数/复数/比较级/最高级 etc.", "value": "the form"}],`;
+                    return `  "wordForms": [{"name": "过去式/分词/进行时/三单/复数 etc.", "value": "the form"}],`;
                 })();
 
-                // ── wordForms rules（按源语言适配） ──── 
+                // ── wordForms rules ─────────────────────────────────── 
                 const wordFormsRule = (() => {
                     if (!needsWordForms) return '';
                     if (hintInputLang === 'ja')
-                        return `- wordForms: provide Japanese verb/adjective conjugations (た形,て形,ます形,ない形,可能形). Return [] for nouns, particles, conjunctions. NEVER fabricate forms.`;
+                        return `- wordForms: verb/adjective conjugations only. [] for nouns/particles/conjunctions. Never fabricate.`;
                     if (hintInputLang === 'ko')
-                        return `- wordForms: provide Korean verb/adjective conjugations (과거형,현재형,존댓말 etc.). Return [] for nouns, particles. NEVER fabricate forms.`;
+                        return `- wordForms: verb/adjective conjugations only. [] for nouns/particles. Never fabricate.`;
                     if (hintInputLang === 'de')
-                        return `- wordForms: provide German morphological forms (Präteritum, Partizip II, Plural etc.). Return [] for prepositions, conjunctions, articles. NEVER fabricate forms.`;
+                        return `- wordForms: morphological forms only. [] for prepositions/conjunctions/articles. Never fabricate.`;
                     if (hintInputLang === 'fr')
-                        return `- wordForms: provide French morphological forms (passé composé, imparfait, pluriel etc.). Return [] for prepositions, conjunctions. NEVER fabricate forms.`;
-                    // 默认
-                    return `- wordForms: return [] for Chinese/Thai/Vietnamese input, and for determiners/pronouns/prepositions/conjunctions/articles (e.g. "every", "the", "and"). NEVER fabricate non-existent forms.`;
+                        return `- wordForms: morphological forms only. [] for prepositions/conjunctions. Never fabricate.`;
+                    return `- wordForms: [] for Chinese/Thai/Vietnamese input and determiners/pronouns/prepositions/conjunctions/articles. Never fabricate.`;
                 })();
 
-                // ── Examples ──────────────────────────────────────────────
                 const sourceLangLabel = hintInputLang
                     ? getFriendlyLanguageName(hintInputLang)
                     : 'source language';
 
-                // baseExample 按源语言适配
+                // ── Examples ────────────────────
                 const baseExample = (() => {
                     if (!needsWordForms) {
                         return `{"basic":"run, operate","phonetic":"rʌn","dictData":[{"pos":"v.","definition":"run, operate, manage"},{"pos":"n.","definition":"a run, running"}],"examples":["<A natural sentence in ${sourceLangLabel}> | <${targetLanguageName} translation>"]}`;
@@ -2409,11 +2484,9 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     if (hintInputLang === 'ko') {
                         return `{"basic":"달리다, 뛰다","phonetic":"dallida","dictData":[{"pos":"동사","definition":"달리다, 뛰다, 작동하다"}],"examples":["나는 매일 달린다。| 我每天跑步。"],"wordForms":[{"name":"과거형","value":"달렸다"},{"name":"존댓말","value":"달립니다"}],"prototype":null}`;
                     }
-                    // 默认英语源
                     return `{"basic":"跑, 运行","phonetic":"rʌn","dictData":[{"pos":"v.","definition":"跑步, 运行, 管理"},{"pos":"n.","definition":"跑步, 运行"}],"examples":["I run every day | 我每天跑步"],"wordForms":[{"name":"过去式","value":"ran"},{"name":"过去分词","value":"run"},{"name":"现在分词","value":"running"},{"name":"第三人称单数","value":"runs"}],"prototype":null}`;
                 })();
 
-                // inflectedExample 按源语言适配
                 const inflectedExample = (() => {
                     if (!needsWordForms) {
                         return `{"basic":"to eat, eating","phonetic":"ˈiːtɪŋ","dictData":[{"pos":"v.","definition":"consuming food, ingesting"}],"examples":[],"prototype":"eat"}`;
@@ -2427,7 +2500,6 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     return `{"basic":"跑步, 运行","phonetic":"ˈrʌnɪŋ","dictData":[{"pos":"v.","definition":"正在跑, 运转"},{"pos":"adj.","definition":"运行中的"}],"examples":[],"wordForms":[],"prototype":"run"}`;
                 })();
 
-                // funcWordExample 按源语言适配
                 const funcWordExample = (() => {
                     if (!needsWordForms) {
                         return `{"basic":"every, each","phonetic":"ˈɛvri","dictData":[{"pos":"det.","definition":"each one of a group"}],"examples":[],"prototype":null}`;
@@ -2441,50 +2513,46 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     return `{"basic":"每个, 每一","phonetic":"ˈɛvri","dictData":[{"pos":"det.","definition":"每个, 所有"}],"examples":[],"wordForms":[],"prototype":null}`;
                 })();
 
-                const examplesPrompt = [
-                    `Input: "run" → ${targetLanguageName}: ${baseExample}`,
-                    `Input: "running" → ${targetLanguageName}: ${inflectedExample}`,
-                    `Input: "every" → ${targetLanguageName}: ${funcWordExample}`,
-                ].join('\n');
-
-                // ── JSON shape ────────────────────────────────────────────
+                // ── JSON shape ──────────────────────────── 
                 const jsonShape = [
                     `{`,
-                    `  "phonetic": "IPA phonetics (if applicable)",`,
+                    `  "phonetic": "IPA or empty",`,
                     req.needPhonetic ? sourcePhoneticDesc : '',
                     `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
-                    `  "dictData": [{"pos": "n./v./adj.", "definition": "comma-separated meanings"}],`,
-                    `  "examples": ["<sentence in ${sourceLangLabel}> | <${targetLanguageName} translation>"],`,
+                    `  "dictData": [{"pos": "n./v./adj.", "definition": "meanings in ${targetLanguageName}"}],`,
+                    `  "examples": ["<${sourceLangLabel} sentence> | <${targetLanguageName} translation>"],`,
                     needsWordForms ? wordFormsInstruction : '',
-                    needsWordForms ? `  "prototype": "base form if input is inflected, otherwise null"` : '',
+                    needsWordForms ? `  "prototype": "base form if inflected, else null"` : '',
                     `}`,
                 ].filter(Boolean).join('\n');
 
-                // ── System Prompt ─────────────────────────────────────────
+                // ── System Prompt ───────────────────────────────────── 
                 systemPrompt = [
-                    `You are a professional ${targetLanguageName} dictionary. Output PURE JSON only — no markdown, no backticks, no explanation.`,
-                    `TARGET LANGUAGE: ${targetLanguageName}. All "basic" and "definition" values MUST be in ${targetLanguageName}.${targetLanguageName.includes('Traditional Chinese') ? ' Use 繁體字 exclusively.' : ''}`,
-                    `CRITICAL: Every single value in "definition" and "basic" fields MUST be written in ${targetLanguageName}. NEVER output source language text (${sourceLangLabel}) as definitions.`,
-                    hintInputLang ? `Source Language: ${sourceLangLabel}.` : '',
+                    // ① 角色 + 输出格式要求 
+                    `You are a ${targetLanguageName} dictionary. Output PURE JSON only — no markdown, no backticks, no explanation.`,
 
-                    `OUTPUT SHAPE:`,
-                    jsonShape,
+                    // ② 语言约束 
+                    `TARGET: ${targetLanguageName}. ALL "basic" and "definition" values MUST be in ${targetLanguageName} — NEVER in ${sourceLangLabel}.`
+                    + (targetLanguageName.includes('Traditional Chinese') ? ' Use 繁體字 exclusively.' : ''),
 
-                    `EXAMPLES (follow these exactly):`,
-                    examplesPrompt,
+                    // ③ 源语言提示 
+                    hintInputLang ? `Source: ${sourceLangLabel}.` : '',
 
-                    `INPUT: "${req.text}"`,
+                    // ④ JSON shape
+                    `OUTPUT:\n${jsonShape}`,
 
+                    // ⑤ Examples 
+                    `EXAMPLES:\nInput: "run" → ${baseExample}\nInput: "running" → ${inflectedExample}\nInput: "every" → ${funcWordExample}`,
+
+                    // ⑥ Rules 
                     `RULES:`,
-                    `- Max 6 dictData entries total. Group by pos — each pos appears ONLY ONCE.`,
-                    `- definition: MAX 5 meanings per pos, each meaning must be UNIQUE. Never repeat the same word. ALL definitions MUST be in ${targetLanguageName}.`,
-                    `- phonetic: MUST be IPA (e.g. /dʑoːhoː/) or Hepburn Romaji (e.g. jōhō). NEVER use Hiragana or Katakana as phonetic.`,
-                    `- prototype: set ONLY if input is a clearly inflected form (e.g. "running"→"run", "走った"→"走る"). If input equals the prototype value, return null. When in doubt, return null.`,
+                    `- dictData: max 6 entries, each pos appears ONCE, max 5 meanings per pos, all unique.`,
+                    `- phonetic: IPA (e.g. /dʑoːhoː/) or Hepburn Romaji (e.g. jōhō). Never Hiragana/Katakana.`,
+                    `- examples: EXACTLY 2 DIFFERENT sentences, never repeat.`,
+                    `- prototype: ONLY if clearly inflected (running→run, 走った→走る). If input equals prototype, return null. When in doubt, null.`,
                     wordFormsRule,
-                    `- wordForms: provide ONLY morphological forms that naturally belong to "${req.text}" itself. Do NOT combine with auxiliary verbs (e.g. "になる", "する"). If "${req.text}" is a noun, pronoun, particle, or conjunction, return []. NEVER fabricate forms.`,
-                    req.needPhonetic ? `- sourcePhonetic: plain romanization only (e.g. "nihon", "zhōng guó") — NEVER IPA symbols, NEVER Hiragana/Katakana.` : '',
-                    `- examples: provide EXACTLY 2 DIFFERENT examples. Each must use a completely different sentence. NEVER repeat the same sentence twice.`,
-                    `- Response MUST start with '{' and end with '}'. Any other output will cause a system error.`,
+                    req.needPhonetic ? `- sourcePhonetic: plain romanization only (e.g. "nihon", "zhōng guó") — no IPA, no Hiragana/Katakana.` : '',
+                    `- Start with '{', end with '}'.`,
                 ].filter(Boolean).join('\n');
             } else if (isSubtitle) {
                 systemPrompt = [
@@ -3162,12 +3230,243 @@ async function detectAndCacheDefaultEngine(force = false) {
 //     });
 // }
 
+
+// ── 用户登录：复用 chrome.identity，但只取 userinfo ──
+
+const MIRA_WORKER_URL = '{{MIRA_WORKER_URL}}';
+
+// ── 用户登录：获取 Google 信息并同步到后端 ── 
+async function handleUserLogin(sendResponse) {
+    try {
+        // 1. 获取 Google OAuth token
+        const token = await new Promise((resolve, reject) => {
+            chrome.identity.getAuthToken({ interactive: true }, (t) => {
+                if (chrome.runtime.lastError || !t) {
+                    reject(new Error(chrome.runtime.lastError?.message || '登录取消'));
+                } else {
+                    resolve(t);
+                }
+            });
+        });
+
+        // 2. 获取 Google 用户详细信息
+        const resp = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!resp.ok) throw new Error('获取 Google 用户信息失败');
+        const info = await resp.json();
+
+        const user = {
+            uid: info.id,
+            email: info.email,
+            displayName: info.name,
+            photoURL: info.picture,
+        };
+
+        //  先去后端拿 JWT 通行证
+        // 只有后端同步成功了，才继续往下走
+        await syncUserToBackend(user, token);
+
+        //  通行证拿到了，现在才正式存入用户信息
+        await safeSetStorage({ mira_user: user });
+
+        // 最后拉取余额
+        await fetchUserBalance(user.uid, () => { });
+
+        // 全部成功，通知界面
+        sendResponse({ user });
+
+    } catch (err) {
+        logger.error('[Mira-Auth] 登录流程异常:', err);
+        // 如果中间报错了，彻底清空 
+        await safeRemoveStorage(['mira_user', 'mira_jwt', 'mira_user_balance']);
+
+        chrome.identity.getAuthToken({ interactive: false }, (t) => {
+            if (t) chrome.identity.removeCachedAuthToken({ token: t });
+        });
+        sendResponse({ user: null, error: err.message });
+    }
+}
+
+// ── 退出登录 ──
+async function handleUserLogout(sendResponse) {
+    try {
+        await safeRemoveStorage(['mira_user', 'mira_user_balance', 'mira_jwt']);
+        sendResponse({ ok: true });
+    } catch (err) {
+        sendResponse({ ok: false, error: err.message });
+    }
+}
+
+// ── 拉取余额：对接 Worker API ──
+async function fetchUserBalance(uid, sendResponse) {
+    try {
+        // 1. 尝试读本地缓存（5分钟有效期）
+        const cached = await safeGetStorage(['mira_user_balance']);
+        if (cached?.mira_user_balance?.uid === uid) {
+            const { balance, updatedAt } = cached.mira_user_balance;
+            if (Date.now() - updatedAt < 5 * 60 * 1000) {
+                sendResponse({ balance });
+                return;
+            }
+        }
+
+        // 2. 缓存失效，从后端请求最新数据
+        const { mira_jwt } = await safeGetStorage(['mira_jwt']);
+        if (!mira_jwt) throw new Error('未发现有效通行证，请重新登录');
+
+        // 3. 请求后端，不传 body，只传 Header
+        const resp = await fetch(`${MIRA_WORKER_URL}/api/balance`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${mira_jwt}`,
+            }
+            // GET 请求不需要 Content-Type，也不需要 body
+        });
+
+        if (resp.status === 401) {
+            // 如果后端报401，说明通行证过期了
+            logger.warn('通行证已过期');
+            return;
+        }
+
+        if (!resp.ok) {
+            const text = await resp.text();
+            throw new Error(`请求失败 ${resp.status}: ${text}`);
+        }
+        const { balance } = await resp.json();
+        await safeSetStorage({ mira_user_balance: { uid, balance, updatedAt: Date.now() } });
+        sendResponse({ balance });
+
+    } catch (err) {
+        logger.error('[Mira-Auth] 获取余额失败:', err);
+        sendResponse({ balance: null, error: err.message });
+    }
+}
+
+// ── 内部方法：同步用户到后端 ──
+async function syncUserToBackend(user, googleToken) {
+    try {
+        const resp = await fetch(`${MIRA_WORKER_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                google_token: googleToken,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+            })
+        });
+
+        if (!resp.ok) throw new Error(`后端返回错误: ${resp.status}`);
+
+        const data = await resp.json();
+        if (data.token) {
+            await safeSetStorage({ mira_jwt: data.token });
+            logger.log('✅ Token 已成功存入');
+        }
+    } catch (err) {
+        logger.error('[Mira-Auth] 同步失败:', err);
+        throw err; // <--- 必须抛出，让 handleUserLogin 捕获并停止流程
+    }
+}
+
+
 // 监听来自 content script 和 popup 的消息,接收消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!chrome.runtime || !chrome.runtime.id) return;
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
+
+    // ── 用户账号 Auth（独立于云同步）──────────────────
+    if (request.action === 'getMiraToken') {
+        // 获取 Google token 供 Worker 验证身份
+        chrome.identity.getAuthToken({ interactive: false }, (token) => {
+            if (chrome.runtime.lastError || !token) {
+                safeSendResponse({ token: null, error: '未登录或 token 获取失败' });
+            } else {
+                safeSendResponse({ token });
+            }
+        });
+        return true;
+    }
+
+    if (request.action === 'googleLogin') {
+        handleUserLogin(safeSendResponse);
+        return true;
+    }
+
+    if (request.action === 'logout') {
+        handleUserLogout(safeSendResponse);
+        return true;
+    }
+
+    if (request.action === 'getUser') {
+        safeGetStorage(['mira_user']).then(data => {
+            safeSendResponse({ user: data?.mira_user || null });
+        });
+        return true;
+    }
+
+    if (request.action === 'getBalance') {
+        fetchUserBalance(request.uid, safeSendResponse);
+        return true;
+    }
+
+    if (request.action === 'openRecharge') {
+        // 1. 同时读取用户信息和余额缓存
+        safeGetStorage(['mira_user', 'mira_user_balance', 'mira_jwt']).then(async (data) => { // 加上 mira_jwt
+            const user = data?.mira_user;
+            const jwt = data?.mira_jwt; // 获取它
+
+            if (!user || !jwt) { // 检查它
+                safeSendResponse({ ok: false, error: '未登录' });
+                return;
+            }
+
+            try {
+                // 2. 向 Worker 请求（确保 MIRA_WORKER_URL 已在顶部全局定义）
+                const res = await fetch(`${MIRA_WORKER_URL}/api/generate-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwt}`,  
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email: user.email || '' }) // 不传 uid
+                });
+
+                if (!res.ok) throw new Error('Worker 响应失败');
+                const { code } = await res.json();
+
+                // 3. 构建 URL 参数（此时 data.mira_user_balance 已有值）
+                const params = new URLSearchParams({
+                    uid: user.uid,
+                    email: user.email || '',
+                    name: user.displayName || '',
+                    avatar: user.photoURL || '',
+                    balance: data?.mira_user_balance?.balance || '0',
+                    code: code || '',
+                });
+
+                chrome.tabs.create({
+                    url: chrome.runtime.getURL('recharge.html') + '?' + params.toString()
+                });
+
+                safeSendResponse({ ok: true });
+            } catch (err) {
+                logger.error('[openRecharge] 异常:', err);
+                // 失败保底：仍打开页面，网页 recharge.js 会再次尝试 fetch
+                chrome.tabs.create({
+                    url: chrome.runtime.getURL('recharge.html') + `?uid=${user.uid}&email=${user.email || ''}`
+                });
+                safeSendResponse({ ok: false });
+            }
+        });
+        return true;
+    }
+    //用户账号结束
+
     if (request.type === 'RECHECK_ENGINE') {
         detectAndCacheDefaultEngine(true);
         safeSendResponse({ ok: true });

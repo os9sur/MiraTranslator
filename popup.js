@@ -2601,5 +2601,133 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsBtn.appendChild(warning);
   }
 
+  // 登录认证相关
+  // ── Auth UI 状态管理 ──────────────────────────────
+
+function updateAuthUI(user) {
+  const btnLogin   = document.getElementById('btnLogin');
+  const btnAvatar  = document.getElementById('btnAvatar');
+
+  if (user) {
+    // 已登录
+    btnLogin.style.display  = 'none';
+    btnAvatar.style.display = 'flex';
+    setAvatarDisplay(user);
+  } else {
+    // 未登录
+    btnLogin.style.display  = 'flex';
+    btnAvatar.style.display = 'none';
+  }
+}
+
+function setAvatarDisplay(user) {
+  // 小头像（header 按钮）
+  const img     = document.getElementById('avatarImg');
+  const initial = document.getElementById('avatarInitial');
+  // 大头像（panel 内）
+  const pImg     = document.getElementById('panelAvatarImg');
+  const pInitial = document.getElementById('panelAvatarInitial');
+
+  if (user.photoURL) {
+    img.src = user.photoURL;
+    img.style.display = 'block';
+    initial.style.display = 'none';
+    pImg.src = user.photoURL;
+    pImg.style.display = 'block';
+    pInitial.style.display = 'none';
+  } else {
+    const letter = (user.displayName || user.email || '?')[0].toUpperCase();
+    initial.textContent  = letter;
+    pInitial.textContent = letter;
+    img.style.display  = 'none';
+    pImg.style.display = 'none';
+  }
+
+  document.getElementById('panelName').textContent  = user.displayName || '—';
+  document.getElementById('panelEmail').textContent = user.email       || '—';
+}
+
+function updateBalance(amount) {
+  document.getElementById('panelBalance').textContent =
+    '$ ' + Number(amount).toFixed(2);
+}
+
+// ── Profile Panel 开关 ────────────────────────────
+
+const profilePanel = document.getElementById('profilePanel');
+
+document.getElementById('btnAvatar').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = profilePanel.style.display !== 'none';
+  profilePanel.style.display = isOpen ? 'none' : 'block';
+});
+
+// 点击 panel 外部关闭
+document.addEventListener('click', (e) => {
+  if (!profilePanel.contains(e.target) &&
+      e.target !== document.getElementById('btnAvatar')) {
+    profilePanel.style.display = 'none';
+  }
+});
+
+// ── 按钮事件 ─────────────────────────────────────
+
+document.getElementById('btnLogin').addEventListener('click', () => { 
+  const btn = document.getElementById('btnLogin');
+  btn.disabled = true;
+  btn.innerText = '正在登录...';
+
+  chrome.runtime.sendMessage({ action: 'googleLogin' }, (res) => {
+    btn.disabled = false;
+    btn.innerText = 'Google 登录';
+
+    if (res?.user) {
+      updateAuthUI(res.user); 
+      fetchBalance(res.user.uid);
+    } else if (res?.error) { 
+      if (res.error !== '登录取消') {
+        alert('登录同步中，请稍后刷新查看');
+      }
+    }
+  });
+});
+
+document.getElementById('btnLogout').addEventListener('click', () => {
+  chrome.runtime.sendMessage({ action: 'logout' }, () => {
+    profilePanel.style.display = 'none';
+    updateAuthUI(null);
+  });
+});
+
+document.getElementById('btnRecharge').addEventListener('click', () => {
+  profilePanel.style.display = 'none';
+  // 打开充值引导页（新 tab 或 popup 内路由）
+  chrome.runtime.sendMessage({ action: 'openRecharge' });
+});
+
+// ── 初始化：读取登录状态 ───────────────────────────
+
+function fetchBalance(uid) {
+  chrome.runtime.sendMessage({ action: 'getBalance', uid }, (res) => {
+    if (res?.balance != null) updateBalance(res.balance);
+  });
+}
+
+// ── 初始化：读取登录状态 ──
+chrome.runtime.sendMessage({ action: 'getUser' }, (res) => {
+  if (res?.user) { 
+    updateAuthUI(res.user);
+    chrome.storage.local.get(['mira_jwt'], (data) => {
+      if (data.mira_jwt) {
+        fetchBalance(res.user.uid);
+      } else {
+        logger.log('通行证尚未就绪，暂不拉取余额');
+      }
+    });
+  } else {
+    updateAuthUI(null);
+  }
+});
+
   checkEngineStatus();
 });

@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const ui_lang = window.currentConfig.ui_language;
     const TEMPLATES = {
+        'mira_pro': {
+            name: 'Mira 高级翻译',
+            isBuiltIn: true,
+            isPro: true,
+            color: '#7c3aed',
+            meta: 'MIRA.PRO',
+        },
         'google': {
             name: 'Google Translate', isBuiltIn: true, color: '#4285F4', meta: 'G.FREE'
         },
@@ -154,12 +161,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
         const builtInEngines = [
+            { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira 高级翻译' },
             { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
             { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
         ];
         const customConfigs = storedConfigs.filter(c =>
             c.id !== 'google_builtin' &&
-            c.id !== 'bing_builtin'
+            c.id !== 'bing_builtin' &&
+            c.id !== 'mira_pro'
         );
         if (customConfigs.length === 0 && Object.keys(oldApiKeys).length > 0) {
             for (const engineKey of Object.keys(TEMPLATES)) {
@@ -216,16 +225,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.innerHTML = userConfigs.map(c => {
             const isEditing = c.id === currentId;
             const isRunning = c.id === lastActiveId;
+            const tpl = TEMPLATES[c.engine] || {};
+            const proTag = tpl.isPro ? `<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">Pro</span>` : '';
             return `
             <div class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
                 <div class="engine-info">
                     ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
-                    <span class="engine-name">${c.alias}</span>
+                    <span class="engine-name">${c.alias}</span>${proTag}
                 </div>
-                ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
+                ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin' && c.id !== 'mira_pro') ?
                     `<span class="del-icon" data-id="${c.id}">×</span>` : ''}
-            </div>
-        `;
+            </div>`;
         }).join('');
         list.querySelectorAll('.engine-item').forEach(el => {
             el.onclick = (e) => {
@@ -245,6 +255,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const config = userConfigs.find(c => c.id === lastActiveId);
         if (!config) return;
+
+        // Mira Pro 特殊处理：检查用户登录和余额
+        if (config.engine === 'mira_pro') {
+            try {
+                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+                const targetLang = storage?.ui_language || 'en';
+                const isTargetEn = targetLang.toLowerCase().startsWith('en');
+                const testText = isTargetEn ? '你好' : 'Good morning';
+
+                const res = await Promise.race([
+                    safeSendMessage({
+                        type: 'TRANSLATE',
+                        text: testText,
+                        targetLang,
+                        isTest: true,
+                        engine: 'mira_pro'
+                    }),
+                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
+                ]);
+
+                let failed = true;
+                if (res && !res.error) {
+                    const data = res.currentTranslationResponse;
+                    if (data && !data.error) {
+                        const translatedText = (typeof data === 'string'
+                            ? data
+                            : (data.translatedText || data.basic || '')
+                        ).trim();
+                        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
+                        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
+                        failed = !hasContent || !isNotOriginal;
+                    }
+                }
+
+                dot.classList.remove('checking');
+                dot.classList.add(failed ? 'error' : 'success');
+                dot.title = failed ? 'Mira Pro 不可用（未登录或余额不足）' : 'Mira Pro 正常';
+            } catch (e) {
+                dot.classList.remove('checking');
+                dot.classList.add('error');
+                dot.title = 'Mira Pro 状态检查失败';
+            }
+            return;
+        }
 
         const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
         const targetLang = storage?.ui_language || 'en';
@@ -333,115 +387,190 @@ document.addEventListener('DOMContentLoaded', async () => {
         const displayAlias = config.alias || tpl.name || activeEngine;
         const tipsDesc = document.getElementById('tips');
         const testBtn = document.getElementById('testApiConfig');
+        const saveBtn = document.getElementById('saveApiConfig');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
             testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
             testBtn.style.borderColor = "";
             testBtn.disabled = false;
         }
+        if (saveBtn) {
+            saveBtn.innerHTML = `${t('save', uiLanguage)}`;
+            saveBtn.style.backgroundColor = "";
+            saveBtn.disabled = false;
+        }
+
+        // ---- Mira Pro 专属页面 ----
+        if (config.engine === 'mira_pro') {
+            actions.classList.remove('hidden');
+            const miraSaved = (await safeGetStorage(`data_mira_pro`)) || {};
+            const selectedModel = miraSaved[`data_mira_pro`]?.model || 'claude';
+
+            // 从 background.js 获取真实余额数据
+            let balance = 0;
+            let usedTokens = 0;
+            let usedCost = '0.00';
+            try {
+                const userData = await safeGetStorage(['mira_user', 'mira_user_balance']);
+                const user = userData?.mira_user;
+                const balanceData = userData?.mira_user_balance;
+
+                if (balanceData?.balance !== undefined) {
+                    balance = balanceData.balance;
+                }
+
+                // 使用数据也从存储中获取（如果有的话）
+                if (miraSaved[`data_mira_pro`]?.usedTokens !== undefined) {
+                    usedTokens = miraSaved[`data_mira_pro`].usedTokens;
+                    usedCost = (usedTokens / 1000000 * 1.8).toFixed(2);
+                }
+            } catch (e) {
+                logger.warn('获取 Mira 余额数据失败:', e);
+                balance = 0;
+            }
+
+            const models = [
+                { id: 'deepseek_v3', label: 'DeepSeek V3', tag: '均衡', tagColor: '#0284c7', desc: '速度与质量兼顾 · 推荐日常使用' },
+                { id: 'deepseek_v3_2', label: 'DeepSeek V3.2', tag: '最新', tagColor: '#7c3aed', desc: '最新版本 · 效果更佳' },
+                { id: 'claude_haiku', label: 'Claude 3.5 Haiku', tag: '最准', tagColor: '#7c3aed', desc: '语义最佳 · 适合精准翻译' },
+                { id: 'gpt4o_mini', label: 'GPT-4o Mini', tag: '稳定', tagColor: '#b45309', desc: '稳定可靠 · 速度与质量兼顾' },
+                { id: 'mistral_7b', label: 'Mistral 7B Instruct', tag: '极速', tagColor: '#16a34a', desc: '响应最快 · 适合大量翻译' },
+                { id: 'gemini_flash', label: 'Gemini 2.0 Flash', tag: '最省', tagColor: '#0ea5e9', desc: '成本最低 · 适合预算有限' },
+            ];
+
+            container.innerHTML = `
+            <div class="main-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <span class="status-dot checking" data-id="mira_pro" style="width:12px;height:12px;display:inline-block;"></span>
+                    <div>
+                        <h2 style="margin:0;display:flex;align-items:center;gap:8px;">
+                            ✦ Mira 高级翻译
+                            <span style="background:#7c3aed;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;">Pro</span>
+                        </h2>
+                        <p style="margin:4px 0 0;font-size:12px;color:#8b949e;">无需配置 API Key，开箱即用，按用量计费</p>
+                    </div>
+                </div>
+                <button id="miraMenuBtn" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;padding:4px 8px;">···</button>
+            </div>
+            <div class="form-container">
+                <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+                    <div>
+                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">当前余额</div>
+                        <div style="font-size:28px;font-weight:600;">$${balance.toFixed(2)} <span style="font-size:14px;color:#8b949e;">≈ ¥${(balance * 7.25).toFixed(1)}</span></div>
+                    </div>
+                    <button id="miraRechargeBtn" style="background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">+ 充值</button>
+                </div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">选择翻译模型</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;" id="miraModelGrid">
+                    ${models.map(m => `
+                    <div class="mira-model-card" data-model="${m.id}"
+                         style="border:1.5px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
+                                border-radius:10px;padding:14px;cursor:pointer;
+                                background:${m.id === selectedModel ? '#1a1230' : 'transparent'};">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            <div style="width:16px;height:16px;border-radius:50%;
+                                        border:2px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
+                                        background:${m.id === selectedModel ? '#7c3aed' : 'transparent'};
+                                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                ${m.id === selectedModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
+                            </div>
+                            <span style="font-size:14px;font-weight:500;">${m.label}</span>
+                            <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
+                        </div>
+                        <div style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
+                    </div>`).join('')}
+                </div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;">本月用量</div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                    <span>已用 ${usedTokens.toLocaleString()} tokens</span>
+                    <span style="color:#8b949e;">约 $${usedCost}</span>
+                </div>
+                <div style="background:#21262d;border-radius:4px;height:6px;overflow:hidden;">
+                    <div style="background:#7c3aed;width:35%;height:100%;border-radius:4px;"></div>
+                </div>
+            </div>`;
+
+            // 绑定模型切换
+            document.getElementById('miraModelGrid').querySelectorAll('.mira-model-card').forEach(card => {
+                card.onclick = async () => {
+                    const modelId = card.dataset.model;
+                    const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
+                    await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: modelId } });
+                    switchInstance(id);
+                };
+            });
+
+            // 绑定充值按钮
+            document.getElementById('miraRechargeBtn').onclick = () => {
+                safeSendMessage({ action: 'openRecharge' }, (response) => {
+                    if (!response?.ok) {
+                        logger.warn('充值页面打开失败或未登录');
+                    }
+                });
+            };
+
+            return;
+        }
+
+        // ---- 原有 isBuiltIn 逻辑（google / bing）----
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-                <div class="main-header">
-                    <h2 style="margin:0">${displayAlias}</h2>
+            <div class="main-header">
+                <h2 style="margin:0">${displayAlias}</h2>
+            </div>
+            <div class="form-container">
+                <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                    <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
+                    <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                    <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
+                    <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
+                    <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
                 </div>
-                <div class="form-container">
-                    <div class="built-in-notice" style="border: 1px dashed #30363d; padding: 20px; border-radius: 8px;margin-top: 10px;">
-                        <div id="statusIcon" class="notice-icon" style="color: #8b949e; font-size: 24px; margin-bottom: 10px;">⌛</div>
-                        <p style="margin: 0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                        <hr style="border: 0; border-top: 1px solid #30363d; margin: 15px 0;">
-                        <p style="color:#8b949e; font-size:12px; line-height:1.6; margin:0">
-                            ${t('freeInterfaceTipsInfo', uiLanguage)}
-                        </p>
-                        <p style="color:#d1d5da; font-size:12px; margin-top: 8px;">
-                            ✨ ${t('wantBetterExperience', uiLanguage)} <span style="color: #f2cc60;font-size: larger;">${t('clickBottomTip', uiLanguage)}</span>
-                        </p>
-                    </div>
-                    <button id="activateBuiltIn" class="btn-save" style="margin-top: 25px; margin-left: 155px;width: 100%; display: none;">
-                        ${t('enableEngineNow', uiLanguage)}
-                    </button>
-                </div>
-                `;
+                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
+                    ${t('enableEngineNow', uiLanguage)}
+                </button>
+            </div>`;
 
             const checkConnectivity = async () => {
                 const icon = document.getElementById('statusIcon');
                 const text = document.getElementById('statusText');
                 const btn = document.getElementById('activateBuiltIn');
-
                 let isOk = false;
                 let errorMsg = '';
                 try {
-                    if (config.engine === 'google' || config.engine === 'bing') {
-                        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                        const targetLang = storage?.ui_language || 'en';
-                        const isTargetEn = targetLang.toLowerCase().startsWith('en');
-                        const testText = isTargetEn ? '你好' : 'Good morning';
-
-                        const res = await Promise.race([
-                            safeSendMessage({
-                                type: 'TRANSLATE',
-                                text: testText,
-                                targetLang,
-                                isTest: true,
-                                engine: config.engine,
-                            }),
-                            new Promise(resolve => setTimeout(() => resolve(null), 5000))
-                        ]);
-
-                        if (!res) {
-                            errorMsg = 'Timeout';
-                        } else if (res.error) {
-                            errorMsg = res.error;
-                            errorCode = res.errorCode || '';
-                        } else {
-                            const data = res.currentTranslationResponse;
-                            if (!data || data.error) {
-                                errorMsg = data?.error || 'No response';
-                                errorCode = data?.errorCode || '';
-                            } else {
-                                const translatedText = (typeof data === 'string'
-                                    ? data
-                                    : (data?.translatedText || data?.basic || '')
-                                ).trim();
-                                isOk = translatedText.length > 0
-                                    && translatedText.toLowerCase() !== testText.toLowerCase()
-                                    && !data?.isError;
-                                if (!isOk) errorMsg = 'Invalid result';
-                            }
+                    const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+                    const targetLang = storage?.ui_language || 'en';
+                    const isTargetEn = targetLang.toLowerCase().startsWith('en');
+                    const testText = isTargetEn ? '你好' : 'Good morning';
+                    const res = await Promise.race([
+                        safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang, isTest: true, engine: config.engine }),
+                        new Promise(resolve => setTimeout(() => resolve(null), 5000))
+                    ]);
+                    if (!res) { errorMsg = 'Timeout'; }
+                    else if (res.error) { errorMsg = res.error; }
+                    else {
+                        const data = res.currentTranslationResponse;
+                        if (!data || data.error) { errorMsg = data?.error || 'No response'; }
+                        else {
+                            const translatedText = (typeof data === 'string' ? data : (data?.translatedText || data?.basic || '')).trim();
+                            isOk = translatedText.length > 0 && translatedText.toLowerCase() !== testText.toLowerCase() && !data?.isError;
+                            if (!isOk) errorMsg = 'Invalid result';
                         }
                     }
-                } catch (e) {
-                    errorMsg = e.message;
-                }
+                } catch (e) { errorMsg = e.message; }
 
                 if (isOk) {
-                    icon.innerText = '✓';
-                    icon.style.color = '#3fb950';
+                    icon.innerText = '✓'; icon.style.color = '#3fb950';
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
                     btn.style.display = 'block';
-
-                    //  更新缓存，popup 下次打开直接读到最新结果
-                    if (config.engine === 'google' || config.engine === 'bing') {
-                        await safeSetStorage({
-                            _engineAvailable: true,
-                            _engineCheckTime: Date.now()
-                        });
-                    }
+                    await safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 } else {
-                    icon.innerText = '✕';
-                    icon.style.color = '#f85149';
+                    icon.innerText = '✕'; icon.style.color = '#f85149';
                     const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px; opacity:0.7; display:block; margin-top:11px; line-height:1.4;">${friendlyError}</span>` : ''}`;
-                    btn.style.display = 'block';
-                    btn.style.opacity = '0.6';
-
-                    //  失败也更新缓存，让 popup 能马上显示警告
-                    if (config.engine === 'google' || config.engine === 'bing') {
-                        await safeSetStorage({
-                            _engineAvailable: false,
-                            _engineCheckTime: Date.now()
-                        });
-                    }
+                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px;opacity:0.7;display:block;margin-top:11px;line-height:1.4;">${friendlyError}</span>` : ''}`;
+                    btn.style.display = 'block'; btn.style.opacity = '0.6';
+                    await safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 }
             };
 
@@ -450,19 +579,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('activateBuiltIn').onclick = async (e) => {
                 const btn = e.target;
                 btn.disabled = true;
+                // 直接切换并激活这个内置引擎
                 await safeSetStorage({ lastActiveId: id });
-                if (typeof syncGlobalConfig === 'function') {
-                    await syncGlobalConfig(id, config.engine, {});
-                }
+                if (typeof syncGlobalConfig === 'function') await syncGlobalConfig(id, config.engine, {});
                 btn.innerText = t('enabled', uiLanguage);
                 btn.style.background = "#22c55e";
                 isDirty = false;
                 renderSidebar();
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerText = t('enableEngineNow', uiLanguage);
-                    btn.style.background = "";
-                }, 1000);
+                setTimeout(() => { btn.disabled = false; btn.innerText = t('enableEngineNow', uiLanguage); btn.style.background = ""; }, 1000);
             };
             return;
         }
@@ -590,69 +714,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     function bindEvents() {
-        document.getElementById('saveApiConfig').onclick = async () => {
-            const saveBtn = document.getElementById('saveApiConfig');
-            if (!saveBtn) return;
-            const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
-            const inputs = document.querySelectorAll('#dynamic-form-container input');
-            const data = {};
-            inputs.forEach(i => {
-                const key = i.dataset.key;
-                if (key) data[key] = i.value.trim();
-            });
-            const config = userConfigs.find(c => c.id === currentId);
-            if (!config) {
-                logger.error("[Mira] 找不到当前配置实例");
-                return;
-            }
-            saveBtn.disabled = true;
-            const originalText = saveBtn.innerText;
-            const originalBg = saveBtn.style.backgroundColor;
-            try {
-                const idx = userConfigs.findIndex(c => c.id === currentId);
-                let finalEngine = config.engine;
-                if (idx > -1) {
-                    const detectedEngine = Object.keys(TEMPLATES).find(key => {
-                        const tpl = TEMPLATES[key];
-                        return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
-                    });
-                    if (detectedEngine && userConfigs[idx].engine === 'google') {
-                        userConfigs[idx].engine = detectedEngine;
-                    }
-                    finalEngine = userConfigs[idx].engine;
-                    const engineTemplate = TEMPLATES[finalEngine] || {};
-                    userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
-                }
-                await safeSetStorage({
-                    [`data_${currentId}`]: data,
-                    userConfigs: userConfigs,
-                    lastActiveId: currentId
-                });
-                if (typeof syncGlobalConfig === 'function') {
-                    await syncGlobalConfig(currentId, finalEngine, data);
-                }
-                if (typeof renderSidebar === 'function') renderSidebar();
-                logger.log("保存成功提示: ", uiLanguage);
-                saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
-                saveBtn.style.setProperty('background-color', '#22c55e', 'important');
-                if (typeof checkEngineStatus === 'function') {
-                    await checkEngineStatus();
-                }
-            } catch (error) {
-                logger.error("[Mira] 保存配置失败:", error);
-                saveBtn.innerText = `${t('save', uiLanguage)} ${t('failed', uiLanguage)}`;
-                saveBtn.style.setProperty('background-color', '#ef4444', 'important');
-            } finally {
-                setTimeout(() => {
-                    if (saveBtn) {
-                        saveBtn.innerText = originalText;
-                        saveBtn.style.removeProperty('background-color');
-                        saveBtn.style.backgroundColor = originalBg;
-                        saveBtn.disabled = false;
-                    }
-                }, 1000);
-            }
-        };
+
         const modal = document.getElementById('engine-modal');
         const hexToRgb = (hex) => {
             hex = hex.replace('#', '');
@@ -780,50 +842,130 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipsDesc.style.color = "";
             tipsDesc.innerText = "";
         }
-        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-        const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
-        const tempKeys = {};
-        document.querySelectorAll('.api-input-field').forEach(input => {
-            const key = input.getAttribute('data-key');
-            if (key) tempKeys[key] = input.value.trim();
-        });
+
         const userConfig = userConfigs.find(c => c.id === currentId);
         if (!userConfig) {
             btn.disabled = false;
             btn.innerHTML = originalHTML;
             return;
         }
-        const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
-        const testText = isTargetEn ? '你好' : 'Good morning';
-        logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
+
+        let testResult = false;
         try {
-            const res = await safeSendMessage({
-                type: 'TRANSLATE',
-                text: testText,
-                targetLang: testTargetLang,
-                isTest: true,
-                engine: userConfig.engine,
-                tempKeys
-            });
-            if (!res) throw new Error(i18n.error_no_response || 'No response from background');
-            if (res.error) throw new Error(res.error);
-            const data = res.currentTranslationResponse;
-            if (!data) throw new Error('Invalid response structure');
-            if (data.error) throw new Error(data.error);
-            const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
-            const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
-            const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
-            if (hasValidStructure && isNotOriginal) {
-                btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
-                btn.style.setProperty('border-color', '#10a37f', 'important');
+            // Mira Pro 特殊处理 - 实际测试翻译功能
+            if (userConfig.engine === 'mira_pro') {
+                const userData = await safeGetStorage(['mira_user', 'mira_user_balance']);
+                const user = userData?.mira_user;
+                const balanceData = userData?.mira_user_balance;
+
+                // 第一步：检查登录状态和余额
+                if (!user) {
+                    throw new Error('Not logged in / 未登录');
+                }
+
+                let hasBalance = false;
+                if (balanceData?.balance !== undefined && balanceData.balance > 0) {
+                    hasBalance = true;
+                } else if (!balanceData) {
+                    // 尝试从后端获取余额
+                    const response = await new Promise((resolve) => {
+                        safeSendMessage({ action: 'getBalance', uid: user.uid }, resolve);
+                    });
+                    hasBalance = response?.balance && response.balance > 0;
+                }
+
+                if (!hasBalance) {
+                    throw new Error('No balance / 余额不足');
+                }
+
+                // 第二步：实际测试翻译功能
+                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+                const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
+                const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
+                const testText = isTargetEn ? '你好' : 'Good morning';
+
+                logger.log("Testing Mira Pro: ", "text:", testText, "targetLang: ", testTargetLang);
+
+                const res = await safeSendMessage({
+                    type: 'TRANSLATE',
+                    text: testText,
+                    targetLang: testTargetLang,
+                    isTest: true,
+                    engine: 'mira_pro'
+                });
+
+                if (!res) throw new Error('No response from Mira Pro');
+                if (res.error) throw new Error(res.error);
+
+                const data = res.currentTranslationResponse;
+                if (!data) throw new Error('Invalid response structure');
+                if (data.error) throw new Error(data.error);
+
+                const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
+                const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
+                const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
+
+                if (hasValidStructure && isNotOriginal) {
+                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                    btn.style.setProperty('border-color', '#10a37f', 'important');
+                    testResult = true;
+                } else {
+                    throw new Error(translatedText.length === 0 ? "Empty Content from Mira Pro" : "Mira Pro returned original text");
+                }
             } else {
-                throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
+                // 其他引擎的处理逻辑
+                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+                const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
+                const tempKeys = {};
+                document.querySelectorAll('.api-input-field').forEach(input => {
+                    const key = input.getAttribute('data-key');
+                    if (key) tempKeys[key] = input.value.trim();
+                });
+
+                const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
+                const testText = isTargetEn ? '你好' : 'Good morning';
+                logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
+
+                const res = await safeSendMessage({
+                    type: 'TRANSLATE',
+                    text: testText,
+                    targetLang: testTargetLang,
+                    isTest: true,
+                    engine: userConfig.engine,
+                    tempKeys
+                });
+                if (!res) throw new Error(i18n.error_no_response || 'No response from background');
+                if (res.error) throw new Error(res.error);
+                const data = res.currentTranslationResponse;
+                if (!data) throw new Error('Invalid response structure');
+                if (data.error) throw new Error(data.error);
+                const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
+                const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
+                const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
+                if (hasValidStructure && isNotOriginal) {
+                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                    btn.style.setProperty('border-color', '#10a37f', 'important');
+                    testResult = true;
+                } else {
+                    throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
+                }
             }
         } catch (e) {
+            // Mira Pro 的特殊错误处理
+            if (userConfig && userConfig.engine === 'mira_pro' && e.message.includes('connection check passed')) {
+                // 这是成功的情况，不需要显示错误
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.removeProperty('border-color');
+                return;
+            }
+
             logger.error("[Test] Failed:", e);
             btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
             btn.style.setProperty('border-color', '#f87171', 'important');
             btn.style.userSelect = 'text';
+            testResult = false;
+
             if (tipsDesc) {
                 tipsDesc.style.color = "#f87171";
                 tipsDesc.style.userSelect = 'text';
@@ -837,8 +979,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
                     displayMessage = friendlyMsg ? `${friendlyMsg} (Code: ${errorCode})` : `API Error: ${errorCode}`;
                 } else if (errorText.toLowerCase().includes("timeout")) {
-                    const isLocalModel = (tempKeys?.baseUrl || '').includes('localhost') ||
-                        (tempKeys?.baseUrl || '').includes('127.0.0.1');
+                    const isLocalModel = (((userConfig && userConfig.engine !== 'mira_pro') ? (document.querySelector('[data-key="baseUrl"]')?.value || '') : '').includes('localhost') ||
+                        (document.querySelector('[data-key="baseUrl"]')?.value || '').includes('127.0.0.1'));
                     displayMessage = isLocalModel
                         ? t('timeoutLocalModel')
                         : (i18n.error_timeout || "Timeout ⌛");
@@ -856,7 +998,124 @@ document.addEventListener('DOMContentLoaded', async () => {
                     btn.innerHTML = originalHTML;
                     btn.style.removeProperty('border-color');
                 }
+                // 测试完成后更新sidebar状态点和当前引擎激活状态
+                if (userConfig && testResult) {
+                    // 测试成功 - 激活这个引擎为当前使用的引擎
+                    safeSetStorage({ lastActiveId: currentId }).then(() => {
+                        if (typeof renderSidebar === 'function') {
+                            renderSidebar();
+                        }
+                    });
+                } else if (typeof renderSidebar === 'function') {
+                    // 测试失败或其他情况 - 只更新状态点
+                    renderSidebar();
+                }
             }, 3000);
+        }
+    };
+
+    document.getElementById('saveApiConfig').onclick = async () => {
+        const saveBtn = document.getElementById('saveApiConfig');
+        if (!saveBtn) return;
+        const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
+        const config = userConfigs.find(c => c.id === currentId);
+        if (!config) {
+            logger.error("[Mira] 找不到当前配置实例");
+            return;
+        }
+
+        saveBtn.disabled = true;
+        const originalText = saveBtn.innerText;
+        const originalBg = saveBtn.style.backgroundColor;
+        try {
+            // Mira Pro 特殊处理 - 保存后触发测试
+            if (config.engine === 'mira_pro') {
+                await safeSetStorage({ lastActiveId: currentId });
+                if (typeof syncGlobalConfig === 'function') {
+                    await syncGlobalConfig(currentId, config.engine, {});
+                }
+
+                logger.log("Mira Pro 配置已保存，准备测试: ", uiLanguage);
+
+                // 显示保存成功提示（固定时间，只显示消息）
+                saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
+                saveBtn.style.setProperty('background-color', '#22c55e', 'important');
+
+                // 延迟后触发测试，这样用户能看到保存成功的提示
+                setTimeout(() => {
+                    if (saveBtn) {
+                        saveBtn.innerText = originalText;
+                        saveBtn.style.removeProperty('background-color');
+                        saveBtn.style.backgroundColor = originalBg;
+                        saveBtn.disabled = false;
+                    }
+                    // 触发测试连接
+                    const testBtn = document.getElementById('testApiConfig');
+                    if (testBtn) {
+                        testBtn.click();
+                    }
+                }, 1500);
+                return;
+            }
+
+            // 其他自定义引擎的处理逻辑 - 先保存配置
+            const inputs = document.querySelectorAll('#dynamic-form-container input');
+            const data = {};
+            inputs.forEach(i => {
+                const key = i.dataset.key;
+                if (key) data[key] = i.value.trim();
+            });
+
+            const idx = userConfigs.findIndex(c => c.id === currentId);
+            let finalEngine = config.engine;
+            if (idx > -1) {
+                const detectedEngine = Object.keys(TEMPLATES).find(key => {
+                    const tpl = TEMPLATES[key];
+                    return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
+                });
+                if (detectedEngine && userConfigs[idx].engine === 'google') {
+                    userConfigs[idx].engine = detectedEngine;
+                }
+                finalEngine = userConfigs[idx].engine;
+                const engineTemplate = TEMPLATES[finalEngine] || {};
+                userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            }
+
+            await safeSetStorage({
+                [`data_${currentId}`]: data,
+                userConfigs: userConfigs,
+                lastActiveId: currentId
+            });
+
+            if (typeof syncGlobalConfig === 'function') {
+                await syncGlobalConfig(currentId, finalEngine, data);
+            }
+
+            logger.log("配置已保存，准备测试: ", uiLanguage);
+
+            // 现在触发自动测试连接
+            const testBtn = document.getElementById('testApiConfig');
+            if (testBtn) {
+                // 触发测试连接的点击事件
+                testBtn.click();
+            }
+
+            // 显示保存成功提示（固定时间）
+            saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
+            saveBtn.style.setProperty('background-color', '#22c55e', 'important');
+
+        } catch (error) {
+            logger.error("[Mira] 保存配置失败:", error);
+            saveBtn.innerText = `${t('save', uiLanguage)} ${t('failed', uiLanguage)}`;
+            saveBtn.style.setProperty('background-color', '#ef4444', 'important');
+            setTimeout(() => {
+                if (saveBtn) {
+                    saveBtn.innerText = originalText;
+                    saveBtn.style.removeProperty('background-color');
+                    saveBtn.style.backgroundColor = originalBg;
+                    saveBtn.disabled = false;
+                }
+            }, 1500);
         }
     };
     async function syncGlobalConfig(instanceId, engineType, instanceData) {

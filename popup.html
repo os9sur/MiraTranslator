@@ -393,6 +393,26 @@
           <span id="app-name-label" data-i18n="appName"
             style="font-weight: 900; font-size: 12px; letter-spacing: 1.5px; color: #ffffffeb; text-shadow: 0 0 10px rgba(255,255,255,0.2); font-style: italic;"></span>
         </div>
+
+        <div class="header-right">
+
+  <!-- 未登录状态 -->
+  <button class="btn-login" id="btnLogin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      style="width:13px;height:13px;">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span data-i18n="login">登录</span>
+  </button>
+
+  <!-- 已登录状态（默认隐藏） -->
+  <button class="btn-avatar" id="btnAvatar" style="display:none;">
+    <img id="avatarImg" src="" alt="" style="height:100%;border-radius:50%;display:none;">
+    <span id="avatarInitial"></span>
+  </button>
+</div>
+
         <div id="advancedSettingsBtn" data-i18n="moreSettings" class="icon-action-btn"
           style="padding: 4px; color: rgba(255,255,255,0.5); cursor: pointer;margin-right: 5px;" data-i18n-title
           title="Advanced settings">
@@ -788,6 +808,34 @@
       APPLY CHANGES
     </button>
   </div>
+
+  <!-- 充值界面开始 -->
+<!-- Profile Dropdown Panel  -->
+<div class="profile-panel" id="profilePanel" style="display:none;">
+  <div class="profile-info">
+    <div class="profile-avatar-lg" id="panelAvatar">
+      <img id="panelAvatarImg" src="" alt="" style="width:100%;height:100%;border-radius:50%;display:none;">
+      <span id="panelAvatarInitial"></span>
+    </div>
+    <div class="profile-meta">
+      <div class="profile-name" id="panelName">—</div>
+      <div class="profile-email" id="panelEmail">—</div>
+    </div>
+  </div>
+
+  <div class="balance-block">
+    <span class="balance-label" data-i18n="balance">余额</span>
+    <span class="balance-amount" id="panelBalance">¥ 0.00</span>
+  </div>
+
+  <button class="btn-recharge" id="btnRecharge" data-i18n="recharge">充值</button>
+
+  <div class="profile-divider"></div>
+
+  <button class="btn-logout" id="btnLogout" data-i18n="logout">退出登录</button>
+</div>
+  <!-- 充值界面结束 -->
+
   <div id="advancedMenu" class="advancedMenu" style="min-width: 180px;">
     <div class="menu-ui-setting">
       <div class="ui-lang-label">

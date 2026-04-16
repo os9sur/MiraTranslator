@@ -2117,3 +2117,163 @@ yt-attributed-string+.kt-paragraph-translation {
   #searchSubmitBtn:active {
     transform: scale(0.95);
   }
+
+  /* 登录相关  */
+  /* ── Header right group ── */
+.header-right {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+  gap: 6px;
+  margin-left: auto;    
+}
+
+/* 登录文字按钮 */
+.btn-login {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #3fcfa0;
+  background: rgba(29, 158, 117, 0.15);
+  border: 1px solid rgba(29, 158, 117, 0.35);
+  border-radius: 6px;
+  padding: 4px 9px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-login:hover {
+  background: rgba(29, 158, 117, 0.28);
+}
+
+/* 头像圆形按钮 */
+.btn-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #1D9E75;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.btn-avatar:hover { opacity: 0.85; }
+
+/* ── Profile dropdown panel ── */
+.profile-panel {
+  position: absolute;
+  top: 44px;          /* header 高度 */
+  right: 10px;
+  width: 220px;
+  background: #0d1e2e;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 12px;
+  padding: 14px;
+  z-index: 9999;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45); 
+  animation: panelFadeIn 0.15s ease;
+}
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.profile-avatar-lg {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #1D9E75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.profile-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e0e8f0;
+}
+.profile-email {
+  font-size: 11px;
+  color: #7a9ab5;
+  margin-top: 1px;
+  word-break: break-all;
+}
+
+/* 余额区 */
+.balance-block {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 9px 11px;
+  margin-bottom: 10px;
+}
+.balance-label {
+  font-size: 11px;
+  color: #7a9ab5;
+}
+.balance-amount {
+  font-size: 16px;
+  font-weight: 600;
+  color: #3fcfa0;
+}
+
+/* 充值按钮 */
+.btn-recharge {
+  width: 100%;
+  background: #1a6fc4;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: background 0.15s;
+}
+.btn-recharge:hover { background: #1860ad; }
+
+.profile-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 0 8px;
+}
+
+/* 退出按钮 */
+.btn-logout {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 7px;
+  font-size: 12px;
+  color: #7a9ab5;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #e0e8f0;
+}
