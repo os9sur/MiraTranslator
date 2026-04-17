@@ -1623,23 +1623,23 @@ async function handleTranslateElement(el, forceRefresh = false) {
     }
   }
 
-// 检查祖先元素是否已翻译过, 避免重复（仅 YouTube）
-if (!forceRefresh && isYoutube) {
-  let ancestor = el.parentElement;
-  let depth = 0;
-  while (ancestor && ancestor !== document.body && depth < 3) {
-    if (
-      ancestor.querySelector(':scope > .kt-paragraph-translation') ||
-      ancestor.nextElementSibling?.classList?.contains('kt-paragraph-translation') ||
-      ancestor.dataset.translated === 'true'
-    ) {
-      el.dataset.translated = 'true';
-      return;
+  // 检查祖先元素是否已翻译过, 避免重复（仅 YouTube）
+  if (!forceRefresh && isYoutube) {
+    let ancestor = el.parentElement;
+    let depth = 0;
+    while (ancestor && ancestor !== document.body && depth < 3) {
+      if (
+        ancestor.querySelector(':scope > .kt-paragraph-translation') ||
+        ancestor.nextElementSibling?.classList?.contains('kt-paragraph-translation') ||
+        ancestor.dataset.translated === 'true'
+      ) {
+        el.dataset.translated = 'true';
+        return;
+      }
+      ancestor = ancestor.parentElement;
+      depth++;
     }
-    ancestor = ancestor.parentElement;
-    depth++;
   }
-}
   if (!forceRefresh) {
     if (
       el.dataset.translated === 'true' ||
@@ -1681,35 +1681,35 @@ if (!forceRefresh && isYoutube) {
       return;
     }
   }
-   //  跳过社交平台用户名链接不过滤 span 里的文字
-if (el.tagName === 'A') {
-  const isSocial = location.hostname.includes('facebook.com') || 
-                   location.hostname.includes('instagram.com');
-  if (isSocial) {
-    const href = el.getAttribute('href') || '';
-    const text = el.textContent?.trim() || '';
-    const looksLikeUsername = /^\/[\w.]+\/?$/.test(href) && !text.includes(' ') && text.length < 30;
-    if (looksLikeUsername) {
-      el.dataset.translated = 'true';
-      return;
+  //  跳过社交平台用户名链接不过滤 span 里的文字
+  if (el.tagName === 'A') {
+    const isSocial = location.hostname.includes('facebook.com') ||
+      location.hostname.includes('instagram.com');
+    if (isSocial) {
+      const href = el.getAttribute('href') || '';
+      const text = el.textContent?.trim() || '';
+      const looksLikeUsername = /^\/[\w.]+\/?$/.test(href) && !text.includes(' ') && text.length < 30;
+      if (looksLikeUsername) {
+        el.dataset.translated = 'true';
+        return;
+      }
     }
   }
-}
 
-// 同时检查父元素是否是只包含用户名链接的 div
-if ((isFacebook || isInstagram) && el.tagName === 'DIV') {
-  const onlyLink = el.children.length === 1 && el.children[0].tagName === 'A';
-  if (onlyLink) {
-    const href = el.children[0].getAttribute('href') || '';
-    const text = el.children[0].textContent?.trim() || '';
-    const looksLikeUsername = /^\/[\w.]+\/?$/.test(href) && !text.includes(' ') && text.length < 30;
-    if (looksLikeUsername) {
-      el.dataset.translated = 'true';
-      el.children[0].dataset.translated = 'true';
-      return;
+  // 同时检查父元素是否是只包含用户名链接的 div
+  if ((isFacebook || isInstagram) && el.tagName === 'DIV') {
+    const onlyLink = el.children.length === 1 && el.children[0].tagName === 'A';
+    if (onlyLink) {
+      const href = el.children[0].getAttribute('href') || '';
+      const text = el.children[0].textContent?.trim() || '';
+      const looksLikeUsername = /^\/[\w.]+\/?$/.test(href) && !text.includes(' ') && text.length < 30;
+      if (looksLikeUsername) {
+        el.dataset.translated = 'true';
+        el.children[0].dataset.translated = 'true';
+        return;
+      }
     }
   }
-}
   if (isTwitter) {
     const isSystemUI =
       (el.matches('[role="heading"]') || el.closest('[role="heading"]')) &&
@@ -4763,7 +4763,11 @@ function initSelectionTranslate() {
     if (pE?.style) {
       if (res.examples?.length) {
         const safeText = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const regex = new RegExp(`\\b(${safeText})\\b`, 'gi');
+        const stem = text.length > 3
+          ? text.replace(/[ey]$/, '').replace(/([bcdfghjklmnpqrstvwxz])\1$/, '$1') // 去双写辅音，如 running->run
+          : text;
+        const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\b(${safeText}[a-z]*|${safeStem}[a-z]*)\\b`, 'gi');
         pE.innerHTML = `<div style="font-size:9px;opacity:0.5;margin-bottom:10px;font-weight:bold;letter-spacing:1px;">EXAMPLES</div>` +
           res.examples.slice(0, 3).map(s => {
             const en = esc(cleanMarker(typeof s === 'string' ? s : (s.en || s.sentence || '')));

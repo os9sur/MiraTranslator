@@ -176,124 +176,13 @@
     <!-- 语言对选择：展开态 -->
     <div id="langPairEdit" style="display:none; align-items:center; gap:6px; margin-bottom:8px;">
       <select id="lpSelA"
-        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;">
-        <option value="auto">AUTO</option>
-        <option value="en">English</option>
-        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
-        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
-        <option value="ja">日本語 (Japanese)</option>
-        <option value="ko">한국어 (Korean)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Southeast Asia ──</option>
-        <option value="id">Bahasa Indonesia (Indonesian)</option>
-        <option value="ms">Bahasa Melayu (Malay)</option>
-        <option value="th">ไทย (Thai)</option>
-        <option value="vi">Tiếng Việt (Vietnamese)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Middle East & South Asia ──</option>
-        <option value="ar">العربية (Arabic)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-        <option value="fa">فارسی (Persian)</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="he">עברית (Hebrew)</option>
-        <option value="tr">Türkçe (Turkish)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Americas & Europe ──</option>
-        <option value="bg">Български (Bulgarian)</option>
-        <option value="cs">Čeština (Czech)</option>
-        <option value="da">Dansk (Danish)</option>
-        <option value="de">Deutsch (German)</option>
-        <option value="et">Eesti (Estonian)</option>
-        <option value="el">Ελληνικά (Greek)</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="fr">Français (French)</option>
-        <option value="ga">Gaeilge (Irish)</option>
-        <option value="hr">Hrvatski (Croatian)</option>
-        <option value="it">Italiano (Italian)</option>
-        <option value="lv">Latviešu (Latvian)</option>
-        <option value="lt">Lietuvių (Lithuanian)</option>
-        <option value="hu">Magyar (Hungarian)</option>
-        <option value="nl">Nederlands (Dutch)</option>
-        <option value="no">Norsk (Norwegian)</option>
-        <option value="pl">Polski (Polish)</option>
-        <option value="pt">Português (Portuguese)</option>
-        <option value="ro">Română (Romanian)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="sk">Slovenčina (Slovak)</option>
-        <option value="sl">Slovenščina (Slovenian)</option>
-        <option value="fi">Suomi (Finnish)</option>
-        <option value="sv">Svenska (Swedish)</option>
-        <option value="uk">Українська (Ukrainian)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Africa ──</option>
-        <option value="af">Afrikaans</option>
-        <option value="am">አማርኛ (Amharic)</option>
-        <option value="ha">Hausa</option>
-        <option value="zu">IsiZulu (Zulu)</option>
-        <option value="sw">Kiswahili (Swahili)</option>
-        <option value="yo">Yorùbá (Yoruba)</option>
-      </select>
+        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;"></select>
 
       <button id="lpSwapBtn"
         style="flex:0 0 auto; font-size:13px; color:#94a3b8; background:none; border:none; cursor:pointer; padding:0 2px;">⇄</button>
 
       <select id="lpSelB"
-        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;">
-        <option value="en">English</option>
-        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
-        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
-        <option value="ja" selected>日本語 (Japanese)</option>
-        <option value="ko">한국어 (Korean)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Southeast Asia ──</option>
-        <option value="id">Bahasa Indonesia (Indonesian)</option>
-        <option value="ms">Bahasa Melayu (Malay)</option>
-        <option value="th">ไทย (Thai)</option>
-        <option value="vi">Tiếng Việt (Vietnamese)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Middle East & South Asia ──</option>
-        <option value="ar">العربية (Arabic)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-        <option value="fa">فارسی (Persian)</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="he">עברית (Hebrew)</option>
-        <option value="tr">Türkçe (Turkish)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Americas & Europe ──</option>
-        <option value="bg">Български (Bulgarian)</option>
-        <option value="cs">Čeština (Czech)</option>
-        <option value="da">Dansk (Danish)</option>
-        <option value="de">Deutsch (German)</option>
-        <option value="et">Eesti (Estonian)</option>
-        <option value="el">Ελληνικά (Greek)</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="fr">Français (French)</option>
-        <option value="ga">Gaeilge (Irish)</option>
-        <option value="hr">Hrvatski (Croatian)</option>
-        <option value="it">Italiano (Italian)</option>
-        <option value="lv">Latviešu (Latvian)</option>
-        <option value="lt">Lietuvių (Lithuanian)</option>
-        <option value="hu">Magyar (Hungarian)</option>
-        <option value="nl">Nederlands (Dutch)</option>
-        <option value="no">Norsk (Norwegian)</option>
-        <option value="pl">Polski (Polish)</option>
-        <option value="pt">Português (Portuguese)</option>
-        <option value="ro">Română (Romanian)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="sk">Slovenčina (Slovak)</option>
-        <option value="sl">Slovenščina (Slovenian)</option>
-        <option value="fi">Suomi (Finnish)</option>
-        <option value="sv">Svenska (Swedish)</option>
-        <option value="uk">Українська (Ukrainian)</option>
-
-        <option disabled style="background: #21262d; color: #8b949e;">── Africa ──</option>
-        <option value="af">Afrikaans</option>
-        <option value="am">አማርኛ (Amharic)</option>
-        <option value="ha">Hausa</option>
-        <option value="zu">IsiZulu (Zulu)</option>
-        <option value="sw">Kiswahili (Swahili)</option>
-        <option value="yo">Yorùbá (Yoruba)</option>
-      </select>
+        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;"></select>
       <button id="lpDoneBtn"
         style="font-size:12px; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:2px 7px; cursor:pointer; white-space:nowrap;">OK</button>
     </div>
@@ -609,74 +498,7 @@
       </label>
 
       <select id="targetLang"
-        style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;">
-        <option value="en">English</option>
-        <option value="zh-CN">简体中文 (Chinese Simplified)</option>
-        <option value="zh-TW">繁體中文 (Chinese Traditional)</option>
-        <option value="ja">日本語 (Japanese)</option>
-        <option value="ko">한국어 (Korean)</option>
-
-        <option disabled
-          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
-          ── Southeast Asia ──
-        </option>
-        <option value="id">Bahasa Indonesia (Indonesian)</option>
-        <option value="ms">Bahasa Melayu (Malay)</option>
-        <option value="th">ไทย (Thai)</option>
-        <option value="vi">Tiếng Việt (Vietnamese)</option>
-
-        <option disabled
-          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
-          ── Middle East & South Asia ──
-        </option>
-        <option value="ar">العربية (Arabic)</option>
-        <option value="bn">বাংলা (Bengali)</option>
-        <option value="fa">فارسی (Persian)</option>
-        <option value="hi">हिन्दी (Hindi)</option>
-        <option value="he">עברית (Hebrew)</option>
-        <option value="tr">Türkçe (Turkish)</option>
-
-        <option disabled
-          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
-          ── Americas & Europe ──
-        </option>
-        <option value="bg">Български (Bulgarian)</option>
-        <option value="cs">Čeština (Czech)</option>
-        <option value="da">Dansk (Danish)</option>
-        <option value="de">Deutsch (German)</option>
-        <option value="et">Eesti (Estonian)</option>
-        <option value="el">Ελληνικά (Greek)</option>
-        <option value="es">Español (Spanish)</option>
-        <option value="fr">Français (French)</option>
-        <option value="ga">Gaeilge (Irish)</option>
-        <option value="hr">Hrvatski (Croatian)</option>
-        <option value="it">Italiano (Italian)</option>
-        <option value="lv">Latviešu (Latvian)</option>
-        <option value="lt">Lietuvių (Lithuanian)</option>
-        <option value="hu">Magyar (Hungarian)</option>
-        <option value="nl">Nederlands (Dutch)</option>
-        <option value="no">Norsk (Norwegian)</option>
-        <option value="pl">Polski (Polish)</option>
-        <option value="pt">Português (Portuguese)</option>
-        <option value="ro">Română (Romanian)</option>
-        <option value="ru">Русский (Russian)</option>
-        <option value="sk">Slovenčina (Slovak)</option>
-        <option value="sl">Slovenščina (Slovenian)</option>
-        <option value="fi">Suomi (Finnish)</option>
-        <option value="sv">Svenska (Swedish)</option>
-        <option value="uk">Українська (Ukrainian)</option>
-
-        <option disabled
-          style="background: #21262d; color: #8b949e; font-size: 12px; font-weight: 600;font-style: italic;">
-          ── Africa ──
-        </option>
-        <option value="af">Afrikaans</option>
-        <option value="am">አማርኛ (Amharic)</option>
-        <option value="ha">Hausa</option>
-        <option value="zu">IsiZulu (Zulu)</option>
-        <option value="sw">Kiswahili (Swahili)</option>
-        <option value="yo">Yorùbá (Yoruba)</option>
-      </select>
+        style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;"></select>
     </div>
     <div id="inspectContainer" class="row-group"
       style="margin-top: 1px; border-top: 1px solid #334155; padding-top: 8px;">
