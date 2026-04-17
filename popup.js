@@ -33,14 +33,14 @@ async function initOnboarding() {
       guideEl.style.display = 'none';
       targetBox.classList.remove('first-time-highlight');
       //  蒙层消失时，恢复原生高度，不再占用多余空间
-      document.body.style.minHeight = '';
+      // document.body.style.minHeight = '';
     }, 400);
   };
 
   if (!localStorage.getItem(storageKey)) {
     if (labelEl) labelEl.style.display = 'none';
     //  强制撑开 popup 窗口，保证蒙层内容完全展示
-    document.body.style.minHeight = '620px';
+    //document.body.style.minHeight = '0';
 
     guideEl.style.display = 'flex';
     targetBox.classList.add('first-time-highlight');
@@ -221,6 +221,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       ui_language: res_uiLanguage.ui_language || (getBrowserLang() || 'en').replace('_', '-')
     };
   }
+
+  populateSelect(document.getElementById('targetLang'), { selected: 'ja' });
+  populateSelect(document.getElementById('lpSelA'), { includeAuto: true, selected: 'auto' });
+  populateSelect(document.getElementById('lpSelB'), { selected: 'ja' });
+
   // ── 语言对初始化
   async function initLangPair() {
     const r = await safeGetStorage(['lpLangA', 'lpLangB']);
@@ -2220,8 +2225,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       //  恢复界面语言下拉框状态 
       const uiLangSelect = document.getElementById('uiLangSelect');
       if (uiLangSelect) {
-        const savedUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'en';
-        uiLangSelect.value = normalizeLang(savedUiLang);
+        //  获取标准化后的语言代码
+        const rawUiLang = storage.ui_language || chrome.i18n.getUILanguage().replace('_', '-') || 'en';
+        const normalized = normalizeLang(rawUiLang);
+
+        //  尝试直接赋值
+        uiLangSelect.value = normalized;
+
+        //  如果赋值失败（value 变为空），则尝试回退到基础语言
+        if (uiLangSelect.value !== normalized) {
+          const baseLang = normalized.split('-')[0]; // 例如从 'pt-BR' 提取出 'pt'
+          uiLangSelect.value = baseLang;
+        }
+
+        //  二次兜底：如果连基础语言都没有（比如某种罕见语种），默认选英文
+        if (!uiLangSelect.value) {
+          uiLangSelect.value = 'en';
+        }
       }
 
       const domainLabel = document.getElementById('domainIndicator');
