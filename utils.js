@@ -70,6 +70,9 @@ const normalizeLang = (lang) => {
   if (lang.startsWith('zh')) {
     return (lang === 'zh-TW' || lang === 'zh-HK') ? 'zh-TW' : 'zh-CN';
   }
+  if (lang.toLowerCase() === 'pt-br') {
+    return 'pt-BR';
+  }
   return lang.split('-')[0];
 };
 
@@ -192,7 +195,8 @@ async function getActiveTab() {
   });
 }
 
-let _defaultEngine = 'bing';
+const lang = getBrowserLang();
+let _defaultEngine = (lang === 'zh-CN') ? 'bing' : 'google';
 
 let _defaultEngineReady = safeGetStorage(['_defaultEngine'], true).then(res => {
   if (res && res._defaultEngine) _defaultEngine = res._defaultEngine;
@@ -1503,23 +1507,35 @@ const LANGS = [
   { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
   { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
+  { value: 'tl', label: 'Filipino (Tagalog)', en: 'Filipino' },
+  { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' }, 
+  { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },  
   { type: 'sep', label: '—— Middle East & South Asia ——' },
   { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
   { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
   { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
   { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
+  { value: 'ur', label: 'اردو (Urdu)', en: 'Urdu' },
+  { value: 'te', label: 'తెలుగు (Telugu)', en: 'Telugu' },
+  { value: 'mr', label: 'मराठी (Marathi)', en: 'Marathi' },
   { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
   { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
+  { value: 'kk', label: 'Қазақ тілі (Kazakh)', en: 'Kazakh' },
+  { value: 'uz', label: "O'zbek (Uzbek)", en: 'Uzbek' },
   { type: 'sep', label: '—— Europe ——' },
   { value: 'de', label: 'Deutsch (German)', en: 'German' },
   { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
   { value: 'fr', label: 'Français (French)', en: 'French' },
   { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
   { value: 'pt', label: 'Português (Portuguese)', en: 'Portuguese' },
+  { value: 'pt-BR', label: 'Português (Brasil)', en: 'Portuguese (Brazil)' },
   { value: 'ru', label: 'Русский (Russian)', en: 'Russian' },
+  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
   { value: 'nl', label: 'Nederlands (Dutch)', en: 'Dutch' },
+  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
   { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
   { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
+  { value: 'ca', label: 'Català (Catalan)', en: 'Catalan' },
   { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
   { value: 'bg', label: 'Български (Bulgarian)', en: 'Bulgarian' },
   { value: 'cs', label: 'Čeština (Czech)', en: 'Czech' },
@@ -1528,11 +1544,10 @@ const LANGS = [
   { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
   { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
   { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
+  { value: 'sr', label: 'Srpski (Serbian)', en: 'Serbian' }, 
   { value: 'hu', label: 'Magyar (Hungarian)', en: 'Hungarian' },
   { value: 'lv', label: 'Latviešu (Latvian)', en: 'Latvian' },
   { value: 'lt', label: 'Lietuvių (Lithuanian)', en: 'Lithuanian' },
-  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
-  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
   { value: 'sk', label: 'Slovenčina (Slovak)', en: 'Slovak' },
   { value: 'sl', label: 'Slovenščina (Slovenian)', en: 'Slovenian' },
   { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
@@ -1545,6 +1560,29 @@ const LANGS = [
   { value: 'zu', label: 'IsiZulu (Zulu)', en: 'Zulu' },
 ];
 
+function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {}) {
+  selectEl.innerHTML = '';
+
+  for (const lang of LANGS) {
+    // 跳过 AUTO（按需保留）
+    if (lang.value === 'auto' && !includeAuto) continue;
+
+    if (lang.type === 'sep') {
+      const opt = document.createElement('option');
+      opt.disabled = true;
+      opt.textContent = lang.label;
+      opt.style.cssText = 'background:#21262d; color:#8b949e;';
+      opt.style.fontStyle = 'italic';
+      selectEl.appendChild(opt);
+    } else {
+      const opt = document.createElement('option');
+      opt.value = lang.value;
+      opt.textContent = lang.label;
+      if (lang.value === selected) opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+  }
+}
 
 //剑桥词典URL 模板
 const FORWARD = {
