@@ -44,8 +44,8 @@
     {
       "id": "anthropic/claude-3-5-haiku",
       "label": "Claude 3.5 Haiku",
-      "tag": "",
-      "tagColor": "#7c3aed",
+      "tag": "Natural",
+      "tagColor": "#d946ef",
       "desc": {
         "zh": "自然语境处理能力极佳",
         "zh_TW": "自然語境處理能力極佳",
@@ -57,7 +57,7 @@
     {
       "id": "qwen/qwen-plus",
       "label": "Qwen Plus",
-      "tag": "",
+      "tag": "Enhanced",
       "tagColor": "#059669",
       "desc": {
         "zh": "通义千问增强版，逻辑更强",
@@ -70,7 +70,7 @@
     {
       "id": "qwen/qwen-turbo",
       "label": "Qwen Turbo",
-      "tag": "",
+      "tag": "Turbo",
       "tagColor": "#16a34a",
       "desc": {
         "zh": "追求极致的生成速度",
@@ -83,7 +83,7 @@
     {
       "id": "mistralai/mistral-7b-instruct",
       "label": "Mistral 7B",
-      "tag": "",
+      "tag": "Balanced",
       "tagColor": "#4b5563",
       "desc": {
         "zh": "优秀的开源指令遵循模型",
