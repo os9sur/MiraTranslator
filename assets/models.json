@@ -81,8 +81,8 @@
       }
     },
     {
-      "id": "mistralai/mistral-7b-instruct-v0.1",
-      "label": "Mistral 7B",
+      "id": "meta-llama/llama-3.1-8b-instruct",
+      "label": "Llama 3.1 8B",
       "tag": "Balanced",
       "tagColor": "#4b5563",
       "desc": {
