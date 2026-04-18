@@ -81,7 +81,7 @@
       }
     },
     {
-      "id": "mistralai/mistral-7b-instruct",
+      "id": "mistralai/mistral-7b-instruct-v0.1",
       "label": "Mistral 7B",
       "tag": "Balanced",
       "tagColor": "#4b5563",
