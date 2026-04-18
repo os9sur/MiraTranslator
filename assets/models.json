@@ -1,0 +1,97 @@
+{
+  "version": "2026.04.18",
+  "enabled": true,
+  "models": [
+    {
+      "id": "google/gemini-2.5-flash-lite",
+      "label": "Gemini 2.5 Flash Lite",
+      "tag": "Fastest",
+      "tagColor": "#0ea5e9",
+      "desc": {
+        "zh": "极速响应，超轻量化翻译首选",
+        "zh_TW": "極速響應，超輕量化翻譯首選",
+        "en": "Ultra-fast and lightweight, best for quick translation",
+        "ja": "超高速・軽量、クイック翻訳に最適",
+        "ko": "초고속 및 경량, 빠른 번역에 최적"
+      }
+    },
+    {
+      "id": "deepseek/deepseek-chat",
+      "label": "DeepSeek V3.2",
+      "tag": "Popular",
+      "tagColor": "#7c3aed",
+      "desc": {
+        "zh": "智能平衡，极高性价比",
+        "zh_TW": "智能平衡，極高性價比",
+        "en": "Smart balancing with exceptional cost-performance",
+        "ja": "知的なバランス、最高のコストパフォーマンス",
+        "ko": "지능형 균형, 탁월한 가성비"
+      }
+    },
+    {
+      "id": "openai/gpt-4o-mini",
+      "label": "GPT-4o Mini",
+      "tag": "Stable",
+      "tagColor": "#b45309",
+      "desc": {
+        "zh": "表现稳定，综合能力出色",
+        "zh_TW": "表現穩定，綜合能力出色",
+        "en": "Highly stable with balanced overall performance",
+        "ja": "安定したパフォーマンス、総合能力に優れる",
+        "ko": "안정적인 성능, 뛰어난 종합 능력"
+      }
+    },
+    {
+      "id": "anthropic/claude-3-5-haiku",
+      "label": "Claude 3.5 Haiku",
+      "tag": "",
+      "tagColor": "#7c3aed",
+      "desc": {
+        "zh": "自然语境处理能力极佳",
+        "zh_TW": "自然語境處理能力極佳",
+        "en": "Excellent at natural context and nuance",
+        "ja": "自然な文脈理解に長けています",
+        "ko": "자연스러운 문맥 처리 능력이 탁월함"
+      }
+    },
+    {
+      "id": "qwen/qwen-plus",
+      "label": "Qwen Plus",
+      "tag": "",
+      "tagColor": "#059669",
+      "desc": {
+        "zh": "通义千问增强版，逻辑更强",
+        "zh_TW": "通義千問增強版，邏輯更強",
+        "en": "Enhanced Qwen model with stronger logic",
+        "ja": "Qwen強化版、より強力な論理思考",
+        "ko": "Qwen 강화 버전, 더 강력한 논리"
+      }
+    },
+    {
+      "id": "qwen/qwen-turbo",
+      "label": "Qwen Turbo",
+      "tag": "",
+      "tagColor": "#16a34a",
+      "desc": {
+        "zh": "追求极致的生成速度",
+        "zh_TW": "追求極致的生成速度",
+        "en": "Optimized for maximum generation speed",
+        "ja": "究極の生成スピードを追求",
+        "ko": "극한의 생성 속도 추구"
+      }
+    },
+    {
+      "id": "mistralai/mistral-7b-instruct",
+      "label": "Mistral 7B",
+      "tag": "",
+      "tagColor": "#4b5563",
+      "desc": {
+        "zh": "优秀的开源指令遵循模型",
+        "zh_TW": "優秀的開源指令遵循模型",
+        "en": "Top-tier open-source instruction model",
+        "ja": "優れたオープンソースの指示遂行モデル",
+        "ko": "우수한 오픈 소스 명령 준수 모델"
+      }
+    }
+  ]
+}
