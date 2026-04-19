@@ -16,7 +16,7 @@
       }
     },
     {
-      "id": "deepseek/deepseek-chat",
+      "id": "deepseek/deepseek-v3.2",
       "label": "DeepSeek V3.2",
       "tag": "Popular",
       "tagColor": "#7c3aed",
