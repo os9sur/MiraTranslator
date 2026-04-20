@@ -2813,6 +2813,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btnLogin.innerText = t('login') || 'Log in';
 
     if (res?.user) {
+      await safeSendMessage({ action: 'clearBalanceCache' });
       updateAuthUI(res.user);
       fetchBalance(res.user.uid);
     } else if (res?.error && res.error !== 'USER_CANCELED') {
@@ -2829,7 +2830,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     profilePanel.style.display = 'none';
     updateAuthUI(null);
   });
+  document.getElementById('btnDeleteAccount').addEventListener('click', async () => {
+    const confirmed = confirm(t('deleteAccountConfirm') || 'Are you sure you want to delete your account? This action cannot be undone.');
+    if (!confirmed) return;
 
+    const btn = document.getElementById('btnDeleteAccount');
+    const originalText = btn.innerText;
+
+    // 删除中状态
+    btn.disabled = true;
+    btn.innerHTML = '<div class="mini-spinner"></div>';
+
+    const response = await safeSendMessage({ action: 'deleteAccount' });
+
+    if (response.ok) {
+      btn.innerText = t('deleteAccountSuccess') || 'Account deleted successfully';
+      setTimeout(() => {
+        document.getElementById('btnLogout').click();
+      }, 800);
+    } else {
+      btn.innerText = t('deleteAccountFail') || '✗ Deletion failed, please try again later';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }, 2000); // 2秒后恢复 
+    }
+  });
   document.getElementById('btnRecharge').addEventListener('click', () => {
     profilePanel.style.display = 'none';
     safeSendMessage({ action: 'openRecharge' });

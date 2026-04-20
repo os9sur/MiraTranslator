@@ -2449,7 +2449,7 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery) {
             ? getFriendlyLanguageName(hintInputLang)
             : 'source language';
 
-       const wordFormsRule = `- wordForms: Provide morphological forms of the INPUT word in its SOURCE language (${sourceLangLabel}). 
+        const wordFormsRule = `- wordForms: Provide morphological forms of the INPUT word in its SOURCE language (${sourceLangLabel}). 
                         - The "name" field is the grammatical label, written in ${targetLanguageName}.
                         - The "value" field MUST be the actual inflected form in the SOURCE language (${sourceLangLabel}), NOT in ${targetLanguageName}.
                         - Example: Input "run" (English→Japanese): [{"name":"過去形","value":"ran"},{"name":"現在分詞","value":"running"}] ← value is English, name is Japanese.
@@ -3718,15 +3718,43 @@ async function handleUserLogout(sendResponse) {
         sendResponse({ ok: false, error: err.message });
     }
 }
+// ── 删除账户 ──
+async function handleDeleteAccount(sendResponse) {
+    try {
+        const jwtResult = await chrome.storage.local.get('mira_jwt');
+        const token = jwtResult.mira_jwt;
+        if (!token) {
+            sendResponse({ ok: false, error: 'Not logged in' });
+            return;
+        }
 
-// ── 拉取余额：对接 Worker API ──
+        const res = await workerFetch('/api/user/delete', {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await res.json();
+        if (data.success) {
+            await safeRemoveStorage(['mira_user', 'mira_user_balance', 'mira_jwt']);
+            sendResponse({ ok: true });
+        } else {
+            sendResponse({ ok: false, error: data.error });
+        }
+    } catch (err) {
+        sendResponse({ ok: false, error: err.message });
+    }
+}
+
+// ── 拉取余额  ──
 async function fetchUserBalance(uid, sendResponse) {
     try {
-        // 1. 尝试读本地缓存（5分钟有效期）
+        // 尝试读本地缓存（1分钟有效期）
         const cached = await safeGetStorage(['mira_user_balance']);
         if (cached?.mira_user_balance?.uid === uid) {
             const { balance, updatedAt } = cached.mira_user_balance;
-            if (Date.now() - updatedAt < 5 * 60 * 1000) {
+            if (Date.now() - updatedAt < 1 * 60 * 1000) {
                 sendResponse({ balance });
                 return;
             }
@@ -3799,7 +3827,10 @@ async function syncUserToBackend(user, googleToken) {
         throw err; // 继续向上抛，让 handleUserLogin 捕获并停止流程
     }
 }
-
+async function handleClearBalanceCache(sendResponse) {
+    await safeRemoveStorage(['mira_user_balance']);
+    sendResponse({ ok: true });
+}
 
 // 监听来自 content script 和 popup 的消息,接收消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -3833,7 +3864,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleUserLogout(safeSendResponse);
         return true;
     }
-
+if (request.action === 'clearBalanceCache') {
+    handleClearBalanceCache(safeSendResponse);
+    return true;
+}
+    //注销账户
+    if (request.action === 'deleteAccount') {
+        handleDeleteAccount(safeSendResponse);
+        return true;
+    }
     if (request.action === 'getUser') {
         safeGetStorage(['mira_user']).then(data => {
             safeSendResponse({ user: data?.mira_user || null });

@@ -3470,7 +3470,11 @@ self.i18nAttach9 = {
     selectPlan: "选择套餐",
     recommended: "推荐",
     notArrived: "充值未到账？",
-    paymentNotice: "点击套餐直接跳转 <b>Ko-fi</b> 结账，支持信用卡 / PayPal。<br>支付成功后余额通常在 <b>5 分钟内</b>自动到账。"
+    paymentNotice: "点击套餐直接跳转 <b>Ko-fi</b> 结账，支持信用卡 / PayPal。<br>支付成功后余额通常在 <b>5 分钟内</b>自动到账。",
+    deleteAccount: "删除账户",
+    deleteAccountConfirm: "确定要删除账户吗？此操作不可撤销，余额将清空。",
+    deleteAccountSuccess: "✓ 账户已删除",
+    deleteAccountFail: "✗ 删除失败，请稍后重试",
   },
   "zh_TW": {
     refreshing: "刷新中...",
@@ -3488,7 +3492,11 @@ self.i18nAttach9 = {
     selectPlan: "選擇方案",
     recommended: "推薦",
     notArrived: "加值未到帳？",
-    paymentNotice: "點擊方案直接跳轉至 <b>Ko-fi</b> 結帳，支援信用卡 / PayPal。<br>支付成功後餘額通常在 <b>5 分鐘內</b>自動到帳。"
+    paymentNotice: "點擊方案直接跳轉至 <b>Ko-fi</b> 結帳，支援信用卡 / PayPal。<br>支付成功後餘額通常在 <b>5 分鐘內</b>自動到帳。",
+    deleteAccount: "刪除帳號",
+    deleteAccountConfirm: "確定要刪除帳號嗎？此操作不可撤銷，餘額將清空。",
+    deleteAccountSuccess: "✓ 帳號已刪除",
+    deleteAccountFail: "✗ 刪除失敗，請稍後再試",
   },
   "en": {
     refreshing: "updating...",
@@ -3506,7 +3514,12 @@ self.i18nAttach9 = {
     selectPlan: "Select a Plan",
     recommended: "Recommended",
     notArrived: "Top-up not received?",
-    paymentNotice: "Click a plan to go to <b>Ko-fi</b> for checkout. Supports Credit Cards / PayPal.<br>Balance usually arrives automatically within <b>5 minutes</b> after payment."
+    paymentNotice: "Click a plan to go to <b>Ko-fi</b> for checkout. Supports Credit Cards / PayPal.<br>Balance usually arrives automatically within <b>5 minutes</b> after payment.",
+    deleteAccount: "Delete account",
+    deleteAccountConfirm: "Are you sure you want to delete your account? This action is irreversible and your balance will be lost.",
+    deleteAccountSuccess: "✓ Account deleted",
+    deleteAccountFail: "✗ Deletion failed, please try again later",
+
   },
   "ja": {
     refreshing: "更新中...",
@@ -3524,7 +3537,11 @@ self.i18nAttach9 = {
     selectPlan: "プランを選択",
     recommended: "おすすめ",
     notArrived: "チャージが反映されない場合",
-    paymentNotice: "プランをクリックすると <b>Ko-fi</b> 決済ページに移動します。クレジットカード / PayPalに対応。<br>決済完了後、通常 <b>5分以内</b>に残高が反映されます。"
+    paymentNotice: "プランをクリックすると <b>Ko-fi</b> 決済ページに移動します。クレジットカード / PayPalに対応。<br>決済完了後、通常 <b>5分以内</b>に残高が反映されます。",
+    deleteAccount: "アカウント削除",
+    deleteAccountConfirm: "アカウントを削除しますか？この操作は取り消せず、残高も消去されます。",
+    deleteAccountSuccess: "✓ アカウントを削除しました",
+    deleteAccountFail: "✗ 削除に失敗しました。しばらくしてから再試行してください",
   },
   "ko": {
     refreshing: "갱신 중...",
@@ -3542,6 +3559,10 @@ self.i18nAttach9 = {
     selectPlan: "요금제 선택",
     recommended: "추천",
     notArrived: "충전 금액이 들어오지 않았나요?",
-    paymentNotice: "요금제를 클릭하면 <b>Ko-fi</b> 결제 페이지로 이동합니다. 신용카드 / PayPal 지원.<br>결제 성공 후 잔액은 보통 <b>5분 이내</b>에 자동 반영됩니다."
+    paymentNotice: "요금제를 클릭하면 <b>Ko-fi</b> 결제 페이지로 이동합니다. 신용카드 / PayPal 지원.<br>결제 성공 후 잔액은 보통 <b>5분 이내</b>에 자동 반영됩니다.",
+    deleteAccount: "계정 삭제",
+    deleteAccountConfirm: "정말로 계정을 삭제하시겠습니까？이 작업은 되돌릴 수 없으며 잔액도 사라집니다。",
+    deleteAccountSuccess: "✓ 계정이 삭제되었습니다",
+    deleteAccountFail: "✗ 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요",
   }
 };
