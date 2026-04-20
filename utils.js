@@ -254,31 +254,51 @@ function getSafeMessage(key, defaultMsg) {
   }
 }
 async function safeSendMessage(message) {
-  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-    if (isCurrentSiteActive()) showUpdateNotice();
-    return null;
-  }
-  return new Promise((resolve) => {
-    try {
-      chrome.runtime.sendMessage(message, (response) => {
-        if (chrome.runtime.lastError) {
-          const errorMsg = chrome.runtime.lastError.message;
-          if (errorMsg.includes("context invalidated")) {
-            if (isCurrentSiteActive()) showUpdateNotice();
-          }
-          resolve(null);
-        } else {
-          resolve(response);
-        }
-      });
-    } catch (e) {
-      if (e.message?.includes("context invalidated") || !chrome.runtime?.id) {
-        if (isCurrentSiteActive()) showUpdateNotice();
-      }
-      resolve(null);
+    if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+        if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+        return null;
     }
-  });
+    return new Promise((resolve) => {
+        try {
+            chrome.runtime.sendMessage(message, (response) => {
+                // 立即消费 lastError，防止 Unchecked 警告
+                const err = chrome.runtime.lastError;
+                if (err) {
+                    const errorMsg = err.message || '';
+                    if (errorMsg.includes('context invalidated')) {
+                        if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+                    }
+                    // "Receiving end does not exist" 是正常情况（background 未就绪），静默处理
+                    resolve(null);
+                } else {
+                    resolve(response);
+                }
+            });
+        } catch (e) {
+            if (e.message?.includes('context invalidated') || !chrome.runtime?.id) {
+                if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+            }
+            resolve(null);
+        }
+    });
 }
+
+
+// ── Mira Pro 模型配置 ──
+const MIRA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
+
+const MIRA_FALLBACK_MODELS = [
+    { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: '' },
+    { id: 'deepseek/deepseek-v3.2',        label: 'DeepSeek V3.2',         tag: 'Popular', tagColor: '#7c3aed', desc: '' },
+    { id: 'openai/gpt-4o-mini',            label: 'GPT-4o Mini',           tag: 'Stable',  tagColor: '#b45309', desc: '' },
+    { id: 'anthropic/claude-3-5-haiku',    label: 'Claude 3.5 Haiku',      tag: 'Natural', tagColor: '#d946ef', desc: '' },
+    { id: 'qwen/qwen-plus',                label: 'Qwen Plus',             tag: 'Enhanced',tagColor: '#059669', desc: '' },
+    { id: 'qwen/qwen-turbo',               label: 'Qwen Turbo',            tag: 'Turbo',   tagColor: '#16a34a', desc: '' },
+    { id: 'mistralai/mistral-7b-instruct-v0.1', label: 'Mistral 7B',       tag: 'Balanced',tagColor: '#4b5563', desc: '' },
+];
+const MODELS_URL = `https://raw.githubusercontent.com/os9sur/MiraTranslator/refs/heads/main/assets/models.json?t=${Date.now()}`;
+
+
 let isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
@@ -370,7 +390,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -430,10 +450,12 @@ function t(key, forcedLang) {
 function applyI18n(forcedLang) {
   if (typeof document === 'undefined') return;
   syncI18nDict();
+  
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const type = el.getAttribute('data-i18n-type');
     const translation = t(key, forcedLang);
+    
     if (translation && translation !== key) {
       if (type === 'placeholder' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         el.placeholder = translation;
@@ -441,6 +463,8 @@ function applyI18n(forcedLang) {
         el.title = translation;
       } else if (type === 'value') {
         el.value = translation;
+      } else if (type === 'html' || (translation.includes('<') && translation.includes('>'))) {
+        el.innerHTML = translation;
       } else {
         el.innerText = translation;
       }
@@ -864,6 +888,7 @@ function localizePos(pos, targetLang) {
     pos;
 }
 const AI_LLM_WHITE_LIST = [
+  'mira_pro',
   'openai',
   'deepseek',
   'claude',
@@ -1187,8 +1212,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
       wordTranslationCache.set(query.toLowerCase(), result);
       return result;
-    }
-    // chrome.i18n检测同理
+    } 
     try {
       const detection = await new Promise((resolve) => {
         if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
@@ -1418,7 +1442,8 @@ const MiraUtils = {
 
     const restrictedDomains = [
       'chrome.google.com/webstore',
-      'chromewebstore.google.com'
+      'chromewebstore.google.com',
+      'paypal.com',
     ];
 
     const isPrefixMatch = restrictedPrefixes.some(prefix => url.startsWith(prefix));
@@ -1559,6 +1584,17 @@ const LANGS = [
   { value: 'yo', label: 'Yorùbá (Yoruba)', en: 'Yoruba' },
   { value: 'zu', label: 'IsiZulu (Zulu)', en: 'Zulu' },
 ];
+
+function getPromptLanguageName(langCode) {
+    if (!langCode) return 'Chinese Simplified';
+    const normalized = langCode.replace('_', '-').toLowerCase();
+    const found = LANGS.find(l => l.value && l.value.toLowerCase() === normalized);
+    if (found?.en) return found.en;
+    // 兜底：截取括号里的英文
+    const match = found?.label?.match(/\(([^)]+)\)/);
+    if (match) return match[1];
+    return langCode;
+}
 
 function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {}) {
   selectEl.innerHTML = '';

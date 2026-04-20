@@ -715,7 +715,9 @@ select:hover {
     opacity: 1;
   }
 }
-
+.mira-font-family{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
 .mira-input-terminal {
   display: block !important;
   width: 100% !important;
@@ -2123,157 +2125,289 @@ yt-attributed-string+.kt-paragraph-translation {
 .header-right {
   display: flex;
   align-items: center;
-  margin-right: 10px;
+  margin-right: 0px;
   gap: 6px;
   margin-left: auto;    
 }
+.mini-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
 
-/* 登录文字按钮 */
 .btn-login {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #3fcfa0;
-  background: rgba(29, 158, 117, 0.15);
-  border: 1px solid rgba(29, 158, 117, 0.35);
-  border-radius: 6px;
-  padding: 4px 9px;
-  cursor: pointer;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f0f9ff;
   white-space: nowrap;
-  transition: background 0.15s;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+.btn-login .btn-icon {
+  width: 14px;
+  height: 14px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.4));
+}
+
 .btn-login:hover {
-  background: rgba(29, 158, 117, 0.28);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  transform: translateY(-1px);
 }
 
-/* 头像圆形按钮 */
+.btn-login:active {
+  transform: scale(0.95) translateY(0);
+  background: rgba(56, 189, 248, 0.25);
+  transition: all 0.1s;
+}
+
+/* 头像圆形按钮   */
+.btn-avatar { 
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  overflow: visible; 
+  flex-shrink: 0;
+  border: 2px solid #58f1ff;  
+  position: relative;
+   
+  box-shadow: 
+    0 0 8px rgba(88, 241, 255, 0.6), 
+    0 0 15px rgba(0, 163, 255, 0.3);
+   
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  outline: none;
+}
+ 
+@keyframes avatar-glow {
+  0% { box-shadow: 0 0 8px rgba(88, 241, 255, 0.6), 0 0 15px rgba(0, 163, 255, 0.3); }
+  50% { box-shadow: 0 0 15px rgba(88, 241, 255, 0.9), 0 0 25px rgba(0, 163, 255, 0.5); }
+  100% { box-shadow: 0 0 8px rgba(88, 241, 255, 0.6), 0 0 15px rgba(0, 163, 255, 0.3); }
+}
+
 .btn-avatar {
-  width: 28px;
-  height: 28px;
+  animation: avatar-glow 2s infinite ease-in-out;
+}
+ 
+.btn-avatar:hover {
+  transform: scale(1.1); 
+  border-color: #ffffff;
+  filter: brightness(1.2); 
+  animation-play-state: paused;  
+}
+
+/* 头像图片 */
+#avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 50%;
-  background: #1D9E75;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
+  display: block;
+}
+
+/* 首字母 */
+#avatarInitial {
   color: #fff;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition: opacity 0.15s;
-}
-.btn-avatar:hover { opacity: 0.85; }
-
-/* ── Profile dropdown panel ── */
-.profile-panel {
-  position: absolute;
-  top: 44px;          /* header 高度 */
-  right: 10px;
-  width: 220px;
-  background: #0d1e2e;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 12px;
-  padding: 14px;
-  z-index: 9999;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45); 
-  animation: panelFadeIn 0.15s ease;
-}
-@keyframes panelFadeIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.profile-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.profile-avatar-lg {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #1D9E75;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 14px;
-  font-weight: 600;
-  color: #fff;
-  overflow: hidden;
-  flex-shrink: 0;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(0,0,0,0.5);
+} 
+.profile-panel {
+    position: absolute;
+    top: 55px;         
+    right: 10px;
+    width: 230px;        
+   
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.65), rgba(15, 23, 42, 0.45)); 
+     
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+   
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;  
+    padding: 18px;
+    z-index: 9999;
+  
+    box-shadow: 
+        0 24px 40px -8px rgba(0, 0, 0, 0.5), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  
+    animation: panelFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes panelFadeIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* --- 用户信息区 --- */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.profile-avatar-lg {
+    width: 42px;
+    height: 42px;
+    border-radius: 50px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(29, 158, 117, 0.3);
+}
+
 .profile-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #e0e8f0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #f8fafc;
+    letter-spacing: -0.2px;
 }
+
 .profile-email {
-  font-size: 11px;
-  color: #7a9ab5;
-  margin-top: 1px;
-  word-break: break-all;
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 2px;
+    word-break: break-all;
 }
-
-/* 余额区 */
+ 
 .balance-block {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  padding: 9px 11px;
-  margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.08); 
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 12px; 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
+
 .balance-label {
-  font-size: 11px;
-  color: #7a9ab5;
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
+
 .balance-amount {
-  font-size: 16px;
-  font-weight: 600;
-  color: #3fcfa0;
+    font-size: 17px;
+    font-weight: 700;
+    color: #3fcfa0;
+    text-shadow: 0 0 15px rgba(63, 207, 160, 0.2);
 }
-
-/* 充值按钮 */
+ 
 .btn-recharge {
-  width: 100%;
-  background: #1a6fc4;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: background 0.15s;
+    width: 100%;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
-.btn-recharge:hover { background: #1860ad; }
 
+.btn-recharge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
+    filter: brightness(1.1);
+}
+ 
 .profile-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-  margin: 0 0 8px;
+    height: 1px; 
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    margin: 6px 0 14px;
+}
+ 
+.btn-logout {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #94a3b8;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-/* 退出按钮 */
-.btn-logout {
-  width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 7px;
-  font-size: 12px;
-  color: #7a9ab5;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
 .btn-logout:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: #e0e8f0;
+    background: rgba(255, 68, 68, 0.1);
+    border-color: rgba(255, 68, 68, 0.2);
+    color: #fca5a5;
 }
+
+.mira-login-btn:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    transform: translateY(-1px);
+}
+.mira-login-btn:active {
+    transform: translateY(0);
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+ 
+.loginModal {
+    display: none; 
+    position: absolute; 
+    top: 55px; 
+    right: 10px; 
+    z-index: 9999; 
+    width: 220px; 
+    padding: 20px; 
+     
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.65), rgba(15, 23, 42, 0.45)); 
+    backdrop-filter: blur(20px) saturate(180%); 
+    -webkit-backdrop-filter: blur(20px) saturate(180%); 
+    border: 1px solid rgba(255, 255, 255, 0.06); 
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-left: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px; 
+    box-shadow: 
+        0 24px 40px -8px rgba(0, 0, 0, 0.5), 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+

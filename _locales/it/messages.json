@@ -3,7 +3,7 @@
     "message": "Mira Translator - Traduzione immersiva e sottotitoli bilingui per YouTube"
   },
   "appDesc": {
-    "message": "<0.5MB: Open-source, sicuro. Motori pubblici + AI API (Propria Key). Traduzione Web/YouTube e sincro WebDAV/GDrive."
+    "message": "Traduzione immersiva, sottotitoli bilingui YouTube, AI e ricerca parole. Leggero e open-source. Google Drive/WebDAV."
   },
   "ERROR_400": {
     "message": "Errore API: Richiesta non valida."

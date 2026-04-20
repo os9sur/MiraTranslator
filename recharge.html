@@ -1,31 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mira 翻译 · 充值</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=DM+Sans:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <title>Mira Credit</title>
+
+    <script src="i18n.js"></script>
+    <script src="constants.js"></script>    
+    <script src="utils.js"></script>
     <style>
         :root {
-            --bg: #0d1117;
-            --surface: #161b27;
-            --surface2: #1e2740;
-            --border: rgba(255, 255, 255, 0.08);
-            --border-active: rgba(91, 141, 238, 0.6);
-            --blue: #4e8ef7;
-            --blue-dim: rgba(78, 142, 247, 0.12);
-            --blue-glow: rgba(78, 142, 247, 0.25);
-            --green: #3ecf8e;
-            --green-dim: rgba(62, 207, 142, 0.12);
-            --text: #e8edf5;
-            --text-muted: #6b7fa3;
-            --text-dim: #3d4f6e;
-            --radius: 12px;
-            --radius-sm: 8px;
+            --bg: #0b0e14;
+            --surface: #171d29;
+            --surface2: #21293b;
+            --border: rgba(255, 255, 255, 0.12);
+            --border-active: #4e8ef7;
+            --text: #ffffff;
+            --text-muted: #a6c0e8;
+            --text-dim: #6c80a3;
+            --blue: #5c9aff;
+            --blue-bright: #7bb0ff;
+            --blue-dim: rgba(92, 154, 255, 0.15);
+            --purple: #9d7cd8;
+            --radius: 16px;
+            --radius-sm: 10px;
             --font-cn: 'Noto Sans SC', sans-serif;
             --font-en: 'DM Sans', sans-serif;
         }
@@ -45,173 +44,152 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            position: relative;
             overflow-x: hidden;
         }
 
-        /* Background glow effects */
         body::before {
             content: '';
             position: fixed;
-            top: -200px;
-            left: -200px;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(78, 142, 247, 0.06) 0%, transparent 70%);
+            top: -150px;
+            left: -150px;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(92, 154, 255, 0.08) 0%, transparent 60%);
             pointer-events: none;
         }
 
         body::after {
             content: '';
             position: fixed;
-            bottom: -200px;
-            right: -200px;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(62, 207, 142, 0.05) 0%, transparent 70%);
+            bottom: -150px;
+            right: -150px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(157, 124, 216, 0.06) 0%, transparent 60%);
             pointer-events: none;
         }
 
+        /* 主卡片*/
         .card {
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
             background: var(--surface);
-            border: 0.5px solid var(--border);
-            border-radius: 20px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
             overflow: hidden;
-            position: relative;
-            animation: fadeUp 0.4s ease both;
+            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02);
+            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         @keyframes fadeUp {
             from {
                 opacity: 0;
-                transform: translateY(16px);
+                transform: translateY(20px) scale(0.98);
             }
 
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
 
         /* Header */
         .header {
-            padding: 20px 20px 16px;
-            border-bottom: 0.5px solid var(--border);
+            padding: 24px 28px 20px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
-        .logo-circle {
-            width: 42px;
-            height: 42px;
+        .logo-fallback {
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            background: #1e2740;
+            background: var(--surface2);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 20px;
+            color: var(--blue-bright);
+            flex-shrink: 0;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .logo-circle svg {
-            width: 28px;
-            height: 28px;
-        }
-
-        .header-text {
-            flex: 1;
+        .header-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .header-title {
-            font-size: 15px;
+            font-size: 18px;
             font-weight: 700;
-            color: var(--text);
             font-family: var(--font-en);
+            letter-spacing: 0.5px;
         }
 
         .header-sub {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-top: 1px;
-            font-family: var(--font-en);
         }
 
         .header-back {
-            font-size: 12px;
+            margin-left: auto;
+            font-size: 13px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
             color: var(--text-muted);
             cursor: pointer;
-            padding: 6px 10px;
-            border: 0.5px solid var(--border);
-            border-radius: 6px;
-            background: transparent;
-            color: var(--text-muted);
-            transition: all 0.15s;
+            transition: all 0.2s ease;
             font-family: var(--font-cn);
         }
 
         .header-back:hover {
             border-color: var(--border-active);
-            color: var(--blue);
+            color: var(--text);
+            background: var(--blue-dim);
         }
 
-        /* Login warning */
-        .login-warn {
-            margin: 16px 20px 0;
-            background: rgba(255, 180, 0, 0.08);
-            border: 0.5px solid rgba(255, 180, 0, 0.25);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            font-size: 12.5px;
-            color: #f0c040;
+        /* Account 区域放大 */
+        .account {
+            margin: 20px 28px 0;
+            background: var(--surface2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius);
+            padding: 16px 20px;
             display: none;
             align-items: center;
-            gap: 8px;
-            line-height: 1.5;
+            gap: 16px;
         }
 
-        .login-warn.show {
+        .account.show {
             display: flex;
-        }
-
-        .login-warn a {
-            color: var(--blue);
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        /* Account */
-        .account {
-            margin: 16px 20px;
-            background: var(--surface2);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
 
         .acc-avatar {
-            width: 38px;
-            height: 38px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: linear-gradient(135deg, #2d4a80, #1e3560);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             color: #7aabee;
             flex-shrink: 0;
             overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         .acc-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 50%;
         }
 
         .acc-info {
@@ -220,18 +198,18 @@
         }
 
         .acc-name {
-            font-size: 13.5px;
-            font-weight: 500;
-            color: var(--text);
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            letter-spacing: 0.3px;
         }
 
         .acc-email {
-            font-size: 11.5px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-top: 2px;
+            margin-top: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -245,25 +223,27 @@
         .bal-label {
             font-size: 11px;
             color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
         }
 
         .bal-val {
-            font-size: 17px;
+            font-size: 20px;
             font-weight: 700;
-            color: var(--blue);
-            margin-top: 2px;
+            color: var(--blue-bright);
             font-family: var(--font-en);
+            line-height: 1;
         }
 
-        /* Not logged in state */
         .not-logged {
-            margin: 16px 20px;
-            background: var(--surface2);
+            margin: 20px 28px 0;
+            background: rgba(255, 180, 0, 0.08);
+            border: 1px solid rgba(255, 180, 0, 0.3);
             border-radius: var(--radius);
-            padding: 14px 16px;
+            padding: 16px 20px;
             display: none;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
 
         .not-logged.show {
@@ -271,283 +251,219 @@
         }
 
         .not-logged-icon {
-            width: 38px;
-            height: 38px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(255, 180, 0, 0.1);
+            background: rgba(255, 180, 0, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
         }
 
-        .not-logged-text {
-            flex: 1;
+        .not-logged p {
+            font-size: 14px;
+            color: #e6c387;
         }
 
-        .not-logged-text p {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .not-logged-text a {
-            font-size: 12.5px;
-            color: var(--blue);
+        .not-logged a {
+            font-size: 14px;
+            color: #ffb400;
             text-decoration: underline;
             cursor: pointer;
+            font-weight: 600;
         }
 
-        /* Channel switcher */
+        /* Switcher 平台切换按钮放大 */
         .switcher {
-            margin: 0 20px 4px;
             display: flex;
-            gap: 6px;
+            gap: 10px;
+            margin: 24px 28px 0;
         }
 
         .sw-btn {
             flex: 1;
-            padding: 9px 8px;
+            padding: 12px;
+            border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            border: 0.5px solid var(--border);
-            background: transparent;
+            background: rgba(255, 255, 255, 0.02);
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            transition: all 0.2s ease;
             font-family: var(--font-cn);
+        }
+
+        .sw-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
         }
 
         .sw-btn.active {
             background: var(--blue-dim);
-            border-color: var(--border-active);
-            color: var(--blue);
+            border-color: var(--blue);
+            color: var(--blue-bright);
+            box-shadow: inset 0 0 0 1px rgba(92, 154, 255, 0.2);
         }
 
-        .sw-btn .flag {
-            font-size: 15px;
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 28px 0;
         }
 
-        /* Body padding */
-        .body {
-            padding: 16px 20px 24px;
-        }
-
-        /* Section label */
-        .sec-label {
-            font-size: 11px;
-            color: var(--text-dim);
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        /* Amount grid */
-        .amounts {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .amt-btn {
-            position: relative;
-            padding: 13px 8px;
-            border: 0.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--surface2);
-            color: var(--text);
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.18s;
-            font-family: var(--font-cn);
-        }
-
-        .amt-btn:hover {
-            border-color: rgba(78, 142, 247, 0.35);
-        }
-
-        .amt-btn.sel {
-            border-color: var(--border-active);
-            background: var(--blue-dim);
-        }
-
-        .amt-btn.sel::after {
-            content: '✓';
-            position: absolute;
-            top: 4px;
-            right: 6px;
-            font-size: 10px;
-            color: var(--blue);
-        }
-
-        .amt-num {
-            font-size: 18px;
-            font-weight: 700;
-            font-family: var(--font-en);
-        }
-
-        .amt-sub {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 3px;
-        }
-
-        .amt-tag {
-            position: absolute;
-            top: -9px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--blue);
-            color: #fff;
-            font-size: 10px;
-            padding: 1px 8px;
-            border-radius: 10px;
-            white-space: nowrap;
-            font-family: var(--font-cn);
-        }
-
-        /* Custom amount */
-        .custom-wrap {
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .custom-prefix {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            font-size: 14px;
-            font-family: var(--font-en);
-            pointer-events: none;
-        }
-
-        .custom-input {
-            width: 100%;
-            background: var(--surface2);
-            border: 0.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 11px 14px 11px 32px;
-            color: var(--text);
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.15s;
-            font-family: var(--font-en);
-        }
-
-        .custom-input::placeholder {
-            color: var(--text-dim);
-        }
-
-        .custom-input:focus {
-            border-color: var(--border-active);
-        }
-
-        /* Notice box */
-        .notice {
-            background: rgba(78, 142, 247, 0.06);
-            border: 0.5px solid rgba(78, 142, 247, 0.15);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            font-size: 12px;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 16px;
-        }
-
-        .notice b {
-            color: #7aabee;
-            font-weight: 500;
-        }
-
-        /* Main CTA */
-        .btn-pay {
-            width: 100%;
-            padding: 14px;
-            border-radius: var(--radius);
-            border: none;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: var(--font-cn);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-pay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.08);
-            opacity: 0;
-            transition: opacity 0.15s;
-        }
-
-        .btn-pay:hover::before {
-            opacity: 1;
-        }
-
-        .btn-pay:active {
-            transform: scale(0.98);
-        }
-
-        .btn-kofi {
-            background: #4e8ef7;
-            color: #fff;
-        }
-
-        .btn-afdian {
-            background: #7b5ea7;
-            color: #fff;
-        }
-
-        /* Footer links */
-        .footer-links {
-            margin-top: 14px;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .flink {
-            font-size: 12px;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: color 0.15s;
-        }
-
-        .flink:hover {
-            color: var(--blue);
-        }
-
-        /* Panel visibility */
+        /* Panel */
         .panel {
             display: none;
+            padding: 24px 28px 28px;
         }
 
         .panel.active {
             display: block;
         }
 
-        /* Divider */
-        .divider {
-            height: 0.5px;
-            background: var(--border);
-            margin: 0 20px 0;
+        .sec-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            font-weight: 600;
         }
 
-        /* Responsive */
-        @media (max-width: 460px) {
+        .plans {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .plan-card {
+            position: relative;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background: var(--surface2);
+            padding: 24px 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            color: inherit;
+        }
+
+        .plan-card:hover {
+            border-color: var(--blue);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            background: rgba(92, 154, 255, 0.05);
+        }
+
+        /* 推荐套餐高亮 */
+        .plan-card.featured {
+            border-color: var(--blue);
+            background: linear-gradient(180deg, rgba(92, 154, 255, 0.12) 0%, rgba(92, 154, 255, 0.03) 100%);
+            box-shadow: 0 0 0 1px var(--blue), 0 8px 24px rgba(92, 154, 255, 0.15);
+        }
+
+        .plan-card.featured:hover {
+            box-shadow: 0 0 0 1px var(--blue), 0 12px 30px rgba(92, 154, 255, 0.25);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #4e8ef7, #3b76d9);
+            color: #fff;
+            font-size: 11px;
+            padding: 4px 14px;
+            border-radius: 12px;
+            white-space: nowrap;
+            font-family: var(--font-cn);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(78, 142, 247, 0.4);
+        }
+
+        .plan-name {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-family: var(--font-en);
+            font-weight: 500;
+        }
+
+        .plan-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: var(--font-en);
+            line-height: 1;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .plan-unit {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .plan-arrow {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--text-dim);
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .plan-card:hover .plan-arrow {
+            color: var(--blue-bright);
+            transform: translateX(2px);
+        }
+
+        /* Notice 文字放大，增加阅读性 */
+        .notice {
+            background: rgba(92, 154, 255, 0.06);
+            border: 1px solid rgba(92, 154, 255, 0.15);
+            border-radius: var(--radius-sm);
+            padding: 16px 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .notice b {
+            color: var(--blue-bright);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            padding: 0 28px 24px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .flink {
+            font-size: 13px;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: color 0.2s;
+            font-weight: 500;
+        }
+
+        .flink:hover {
+            color: var(--text);
+        }
+
+        @media (max-width: 480px) {
             body {
                 padding: 0;
                 align-items: flex-start;
@@ -557,6 +473,47 @@
                 border-radius: 0;
                 max-width: 100%;
                 min-height: 100vh;
+                border: none;
+                box-shadow: none;
+            }
+
+            .plans {
+                grid-template-columns: 1fr;
+            }
+
+            .plan-card {
+                padding: 16px;
+                flex-direction: row;
+                align-items: center;
+                text-align: left;
+            }
+
+            .plan-badge {
+                top: -10px;
+                left: 16px;
+                transform: none;
+            }
+
+            .plan-name {
+                margin-bottom: 0;
+                font-size: 14px;
+                width: 80px;
+            }
+
+            .plan-price {
+                font-size: 24px;
+                flex: 1;
+                text-align: center;
+            }
+
+            .plan-unit {
+                margin-top: 0;
+                margin-left: 8px;
+            }
+
+            .plan-arrow {
+                margin-top: 0;
+                margin-left: auto;
             }
         }
     </style>
@@ -564,140 +521,80 @@
 
 <body>
     <div class="card">
+
+        <!-- Header -->
         <div class="header">
-            <div class="logo-circle">
-                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="20" fill="#1a2a4a" />
-                    <text x="20" y="26" text-anchor="middle" font-size="18" fill="#4e8ef7">译</text>
-                </svg>
-            </div>
-            <div class="header-text">
+            <div class="logo-fallback"><img src="/icons/icon-128.png"
+                    style="width: 100%; height: 100%; object-fit: contain;" /></div>
+            <div>
                 <div class="header-title">Mira Translator</div>
-                <div class="header-sub">账户充值</div>
+                <div class="header-sub" data-i18n="recharge">充值</div>
             </div>
-            <button class="header-back" id="goBack">← 返回插件</button>
+            <button class="header-back" id="goBack">×</button>
         </div>
 
         <div class="not-logged" id="notLoggedBox">
             <div class="not-logged-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <circle cx="12" cy="8" r="4" stroke="#f0c040" stroke-width="1.5" />
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#f0c040" stroke-width="1.5" stroke-linecap="round" />
                 </svg>
             </div>
-            <div class="not-logged-text">
-                <p>请先登录 Google 账号后再充值</p>
-                <a id="triggerLogin" style="cursor:pointer">点此登录 →</a>
+            <div>
+                <p data-i18n="loginFirst">请先登录 Google 账号后再充值</p>
+                <a id="triggerLogin" data-i18n="login">点此登录 →</a>
             </div>
         </div>
 
         <div class="account" id="accountBox">
             <div class="acc-avatar" id="userAvatar">--</div>
             <div class="acc-info">
-                <div class="acc-name" id="userName">未登录</div>
+                <div class="acc-name" id="userName">—</div>
                 <div class="acc-email" id="userEmail">—</div>
             </div>
             <div class="acc-balance">
-                <div class="bal-label">当前余额</div>
-                <div class="bal-val" id="balanceVal">¥ 0.00</div>
+                <div class="bal-label" data-i18n="balance">当前余额</div>
+                <div class="bal-val" id="balanceVal">$0.00</div>
             </div>
         </div>
 
-        <div style="background: #fff4e5; border: 1px dashed #f0c040; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-            <div style="font-size: 12px; color: #856404;">⚠️ 支付时请务必填写备注（Message）:</div>
-            <div style="font-size: 18px; font-weight: bold; color: #1a2a4a; display: flex; justify-content: space-between; align-items: center;">
-                <span id="displayPayCode">PAY-XXXXXX</span>
-                <button id="copyCode" style="font-size:12px; cursor:pointer;">复制</button>
+        <div class="divider"></div>
+
+        <div class="panel" id="panelKofi" style="display:block;">
+            <div class="sec-label" data-i18n="selectPlan">选择套餐</div>
+            <div class="plans">
+                <a class="plan-card" data-url="https://ko-fi.com/s/079b533b66">
+                    <div class="plan-name">Basic</div>
+                    <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>5</div>
+                    <div class="plan-unit">Credit</div>
+                    <!-- <div class="plan-arrow">前往 →</div> -->
+                </a>
+                <a class="plan-card featured" data-url="https://ko-fi.com/s/541f4e2a84">
+                    <div class="plan-badge" data-i18n="recommended">推荐</div>
+                    <div class="plan-name">Standard</div>
+                    <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>10</div>
+                    <div class="plan-unit">Credit</div>
+                    <!-- <div class="plan-arrow">前往 →</div> -->
+                </a>
+                <a class="plan-card" data-url="https://ko-fi.com/s/6a3ee2d2b7">
+                    <div class="plan-name">Premium</div>
+                    <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>15</div>
+                    <div class="plan-unit">Credit</div>
+                    <!-- <div class="plan-arrow">前往 →</div> -->
+                </a>
+            </div>
+            <div class="notice" data-i18n="paymentNotice" data-i18n-type="html">
             </div>
         </div>
 
-        <div class="switcher">
-            <button class="sw-btn" id="swKofi">
-                <span class="flag">🌍</span> Ko-fi · USD
-            </button>
-            <button class="sw-btn" id="swAfdian">
-                <span class="flag">🇨🇳</span> 爱发电 · CNY
-            </button>
+        <!-- Footer -->
+        <div class="footer">
+            <span class="flink" id="openSupport" data-i18n="notArrived">充值未到账？</span>
+            <!-- <span class="flink" id="openFaq">使用说明</span> -->
+            <span class="flink" id="openKofiPage">Ko-fi</span>
         </div>
 
-        <div class="divider" style="margin-top:14px;"></div>
-
-        <div class="panel body" id="panelKofi">
-            <div class="sec-label">选择充值金额 (USD)</div>
-            <div class="amounts" id="amtsKofi">
-                <div class="amt-btn sel" data-ch="kofi" data-amt="5">
-                    <div class="amt-num">$5</div>
-                    <div class="amt-sub">入门</div>
-                </div>
-                <div class="amt-btn" data-ch="kofi" data-amt="10">
-                    <div class="amt-tag">推荐</div>
-                    <div class="amt-num">$10</div>
-                    <div class="amt-sub">常用</div>
-                </div>
-                <div class="amt-btn" data-ch="kofi" data-amt="15">
-                    <div class="amt-num">$15</div>
-                    <div class="amt-sub">畅用</div>
-                </div>
-            </div>
-            <div class="custom-wrap">
-                <span class="custom-prefix">$</span>
-                <input class="custom-input" id="customKofi" type="number" min="1" placeholder="或输入自定义金额">
-            </div>
-            <div class="notice">
-                将跳转到 <b>Ko-fi</b> 完成支付，支持信用卡 / PayPal。<br>
-                支付成功后余额通常在 <b>5 分钟内</b>自动到账。
-            </div>
-            <button class="btn-pay btn-kofi" id="btnKofi">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                前往 Ko-fi 支付 <span style="opacity:0.7;font-size:13px;">→</span>
-            </button>
-        </div>
-
-        <div class="panel body" id="panelAfdian">
-            <div class="sec-label">选择充值金额 (CNY)</div>
-            <div class="amounts" id="amtsAfdian">
-                <div class="amt-btn sel" data-ch="afdian" data-amt="10">
-                    <div class="amt-num">¥10</div>
-                    <div class="amt-sub">入门</div>
-                </div>
-                <div class="amt-btn" data-ch="afdian" data-amt="30">
-                    <div class="amt-tag">推荐</div>
-                    <div class="amt-num">¥30</div>
-                    <div class="amt-sub">常用</div>
-                </div>
-                <div class="amt-btn" data-ch="afdian" data-amt="50">
-                    <div class="amt-num">¥50</div>
-                    <div class="amt-sub">畅用</div>
-                </div>
-            </div>
-            <div class="custom-wrap">
-                <span class="custom-prefix">¥</span>
-                <input class="custom-input" id="customAfdian" type="number" min="1" placeholder="或输入自定义金额">
-            </div>
-            <div class="notice">
-                将跳转到 <b>爱发电</b> 完成支付，支持支付宝 / 微信支付。<br>
-                支付成功后余额通常在 <b>5 分钟内</b>自动到账。
-            </div>
-            <button class="btn-pay btn-afdian" id="btnAfdian">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2c5.5 0 10 4.5 10 10s-4.5 10-10 10S2 17.5 2 12 6.5 2 12 2z" stroke="currentColor" stroke-width="1.8" />
-                    <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-                </svg>
-                前往爱发电支付 <span style="opacity:0.7;font-size:13px;">→</span>
-            </button>
-        </div>
-
-        <div style="padding: 0 20px 20px;">
-            <div class="footer-links">
-                <span class="flink" id="openSupport">充值未到账？</span>
-                <span class="flink" id="openFaq">使用说明</span>
-                <span class="flink" id="openKofiPage">Ko-fi 主页</span>
-            </div>
-        </div>
     </div>
-
     <script src="recharge.js"></script>
 </body>
 

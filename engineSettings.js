@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ui_lang = window.currentConfig.ui_language;
     const TEMPLATES = {
         'mira_pro': {
-            name: 'Mira 高级翻译',
+            name: 'Mira Pro',
             isBuiltIn: true,
             isPro: true,
             color: '#7c3aed',
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
         const builtInEngines = [
-            { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira 高级翻译' },
+            { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
             { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
             { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
         ];
@@ -213,29 +213,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     async function renderSidebar() {
         const list = document.getElementById('engine-sidebar-list');
-        const data = await safeGetStorage('lastActiveId');
+        const data = await safeGetStorage(['lastActiveId', 'activeConfig']);
         if (!data) return;
         const defaultId = userConfigs.find(c => c.engine === _defaultEngine)?.id ?? userConfigs[0].id;
-        const lastActiveId = data?.lastActiveId ?? defaultId;//默认引擎
-        const activeConfig = userConfigs.find(c => c.id === lastActiveId);
+        const lastActiveId = data?.lastActiveId ?? defaultId; // 侧边栏当前编辑的
+        const runningId = data?.activeConfig?.id ?? defaultId;
+
+
+        const activeConfig = userConfigs.find(c => c.id === runningId);
         const statusValueEl = document.getElementById('active-engine-name');
         if (statusValueEl) {
             statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', ui_lang);
         }
         list.innerHTML = userConfigs.map(c => {
-            const isEditing = c.id === currentId;
-            const isRunning = c.id === lastActiveId;
+            const isEditing = c.id === lastActiveId;
+            const isRunning = c.id === runningId;
+
+            //  判断是否为 mira_pro
+            const isMiraPro = c.id === 'mira_pro';
+
             const tpl = TEMPLATES[c.engine] || {};
             const proTag = tpl.isPro ? `<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">Pro</span>` : '';
+
             return `
-            <div class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
-                <div class="engine-info">
-                    ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
-                    <span class="engine-name">${c.alias}</span>${proTag}
-                </div>
-                ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin' && c.id !== 'mira_pro') ?
+    <div class="engine-item ${isEditing ? 'active' : ''} ${isMiraPro ? 'item-gold-pro' : ''}" data-id="${c.id}">
+        <div class="engine-info">
+            ${isRunning ? `<span class="status-dot success" data-id="${c.id}"></span>` : ''}
+            <span class="engine-name">${c.alias}</span>${proTag}
+        </div>
+        ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin' && c.id !== 'mira_pro') ?
                     `<span class="del-icon" data-id="${c.id}">×</span>` : ''}
-            </div>`;
+    </div>`;
         }).join('');
         list.querySelectorAll('.engine-item').forEach(el => {
             el.onclick = (e) => {
@@ -247,51 +255,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
         });
-        checkCurrentEngineStatus(lastActiveId, userConfigs);
+        checkCurrentEngineStatus(runningId, userConfigs);
     }
-    async function checkCurrentEngineStatus(lastActiveId, userConfigs) {
-        const dot = document.querySelector(`.status-dot[data-id="${lastActiveId}"]`);
+    async function checkCurrentEngineStatus(runningId, userConfigs) {
+        const dot = document.querySelector(`.status-dot[data-id="${runningId}"]`);
         if (!dot) return;
 
-        const config = userConfigs.find(c => c.id === lastActiveId);
+        const config = userConfigs.find(c => c.id === runningId);
         if (!config) return;
 
-        // Mira Pro 特殊处理：检查用户登录和余额
+        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+        const targetLang = storage?.ui_language || 'en';
+        const isTargetEn = targetLang.toLowerCase().startsWith('en');
+        const testText = isTargetEn ? '早上好' : 'Good morning';
+
+        // Mira Pro 特殊处理：只检查登录和余额，不做翻译测试（避免扣费）
         if (config.engine === 'mira_pro') {
             try {
-                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                const targetLang = storage?.ui_language || 'en';
-                const isTargetEn = targetLang.toLowerCase().startsWith('en');
-                const testText = isTargetEn ? '你好' : 'Good morning';
-
-                const res = await Promise.race([
-                    safeSendMessage({
-                        type: 'TRANSLATE',
-                        text: testText,
-                        targetLang,
-                        isTest: true,
-                        engine: 'mira_pro'
-                    }),
-                    new Promise(resolve => setTimeout(() => resolve(null), 8000))
-                ]);
-
-                let failed = true;
-                if (res && !res.error) {
-                    const data = res.currentTranslationResponse;
-                    if (data && !data.error) {
-                        const translatedText = (typeof data === 'string'
-                            ? data
-                            : (data.translatedText || data.basic || '')
-                        ).trim();
-                        const isNotOriginal = translatedText.toLowerCase() !== testText.toLowerCase();
-                        const hasContent = translatedText.length > 0 || data.dictData?.length > 0;
-                        failed = !hasContent || !isNotOriginal;
-                    }
+                const userData = await safeGetStorage(['mira_user']);
+                const user = userData?.mira_user;
+                if (!user) {
+                    dot.classList.remove('checking');
+                    dot.classList.add('error');
+                    dot.title = 'Mira Pro 未登录';
+                    return;
                 }
 
+                const res = await safeSendMessage({ action: 'getBalance', uid: user.uid });
+                const failed = !res?.balance || res.balance <= 0;
                 dot.classList.remove('checking');
                 dot.classList.add(failed ? 'error' : 'success');
-                dot.title = failed ? 'Mira Pro 不可用（未登录或余额不足）' : 'Mira Pro 正常';
+                dot.title = failed
+                    ? 'Mira Pro 余额不足'
+                    : `Mira Pro 正常 余额$${res.balance.toFixed(2)}`;
             } catch (e) {
                 dot.classList.remove('checking');
                 dot.classList.add('error');
@@ -300,18 +296,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-        const targetLang = storage?.ui_language || 'en';
-        const isTargetEn = targetLang.toLowerCase().startsWith('en');
-        const testText = isTargetEn ? '你好' : 'Good morning';
-
+        // google / bing / 其他AI引擎：做翻译测试
         try {
             let failed = false;
 
-            //  google/bing/AI 统一走 TRANSLATE 消息，isTest=true 跳过降级逻辑
             const instanceData = ['google', 'bing'].includes(config.engine)
                 ? {}
-                : (await safeGetStorage(`data_${lastActiveId}`))?.[`data_${lastActiveId}`] || {};
+                : (await safeGetStorage(`data_${runningId}`))?.[`data_${runningId}`] || {};
 
             const res = await Promise.race([
                 safeSendMessage({
@@ -349,6 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
             dot.classList.remove('checking');
             dot.classList.add('error');
+            dot.title = 'Engine check failed';
         }
     }
     function getFriendlyEngineError(engine, errorMsg) {
@@ -368,7 +360,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return errorMsg;
     }
 
+
+    let switchVersion = 0;
+
+    let currentModel = null;
     async function switchInstance(id) {
+        await safeSetStorage({ lastActiveId: id });
+        const myVersion = ++switchVersion;
         const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
         currentId = id;
         const config = userConfigs.find(c => c.id === id) || userConfigs[0];
@@ -399,12 +397,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveBtn.style.backgroundColor = "";
             saveBtn.disabled = false;
         }
-
         // ---- Mira Pro 专属页面 ----
         if (config.engine === 'mira_pro') {
             actions.classList.remove('hidden');
             const miraSaved = (await safeGetStorage(`data_mira_pro`)) || {};
-            const selectedModel = miraSaved[`data_mira_pro`]?.model || 'claude';
+            const selectedModel = miraSaved[`data_mira_pro`]?.model || MIRA_DEFAULT_MODEL;
 
             // 从 background.js 获取真实余额数据
             let balance = 0;
@@ -412,14 +409,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let usedCost = '0.00';
             try {
                 const userData = await safeGetStorage(['mira_user', 'mira_user_balance']);
-                const user = userData?.mira_user;
                 const balanceData = userData?.mira_user_balance;
-
                 if (balanceData?.balance !== undefined) {
                     balance = balanceData.balance;
                 }
-
-                // 使用数据也从存储中获取（如果有的话）
                 if (miraSaved[`data_mira_pro`]?.usedTokens !== undefined) {
                     usedTokens = miraSaved[`data_mira_pro`].usedTokens;
                     usedCost = (usedTokens / 1000000 * 1.8).toFixed(2);
@@ -429,120 +422,371 @@ document.addEventListener('DOMContentLoaded', async () => {
                 balance = 0;
             }
 
-            const models = [
-                { id: 'deepseek_v3', label: 'DeepSeek V3', tag: '均衡', tagColor: '#0284c7', desc: '速度与质量兼顾 · 推荐日常使用' },
-                { id: 'deepseek_v3_2', label: 'DeepSeek V3.2', tag: '最新', tagColor: '#7c3aed', desc: '最新版本 · 效果更佳' },
-                { id: 'claude_haiku', label: 'Claude 3.5 Haiku', tag: '最准', tagColor: '#7c3aed', desc: '语义最佳 · 适合精准翻译' },
-                { id: 'gpt4o_mini', label: 'GPT-4o Mini', tag: '稳定', tagColor: '#b45309', desc: '稳定可靠 · 速度与质量兼顾' },
-                { id: 'mistral_7b', label: 'Mistral 7B Instruct', tag: '极速', tagColor: '#16a34a', desc: '响应最快 · 适合大量翻译' },
-                { id: 'gemini_flash', label: 'Gemini 2.0 Flash', tag: '最省', tagColor: '#0ea5e9', desc: '成本最低 · 适合预算有限' },
-            ];
+            // ── 语言工具函数 ──────────────────────────────────────────
+            const normalizeLang = (lang) => {
+                if (!lang) return 'en';
+                if (lang.startsWith('zh')) {
+                    return (lang === 'zh-TW' || lang === 'zh-HK') ? 'zh_TW' : 'zh';
+                }
+                if (lang.toLowerCase() === 'pt-br') return 'pt-BR';
+                return lang.split('-')[0];
+            };
 
+            const getBrowserLang = () => {
+                try {
+                    let chromeAvailable = false;
+                    try { chromeAvailable = typeof chrome !== 'undefined' && !!chrome.runtime?.id; } catch (_) { }
+                    if (!chromeAvailable) return normalizeLang(navigator.language) || 'en';
+                    const raw = chrome.i18n?.getUILanguage?.() ||
+                        (navigator.languages && navigator.languages[0]) ||
+                        navigator.language || 'en';
+                    return normalizeLang(raw);
+                } catch (e) {
+                    return normalizeLang(navigator.language) || 'en';
+                }
+            };
+
+            const getDesc = (descObj, lang) => {
+                if (!descObj) return '';
+                return descObj[lang] || descObj['en'] || '';
+            };
+
+            // ── 动态加载模型列表 ──────────────────────────────────────
+            let models = [];
+            const browserLang = getBrowserLang();
+            // 先显示 loading
             container.innerHTML = `
-            <div class="main-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px;color:#8b949e;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"
+                    style="animation:spin 1s linear infinite;">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+                <span style="font-size:13px;">Loading models...</span>
+            </div>
+            <style>@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>`;
+
+            try {
+                const resp = await fetch(MODELS_URL);
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const notice = await resp.json();
+                models = (notice.models || []).map(m => ({
+                    id: m.id,
+                    label: m.label,
+                    tag: m.tag || '',
+                    tagColor: m.tagColor || '#7c3aed',
+                    desc: getDesc(m.desc, browserLang),
+                }));
+            } catch (e) {
+                logger.warn('加载模型列表失败，使用内置备用列表:', e);
+                // 备用列表（与 JSON 保持一致）
+                models = MIRA_FALLBACK_MODELS
+            }
+
+            // ── 渲染页面 ──────────────────────────────────────────────
+            container.innerHTML = `
+            <div class="main-header" style="display:flex;margin-bottom:10px; justify-content:space-between;align-items:center;">
                 <div style="display:flex;align-items:center;gap:12px;">
-                    <span class="status-dot checking" data-id="mira_pro" style="width:12px;height:12px;display:inline-block;"></span>
                     <div>
-                        <h2 style="margin:0;display:flex;align-items:center;gap:8px;">
-                            ✦ Mira 高级翻译
-                            <span style="background:#7c3aed;color:#fff;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;">Pro</span>
+                        <h2 style="margin:0; display:flex; align-items:center; gap:8px; 
+                            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); 
+                            -webkit-background-clip: text; 
+                            -webkit-text-fill-color: transparent; 
+                            font-weight: 800; 
+                            letter-spacing: -0.2px;">
+                            
+                            <span style="-webkit-text-fill-color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);">✦</span> 
+                            Mira AI Translator
+                            
+                            <span style="background: linear-gradient(135deg, #f59e0b, #d97706); 
+                                        -webkit-text-fill-color: #fff; 
+                                        color: #fff; 
+                                        font-size: 11px; 
+                                        padding: 2px 8px; 
+                                        border-radius: 10px; 
+                                        font-weight: 600; 
+                                        margin-left: 2px;
+                                        box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);">
+                                Pro
+                            </span>
                         </h2>
-                        <p style="margin:4px 0 0;font-size:12px;color:#8b949e;">无需配置 API Key，开箱即用，按用量计费</p>
+                        <p style="margin:4px 0 0;font-size:12px;color:#8b949e;">${t('byokNotice', ui_lang) || 'No API Key required. Out-of-the-box'}</p>
                     </div>
                 </div>
-                <button id="miraMenuBtn" style="background:none;border:none;color:#8b949e;font-size:20px;cursor:pointer;padding:4px 8px;">···</button>
             </div>
             <div class="form-container">
                 <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
                     <div>
-                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">当前余额</div>
-                        <div style="font-size:28px;font-weight:600;">$${balance.toFixed(2)} <span style="font-size:14px;color:#8b949e;">≈ ¥${(balance * 7.25).toFixed(1)}</span></div>
+                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', ui_lang) || 'Current Balance'}</div>
+                        <div style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
                     </div>
-                    <button id="miraRechargeBtn" style="background:#21262d;border:1px solid #30363d;color:#e6edf3;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;">+ 充值</button>
+                    <button id="miraRechargeBtn"><span>+ ${t('recharge', ui_lang) || 'Recharge'}</span></button>
                 </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">选择翻译模型</div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">${t('selectModel', ui_lang) || 'Select Translation Model'}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;" id="miraModelGrid">
-                    ${models.map(m => `
-                    <div class="mira-model-card" data-model="${m.id}"
-                         style="border:1.5px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
-                                border-radius:10px;padding:14px;cursor:pointer;
-                                background:${m.id === selectedModel ? '#1a1230' : 'transparent'};">
-                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                            <div style="width:16px;height:16px;border-radius:50%;
-                                        border:2px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
-                                        background:${m.id === selectedModel ? '#7c3aed' : 'transparent'};
-                                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                ${m.id === selectedModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
+                        ${models.map(m => `
+                <div class="mira-model-card" data-model="${m.id}"
+                    style="border:1.5px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
+                            border-radius:10px;padding:14px;cursor:pointer;
+                        background:${m.id === selectedModel ? '#1a1230' : 'transparent'};">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                    <div style="width:16px;height:16px;border-radius:50%;
+                                border:2px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
+                                background:${m.id === selectedModel ? '#7c3aed' : 'transparent'};
+                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                        ${m.id === selectedModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
+                                </div>
+                                <span style="font-size:14px;font-weight:500;">${m.label}</span>
+                                <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
                             </div>
-                            <span style="font-size:14px;font-weight:500;">${m.label}</span>
-                            <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
-                        </div>
-                        <div style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
-                    </div>`).join('')}
+                            <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+            // ── 模型切换：只更新存储+重绘卡片，不重新渲染整页 ──
+            const renderCards = (activeModel) => {
+                document.getElementById('miraModelGrid').innerHTML = models.map(m => `
+        <div class="mira-model-card" data-model="${m.id}"
+             style="border:1.5px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
+                    border-radius:10px;padding:14px;cursor:pointer;
+                    background:${m.id === activeModel ? '#1a1230' : 'transparent'};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <div style="width:16px;height:16px;border-radius:50%;
+                            border:2px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
+                            background:${m.id === activeModel ? '#7c3aed' : 'transparent'};
+                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    ${m.id === activeModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
                 </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:8px;">本月用量</div>
-                <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
-                    <span>已用 ${usedTokens.toLocaleString()} tokens</span>
-                    <span style="color:#8b949e;">约 $${usedCost}</span>
-                </div>
-                <div style="background:#21262d;border-radius:4px;height:6px;overflow:hidden;">
-                    <div style="background:#7c3aed;width:35%;height:100%;border-radius:4px;"></div>
-                </div>
-            </div>`;
-
-            // 绑定模型切换
-            document.getElementById('miraModelGrid').querySelectorAll('.mira-model-card').forEach(card => {
-                card.onclick = async () => {
-                    const modelId = card.dataset.model;
-                    const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
-                    await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: modelId } });
-                    switchInstance(id);
-                };
-            });
-
-            // 绑定充值按钮
-            document.getElementById('miraRechargeBtn').onclick = () => {
-                safeSendMessage({ action: 'openRecharge' }, (response) => {
-                    if (!response?.ok) {
-                        logger.warn('充值页面打开失败或未登录');
-                    }
+                <span style="font-size:14px;font-weight:500;">${m.label}</span>
+                <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
+            </div>
+            <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
+        </div>`).join('');
+                // 绑定模型切换
+                document.getElementById('miraModelGrid').querySelectorAll('.mira-model-card').forEach(card => {
+                    card.onclick = async () => {
+                        currentModel = card.dataset.model;
+                        // const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
+                        // await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: modelId } });
+                        renderCards(currentModel);
+                    };
                 });
             };
+
+            renderCards(selectedModel);
+
+            // ── 以下保持原有逻辑不变 ──────────────────────────────────
+            const res = await safeSendMessage({ action: 'getUser' });
+            if (res?.user) showMiraAvatar(res.user);
+
+            function showMiraAvatar(user) {
+                const wrap = document.getElementById('miraUserAvatar');
+                const img = document.getElementById('miraAvatarImg');
+                const initial = document.getElementById('miraAvatarInitial');
+                const name = document.getElementById('miraUserName');
+                if (!wrap) return;
+
+                wrap.style.display = 'flex';
+                if (user.photoURL) {
+                    img.src = user.photoURL;
+                    img.style.display = 'block';
+                    initial.style.display = 'none';
+                } else {
+                    initial.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+                    initial.style.display = 'block';
+                    img.style.display = 'none';
+                }
+                if (name) name.textContent = user.displayName || user.email || '';
+            }
+            // 绑定充值按钮
+            document.getElementById('miraRechargeBtn').onclick = async () => {
+                const userData = await safeGetStorage(['mira_user']);
+                const user = userData?.mira_user;
+
+                if (!user) {
+                    _loginTrigger = 'recharge';
+                    // 未登录，显示登录弹窗
+                    const modal = document.getElementById('loginModal');
+                    const backdrop = document.getElementById('loginModalBackdrop');
+                    if (modal) {
+                        const isOpen = modal.style.display === 'block';
+                        modal.style.display = isOpen ? 'none' : 'block';
+                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
+                    }
+                    return;
+                }
+
+                // 已登录，打开充值页 
+                safeSendMessage({ action: 'openRecharge' }).then(() => {
+                    chrome.tabs.getCurrent((tab) => {
+                        if (tab?.id) {
+                            chrome.tabs.remove(tab.id);
+                        } else {
+                            window.close();
+                        }
+                    });
+                });
+            };
+
+            // 更新弹窗内用户信息
+            function updateModalUserInfo(user) {
+                const userInfo = document.getElementById('modalUserInfo');
+                const loginPrompt = document.getElementById('modalLoginPrompt');
+                const avatarImg = document.getElementById('modalAvatarImg');
+                const avatarInitial = document.getElementById('modalAvatarInitial');
+                const userName = document.getElementById('modalUserName');
+                const userEmail = document.getElementById('modalUserEmail');
+
+                if (user) {
+                    if (userInfo) userInfo.style.display = 'block';
+                    if (loginPrompt) loginPrompt.style.display = 'none';
+                    if (user.photoURL && avatarImg) {
+                        avatarImg.src = user.photoURL;
+                        avatarImg.style.display = 'block';
+                        if (avatarInitial) avatarInitial.style.display = 'none';
+                    } else if (avatarInitial) {
+                        avatarInitial.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+                        avatarInitial.style.display = 'block';
+                        if (avatarImg) avatarImg.style.display = 'none';
+                    }
+                    if (userName) userName.textContent = user.displayName || '';
+                    if (userEmail) userEmail.textContent = user.email || '';
+                } else {
+                    if (userInfo) userInfo.style.display = 'none';
+                    if (loginPrompt) loginPrompt.style.display = 'block';
+                }
+            }
+
+            // 登录按钮处理
+            async function doLogin(provider) {
+                const action = provider === 'google' ? 'googleLogin' : 'microsoftLogin';
+                const btn = document.getElementById(provider === 'google' ? 'btnGoogleLogin' : 'btnMicrosoftLogin');
+
+                // 显示loading状态
+                if (btn) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.6';
+                    btn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        style="animation:spin 1s linear infinite;">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                    ${t('loggingIn', ui_lang) || 'Logging in...'}`;
+                }
+
+                const res = await safeSendMessage({ action });
+
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.innerHTML = provider === 'google'
+                        ? `<svg width="14" height="14" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908C16.658 14.095 17.64 11.787 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Google `
+                        : `<svg width="14" height="14" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/></svg> Microsoft`;
+                }
+
+                if (res?.user) {
+                    showMiraAvatar(res.user);
+                    updateModalUserInfo(res.user);
+                    switchInstance(currentId);
+
+                    //  登录成功，显示用户信息后自动关闭
+                    if (_loginTrigger !== 'recharge') {
+                        // 先显示登录成功的用户头像信息，等1.5秒后动画关闭
+                        setTimeout(() => {
+                            const modal = document.getElementById('loginModal');
+                            const backdrop = document.getElementById('loginModalBackdrop');
+
+                            // 同时播放淡出动画
+                            if (modal) {
+                                modal.style.animation = 'fadeOutScale 0.4s ease forwards';
+                            }
+                            if (backdrop) {
+                                backdrop.style.animation = 'fadeOut 0.4s ease forwards';
+                            }
+
+                            // 动画结束后隐藏元素
+                            setTimeout(() => {
+                                if (modal) {
+                                    modal.style.display = 'none';
+                                    modal.style.animation = '';
+                                }
+                                if (backdrop) {
+                                    backdrop.style.display = 'none';
+                                    backdrop.style.animation = '';
+                                }
+                            }, 400);
+
+                        }, 1500);
+                    }
+
+                    if (_loginTrigger === 'recharge') {
+                        setTimeout(() => {
+                            chrome.runtime.sendMessage({ action: 'openRecharge' }, () => {
+                                chrome.tabs.getCurrent((tab) => {
+                                    if (tab?.id) {
+                                        chrome.tabs.remove(tab.id);
+                                    } else {
+                                        window.close();
+                                    }
+                                });
+                            });
+                        }, 300);
+                    }
+                } else if (res?.error && res.error !== 'USER_CANCELED') {
+                    logger.error('Login error:', res.error);
+                }
+
+            }
+
+            document.getElementById('btnGoogleLogin')?.addEventListener('click', () => doLogin('google'));
+            document.getElementById('btnMicrosoftLogin')?.addEventListener('click', () => doLogin('microsoft'));
+
+            // 点击遮罩关闭弹窗
+            document.getElementById('loginModalBackdrop')?.addEventListener('click', () => {
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('loginModalBackdrop').style.display = 'none';
+            });
+
+            // 页面初始化时检查登录状态，更新弹窗头像
+            const resUser = await safeSendMessage({ action: 'getUser' });
+            if (resUser?.user) updateModalUserInfo(resUser.user);
 
             return;
         }
 
-        // ---- 原有 isBuiltIn 逻辑（google / bing）----
+        // ----  isBuiltIn 逻辑（google / bing）----
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-            <div class="main-header">
-                <h2 style="margin:0">${displayAlias}</h2>
+        <div class="main-header">
+            <h2 style="margin:0">${displayAlias}</h2>
+        </div>
+        <div class="form-container">
+            <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
+                <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
+                <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
+                <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
             </div>
-            <div class="form-container">
-                <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
-                    <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
-                    <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                    <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
-                    <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
-                    <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
-                </div>
-                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
-                    ${t('enableEngineNow', uiLanguage)}
-                </button>
-            </div>`;
+            <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
+                ${t('enableEngineNow', uiLanguage)}
+            </button>
+        </div>`;
 
             const checkConnectivity = async () => {
+
+                if (myVersion !== switchVersion) return;
                 const icon = document.getElementById('statusIcon');
                 const text = document.getElementById('statusText');
                 const btn = document.getElementById('activateBuiltIn');
+                if (!icon || !text || !btn) return;
                 let isOk = false;
                 let errorMsg = '';
                 try {
                     const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
                     const targetLang = storage?.ui_language || 'en';
                     const isTargetEn = targetLang.toLowerCase().startsWith('en');
-                    const testText = isTargetEn ? '你好' : 'Good morning';
+                    const testText = isTargetEn ? '早上好' : 'Good morning';
                     const res = await Promise.race([
                         safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang, isTest: true, engine: config.engine }),
                         new Promise(resolve => setTimeout(() => resolve(null), 5000))
@@ -559,7 +803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (e) { errorMsg = e.message; }
-
+                if (!document.getElementById('statusIcon')) return;
                 if (isOk) {
                     icon.innerText = '✓'; icon.style.color = '#3fb950';
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
@@ -576,18 +820,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             checkConnectivity();
 
-            document.getElementById('activateBuiltIn').onclick = async (e) => {
-                const btn = e.target;
-                btn.disabled = true;
-                // 直接切换并激活这个内置引擎
-                await safeSetStorage({ lastActiveId: id });
-                if (typeof syncGlobalConfig === 'function') await syncGlobalConfig(id, config.engine, {});
-                btn.innerText = t('enabled', uiLanguage);
-                btn.style.background = "#22c55e";
-                isDirty = false;
-                renderSidebar();
-                setTimeout(() => { btn.disabled = false; btn.innerText = t('enableEngineNow', uiLanguage); btn.style.background = ""; }, 1000);
-            };
+            const activateBtn = document.getElementById('activateBuiltIn');
+            if (activateBtn) {
+                activateBtn.onclick = async (e) => {
+                    const btn = e.target;
+                    btn.disabled = true;
+                    // 直接切换并激活这个内置引擎
+                    await safeSetStorage({ lastActiveId: id });
+                    if (typeof syncGlobalConfig === 'function') await syncGlobalConfig(id, config.engine, {});
+                    btn.innerText = t('enabled', uiLanguage);
+                    btn.style.background = "#22c55e";
+                    isDirty = false;
+                    renderSidebar();
+                    setTimeout(() => { btn.disabled = false; btn.innerText = t('enableEngineNow', uiLanguage); btn.style.background = ""; }, 1000);
+                };
+            }
             return;
         }
         actions.classList.remove('hidden');
@@ -858,9 +1105,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const user = userData?.mira_user;
                 const balanceData = userData?.mira_user_balance;
 
-                // 第一步：检查登录状态和余额
+
                 if (!user) {
-                    throw new Error('Not logged in / 未登录');
+                    _loginTrigger = 'test';
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+
+                    const modal = document.getElementById('loginModal');
+                    const backdrop = document.getElementById('loginModalBackdrop');
+
+                    if (modal) {
+                        const modalUserInfo = document.getElementById('modalUserInfo');
+                        const modalLoginPrompt = document.getElementById('modalLoginPrompt');
+                        const btnGoogle = document.getElementById('btnGoogleLogin');
+                        const btnMicrosoft = document.getElementById('btnMicrosoftLogin');
+
+                        if (modalUserInfo) modalUserInfo.style.display = 'none';
+                        if (modalLoginPrompt) modalLoginPrompt.style.display = 'block';
+                        if (btnGoogle) btnGoogle.style.display = 'flex';
+                        if (btnMicrosoft) btnMicrosoft.style.display = 'flex';
+
+                        const isOpen = modal.style.display === 'block';
+                        modal.style.display = isOpen ? 'none' : 'block';
+                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
+                    }
+                    return;
                 }
 
                 let hasBalance = false;
@@ -882,7 +1151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
                 const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
                 const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
-                const testText = isTargetEn ? '你好' : 'Good morning';
+                const testText = isTargetEn ? '早上好' : 'Good morning';
 
                 logger.log("Testing Mira Pro: ", "text:", testText, "targetLang: ", testTargetLang);
 
@@ -923,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
-                const testText = isTargetEn ? '你好' : 'Good morning';
+                const testText = isTargetEn ? '早上好' : 'Good morning';
                 logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
 
                 const res = await safeSendMessage({
@@ -1030,7 +1299,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             // Mira Pro 特殊处理 - 保存后触发测试
             if (config.engine === 'mira_pro') {
+                const userData = await safeGetStorage(['mira_user']);
+                const user = userData?.mira_user;
+
+                if (!user) {
+                    _loginTrigger = 'save';
+                    saveBtn.disabled = false;
+                    // 未登录，显示登录弹窗
+                    const modal = document.getElementById('loginModal');
+                    const backdrop = document.getElementById('loginModalBackdrop');
+                    if (modal) {
+                        const isOpen = modal.style.display === 'block';
+                        modal.style.display = isOpen ? 'none' : 'block';
+                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
+                    }
+                    return;
+                }
+
                 await safeSetStorage({ lastActiveId: currentId });
+                const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
+                await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: currentModel } });
+
                 if (typeof syncGlobalConfig === 'function') {
                     await syncGlobalConfig(currentId, config.engine, {});
                 }
@@ -1103,7 +1392,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 显示保存成功提示（固定时间）
             saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
             saveBtn.style.setProperty('background-color', '#22c55e', 'important');
-
+            // 恢复按钮状态
+            setTimeout(() => {
+                if (saveBtn) {
+                    saveBtn.innerText = originalText;
+                    saveBtn.style.removeProperty('background-color');
+                    saveBtn.style.backgroundColor = originalBg;
+                    saveBtn.disabled = false;
+                }
+            }, 1500);
         } catch (error) {
             logger.error("[Mira] 保存配置失败:", error);
             saveBtn.innerText = `${t('save', uiLanguage)} ${t('failed', uiLanguage)}`;

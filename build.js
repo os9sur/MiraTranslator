@@ -56,7 +56,7 @@ async function build() {
             content = content.replace(/{{MY_ID}}/g, finalClientId || '');
             content = content.replace(/{{MY_KEY}}/g, config.MANIFEST_KEY || '');
             content = content.replace(/{{ONEDRIVE_CLIENT_ID}}/g, config.ONEDRIVE_CLIENT_ID || '');
-            content = content.replace(/{{MIRA_WORKER_URL}}/g, config.MIRA_WORKER_URL || '');
+            content = content.replace(/{{MIRA_WORKER_URLS}}/g, config.MIRA_WORKER_URLS.join(','));
             content = content.replace(/IS_DEV\s*=\s*(true|false)/g, `IS_DEV = ${IS_DEV_MODE}`);
 
             // --- Smart Version Update ---

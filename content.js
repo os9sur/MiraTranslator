@@ -987,7 +987,10 @@ const TranslationBatcher = {
       this._flushSingle(item);
       return;
     }
-    if (this._isFirstScreen && this._firstScreenCount < this.FIRST_SCREEN_LIMIT) {
+    // 判断是否是 li 元素（兼容 article li / section li 等组合选择器）
+    const isLiEl = item.el.tagName === 'LI';
+
+    if (!isLiEl && this._isFirstScreen && this._firstScreenCount < this.FIRST_SCREEN_LIMIT) {
       this._firstScreenCount++;
       item._singleRetry = true;
       this.queue.unshift(item);
@@ -997,6 +1000,16 @@ const TranslationBatcher = {
           this.flush();
         }
       }, delay);
+      return;
+    }
+
+    // li 元素始终推到队尾
+    if (isLiEl) {
+      this.queue.push(item);
+      if (!this.isProcessing) {
+        if (this.timer) clearTimeout(this.timer);
+        this.timer = setTimeout(() => this.flush(), this.wait);
+      }
       return;
     }
     this.queue.push(item);
@@ -1018,6 +1031,24 @@ const TranslationBatcher = {
     }
     if (this.timer) { clearTimeout(this.timer); this.timer = null; }
     this.isProcessing = true;
+
+    // flush 时对队列重排，可视区域的非li元素优先
+    const isVisible = (el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.top < window.innerHeight + 800 && rect.bottom > -800;
+    };
+    const isLi = (el) => el.tagName === 'LI';
+
+    // 检查是否存在可视区域内的非li元素
+    const hasVisibleNonLi = this.queue.some(q => !isLi(q.el) && isVisible(q.el));
+
+    if (hasVisibleNonLi) {
+      // 把可视区域的非li排前面，li和不可视的排后面
+      const front = this.queue.filter(q => !isLi(q.el) && isVisible(q.el));
+      const back = this.queue.filter(q => isLi(q.el) || !isVisible(q.el));
+      this.queue = [...front, ...back];
+    }
+
     const storage = await safeGetStorage(['activeConfig', 'targetLanguage']);
     if (!storage) {
       this.queue = [];
@@ -2206,18 +2237,22 @@ function getObserver() {
           if (parent) targetEl = parent;
         }
 
-        if (!isMatch && targetEl === el) {
-          if (!(isDynamic && (
-            isYoutube
-              ? (el.classList?.contains('yt-core-attributed-string') ||
-                el.classList?.contains('ytLockupMetadataViewModelTitle') ||
-                el.classList?.contains('ytLockupMetadataViewModelHeadingReset'))
-              : el.classList?.contains('x')
-          ))) {
-            window.observer.unobserve(el);
-            return;
-          }
-        }
+if (!isMatch && targetEl === el) {
+  const hasText = (el.textContent || '').trim().length >= (rule?.minLen || 3);
+  if (!hasText) {
+    window.observer.unobserve(el);
+    return;
+  }
+  if (!isDynamic && !(
+    isYoutube
+      ? (el.classList?.contains('yt-core-attributed-string') ||
+        el.classList?.contains('ytLockupMetadataViewModelTitle') ||
+        el.classList?.contains('ytLockupMetadataViewModelHeadingReset'))
+      : el.classList?.contains('x')
+  )) {
+    // 有文本内容，继续翻译，不 unobserve
+  }
+}
 
         if (isDynamic) {
           const currentText = (targetEl.textContent || '').trim();
@@ -2711,6 +2746,24 @@ function isElementVisible(el) {
   if (rect.width === 0 && rect.height === 0) return false;
   return true;
 }
+
+function sortElementsByPriority(elements, selectors) {
+  const liSelectors = selectors
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => /\bli\b\s*$/.test(s));
+
+  if (liSelectors.length === 0) return elements;
+
+  const isLiTarget = (el) => liSelectors.some(sel => {
+    try { return el.matches(sel); } catch { return false; }
+  });
+
+  return [...elements].sort((a, b) => {
+    return (isLiTarget(a) ? 1 : 0) - (isLiTarget(b) ? 1 : 0);
+  });
+}
+
 async function executeReScan(config) {
   if (!isPageScanEnabled) return;
   if (!window.__mira_reScanLock) window.__mira_reScanLock = { running: false, lastAt: 0 };
@@ -2759,6 +2812,7 @@ async function executeReScan(config) {
     let allElements = (typeof querySelectorAllDeep === 'function')
       ? querySelectorAllDeep(scanRules)
       : Array.from(document.querySelectorAll(scanRules));
+    allElements = sortElementsByPriority(allElements, scanRules);  // ← 加这行
     let triggered = 0;
     const tasks = [];
     const targets = [];
@@ -2873,6 +2927,7 @@ async function scanContent(forcedSelectors = null) {
     } else {
       allTargets = Array.from(document.querySelectorAll(finalSelectors));
     }
+    allTargets = sortElementsByPriority(allTargets, finalSelectors);
     allTargets.forEach(el => {
       if (!el || el.nodeType !== 1) return;
       const isAmazon = location.hostname.includes('amazon.');
@@ -2979,8 +3034,7 @@ async function scanContent(forcedSelectors = null) {
   }
 }
 /**
- * 监听：捕获来自拾取器（content_pick_script.js）的即时更新信号
- * 这种方式避免了使用 chrome.runtime.sendMessage 导致的“通信未就绪”报错
+ * 监听：捕获来自拾取器（content_pick_script.js）的即时更新信号 
  */
 document.addEventListener('KT_CONFIG_UPDATED', (e) => {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
@@ -3370,6 +3424,7 @@ function initSelectionTranslate() {
         align-items:    center;
         margin-bottom:  6px;
         pointer-events: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       }
 
       /* Logo 动画 */
@@ -3594,7 +3649,9 @@ function initSelectionTranslate() {
         from { transform: rotate(0deg); }
         to   { transform: rotate(360deg); }
       }
-
+.mira-font-family{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
       .speak-btn {
         position:   relative;
         width:      32px;
@@ -3654,6 +3711,7 @@ function initSelectionTranslate() {
         color:       var(--p-accent);
         margin:      2px 0 2px;
         font-weight: 500;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
       }
       .detail {
         font-size:   13.5px;
@@ -3716,6 +3774,7 @@ function initSelectionTranslate() {
   min-width: unset;
   width: auto;
   height: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
 }
 
 .lang-tag-btn:hover {
@@ -4061,7 +4120,7 @@ function initSelectionTranslate() {
             ? `/${result.sourcePhonetic.replace(/[\[\]\/]/g, '')}/` : '';
         }
         if (pDetail) {
-          pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loading')}...</span>`;
+          pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t('loading')}...</span>`;
           pDetail.style.display = 'block';
         }
       } else {
@@ -4114,7 +4173,7 @@ function initSelectionTranslate() {
         if (isWord) {
           if (pDetail) {
             pDetail.style.display = 'block';
-            pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
+            pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t('loadingMore', window.uiLanguage)}</span>`;
           }
           // 8秒超时显示刷新按钮
           shadowHost._detailTimer = setTimeout(() => {
@@ -4122,7 +4181,7 @@ function initSelectionTranslate() {
             const pDetail = shadow.getElementById('p-detail');
             if (pDetail) {
               pDetail.style.display = 'block';
-              pDetail.innerHTML = `<span id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || 'retry'}</span>`;
+              pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t('retry', window.uiLanguage) || 'retry'}</span>`;
               shadow.getElementById('p-detail-retry')?.addEventListener('click', () => {
                 shadow.getElementById('p-refresh')?.click();
               });
@@ -4321,6 +4380,7 @@ function initSelectionTranslate() {
     function buildLangItem(lang, colors, onClick) {
       if (lang.type === 'sep') {
         const sep = document.createElement('div');
+        sep.className = 'mira-font-family';
         sep.style.cssText = `
       padding:5px 14px 3px; font-size:11px; color:${colors.textMuted};
       letter-spacing:0.5px; border-top:1px solid ${colors.sepBorder};
@@ -4331,6 +4391,7 @@ function initSelectionTranslate() {
       }
 
       const item = document.createElement('div');
+      item.className = 'mira-font-family';
       item.textContent = lang.label;
       item.style.cssText = `
     padding:6px 14px; cursor:pointer; color:${colors.text};
@@ -4544,24 +4605,24 @@ function initSelectionTranslate() {
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
   
-<div style="display:inline-flex; align-items:center; gap:2px; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
+        <div style="display:inline-flex; align-items:center; gap:2px; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
 
-  <div id="p-lang-select" class="lang-tag-btn"
-       style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
-    <span id="p-lang-src" style="pointer-events:none;">AUTO</span>
-  </div>
+          <div id="p-lang-select" class="lang-tag-btn"
+              style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+            <span id="p-lang-src" style="pointer-events:none;">AUTO</span>
+          </div>
 
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--p-accent)"
-       stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none;">
-    <path d="M5 12h14m-7-7 7 7-7 7"/>
-  </svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--p-accent)"
+              stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none;">
+            <path d="M5 12h14m-7-7 7 7-7 7"/>
+          </svg>
 
-  <div id="p-lang-tgt-btn" class="lang-tag-btn"
-       style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
-    <span id="p-lang-tgt" style="pointer-events:none;">${targetLangDisplay}</span>
-  </div>
+          <div id="p-lang-tgt-btn" class="lang-tag-btn"
+              style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
+            <span id="p-lang-tgt" style="pointer-events:none;">${targetLangDisplay}</span>
+          </div>
 
-</div>
+        </div>
 
         <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
           <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
@@ -4590,8 +4651,8 @@ function initSelectionTranslate() {
         </div>
       </div>
 
-      <div id="p-query-container" style="padding: 4px 2px 0;">
-        <div id="p-query" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); 
+      <div id="p-query-container"style="padding: 4px 2px 0;">
+        <div id="p-query"  class="mira-font-family" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); 
              word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
           ${text}
         </div>
@@ -4604,7 +4665,7 @@ function initSelectionTranslate() {
         <div id="p-examples" style="display:none; margin-top:4px;"></div>
       </div>
 
-      <div id="p-source" style="display:none; margin-top:8px; font-size:10px; opacity:0.5; text-align:right; font-style:italic;"></div>
+      <div id="p-source" class="mira-font-family" style="display:none; margin-top:8px; font-size:10px; opacity:0.5; text-align:right; font-style:italic;"></div>
     </div>`;
   }
 
@@ -4691,7 +4752,7 @@ function initSelectionTranslate() {
           return `<div style="margin-bottom:4px;">
         <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
           <b style="color:#319BCA;font-size:12px;margin-right:4px;flex-shrink:0;">${pos}</b>
-          <span>${meanings}</span>
+          <span class="mira-font-family">${meanings}</span>
           ${enToggle}
         </div>
         ${origBlock}
@@ -4704,18 +4765,18 @@ function initSelectionTranslate() {
           background:color-mix(in srgb,var(--p-accent) 8%,transparent);
           border:0.5px solid color-mix(in srgb,var(--p-accent) 40%,transparent);
           border-radius:6px;padding:3px 8px;font-size:12px;">
-        <span style="color:var(--p-text-muted);font-size:11px;">Prototype</span>
-        <span style="color:var(--p-accent);font-weight:500;">${esc(res.prototype)}</span>
+        <span class="mira-font-family" style="color:var(--p-text-muted);font-size:11px;">Prototype</span>
+        <span class="mira-font-family" style="color:var(--p-accent);font-weight:500;">${esc(res.prototype)}</span>
       </span>`;
         }
         (res.wordForms || []).forEach(wf => {
           const name = esc(isTraditional ? (ZH_FORM_TW[wf.name] || wf.name) : wf.name);
-          forms += `<span style="display:inline-flex;align-items:center;gap:4px;
+          forms += `<span class="mira-font-family" style="display:inline-flex;align-items:center;gap:4px;
           background:color-mix(in srgb,var(--p-text-main) 5%,transparent);
           border:0.5px solid color-mix(in srgb,var(--p-border) 60%,transparent);
           border-radius:6px;padding:3px 8px;font-size:12px;">
-        <span style="color:var(--p-text-muted);font-size:11px;">${name}</span>
-        <span style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
+        <span class="mira-font-family" style="color:var(--p-text-muted);font-size:11px;">${name}</span>
+        <span class="mira-font-family" style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
       </span>`;
         });
         if (forms) html += `<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${forms}</div>`;
@@ -4768,17 +4829,17 @@ function initSelectionTranslate() {
           : text;
         const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`\\b(${safeText}[a-z]*|${safeStem}[a-z]*)\\b`, 'gi');
-        pE.innerHTML = `<div style="font-size:9px;opacity:0.5;margin-bottom:10px;font-weight:bold;letter-spacing:1px;">EXAMPLES</div>` +
+        pE.innerHTML = `<div class="mira-font-family" style="font-size:9px;opacity:0.5;margin-bottom:10px;font-weight:bold;letter-spacing:1px;">EXAMPLES</div>` +
           res.examples.slice(0, 3).map(s => {
             const en = esc(cleanMarker(typeof s === 'string' ? s : (s.en || s.sentence || '')));
             const cn = esc(cleanMarker(typeof s === 'object' ? (s.cn || s.translation || '') : ''));
             const dir = isRTL ? 'rtl' : 'ltr';
-            return `<div style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
+            return `<div class="mira-font-family" style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
                        border-radius:2px;word-break:break-word;direction:${dir};text-align:${dir === 'rtl' ? 'right' : 'left'};">
-            <div style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
+            <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
               ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
             </div>
-           <div style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.55;">${cn}</div>
+           <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.55;">${cn}</div>
           </div>`;
           }).join('');
         pE.style.display = 'block';
@@ -4893,6 +4954,8 @@ function initSelectionTranslate() {
         const caHoverBg = isDark ? 'rgba(148,163,184,0.28)' : 'rgba(71,85,105,0.15)';
 
         ca.style.cssText = `
+          word-space: nowrap;
+          display: inline-block;
           color: ${caNormalColor};
           text-decoration: none;
           font-weight: 500;

@@ -3,7 +3,7 @@
     "message": "Mira Translator - Dịch đắm chìm và phụ đề YouTube song ngữ"
   },
   "appDesc": {
-    "message": "<0.5MB: Mã nguồn mở, an toàn. Engine công cộng + AI API (Key riêng). Dịch Web/YouTube và đồng bộ WebDAV/GDrive."
+    "message": "Dịch web toàn trang, phụ đề song ngữ YouTube, dịch AI, tra từ. Nhẹ & mã nguồn mở. Hỗ trợ Google Drive/WebDAV."
   },
   "ERROR_400": {
     "message": "Lỗi API: Yêu cầu không hợp lệ hoặc hết số dư."
