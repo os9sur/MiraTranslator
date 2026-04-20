@@ -3,7 +3,7 @@
     "message": "Mira Translator - Tam sayfa çeviri ve YouTube çift dilli altyazı"
   },
   "appDesc": {
-    "message": "<0.5MB: Açık kaynak, güvenli. Standart motorlar + AI API (Kendi Key'iniz). Web/YouTube çeviri ve WebDAV/GDrive senk."
+    "message": "Tam sayfa çeviri, YouTube çift dilli altyazı, yapay zeka çevirisi, kelime arama. Hafif & açık kaynak. Google Drive/WebDAV."
   },
   "ERROR_400": {
     "message": "API Hatası: Geçersiz istek."

@@ -3,7 +3,7 @@
     "message": "Mira 翻译 - 沉浸式全文与 YouTube 双语字幕"
   },
   "appDesc": {
-    "message": "不到 0.5MB：开源安全、零追踪。内置公共引擎，支持私有 AI API (自备 Key) 接入。沉浸式翻译、划词及 YouTube 双语翻译，支持 Google Drive/WebDAV 云同步。"
+    "message": "轻量开源、沉浸式网页翻译、YouTube 双语字幕、AI 智能翻译、划词查词。支持 Google Drive/WebDAV 云同步。"
   },
   "ERROR_400": {
     "message": "接口提示：请求无效或账户余额不足。"

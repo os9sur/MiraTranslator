@@ -3,7 +3,7 @@
     "message": "Mira Translator - Immersive Web & YouTube Dual Subtitles"
   },
   "appDesc": {
-    "message": "<0.5MB: Open-source, no tracking. Built-in engines + Private AI API (Own Key). Immersive Web/YouTube translation & GDrive sync."
+    "message": "Immersive web translation, YouTube dual subtitles, AI translation & word lookup. Open-source & lightweight. Google Drive sync."
   },
   "ERROR_400": {
     "message": "API Error: Invalid request or low balance."

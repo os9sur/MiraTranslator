@@ -32,7 +32,9 @@ self.i18nData = {
     collect: "收藏",
     uncollect: "取消收藏",
     pronunciation: "发音",
-    retranslate: "重新翻译"
+    retranslate: "重新翻译",
+    resetBuildinRules: "重置",
+
   },
   "zh-TW": {
     appName: "Mira 翻譯",
@@ -64,7 +66,8 @@ self.i18nData = {
     collect: "收藏",
     uncollect: "取消收藏",
     pronunciation: "發音",
-    retranslate: "重新翻譯"
+    retranslate: "重新翻譯",
+    resetBuildinRules: "重置",
   },
   "en": {
     appName: "Mira Translator",
@@ -96,7 +99,8 @@ self.i18nData = {
     collect: "Collect",
     uncollect: "Remove",
     pronunciation: "Pronunciation",
-    retranslate: "Retranslate"
+    retranslate: "Retranslate",
+    resetBuildinRules: "Reset",
   },
   "ja": {
     appName: "Mira 翻訳",
@@ -128,7 +132,8 @@ self.i18nData = {
     collect: "コレクション",
     uncollect: "削除",
     pronunciation: "発音",
-    retranslate: "再翻訳"
+    retranslate: "再翻訳",
+    resetBuildinRules: "リセット",
   },
   "ko": {
     appName: "Mira Translator",
@@ -160,7 +165,8 @@ self.i18nData = {
     collect: "저장",
     uncollect: "저장 취소",
     pronunciation: "발음",
-    retranslate: "다시 번역"
+    retranslate: "다시 번역",
+    resetBuildinRules: "리셋",
   },
   "es": {
     appName: "Mira Translator",
@@ -622,7 +628,7 @@ self.i18nEngineData = {
     failed: "失败",
     freeInterfaceTipsInfo: "此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥",
     wantBetterExperience: "想要更好的翻译体验？",
-    clickBottomTip: "点击左下角按钮，选择更多翻译服务"
+    clickBottomTip: "请点击左侧 Mira AI Translator Pro"
   },
   "zh-TW": {
     engineListTitle: "引擎列表",
@@ -648,7 +654,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "本介面基於公共網路請求驅動，僅供個人學習及非商業用途。無需配置金鑰",
     wantBetterExperience: "想要更好的翻譯體驗？",
-    clickBottomTip: "點擊左下角按鈕，選擇更多翻譯服務"
+    clickBottomTip: "請點擊左側 Mira AI Translator Pro"
   },
   "en": {
     engineListTitle: "Engine List",
@@ -674,7 +680,7 @@ self.i18nEngineData = {
     failed: "Failed",
     freeInterfaceTipsInfo: "Powered by public requests. For personal learning and non-commercial use only. No API key required.",
     wantBetterExperience: "Want a better experience?",
-    clickBottomTip: "Click the bottom-left button to select more engines"
+    clickBottomTip: "Click 'Mira AI Translator Pro' on the left"
   },
   "ja": {
     engineListTitle: "エンジンリスト",
@@ -700,7 +706,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "パブリックリクエストに基づいています。個人の学習および非営利目的のみ。APIキーは不要です",
     wantBetterExperience: "より良い体験をお求めですか？",
-    clickBottomTip: "左下のボタンをクリックして、さらにエンジンを選択"
+    clickBottomTip: "左側の「Mira AI Translator Pro」をクリックしてください"
   },
   "ko": {
     engineListTitle: "엔진 목록",
@@ -726,7 +732,7 @@ self.i18nEngineData = {
     failed: "실패",
     freeInterfaceTipsInfo: "공용 네트워크 요청 기반입니다. 개인 학습 및 비상업적 용도로만 사용 가능. API 키 불필요",
     wantBetterExperience: "더 나은 번역 경험을 원하십니까?",
-    clickBottomTip: "왼쪽 하단 버튼을 클릭하여 더 많은 엔진 선택"
+    clickBottomTip: "왼쪽의 'Mira AI Translator Pro'을 클릭하세요"
   },
   "es": {
     engineListTitle: "Lista de motores",
@@ -752,7 +758,7 @@ self.i18nEngineData = {
     failed: "Fallo",
     freeInterfaceTipsInfo: "Basado en red pública. Solo para uso personal y no comercial. No requiere clave API",
     wantBetterExperience: "¿Desea una mejor experiencia?",
-    clickBottomTip: "Pulse el botón inferior izquierdo para ver más motores"
+    clickBottomTip: "Haz clic en 'Mira AI Translator Pro' a la izquierda"
   },
   "fr": {
     engineListTitle: "Liste des moteurs",
@@ -778,7 +784,7 @@ self.i18nEngineData = {
     failed: "Échec",
     freeInterfaceTipsInfo: "Basé sur le réseau public. Usage personnel et non commercial uniquement. Aucune clé requise",
     wantBetterExperience: "Vous voulez une meilleure expérience ?",
-    clickBottomTip: "Cliquez sur le bouton en bas à gauche pour plus de moteurs"
+    clickBottomTip: "Cliquez sur 'Mira AI Translator Pro' à gauche"
   },
   "de": {
     engineListTitle: "Engine-Liste",
@@ -804,7 +810,7 @@ self.i18nEngineData = {
     failed: "Fehlgeschlagen",
     freeInterfaceTipsInfo: "Basiert auf öffentlichen Anfragen. Nur für persönlichen/nicht-kommerziellen Gebrauch. Kein Schlüssel nötig",
     wantBetterExperience: "Möchten Sie ein besseres Erlebnis?",
-    clickBottomTip: "Klicken Sie links unten für weitere Engines"
+    clickBottomTip: "Klicken Sie links auf 'Mira AI Translator Pro'"
   },
   "ru": {
     engineListTitle: "Список движков",
@@ -830,7 +836,7 @@ self.i18nEngineData = {
     failed: "Ошибка",
     freeInterfaceTipsInfo: "На основе публичных запросов. Только для личного некоммерческого использования. Ключ не нужен",
     wantBetterExperience: "Хотите переводить качественнее?",
-    clickBottomTip: "Нажмите кнопку слева внизу لل выбора движков"
+    clickBottomTip: "Нажмите «Mira AI Translator Pro» слева"
   },
   "pt": {
     engineListTitle: "Lista de motores",
@@ -856,7 +862,7 @@ self.i18nEngineData = {
     failed: "Falha",
     freeInterfaceTipsInfo: "Baseado em rede pública. Apenas uso pessoal/não comercial. Nenhuma chave necessária",
     wantBetterExperience: "Quer uma experiência melhor?",
-    clickBottomTip: "Clique no botão inferior esquerdo para mais motores"
+    clickBottomTip: "Clique em 'Mira AI Translator Pro' à esquerda"
   },
   "it": {
     engineListTitle: "Elenco motori",
@@ -882,7 +888,7 @@ self.i18nEngineData = {
     failed: "Fallito",
     freeInterfaceTipsInfo: "Basado su richieste pubbliche. Solo uso personale/non commerciale. Nessuna chiave richiesta",
     wantBetterExperience: "Vuoi un'esperienza migliore?",
-    clickBottomTip: "Clicca il pulsante in basso a sinistra per altri motori"
+    clickBottomTip: "Clicca su 'Mira AI Translator Pro' a sinistra"
   },
   "vi": {
     engineListTitle: "Danh sách công cụ",
@@ -908,7 +914,7 @@ self.i18nEngineData = {
     failed: "Thất bại",
     freeInterfaceTipsInfo: "Dựa trên yêu cầu mạng công cộng. Chỉ dùng cho cá nhân/phi thương mại. Không cần khóa",
     wantBetterExperience: "Bạn muốn trải nghiệm tốt hơn?",
-    clickBottomTip: "Nhấp vào nút dưới cùng bên trái để chọn thêm công cụ"
+    clickBottomTip: "Vui lòng nhấp vào 'Mira AI Translator Pro' ở bên trái"
   },
   "th": {
     engineListTitle: "รายการเครื่องยนต์",
@@ -934,7 +940,7 @@ self.i18nEngineData = {
     failed: "ล้มเหลว",
     freeInterfaceTipsInfo: "ใช้คำขอเครือข่ายสาธารณะ สำหรับการเรียนรู้ส่วนบุคคล/ไม่ใช่เชิงพาณิชย์ ไม่ต้องใช้คีย์",
     wantBetterExperience: "ต้องการประสบการณ์ที่ดีกว่าเดิมไหม?",
-    clickBottomTip: "คลิกปุ่มซ้ายล่างเพื่อเลือกเครื่องยนต์เพิ่มเติม"
+    clickBottomTip: "กรุณาคลิกที่ 'Mira AI Translator Pro' ทางด้านซ้าย"
   },
   "ar": {
     engineListTitle: "قائمة المحركات",
@@ -960,7 +966,7 @@ self.i18nEngineData = {
     failed: "فشل",
     freeInterfaceTipsInfo: "مدعوم بطلبات الشبكة العامة. للاستخدام الشخصي وغير التجاري فقط. لا يتطلب مفتاح",
     wantBetterExperience: "هل تريد تجربة أفضل؟",
-    clickBottomTip: "انقر على الزر في أسفل اليسار لاختيار المزيد"
+    clickBottomTip: "يرجى النقر على 'Mira AI Translator Pro' على اليسار"
   },
   "fa": {
     engineListTitle: "لیست موتورها",
@@ -986,7 +992,7 @@ self.i18nEngineData = {
     failed: "ناموفق",
     freeInterfaceTipsInfo: "مبتنی بر شبکه عمومی. فقط استفاده شخصی/غیرتجاری. بدون نیاز به کلید",
     wantBetterExperience: "تجربه بهتری می‌خواهید؟",
-    clickBottomTip: "برای انتخاب موتورهای بیشتر روی دکمه پایین سمت چپ کلیک کنید"
+    clickBottomTip: "لطفاً روی «ترجمه پیشرفته Mira AI Translator Pro» در سمت چپ کلیک کنید"
   },
   "tr": {
     engineListTitle: "Motor Listesi",
@@ -1012,7 +1018,7 @@ self.i18nEngineData = {
     failed: "Başarısız",
     freeInterfaceTipsInfo: "Genel ağ isteklerine dayalıdır. Yalnızca kişisel/ticari olmayan kullanım. Anahtar gerekmez",
     wantBetterExperience: "Daha iyi bir deneyim ister misiniz?",
-    clickBottomTip: "Daha fazla motor seçmek için sol alt düğmeye tıklayın"
+    clickBottomTip: "Sol taraftaki 'Mira AI Translator Pro' seçeneğine tıklayın"
   }
 };
 self.i18nStyleData = {
@@ -2540,10 +2546,10 @@ self.i18nThemeData = {
     moreSettings: "詳細設定"
   },
   "ko": {
-    autoTheme: "테마: 시스템 설정 유지",  
+    autoTheme: "테마: 시스템 설정 유지",
     lightTheme: "테마: 라이트 모드",
-    darkTheme: "테마: 다크 모드",  
-    moreSettings: "상세 설정 및 더 보기"  
+    darkTheme: "테마: 다크 모드",
+    moreSettings: "상세 설정 및 더 보기"
   },
   "es": {
     autoTheme: "Tema: Seguir página automáticamente",
@@ -2748,9 +2754,9 @@ self.i18nAttach2 = {
   "ko": {
     update_notice: "Mira Translator가 업데이트되었습니다. 계속하려면 여기를 클릭하여 페이지를 새로고침하세요.",
     manualModeNoSync: "수동 모드에서는 클라우드 동기화가 실행되지 않습니다",
-    builtinRuleHint: "⚡ 전용 규칙: '현재 사이트' 설정이 '전역 기본값'보다 우선 적용됩니다", 
-    getApiKey: "API Key 발급 ↗"  
-},
+    builtinRuleHint: "⚡ 전용 규칙: '현재 사이트' 설정이 '전역 기본값'보다 우선 적용됩니다",
+    getApiKey: "API Key 발급 ↗"
+  },
   "en": {
     update_notice: "Mira Translator has been updated. Please click here to refresh the page.",
     manualModeNoSync: "Cloud sync is not triggered in manual mode",
@@ -3200,10 +3206,10 @@ self.i18nAttach6 = {
     "dlRateLow": "字幕の {rate}% のみ翻訳済みです。\n\n翻訳は再生に合わせて段階的に生成されます。完了するまで待機してからダウンロードすることをお勧めします。\n\n現在の {rate}% をダウンロードしますか？",
     "dlRatePartial": "{rate}% 翻訳済み、残り {missing} 件未翻訳。\n\n一部の翻訳がまだ完了していません。再生を続けてシステムが処理してからダウンロードすることをお勧めします。\n\n現在の部分をダウンロードしますか？"
   },
-    "ko": {
-      "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것을 권장합니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
-      "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n그대로 다운로드하시겠습니까?"
-    },
+  "ko": {
+    "dlRateLow": "자막의 {rate}%만 번역되었습니다.\n\n번역은 재생 진행 상황에 따라 순차적으로 생성됩니다. 재생이 완료되거나 충분히 버퍼링된 후 다운로드하는 것을 권장합니다.\n\n현재 {rate}%를 다운로드하시겠습니까?",
+    "dlRatePartial": "{rate}% 번역됨, {missing}개 미번역.\n\n일부 번역이 아직 진행 중입니다. 영상을 조금 더 재생하여 번역을 완료한 후 다운로드해 주세요.\n\n그대로 다운로드하시겠습니까?"
+  },
   "fr": {
     "dlRateLow": "Seulement {rate}% des sous-titres traduits.\n\nLa traduction est générée progressivement durant la lecture. Pour un résultat complet, attendez la fin de la vidéo ou la mise en cache.\n\nTélécharger les {rate}% disponibles ?",
     "dlRatePartial": "{rate}% traduit, {missing} segments manquants.\n\nLa traduction est encore en cours pour certaines parties. Continuez la lecture avant de télécharger.\n\nTélécharger la partie disponible ?"
@@ -3444,5 +3450,119 @@ self.i18nAttach8 = {
     "loadingSlow": "سرعت پاسخگویی کم است",
     "retry": "تلاش مجدد",
     "loadingSubtitles": "در حال بارگذاری زیرنویس..."
+  }
+};
+
+self.i18nAttach9 = {
+  "zh_CN": {
+    refreshing: "刷新中...",
+    loggingIn: "正在登录...",
+    login: "登录",
+    logout: "退出登录",
+    balance: "余额",
+    recharge: "充值",
+    loginAccount: "登录账号",
+    byokNotice: "无需配置 API Key，开箱即用，按用量计费",
+    selectModel: "选择翻译模型",
+    loginFirst: "请先在插件中登录账号，再进行充值。",
+    openPluginToLogin: "请打开 Mira 插件后点击登录按钮。",
+    rechargeIssue: "充值问题",
+    selectPlan: "选择套餐",
+    recommended: "推荐",
+    notArrived: "充值未到账？",
+    paymentNotice: "点击套餐直接跳转 <b>Ko-fi</b> 结账，支持信用卡 / PayPal。<br>支付成功后余额通常在 <b>5 分钟内</b>自动到账。",
+    deleteAccount: "删除账户",
+    deleteAccountConfirm: "确定要删除账户吗？此操作不可撤销，余额将清空。",
+    deleteAccountSuccess: "✓ 账户已删除",
+    deleteAccountFail: "✗ 删除失败，请稍后重试",
+  },
+  "zh_TW": {
+    refreshing: "刷新中...",
+    loggingIn: "正在登入...",
+    login: "登入",
+    logout: "登出",
+    balance: "餘額",
+    recharge: "加值",
+    loginAccount: "登入帳號",
+    byokNotice: "無需配置 API Key，隨開即用，按用量計費",
+    selectModel: "選擇翻譯模型",
+    loginFirst: "請先在擴充功能中登入帳號，再進行加值。",
+    openPluginToLogin: "請打開 Mira 擴充功能後點擊登入按鈕。",
+    rechargeIssue: "加值問題",
+    selectPlan: "選擇方案",
+    recommended: "推薦",
+    notArrived: "加值未到帳？",
+    paymentNotice: "點擊方案直接跳轉至 <b>Ko-fi</b> 結帳，支援信用卡 / PayPal。<br>支付成功後餘額通常在 <b>5 分鐘內</b>自動到帳。",
+    deleteAccount: "刪除帳號",
+    deleteAccountConfirm: "確定要刪除帳號嗎？此操作不可撤銷，餘額將清空。",
+    deleteAccountSuccess: "✓ 帳號已刪除",
+    deleteAccountFail: "✗ 刪除失敗，請稍後再試",
+  },
+  "en": {
+    refreshing: "updating...",
+    loggingIn: "Logging in...",
+    login: "Sign in",
+    logout: "Log out",
+    balance: "Balance",
+    recharge: "Top up",
+    loginAccount: "Sign in",
+    byokNotice: "No API Key required. Out-of-the-box, pay-as-you-go.",
+    selectModel: "Select Translation Model",
+    loginFirst: "Please log in to your account in the extension before topping up.",
+    openPluginToLogin: "Please open the Mira extension and click the login button.",
+    rechargeIssue: "Top-up Issues",
+    selectPlan: "Select a Plan",
+    recommended: "Recommended",
+    notArrived: "Top-up not received?",
+    paymentNotice: "Click a plan to go to <b>Ko-fi</b> for checkout. Supports Credit Cards / PayPal.<br>Balance usually arrives automatically within <b>5 minutes</b> after payment.",
+    deleteAccount: "Delete account",
+    deleteAccountConfirm: "Are you sure you want to delete your account? This action is irreversible and your balance will be lost.",
+    deleteAccountSuccess: "✓ Account deleted",
+    deleteAccountFail: "✗ Deletion failed, please try again later",
+
+  },
+  "ja": {
+    refreshing: "更新中...",
+    loggingIn: "ログイン中...",
+    login: "ログイン",
+    logout: "ログアウト",
+    balance: "残高",
+    recharge: "チャージ",
+    loginAccount: "サインイン",
+    byokNotice: "APIキーの設定不要。従量課金制ですぐに使えます。",
+    selectModel: "翻訳モデルを選択",
+    loginFirst: "チャージする前に、拡張機能でアカウントにログインしてください。",
+    openPluginToLogin: "Mira拡張機能を開き、ログインボタンをクリックしてください。",
+    rechargeIssue: "チャージに関する問題",
+    selectPlan: "プランを選択",
+    recommended: "おすすめ",
+    notArrived: "チャージが反映されない場合",
+    paymentNotice: "プランをクリックすると <b>Ko-fi</b> 決済ページに移動します。クレジットカード / PayPalに対応。<br>決済完了後、通常 <b>5分以内</b>に残高が反映されます。",
+    deleteAccount: "アカウント削除",
+    deleteAccountConfirm: "アカウントを削除しますか？この操作は取り消せず、残高も消去されます。",
+    deleteAccountSuccess: "✓ アカウントを削除しました",
+    deleteAccountFail: "✗ 削除に失敗しました。しばらくしてから再試行してください",
+  },
+  "ko": {
+    refreshing: "갱신 중...",
+    loggingIn: "로그인 중...",
+    login: "로그인",
+    logout: "로그아웃",
+    balance: "잔액",
+    recharge: "충전",
+    loginAccount: "로그인하기",
+    byokNotice: "API 키 설정 필요 없음. 사용량 기반 결제 방식.",
+    selectModel: "번역 모델 선택",
+    loginFirst: "충전하기 전에 먼저 확장 프로그램에서 Google 계정으로 로그인해 주세요.",
+    openPluginToLogin: "Mira 확장 프로그램을 연 후 로그인 버튼을 클릭해 주세요.",
+    rechargeIssue: "충전 관련 문제",
+    selectPlan: "요금제 선택",
+    recommended: "추천",
+    notArrived: "충전 금액이 들어오지 않았나요?",
+    paymentNotice: "요금제를 클릭하면 <b>Ko-fi</b> 결제 페이지로 이동합니다. 신용카드 / PayPal 지원.<br>결제 성공 후 잔액은 보통 <b>5분 이내</b>에 자동 반영됩니다.",
+    deleteAccount: "계정 삭제",
+    deleteAccountConfirm: "정말로 계정을 삭제하시겠습니까？이 작업은 되돌릴 수 없으며 잔액도 사라집니다。",
+    deleteAccountSuccess: "✓ 계정이 삭제되었습니다",
+    deleteAccountFail: "✗ 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요",
   }
 };

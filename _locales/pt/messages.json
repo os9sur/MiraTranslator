@@ -3,7 +3,7 @@
     "message": "Mira Translator - Tradução imersiva e legendas bilíngues no YouTube"
   },
   "appDesc": {
-    "message": "<0.5MB: Código Aberto. IA Própria (BYOK). Tradução Imersiva/YouTube. Sincronização Drive/WebDAV."
+    "message": "Tradução imersiva, legendas bilíngues YouTube, IA e pesquisa de palavras. Leve e open-source. Google Drive/WebDAV."
   },
   "ERROR_400": {
     "message": "Erro de API: Solicitação inválida."

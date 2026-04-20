@@ -733,8 +733,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else {
         if (response.error === 'onedrive_reauth_required') {
           updateSyncProgressUI(btnId, 'Reauthorizing...', true);
-          safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((authRes) => {
-            if (authRes?.success) {
+          safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then(async (authRes) => {
+            const tokenData = await safeGetStorage('onedrive_token');
+            if (tokenData?.onedrive_token) {
               executeSyncDataAction(btn, originalText, direction);
             } else {
               updateSyncProgressUI(btnId, 'sync_failed ✕', true);
@@ -746,25 +747,26 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
           return;
         }
+
         if (response.error?.includes('401') || response.error?.includes('Unauthorized')) {
           updateSyncProgressUI(btnId, 'Reauthorizing...', true);
           const syncData = await safeGetStorage('syncConfig');
           const currentMethod = syncData?.syncConfig?.method || 'googleDrive';
 
           if (currentMethod === 'oneDrive') {
-            // 先尝试静默刷新，不弹窗
             safeSendMessage({ type: 'ONEDRIVE_SILENT_REFRESH' }).then(async (refreshRes) => {
               if (refreshRes?.success) {
-                // 静默刷新成功，直接重试同步
-                logger.log('[DEBUG] OneDrive 静默刷新成功，重试同步');
                 executeSyncDataAction(btn, originalText, direction);
               } else {
-                // 静默刷新失败，才清除 token 并弹窗重新授权
-                logger.warn('[DEBUG] OneDrive 静默刷新失败，需要重新登录');
                 await safeRemoveStorage('onedrive_token');
-                safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((authRes) => {
-                  if (authRes?.success) executeSyncDataAction(btn, originalText, direction);
-                  else updateSyncProgressUI(btnId, '', false);
+                safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then(async (authRes) => {
+                  const tokenData = await safeGetStorage('onedrive_token');
+                  if (tokenData?.onedrive_token) {
+                    executeSyncDataAction(btn, originalText, direction);
+                  } else {
+                    btn.disabled = false;
+                    updateSyncProgressUI(btnId, '', false);
+                  }
                 });
               }
             });
@@ -773,12 +775,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof getGoogleTokenForFirefox === 'function') {
               return getGoogleTokenForFirefox(btn, originalText, direction);
             }
-            //token过期之后,重新授权之后继续同步
-            safeSendMessage({ type: 'START_AUTH' }).then((authRes) => {
-              if (authRes?.success) executeSyncDataAction(btn, originalText, direction);
-              else updateSyncProgressUI(btnId, '', false);
+            safeSendMessage({ type: 'START_AUTH' }).then(async (authRes) => {
+              const tokenData = await safeGetStorage('google_drive_token');    // await 生效
+              if (tokenData?.google_drive_token) {                             //  读 storage 判断
+                executeSyncDataAction(btn, originalText, direction);
+              } else {
+                btn.disabled = false;
+                updateSyncProgressUI(btnId, '', false);
+              }
             });
           }
+          return; // 阻止底部 setTimeout 提前重置 UI
         } else {
           updateSyncProgressUI(btnId, 'sync_failed ✕', true);
           showToast(`${t('syncFailed', window.uiLanguage)} ` + (response.error || t('unknownError', window.uiLanguage)), 'error');
@@ -1319,6 +1326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
+    profilePanel.style.display = 'none';
   });
   // 切换UI语言
   const uiSelect = document.getElementById('uiLangSelect');
@@ -1671,10 +1679,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       // source 和 Cambridge 
       if (response.source || cambridgeHref) {
         html += `<div id="wiki-source-placeholder" 
-            style="margin-top:10px; font-size:11px;
-                  display:flex; justify-content:flex-end; align-items:center; gap:4px;
-                  color:#64748b;">
-        <span>Source:</span>
+        style="margin-top:10px; font-size:11px;
+              display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:4px;
+              color:#64748b;">
       </div>`;
       }
 
@@ -1708,8 +1715,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (response.source || cambridgeHref) {
         const placeholder = resContent.querySelector('#wiki-source-placeholder');
         if (placeholder) {
-          // Google+Dict 链接
+
+          // Source + 模型名 包在同一个 span 里
           if (response.source) {
+            const sourceWrapper = document.createElement('span');
+            sourceWrapper.style.cssText = `
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 220px;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+      `;
+
+            const label = document.createTextNode('Source: ');
+            sourceWrapper.appendChild(label);
+
             if (response.sourceUrl) {
               const a = document.createElement('a');
               a.href = response.sourceUrl;
@@ -1717,16 +1739,16 @@ document.addEventListener('DOMContentLoaded', async () => {
               a.rel = 'noopener noreferrer';
               a.textContent = response.source;
               a.style.cssText = `
-              color: #38bdf8;
-              text-decoration: none;
-              font-weight: 500;
-              font-size: 10px;
-              font-style: italic;
-              border-radius: 4px;
-              background: rgba(56,189,248,0.08);
-              transition: all 0.2s ease;
-              margin-left: 4px;
-            `;
+          color: #38bdf8;
+          text-decoration: none;
+          font-weight: 500;
+          font-size: 10px;
+          font-style: italic;
+          border-radius: 4px;
+          background: rgba(56,189,248,0.08);
+          transition: all 0.2s ease;
+          margin-left: 4px;
+        `;
               a.addEventListener('mouseover', () => {
                 a.style.background = 'rgba(56,189,248,0.2)';
                 a.style.color = '#7dd3fc';
@@ -1735,13 +1757,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 a.style.background = 'rgba(56,189,248,0.08)';
                 a.style.color = '#38bdf8';
               });
-              placeholder.appendChild(a);
+              sourceWrapper.appendChild(a);
             } else {
-              placeholder.appendChild(document.createTextNode(response.source));
+              sourceWrapper.appendChild(document.createTextNode(response.source));
             }
+
+            placeholder.appendChild(sourceWrapper);
           }
 
-          // Cambridge 链接，追加在 Google+Dict 后面
+          // Cambridge 链接
           if (cambridgeHref) {
             const sep = document.createTextNode(' · ');
             placeholder.appendChild(sep);
@@ -1751,16 +1775,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             ca.rel = 'noopener noreferrer';
             ca.textContent = 'Cambridge ↗';
             ca.style.cssText = `
-              color: #94a3b8;
-              text-decoration: none;
-              font-weight: 500;
-              font-size: 10px;
-              font-style: italic;
-              padding: 2px 6px;
-              border-radius: 4px;
-              background: rgba(148,163,184,0.08);
-              transition: all 0.2s ease;
-            `;
+        white-space: nowrap;
+        display: inline-block;
+        color: #94a3b8;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 10px;
+        font-style: italic;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(148,163,184,0.08);
+        transition: all 0.2s ease;
+      `;
             ca.addEventListener('mouseover', () => {
               ca.style.background = 'rgba(148,163,184,0.2)';
               ca.style.color = '#cbd5e1';
@@ -2281,10 +2307,60 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateScanInputs();
       if (typeof updateCacheSizeDisplay === 'function') updateCacheSizeDisplay();
       const hintEl = document.getElementById('builtinRuleHint');
+      const resetBtn = document.getElementById('btnResetToBuiltin');
+      const hasBuiltinRule = (typeof SiteRules !== 'undefined') && SiteRules.hasRule(domain);
+
       if (hintEl) {
-        const hasBuiltinRule = (typeof SiteRules !== 'undefined') && SiteRules.hasRule(domain);
         hintEl.style.display = hasBuiltinRule ? 'block' : 'none';
         hintEl.title = t('builtinRuleHint');
+      }
+
+      //  控制重置按钮显示
+      if (resetBtn) {
+        resetBtn.style.display = hasBuiltinRule ? 'inline-block' : 'none';
+
+        if (resetBtn) {
+          resetBtn.style.display = hasBuiltinRule ? 'inline-block' : 'none';
+
+          // ✅ hover 效果用 JS 绑定，避免 CSP 报错
+          resetBtn.addEventListener('mouseover', () => {
+            resetBtn.style.background = '#3b82f6';
+            resetBtn.style.color = '#fff';
+            resetBtn.style.boxShadow = '0 0 8px rgba(59,130,246,0.5)';
+          });
+          resetBtn.addEventListener('mouseout', () => {
+            resetBtn.style.background = 'transparent';
+            resetBtn.style.color = '#3b82f6';
+            resetBtn.style.boxShadow = 'none';
+          });
+
+          resetBtn.onclick = async () => {
+            const rule = SiteRules.getRule(domain);
+            const builtinSelectors = rule.selectors;
+            const builtinMinLen = rule.minLen ?? 5;
+
+            const formatted = builtinSelectors
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean)
+              .join(',\n');
+
+            selectorInput.value = formatted;
+            minLenInput.value = builtinMinLen;
+
+            const res = await safeGetStorage('scanConfig');
+            let config = { global: {}, custom: {} };
+            if (res?.scanConfig) {
+              config.global = res.scanConfig.global || {};
+              config.custom = res.scanConfig.custom || {};
+            }
+            delete config.custom[domain];
+            await safeSetStorage({ scanConfig: config });
+
+            await saveScanConfig();
+            showToast(t('resetToBuiltinSuccess') || '已恢复内置规则', 'success');
+          };
+        }
       }
     } catch (e) {
       logger.error("[Mira-Trace] refreshUI 发生致命错误:", e);
@@ -2569,7 +2645,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // AI 引擎：必须实时检测，因为 API Key 随时可能失效
     const targetLang = currentConfig?.targetLanguage || 'zh-CN';
     const isTargetEn = targetLang.toLowerCase().startsWith('en');
-    const testText = isTargetEn ? '你好' : 'Good morning';
+    const testText = isTargetEn ? '早上好' : 'Good morning';
 
     const res = await Promise.race([
       safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang }),
@@ -2620,6 +2696,232 @@ document.addEventListener('DOMContentLoaded', async () => {
     warning.textContent = '!';
     settingsBtn.appendChild(warning);
   }
+
+  // 登录认证相关
+  // ── Auth UI 状态管理 ──────────────────────────────
+  let userData = null;
+  function updateAuthUI(user) {
+    userData = user;
+    const btnLogin = document.getElementById('btnLogin');
+    const btnAvatar = document.getElementById('btnAvatar');
+    if (user) {
+      // 已登录
+      btnLogin.style.display = 'none';
+      btnAvatar.style.display = 'flex';
+      setAvatarDisplay(user);
+    } else {
+      // 未登录
+      btnLogin.style.display = 'flex';
+      btnAvatar.style.display = 'none';
+    }
+  }
+
+  function setAvatarDisplay(user) {
+    // 小头像（header 按钮）
+    const img = document.getElementById('avatarImg');
+    const initial = document.getElementById('avatarInitial');
+    // 大头像（panel 内）
+    const pImg = document.getElementById('panelAvatarImg');
+    const pInitial = document.getElementById('panelAvatarInitial');
+
+    if (user.photoURL) {
+      img.src = user.photoURL;
+      img.style.display = 'block';
+      initial.style.display = 'none';
+      pImg.src = user.photoURL;
+      pImg.style.display = 'block';
+      pInitial.style.display = 'none';
+    } else {
+      const letter = (user.displayName || user.email || '?')[0].toUpperCase();
+      initial.textContent = letter;
+      pInitial.textContent = letter;
+      img.style.display = 'none';
+      pImg.style.display = 'none';
+    }
+
+    document.getElementById('panelName').textContent = user.displayName || '—';
+    document.getElementById('panelEmail').textContent = user.email || '—';
+  }
+
+  function updateBalance(amount) {
+    document.getElementById('panelBalance').textContent =
+      '$ ' + Number(amount).toFixed(2);
+  }
+
+  // ── Profile Panel 开关 ────────────────────────────
+  const profilePanel = document.getElementById('profilePanel');
+
+  document.getElementById('btnAvatar').addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    const isOpening = profilePanel.style.display !== 'block';
+    profilePanel.style.display = isOpening ? 'block' : 'none';
+    advMenu.style.display = 'none';
+
+    if (isOpening) {
+      const balanceEl = document.getElementById('panelBalance');
+      if (balanceEl) {
+        balanceEl.innerText = t('refreshing') || 'fetching balance...';
+        balanceEl.style.opacity = '0.7';
+      }
+
+      setTimeout(() => {
+        if (userData?.uid) {
+          logger.log('--- 延迟后发起真实的获取请求 ---');
+          fetchBalance(userData.uid);
+        }
+      }, 150);
+    }
+  });
+
+  // 点击 panel 外部关闭
+  document.addEventListener('click', (e) => {
+    if (!profilePanel.contains(e.target) && e.target !== document.getElementById('btnAvatar')) {
+      profilePanel.style.display = 'none';
+    }
+  });
+
+  // ── 按钮事件 ─────────────────────────────────────
+
+  // ── 登录弹窗开关 ──────────────────────────────────
+  const loginModal = document.getElementById('loginModal');
+
+  document.getElementById('btnLogin').addEventListener('click', (e) => {
+    e.stopPropagation();
+    loginModal.style.display = loginModal.style.display === 'none' ? 'block' : 'none';
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!loginModal.contains(e.target) &&
+      e.target !== document.getElementById('btnLogin')) {
+      loginModal.style.display = 'none';
+    }
+  });
+
+  async function doLogin(provider) {
+    loginModal.style.display = 'none';
+
+    const btnLogin = document.getElementById('btnLogin');
+    btnLogin.disabled = true;
+    btnLogin.innerHTML = '<div class="mini-spinner"></div>';
+
+    const action = provider === 'google' ? 'googleLogin' : 'microsoftLogin';
+
+    const res = await safeSendMessage({ action });
+
+    btnLogin.disabled = false;
+    btnLogin.innerText = t('login') || 'Log in';
+
+    if (res?.user) {
+      await safeSendMessage({ action: 'clearBalanceCache' });
+      updateAuthUI(res.user);
+      fetchBalance(res.user.uid);
+    } else if (res?.error && res.error !== 'USER_CANCELED') {
+      logger.error('Login error:', res.error);
+    }
+  }
+
+  document.getElementById('btnGoogleLogin').addEventListener('click', () => doLogin('google'));
+  document.getElementById('btnMicrosoftLogin').addEventListener('click', () => doLogin('microsoft'));
+
+
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    await safeSendMessage({ action: 'logout' });
+    profilePanel.style.display = 'none';
+    updateAuthUI(null);
+  });
+  document.getElementById('btnDeleteAccount').addEventListener('click', async () => {
+    const confirmed = confirm(t('deleteAccountConfirm') || 'Are you sure you want to delete your account? This action cannot be undone.');
+    if (!confirmed) return;
+
+    const btn = document.getElementById('btnDeleteAccount');
+    const originalText = btn.innerText;
+
+    // 删除中状态
+    btn.disabled = true;
+    btn.innerHTML = '<div class="mini-spinner"></div>';
+
+    const response = await safeSendMessage({ action: 'deleteAccount' });
+
+    if (response.ok) {
+      btn.innerText = t('deleteAccountSuccess') || 'Account deleted successfully';
+      setTimeout(() => {
+        document.getElementById('btnLogout').click();
+      }, 800);
+    } else {
+      btn.innerText = t('deleteAccountFail') || '✗ Deletion failed, please try again later';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }, 2000); // 2秒后恢复 
+    }
+  });
+  document.getElementById('btnRecharge').addEventListener('click', () => {
+    profilePanel.style.display = 'none';
+    safeSendMessage({ action: 'openRecharge' });
+  });
+
+  // ── 初始化：读取登录状态 ───────────────────────────
+
+  async function fetchBalance(uid) {
+    if (!uid) return;
+    logger.log('[fetchBalance] 开始请求, uid:', uid);
+
+    const res = await safeSendMessage({ action: 'getBalance', uid });
+    logger.log('[fetchBalance] 返回结果:', res);
+
+    if (!res) {
+      logger.warn('[fetchBalance] res 为 null，请求失败');
+      return;
+    }
+
+    const balanceEl = document.getElementById('panelBalance');
+    if (balanceEl) balanceEl.style.opacity = '1';
+
+    if (res?.balance != null) {
+      logger.log('[fetchBalance] 获取到余额:', res.balance);
+      updateBalance(res.balance);
+      const data = await safeGetStorage(['mira_user']);
+      const existingUser = data?.mira_user || {};
+      await safeSetStorage({ 'mira_user': { ...existingUser, balance: res.balance } });
+    } else {
+      logger.warn('[fetchBalance] balance 为空, 使用本地缓存');
+      if (userData && userData.balance != null) {
+        updateBalance(userData.balance);
+      }
+    }
+  }
+
+  // ── 初始化：读取登录状态 ──
+  const resUser = await safeSendMessage({ action: 'getUser' });
+  if (resUser?.user) {
+    updateAuthUI(resUser.user);
+    safeGetStorage(['mira_jwt'], (data) => {
+      if (data.mira_jwt) {
+        fetchBalance(resUser.user.uid);
+      } else {
+        logger.log('通行证尚未就绪，暂不拉取余额');
+      }
+    });
+  } else {
+    updateAuthUI(null);
+  }
+
+  //  监听 storage 变化自动刷新 UI
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.mira_user) {
+      const user = changes.mira_user.newValue;
+      if (user) {
+        // 如果是其他地方（比如后台翻译完）更新了 storage，这里的监听会自动同步头像和面板里的显示。
+        userData = user; // 同步内存变量
+        if (user.balance !== undefined) {
+          updateBalance(user.balance);
+        }
+      } else {
+        updateAuthUI(null);
+      }
+    }
+  });
 
   checkEngineStatus();
 });

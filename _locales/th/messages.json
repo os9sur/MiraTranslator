@@ -3,7 +3,7 @@
     "message": "Mira Translator - แปลหน้าเว็บแบบ Immersive และซับ YouTube สองภาษา"
   },
   "appDesc": {
-    "message": "<0.5MB: โอเพนซอร์ส ปลอดภัย. มีเครื่องมือในตัว + AI API (ใช้ Key ตัวเอง). แปลหน้าเว็บ/YouTube และซิงค์ WebDAV/GDrive."
+    "message": "แปลเว็บแบบ Immersive ซับสองภาษา YouTube แปล AI ค้นหาคำศัพท์ โอเพนซอร์ส รองรับ Google Drive/WebDAV"
   },
   "ERROR_400": {
     "message": "ข้อผิดพลาด API: คำขอไม่ถูกต้องหรือยอดเงินไม่พอ"

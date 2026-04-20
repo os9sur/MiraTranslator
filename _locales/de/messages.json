@@ -3,7 +3,7 @@
     "message": "Mira Translator - Immersive Übersetzung & zweisprachige YouTube-Untertitel"
   },
   "appDesc": {
-    "message": "<0,5MB: Open-Source, sicher. Standard-Engines + KI-API (Eigener Key). Web/YouTube-Übersetzung & WebDAV/GDrive-Sync."
+    "message": "Immersive Übersetzung, zweisprachige YouTube-Untertitel, KI-Übersetzung, Wortsuche. Leicht & Open-Source. Google Drive/WebDAV."
   },
   "ERROR_400": {
     "message": "API-Fehler: Ungültige Anfrage."

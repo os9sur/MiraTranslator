@@ -3,7 +3,7 @@
     "message": "Mira 번역 - 몰입형 웹 번역 및 YouTube 이중 자막"
   },
   "appDesc": {
-    "message": "0.5MB 미만: 오픈 소스, 추적 없음. 기본 엔진 + 개인 AI API (자체 Key). 몰입형 번역, YouTube 자막, WebDAV/GDrive 동기화 지원."
+    "message": "몰입형 웹 번역, YouTube 이중 자막, AI 번역, 단어 검색. 가볍고 오픈소스. Google Drive/WebDAV 동기화 지원."
   },
   "ERROR_400": {
     "message": "API 오류: 잘못된 요청 또는 잔액 부족."

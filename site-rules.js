@@ -129,6 +129,10 @@ const SiteRules = {
             selectors: "h1, h2, h3, p, span[data-testid='TitleHeading'], [class*='nav-dropdown'] li, article li",
             minLen: 10
         },
+        "linkedin.com": {
+    selectors: "h1, h2, h3, p, span, li, a, [class*='feed-shared-text'], [class*='attributed-text'], [class*='job-card-list__title'], [class*='entity-result__title'], [class*='profile-section-card__title'], [class*='artdeco-entity-lockup__title']",
+    minLen: 10
+},
         "instagram.com": {
             selectors: [
                 // 评论和帖子描述的核心 class 

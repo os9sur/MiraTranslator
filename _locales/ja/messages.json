@@ -3,7 +3,7 @@
     "message": "Mira 翻訳 - 没入型全文翻訳と YouTube 2言語字幕"
   },
   "appDesc": {
-    "message": "0.5MB未満：オープンソース、追跡なし。標準エンジン＋プライベートAI API (自前Key)。全文翻訳、YouTube字幕、WebDAV/GDrive同期対応。"
+    "message": "没入型ウェブ翻訳・YouTube二言語字幕・AI翻訳・単語検索。軽量オープンソース。Google Drive/WebDAV同期対応。"
   },
   "ERROR_400": {
     "message": "APIエラー：無効なリクエストまたは残高不足。"
