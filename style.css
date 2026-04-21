@@ -1957,12 +1957,32 @@ yt-attributed-string+.kt-paragraph-translation {
   }
 }
 
+#close-guide-btn { 
+  background: #238636;
+  color: white;
+  border: none;
+  padding: 14px 60px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: rgb(39 140 50) 0px 0px 33px;
+  transition: all 0.3s ease-out;
+  -webkit-font-smoothing: antialiased;
+}
+
+#close-guide-btn:hover {
+  background: #2ea043 !important;
+  box-shadow: 0 0 20px 5px rgba(46, 230, 90, 0.6) !important;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
 #close-guide-btn:active {
   transform: scale(0.95);
   background: #2ea043;
+  box-shadow: 0 0 4px rgba(46, 160, 67, 0.4);
 }
 
-/*  UI 设置容器 */
 .menu-ui-setting {
   display: flex;
   flex-direction: column;
