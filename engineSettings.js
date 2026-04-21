@@ -2,6 +2,9 @@ window.browser = (function () {
     return window.msBrowser || window.browser || window.chrome;
 })();
 let userConfig = null;
+let currentId = '';
+let userConfigs = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
@@ -153,8 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             engines: ['google', 'bing', 'deepl', 'baidu']
         }
     ];
-    let userConfigs = [];
-    let currentId = '';
+
     async function init() {
         const data = await safeGetStorage(['userConfigs', 'lastActiveId', 'selectedEngine', 'apiKeys']);
         if (!data) return;
@@ -423,28 +425,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // ── 语言工具函数 ──────────────────────────────────────────
-            const normalizeLang = (lang) => {
-                if (!lang) return 'en';
-                if (lang.startsWith('zh')) {
-                    return (lang === 'zh-TW' || lang === 'zh-HK') ? 'zh_TW' : 'zh';
-                }
-                if (lang.toLowerCase() === 'pt-br') return 'pt-BR';
-                return lang.split('-')[0];
-            };
-
-            const getBrowserLang = () => {
-                try {
-                    let chromeAvailable = false;
-                    try { chromeAvailable = typeof chrome !== 'undefined' && !!chrome.runtime?.id; } catch (_) { }
-                    if (!chromeAvailable) return normalizeLang(navigator.language) || 'en';
-                    const raw = chrome.i18n?.getUILanguage?.() ||
-                        (navigator.languages && navigator.languages[0]) ||
-                        navigator.language || 'en';
-                    return normalizeLang(raw);
-                } catch (e) {
-                    return normalizeLang(navigator.language) || 'en';
-                }
-            };
 
             const getDesc = (descObj, lang) => {
                 if (!descObj) return '';
@@ -490,6 +470,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <h2 style="margin:0; display:flex; align-items:center; gap:8px; 
                             background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); 
                             -webkit-background-clip: text; 
+                            background-clip: text;
                             -webkit-text-fill-color: transparent; 
                             font-weight: 800; 
                             letter-spacing: -0.2px;">
@@ -513,11 +494,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             </div>
-            <div class="form-container">
+            <div class="form-container" style="padding-left:2px;">
                 <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
                     <div>
                         <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', ui_lang) || 'Current Balance'}</div>
-                        <div style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
+                        <div id="miraBalance" style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
                     </div>
                     <button id="miraRechargeBtn"><span>+ ${t('recharge', ui_lang) || 'Recharge'}</span></button>
                 </div>
@@ -545,22 +526,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ── 模型切换：只更新存储+重绘卡片，不重新渲染整页 ──
             const renderCards = (activeModel) => {
                 document.getElementById('miraModelGrid').innerHTML = models.map(m => `
-        <div class="mira-model-card" data-model="${m.id}"
-             style="border:1.5px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
-                    border-radius:10px;padding:14px;cursor:pointer;
-                    background:${m.id === activeModel ? '#1a1230' : 'transparent'};">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <div style="width:16px;height:16px;border-radius:50%;
-                            border:2px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
-                            background:${m.id === activeModel ? '#7c3aed' : 'transparent'};
-                            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    ${m.id === activeModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
-                </div>
-                <span style="font-size:14px;font-weight:500;">${m.label}</span>
-                <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
-            </div>
-            <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
-        </div>`).join('');
+                <div class="mira-model-card" data-model="${m.id}"
+                    style="border:1.5px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
+                            border-radius:10px;padding:14px;cursor:pointer;
+                            background:${m.id === activeModel ? '#1a1230' : 'transparent'};">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <div style="width:16px;height:16px;border-radius:50%;
+                                    border:2px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
+                                    background:${m.id === activeModel ? '#7c3aed' : 'transparent'};
+                                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            ${m.id === activeModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
+                        </div>
+                        <span style="font-size:14px;font-weight:500;">${m.label}</span>
+                        <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
+                    </div>
+                    <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
+                </div>`).join('');
                 // 绑定模型切换
                 document.getElementById('miraModelGrid').querySelectorAll('.mira-model-card').forEach(card => {
                     card.onclick = async () => {
@@ -574,9 +555,45 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             renderCards(selectedModel);
 
-            // ── 以下保持原有逻辑不变 ──────────────────────────────────
+//  防止重复注册
+if (window._miraStorageListener) {
+    chrome.storage.onChanged.removeListener(window._miraStorageListener);
+}
+
+window._miraStorageListener = (changes, area) => {
+    if (area !== 'local') return;
+
+    if (changes.mira_user) {
+        const newUser = changes.mira_user.newValue;
+        if (!newUser) {
+            const balanceEl = document.getElementById('miraBalance');
+            if (balanceEl) balanceEl.textContent = '$0.00';
+
+            const wrap = document.getElementById('miraUserAvatar');
+            if (wrap) wrap.style.display = 'none';
+
+            updateModalUserInfo(null);
+        } else {
+            showMiraAvatar(newUser);
+            updateModalUserInfo(newUser);
+        }
+    }
+};
+
+chrome.storage.onChanged.addListener(window._miraStorageListener);
             const res = await safeSendMessage({ action: 'getUser' });
-            if (res?.user) showMiraAvatar(res.user);
+            if (res?.user) {
+                showMiraAvatar(res.user);
+                // 已登录，确保登录弹窗关闭
+                const modal = document.getElementById('loginModal');
+                const backdrop = document.getElementById('loginModalBackdrop');
+                if (modal) modal.style.display = 'none';
+                if (backdrop) backdrop.style.display = 'none';
+            } else {
+                // 未登录，隐藏头像
+                const wrap = document.getElementById('miraUserAvatar');
+                if (wrap) wrap.style.display = 'none';
+            }
 
             function showMiraAvatar(user) {
                 const wrap = document.getElementById('miraUserAvatar');
@@ -604,7 +621,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 if (!user) {
                     _loginTrigger = 'recharge';
-                    // 未登录，显示登录弹窗
+
+                    // 未登录，重置弹窗为未登录状态
+                    updateModalUserInfo(null);
+
                     const modal = document.getElementById('loginModal');
                     const backdrop = document.getElementById('loginModalBackdrop');
                     if (modal) {
@@ -615,7 +635,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
 
-                // 已登录，打开充值页 
+                // 已登录，打开充值页
+                const btn = document.getElementById('miraRechargeBtn');
+                btn.disabled = true;
+                btn.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        style="animation:spin 1s linear infinite;">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                    <span>Redirecting...</span>
+                `;
                 safeSendMessage({ action: 'openRecharge' }).then(() => {
                     chrome.tabs.getCurrent((tab) => {
                         if (tab?.id) {
@@ -749,7 +778,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 页面初始化时检查登录状态，更新弹窗头像
             const resUser = await safeSendMessage({ action: 'getUser' });
             if (resUser?.user) updateModalUserInfo(resUser.user);
-
+            await renderAIPromptSection();
             return;
         }
 
@@ -881,6 +910,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>`;
         container.innerHTML = html;
         if (typeof initAllComboboxes === 'function') initAllComboboxes();
+        await renderAIPromptSection();
     }
     function initAllComboboxes() {
         document.querySelectorAll('.combobox-toggle').forEach(toggle => {
@@ -1592,4 +1622,238 @@ async function updateCacheSizeDisplay() {
         logger.error("更新缓存显示失败:", err);
         el.innerText = "0 KB";
     }
+}
+
+
+/* AI Prompt Section */
+
+
+function isAIEngine(id) {
+    const config = userConfigs.find(c => c.id === id);
+    return config && AI_LLM_WHITE_LIST.includes(config.engine);
+}
+
+async function renderAIPromptSection() { 
+    const old = document.getElementById('ai-prompt-section');
+    if (old) old.remove();
+
+    if (!isAIEngine(currentId)) return; 
+    const stored = await safeGetStorage([AI_PROMPT_KEY]);
+    const saved = stored?.[AI_PROMPT_KEY] || { web: '', subtitle: '' };
+
+    const section = document.createElement('div');
+    section.id = 'ai-prompt-section';
+    section.className = 'ai-prompt-section';
+    section.innerHTML = _buildAIPromptHTML(saved);
+
+    const formContainer = document.querySelector('#dynamic-form-container .form-container');
+    if (formContainer) {
+        formContainer.appendChild(section);
+    } else {
+        document.getElementById('dynamic-form-container').appendChild(section);
+    }
+
+    _bindAIPromptEvents(section, saved);
+}
+
+function _buildAIPromptHTML(saved) {
+    const webVal = saved.web || '';
+    const subVal = saved.subtitle || '';
+
+    return `
+        <div class="ai-prompt-header" id="ai-prompt-toggle">
+            <div class="ai-prompt-header-left">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+                <span class="ai-prompt-title">${t('cpTitle')}</span>
+                <span class="ai-prompt-badge">${t('cpOptional')}</span>
+            </div>
+            <svg class="ai-prompt-chevron ${webVal || subVal ? 'open' : ''}"
+                 id="ai-prompt-chevron"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
+        </div>
+
+        <div class="ai-prompt-body ${webVal || subVal ? 'open' : ''}" id="ai-prompt-body">
+
+            <div class="ai-prompt-item">
+                <div class="ai-prompt-item-header">
+                    <div class="ai-prompt-item-label">
+                        🌐 <span>${t('cpWeb')}</span>
+                    </div>
+                    <button class="ai-prompt-clear-btn ${webVal ? 'visible' : ''}"
+                            data-target="ai-prompt-web">${t('cpClear')}</button>
+                </div>
+                <textarea
+                    id="ai-prompt-web"
+                    class="ai-prompt-textarea"
+                    maxlength="150"
+                    placeholder="${t('cpWebPH')}"
+                    spellcheck="false"
+                >${_escapeHtml(webVal)}</textarea>
+                <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
+                <div class="ai-prompt-style-hint">${t('cpHint')}</div>
+            </div>
+
+            <div class="ai-prompt-item">
+                <div class="ai-prompt-item-header">
+                    <div class="ai-prompt-item-label">
+                        🎬 <span>${t('cpSub')}</span>
+                    </div>
+                    <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
+                            data-target="ai-prompt-subtitle">${t('cpClear')}</button>
+                </div>
+                <textarea
+                    id="ai-prompt-subtitle"
+                    class="ai-prompt-textarea"
+                    maxlength="150"
+                    placeholder="${t('cpSubPH')}"
+                    spellcheck="false"
+                >${_escapeHtml(subVal)}</textarea>
+                <div class="ai-prompt-char-count" id="ai-prompt-subtitle-count">${subVal.length} / 150</div>
+                <div class="ai-prompt-style-hint">${t('cpHint')}</div>
+            </div>
+
+            <div class="ai-prompt-footer">
+                <button class="ai-prompt-save-btn" id="ai-prompt-save-btn" disabled>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    ${t('cpSave')}
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function _bindAIPromptEvents(section, initialSaved) {
+    const toggle = section.querySelector('#ai-prompt-toggle');
+    const body = section.querySelector('#ai-prompt-body');
+    const chevron = section.querySelector('#ai-prompt-chevron');
+    const saveBtn = section.querySelector('#ai-prompt-save-btn');
+    const webTA = section.querySelector('#ai-prompt-web');
+    const subTA = section.querySelector('#ai-prompt-subtitle');
+    const webCount = section.querySelector('#ai-prompt-web-count');
+    const subCount = section.querySelector('#ai-prompt-subtitle-count');
+
+    let isDirty = false;
+    let saveTimer = null;
+ 
+    toggle.addEventListener('click', () => {
+        const isOpen = body.classList.toggle('open');
+        chevron.classList.toggle('open', isOpen);
+
+        if (isOpen) {
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
+        }
+    });
+    // ── 字符计数 
+    function updateCount(ta, countEl) {
+        const len = ta.value.length;
+        countEl.textContent = `${len} / 150`;
+        countEl.classList.toggle('warn', len > 120);
+    }
+
+    // ── dirty 标记 → 激活保存按钮
+    function markDirty() {
+        if (!isDirty) {
+            isDirty = true;
+            saveBtn.disabled = false;
+            _setPromptBtnState(saveBtn, 'idle');
+        }
+    }
+
+    webTA.addEventListener('input', () => {
+        updateCount(webTA, webCount);
+        section.querySelector('[data-target="ai-prompt-web"]')
+            .classList.toggle('visible', webTA.value.length > 0);
+        markDirty();
+    });
+
+    subTA.addEventListener('input', () => {
+        updateCount(subTA, subCount);
+        section.querySelector('[data-target="ai-prompt-subtitle"]')
+            .classList.toggle('visible', subTA.value.length > 0);
+        markDirty();
+    });
+
+    section.querySelectorAll('.ai-prompt-clear-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const ta = document.getElementById(btn.dataset.target);
+            if (!ta) return;
+            ta.value = '';
+            btn.classList.remove('visible');
+            const countEl = document.getElementById(btn.dataset.target + '-count');
+            if (countEl) updateCount(ta, countEl);
+            markDirty();
+        });
+    });
+
+    // ── 保存 ───
+    saveBtn.addEventListener('click', async () => {
+        if (!isDirty || saveBtn.disabled) return;
+
+        _setPromptBtnState(saveBtn, 'saving');
+
+        try {
+            await safeSetStorage({
+                [AI_PROMPT_KEY]: {
+                    web: webTA.value.trim(),
+                    subtitle: subTA.value.trim(),
+                }
+            });
+
+            isDirty = false;
+            _setPromptBtnState(saveBtn, 'saved');
+
+            // 2s 后恢复，但 disable（无变化不可再按）
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                _setPromptBtnState(saveBtn, 'idle');
+                saveBtn.disabled = true;
+            }, 2000);
+
+        } catch (e) {
+            _setPromptBtnState(saveBtn, 'error');
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                _setPromptBtnState(saveBtn, 'idle');
+                saveBtn.disabled = false; // 出错可重试
+            }, 2000);
+        }
+    });
+}
+
+// ── 按钮状态切换 ──── 
+function _setPromptBtnState(btn, state) {
+    btn.classList.remove('state-saving', 'state-saved', 'state-error');
+    const icons = {
+        idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save`,
+        saving: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving...`,
+        saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved`,
+        error: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Failed`,
+    };
+    if (state !== 'idle') btn.classList.add(`state-${state}`);
+    btn.innerHTML = icons[state] || icons.idle;
+    btn.disabled = (state === 'saving');
+}
+
+// ── HTML 转义（防止 saved prompt 里有 < > 破坏 innerHTML）──
+function _escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 }

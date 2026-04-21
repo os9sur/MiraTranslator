@@ -64,39 +64,41 @@ const getCleanDomain = (url) => {
     return "unknown";
   }
 };
+
 //浏览器语言
 const normalizeLang = (lang) => {
   if (!lang) return 'en';
-  if (lang.startsWith('zh')) {
-    return (lang === 'zh-TW' || lang === 'zh-HK') ? 'zh-TW' : 'zh-CN';
+  const l = lang.toLowerCase();
+
+  // 中文逻辑 
+  if (l.startsWith('zh')) {
+    if (l.includes('hk')) return 'zh-HK';
+    if (l.includes('sg')) return 'zh-SG';
+    const isTrad = l.includes('tw') || l.includes('mo') || l.includes('hant');
+    return isTrad ? 'zh-TW' : 'zh-CN';
   }
-  if (lang.toLowerCase() === 'pt-br') {
-    return 'pt-BR';
-  }
-  return lang.split('-')[0];
+
+  const specials = {
+    'en-in': 'en-IN', 'en-gb': 'en-GB', 'en-ca': 'en-CA', 'en-au': 'en-AU',
+    'en-nz': 'en-NZ', 'en-ie': 'en-IE',
+    'de-ch': 'de-CH', 'fr-ca': 'fr-CA', 'pt-br': 'pt-BR',
+    'ar-ae': 'ar-AE', 'ar-sa': 'ar-SA'
+  };
+
+  if (specials[l]) return specials[l];
+
+  return l.split('-')[0];
 };
 
 const getBrowserLang = () => {
   try {
-    let chromeAvailable = false;
-    try {
-      chromeAvailable = typeof chrome !== 'undefined' && !!chrome.runtime?.id;
-    } catch (_) {
-      chromeAvailable = false;
-    }
-
-    if (!chromeAvailable) {
-      return normalizeLang(navigator.language) || 'en';
-    }
-
-    const raw = chrome.i18n?.getUILanguage?.() ||
+    return normalizeLang(
       (navigator.languages && navigator.languages[0]) ||
       navigator.language ||
-      'en';
-
-    return normalizeLang(raw);
+      'en'
+    );
   } catch (e) {
-    return normalizeLang(navigator.language) || 'en';
+    return 'en';
   }
 };
 
@@ -254,50 +256,68 @@ function getSafeMessage(key, defaultMsg) {
   }
 }
 async function safeSendMessage(message) {
-    if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-        if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
-        return null;
-    }
-    return new Promise((resolve) => {
-        try {
-            chrome.runtime.sendMessage(message, (response) => {
-                // 立即消费 lastError，防止 Unchecked 警告
-                const err = chrome.runtime.lastError;
-                if (err) {
-                    const errorMsg = err.message || '';
-                    if (errorMsg.includes('context invalidated')) {
-                        if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
-                    }
-                    // "Receiving end does not exist" 是正常情况（background 未就绪），静默处理
-                    resolve(null);
-                } else {
-                    resolve(response);
-                }
-            });
-        } catch (e) {
-            if (e.message?.includes('context invalidated') || !chrome.runtime?.id) {
-                if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
-            }
-            resolve(null);
+  if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
+    if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+    return null;
+  }
+  return new Promise((resolve) => {
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        // 立即消费 lastError，防止 Unchecked 警告
+        const err = chrome.runtime.lastError;
+        if (err) {
+          const errorMsg = err.message || '';
+          if (errorMsg.includes('context invalidated')) {
+            if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+          }
+          // "Receiving end does not exist" 是正常情况（background 未就绪），静默处理
+          resolve(null);
+        } else {
+          resolve(response);
         }
-    });
+      });
+    } catch (e) {
+      if (e.message?.includes('context invalidated') || !chrome.runtime?.id) {
+        if (typeof isCurrentSiteActive === 'function' && isCurrentSiteActive()) showUpdateNotice();
+      }
+      resolve(null);
+    }
+  });
 }
 
 
+const AI_PROMPT_KEY = 'ai_prompt_settings';
 // ── Mira Pro 模型配置 ──
 const MIRA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
 
 const MIRA_FALLBACK_MODELS = [
-    { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: '' },
-    { id: 'deepseek/deepseek-v3.2',        label: 'DeepSeek V3.2',         tag: 'Popular', tagColor: '#7c3aed', desc: '' },
-    { id: 'openai/gpt-4o-mini',            label: 'GPT-4o Mini',           tag: 'Stable',  tagColor: '#b45309', desc: '' },
-    { id: 'anthropic/claude-3-5-haiku',    label: 'Claude 3.5 Haiku',      tag: 'Natural', tagColor: '#d946ef', desc: '' },
-    { id: 'qwen/qwen-plus',                label: 'Qwen Plus',             tag: 'Enhanced',tagColor: '#059669', desc: '' },
-    { id: 'qwen/qwen-turbo',               label: 'Qwen Turbo',            tag: 'Turbo',   tagColor: '#16a34a', desc: '' },
-    { id: 'mistralai/mistral-7b-instruct-v0.1', label: 'Mistral 7B',       tag: 'Balanced',tagColor: '#4b5563', desc: '' },
+  { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: '' },
+  { id: 'deepseek/deepseek-v3.2', label: 'DeepSeek V3.2', tag: 'Popular', tagColor: '#7c3aed', desc: '' },
+  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', tag: 'Stable', tagColor: '#b45309', desc: '' },
+  { id: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', tag: 'Natural', tagColor: '#d946ef', desc: '' },
+  { id: 'qwen/qwen-plus', label: 'Qwen Plus', tag: 'Enhanced', tagColor: '#059669', desc: '' },
+  { id: 'qwen/qwen-turbo', label: 'Qwen Turbo', tag: 'Turbo', tagColor: '#16a34a', desc: '' },
+  { id: 'mistralai/mistral-7b-instruct-v0.1', label: 'Mistral 7B', tag: 'Balanced', tagColor: '#4b5563', desc: '' },
 ];
 const MODELS_URL = `https://raw.githubusercontent.com/os9sur/MiraTranslator/refs/heads/main/assets/models.json?t=${Date.now()}`;
 
+const AI_LLM_WHITE_LIST = [
+  'mira_pro',
+  'openai',
+  'deepseek',
+  'claude',
+  'gemini',
+  'grok',
+  'groq',
+  'siliconflow',
+  'custom_ai'
+];
+const TRADITIONAL_ENGINE_LIST = [
+  'google',
+  'deepl',
+  'deeplx',
+  'bing'
+];
 
 let isNoticeShowing = false;
 function showUpdateNotice() {
@@ -390,7 +410,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -450,12 +470,12 @@ function t(key, forcedLang) {
 function applyI18n(forcedLang) {
   if (typeof document === 'undefined') return;
   syncI18nDict();
-  
+
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const type = el.getAttribute('data-i18n-type');
     const translation = t(key, forcedLang);
-    
+
     if (translation && translation !== key) {
       if (type === 'placeholder' || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         el.placeholder = translation;
@@ -887,23 +907,7 @@ function localizePos(pos, targetLang) {
     entry['en'] ||
     pos;
 }
-const AI_LLM_WHITE_LIST = [
-  'mira_pro',
-  'openai',
-  'deepseek',
-  'claude',
-  'gemini',
-  'grok',
-  'groq',
-  'siliconflow',
-  'custom_ai'
-];
-const TRADITIONAL_ENGINE_LIST = [
-  'google',
-  'deepl',
-  'deeplx',
-  'bing'
-];
+
 
 const STORAGE_KEYS = {
   core: ['userConfigs', 'activeConfig', 'lastActiveId'],
@@ -1212,7 +1216,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       const result = { basic: query, phonetic: "", dictData: [], examples: [], isSameLang: true, timestamp: Date.now() };
       wordTranslationCache.set(query.toLowerCase(), result);
       return result;
-    } 
+    }
     try {
       const detection = await new Promise((resolve) => {
         if (!chrome.i18n || !chrome.i18n.detectLanguage) return resolve(null);
@@ -1233,7 +1237,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
     if (!forceRefresh && !isBatch) {
-     // logger.log('[lookupCache] query:', JSON.stringify(query));
+      // logger.log('[lookupCache] query:', JSON.stringify(query));
       const hit = await lookupCache(query, engine, lang);
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
@@ -1318,7 +1322,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         result.source = parsed.source || "";
         result.sourceUrl = parsed.sourceUrl || "";
         result.isPartial = parsed.isPartial || false;
-        result.isWord = parsed.isWord ?? false; 
+        result.isWord = parsed.isWord ?? false;
       } catch {
         result.basic = data;
       }
@@ -1519,63 +1523,89 @@ function detectSourceLang(text) {
   return null; // 无法判断
 }
 
-
 const LANGS = [
+  // --- 基础选项 ---
   { value: 'auto', label: 'AUTO', en: 'Auto Detect' },
   { value: 'en', label: 'English', en: 'English' },
+
+  // --- 东亚 East Asia ---
+  { type: 'sep', label: '—— East Asia ——' },
   { value: 'zh-CN', label: '简体中文 (Chinese Simplified)', en: 'Chinese Simplified' },
   { value: 'zh-TW', label: '繁體中文 (Chinese Traditional)', en: 'Chinese Traditional' },
+  { value: 'zh-HK', label: '繁體中文 (Chinese Hong Kong)', en: 'Chinese (Hong Kong)' },
   { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
   { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
-  { type: 'sep', label: '—— Southeast Asia ——' },
-  { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
-  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
-  { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
-  { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
-  { value: 'tl', label: 'Filipino (Tagalog)', en: 'Filipino' },
-  { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' }, 
-  { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },  
-  { type: 'sep', label: '—— Middle East & South Asia ——' },
-  { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
-  { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
-  { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
-  { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
-  { value: 'ur', label: 'اردو (Urdu)', en: 'Urdu' },
-  { value: 'te', label: 'తెలుగు (Telugu)', en: 'Telugu' },
-  { value: 'mr', label: 'मराठी (Marathi)', en: 'Marathi' },
-  { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
-  { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
-  { value: 'kk', label: 'Қазақ тілі (Kazakh)', en: 'Kazakh' },
-  { value: 'uz', label: "O'zbek (Uzbek)", en: 'Uzbek' },
-  { type: 'sep', label: '—— Europe ——' },
-  { value: 'de', label: 'Deutsch (German)', en: 'German' },
-  { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
-  { value: 'fr', label: 'Français (French)', en: 'French' },
-  { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
-  { value: 'pt', label: 'Português (Portuguese)', en: 'Portuguese' },
-  { value: 'pt-BR', label: 'Português (Brasil)', en: 'Portuguese (Brazil)' },
-  { value: 'ru', label: 'Русский (Russian)', en: 'Russian' },
-  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
-  { value: 'nl', label: 'Nederlands (Dutch)', en: 'Dutch' },
-  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
-  { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
-  { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
-  { value: 'ca', label: 'Català (Catalan)', en: 'Catalan' },
-  { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
+
+  // --- 欧洲与美洲 Europe & America ---
+  { type: 'sep', label: '—— Europe & America ——' },
   { value: 'bg', label: 'Български (Bulgarian)', en: 'Bulgarian' },
+  { value: 'ca', label: 'Català (Catalan)', en: 'Catalan' },
+  { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
   { value: 'cs', label: 'Čeština (Czech)', en: 'Czech' },
   { value: 'da', label: 'Dansk (Danish)', en: 'Danish' },
+  { value: 'nl', label: 'Nederlands (Dutch)', en: 'Dutch' },
+  { value: 'en-CA', label: 'English (Canada)', en: 'English (Canada)' },
+  { value: 'en-IE', label: 'English (Ireland)', en: 'English (Ireland)' },
+  { value: 'en-GB', label: 'English (United Kingdom)', en: 'English (UK)' },
   { value: 'et', label: 'Eesti (Estonian)', en: 'Estonian' },
-  { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
   { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
-  { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
-  { value: 'sr', label: 'Srpski (Serbian)', en: 'Serbian' }, 
+  { value: 'fr', label: 'Français (French)', en: 'French' },
+  { value: 'fr-CA', label: 'Français (French Canada)', en: 'French (Canada)' },
+  { value: 'de', label: 'Deutsch (German)', en: 'German' },
+  { value: 'de-CH', label: 'Deutsch (German Switzerland)', en: 'German (Switzerland)' },
+  { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
   { value: 'hu', label: 'Magyar (Hungarian)', en: 'Hungarian' },
+  { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
+  { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
   { value: 'lv', label: 'Latviešu (Latvian)', en: 'Latvian' },
   { value: 'lt', label: 'Lietuvių (Lithuanian)', en: 'Lithuanian' },
+  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
+  { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
+  { value: 'pt', label: 'Português (Portuguese)', en: 'Portuguese' },
+  { value: 'pt-BR', label: 'Português (Portuguese Brazil)', en: 'Portuguese (Brazil)' },
+  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
+  { value: 'ru', label: 'Русский (Russian)', en: 'Russian' },
+  { value: 'sr', label: 'Srpski (Serbian)', en: 'Serbian' },
   { value: 'sk', label: 'Slovenčina (Slovak)', en: 'Slovak' },
   { value: 'sl', label: 'Slovenščina (Slovenian)', en: 'Slovenian' },
-  { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
+  { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
+  { value: 'es-MX', label: 'Español (Spanish Mexico)', en: 'Spanish (Mexico)' },
+  { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
+  { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
+
+  // --- 澳洲与大洋洲 Australia & Oceania ---
+  { type: 'sep', label: '—— Australia & Oceania ——' },
+  { value: 'en-AU', label: 'English (Australia)', en: 'English (Australia)' },
+  { value: 'en-NZ', label: 'English (New Zealand)', en: 'English (New Zealand)' },
+// --- 东南亚 Southeast Asia ---
+  { type: 'sep', label: '—— Southeast Asia ——' },
+  { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' },
+  { value: 'tl', label: 'Filipino (Filipino)', en: 'Filipino' },
+  { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
+  { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },
+  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },  
+  { value: 'zh-SG', label: '简体中文 (Chinese Singapore)', en: 'Chinese (Singapore)' },
+  { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
+  { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
+
+  // --- 中东与南亚 Middle East & South Asia ---
+  { type: 'sep', label: '—— Middle East & South Asia ——' },
+  { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
+  { value: 'ar-SA', label: 'العربية (Arabic Saudi Arabia)', en: 'Arabic (Saudi Arabia)' },
+  { value: 'ar-AE', label: 'العربية (Arabic UAE)', en: 'Arabic (UAE)' },
+  { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
+  { value: 'en-IN', label: 'English (India)', en: 'English (India)' },
+  { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
+  { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
+  { value: 'kk', label: 'Қазақ тілі (Kazakh)', en: 'Kazakh' },
+  { value: 'mr', label: 'मराठी (Marathi)', en: 'Marathi' },
+  { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
+  { value: 'te', label: 'తెలుగు (Telugu)', en: 'Telugu' },
+  { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
+  { value: 'ur', label: 'اردو (Urdu)', en: 'Urdu' },
+  { value: 'uz', label: "O'zbek (Uzbek)", en: 'Uzbek' },
+
+  // --- 非洲 Africa ---
   { type: 'sep', label: '—— Africa ——' },
   { value: 'af', label: 'Afrikaans (Afrikaans)', en: 'Afrikaans' },
   { value: 'am', label: 'አማርኛ (Amharic)', en: 'Amharic' },
@@ -1586,14 +1616,14 @@ const LANGS = [
 ];
 
 function getPromptLanguageName(langCode) {
-    if (!langCode) return 'Chinese Simplified';
-    const normalized = langCode.replace('_', '-').toLowerCase();
-    const found = LANGS.find(l => l.value && l.value.toLowerCase() === normalized);
-    if (found?.en) return found.en;
-    // 兜底：截取括号里的英文
-    const match = found?.label?.match(/\(([^)]+)\)/);
-    if (match) return match[1];
-    return langCode;
+  if (!langCode) return 'Chinese Simplified';
+  const normalized = langCode.replace('_', '-').toLowerCase();
+  const found = LANGS.find(l => l.value && l.value.toLowerCase() === normalized);
+  if (found?.en) return found.en;
+  // 兜底：截取括号里的英文
+  const match = found?.label?.match(/\(([^)]+)\)/);
+  if (match) return match[1];
+  return langCode;
 }
 
 function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {}) {
@@ -1686,58 +1716,58 @@ const LANG_DISPLAY = {
 function isWordText(text) {
   const trimmed = text?.trim() || '';
   if (!trimmed) return false;
-  
+
   // 含有空格 → 不是单词
   if (trimmed.includes(' ')) return false;
-  
+
   // 检测是否为日语
   const isJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(trimmed);
   if (isJapanese) {
     return trimmed.length <= 10;
   }
-  
+
   // 检测是否为汉语（纯汉字）
   const isChinese = /^\p{Script=Han}+$/u.test(trimmed);
   if (isChinese) {
     return trimmed.length <= 4;
   }
-  
+
   // 检测是否为韩语
   const isKorean = /\p{Script=Hangul}/u.test(trimmed);
   if (isKorean) {
     return trimmed.length <= 15;
   }
-  
+
   // 检测是否为阿拉伯语
   const isArabic = /\p{Script=Arabic}/u.test(trimmed);
   if (isArabic) {
     return trimmed.length <= 20;
   }
-  
+
   // 检测是否为俄语（西里尔字母）
   const isRussian = /\p{Script=Cyrillic}/u.test(trimmed);
   if (isRussian) {
     return trimmed.length <= 25;
   }
-  
+
   // 检测是否为泰语
   const isThai = /\p{Script=Thai}/u.test(trimmed);
   if (isThai) {
     return trimmed.length <= 20;
   }
-  
+
   // 检测是否为希伯来语
   const isHebrew = /\p{Script=Hebrew}/u.test(trimmed);
   if (isHebrew) {
     return trimmed.length <= 20;
   }
-  
+
   // 检测是否为印地语（天城文）
   const isDevanagari = /\p{Script=Devanagari}/u.test(trimmed);
   if (isDevanagari) {
     return trimmed.length <= 25;
   }
-  
+
   // 默认：英文及其他拉丁字母，长度 <= 30
   return trimmed.length <= 30;
 }

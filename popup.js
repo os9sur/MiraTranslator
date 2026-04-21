@@ -1322,12 +1322,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
-  gearBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
+gearBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    loginModal.style.display = 'none';
+    profilePanel.style.display = 'none'; 
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
-    profilePanel.style.display = 'none';
-  });
+});
   // 切换UI语言
   const uiSelect = document.getElementById('uiLangSelect');
   if (uiSelect) {
@@ -2786,10 +2787,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── 登录弹窗开关 ──────────────────────────────────
   const loginModal = document.getElementById('loginModal');
 
-  document.getElementById('btnLogin').addEventListener('click', (e) => {
-    e.stopPropagation();
+document.getElementById('btnLogin').addEventListener('click', (e) => {
+    e.stopPropagation(); 
+    advMenu.style.display = 'none';
+    profilePanel.style.display = 'none'; 
     loginModal.style.display = loginModal.style.display === 'none' ? 'block' : 'none';
-  });
+});
 
   document.addEventListener('click', (e) => {
     if (!loginModal.contains(e.target) &&
