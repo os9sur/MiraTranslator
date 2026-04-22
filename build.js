@@ -28,7 +28,7 @@ async function build() {
             'dists', '.git', '.vscode', '.gitignore', 'node_modules',
             'private_config.js', 'build.js', 'package.json',
             'package-lock.json', 'pnpm-lock.yaml', 'README.md',
-            'tools', 'LICENSE', 'img', 'images', '.gitattributes'
+            'tools', 'LICENSE', 'img', 'images', '.gitattributes','assets'
         ];
 
         items.forEach(item => {
