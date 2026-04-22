@@ -98,15 +98,60 @@ const SiteRules = {
             minLen: 5
         },
         "discord.com": {
-            selectors: "[class^='messageContent']",
+            selectors: [
+                "[class*='messageContent'] > span",
+                "[class*='messageContent'] h1",
+                "[class*='messageContent'] h2",
+                "[class*='messageContent'] h3",
+                "[class*='messageContent'] li",
+                "[class*='messageContent'] p",
+                "[class*='embedDescription']",
+                "[class*='blockquote']",
+                "[class*='topic']",
+                "[class*='headerText']",
+            ].join(", "),
             minLen: 2
         },
         "producthunt.com": {
-            selectors: "[class*='styles_title__'], [class*='styles_description__'], [class*='comment_body__']",
+            selectors: [
+                "[class*='styles_title__']",
+                "[class*='styles_description__']",
+                "[class*='comment_body__']",
+
+                "span.text-secondary",
+                "span[class*='font-semibold'] a",
+                "a.line-clamp-3.text-base.font-medium.text-dark-gray",
+                "a[class*='line-clamp'][class*='font-medium']",
+                "div.relative.text-base.font-normal.text-gray-700",
+                "div[class*='text-gray-700']",
+                "[class*='comment_body__']",
+                "div[class*='comment'] p",
+                "div[class*='text-base'] span",
+                "h1, h2, h3, p",
+                "[role='article'] p",
+                "[role='article'] span.text-base",
+                "div[class*='text-base'][class*='font-normal'] span",
+            ].join(", "),
             minLen: 3
         },
         "dev.to": {
-            selectors: "#article-body p, #article-body li, .crayons-article__title",
+            selectors: [
+                "#article-body p",
+                "#article-body li",
+                "#article-body h2",
+                "#article-body h3",
+                "h2.crayons-story__title a",
+                "h2.crayons-story__title",
+                ".crayons-article__title",
+                "h1, h2, h3, h4",
+                "a.crayons-link.crayons-link--contentful",
+                "div.color-base-70",
+                ".user-metadata-details-inner .value",
+                ".user-metadata-details-inner .key",
+                "span.crayons-subtitle-2",
+                ".crayons-card--secondary p",
+                ".crayons-card--secondary div[class*='color']",
+            ].join(", "),
             minLen: 3
         },
         "threads.com": {
@@ -130,9 +175,22 @@ const SiteRules = {
             minLen: 10
         },
         "linkedin.com": {
-    selectors: "h1, h2, h3, p, span, li, a, [class*='feed-shared-text'], [class*='attributed-text'], [class*='job-card-list__title'], [class*='entity-result__title'], [class*='profile-section-card__title'], [class*='artdeco-entity-lockup__title']",
-    minLen: 10
-},
+            selectors: "h1, h2, h3, p, span, li, a, [class*='feed-shared-text'], [class*='attributed-text'], [class*='job-card-list__title'], [class*='entity-result__title'], [class*='profile-section-card__title'], [class*='artdeco-entity-lockup__title']",
+            minLen: 10
+        },
+        "notion.so": {
+            selectors: [
+                "main h1",
+                "main h2",
+                "main p:not(:empty)",
+                "[class*='Review'] [class*='typography']",
+                "[class*='TemplateReviews_review'] span[class*='typography']",
+                "article h1, article h2, article h3",
+                "article p",
+
+            ].join(", "),
+            minLen: 3
+        },
         "instagram.com": {
             selectors: [
                 // 评论和帖子描述的核心 class 
@@ -155,7 +213,11 @@ const SiteRules = {
     },
     generic: {
         selectors: [
-            "h1, h2, h3, p",
+            "h1:not(button *)",
+            "h2:not(button *)",
+            "h3:not(button *)",
+            "p:not(button *)",
+
             "article li",
             "section li",
             "main li",
@@ -165,7 +227,7 @@ const SiteRules = {
             ".entry li",
             "li:not(nav *):not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']):not([role='listbox'] *):not([role='combobox'] *):not([class*='menu'] *):not([class*='sidebar'] *):not([class*='nav'] *)"
         ].join(", "),
-        minLen: 15
+        minLen: 5
     },
     getRule(hostname) {
         if (this.defaults[hostname]) return this.defaults[hostname];

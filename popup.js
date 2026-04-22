@@ -104,9 +104,9 @@ async function initNoticeBar() {
   const chevron = document.getElementById('noticeChevron');
   const dotEl = bar?.querySelector('[style*="border-radius: 50%"]');
 
-if (!bar || !titleEl || !contentEl || !gotItBtn || !expandBody || !chevron) {
-  return;
-}
+  if (!bar || !titleEl || !contentEl || !gotItBtn || !expandBody || !chevron) {
+    return;
+  }
 
   // 应用主题配色
   const theme = NOTICE_THEMES[noticeData.level] || NOTICE_THEMES.warning;
@@ -228,6 +228,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateSelect(document.getElementById('lpSelA'), { includeAuto: true, selected: 'auto' });
   populateSelect(document.getElementById('lpSelB'), { selected: 'ja' });
 
+  function isRTLLang(langVal) {
+    const prefix = (langVal || '').toLowerCase().slice(0, 2);
+    return ['ar', 'he', 'fa', 'ku'].includes(prefix);
+  }
+
   // ── 语言对初始化
   async function initLangPair() {
     const r = await safeGetStorage(['lpLangA', 'lpLangB']);
@@ -239,6 +244,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (selA) selA.value = langA;
     if (selB) selB.value = langB;
     updateLpBadges();
+
+    const rtl = isRTLLang(langB);
+    const arrow = document.getElementById('lpArrow');
+    const toggle = document.getElementById('langPairToggle');
+    if (arrow) arrow.textContent = rtl ? '←' : '→';
+    if (toggle) toggle.style.flexDirection = rtl ? 'row-reverse' : 'row';
   }
 
   function updateLpBadges() {
@@ -250,43 +261,52 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const getShortEn = (val) => {
       if (val === 'auto') return 'AUTO';
-
       const key = val.toLowerCase();
-      if (LANG_DISPLAY[key]) {
-        return LANG_DISPLAY[key];
-      }
-
+      if (LANG_DISPLAY[key]) return LANG_DISPLAY[key];
       if (key === 'ja') return 'JA';
       if (key === 'en') return 'EN';
       if (key === 'ko') return 'KO';
-
       const lang = LANGS.find(item => item.value === val);
-      if (lang) {
-        return lang.en.slice(0, 2).toUpperCase();
-      }
-
+      if (lang) return lang.en.slice(0, 2).toUpperCase();
       return val.slice(0, 2).toUpperCase();
     };
 
     badgeA.textContent = getShortEn(selA.value);
     badgeB.textContent = getShortEn(selB.value);
-
     window.hintSourceLang = selA.value;
+
+    const rtl = isRTLLang(selB.value);
+    const arrow = document.getElementById('lpArrow');
+    const toggle = document.getElementById('langPairToggle');
+    if (arrow) arrow.textContent = rtl ? '←' : '→';
+    if (toggle) toggle.style.flexDirection = rtl ? 'row-reverse' : 'row';
   }
 
   // 语言对 UI 事件绑定
   function bindLangPairEvents() {
     document.getElementById('langPairToggle')?.addEventListener('click', () => {
       document.getElementById('langPairTag').style.display = 'none';
-      document.getElementById('langPairEdit').style.display = 'flex';
-      document.getElementById('lpArrow').textContent = '⇄';
+
+      const editEl = document.getElementById('langPairEdit');
+      editEl.style.display = 'flex';
+
+      const selB = document.getElementById('lpSelB');
+      const rtl = isRTLLang(selB?.value);
+      editEl.style.flexDirection = rtl ? 'row-reverse' : 'row';
+
+      const arrow = document.getElementById('lpArrow');
+      if (arrow) arrow.textContent = '⇄';
     });
 
     document.getElementById('lpDoneBtn')?.addEventListener('click', async () => {
       updateLpBadges();
+
+      const selB = document.getElementById('lpSelB');
+      const rtl = isRTLLang(selB?.value);
+      document.getElementById('langPairEdit').style.flexDirection = rtl ? 'row-reverse' : 'row';
+
       document.getElementById('langPairEdit').style.display = 'none';
       document.getElementById('langPairTag').style.display = 'flex';
-      document.getElementById('lpArrow').textContent = '→';
       await safeSetStorage({
         lpLangA: document.getElementById('lpSelA').value,
         lpLangB: document.getElementById('lpSelB').value,
@@ -299,6 +319,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (a.value === 'auto') return;
       [a.value, b.value] = [b.value, a.value];
       updateLpBadges();
+
+      const rtl = isRTLLang(b.value);
+      document.getElementById('langPairEdit').style.flexDirection = rtl ? 'row-reverse' : 'row';
     });
   }
   initLangPair();
@@ -1324,13 +1347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
-gearBtn.addEventListener('click', (e) => {
-    e.stopPropagation(); 
+  gearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
     loginModal.style.display = 'none';
-    profilePanel.style.display = 'none'; 
+    profilePanel.style.display = 'none';
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
-});
+  });
   // 切换UI语言
   const uiSelect = document.getElementById('uiLangSelect');
   if (uiSelect) {
@@ -2789,12 +2812,12 @@ gearBtn.addEventListener('click', (e) => {
   // ── 登录弹窗开关 ──────────────────────────────────
   const loginModal = document.getElementById('loginModal');
 
-document.getElementById('btnLogin').addEventListener('click', (e) => {
-    e.stopPropagation(); 
+  document.getElementById('btnLogin').addEventListener('click', (e) => {
+    e.stopPropagation();
     advMenu.style.display = 'none';
-    profilePanel.style.display = 'none'; 
+    profilePanel.style.display = 'none';
     loginModal.style.display = loginModal.style.display === 'none' ? 'block' : 'none';
-});
+  });
 
   document.addEventListener('click', (e) => {
     if (!loginModal.contains(e.target) &&

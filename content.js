@@ -229,7 +229,7 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
         clear: ${clearStyle} !important;
         margin: ${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft} !important;
         padding-left: ${sourcePaddingLeft} !important;
-        text-align: ${sourceAlign} !important; 
+        text-align: ${isRTL ? 'right' : sourceAlign} !important;
         color: ${transEl.dataset.translated === 'true' ? '#60a5fa' : 'gray'} !important;
         font-style: ${transEl.dataset.translated === 'true' ? 'normal' : 'italic'} !important;
         text-decoration: none !important;
@@ -272,7 +272,7 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
         max-width: ${isWikiUI ? 'calc(100% - 2px)' : '100%'} !important;
         margin: ${finalMargin} !important;
         direction: ${isRTL ? 'rtl' : 'ltr'} !important;
-        text-align: ${sourceAlign} !important;
+        text-align: ${isRTL ? 'right' : sourceAlign} !important;
         unicode-bidi: ${isRTL ? 'plaintext' : 'normal'} !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
@@ -2237,22 +2237,22 @@ function getObserver() {
           if (parent) targetEl = parent;
         }
 
-if (!isMatch && targetEl === el) {
-  const hasText = (el.textContent || '').trim().length >= (rule?.minLen || 3);
-  if (!hasText) {
-    window.observer.unobserve(el);
-    return;
-  }
-  if (!isDynamic && !(
-    isYoutube
-      ? (el.classList?.contains('yt-core-attributed-string') ||
-        el.classList?.contains('ytLockupMetadataViewModelTitle') ||
-        el.classList?.contains('ytLockupMetadataViewModelHeadingReset'))
-      : el.classList?.contains('x')
-  )) {
-    // 有文本内容，继续翻译，不 unobserve
-  }
-}
+        if (!isMatch && targetEl === el) {
+          const hasText = (el.textContent || '').trim().length >= (rule?.minLen || 3);
+          if (!hasText) {
+            window.observer.unobserve(el);
+            return;
+          }
+          if (!isDynamic && !(
+            isYoutube
+              ? (el.classList?.contains('yt-core-attributed-string') ||
+                el.classList?.contains('ytLockupMetadataViewModelTitle') ||
+                el.classList?.contains('ytLockupMetadataViewModelHeadingReset'))
+              : el.classList?.contains('x')
+          )) {
+            // 有文本内容，继续翻译，不 unobserve
+          }
+        }
 
         if (isDynamic) {
           const currentText = (targetEl.textContent || '').trim();
@@ -4613,7 +4613,7 @@ function initSelectionTranslate() {
           </div>
 
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--p-accent)"
-              stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none;">
+              stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none; ${['ar', 'he', 'fa', 'ku'].includes(targetLang.slice(0, 2)) ? 'transform:scaleX(-1);' : ''}">
             <path d="M5 12h14m-7-7 7 7-7 7"/>
           </svg>
 
