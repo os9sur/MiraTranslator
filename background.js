@@ -3670,15 +3670,49 @@ async function syncMicrosoftUserToBackend(user, msToken) {
 // ── 用户登录：获取 Google 信息并同步到后端 ── 
 async function handleUserLogin(sendResponse) {
     try {
-        // 1. 获取 Google OAuth token
+        const brands = navigator.userAgentData?.brands?.map(b => b.brand) || [];
+        const isEdge = brands.includes('Microsoft Edge');
+        //  获取 Google OAuth token
         const token = await new Promise((resolve, reject) => {
-            chrome.identity.getAuthToken({ interactive: true }, (t) => {
-                if (chrome.runtime.lastError || !t) {
-                    reject(new Error(chrome.runtime.lastError?.message || 'USER_CANCELED'));
-                } else {
-                    resolve(t);
-                }
-            });
+            if (isEdge) {
+                // Edge   launchWebAuthFlow
+                const clientId = "{{MY_ID}}";
+                const redirectUri = `https://${chrome.runtime.id}.chromiumapp.org/`;
+                const scope = [
+                    "https://www.googleapis.com/auth/userinfo.email",
+                    "https://www.googleapis.com/auth/userinfo.profile",
+                    "https://www.googleapis.com/auth/drive.appdata"
+                ].join(" ");
+
+                const authUrl = "https://accounts.google.com/o/oauth2/auth" +
+                    `?client_id=${clientId}` +
+                    `&response_type=token` +
+                    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+                    `&scope=${encodeURIComponent(scope)}`;
+
+                chrome.identity.launchWebAuthFlow(
+                    { url: authUrl, interactive: true },
+                    (responseUrl) => {
+                        if (chrome.runtime.lastError || !responseUrl) {
+                            reject(new Error(chrome.runtime.lastError?.message || 'USER_CANCELED'));
+                            return;
+                        }
+                        const hash = new URL(responseUrl).hash;
+                        const params = new URLSearchParams(hash.substring(1));
+                        const t = params.get("access_token");
+                        t ? resolve(t) : reject(new Error('无法提取 Token'));
+                    }
+                );
+            } else {
+                // Chrome  逻辑 
+                chrome.identity.getAuthToken({ interactive: true }, (t) => {
+                    if (chrome.runtime.lastError || !t) {
+                        reject(new Error(chrome.runtime.lastError?.message || 'USER_CANCELED'));
+                    } else {
+                        resolve(t);
+                    }
+                });
+            }
         });
 
         // 2. 获取 Google 用户详细信息
