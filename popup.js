@@ -104,7 +104,9 @@ async function initNoticeBar() {
   const chevron = document.getElementById('noticeChevron');
   const dotEl = bar?.querySelector('[style*="border-radius: 50%"]');
 
-  if (!bar) return;
+if (!bar || !titleEl || !contentEl || !gotItBtn || !expandBody || !chevron) {
+  return;
+}
 
   // 应用主题配色
   const theme = NOTICE_THEMES[noticeData.level] || NOTICE_THEMES.warning;
@@ -2056,14 +2058,14 @@ gearBtn.addEventListener('click', (e) => {
     searchPanel.style.display = 'flex';
     input.focus();
   };
-  document.getElementById('closeSearchPanel').onclick = () => {
-    mainContainer.style.display = 'block';
-    searchPanel.style.display = 'none';
-    input.value = '';
-    input.style.height = '36px';
-    resultArea.style.display = 'none';
-    notebookBtn.style.display = 'none';
-  };
+  // document.getElementById('closeSearchPanel').onclick = () => {
+  //   mainContainer.style.display = 'block';
+  //   searchPanel.style.display = 'none';
+  //   input.value = '';
+  //   input.style.height = '36px';
+  //   resultArea.style.display = 'none';
+  //   notebookBtn.style.display = 'none';
+  // };
 
   // ── 原文发音
   document.getElementById('ttsBtn').onclick = function () {
@@ -2359,7 +2361,7 @@ gearBtn.addEventListener('click', (e) => {
             await safeSetStorage({ scanConfig: config });
 
             await saveScanConfig();
-            showToast(t('resetToBuiltinSuccess') || '已恢复内置规则', 'success');
+            showToast(t('success') || 'Default presets restored.', 'success');
           };
         }
       }

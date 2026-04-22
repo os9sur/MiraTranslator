@@ -2915,7 +2915,7 @@ self.i18nAttach3 = {
 self.i18nAttach4 = {
   "zh-CN": {
     welcomeTitle: "欢迎使用 Mira! 🪄",
-    setLanguage: "你想把内容翻译成什么语言？",
+    setLanguage: "你希望翻译成哪种语言？",
     targetLang: "翻译成什么语言？",
     uiLanguage: "界面语言",
     restrictedNotice: "此页面受浏览器安全策略限制，Mira 无法在此运行",
@@ -2927,7 +2927,7 @@ self.i18nAttach4 = {
   },
   "zh-TW": {
     welcomeTitle: "歡迎使用 Mira! 🪄",
-    setLanguage: "你想把內容翻譯成什麼語言？",
+    setLanguage: "你希望翻譯成什麼語言？",
     targetLang: "翻譯成什麼語言？",
     uiLanguage: "界面語言",
     restrictedNotice: "此頁面受瀏覽器安全策略限制，Mira 無法在此運行",
@@ -2939,7 +2939,7 @@ self.i18nAttach4 = {
   },
   "en": {
     welcomeTitle: "Welcome to Mira! 🪄",
-    setLanguage: "Which language do you want to read in?",
+    setLanguage: "What language would you like to translate into?",
     targetLang: "Translate to?",
     uiLanguage: "App Language",
     restrictedNotice: "This page is restricted by browser policy. Mira cannot run here.",
@@ -2952,7 +2952,7 @@ self.i18nAttach4 = {
   "ja": {
     welcomeTitle: "Mira へようこそ! 🪄",
     setLanguage: "どの言語に翻訳しますか？",
-    targetLang: "翻訳先の言語は？",
+    targetLang: "どの言語に翻訳しますか？",
     uiLanguage: "表示言語",
     restrictedNotice: "このページはブラウザのポリシーで制限されています。Mira はここでは動作しません。",
     translatePrefix: "Miraはウェブページと YouTube の字幕を",
@@ -2975,7 +2975,7 @@ self.i18nAttach4 = {
   },
   "de": {
     welcomeTitle: "Willkommen bei Mira! 🪄",
-    setLanguage: "In welche Sprache soll übersetzt werden?",
+    setLanguage: "In welche Sprache möchten Sie übersetzen?",
     targetLang: "Übersetzen in?",
     uiLanguage: "Sprache",
     restrictedNotice: "Diese Seite ist durch Browser-Richtlinien eingeschränkt. Mira kann hier nicht ausgeführt werden.",
@@ -2987,7 +2987,7 @@ self.i18nAttach4 = {
   },
   "ru": {
     welcomeTitle: "Добро пожаловать в Mira! 🪄",
-    setLanguage: "На какой язык переводить контент?",
+    setLanguage: "На какой язык вы хотите перевести?",
     targetLang: "Перевести на?",
     uiLanguage: "Язык интерфейса",
     restrictedNotice: "Эта страница ограничена политикой браузера. Mira не может здесь работать.",
@@ -2999,31 +2999,31 @@ self.i18nAttach4 = {
   },
   "es": {
     welcomeTitle: "¡Bienvenido a Mira! 🪄",
-    setLanguage: "¿A qué idioma quieres traducir?",
+    setLanguage: "¿A qué idioma te gustaría traducir?",
     targetLang: "¿Traducir a?",
     uiLanguage: "Idioma",
     restrictedNotice: "Esta página está restringida por la política del navegador. Mira no puede funcionar aquí.",
     translatePrefix: "Mira traducirá páginas web y subtítulos de YouTube al",
     translateHighlight: "idioma seleccionado.",
     translateSuffix: "",
-    btnGotIt: "¡Entendido!",
+    btnGotIt: "Empezar",
     changeSetting: "Puedes cambiarlo en los ajustes en cualquier momento."
   },
   "fr": {
     welcomeTitle: "Bienvenue sur Mira ! 🪄",
-    setLanguage: "En quelle langue voulez-vous traduire ?",
+    setLanguage: "Dans quelle langue souhaitez-vous traduire ?",
     targetLang: "Traduire en ?",
     uiLanguage: "Langue",
     restrictedNotice: "Cette page est limitée par la politique du navigateur. Mira ne peut pas s'exécuter ici.",
     translatePrefix: "Mira traduira les pages et les sous-titres YouTube en",
     translateHighlight: "la langue choisie.",
     translateSuffix: "",
-    btnGotIt: "C'est compris !",
+    btnGotIt: "C'est parti !",
     changeSetting: "Modifiable à tout moment dans les paramètres."
   },
   "pt": {
     welcomeTitle: "Bem-vindo ao Mira! 🪄",
-    setLanguage: "Para qual idioma deseja traduzir?",
+    setLanguage: "Para qual idioma você gostaria de traduzir?",
     targetLang: "Traduzir para?",
     uiLanguage: "Idioma",
     restrictedNotice: "Esta página é restrita pela política do navegador. O Mira não pode ser executado aqui.",
@@ -3035,7 +3035,7 @@ self.i18nAttach4 = {
   },
   "it": {
     welcomeTitle: "Benvenuto su Mira! 🪄",
-    setLanguage: "In quale lingua vuoi tradurre?",
+    setLanguage: "In quale lingua vorresti tradurre?",
     targetLang: "Traduci in?",
     uiLanguage: "Lingua",
     restrictedNotice: "Questa pagina è limitata dalle norme del browser. Mira non può essere eseguito qui.",
@@ -3047,7 +3047,7 @@ self.i18nAttach4 = {
   },
   "tr": {
     welcomeTitle: "Mira'ya Hoş Geldiniz! 🪄",
-    setLanguage: "Hangi dile çevirmek istersiniz?",
+    setLanguage: "Hangi dile çeviri yapmak istersiniz?",
     targetLang: "Şuna çevir?",
     uiLanguage: "Dil",
     restrictedNotice: "Bu sayfa tarayıcı politikası tarafından kısıtlanmıştır. Mira burada çalışamaz.",
@@ -3071,7 +3071,7 @@ self.i18nAttach4 = {
   },
   "th": {
     welcomeTitle: "ยินดีต้อนรับสู่ Mira! 🪄",
-    setLanguage: "คุณต้องการแปลเป็นภาษาอะไร?",
+    setLanguage: "คุณต้องการแปลเป็นภาษาใด?",
     targetLang: "แปลเป็นภาษา?",
     uiLanguage: "ภาษา",
     restrictedNotice: "หน้านี้ถูกจำกัดโดยนโยบายของเบราว์เซอร์ Mira ไม่สามารถทำงานที่นี่ได้",
@@ -3083,7 +3083,7 @@ self.i18nAttach4 = {
   },
   "ar": {
     welcomeTitle: "مرحباً بك في Mira! 🪄",
-    setLanguage: "إلى أي لغة تريد الترجمة؟",
+    setLanguage: "ما هي اللغة التي ترغب في الترجمة إليها؟",
     targetLang: "ترجمة إلى؟",
     uiLanguage: "اللغة",
     restrictedNotice: "هذه الصفحة مقيدة بسياسة المتصفح. لا يمكن لـ Mira العمل هنا.",
@@ -3528,7 +3528,7 @@ self.i18nAttach9 = {
     logout: "ログアウト",
     balance: "残高",
     recharge: "チャージ",
-    loginAccount: "サインイン",
+    loginAccount: "ログイン",
     byokNotice: "APIキーの設定不要。従量課金制ですぐに使えます。",
     selectModel: "翻訳モデルを選択",
     loginFirst: "チャージする前に、拡張機能でアカウントにログインしてください。",
