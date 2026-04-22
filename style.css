@@ -124,22 +124,19 @@
 }
 
 .close-btn-common {
-  transition: all 0.2s ease;
-  display: inline-block;
-  cursor: pointer;
   font-size: 16px;
   font-weight: bold;
   color: #94a3b8;
+  display: inline-block;
+  transform: scaleX(-1);
+  margin-left: 6px;
+  scale: 1.5;
+  cursor: pointer;
 }
 
 .close-btn-common:hover {
-  color: #ef4444 !important;
-  transform: scale(1.2);
+  color: #63ef44 !important;
   filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.3));
-}
-
-.close-btn-common:active {
-  transform: scale(0.9);
 }
 
 select {
@@ -1957,7 +1954,7 @@ yt-attributed-string+.kt-paragraph-translation {
   }
 }
 
-#close-guide-btn { 
+#close-guide-btn {
   background: #238636;
   color: white;
   border: none;
@@ -2148,7 +2145,6 @@ yt-attributed-string+.kt-paragraph-translation {
 }
 
 /* 登录相关  */
-/* ── Header right group ── */
 .header-right {
   display: flex;
   align-items: center;
@@ -2174,42 +2170,95 @@ yt-attributed-string+.kt-paragraph-translation {
 }
 
 .btn-login {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 5px 12px;
+  padding: 6px 8px;
+  border: none;
   border-radius: 8px;
   font-size: 12px;
+  height: 30px;
   font-weight: 600;
-  color: #f0f9ff;
+  letter-spacing: 0.5px;
   white-space: nowrap;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  backdrop-filter: blur(4px);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: rgba(0, 229, 255, 0.05);
+  color: #e0ffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow:
+    0 0 12px rgba(0, 229, 255, 0.15),
+    inset 0 0 8px rgba(0, 229, 255, 0.1);
+  /* 内部玻璃反光 */
 }
 
+.btn-login::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right,
+      rgba(0, 229, 255, 0) 0%,
+      rgba(0, 229, 255, 0.4) 50%,
+      rgba(0, 229, 255, 0) 100%);
+  transform: skewX(-25deg);
+  animation: neon-shimmer 3s infinite ease-in-out;
+  pointer-events: none;
+  /*  防止流光层阻挡鼠标点击 */
+}
+
+@keyframes neon-shimmer {
+  0% {
+    left: -100%;
+  }
+
+  20% {
+    left: 200%;
+  }
+
+  100% {
+    left: 200%;
+  }
+}
+
+.btn-login svg,
 .btn-login .btn-icon {
   width: 14px;
   height: 14px;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 2px rgba(56, 189, 248, 0.4));
+  stroke: rgb(67 255 0);
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.6));
+  transition: all 0.3s ease;
 }
 
+
 .btn-login:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: rgba(56, 189, 248, 0.6);
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00e5ff;
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.5),
+    inset 0 0 10px rgba(0, 229, 255, 0.3);
   transform: translateY(-1px);
 }
 
+.btn-login:hover svg {
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 6px #00e5ff);
+}
+
 .btn-login:active {
-  transform: scale(0.95) translateY(0);
-  background: rgba(56, 189, 248, 0.25);
+  transform: scale(0.96) translateY(0);
+  box-shadow:
+    0 0 8px rgba(0, 229, 255, 0.3),
+    inset 0 0 4px rgba(0, 229, 255, 0.2);
+  background: rgba(0, 229, 255, 0.1);
   transition: all 0.1s;
 }
 
