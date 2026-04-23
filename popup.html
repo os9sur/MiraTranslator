@@ -18,10 +18,10 @@
       width: 270px;
       min-width: 250px;
       max-width: 580px;
+      margin: 12px 6px 12px 12px;
       min-height: fit-content;
       border-radius: 20px;
-      /* padding: 3px 3px; 
-      margin-bottom: 10px;*/
+      /* padding: 3px 3px; */
       line-height: 1.1;
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -36,7 +36,11 @@
       overflow-y: auto; */
       transition: width 0.2s ease-in-out;
     }
-
+@supports (-moz-appearance:none) {
+  body {
+    margin: 12px 12px 12px 12px;
+  }
+}
     .mira-hint-icon {
       display: inline-block;
       width: 14px;
@@ -270,7 +274,7 @@
     </div>
   </div>
   <!-- 查单词结束 -->
-  <div id="mainContainer" style="margin-right: -6px;">
+  <div id="mainContainer">
     <!-- 设置 -->
     <div class="main-header" style="margin-bottom: 8px; display: flex; flex-direction: column; width: 100%;">
 
@@ -326,7 +330,7 @@
           </div>
 
           <button class="btn-avatar" id="btnAvatar"
-            style="display:none; width: 24px; height: 24px; border-width: 0; border-style: solid; padding:0; background:none;">
+            style="display:none; width: 24px; height: 24px; border-width: 0; border-style: solid; padding:0; ">
             <img id="avatarImg" src="" style="height:100%; border-radius:50%; display:none;">
             <span id="avatarInitial"></span>
           </button>
@@ -765,9 +769,9 @@
   </div>
   <!-- 云同步panel开始 -->
   <div id="syncSettingsPanel"
-    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 125; display: none; padding: 6px 6px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 125; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
     <div class="settings-card-wrapper">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
         <span id="closeSyncPanel" class="close-btn-common">➥</span>
         <h3 style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">CLOUD SYNC</h3>
       </div>
@@ -850,9 +854,9 @@
   </div>
   <!-- 风格设置panel开始 -->
   <div id="styleSettingsPanel"
-    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    style="width: 100%;border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
     <div
-      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-shrink: 0;">
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
       <span id="closeStylePanel" class="close-btn-common">➥</span>
       <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">STYLE
         CUSTOMIZATION</span>

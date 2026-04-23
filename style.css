@@ -2276,7 +2276,7 @@ yt-attributed-string+.kt-paragraph-translation {
   flex-shrink: 0;
   border: 2px solid #58f1ff;
   position: relative;
-
+background-color: cornflowerblue;
   box-shadow:
     0 0 8px rgba(88, 241, 255, 0.6),
     0 0 15px rgba(0, 163, 255, 0.3);
@@ -2449,6 +2449,10 @@ yt-attributed-string+.kt-paragraph-translation {
   transform: translateY(-1px);
   box-shadow: 0 6px 15px rgba(37, 99, 235, 0.35);
   filter: brightness(1.1);
+}
+.btn-recharge:active {
+  transform: scale(0.96);
+  filter: brightness(0.9);
 }
 
 .profile-divider {

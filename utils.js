@@ -79,7 +79,7 @@ const normalizeLang = (lang) => {
   }
 
   const specials = {
-    'en-in': 'en-IN', 'en-gb': 'en-GB', 'en-ca': 'en-CA', 'en-au': 'en-AU',
+    'en-in': 'en-IN', 'en-gb': 'en-GB','en-us': 'en-US', 'en-ca': 'en-CA', 'en-au': 'en-AU',
     'en-nz': 'en-NZ', 'en-ie': 'en-IE',
     'de-ch': 'de-CH', 'fr-ca': 'fr-CA', 'pt-br': 'pt-BR',
     'ar-ae': 'ar-AE', 'ar-sa': 'ar-SA'
@@ -912,7 +912,7 @@ function localizePos(pos, targetLang) {
 //需要同步的存储键列表
 const STORAGE_KEYS = {
   core: ['userConfigs', 'activeConfig', 'lastActiveId'],
-  settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig','ai_prompt_settings','vocabHighlight'],
+  settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig', 'ai_prompt_settings', 'vocabHighlight'],
   sync: function () {
     return [...this.core, ...this.settings];
   },
@@ -1548,6 +1548,7 @@ const LANGS = [
   { value: 'en-CA', label: 'English (Canada)', en: 'English (Canada)' },
   { value: 'en-IE', label: 'English (Ireland)', en: 'English (Ireland)' },
   { value: 'en-GB', label: 'English (United Kingdom)', en: 'English (UK)' },
+  { value: 'en-US', label: 'English (United States)', en: 'English (US)' },
   { value: 'et', label: 'Eesti (Estonian)', en: 'Estonian' },
   { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
   { value: 'fr', label: 'Français (French)', en: 'French' },
@@ -1578,13 +1579,13 @@ const LANGS = [
   { type: 'sep', label: '—— Australia & Oceania ——' },
   { value: 'en-AU', label: 'English (Australia)', en: 'English (Australia)' },
   { value: 'en-NZ', label: 'English (New Zealand)', en: 'English (New Zealand)' },
-// --- 东南亚 Southeast Asia ---
+  // --- 东南亚 Southeast Asia ---
   { type: 'sep', label: '—— Southeast Asia ——' },
   { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' },
   { value: 'tl', label: 'Filipino (Filipino)', en: 'Filipino' },
   { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
   { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },
-  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },  
+  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
   { value: 'zh-SG', label: '简体中文 (Chinese Singapore)', en: 'Chinese (Singapore)' },
   { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
