@@ -164,6 +164,10 @@ async function initNoticeBar() {
 document.addEventListener('DOMContentLoaded', async () => {
   initNoticeBar();
   await initOnboarding();
+  const btnLogin = document.getElementById('btnLogin');
+  const btnAvatar = document.getElementById('btnAvatar');
+  if (btnLogin) btnLogin.style.display = 'none';
+  if (btnAvatar) btnAvatar.style.display = 'none';
   function showPanel(panelId) {
     const allPanels = [
       'mainContainer',
@@ -2730,13 +2734,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     userData = user;
     const btnLogin = document.getElementById('btnLogin');
     const btnAvatar = document.getElementById('btnAvatar');
+    const authLoading = document.getElementById('authLoading');
+
+    // 隐藏占位
+    if (authLoading) authLoading.style.display = 'none';
+
     if (user) {
-      // 已登录
       btnLogin.style.display = 'none';
       btnAvatar.style.display = 'flex';
       setAvatarDisplay(user);
     } else {
-      // 未登录
       btnLogin.style.display = 'flex';
       btnAvatar.style.display = 'none';
     }
@@ -2884,9 +2891,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       }, 2000); // 2秒后恢复 
     }
   });
-  document.getElementById('btnRecharge').addEventListener('click', () => {
-    profilePanel.style.display = 'none';
-    safeSendMessage({ action: 'openRecharge' });
+  //充值按钮
+  document.getElementById('btnRecharge').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    btn.style.transform = 'scale(0.96)';
+    btn.style.opacity = '0.8';
+    setTimeout(() => {
+      btn.style.transform = '';
+      btn.style.opacity = '';
+      profilePanel.style.display = 'none';
+      safeSendMessage({ action: 'openRecharge' });
+    }, 150);
   });
 
   // ── 初始化：读取登录状态 ───────────────────────────

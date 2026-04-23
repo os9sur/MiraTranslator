@@ -428,7 +428,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const getDesc = (descObj, lang) => {
                 if (!descObj) return '';
-                return descObj[lang] || descObj['en'] || '';
+                // 1. 完整匹配 zh-CN
+                if (descObj[lang]) return descObj[lang];
+                // 2. 下划线格式兼容 zh_CN
+                const underscored = lang.replace('-', '_');
+                if (descObj[underscored]) return descObj[underscored];
+                // 3. 繁体兜底：zh-TW / zh-HK / zh-MO → zh_TW
+                if (lang.startsWith('zh-') && lang !== 'zh-CN') {
+                    if (descObj['zh-TW']) return descObj['zh-TW'];
+                    if (descObj['zh_TW']) return descObj['zh_TW'];
+                }
+                // 4. 主语言码兜底 zh-CN → zh
+                const primary = lang.split('-')[0];
+                return descObj[primary] || descObj['en'] || '';
             };
 
             // ── 动态加载模型列表 ──────────────────────────────────────
@@ -555,32 +567,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             renderCards(selectedModel);
 
-//  防止重复注册
-if (window._miraStorageListener) {
-    chrome.storage.onChanged.removeListener(window._miraStorageListener);
-}
+            //  防止重复注册
+            if (window._miraStorageListener) {
+                chrome.storage.onChanged.removeListener(window._miraStorageListener);
+            }
 
-window._miraStorageListener = (changes, area) => {
-    if (area !== 'local') return;
+            window._miraStorageListener = (changes, area) => {
+                if (area !== 'local') return;
 
-    if (changes.mira_user) {
-        const newUser = changes.mira_user.newValue;
-        if (!newUser) {
-            const balanceEl = document.getElementById('miraBalance');
-            if (balanceEl) balanceEl.textContent = '$0.00';
+                if (changes.mira_user) {
+                    const newUser = changes.mira_user.newValue;
+                    if (!newUser) {
+                        const balanceEl = document.getElementById('miraBalance');
+                        if (balanceEl) balanceEl.textContent = '$0.00';
 
-            const wrap = document.getElementById('miraUserAvatar');
-            if (wrap) wrap.style.display = 'none';
+                        const wrap = document.getElementById('miraUserAvatar');
+                        if (wrap) wrap.style.display = 'none';
 
-            updateModalUserInfo(null);
-        } else {
-            showMiraAvatar(newUser);
-            updateModalUserInfo(newUser);
-        }
-    }
-};
+                        updateModalUserInfo(null);
+                    } else {
+                        showMiraAvatar(newUser);
+                        updateModalUserInfo(newUser);
+                    }
+                }
+            };
 
-chrome.storage.onChanged.addListener(window._miraStorageListener);
+            chrome.storage.onChanged.addListener(window._miraStorageListener);
             const res = await safeSendMessage({ action: 'getUser' });
             if (res?.user) {
                 showMiraAvatar(res.user);
@@ -1633,11 +1645,11 @@ function isAIEngine(id) {
     return config && AI_LLM_WHITE_LIST.includes(config.engine);
 }
 
-async function renderAIPromptSection() { 
+async function renderAIPromptSection() {
     const old = document.getElementById('ai-prompt-section');
     if (old) old.remove();
 
-    if (!isAIEngine(currentId)) return; 
+    if (!isAIEngine(currentId)) return;
     const stored = await safeGetStorage([AI_PROMPT_KEY]);
     const saved = stored?.[AI_PROMPT_KEY] || { web: '', subtitle: '' };
 
@@ -1746,7 +1758,7 @@ function _bindAIPromptEvents(section, initialSaved) {
 
     let isDirty = false;
     let saveTimer = null;
- 
+
     toggle.addEventListener('click', () => {
         const isOpen = body.classList.toggle('open');
         chevron.classList.toggle('open', isOpen);
