@@ -1,3 +1,10 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai (Mira Studio)
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+
 document.addEventListener('DOMContentLoaded', async () => {
   const vocabBody = document.getElementById('vocabBody');
   const wordInp = document.getElementById('wordInp');

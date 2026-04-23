@@ -1,3 +1,10 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai (Mira Studio)
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+
 let isLoggedIn = false;
 let userData = { uid: '', name: '', email: '', balance: 0, avatar: '' };
 
@@ -87,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('openSupport')?.addEventListener('click', () => {
-        window.open('mailto:p35850@proton.me?subject=充值问题', '_blank');
+        window.open('mailto:mira.studio@proton.me?subject=Mira Translator - Payment Issue', '_blank');
     });
 
     document.getElementById('openFaq')?.addEventListener('click', () => {
