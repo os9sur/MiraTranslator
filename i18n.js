@@ -3578,6 +3578,9 @@ self.i18nAttach10 = {
     cpHint: "⚠ 仅支持风格描述，例如：正式语气 / 简洁 / 医学术语等",
     cpSave: "保存",
     cpClear: "清除",
+    footerReview: "⭐ 好评支持",
+    footerFeedback: "✉️ 问题反馈",
+    restoreRules:"恢复默认规则"
   },
   "zh-TW": {
     cpTitle: "自訂提示詞",
@@ -3589,6 +3592,9 @@ self.i18nAttach10 = {
     cpHint: "⚠ 僅支援風格描述，例如：正式語氣 / 簡潔 / 醫學術語",
     cpSave: "儲存",
     cpClear: "清除",
+    footerReview: "⭐ 好評支持",
+    footerFeedback: "✉️ 問題回饋",
+    restoreRules:"恢復預設規則"
   },
   "en": {
     cpTitle: "Custom Prompt",
@@ -3600,6 +3606,9 @@ self.i18nAttach10 = {
     cpHint: "⚠ Style hint only, e.g. formal / concise / medical terms",
     cpSave: "Save",
     cpClear: "Clear",
+    footerReview: "⭐ Rate Us",
+    footerFeedback: "✉️ Feedback",
+    restoreRules:"Restore default rules"
   },
   "ja": {
     cpTitle: "カスタムプロンプト",
@@ -3611,6 +3620,9 @@ self.i18nAttach10 = {
     cpHint: "⚠ スタイルのみ、例：丁寧な文体 / 簡潔に / 医学用語",
     cpSave: "保存",
     cpClear: "クリア",
+    footerReview: "⭐ レビューする",
+    footerFeedback: "✉️ フィードバック",
+    restoreRules:"デフォルト規則に戻す"
   },
   "ko": {
     cpTitle: "커스텀 프롬프트",
@@ -3622,5 +3634,8 @@ self.i18nAttach10 = {
     cpHint: "⚠ 스타일 힌트만 가능, 예: 격식체 / 간결하게 / 의학 용어",
     cpSave: "저장",
     cpClear: "지우기",
+    footerReview: "⭐ 평가하기",
+    footerFeedback: "✉️ 피드백",
+    restoreRules:"기본 규칙으로 복구"
   },
 };

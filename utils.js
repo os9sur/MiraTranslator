@@ -1,3 +1,10 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai (Mira Studio)
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+
 const IS_DEV = true;
 const api = (typeof chrome !== 'undefined' && chrome.runtime?.id)
   ? (typeof browser !== 'undefined' ? browser : chrome)

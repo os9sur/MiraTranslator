@@ -1,3 +1,10 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai (Mira Studio)
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+
 window.browser = (function () {
   return window.msBrowser || window.browser || window.chrome;
 })();
@@ -2345,52 +2352,49 @@ document.addEventListener('DOMContentLoaded', async () => {
         hintEl.title = t('builtinRuleHint');
       }
 
-      //  控制重置按钮显示
+      //  控制重置按钮显示   
       if (resetBtn) {
         resetBtn.style.display = hasBuiltinRule ? 'inline-block' : 'none';
+        resetBtn.innerText = t('resetBuildinRules');
+        resetBtn.title = t('restoreRules');
 
-        if (resetBtn) {
-          resetBtn.style.display = hasBuiltinRule ? 'inline-block' : 'none';
+        resetBtn.addEventListener('mouseover', () => {
+          resetBtn.style.background = '#3b82f6';
+          resetBtn.style.color = '#fff';
+          resetBtn.style.boxShadow = '0 0 8px rgba(59,130,246,0.5)';
+        });
+        resetBtn.addEventListener('mouseout', () => {
+          resetBtn.style.background = 'transparent';
+          resetBtn.style.color = '#3b82f6';
+          resetBtn.style.boxShadow = 'none';
+        });
 
-          // ✅ hover 效果用 JS 绑定，避免 CSP 报错
-          resetBtn.addEventListener('mouseover', () => {
-            resetBtn.style.background = '#3b82f6';
-            resetBtn.style.color = '#fff';
-            resetBtn.style.boxShadow = '0 0 8px rgba(59,130,246,0.5)';
-          });
-          resetBtn.addEventListener('mouseout', () => {
-            resetBtn.style.background = 'transparent';
-            resetBtn.style.color = '#3b82f6';
-            resetBtn.style.boxShadow = 'none';
-          });
+        resetBtn.onclick = async () => {
+          const rule = SiteRules.getRule(domain);
+          const builtinSelectors = rule.selectors;
+          const builtinMinLen = rule.minLen ?? 5;
 
-          resetBtn.onclick = async () => {
-            const rule = SiteRules.getRule(domain);
-            const builtinSelectors = rule.selectors;
-            const builtinMinLen = rule.minLen ?? 5;
+          const formatted = builtinSelectors
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+            .join(',\n');
 
-            const formatted = builtinSelectors
-              .split(',')
-              .map(s => s.trim())
-              .filter(Boolean)
-              .join(',\n');
+          selectorInput.value = formatted;
+          minLenInput.value = builtinMinLen;
 
-            selectorInput.value = formatted;
-            minLenInput.value = builtinMinLen;
+          const res = await safeGetStorage('scanConfig');
+          let config = { global: {}, custom: {} };
+          if (res?.scanConfig) {
+            config.global = res.scanConfig.global || {};
+            config.custom = res.scanConfig.custom || {};
+          }
+          delete config.custom[domain];
+          await safeSetStorage({ scanConfig: config });
 
-            const res = await safeGetStorage('scanConfig');
-            let config = { global: {}, custom: {} };
-            if (res?.scanConfig) {
-              config.global = res.scanConfig.global || {};
-              config.custom = res.scanConfig.custom || {};
-            }
-            delete config.custom[domain];
-            await safeSetStorage({ scanConfig: config });
-
-            await saveScanConfig();
-            showToast(t('success') || 'Default presets restored.', 'success');
-          };
-        }
+          await saveScanConfig();
+          showToast(t('success') || 'Default presets restored.', 'success');
+        };
       }
     } catch (e) {
       logger.error("[Mira-Trace] refreshUI 发生致命错误:", e);
@@ -2926,7 +2930,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateBalance(res.balance);
       const data = await safeGetStorage(['mira_user']);
       const existingUser = data?.mira_user || {};
-      await safeSetStorage({ 'mira_user': { ...existingUser, balance: res.balance } });
+      if (existingUser.uid) {
+        await safeSetStorage({ 'mira_user': { ...existingUser, balance: res.balance } });
+      }
     } else {
       logger.warn('[fetchBalance] balance 为空, 使用本地缓存');
       if (userData && userData.balance != null) {
@@ -2967,4 +2973,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   checkEngineStatus();
+
+
+  function getReviewUrl() {
+    const ua = navigator.userAgent;
+
+    // Firefox：双重验证
+    if (typeof browser !== 'undefined' && /Firefox/.test(ua)) {
+      return "https://addons.mozilla.org/firefox/addon/mira-translator/";
+    }
+
+    // Edge：UA 有专属 Edg/ 标识
+    if (ua.includes("Edg/")) {
+      return "https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife";
+    }
+
+    // 默认 Chrome
+    return "https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn";
+  }
+  document.querySelector("#reviewLink").href = getReviewUrl();
+
 });

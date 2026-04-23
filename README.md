@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<h1 align="center">Mira Translate</h1>
+<h1 align="center">Mira Translator</h1>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Version-3.4.7.0-blue?style=flat-square" alt="Version">
@@ -79,3 +79,6 @@ Edit `private_config.js` and fill in your `CLIENT_ID`, `MANIFEST_KEY`.
 | --- | --- |
 | `pnpm dev` | **Chrome** |
 | `pnpm dev:edge` | **Edge** |
+
+---
+© 2026 **David Bai**. Licensed under the [AGPL-3.0 License](LICENSE).
