@@ -509,7 +509,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 Pro
                             </span>
                         </h2>
-                        <p style="margin:4px 0 0;font-size:12px;color:#8b949e;">${t('byokNotice', ui_lang) || 'No API Key required. Out-of-the-box'}</p>
+                        <p style="margin:12px 0px 4px 4px;font-size:12px;color:#8b949e;">${t('byokNotice', ui_lang) || 'No API Key required. Out-of-the-box'}</p>
                     </div>
                 </div>
             </div>

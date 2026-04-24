@@ -1530,8 +1530,6 @@ function detectSourceLang(text) {
 
   return null; // 无法判断
 }
-const sysLang = (navigator.language || 'en').toLowerCase().replace('_', '-');
-const isMainland = sysLang === 'zh-cn' || sysLang === 'zh-hans-cn';
 
 const LANGS = [
   // --- 基础选项 ---
@@ -1541,21 +1539,24 @@ const LANGS = [
   // --- 东亚 East Asia ---
   { type: 'sep', label: '—— East Asia ——' },
   { value: 'zh-CN', label: '简体中文 (Chinese Simplified)', en: 'Chinese Simplified' },
-  { 
-    value: 'zh-TW', 
-    label: isMainland ? '繁體中文 (Taiwan, China)' : '繁體中文 (Taiwan)', 
-    en: 'Traditional Chinese (Taiwan)' 
+  {
+    value: 'zh-TW',
+    label: '繁體中文 (Taiwan)',
+    en: 'Traditional Chinese (Taiwan)'
   },
-  { 
-    value: 'zh-HK', 
-    label: isMainland ? '繁體中文 (Hong Kong, China)' : '繁體中文 (Hong Kong)', 
-    en: 'Traditional Chinese (Hong Kong)' 
+  {
+    value: 'zh-HK',
+    label: '繁體中文 (Hong Kong)',
+    en: 'Traditional Chinese (Hong Kong)'
   },
   { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
   { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
 
-  // --- 欧洲与美洲 Europe & America ---
+  // --- 欧洲与美洲 Europe & America ——
   { type: 'sep', label: '—— Europe & America ——' },
+  { value: 'sq', label: 'Shqip (Albanian)', en: 'Albanian' },
+  { value: 'az', label: 'Azərbaycanca (Azerbaijani)', en: 'Azerbaijani' },
+  { value: 'eu', label: 'Euskara (Basque)', en: 'Basque' },
   { value: 'bg', label: 'Български (Bulgarian)', en: 'Bulgarian' },
   { value: 'ca', label: 'Català (Catalan)', en: 'Catalan' },
   { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
@@ -1570,13 +1571,16 @@ const LANGS = [
   { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
   { value: 'fr', label: 'Français (French)', en: 'French' },
   { value: 'fr-CA', label: 'Français (French Canada)', en: 'French (Canada)' },
+  { value: 'gl', label: 'Galego (Galician)', en: 'Galician' },
   { value: 'de', label: 'Deutsch (German)', en: 'German' },
   { value: 'de-CH', label: 'Deutsch (German Switzerland)', en: 'German (Switzerland)' },
   { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
   { value: 'hu', label: 'Magyar (Hungarian)', en: 'Hungarian' },
+  { value: 'is', label: 'Íslenska (Icelandic)', en: 'Icelandic' },
   { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
   { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
   { value: 'lv', label: 'Latviešu (Latvian)', en: 'Latvian' },
+  { value: 'la', label: 'Latina (Latin)', en: 'Latin' },
   { value: 'lt', label: 'Lietuvių (Lithuanian)', en: 'Lithuanian' },
   { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
   { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
@@ -1588,6 +1592,7 @@ const LANGS = [
   { value: 'sk', label: 'Slovenčina (Slovak)', en: 'Slovak' },
   { value: 'sl', label: 'Slovenščina (Slovenian)', en: 'Slovenian' },
   { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
+  { value: 'es-419', label: 'Español (Latinoamérica)', en: 'Spanish (Latin America)' },
   { value: 'es-MX', label: 'Español (Spanish Mexico)', en: 'Spanish (Mexico)' },
   { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
   { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
@@ -1601,24 +1606,34 @@ const LANGS = [
   { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' },
   { value: 'tl', label: 'Filipino (Filipino)', en: 'Filipino' },
   { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
+  { value: 'jv', label: 'Basa Jawa (Javanese)', en: 'Javanese' },
   { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },
   { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
-  { value: 'zh-SG', label: '简体中文 (Singapore)', en: 'Simplified Chinese (Singapore)' },
+  { value: 'su', label: 'Basa Sunda (Sundanese)', en: 'Sundanese' },
   { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
+  { value: 'zh-SG', label: '简体中文 (Singapore)', en: 'Simplified Chinese (Singapore)' },
 
   // --- 中东与南亚 Middle East & South Asia ---
   { type: 'sep', label: '—— Middle East & South Asia ——' },
   { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
   { value: 'ar-SA', label: 'العربية (Arabic Saudi Arabia)', en: 'Arabic (Saudi Arabia)' },
   { value: 'ar-AE', label: 'العربية (Arabic UAE)', en: 'Arabic (UAE)' },
+  { value: 'hy', label: 'Հայերեն (Armenian)', en: 'Armenian' },
   { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
   { value: 'en-IN', label: 'English (India)', en: 'English (India)' },
+  { value: 'gu', label: 'ગુજરાતી (Gujarati)', en: 'Gujarati' },
+  { value: 'ka', label: 'ქართული (Georgian)', en: 'Georgian' },
   { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
   { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
+  { value: 'kn', label: 'ಕನ್ನಡ (Kannada)', en: 'Kannada' },
   { value: 'kk', label: 'Қазақ тілі (Kazakh)', en: 'Kazakh' },
+  { value: 'ml', label: 'മലയാളം (Malayalam)', en: 'Malayalam' },
   { value: 'mr', label: 'मराठी (Marathi)', en: 'Marathi' },
   { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
+  { value: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)', en: 'Punjabi' },
+  { value: 'si', label: 'සිංහල (Sinhala)', en: 'Sinhala' },
+  { value: 'ta', label: 'தமிழ் (Tamil)', en: 'Tamil' },
   { value: 'te', label: 'తెలుగు (Telugu)', en: 'Telugu' },
   { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
   { value: 'ur', label: 'اردو (Urdu)', en: 'Urdu' },
