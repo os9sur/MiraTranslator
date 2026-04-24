@@ -81,16 +81,29 @@
       }
     },
     {
-      "id": "meta-llama/llama-3.1-8b-instruct",
-      "label": "Llama 3.1 8B",
-      "tag": "Balanced",
+      "id": "meta-llama/llama-3.3-70b-instruct",
+      "label": "Llama 3.3 70B",
+      "tag": "Open",
       "tagColor": "#4b5563",
       "desc": {
-        "zh": "优秀的开源指令遵循模型",
-        "zh_TW": "優秀的開源指令遵循模型",
-        "en": "Top-tier open-source instruction model",
-        "ja": "優れたオープンソースの指示遂行モデル",
-        "ko": "우수한 오픈 소스 명령 준수 모델"
+        "zh": "Meta开源旗舰，速度与质量兼顾",
+        "zh_TW": "Meta開源旗艦，速度與品質兼顧",
+        "en": "Meta's open-source flagship, fast and high quality",
+        "ja": "Metaのオープンソース旗艦モデル、速度と品質を両立",
+        "ko": "Meta 오픈소스 플래그십, 속도와 품질 모두 우수"
+      }
+    },
+    {
+      "id": "mistralai/mistral-small-3.2-24b-instruct",
+      "label": "Mistral Small 3.2",
+      "tag": "Europe",
+      "tagColor": "#0284c7",
+      "desc": {
+        "zh": "欧洲顶尖模型，多语言表现卓越",
+        "zh_TW": "歐洲頂尖模型，多語言表現卓越",
+        "en": "European-built model, outstanding multilingual performance",
+        "ja": "欧州製モデル、多言語処理に卓越した性能",
+        "ko": "유럽 최고 모델, 뛰어난 다국어 성능"
       }
     }
   ]
