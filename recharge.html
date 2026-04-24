@@ -11,511 +11,408 @@
     <script src="utils.js"></script>
     <style>
         :root {
-            --bg: #0b0e14;
-            --surface: #171d29;
-            --surface2: #21293b;
-            --border: rgba(255, 255, 255, 0.12);
-            --border-active: #4e8ef7;
-            --text: #ffffff;
-            --text-muted: #a6c0e8;
-            --text-dim: #6c80a3;
-            --blue: #5c9aff;
-            --blue-bright: #7bb0ff;
-            --blue-dim: rgba(92, 154, 255, 0.15);
-            --purple: #9d7cd8;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --font-cn: 'Noto Sans SC', sans-serif;
-            --font-en: 'DM Sans', sans-serif;
-        }
+  --bg: #080b11;
+  --surface: #111827;
+  --surface2: #1a2336;
+  --surface3: #1f2d44;
+  --border: rgba(255,255,255,0.10);
+  --border-active: #4e8ef7;
+  --text: #ffffff;
+  --text-muted: #94b4d8;
+  --text-dim: #5a7099;
+  --blue: #5c9aff;
+  --blue-bright: #7bb0ff;
+  --blue-dim: rgba(92,154,255,0.13);
+  --radius: 20px;
+  --radius-sm: 14px;
+  --font-cn: -apple-system, 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+  --font-en: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--font-cn);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-cn);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  overflow-x: hidden;
+}
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: -150px;
-            left: -150px;
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(92, 154, 255, 0.08) 0%, transparent 60%);
-            pointer-events: none;
-        }
+body::before {
+  content: '';
+  position: fixed;
+  top: -200px; left: -200px;
+  width: 900px; height: 900px;
+  background: radial-gradient(circle, rgba(92,154,255,0.10) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -200px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(157,124,216,0.08) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
 
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -150px;
-            right: -150px;
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(157, 124, 216, 0.06) 0%, transparent 60%);
-            pointer-events: none;
-        }
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 780px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+  animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+}
 
-        /* 主卡片*/
-        .card {
-            width: 100%;
-            max-width: 480px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 24px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02);
-            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px) scale(0.98);
-            }
+.header {
+  padding: 32px 40px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+.logo-fallback {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.3);
+  font-size: 26px;
+}
 
-        /* Header */
-        .header {
-            padding: 24px 28px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
+.header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
 
-        .logo-fallback {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: var(--surface2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: var(--blue-bright);
-            flex-shrink: 0;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+.header-title {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: var(--font-en);
+  letter-spacing: -0.3px;
+}
 
-        .header-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+.header-sub {
+  font-size: 16px;
+  color: var(--text-muted);
+  margin: 10px 0 0 21px;
+}
 
-        .header-title {
-            font-size: 18px;
-            font-weight: 700;
-            font-family: var(--font-en);
-            letter-spacing: 0.5px;
-        }
+.header-back {
+  margin-left: auto;
+  width: 40px; height: 40px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  font-family: var(--font-cn);
+}
+.header-back:hover {
+  border-color: var(--border-active);
+  color: var(--text);
+  background: var(--blue-dim);
+}
 
-        .header-sub {
-            font-size: 13px;
-            color: var(--text-muted);
-        }
+.account {
+  margin: 28px 40px 0;
+  background: var(--surface2);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius);
+  padding: 22px 28px;
+  display: none;
+  align-items: center;
+  gap: 20px;
+}
+.account.show {
+  display: flex;
+}
 
-        .header-back {
-            margin-left: auto;
-            font-size: 13px;
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.03);
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: var(--font-cn);
-        }
+.acc-avatar {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d4a80, #1e3560);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+  color: #7aabee;
+  flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+}
+.acc-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 
-        .header-back:hover {
-            border-color: var(--border-active);
-            color: var(--text);
-            background: var(--blue-dim);
-        }
+.acc-info { flex: 1; min-width: 0; }
 
-        /* Account 区域放大 */
-        .account {
-            margin: 20px 28px 0;
-            background: var(--surface2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            display: none;
-            align-items: center;
-            gap: 16px;
-        }
+.acc-name {
+  font-size: 17px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: 0.3px;
+}
+.acc-email {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
-        .account.show {
-            display: flex;
-        }
+.acc-balance {
+  text-align: right;
+  flex-shrink: 0;
+}
+.bal-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: block;
+}
+.bal-val {
+  font-size: 28px; font-weight: 800;
+  color: var(--blue-bright);
+  font-family: var(--font-en);
+  line-height: 1;
+}
 
-        .acc-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2d4a80, #1e3560);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 700;
-            color: #7aabee;
-            flex-shrink: 0;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        }
+.not-logged {
+  margin: 28px 40px 0;
+  background: rgba(255,180,0,0.08);
+  border: 1px solid rgba(255,180,0,0.3);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: none;
+  align-items: center;
+  gap: 16px;
+}
+.not-logged.show {
+  display: flex;
+}
+.not-logged-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(255,180,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.not-logged p {
+  font-size: 14px;
+  color: #e6c387;
+}
+.not-logged a {
+  font-size: 14px;
+  color: #ffb400;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
 
-        .acc-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+.switcher {
+  display: flex;
+  gap: 12px;
+  margin: 28px 40px 0;
+}
+.sw-btn {
+  flex: 1;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.02);
+  color: var(--text-muted);
+  font-size: 14px; font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  font-family: var(--font-cn);
+}
+.sw-btn:hover { background: rgba(255,255,255,0.06); }
+.sw-btn.active {
+  background: var(--blue-dim);
+  border-color: var(--blue);
+  color: var(--blue-bright);
+  box-shadow: inset 0 0 0 1px rgba(92,154,255,0.2);
+}
 
-        .acc-info {
-            flex: 1;
-            min-width: 0;
-        }
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 40px 0;
+}
 
-        .acc-name {
-            font-size: 15px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: 0.3px;
-        }
+.panel {
+  display: none;
+  padding: 32px 40px 36px;
+}
+.panel.active {
+  display: block;
+}
 
-        .acc-email {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+.sec-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  font-weight: 700;
+}
 
-        .acc-balance {
-            text-align: right;
-            flex-shrink: 0;
-        }
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
 
-        .bal-label {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            display: block;
-        }
+.plan-card {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  padding: 36px 16px 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.28s cubic-bezier(0.16,1,0.3,1);
+  text-decoration: none;
+  display: flex; flex-direction: column;
+  color: inherit;
+}
+.plan-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+  background: rgba(92,154,255,0.06);
+}
+.plan-card.featured {
+  border-color: var(--blue);
+  background: linear-gradient(180deg, rgba(92,154,255,0.14) 0%, rgba(92,154,255,0.04) 100%);
+  box-shadow: 0 0 0 1px var(--blue), 0 10px 30px rgba(92,154,255,0.18);
+}
+.plan-card.featured:hover {
+  box-shadow: 0 0 0 1px var(--blue), 0 18px 40px rgba(92,154,255,0.28);
+}
 
-        .bal-val {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--blue-bright);
-            font-family: var(--font-en);
-            line-height: 1;
-        }
+.plan-badge {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #4e8ef7, #3b76d9);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 18px;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(78,142,247,0.45);
+  font-family: var(--font-cn);
+}
 
-        .not-logged {
-            margin: 20px 28px 0;
-            background: rgba(255, 180, 0, 0.08);
-            border: 1px solid rgba(255, 180, 0, 0.3);
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            display: none;
-            align-items: center;
-            gap: 14px;
-        }
+.plan-name {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  font-family: var(--font-en);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
 
-        .not-logged.show {
-            display: flex;
-        }
+.plan-price {
+  font-size: 52px;
+  font-weight: 800;
+  color: #fff;
+  font-family: var(--font-en);
+  line-height: 1;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
 
-        .not-logged-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(255, 180, 0, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
+.plan-unit {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 10px;
+  line-height: 1.6;
+}
 
-        .not-logged p {
-            font-size: 14px;
-            color: #e6c387;
-        }
+.plan-arrow {
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: all 0.2s;
+  font-weight: 600;
+}
+.plan-card:hover .plan-arrow {
+  color: var(--blue-bright);
+  transform: translateX(3px);
+}
 
-        .not-logged a {
-            font-size: 14px;
-            color: #ffb400;
-            text-decoration: underline;
-            cursor: pointer;
-            font-weight: 600;
-        }
+.notice {
+  background: rgba(92,154,255,0.06);
+  border: 1px solid rgba(92,154,255,0.14);
+  border-radius: var(--radius-sm);
+  padding: 20px 24px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.7;
+}
+.notice b {
+  color: var(--blue-bright);
+  font-weight: 600;
+}
 
-        /* Switcher 平台切换按钮放大 */
-        .switcher {
-            display: flex;
-            gap: 10px;
-            margin: 24px 28px 0;
-        }
+.footer {
+  padding: 0 40px 32px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+}
+.flink {
+  font-size: 14px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.2s;
+  font-weight: 500;
+}
+.flink:hover { color: var(--text); }
 
-        .sw-btn {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: rgba(255, 255, 255, 0.02);
-            color: var(--text-muted);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            font-family: var(--font-cn);
-        }
-
-        .sw-btn:hover {
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .sw-btn.active {
-            background: var(--blue-dim);
-            border-color: var(--blue);
-            color: var(--blue-bright);
-            box-shadow: inset 0 0 0 1px rgba(92, 154, 255, 0.2);
-        }
-
-        .divider {
-            height: 1px;
-            background: var(--border);
-            margin: 24px 28px 0;
-        }
-
-        /* Panel */
-        .panel {
-            display: none;
-            padding: 24px 28px 28px;
-        }
-
-        .panel.active {
-            display: block;
-        }
-
-        .sec-label {
-            font-size: 12px;
-            color: var(--text-dim);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-
-        .plans {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .plan-card {
-            position: relative;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background: var(--surface2);
-            padding: 24px 10px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            color: inherit;
-        }
-
-        .plan-card:hover {
-            border-color: var(--blue);
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            background: rgba(92, 154, 255, 0.05);
-        }
-
-        /* 推荐套餐高亮 */
-        .plan-card.featured {
-            border-color: var(--blue);
-            background: linear-gradient(180deg, rgba(92, 154, 255, 0.12) 0%, rgba(92, 154, 255, 0.03) 100%);
-            box-shadow: 0 0 0 1px var(--blue), 0 8px 24px rgba(92, 154, 255, 0.15);
-        }
-
-        .plan-card.featured:hover {
-            box-shadow: 0 0 0 1px var(--blue), 0 12px 30px rgba(92, 154, 255, 0.25);
-        }
-
-        .plan-badge {
-            position: absolute;
-            top: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(90deg, #4e8ef7, #3b76d9);
-            color: #fff;
-            font-size: 11px;
-            padding: 4px 14px;
-            border-radius: 12px;
-            white-space: nowrap;
-            font-family: var(--font-cn);
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(78, 142, 247, 0.4);
-        }
-
-        .plan-name {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            font-family: var(--font-en);
-            font-weight: 500;
-        }
-
-        .plan-price {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ffffff;
-            font-family: var(--font-en);
-            line-height: 1;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-        }
-
-        .plan-unit {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-
-        .plan-arrow {
-            margin-top: 14px;
-            font-size: 13px;
-            color: var(--text-dim);
-            transition: all 0.2s;
-            font-weight: 600;
-        }
-
-        .plan-card:hover .plan-arrow {
-            color: var(--blue-bright);
-            transform: translateX(2px);
-        }
-
-        /* Notice 文字放大，增加阅读性 */
-        .notice {
-            background: rgba(92, 154, 255, 0.06);
-            border: 1px solid rgba(92, 154, 255, 0.15);
-            border-radius: var(--radius-sm);
-            padding: 16px 20px;
-            font-size: 13px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .notice b {
-            color: var(--blue-bright);
-            font-weight: 600;
-        }
-
-        /* Footer */
-        .footer {
-            padding: 0 28px 24px;
-            display: flex;
-            justify-content: center;
-            gap: 24px;
-        }
-
-        .flink {
-            font-size: 13px;
-            color: var(--text-dim);
-            cursor: pointer;
-            transition: color 0.2s;
-            font-weight: 500;
-        }
-
-        .flink:hover {
-            color: var(--text);
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 0;
-                align-items: flex-start;
-            }
-
-            .card {
-                border-radius: 0;
-                max-width: 100%;
-                min-height: 100vh;
-                border: none;
-                box-shadow: none;
-            }
-
-            .plans {
-                grid-template-columns: 1fr;
-            }
-
-            .plan-card {
-                padding: 16px;
-                flex-direction: row;
-                align-items: center;
-                text-align: left;
-            }
-
-            .plan-badge {
-                top: -10px;
-                left: 16px;
-                transform: none;
-            }
-
-            .plan-name {
-                margin-bottom: 0;
-                font-size: 14px;
-                width: 80px;
-            }
-
-            .plan-price {
-                font-size: 24px;
-                flex: 1;
-                text-align: center;
-            }
-
-            .plan-unit {
-                margin-top: 0;
-                margin-left: 8px;
-            }
-
-            .plan-arrow {
-                margin-top: 0;
-                margin-left: auto;
-            }
-        }
+@media (max-width: 600px) {
+  body { padding: 0; align-items: flex-start; }
+  .card { border-radius: 0; max-width: 100%; min-height: 100vh; border: none; box-shadow: none; }
+  .header { padding: 24px 20px 20px; }
+  .account, .not-logged, .divider, .switcher { margin-left: 20px; margin-right: 20px; }
+  .panel { padding: 24px 20px 28px; }
+  .footer { padding: 0 20px 28px; }
+  .plans { grid-template-columns: 1fr; }
+  .plan-card { padding: 20px 16px; flex-direction: row; align-items: center; text-align: left; }
+  .plan-badge { top: -10px; left: 16px; transform: none; }
+  .plan-name { margin-bottom: 0; width: 80px; }
+  .plan-price { font-size: 32px; flex: 1; text-align: center; }
+  .plan-unit { margin-top: 0; margin-left: 8px; }
+  .plan-arrow { margin-top: 0; margin-left: auto; }
+}
     </style>
 </head>
 
@@ -587,20 +484,23 @@
             <div class="sec-label" data-i18n="selectPlan">选择充值金额</div>
             <div class="plans">
                 <a class="plan-card" data-url="https://ko-fi.com/s/079b533b66">
-                    <div class="plan-name">Top-up</div>
+                    <div class="plan-name" data-i18n="recharge">Top-up</div>
                     <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>5</div>
-                    <div class="plan-unit">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="PAYG">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="expired">永不过期</div>
                 </a>
                 <a class="plan-card featured" data-url="https://ko-fi.com/s/541f4e2a84">
                     <div class="plan-badge" data-i18n="recommended">推荐</div>
-                    <div class="plan-name">Top-up</div>
+                    <div class="plan-name" data-i18n="recharge">Top-up</div>
                     <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>10</div>
-                    <div class="plan-unit">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="PAYG">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="expired">永不过期</div>
                 </a>
                 <a class="plan-card" data-url="https://ko-fi.com/s/6a3ee2d2b7">
-                    <div class="plan-name">Top-up</div>
+                    <div class="plan-name" data-i18n="recharge">Top-up</div>
                     <div class="plan-price"><span style="font-size:0.5em;vertical-align:super;">$</span>15</div>
-                    <div class="plan-unit">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="PAYG">Pay as you go</div>
+                    <div class="plan-unit" data-i18n="expired">永不过期</div>
                 </a>
             </div>
             <div class="notice" data-i18n="paymentNotice" data-i18n-type="html">
@@ -610,8 +510,6 @@
         <!-- Footer -->
         <div class="footer">
             <span class="flink" id="openSupport" data-i18n="notArrived">充值未到账？</span>
-            <!-- <span class="flink" id="openFaq">使用说明</span> -->
-            <span class="flink" id="openKofiPage">Ko-fi</span>
         </div>
 
     </div>
