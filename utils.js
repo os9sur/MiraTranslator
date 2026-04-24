@@ -86,7 +86,7 @@ const normalizeLang = (lang) => {
   }
 
   const specials = {
-    'en-in': 'en-IN', 'en-gb': 'en-GB','en-us': 'en-US', 'en-ca': 'en-CA', 'en-au': 'en-AU',
+    'en-in': 'en-IN', 'en-gb': 'en-GB', 'en-us': 'en-US', 'en-ca': 'en-CA', 'en-au': 'en-AU',
     'en-nz': 'en-NZ', 'en-ie': 'en-IE',
     'de-ch': 'de-CH', 'fr-ca': 'fr-CA', 'pt-br': 'pt-BR',
     'ar-ae': 'ar-AE', 'ar-sa': 'ar-SA'
@@ -1530,6 +1530,8 @@ function detectSourceLang(text) {
 
   return null; // 无法判断
 }
+const sysLang = (navigator.language || 'en').toLowerCase().replace('_', '-');
+const isMainland = sysLang === 'zh-cn' || sysLang === 'zh-hans-cn';
 
 const LANGS = [
   // --- 基础选项 ---
@@ -1539,8 +1541,16 @@ const LANGS = [
   // --- 东亚 East Asia ---
   { type: 'sep', label: '—— East Asia ——' },
   { value: 'zh-CN', label: '简体中文 (Chinese Simplified)', en: 'Chinese Simplified' },
-  { value: 'zh-TW', label: '繁體中文 (Chinese Traditional)', en: 'Chinese Traditional' },
-  { value: 'zh-HK', label: '繁體中文 (Chinese Hong Kong)', en: 'Chinese (Hong Kong)' },
+  { 
+    value: 'zh-TW', 
+    label: isMainland ? '繁體中文 (Taiwan, China)' : '繁體中文 (Taiwan)', 
+    en: 'Traditional Chinese (Taiwan)' 
+  },
+  { 
+    value: 'zh-HK', 
+    label: isMainland ? '繁體中文 (Hong Kong, China)' : '繁體中文 (Hong Kong)', 
+    en: 'Traditional Chinese (Hong Kong)' 
+  },
   { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
   { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
 
@@ -1593,7 +1603,7 @@ const LANGS = [
   { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
   { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },
   { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
-  { value: 'zh-SG', label: '简体中文 (Chinese Singapore)', en: 'Chinese (Singapore)' },
+  { value: 'zh-SG', label: '简体中文 (Singapore)', en: 'Simplified Chinese (Singapore)' },
   { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
   { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
 
