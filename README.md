@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/mira-translator/hmmllfdmkbmmfffjekhmmbhhfhhnocmn" target="_blank">
-    <img src="icons/icon.png" width="64" height="64" alt="Mira Logo">
+    <img src="images/logo.png" width="64" height="64" alt="Mira Logo">
   </a>
 </p>
 
