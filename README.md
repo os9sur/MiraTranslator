@@ -1,13 +1,13 @@
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/mira-translator/hmmllfdmkbmmfffjekhmmbhhfhhnocmn" target="_blank">
-    <img src="images/logo.png" width="64" height="64" alt="Mira Logo">
+    <img src="images/logo.png" width="120px" height="auto" alt="Mira Logo">
   </a>
 </p>
 
 <h1 align="center">Mira Translator</h1>
 
 <p align="center">
-  <em>Ultra-lightweight (~300KB) AI translation gateway — simple setup, beautiful design, real-time WYSIWYG feedback.</em>
+  <em>Ultra-lightweight (~300KB) AI Gateway — Pure Native JS for immersive web reading, YouTube bilingual subtitles, and cross-site word highlighting. Zero-bloat, privacy-first.</em>
 </p>
 
 <p align="center">
