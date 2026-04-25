@@ -1,39 +1,43 @@
 <p align="center">
   <a href="https://chromewebstore.google.com/detail/mira-translator/hmmllfdmkbmmfffjekhmmbhhfhhnocmn" target="_blank">
-    <img src="icons/icon-128.png" width="48" height="48" alt="Mira Logo">
+    <img src="icons/icon.png" width="64" height="64" alt="Mira Logo">
   </a>
 </p>
 
 <h1 align="center">Mira Translator</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.5.0.0-blue?style=flat-square" alt="Version">
-  <img src="https://img.shields.io/badge/License-AGPL--3.0-orange?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/Platform-Chrome-blue?style=flat-square" alt="Platform">
-  <a href="https://os9sur.github.io/mira-translator-home/">
-    <img src="https://img.shields.io/badge/Official-Website-brightgreen?style=flat-square" alt="Website">
+  <em>Ultra-lightweight (~300KB) AI translation gateway — simple setup, beautiful design, real-time WYSIWYG feedback.</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-3.5.0.0-blue" alt="Version">
+  &nbsp;
+  <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
+  &nbsp;
+  <a href="https://os9sur.github.io/mira-translator/">
+    <img src="https://img.shields.io/badge/Official-Website-brightgreen" alt="Website">
   </a>
 </p>
 
 <p align="center">
-  <b>Ultra-lightweight (~200KB) AI translation gateway. Simple setup, beautiful design, with real-time WYSIWYG visual feedback.</b>
+  <img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome">
+  &nbsp;
+  <img src="https://img.shields.io/badge/Firefox-FF7139?logo=firefoxbrowser&logoColor=white" alt="Firefox">
+  &nbsp;
+  <img src="https://custom-icon-badges.demolab.com/badge/Microsoft_Edge-2771D8?logo=edge-white&logoColor=white" alt="Microsoft Edge">
 </p>
 
-<p align="center">
-  <a href="https://www.youtube.com/watch?v=qUbX6mzlsag" target="_blank">
-    <img src="https://lh3.googleusercontent.com/nGElWTi1OJrm3o86_N8NTGPk4KOVbqQE799wU7kqJ4ATNqcfkTR3FBUVkw9aB9sMfiW9psQrYahzlG4eA-kPNgVq=s1280-w1280-h800" alt="Mira Translator Video Intro" width="400">
-    <br>
-    <b>Click to Watch Video Demo</b>
-  </a>
-</p>
+<br>
 
 <p align="center">
   <img src="images/bird_screenshot.png" width="415" alt="Translation Preview">
   <img src="images/caddy_screenshot.png" width="415" alt="Feature Preview">
 </p>
+
 <p align="center">
-  <img src="images/style_setting_screenshot.png" width="415" alt="Mira Translate UI Preview">
-  <img src="images/settings_screenshot.png" width="415" alt="Mira Translate UI Preview">
+  <img src="images/style_setting_screenshot.png" width="415" alt="Style Settings">
+  <img src="images/settings_screenshot.png" width="415" alt="Settings">
 </p>
 
 ---
