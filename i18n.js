@@ -2619,118 +2619,22 @@ self.i18nThemeData = {
   }
 };
 self.i18nAttach1 = {
-  "zh-CN": {
-    source: "来源",
-    delete: "删除",
-    recall: "撤回",
-    searchVocabulary: "搜索生词本",
-    appliedAndSaved: "已应用并保存"
-  },
-  "zh-TW": {
-    source: "來源",
-    delete: "刪除",
-    recall: "撤回",
-    searchVocabulary: "搜尋生字本",
-    appliedAndSaved: "已應用並保存"
-  },
-  "en": {
-    source: "Source",
-    delete: "Delete",
-    recall: "Recall",
-    searchVocabulary: "Search Vocabulary",
-    appliedAndSaved: "Applied and saved"
-  },
-  "ja": {
-    source: "ソース",
-    delete: "削除",
-    recall: "送信消去",
-    searchVocabulary: "単語帳を検索",
-    appliedAndSaved: "適用して保存済み"
-  },
-  "ko": {
-    source: "출처",
-    delete: "삭제",
-    recall: "실행 취소",
-    searchVocabulary: "단어장 검색",
-    appliedAndSaved: "적용 및 저장됨"
-  },
-  "es": {
-    source: "Fuente",
-    delete: "Eliminar",
-    recall: "Anular",
-    searchVocabulary: "Buscar en vocabulario",
-    appliedAndSaved: "Aplicado y guardado"
-  },
-  "fr": {
-    source: "Source",
-    delete: "Supprimer",
-    recall: "Annuler",
-    searchVocabulary: "Chercher dans le vocabulaire",
-    appliedAndSaved: "Appliqué et enregistré"
-  },
-  "de": {
-    source: "Quelle",
-    delete: "Löschen",
-    recall: "Widerrufen",
-    searchVocabulary: "Vokabeln durchsuchen",
-    appliedAndSaved: "Angewendet und gespeichert"
-  },
-  "ru": {
-    source: "Источник",
-    delete: "Удалить",
-    recall: "Отозвать",
-    searchVocabulary: "Поиск в словаре",
-    appliedAndSaved: "Применено и сохранено"
-  },
-  "pt": {
-    source: "Fonte",
-    delete: "Excluir",
-    recall: "Anular",
-    searchVocabulary: "Pesquisar vocabulário",
-    appliedAndSaved: "Aplicado e salvo"
-  },
-  "it": {
-    source: "Fonte",
-    delete: "Elimina",
-    recall: "Annulla",
-    searchVocabulary: "Cerca nel vocabolario",
-    appliedAndSaved: "Applicato e salvato"
-  },
-  "vi": {
-    source: "Nguồn",
-    delete: "Xóa",
-    recall: "Thu hồi",
-    searchVocabulary: "Tìm trong từ điển",
-    appliedAndSaved: "Đã áp dụng và lưu"
-  },
-  "th": {
-    source: "ที่มา",
-    delete: "ลบ",
-    recall: "ยกเลิก",
-    searchVocabulary: "ค้นหาสมุดคำศัพท์",
-    appliedAndSaved: "ประยุกต์ใช้และบันทึกแล้ว"
-  },
-  "ar": {
-    source: "المصدر",
-    delete: "حذف",
-    recall: "استرجاع",
-    searchVocabulary: "بحث في مفرداتي",
-    appliedAndSaved: "تم التطبيق والحفظ"
-  },
-  "fa": {
-    source: "منبع",
-    delete: "حذف",
-    recall: "واگردانی",
-    searchVocabulary: "جستجو در لغت‌نامه",
-    appliedAndSaved: "اعمال و ذخیره شد"
-  },
-  "tr": {
-    source: "Kaynak",
-    delete: "Sil",
-    recall: "Geri çek",
-    searchVocabulary: "Kelime defterinde ara",
-    appliedAndSaved: "Uygulandı ve kaydedildi"
-  }
+  "zh-CN": { source: "来源", delete: "删除", recall: "撤回", searchVocabulary: "搜索原文、释义、备注或网址...", appliedAndSaved: "已应用并保存" },
+  "zh-TW": { source: "來源", delete: "刪除", recall: "撤回", searchVocabulary: "搜尋原文、釋義、備註或網址...", appliedAndSaved: "已應用並保存" },
+  "en": { source: "Source", delete: "Delete", recall: "Recall", searchVocabulary: "Search words, notes, or URLs...", appliedAndSaved: "Applied and saved" },
+  "ja": { source: "ソース", delete: "削除", recall: "取消", searchVocabulary: "原文、備考、またはURLで検索...", appliedAndSaved: "適用して保存済み" },
+  "ko": { source: "출처", delete: "삭제", recall: "실행 취소", searchVocabulary: "원문, 메모 또는 URL로 검색...", appliedAndSaved: "적용 및 저장됨" },
+  "es": { source: "Fuente", delete: "Eliminar", recall: "Anular", searchVocabulary: "Buscar por palabra, nota o URL...", appliedAndSaved: "Aplicado y guardado" },
+  "fr": { source: "Source", delete: "Supprimer", recall: "Annuler", searchVocabulary: "Chercher par mot, note ou URL...", appliedAndSaved: "Appliqué et enregistré" },
+  "de": { source: "Quelle", delete: "Löschen", recall: "Widerrufen", searchVocabulary: "Suche nach Wort, Notiz oder URL...", appliedAndSaved: "Angewendet und gespeichert" },
+  "ru": { source: "Источник", delete: "Удалить", recall: "Отозвать", searchVocabulary: "Поиск по слову, заметке или URL...", appliedAndSaved: "Применено и сохранено" },
+  "pt": { source: "Fonte", delete: "Excluir", recall: "Anular", searchVocabulary: "Pesquisar por palavra, nota ou URL...", appliedAndSaved: "Aplicado e salvo" },
+  "it": { source: "Fonte", delete: "Elimina", recall: "Annulla", searchVocabulary: "Cerca per parola, nota o URL...", appliedAndSaved: "Applicato e salvato" },
+  "vi": { source: "Nguồn", delete: "Xóa", recall: "Thu hồi", searchVocabulary: "Tìm theo từ, ghi chú hoặc URL...", appliedAndSaved: "Đã áp dụng và lưu" },
+  "th": { source: "ที่มา", delete: "ลบ", recall: "ยกเลิก", searchVocabulary: "ค้นหาคำ บันทึก หรือ URL...", appliedAndSaved: "ประยุกต์ใช้และบันทึกแล้ว" },
+  "ar": { source: "المصدر", delete: "حذف", recall: "استرجاع", searchVocabulary: "بحث بالكلمة، الملاحظة أو الرابط...", appliedAndSaved: "تم التطبيق والحفظ" },
+  "fa": { source: "منبع", delete: "حذف", recall: "واگردانی", searchVocabulary: "جستجو با واژه، یادداشت یا آدرس...", appliedAndSaved: "اعمال و ذخیره شد" },
+  "tr": { source: "Kaynak", delete: "Sil", recall: "Geri çek", searchVocabulary: "Kelime, not veya URL ile ara...", appliedAndSaved: "Uygulandı ve kaydedildi" }
 };
 self.i18nAttach2 = {
   "zh-CN": {
@@ -3462,6 +3366,7 @@ self.i18nAttach9 = {
     balance: "账户余额",
     recharge: "充值",
     no_balance: "余额不足",
+    loginExpired: "登入逾期，請重新登入",
     loginAccount: "当前账号",
     PAYG: "按量计费",
     expired: "余额永不过期",
@@ -3480,19 +3385,20 @@ self.i18nAttach9 = {
     deleteAccountFail: "✗ 操作失败，请稍后重试",
   },
   "zh_TW": {
-    refreshing: "重新整理中...", 
+    refreshing: "重新整理中...",
     loggingIn: "登入中...",
     login: "登入",
     logout: "登出",
     balance: "帳戶餘額",
-    recharge: "儲值", 
+    recharge: "儲值",
     no_balance: "餘額不足",
+    loginExpired: "登入逾期，請重新登入",
     loginAccount: "當前帳號",
-    PAYG: "隨用隨付",  
+    PAYG: "隨用隨付",
     expired: "儲值餘額永不失效",
     byokNotice: "無需配置 API Key，隨開即用，按用量計費",
     selectModel: "選擇翻譯模型",
-    loginFirst: "請先在擴充功能中登入帳號，再進行儲值。",  
+    loginFirst: "請先在擴充功能中登入帳號，再進行儲值。",
     openPluginToLogin: "請打開 Mira 擴充功能後點擊登入按鈕。",
     rechargeIssue: "儲值遇到問題",
     selectPlan: "選擇儲值金額",
@@ -3508,9 +3414,10 @@ self.i18nAttach9 = {
     refreshing: "Refreshing...",
     loggingIn: "Signing in...",
     login: "Sign in",
-    logout: "Sign out",  
+    logout: "Sign out",
     balance: "Balance",
     no_balance: "Insufficient balance",
+    loginExpired: "Session expired. Please log in again.",
     recharge: "Top up",
     loginAccount: "Account",
     PAYG: "Pay-as-you-go",
@@ -3520,8 +3427,8 @@ self.i18nAttach9 = {
     loginFirst: "Please sign in to the extension before topping up.",
     openPluginToLogin: "Please open the Mira extension and click the sign-in button.",
     rechargeIssue: "Top-up issues?",
-    selectPlan: "Select Amount", 
-    recommended: "Best Value", 
+    selectPlan: "Select Amount",
+    recommended: "Best Value",
     notArrived: "Didn't receive balance?",
     paymentNotice: "Click a plan to pay via <b>Ko-fi</b> (Credit Card / PayPal).<br>Balance usually arrives within <b>5 minutes</b>.",
     deleteAccount: "Delete account",
@@ -3536,7 +3443,8 @@ self.i18nAttach9 = {
     logout: "ログアウト",
     balance: "残高",
     no_balance: "残高不足",
-    recharge: "チャージ", 
+    loginExpired: "セッションの有効期限が切れました。再度ログインしてください。",
+    recharge: "チャージ",
     loginAccount: "アカウント",
     PAYG: "従量課金制",
     expired: "有効期限はありません",
@@ -3561,6 +3469,7 @@ self.i18nAttach9 = {
     logout: "로그아웃",
     balance: "잔액",
     no_balance: "잔액 부족",
+    loginExpired: "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
     recharge: "충전",
     loginAccount: "계정 정보",
     PAYG: "종량제",
@@ -3594,7 +3503,11 @@ self.i18nAttach10 = {
     cpClear: "清除",
     footerReview: "⭐ 好评支持",
     footerFeedback: "✉️ 问题反馈",
-    restoreRules: "恢复默认规则"
+    restoreRules: "恢复默认规则",
+    aiTranslationTip: "AI 翻译效果更好，但由于模型推理计算量较大且逐字生成，速度比传统机器翻译（Google、Bing）慢。",
+    byokTip: "也可自行前往各大 AI 平台申请 API Key 进行配置。",
+    devNote: "这是一款开源翻译工具 {0}，由开发者利用业余时间开发维护。Mira AI Translator Pro 是为希望免去 API Key 配置、直接使用 AI 翻译的用户提供的付费选项。",
+    aiModelTip: "友情提醒：AI 翻译并非模型越新越好。翻译不需要复杂推理，普通 AI 模型已完全胜任，而最新模型的价格往往高出数倍甚至更多。",
   },
   "zh-TW": {
     cpTitle: "自訂提示詞",
@@ -3608,7 +3521,11 @@ self.i18nAttach10 = {
     cpClear: "清除",
     footerReview: "⭐ 好評支持",
     footerFeedback: "✉️ 問題回饋",
-    restoreRules: "恢復預設規則"
+    restoreRules: "恢復預設規則",
+    aiTranslationTip: "AI 翻譯效果較佳，但由於模型推理計算量較大且逐字生成，速度比傳統機器翻譯（Google、Bing）慢。",
+    byokTip: "也可自行前往各大 AI 平台申請 API Key 進行設定。",
+    devNote: "這是一款開源翻譯工具 {0}，由開發者利用業餘時間開發維護。Mira AI Translator Pro 是為希望免去 API Key 設定、直接使用 AI 翻譯的用戶提供的付費選項。",
+    aiModelTip: "友情提醒：AI 翻譯並非模型越新越好。翻譯不需要複雜推理，普通 AI 模型已完全勝任，而最新模型的價格往往高出數倍甚至更多。",
   },
   "en": {
     cpTitle: "Custom Prompt",
@@ -3622,7 +3539,12 @@ self.i18nAttach10 = {
     cpClear: "Clear",
     footerReview: "⭐ Rate Us",
     footerFeedback: "✉️ Feedback",
-    restoreRules: "Restore default rules"
+    restoreRules: "Restore default rules",
+    aiTranslationTip: "AI translation produces better results, but is slower than traditional engines (Google, Bing) due to the heavier computation involved in model inference and token-by-token generation.",
+    byokTip: "Alternatively, you can obtain an API key from any major AI platform and configure it yourself.",
+    devNote: "This is an open-source translation tool {0}, developed and maintained in the developer's spare time. Mira AI Translator Pro is a paid option for users who want AI translation without the hassle of configuring API keys.",
+    aiModelTip: "Note: Newer AI models are not necessarily better for translation. Translation does not require complex reasoning — standard models are more than capable, while the latest models can cost significantly more.",
+
   },
   "ja": {
     cpTitle: "カスタムプロンプト",
@@ -3636,7 +3558,11 @@ self.i18nAttach10 = {
     cpClear: "クリア",
     footerReview: "⭐ レビューする",
     footerFeedback: "✉️ フィードバック",
-    restoreRules: "デフォルト規則に戻す"
+    restoreRules: "デフォルト規則に戻す",
+    aiTranslationTip: "AI翻訳は精度が高いですが、モデルの推論計算量が多く逐字生成のため、従来の機械翻訳（Google、Bing）より速度が遅くなります。",
+    byokTip: "各 AI プラットフォームで API Key を取得して、自分で設定することもできます。",
+    devNote: "これは開発者が業務外の時間を使って開発・保守しているオープンソースの翻訳拡張機能 {0} です。Mira AI Translator Pro は、API Key の設定なしで AI 翻訳をすぐに使いたい方向けの有料オプションです。",
+    aiModelTip: "ご参考：AI 翻訳において、モデルが新しいほど優れているとは限りません。翻訳に複雑な推論は不要であり、標準的な AI モデルで十分対応できます。最新モデルはコストが大幅に高くなる場合があります。",
   },
   "ko": {
     cpTitle: "커스텀 프롬프트",
@@ -3650,6 +3576,11 @@ self.i18nAttach10 = {
     cpClear: "지우기",
     footerReview: "⭐ 평가하기",
     footerFeedback: "✉️ 피드백",
-    restoreRules: "기본 규칙으로 복구"
+    restoreRules: "기본 규칙으로 복구",
+    aiTranslationTip: "AI 번역은 품질이 더 좋지만, 모델 추론 연산량이 크고 토큰 단위로 생성되기 때문에 기존 기계 번역(Google, Bing)보다 속도가 느립니다.",
+    byokTip: "각 AI 플랫폼에서 직접 API Key를 발급받아 설정할 수도 있습니다.",
+    devNote: "이 확장 프로그램은 개발자가 개인 시간을 활용해 개발·유지 관리하는 오픈소스 번역 도구 {0} 입니다。Mira AI Translator Pro는 API Key 설정 없이 바로 AI 번역을 사용하고 싶은 분들을 위한 유료 옵션입니다.",
+    aiModelTip: "참고: AI 번역에서 최신 모델이 반드시 더 좋은 것은 아닙니다. 번역에는 복잡한 추론이 필요하지 않으며 일반 AI 모델로도 충분히 대응할 수 있습니다. 최신 모델은 비용이 크게 높아질 수 있습니다.",
   },
 };
+

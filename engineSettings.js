@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiKeys: res.apiKeys || {}
     };
     const ui_lang = window.currentConfig.ui_language;
+
+    const titleSuffix = t('engineListTitle', ui_lang);
+    document.title = `Mira - ${titleSuffix}`;
+
     const TEMPLATES = {
         'mira_pro': {
             name: 'Mira Pro',
@@ -805,21 +809,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
             container.innerHTML = `
-        <div class="main-header">
-            <h2 style="margin:0">${displayAlias}</h2>
-        </div>
-        <div class="form-container">
-            <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
-                <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
-                <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
-                <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
-                <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
-            </div>
-            <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
-                ${t('enableEngineNow', uiLanguage)}
-            </button>
-        </div>`;
+                <div class="main-header">
+                    <h2 style="margin:0">${displayAlias}</h2>
+                </div>
+                <div class="form-container">
+                    <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                        <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
+                        <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                        <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
+                        <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
+                        <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
+<hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
+<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 6px 0;">
+    ❤️ ${(t('devNote', uiLanguage) || '').replace('{0}', '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>')}
+</p>
+<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:0;">
+    💡 ${t('aiTranslationTip', uiLanguage) || 'AI translation produces better results, but is slower than traditional engines (Google, Bing).'}
+</p>
+<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 0 0;">
+    🔑 ${t('byokTip', uiLanguage) || 'You can configure your own AI API key, or use <span style="color:#f2cc60;">Mira Pro</span> with no setup required — recommended for non-technical users.'}
+</p>
+<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 0 0;">
+    💡 ${t('aiModelTip', uiLanguage) || 'AI translation produces better results, but is slower than traditional engines (Google, Bing).'}
+</p>
+
+
+                    </div>
+                    <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
+                        ${t('enableEngineNow', uiLanguage)}
+                    </button>
+                </div>`;
 
             const checkConnectivity = async () => {
 

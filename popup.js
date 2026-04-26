@@ -73,7 +73,7 @@ const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
 async function initNoticeBar() {
   const GITHUB_NOTICE_URL =
-    'https://raw.githubusercontent.com/os9sur/MiraTranslator/refs/heads/main/assets/notice.json';
+    'https://os9sur.github.io/MiraTranslator/assets/notice.json';
 
   let noticeData = null;
 

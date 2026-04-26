@@ -299,15 +299,17 @@ const AI_PROMPT_KEY = 'ai_prompt_settings';
 const MIRA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
 
 const MIRA_FALLBACK_MODELS = [
-  { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: '' },
-  { id: 'deepseek/deepseek-v3.2', label: 'DeepSeek V3.2', tag: 'Popular', tagColor: '#7c3aed', desc: '' },
-  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', tag: 'Stable', tagColor: '#b45309', desc: '' },
-  { id: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', tag: 'Natural', tagColor: '#d946ef', desc: '' },
-  { id: 'qwen/qwen-plus', label: 'Qwen Plus', tag: 'Enhanced', tagColor: '#059669', desc: '' },
-  { id: 'qwen/qwen-turbo', label: 'Qwen Turbo', tag: 'Turbo', tagColor: '#16a34a', desc: '' },
-  { id: 'mistralai/mistral-7b-instruct-v0.1', label: 'Mistral 7B', tag: 'Balanced', tagColor: '#4b5563', desc: '' },
+  { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: 'Ultra-fast and lightweight, best for quick translation' },
+  { id: 'deepseek/deepseek-v3.2', label: 'DeepSeek V3.2', tag: 'Popular', tagColor: '#7c3aed', desc: 'Smart balancing with exceptional cost-performance' },
+  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', tag: 'Stable', tagColor: '#b45309', desc: 'Highly stable with balanced overall performance' },
+  { id: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', tag: 'Natural', tagColor: '#d946ef', desc: 'Excellent at natural context and nuance' },
+  { id: 'qwen/qwen-plus', label: 'Qwen Plus', tag: 'Enhanced', tagColor: '#059669', desc: 'Enhanced Qwen model with stronger logic' },
+  { id: 'qwen/qwen-turbo', label: 'Qwen Turbo', tag: 'Turbo', tagColor: '#16a34a', desc: 'Optimized for maximum generation speed' },
+  { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', tag: 'Open', tagColor: '#4b5563', desc: 'Meta\'s open-source flagship, fast and high quality' },
+  { id: 'mistralai/mistral-small-3.2-24b-instruct', label: 'Mistral Small 3.2', tag: 'Europe', tagColor: '#0284c7', desc: 'European-built model, outstanding multilingual performance' }
 ];
-const MODELS_URL = `https://raw.githubusercontent.com/os9sur/MiraTranslator/refs/heads/main/assets/models.json?t=${Date.now()}`;
+
+const MODELS_URL = `https://os9sur.github.io/MiraTranslator/assets/models.json?t=${Date.now()}`;
 
 const AI_LLM_WHITE_LIST = [
   'mira_pro',
@@ -1298,8 +1300,9 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     if (response && response.error && typeof response.error === 'string') {
       throw new Error(response.error);
     }
-    //透传
+    //透传 
     const data = response.currentTranslationResponse || response.result || response;
+
     let result = {
       basic: "",
       phonetic: "",
@@ -1419,7 +1422,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     } else if (errorText.toLowerCase().includes("timeout")) {
       displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
     } else {
-      displayMessage = getSafeMessage("ERROR_GENERIC") || "Translation failed";
+      displayMessage = errorText || getSafeMessage("ERROR_GENERIC") || "Translation failed";
     }
     return { basic: displayMessage, isError: true };
   } finally {

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <script src="i18n.js"></script>
-  <title data-i18n="wordBook">Vocabulary</title>
+  <title>Mira-Vocabulary</title>
   <style>
     body {
       background: #020617;
@@ -44,16 +44,16 @@
     }
 
     .search-bar-input {
-    width: 200px;
-    background: rgb(23 40 81 / 64%);
-    border: 1px solid #687e9c;
-    color: white;
-    padding: 10px 16px 10px 42px;
-    border-radius: 999px;
-    font-size: 14px;
-    outline: none;
-    box-sizing: border-box;
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 300px;
+      background: rgb(23 40 81 / 64%);
+      border: 1px solid #687e9c;
+      color: white;
+      padding: 10px 16px 10px 42px;
+      border-radius: 999px;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .search-bar-input:focus {
@@ -249,10 +249,11 @@
       color: #64748b;
       font-size: 10px;
       line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
       overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
     }
 
     #pagination {
@@ -418,33 +419,32 @@
       <input type="text" id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning...">
       <button id="addBtn" class="btn btn-primary" data-i18n="manualAdd">手动添加</button>
     </div>
-     
-<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-  
-  <!-- 搜索框 -->
-  <div class="search-bar-wrapper" style="margin-bottom:0;">
-    <span class="search-bar-icon">🔍</span>
-    <input type="text" id="searchInp" class="search-bar-input" 
-      data-i18n="searchVocabulary" data-i18n-type="placeholder" 
-      placeholder="搜索生词本...">
-  </div>
 
-  <!--  高亮开关 -->
-  <label style="display:flex; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
-    <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
-    <div id="highlightToggle" style="
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+
+      <!-- 搜索框 -->
+      <div class="search-bar-wrapper" style="margin-bottom:0;">
+        <span class="search-bar-icon">🔍</span>
+        <input type="text" id="searchInp" class="search-bar-input" data-i18n="searchVocabulary"
+          data-i18n-type="placeholder" placeholder="Search vocabulary...">
+      </div>
+
+      <!--  高亮开关 -->
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer; white-space:nowrap;">
+        <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
+        <div id="highlightToggle" style="
       width:36px; height:20px; border-radius:999px; 
       background:#334155; cursor:pointer; position:relative;
       transition: background 0.2s;">
-      <div id="highlightThumb" style="
+          <div id="highlightThumb" style="
         width:16px; height:16px; border-radius:50%; 
         background:white; position:absolute; top:2px; left:2px;
         transition: left 0.2s;">
-      </div>
-    </div>
-  </label>
+          </div>
+        </div>
+      </label>
 
-</div>
+    </div>
 
     <div class="table-container">
       <table id="vocabTable">
