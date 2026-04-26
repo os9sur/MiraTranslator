@@ -3285,7 +3285,7 @@ function initSelectionTranslate() {
       /* ── 亮色变量── */
       :host([theme="light"]),
       :host(:not([theme="dark"])) {
-        --p-bg:               #ffffffb7;
+        --p-bg:               #fffffff3;
         --p-text-main:        #1a202c;
         --p-text-query:       #2d3748;
         --p-text-muted:       #718096;
@@ -3305,7 +3305,7 @@ function initSelectionTranslate() {
       /* 仅在系统偏好亮色且未手动设置 dark 时生效 */
       @media (prefers-color-scheme: light) {
         :host(:not([theme="dark"])) {
-          --p-bg:            #ffffffb7;
+          --p-bg:            #fffffff3;
           --p-text-main:     #1a202c;
           --p-text-query:    #2d3748;
           --p-text-muted:    #718096;
@@ -3839,6 +3839,23 @@ function initSelectionTranslate() {
       .p-orig-text.is-visible {
         display: block;
       }
+
+      #p-engine-wrap:hover,
+.p-eng-item:hover,
+.p-eng-subitem:hover {
+  background: rgba(99, 102, 241, 0.12);
+  border-radius: 7px;
+}
+#p-engine-dropdown::-webkit-scrollbar {
+  width: 4px;
+}
+#p-engine-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+#p-engine-dropdown::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--p-accent) 40%, transparent);
+  border-radius: 4px;
+}
       `;
 
     return style;
@@ -3969,6 +3986,325 @@ function initSelectionTranslate() {
     }
   };
 
+
+  async function getMiraModels() {
+    // 先读缓存
+    const cached = await safeGetStorage('mira_models_cache');
+    const cache = cached?.mira_models_cache;
+    const ONE_HOUR = 60 * 60 * 1000;
+
+    // 缓存存在且未过期（1小时内）
+    if (cache?.models?.length && Date.now() - cache.timestamp < ONE_HOUR) {
+      return cache.models;
+    }
+
+    // 缓存过期或不存在，重新 fetch
+    try {
+      const resp = await fetch(MODELS_URL);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const notice = await resp.json();
+      const models = (notice.models || []).map(m => ({
+        id: m.id,
+        label: m.label,
+        tag: m.tag || '',
+        tagColor: m.tagColor || '#7c3aed',
+      }));
+      // 存入缓存
+      await safeSetStorage({ mira_models_cache: { models, timestamp: Date.now() } });
+      return models;
+    } catch (e) {
+      // fetch 失败，用旧缓存（即使过期）
+      if (cache?.models?.length) return cache.models;
+      // 实在没有，用内置备用
+      return MIRA_FALLBACK_MODELS;
+    }
+  }
+
+  function createEngineDropdown(anchorEl, shadow, shadowHost, userConfigs, currentId, currentModel, onSelect) {
+    const shadowRoot = shadowHost.shadowRoot;
+
+    // 已存在则关闭
+    const existing = shadowRoot.getElementById('p-engine-dropdown');
+    if (existing) { existing.remove(); return; }
+
+    const isDark = shadowHost.getAttribute('theme') === 'dark' ||
+      (shadowHost.getAttribute('theme') !== 'light' &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const colors = isDark ? {
+      bg: 'rgba(18,18,18,0.4)', border: 'rgba(255,255,255,0.27)',
+      shadow: '0 8px 24px rgba(0,0,0,0.6)', text: '#ffffffb7',
+      textMuted: 'rgba(255,255,255,0.50)',
+      hoverBg: 'rgba(56,189,248,0.15)', accent: '#38bdf8',
+      activeBg: 'rgba(56,189,248,0.15)',
+    } : {
+      bg: 'rgba(255,255,255,0.97)', border: 'rgba(0,0,0,0.1)',
+      shadow: '0 8px 24px rgba(0,0,0,0.15)', text: '#1a202c',
+      textMuted: '#718096',
+      hoverBg: 'rgba(2,132,199,0.1)', accent: '#0284c7',
+      activeBg: 'rgba(2,132,199,0.1)',
+    };
+
+    const dropdown = document.createElement('div');
+    dropdown.id = 'p-engine-dropdown';
+    dropdown.style.cssText = `
+          position:fixed; z-index:2147483647;
+          background:${colors.bg}; border:1px solid ${colors.border};
+          border-radius:10px; box-shadow:${colors.shadow};
+          max-height:360px; overflow-y:auto; min-width:200px;
+          padding:4px; font-size:12px; color:${colors.text};
+          pointer-events:auto;
+          backdrop-filter:blur(20px) saturate(180%);
+          -webkit-backdrop-filter:blur(20px) saturate(180%);
+      `;
+
+    dropdown.addEventListener('wheel', (ev) => {
+      ev.stopPropagation();
+      dropdown.scrollTop += ev.deltaY;
+    }, { passive: false });
+
+    // 定位
+    const btnRect = anchorEl.getBoundingClientRect();
+    const gap = 6;
+    const dropW = 200;
+    const dropH = 360;
+    let left = btnRect.left;
+    let top = btnRect.bottom + gap;
+    if (left + dropW > window.innerWidth) left = window.innerWidth - dropW - gap;
+    if (left < gap) left = gap;
+    if (top + dropH > window.innerHeight) top = btnRect.top - dropH - gap;
+    dropdown.style.top = `${top}px`;
+    dropdown.style.left = `${left}px`;
+
+    // 滚动条样式
+    const scrollStyle = document.createElement('style');
+    scrollStyle.textContent = `
+        #p-engine-dropdown::-webkit-scrollbar { width: 4px; }
+        #p-engine-dropdown::-webkit-scrollbar-track { background: transparent; }
+        #p-engine-dropdown::-webkit-scrollbar-thumb {
+            background: ${colors.textMuted}; border-radius: 4px;
+        }
+    `;
+    dropdown.appendChild(scrollStyle);
+
+    // 覆写 remove
+    const origRemove = dropdown.remove.bind(dropdown);
+    dropdown.remove = () => {
+      origRemove();
+      anchorEl.classList.remove('is-open');
+      shadowHost.style.pointerEvents = 'none';
+    };
+    //const miraModels = await getMiraModels();
+    // 构建列表项
+    userConfigs.forEach(cfg => {
+      const isMira = cfg.engine === 'mira_pro';
+      const isEngineActive = cfg.id === currentId;
+
+      if (isMira) {
+        const header = document.createElement('div');
+        header.style.cssText = `
+        display:flex; align-items:center; gap:6px;
+        padding:6px 10px; font-size:12px; font-weight:600;
+        color:${colors.textMuted}; user-select:none;
+    `;
+        header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator
+        <span style="margin-left:auto; background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6)) !important; color:#fff;
+            font-size:9px; padding:1px 5px; border-radius:8px;">Pro</span>`;
+        dropdown.appendChild(header);
+
+        //  创建子项容器
+        const miraContainer = document.createElement('div');
+        miraContainer.id = 'p-mira-models-list';
+        dropdown.appendChild(miraContainer);
+
+        //  渲染函数
+        const buildMiraItems = (models) => {
+          miraContainer.innerHTML = '';
+          models.forEach(m => {
+            const isActive = isEngineActive && currentModel === m.id;
+            const item = document.createElement('div');
+            item.style.cssText = `
+                display:flex; align-items:center; gap:8px;
+                padding:5px 10px 5px 24px; border-radius:7px; cursor:pointer;
+                color:${isActive ? colors.accent : colors.text};
+                background:${isActive ? colors.activeBg : 'transparent'};
+                transition:background 0.15s;
+            `;
+            item.innerHTML = `
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.label}</span>
+                <span style="font-size:9px; padding:1px 5px; border-radius:8px; flex-shrink:0;
+                    background:${m.tagColor}22; color:${m.tagColor};">${m.tag}</span>
+            `;
+            item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
+            item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
+            item.onclick = (ev) => {
+              ev.stopPropagation();
+              dropdown.remove();
+              onSelect(cfg, m.id);
+            };
+            miraContainer.appendChild(item);
+          });
+        };
+
+        buildMiraItems(MIRA_FALLBACK_MODELS);
+
+        getMiraModels().then(models => {
+          if (!shadowRoot.getElementById('p-engine-dropdown')) return;
+          buildMiraItems(models);
+        });
+      } else {
+        // 普通引擎
+        const isActive = isEngineActive;
+        const item = document.createElement('div');
+        item.style.cssText = `
+                display:flex; align-items:center; gap:8px;
+                padding:6px 10px; border-radius:7px; cursor:pointer;
+                color:${isActive ? colors.accent : colors.text};
+                background:${isActive ? colors.activeBg : 'transparent'};
+                font-weight:${isActive ? '600' : '400'};
+                transition:background 0.15s;
+            `;
+        item.innerHTML = `
+                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    ${cfg.alias}
+                </span>
+            `;
+        item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
+        item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
+        item.onclick = (ev) => {
+          ev.stopPropagation();
+          dropdown.remove();
+          onSelect(cfg, null);
+        };
+        dropdown.appendChild(item);
+      }
+    });
+
+    // 挂载到 shadowRoot
+    shadowRoot.appendChild(dropdown);
+    shadowHost.style.pointerEvents = 'auto';
+
+    // 点击外部关闭
+    const closeDropdown = (ev) => {
+      const path = ev.composedPath();
+      if (!path.includes(dropdown) && !path.includes(anchorEl)) {
+        dropdown.remove();
+        shadowRoot.removeEventListener('click', closeDropdown, true);
+        document.removeEventListener('click', closeDropdown, true);
+      }
+    };
+    setTimeout(() => {
+      shadowRoot.addEventListener('click', closeDropdown, true);
+      document.addEventListener('click', closeDropdown, true);
+    }, 0);
+  }
+  async function switchEngineInPopup(cfg, model, userConfigs, shadow, dotEl, labelEl) {
+    const instanceData = (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
+
+    let finalInstanceData = instanceData;
+    if (cfg.engine === 'mira_pro' && model) {
+      finalInstanceData = { ...instanceData, model };
+    }
+
+    const activeConfig = {
+      id: cfg.id,
+      engine: cfg.engine,
+      data: finalInstanceData,
+    };
+
+    // 存储操作不 await，fire-and-forget
+    safeSetStorage({
+      activeConfig,
+      lastActiveId: cfg.id,
+      selectedEngine: cfg.engine,
+      ...(cfg.engine === 'mira_pro' && model ? { 'data_mira_pro': finalInstanceData } : {})
+    });
+
+    // 立即更新 UI
+    if (labelEl) {
+      const m = MIRA_FALLBACK_MODELS.find(m => m.id === model);
+      labelEl.textContent = cfg.engine === 'mira_pro'
+        ? (m ? m.label : 'Mira')
+        : (cfg.alias || cfg.engine).slice(0, 10);
+    }
+    if (dotEl) dotEl.style.background = '#6b7280';
+
+    // 立即触发翻译
+    shadow.getElementById('p-refresh')?.onclick({ stopPropagation: () => { } });
+  }
+  async function initEngineSelector(shadow) {
+    // 1. 读取数据
+    const data = await safeGetStorage(['userConfigs', 'activeConfig', 'data_mira_pro']);
+    if (!data) return;
+
+    const builtInEngines = [
+      { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
+      { id: 'google_builtin', engine: 'google', alias: 'Google' },
+      { id: 'bing_builtin', engine: 'bing', alias: 'Bing' },
+    ];
+
+    const storedConfigs = data.userConfigs || [];
+    const customConfigs = storedConfigs.filter(c =>
+      !['mira_pro', 'google_builtin', 'bing_builtin'].includes(c.id)
+    );
+    const userConfigs = [...builtInEngines, ...customConfigs];
+
+    const activeConfig = data.activeConfig || userConfigs[0];
+    const currentId = activeConfig?.id || 'google_builtin';
+    const miraSaved = data.data_mira_pro || {};
+    const currentModel = miraSaved.model || MIRA_FALLBACK_MODELS[0].id;
+
+    // 2. 更新按钮标签
+    function getShortAlias(cfg, modelId) {
+      if (cfg.engine === 'mira_pro') {
+        const m = MIRA_FALLBACK_MODELS.find(m => m.id === modelId);
+        return m ? m.label : 'Mira';
+      }
+      // 自定义引擎取前8字
+      return (cfg.alias || cfg.engine).slice(0, 10);
+    }
+
+    const labelEl = shadow.getElementById('p-engine-label');
+    const dotEl = shadow.getElementById('p-engine-dot');
+    if (labelEl) {
+      const curCfg = userConfigs.find(c => c.id === currentId) || userConfigs[0];
+      labelEl.textContent = getShortAlias(curCfg, currentModel);
+    }
+    shadow.host._engineDotEl = dotEl;
+    // safeGetStorage('_engineAvailable').then(res => {
+    //   if (!dotEl) return;
+    //   if (res?._engineAvailable === true) dotEl.style.background = '#22c55e';
+    //   else if (res?._engineAvailable === false) dotEl.style.background = '#ef4444';
+    //   else dotEl.style.background = '#6b7280'; // 从未检测过，灰色
+    // });
+
+    // 4. 按钮点击
+    const btn = shadow.getElementById('p-engine-btn');
+    btn?.addEventListener('click', async (e) => {
+      e.stopPropagation();
+
+      const latestData = await safeGetStorage(['activeConfig', 'data_mira_pro']);
+      const latestConfig = latestData?.activeConfig || userConfigs[0];
+      const latestId = latestConfig?.id || 'google_builtin';
+      const latestModel = latestData?.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
+
+      createEngineDropdown(
+        btn,
+        shadow,
+        shadow.host,
+        userConfigs,
+        latestId,
+        latestModel,
+        async (cfg, model) => {
+          await switchEngineInPopup(cfg, model, userConfigs, shadow, dotEl, labelEl);
+        }
+      );
+    });
+
+    // // 点击外部关闭
+    // shadow.host?.ownerDocument?.addEventListener('click', () => {
+    //   if (dropdown) dropdown.style.display = 'none';
+    // });
+  }
   // ─── 渲染并展示翻译面板 ───────────────────────────────────────────────────────
 
   async function renderAndShowPopup(text, pos, shadow, manualLang = 'auto', hintSourceLang = null) {
@@ -4024,6 +4360,8 @@ function initSelectionTranslate() {
         hintSourceLangNew = saved;
       }
     });
+
+    initEngineSelector(shadow);
     // 面板可见
     popupEl.classList.remove('is-hidden');
     Object.assign(popupEl.style, {
@@ -4198,15 +4536,18 @@ function initSelectionTranslate() {
           //  句子：直接隐藏 pDetail，不启动定时器
           if (pDetail) pDetail.style.display = 'none';
         }
+        if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#6b7280';
 
         getDetailedTranslation(text, true, currentTargetLang, {
           hintInputLang: currentSourceLang
         }, currentSourceLang)
           .then(result => {
             if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+            if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
             handleTranslationResult(result, text, shadow);
           })
           .catch(err => {
+            if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
             setBasicError(basicEl, err.message || 'Network Error');
           })
           .finally(() => {
@@ -4548,13 +4889,14 @@ function initSelectionTranslate() {
     if (pDetail) {
       pDetail.style.display = 'none';
     }
-
+    if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#6b7280';
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(text, false, manualLang, {
       hintInputLang: hintSourceLangNew !== 'auto' ? hintSourceLangNew : null
     }, hintSourceLangNew !== 'auto' ? hintSourceLangNew : null)
       .then(result => {
         if (!result) return;
+        if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
         const currentWord = shadowHost?.getAttribute('data-current-word');
         if (text.trim() !== currentWord) return;
 
@@ -4582,6 +4924,7 @@ function initSelectionTranslate() {
               pDetail.style.display = 'block';
             }
           }
+          if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
         } else {
           logger.log('result.isPartial 为 false', result);
           // 缓存命中时清掉可能残留的计时器
@@ -4590,10 +4933,12 @@ function initSelectionTranslate() {
             shadowHost._slowTimer = null;
             shadowHost._detailFullyRendered = true;
           }
+          if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
           fillPopupData(result, shadow, text.trim(), window.currentTargetL, isRTL);
         }
       })
       .catch(err => {
+        if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
         logger.log('❌ getDetailedTranslation 报错', err);
         setBasicError(basicEl, err.message || '网络异常');
       });
@@ -4630,7 +4975,23 @@ function initSelectionTranslate() {
           </div>
 
         </div>
+<!-- 引擎选择器 -->
+<div id="p-engine-wrap" style="position:relative; display:flex; align-items:center;">
+  <div id="p-engine-btn"
+      style="display:flex; align-items:center; gap:4px; cursor:pointer;
+             padding:5px 7px; border-radius:8px; font-size:12px; font-weight:550;
+             color:var(--p-accent); background:color-mix(in srgb, var(--p-accent) 10%, transparent);
+             user-select:none; -webkit-user-select:none; white-space:nowrap;">
+    <span id="p-engine-dot"
+          style="width:6px; height:6px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
+    <span id="p-engine-label" style="max-width:72px; overflow:hidden; text-overflow:ellipsis;">···</span>
+    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
+      <path d="M6 9l6 6 6-6"/>
+    </svg>
+  </div>
 
+</div>
         <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
           <div id="p-speak" class="icon-btn speak-btn" title="${t('pronunciation')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block;">

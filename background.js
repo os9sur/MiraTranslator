@@ -1486,7 +1486,7 @@ async function _buildDetailData(
             sourceUrl: detailData.sourceUrl || null,
             meta: detailData.meta || null,
             allPronunciations: detailData.allPronunciations || [],
-            source: isChineseTarget ? `${sourceName}+Dict` : `${sourceName}+Wiktionary`
+            source: isChineseTarget ? `${sourceName}` : `${sourceName}+Wiktionary`
         };
     }
 
@@ -1937,87 +1937,138 @@ const Translators = {
         resetBingState('bing 所有 host 失败');
         throw lastError;
     },
+    _fetchBingDictDetail: async function (query) {
+        try {
+            const url = `https://cn.bing.com/dict/search?q=${encodeURIComponent(query)}&cc=cn`;
+            const res = await fetch(url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Referer': 'https://cn.bing.com/dict/',
+                }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const html = await res.text();
 
-_fetchBingDictDetail: async function (query) {
-    try {
-        const url = `https://cn.bing.com/dict/search?q=${encodeURIComponent(query)}&cc=cn`;
-        const res = await fetch(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Referer': 'https://cn.bing.com/dict/',
+            // 音标
+            const usPhoneMatch = html.match(/<div class="hd_prUS b_primtxt">[^[]*(\[[^\]]+\])/);
+            const ukPhoneMatch = html.match(/<div class="hd_pr b_primtxt">[^[]*(\[[^\]]+\])/);
+            const phonetic = (usPhoneMatch?.[1] || ukPhoneMatch?.[1] || '').trim();
+
+            // 词性+释义，从权威英汉双解区域 #authid 提取
+            const posMap = {};
+
+            // 主流程：从 pos_lin 结构提取
+            const posRegex = /<div class="pos_lin">[\s\S]*?<div class="pos">([^<]+)<\/div>[\s\S]*?<\/div>([\s\S]*?)(?=<div class="pos_lin"|<div id="crossid"|$)/g;
+            let posBlock;
+            while ((posBlock = posRegex.exec(html)) !== null) {
+                const pos = posBlock[1].trim();
+                const block = posBlock[2];
+                const meanings = [];
+                const bilRegex = /<span class="bil b_primtxt">([^<]+)<\/span>/g;
+                let bilMatch;
+                while ((bilMatch = bilRegex.exec(block)) !== null) {
+                    meanings.push(bilMatch[1].trim());
+                }
+                if (meanings.length) {
+                    if (!posMap[pos]) posMap[pos] = [];
+                    posMap[pos].push(...meanings);
+                }
             }
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const html = await res.text();
 
-        // 音标
-        const usPhoneMatch = html.match(/hd_prUS[^>]*>美&nbsp;([^<]+)</);
-        const ukPhoneMatch = html.match(/hd_pr b_primtxt[^>]*>英&nbsp;([^<]+)</);
-        const phonetic = (usPhoneMatch?.[1] || ukPhoneMatch?.[1] || '').trim();
-
-        // 词性+释义，从权威英汉双解区域 #authid 提取
-        const dictData = [];
-        const posMap = {};
-
-        // 提取所有 <span class="pos">...</span> 和紧随的 <span class="bil ...">...</span>
-        const posRegex = /<div class="pos_lin">[\s\S]*?<div class="pos">([^<]+)<\/div>[\s\S]*?<\/div>([\s\S]*?)(?=<div class="pos_lin"|<div id="crossid"|$)/g;
-        let posBlock;
-        while ((posBlock = posRegex.exec(html)) !== null) {
-            const pos = posBlock[1].trim();
-            const block = posBlock[2];
-            const meanings = [];
-            const bilRegex = /<span class="bil b_primtxt">([^<]+)<\/span>/g;
-            let bilMatch;
-            while ((bilMatch = bilRegex.exec(block)) !== null) {
-                meanings.push(bilMatch[1].trim());
-            }
-            if (meanings.length) {
-                if (!posMap[pos]) posMap[pos] = [];
-                posMap[pos].push(...meanings);
-            }
-        }
-
-        // 降级：用 .qdef ul li 简单释义
-        if (!Object.keys(posMap).length) {
-            const liRegex = /<span class="pos">([^<]+)<\/span><span class="def b_regtxt"><span>([^<]+)<\/span>/g;
+            // 补充/降级：ul > li 里的释义（含 "網路" 条目）
+            const liRegex = /<span class="pos(?:\s+web)?">([^<]+)<\/span><span class="def b_regtxt"><span>([^<]+)<\/span>/g;
             let liMatch;
             while ((liMatch = liRegex.exec(html)) !== null) {
                 const pos = liMatch[1].trim();
                 const meaning = liMatch[2].trim();
-                if (!posMap[pos]) posMap[pos] = [];
-                posMap[pos].push(meaning);
+                if (!posMap[pos]) {
+                    posMap[pos] = [meaning];
+                }
             }
+
+            const dictData = [];
+            Object.entries(posMap).forEach(([pos, meanings]) => {
+                dictData.push({ pos, meanings });
+            });
+
+            if (!dictData.length) throw new Error('no dict data');
+
+            // 词形变化
+            const wordForms = [];
+
+            // ① 解析顶部变形提示（如 "maintained 是 maintain 的 過去式"）
+            let prototype = null;
+            const inTipMatch = html.match(/<div class="in_tip b_fpage">([^<]+)<\/div>/);
+            if (inTipMatch) {
+                const protoMatch = inTipMatch[1].trim().match(/是\s+(\S+)\s+的\s+(.+)/);
+                if (protoMatch) {
+                    prototype = protoMatch[1];
+                    wordForms.push({ label: protoMatch[2], value: query, isCurrentWord: true });
+                }
+            }
+
+            // ② 从 hd_if 提取其他变形（复数、过去式、现在分词等）
+            const formPatterns = [
+                { label: '复数', regex: /複數：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '过去式', regex: /過去式：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '过去分词', regex: /過去分詞：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '现在分词', regex: /現在分詞：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '第三人称单数', regex: /簡單現在式：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '比较级', regex: /比較級：<\/span><a[^>]+>([^<]+)<\/a>/ },
+                { label: '最高级', regex: /最高級：<\/span><a[^>]+>([^<]+)<\/a>/ },
+            ];
+            formPatterns.forEach(({ label, regex }) => {
+                const m = html.match(regex);
+                if (m) wordForms.push({ label, value: m[1].trim() });
+            });
+
+            // 例句：优先从 authid 区域取（有权威词典的词，如 system）
+            // 降级从 sentenceSeg 取（变形词或无权威词典的词，如 maintained）
+            const stripTags = str => str.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+            const examples = [];
+
+            // 方式一：authid 区域例句
+            const authExRegex = /<div class="val_ex">([\s\S]*?)<\/div>\s*<div class="bil_ex">([\s\S]*?)<\/div>/g;
+            let authExMatch;
+            while ((authExMatch = authExRegex.exec(html)) !== null && examples.length < 2) {
+                const en = stripTags(authExMatch[1]);
+                const cn = stripTags(authExMatch[2]);
+                if (en && cn) examples.push({ en, cn });
+            }
+
+            // 方式二：sentenceSeg 例句（authid 没有时补充）
+            if (examples.length < 2) {
+                const senSegMatch = html.match(/<div id="sentenceSeg">([\s\S]*?)<\/div>\s*<\/div>\s*<div class="b_pag/);
+                if (senSegMatch) {
+                    const segHtml = senSegMatch[1];
+                    // 每条例句是一个 se_li
+                    const seliRegex = /<div class="se_li">[\s\S]*?<div class="sen_en b_regtxt">([\s\S]*?)<\/div>[\s\S]*?<div class="sen_cn b_regtxt">([\s\S]*?)<\/div>/g;
+                    let seliMatch;
+                    while ((seliMatch = seliRegex.exec(segHtml)) !== null && examples.length < 2) {
+                        const en = stripTags(seliMatch[1]);
+                        const cn = stripTags(seliMatch[2]);
+                        if (en && cn) examples.push({ en, cn });
+                    }
+                }
+            }
+
+            // 选取最佳释义（跳过纯语法说明）
+            const grammarPattern = /的(现在分词|过去式|过去分词|第三人称单数|比较级|最高级)/;
+            const bestEntry = dictData.find(d => !grammarPattern.test(d.meanings[0])) || dictData[0];
+
+            return {
+                phonetic,
+                basic: bestEntry.meanings[0] || query,
+                dictData,
+                examples,
+                wordForms,
+                prototype,
+            };
+
+        } catch (e) {
+            return null;
         }
-
-        Object.entries(posMap).forEach(([pos, meanings]) => {
-            dictData.push({ pos, meanings });
-        });
-
-        if (!dictData.length) throw new Error('no dict data');
-
-        // 例句
-        const examples = [];
-        const exRegex = /<div class="val_ex">([\s\S]*?)<\/div>\s*<div class="bil_ex">([\s\S]*?)<\/div>/g;
-        let exMatch;
-        while ((exMatch = exRegex.exec(html)) !== null && examples.length < 2) {
-            const en = exMatch[1].replace(/<[^>]+>/g, '').trim();
-            const cn = exMatch[2].replace(/<[^>]+>/g, '').trim();
-            if (en && cn) examples.push({ en, cn });
-        }
-
-        return {
-            phonetic,
-            basic: dictData[0]?.meanings[0] || query,
-            dictData,
-            examples,
-            wordForms: [],
-            prototype: null
-        };
-
-    } catch (e) {
-        return null;
-    }
-},
+    },
     google: async (text, target, lightweight = false, hintSourceLang = null, tabId = null, cacheKey = null, fromPopup = false) => {
         if (!text || text.trim().length < 1) return null;
         const query = text.trim();
@@ -2882,8 +2933,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     })
                 }, 20000);
 
-                if (resp.status === 402) return { __error: '余额不足，请充值后继续使用' };
-                if (resp.status === 401) return { __error: '登录已过期，请重新登录' };
+                if (resp.status === 402) return { __error: t('no_balance') };
+                if (resp.status === 401) return { __error: t('loginExpired') };
                 if (!resp.ok) {
                     const errData = await resp.json().catch(() => ({}));
                     throw new Error(errData.error || `Worker error ${resp.status}`);
@@ -2896,7 +2947,6 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
 
                 // ── 失败时检查模型是否下架 ────────────────────────
                 if (result?.__error === undefined && !result) {
-                    // 不应该发生，保险处理
                     throw new Error('Empty response');
                 }
 

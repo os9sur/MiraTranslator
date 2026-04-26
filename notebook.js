@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const _t = (key) => {
     return (typeof t === 'function') ? t(key, targetLanguage) : key;
   };
+
+  const titleSuffix = _t('wordBook', targetLanguage);
+  document.title = `Mira - ${titleSuffix}`;
   if (typeof applyI18n === 'function') {
     applyI18n(targetLanguage);
   }
