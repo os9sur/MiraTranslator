@@ -4101,6 +4101,7 @@ function initSelectionTranslate() {
 
       if (isMira) {
         const header = document.createElement('div');
+        header.classList.add("mira-font-family");
         header.style.cssText = `
         display:flex; align-items:center; gap:6px;
         padding:6px 10px; font-size:12px; font-weight:600;
@@ -4115,7 +4116,7 @@ function initSelectionTranslate() {
         const miraContainer = document.createElement('div');
         miraContainer.id = 'p-mira-models-list';
         dropdown.appendChild(miraContainer);
-
+        miraContainer.classList.add("mira-font-family");
         //  渲染函数
         const buildMiraItems = (models) => {
           miraContainer.innerHTML = '';
@@ -4155,6 +4156,8 @@ function initSelectionTranslate() {
         // 普通引擎
         const isActive = isEngineActive;
         const item = document.createElement('div');
+
+        item.classList.add("mira-font-family");
         item.style.cssText = `
                 display:flex; align-items:center; gap:8px;
                 padding:6px 10px; border-radius:7px; cursor:pointer;
@@ -4248,8 +4251,15 @@ function initSelectionTranslate() {
     );
     const userConfigs = [...builtInEngines, ...customConfigs];
 
-    const activeConfig = data.activeConfig || userConfigs[0];
-    const currentId = activeConfig?.id || 'google_builtin';
+    const activeConfig = data.activeConfig;
+    const getDefaultEngineId = (userConfigs) => {
+      return userConfigs.find(c => c.engine === _defaultEngine)?.id || 'google_builtin';
+    };
+
+    const currentId = activeConfig?.id
+      || userConfigs.find(c => c.engine === data.selectedEngine)?.id
+      || userConfigs.find(c => c.engine === _defaultEngine)?.id
+      || getDefaultEngineId(userConfigs);
     const miraSaved = data.data_mira_pro || {};
     const currentModel = miraSaved.model || MIRA_FALLBACK_MODELS[0].id;
 
@@ -4281,19 +4291,19 @@ function initSelectionTranslate() {
     const btn = shadow.getElementById('p-engine-btn');
     btn?.addEventListener('click', async (e) => {
       e.stopPropagation();
+      const latestData = await safeGetStorage(['activeConfig', 'data_mira_pro', 'selectedEngine', '_defaultEngine']);
 
-      const latestData = await safeGetStorage(['activeConfig', 'data_mira_pro']);
-      const latestConfig = latestData?.activeConfig || userConfigs[0];
-      const latestId = latestConfig?.id || 'google_builtin';
+      const latestConfig = latestData?.activeConfig;
+      const latestId =
+        (latestData?.activeConfig?.id && userConfigs.find(c => c.id === latestData.activeConfig.id)?.id) ||
+        (latestData?.selectedEngine && userConfigs.find(c => c.engine === latestData.selectedEngine)?.id) ||
+        (latestData?._defaultEngine && userConfigs.find(c => c.engine === latestData._defaultEngine)?.id) ||
+        'google_builtin';
       const latestModel = latestData?.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
 
       createEngineDropdown(
-        btn,
-        shadow,
-        shadow.host,
-        userConfigs,
-        latestId,
-        latestModel,
+        btn, shadow, shadow.host,
+        userConfigs, latestId, latestModel,
         async (cfg, model) => {
           await switchEngineInPopup(cfg, model, userConfigs, shadow, dotEl, labelEl);
         }
@@ -4957,7 +4967,7 @@ function initSelectionTranslate() {
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
   
-        <div style="display:inline-flex; align-items:center; gap:2px; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
+        <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
 
           <div id="p-lang-select" class="lang-tag-btn"
               style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
@@ -4976,7 +4986,7 @@ function initSelectionTranslate() {
 
         </div>
 <!-- 引擎选择器 -->
-<div id="p-engine-wrap" style="position:relative; display:flex; align-items:center;">
+<div id="p-engine-wrap" class="mira-font-family" style="position:relative; display:flex; align-items:center; margin-left:4px;">
   <div id="p-engine-btn"
       style="display:flex; align-items:center; gap:4px; cursor:pointer;
              padding:5px 7px; border-radius:8px; font-size:12px; font-weight:550;
