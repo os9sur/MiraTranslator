@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `
     <div class="engine-item ${isEditing ? 'active' : ''} ${isMiraPro ? 'item-gold-pro' : ''}" data-id="${c.id}">
         <div class="engine-info">
-            ${isRunning ? `<span class="status-dot success" data-id="${c.id}"></span>` : ''}
+            ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
             <span class="engine-name">${c.alias}</span>${proTag}
         </div>
         ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin' && c.id !== 'mira_pro') ?

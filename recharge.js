@@ -60,7 +60,7 @@ document.addEventListener('click', e => {
     e.preventDefault();
 
     if (!isLoggedIn || !userData.uid) {
-        alert(t('loginFirst') || 'Please log in first.');
+        alert(t('loginFirst') || 'Please sign in first.');
         return;
     }
 

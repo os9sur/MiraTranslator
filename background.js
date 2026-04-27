@@ -56,7 +56,7 @@ async function ensureRemoteDir(config) {
                     headers: { 'Authorization': `Basic ${auth}` }
                 });
                 if (!mkcol.ok && mkcol.status !== 405) {
-                    throw new Error(`无法创建目录: ${mkcol.status}`);
+                    throw new Error(`Unable to create directory: ${mkcol.status}`);
                 }
             }
         } catch (e) {
@@ -143,7 +143,7 @@ async function webdavRequest(config, method, body = null) {
     try {
         response = await fetch(fileUrl, options);
     } catch (err) {
-        throw new Error(`WebDAV 网络请求失败 [${method}]: ${err.message}`);
+        throw new Error(`WebDAV network request failed. [${method}]: ${err.message}`);
     }
 
     if (method === 'PUT' && response.status === 404) {
@@ -152,17 +152,17 @@ async function webdavRequest(config, method, body = null) {
         try {
             response = await fetch(fileUrl, options);
         } catch (err) {
-            throw new Error(`WebDAV 重试请求失败 [${method}]: ${err.message}`);
+            throw new Error(`WebDAV retry request failed. [${method}]: ${err.message}`);
         }
     }
 
     if (method === 'GET') {
         if (response.status === 404 || response.status === 410) return {};
-        if (!response.ok) throw new Error(`云端读取失败: ${response.status}`);
+        if (!response.ok) throw new Error(`Cloud read failed: ${response.status}`);
         return await response.json();
     }
     if (!response.ok) {
-        throw new Error(`WebDAV写入失败: ${response.status}。请确保已在云端手动创建了配置中的文件夹。`);
+        throw new Error(`WebDAV write failed: ${response.status}。Please ensure that the folder in the configuration has been manually created in the cloud.`);
     }
     logger.log(`[WebDAV-Req] <<< ${method} 成功`);
     return true;
@@ -345,19 +345,19 @@ async function handleSyncFlow(message, sendResponse) {
 
         if (method === 'googleDrive') {
             const token = data.google_drive_token;
-            if (!token) throw new Error("未授权，请先连接 Google 账号");
+            if (!token) throw new Error("Unauthorized, please connect your Google account first.");
             logger.log("[Mira-TRACE] 3. 执行 Google Drive 同步...");
             resultData = await syncWithGoogleDrive(token, direction);
         } else if (method === 'oneDrive') {
             let token = data.onedrive_token;
-            if (!token) throw new Error("未授权，请先连接 Microsoft 账号");
+            if (!token) throw new Error("Unauthorized, please connect your Microsoft account first.");
             logger.log("[Mira-TRACE] 3. 执行 OneDrive 同步...");
             resultData = await syncWithOneDrive(token, direction);
         } else if (method === 'webdav') {
             logger.log("[Mira-TRACE] 3. 执行 WebDAV 同步...");
             resultData = await syncWithWebDAV(config, direction);
         } else {
-            throw new Error("请先在设置中配置同步方式");
+            throw new Error("Please configure the synchronization method in the settings first.");
         }
 
         if (chrome.runtime?.id) {
@@ -458,7 +458,7 @@ async function gdriveFetch(url, options) {
     try {
         response = await fetch(url, options);
     } catch (err) {
-        throw new Error(`Google Drive 网络请求失败: ${err.message}`);
+        throw new Error(`Google Drive network request failed: ${err.message}`);
     }
     if (response.status === 401) throw new Error("Unauthorized");
     if (!response.ok) throw new Error(`Google Drive API Error: ${response.status} ${response.statusText}`);
@@ -587,7 +587,7 @@ async function findGoogleDriveFile(token) {
             headers: { Authorization: `Bearer ${token}` }
         });
     } catch (err) {
-        throw new Error(`Google Drive 网络请求失败: ${err.message}`);
+        throw new Error(`Google Drive network request failed: ${err.message}`);
     }
 
     if (!response.ok) {
@@ -615,7 +615,7 @@ async function ensureOneDriveAppRoot(token) {
                 await new Promise(r => setTimeout(r, 1000 * (i + 1)));
                 continue;
             }
-            throw new Error(`初始化 approot 网络请求失败: ${err.message}`);
+            throw new Error(`Approot initialization network request failed: ${err.message}`);
         }
 
         if (res.ok) return await res.json();
@@ -625,9 +625,9 @@ async function ensureOneDriveAppRoot(token) {
             await new Promise(r => setTimeout(r, 1000 * (i + 1)));
             continue;
         }
-        throw new Error(`初始化 approot 失败: ${res.status}`);
+        throw new Error(`Approot initialization failed: ${res.status}`);
     }
-    throw new Error('初始化 approot 失败: 多次重试后仍然 503');
+    throw new Error('Approot initialization failed: Still 503 after multiple retries.');
 }
 // =========================
 // 对应 findGoogleDriveFile
@@ -640,7 +640,7 @@ async function findOneDriveFile(token) {
             headers: { Authorization: `Bearer ${token}` }
         });
     } catch (err) {
-        throw new Error(`OneDrive 网络请求失败: ${err.message}`);
+        throw new Error(`OneDrive network request failed: ${err.message}`);
     }
 
     if (response.status === 404) return null;
@@ -778,7 +778,7 @@ async function syncWithOneDrive(token, direction) {
 
         if (!uploadResponse.ok) {
             const errText = await uploadResponse.text();
-            throw new Error(`OneDrive 上传失败: ${uploadResponse.status} ${errText}`);
+            throw new Error(`OneDrive upload failed: ${uploadResponse.status} ${errText}`);
         }
 
         logger.log(fileId
@@ -1387,7 +1387,7 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
                         ? preferredCache
                         : await refreshBingToken(h);
 
-                    if (!resolvedCache?.ig) throw new Error(`token 不可用: ${h}`);
+                    if (!resolvedCache?.ig) throw new Error(`Token unavailable: ${h}`);
 
                     allTranslatedLines = await translateAllAtOnce(
                         (text) => bingTranslateChunk(text, h, resolvedCache, bingTarget)
@@ -2320,7 +2320,7 @@ const Translators = {
         try {
             const controller = new AbortController();
             const { baiduAppId, baiduKey } = keys;
-            if (!baiduAppId || !baiduKey) throw new Error("缺少百度 AppID 或密钥");
+            if (!baiduAppId || !baiduKey) throw new Error("Missing Baidu AppID or Secret Key.");
             const salt = Date.now().toString();
             const sign = md5(baiduAppId + text + salt + baiduKey);
             const langMap = {
@@ -2353,7 +2353,7 @@ const Translators = {
             if (data.error_code && data.error_code !== "52000") {
                 throw new Error(`Baidu [${data.error_code}]: ${data.error_msg}`);
             }
-            if (!data.trans_result?.[0]) throw new Error("未获取到翻译内容");
+            if (!data.trans_result?.[0]) throw new Error("No translation content retrieved.");
             const baiduBasic = data.trans_result[0].dst;
             return await Translators._withDictDetail(
                 baiduBasic,          // basicText
@@ -2380,7 +2380,7 @@ const Translators = {
                 ? hintSourceLang.split('-')[0]
                 : 'auto';
             const { tenId, tenKey } = keys;
-            if (!tenId || !tenKey) throw new Error("缺少腾讯 SecretId 或 SecretKey");
+            if (!tenId || !tenKey) throw new Error("Missing Tencent SecretId or SecretKey.");
 
             // 腾讯语言代码映射
             const langMap = {
@@ -2417,7 +2417,7 @@ const Translators = {
             }
 
             const tencentBasic = data.Response.TargetText;
-            if (!tencentBasic) throw new Error("未获取到腾讯翻译内容");
+            if (!tencentBasic) throw new Error("No Tencent translation content retrieved.");
 
             return await Translators._withDictDetail(tencentBasic, text, target, 'Tencent', '', '', hintSourceLang || null, [], tabId, '', '', cacheKey);
 
@@ -2888,7 +2888,6 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             }
         }
         //fallback 顺序：Bing->FreeDict->Google，或 Google->FreeDict->Bing，增加一个免费词典接口作为兜底，提升单词翻译的成功率
-        //logger.log(`processTranslate cacheKey: ${cacheKey}`);
         //  计算实际使用的引擎（优先临时降级引擎）
         if (_runtimeEngine && Date.now() - _runtimeEngineFallbackTs > FALLBACK_RESET_MS) {
             logger.log('[引擎] 降级超时重置，重新尝试用户引擎:', engine);
@@ -2910,7 +2909,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             }
 
             if (!token) {
-                return { error: '请先登录 Mira 账号' };
+                return { error: 'Please sign in to use Mira AI Translator' };
             }
 
             const miraData = await safeGetStorage('data_mira_pro');
@@ -3010,6 +3009,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             rawResult = workerRes.text || '';
         }
         // ── Mira Pro 结束 ──────────────────────────────────────────
+        let actualEngine = effectiveEngine; // ← 新增
 
         if (effectiveEngine === 'bing') {
             try {
@@ -3018,17 +3018,16 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
-                    //  翻译成功，更新可用性缓存
                     safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Bing 失败，降级 Google:', e.message);
+                actualEngine = 'google'; // ← 新增
                 if (!req.isTest) {
                     _runtimeEngine = 'google';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
-                    //  翻译失败，标记不可用
                     safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 } else {
                     throw e;
@@ -3043,17 +3042,16 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
-                    //  翻译成功，更新可用性缓存
                     safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Google 失败，降级 Bing:', e.message);
+                actualEngine = 'bing'; // ← 新增
                 if (!req.isTest) {
                     _runtimeEngine = 'bing';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
-                    //  翻译失败，标记不可用
                     safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 } else {
                     throw e;
@@ -3201,7 +3199,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     'microsoft': 'Microsoft',
                     'custom_ai': 'Custom AI'
                 };
-                const engineName = sourceNames[engine] || engine;
+                const engineName = sourceNames[actualEngine] || actualEngine;
                 finalData.source = finalModel
                     ? `${engineName} (${finalModel})`
                     : engineName;
@@ -3725,13 +3723,13 @@ async function handleMicrosoftLogin(sendResponse) {
         // 3. 解析 access_token
         const fragment = new URL(redirected).hash.slice(1);
         const msToken = new URLSearchParams(fragment).get('access_token');
-        if (!msToken) throw new Error('未获取到 Microsoft access_token');
+        if (!msToken) throw new Error('Failed to retrieve Microsoft access_token');
 
         // 4. 拿用户信息（微软官方API，不改）
         const graphResp = await fetch('https://graph.microsoft.com/v1.0/me', {
             headers: { Authorization: `Bearer ${msToken}` }
         });
-        if (!graphResp.ok) throw new Error('获取 Microsoft 用户信息失败');
+        if (!graphResp.ok) throw new Error('Failed to retrieve Microsoft user information.');
         const info = await graphResp.json();
 
         const user = {
@@ -3748,7 +3746,7 @@ async function handleMicrosoftLogin(sendResponse) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ms_token: msToken })
         });
-        if (!resp.ok) throw new Error(`后端返回错误: ${resp.status}`);
+        if (!resp.ok) throw new Error(`Backend returned error: ${resp.status}`);
         const data = await resp.json();
         if (data.token) await safeSetStorage({ mira_jwt: data.token });
 
@@ -3782,7 +3780,7 @@ async function syncMicrosoftUserToBackend(user, msToken) {
         })
     });
 
-    if (!resp.ok) throw new Error(`后端返回错误: ${resp.status}`);
+    if (!resp.ok) throw new Error(`Backend returned error: ${resp.status}`);
 
     const data = await resp.json();
     if (data.token) {
@@ -3915,7 +3913,7 @@ async function handleUserLogin(sendResponse) {
         const resp = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        if (!resp.ok) throw new Error('获取 Google 用户信息失败');
+        if (!resp.ok) throw new Error('Failed to retrieve Google user information.');
         const info = await resp.json();
 
         const user = {
@@ -4006,7 +4004,7 @@ async function fetchUserBalance(uid, sendResponse) {
 
         // 2. 缓存失效，从后端请求最新数据
         const { mira_jwt } = await safeGetStorage(['mira_jwt']);
-        if (!mira_jwt) throw new Error('未发现有效通行证，请重新登录');
+        if (!mira_jwt) throw new Error('No valid access token found, please log in again.');
 
         // 3. 请求后端 
         const resp = await workerFetch('/api/balance', {
@@ -4023,7 +4021,7 @@ async function fetchUserBalance(uid, sendResponse) {
 
         if (!resp.ok) {
             const text = await resp.text();
-            throw new Error(`请求失败 ${resp.status}: ${text}`);
+            throw new Error(`Request failed: ${resp.status}: ${text}`);
         }
         const { balance } = await resp.json();
         await safeSetStorage({ mira_user_balance: { uid, balance, updatedAt: Date.now() } });
@@ -4054,7 +4052,7 @@ async function syncUserToBackend(user, googleToken) {
             })
         });
 
-        if (!resp.ok) throw new Error(`后端返回错误: ${resp.status}`);
+        if (!resp.ok) throw new Error(`Backend returned error: ${resp.status}`);
 
         const data = await resp.json();
         if (data.token) {
@@ -4150,7 +4148,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                     body: JSON.stringify({ email: user.email || '' })
                 });
 
-                if (!res.ok) throw new Error('Worker 响应失败');
+                if (!res.ok) throw new Error('Worker response failed:');
                 const { code } = await res.json();
 
                 const params = new URLSearchParams({
