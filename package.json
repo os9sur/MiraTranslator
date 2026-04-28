@@ -14,5 +14,8 @@
     "fs-extra": "^11.3.3",
     "google-closure-compiler": "^20260218.0.0",
     "terser": "^5.46.0"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
   }
 }
