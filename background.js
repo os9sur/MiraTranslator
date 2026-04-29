@@ -4086,6 +4086,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
 
+    if (request.type === 'UPDATE_UNINSTALL_URL') {
+        updateUninstallURL(request.usageCount);
+    }
+
     if (request.action === 'logout') {
         handleUserLogout(safeSendResponse);
         return true;
@@ -4286,7 +4290,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 const GA_MEASUREMENT_ID = "{{GA_MEASUREMENT_ID}}";
 const GA_API_SECRET = "{{GA_API_SECRET}}";
 
-
 // 公共设备信息
 function getDeviceInfo() {
     const ua = navigator.userAgent;
@@ -4355,13 +4358,12 @@ chrome.runtime.onInstalled.addListener(async (details) => {
             browser_version,
             os,
             timezone,
-            usage_count: 0,
         });
     }
 });
 
-// ============ 卸载时 ============
-(async function () {
+// ============ 卸载时配置 ============
+async function updateUninstallURL(count = null) {
     const version = chrome.runtime.getManifest().version;
     const lang = getBrowserLang();
     const supported = ['zh-CN', 'zh-TW', 'ja'];
@@ -4369,39 +4371,19 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
     const stored = await safeGetStorage(['install_time', 'usage_count'], true);
     const installTime = stored?.install_time;
-    const usageCount = stored?.usage_count || 0;
-    const daysUsed = installTime
-        ? Math.floor((Date.now() - installTime) / 86400000)
-        : 0;
+
+    let usageCount = (typeof count === 'number') ? count : (stored?.usage_count || 0);
+
+    const diff = installTime ? (Date.now() - installTime) : 0;
+    const daysUsed = Math.floor(diff / 86400000);
+    const minutesUsed = Math.floor(diff / 60000);
 
     const { browser, browser_version, os, timezone } = getDeviceInfo();
-    const clientId = await getClientId();
-
-    fetch(
-        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
-        {
-            method: 'POST',
-            keepalive: true,  //  保证页面关闭前也能发出去
-            body: JSON.stringify({
-                client_id: clientId,
-                events: [{
-                    name: 'extension_uninstalled',
-                    params: {
-                        version,
-                        days_used: daysUsed,
-                        usage_count: usageCount,
-                        browser_lang: navigator.language,
-                        browser,
-                        browser_version,
-                        os,
-                        timezone,
-                    }
-                }]
-            })
-        }
-    ).catch(() => { });
 
     chrome.runtime.setUninstallURL(
-        `https://tally.so/r/68xBrJ?lang=${langParam}&version=${version}&days_used=${daysUsed}&usage_count=${usageCount}&browser=${browser}&os=${os}`
+        `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}`
     );
-})();
+} 
+// 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 
+chrome.runtime.onStartup.addListener(updateUninstallURL);
+chrome.runtime.onInstalled.addListener(updateUninstallURL);
