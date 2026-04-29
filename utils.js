@@ -1154,12 +1154,19 @@ function mergeDictData(dictData) {
   return Object.entries(merged).map(([pos, definition]) => ({ pos, definition }));
 }
 
-
+// 每次翻译时调用
+async function incrementUsageCount() {
+    const result = await safeGetStorage('usage_count', true);
+    const count = (result?.usage_count || 0) + 1;
+    await safeSetStorage({ usage_count: count });
+}
 //通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}, hintSourceLang = null) {
   if (!text) return null;
+
+  incrementUsageCount();
   const query = text.trim();
   if (!query) return null;
   if (/^\d+%?$/.test(query)) {

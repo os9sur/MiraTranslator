@@ -3571,23 +3571,7 @@ function drawText(ctx, text, x, y, color) {
     ctx.fillText(text, x, y + 10);
 }
 
-// 初始安装时设置默认翻译引擎，并进行预检测
-chrome.runtime.onInstalled.addListener(async (details) => {
-    if (details.reason === "install") {
-        const lang = getBrowserLang();
-        const safeDefault = (lang === 'zh-CN') ? 'bing' : 'google';
-        await safeSetStorage({
-            _defaultEngine: safeDefault,
-            selectedEngine: safeDefault,
-            _defaultEngineTime: Date.now(),
-            _engineCheckTime: Date.now(),
-            _engineAvailable: true
-        });
 
-        // 异步真实检测来修正，不阻塞安装
-        detectAndCacheDefaultEngine(true);
-    }
-});
 
 chrome.runtime.onStartup.addListener(() => detectAndCacheDefaultEngine(false));
 
@@ -4296,16 +4280,128 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return false;
 });
 
-// ============ 卸载反馈逻辑 ============ 
-(function () {
-    const version = chrome.runtime.getManifest().version;
-    const realLang = navigator.language;
-    const lang = getBrowserLang();
 
+//============= 监控
+// ============ GA4 配置 ============
+const GA_MEASUREMENT_ID = "{{GA_MEASUREMENT_ID}}";
+const GA_API_SECRET = "{{GA_API_SECRET}}";
+
+
+// 公共设备信息
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    return {
+        browser: ua.includes('Edg/') ? 'edge'
+            : ua.includes('Firefox/') ? 'firefox'
+                : 'chrome',
+        browser_version: (
+            /Edg\/(\d+)/.exec(ua) ||
+            /Firefox\/(\d+)/.exec(ua) ||
+            /Chrome\/(\d+)/.exec(ua)
+        )?.[1] || 'unknown',
+        os: ua.includes('Windows') ? 'windows'
+            : ua.includes('Mac') ? 'mac'
+                : ua.includes('Linux') ? 'linux'
+                    : 'unknown',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+}
+
+// 生成/获取唯一用户ID
+async function getClientId() {
+    const result = await safeGetStorage('ga_client_id', true);
+    if (result?.ga_client_id) return result.ga_client_id;
+    const id = crypto.randomUUID();
+    await safeSetStorage({ ga_client_id: id });
+    return id;
+}
+
+// 上报事件
+async function trackEvent(eventName, params = {}) {
+    const clientId = await getClientId();
+    fetch(
+        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                client_id: clientId,
+                events: [{ name: eventName, params }],
+            }),
+        }
+    ).catch(() => { });
+}
+
+// ============ 安装时 ============
+chrome.runtime.onInstalled.addListener(async (details) => {
+    if (details.reason === "install") {
+        const lang = getBrowserLang();
+        const safeDefault = (lang === 'zh-CN') ? 'bing' : 'google';
+        await safeSetStorage({
+            _defaultEngine: safeDefault,
+            selectedEngine: safeDefault,
+            _defaultEngineTime: Date.now(),
+            _engineCheckTime: Date.now(),
+            _engineAvailable: true,
+            install_time: Date.now(),
+        });
+
+        detectAndCacheDefaultEngine(true);
+
+        const { browser, browser_version, os, timezone } = getDeviceInfo();
+        trackEvent('extension_installed', {
+            version: chrome.runtime.getManifest().version,
+            browser_lang: navigator.language,
+            browser,
+            browser_version,
+            os,
+            timezone,
+            usage_count: 0,
+        });
+    }
+});
+
+// ============ 卸载时 ============
+(async function () {
+    const version = chrome.runtime.getManifest().version;
+    const lang = getBrowserLang();
     const supported = ['zh-CN', 'zh-TW', 'ja'];
     const langParam = supported.includes(lang) ? lang : 'en';
 
-    const uninstallUrl = `https://tally.so/r/68xBrJ?lang=${langParam}&browser_lang=${realLang}&version=${version}`;
+    const stored = await safeGetStorage(['install_time', 'usage_count'], true);
+    const installTime = stored?.install_time;
+    const usageCount = stored?.usage_count || 0;
+    const daysUsed = installTime
+        ? Math.floor((Date.now() - installTime) / 86400000)
+        : 0;
 
-    chrome.runtime.setUninstallURL(uninstallUrl);
+    const { browser, browser_version, os, timezone } = getDeviceInfo();
+    const clientId = await getClientId();
+
+    fetch(
+        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+        {
+            method: 'POST',
+            keepalive: true,  //  保证页面关闭前也能发出去
+            body: JSON.stringify({
+                client_id: clientId,
+                events: [{
+                    name: 'extension_uninstalled',
+                    params: {
+                        version,
+                        days_used: daysUsed,
+                        usage_count: usageCount,
+                        browser_lang: navigator.language,
+                        browser,
+                        browser_version,
+                        os,
+                        timezone,
+                    }
+                }]
+            })
+        }
+    ).catch(() => { });
+
+    chrome.runtime.setUninstallURL(
+        `https://tally.so/r/68xBrJ?lang=${langParam}&version=${version}&days_used=${daysUsed}&usage_count=${usageCount}&browser=${browser}&os=${os}`
+    );
 })();
