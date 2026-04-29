@@ -1,6 +1,6 @@
 {
   "name": "mira_translator",
-  "version": "3.5.1.1",
+  "version": "3.5.1.2",
   "scripts": {
     "build:chrome": "node build.js --browser=chrome",
     "build:edge": "node build.js --browser=edge",
@@ -14,5 +14,8 @@
     "fs-extra": "^11.3.3",
     "google-closure-compiler": "^20260218.0.0",
     "terser": "^5.46.0"
+  },
+  "devDependencies": {
+    "archiver": "^7.0.1"
   }
 }

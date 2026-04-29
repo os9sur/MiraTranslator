@@ -36,6 +36,7 @@
   "host_permissions": [
     "<all_urls>",
     "https://os9sur.github.io/MiraTranslator/*",
+    "https://www.google-analytics.com/*",
     "https://www.bing.com/*",
     "https://cn.bing.com/*",
     "https://*.bing.com/*",

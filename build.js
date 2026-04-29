@@ -11,6 +11,7 @@ const config = require('./private_config.js');
 const pkg = require('./package.json');
 const { minify } = require('terser');
 const logger = console;
+const archiver = require('archiver');
 
 const IS_DEV_MODE = process.argv.includes('--dev');
 const targetBrowser = process.argv.find(arg => arg.startsWith('--browser='))?.split('=')[1] || 'chrome';
@@ -34,7 +35,7 @@ async function build() {
             'dists', '.git', '.vscode', '.gitignore', 'node_modules',
             'private_config.js', 'build.js', 'package.json',
             'package-lock.json', 'pnpm-lock.yaml', 'README.md',
-            'tools', 'LICENSE', 'img', 'images', '.gitattributes', 'assets','private_config.example.js'
+            'tools', 'LICENSE', 'img', 'images', '.gitattributes', 'assets', 'private_config.example.js', '.nojekyll'
         ];
 
         items.forEach(item => {
@@ -63,6 +64,8 @@ async function build() {
 
             content = content.replace(/{{MY_ID}}/g, finalClientId || '');
             content = content.replace(/{{FIREFOX_CLIENT_ID}}/g, config.FIREFOX_CLIENT_ID || '');
+            content = content.replace(/{{GA_MEASUREMENT_ID}}/g, config.GA_MEASUREMENT_ID || '');
+            content = content.replace(/{{GA_API_SECRET}}/g, config.GA_API_SECRET || '');
             content = content.replace(/{{MY_KEY}}/g, config.MANIFEST_KEY || '');
             content = content.replace(/{{ONEDRIVE_CLIENT_ID}}/g, config.ONEDRIVE_CLIENT_ID || '');
             content = content.replace(/{{MIRA_WORKER_URLS}}/g, config.MIRA_WORKER_URLS.join(','));
@@ -225,9 +228,39 @@ async function build() {
 
         logger.log(`\n ✨ Build completed successfully! [${new Date().toLocaleString()}]`);
         logger.log(`📦 Output: ${browserDistDir}`);
+
+        // 6. Package as zip
+        if (!IS_DEV_MODE) {
+            await zipDist(browserDistDir, targetBrowser, pkg.version);
+        }
     } catch (err) {
         logger.error(' ❌ Build failed:', err);
     }
+}
+async function zipDist(sourceDir, browser, version) {
+    const zipName = `v${version}-${browser}.zip`;
+    const zipPath = path.join(distDir, zipName);
+    logger.log(` 🔍 Zipping from: ${sourceDir}`);
+    if (fs.existsSync(zipPath)) {
+        logger.log(` ⚠️  Overwriting existing zip: ${zipName}`);
+    }
+    return new Promise((resolve, reject) => {
+        const output = fs.createWriteStream(zipPath);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        output.on('close', () => {
+            logger.log(`\n 🗜️  Zipped: ${zipName} (${(archive.pointer() / 1024).toFixed(1)} KB)`);
+            logger.log(`📍 Location: ${zipPath}`);
+            resolve();
+        });
+
+        archive.on('error', err => reject(err));
+        archive.pipe(output);
+
+        // 将 browserDistDir 下的所有内容打包到 zip 根目录
+        archive.directory(sourceDir, false);
+        archive.finalize();
+    });
 }
 
 build();
