@@ -1156,9 +1156,10 @@ function mergeDictData(dictData) {
 
 // 每次翻译时调用
 async function incrementUsageCount() {
-    const result = await safeGetStorage('usage_count', true);
-    const count = (result?.usage_count || 0) + 1;
-    await safeSetStorage({ usage_count: count });
+  const result = await safeGetStorage('usage_count', true);
+  const count = (result?.usage_count || 0) + 1;
+  await safeSetStorage({ usage_count: count });
+  return count; // 返回 count，让调用者知道当前进度
 }
 //通用翻译
 let lastTranslationResult = null;
@@ -1166,7 +1167,14 @@ const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}, hintSourceLang = null) {
   if (!text) return null;
 
-  incrementUsageCount();
+const currentCount = await incrementUsageCount();
+
+if ((currentCount <= 10 || currentCount % 10 === 0)) { 
+    chrome.runtime.sendMessage({ 
+        type: 'UPDATE_UNINSTALL_URL', 
+        usageCount: currentCount 
+    }).catch(() => {});
+}
   const query = text.trim();
   if (!query) return null;
   if (/^\d+%?$/.test(query)) {
