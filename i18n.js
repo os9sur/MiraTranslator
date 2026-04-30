@@ -2537,7 +2537,7 @@ self.i18nThemeData = {
     autoTheme: "Theme: Auto follow page",
     lightTheme: "Theme: Light mode",
     darkTheme: "Theme: Dark mode",
-    moreSettings: "More settings"
+    moreSettings: "More options"
   },
   "ja": {
     autoTheme: "テーマ: ページ自動追従",
@@ -2549,7 +2549,7 @@ self.i18nThemeData = {
     autoTheme: "테마: 시스템 설정 유지",
     lightTheme: "테마: 라이트 모드",
     darkTheme: "테마: 다크 모드",
-    moreSettings: "상세 설정 및 더 보기"
+    moreSettings: "추가 설정"
   },
   "es": {
     autoTheme: "Tema: Seguir página automáticamente",
@@ -2565,8 +2565,8 @@ self.i18nThemeData = {
   },
   "de": {
     autoTheme: "Theme: Automatisch folgen",
-    lightTheme: "Theme: Hellmodus",
-    darkTheme: "Theme: Dunkelmodus",
+    lightTheme: "Theme: Heller Modus",
+    darkTheme: "Theme: Dunkler Modus",
     moreSettings: "Mehr Einstellungen"
   },
   "ru": {
@@ -2606,9 +2606,9 @@ self.i18nThemeData = {
     moreSettings: "المزيد من الإعدادات"
   },
   "fa": {
-    autoTheme: "تم: دنبال کردن خودکار صفحه",
-    lightTheme: "تم: حالت روشن",
-    darkTheme: "تم: حالت تاریک",
+    autoTheme: "پوسته: دنبال کردن خودکار صفحه",
+    lightTheme: "پوسته: حالت روشن",
+    darkTheme: "پوسته: حالت تاریک",
     moreSettings: "تنظیمات بیشتر"
   },
   "tr": {
@@ -3506,7 +3506,7 @@ self.i18nAttach10 = {
     restoreRules: "恢复默认规则",
     aiTranslationTip: "AI 翻译效果更好，但由于模型推理计算量较大且逐字生成，速度比传统机器翻译（Google、Bing）慢。",
     byokTip: "也可自行前往各大 AI 平台申请 API Key 进行配置。",
-    devNote: "这是一款开源翻译工具 {0}，由开发者利用业余时间开发维护。Mira AI Translator Pro 是为希望免去 API Key 配置、直接使用 AI 翻译的用户提供的付费选项。",
+    devNote: "这是一款开源翻译工具 {0}，由作者利用业余时间开发维护。Mira AI Translator Pro 是为希望免去 API Key 配置、直接使用 AI 翻译的用户提供的付费选项。",
     aiModelTip: "友情提醒：AI 翻译并非模型越新越好。翻译不需要复杂推理，普通 AI 模型已完全胜任，而最新模型的价格往往高出数倍甚至更多。",
   },
   "zh-TW": {
@@ -3524,7 +3524,7 @@ self.i18nAttach10 = {
     restoreRules: "恢復預設規則",
     aiTranslationTip: "AI 翻譯效果較佳，但由於模型推理計算量較大且逐字生成，速度比傳統機器翻譯（Google、Bing）慢。",
     byokTip: "也可自行前往各大 AI 平台申請 API Key 進行設定。",
-    devNote: "這是一款開源翻譯工具 {0}，由開發者利用業餘時間開發維護。Mira AI Translator Pro 是為希望免去 API Key 設定、直接使用 AI 翻譯的用戶提供的付費選項。",
+    devNote: "這是一款開源翻譯工具 {0}，由作者利用業餘時間開發維護。Mira AI Translator Pro 是為希望免去 API Key 設定、直接使用 AI 翻譯的用戶提供的付費選項。",
     aiModelTip: "友情提醒：AI 翻譯並非模型越新越好。翻譯不需要複雜推理，普通 AI 模型已完全勝任，而最新模型的價格往往高出數倍甚至更多。",
   },
   "en": {

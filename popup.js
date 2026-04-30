@@ -1686,10 +1686,11 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
             </span>`;
         }
+        logger.log('wordForms: ',JSON.stringify(response.wordForms));
         wordForms.forEach(wf => {
           formsHtml += `
             <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
-              <span style="color:#94a3b8; font-size:11px;">${wf.name}</span>
+              <span style="color:#94a3b8; font-size:11px;">${wf.label}</span>
               <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
             </span>`;
         });
