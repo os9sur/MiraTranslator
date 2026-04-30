@@ -1170,7 +1170,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
 const currentCount = await incrementUsageCount();
 
 if ((currentCount <= 10 || currentCount % 10 === 0)) { 
-    chrome.runtime.sendMessage({ 
+    safeSendMessage({ 
         type: 'UPDATE_UNINSTALL_URL', 
         usageCount: currentCount 
     }).catch(() => {});
