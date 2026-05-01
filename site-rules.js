@@ -29,10 +29,12 @@ const SiteRules = {
                 ".ytLockupMetadataViewModelHeadingReset:not(ytd-active-account-header-renderer *)",
                 ".yt-core-attributed-string:not(button *):not([role='button'] *):not(ytd-active-account-header-renderer *):not(yt-content-metadata-view-model *):not(.yt-spec-button-shape-next *)",
                 "yt-formatted-string:not(#info):not(#title):not(button *):not(ytd-active-account-header-renderer *):not(ytd-metadata-line-renderer *)",
-                //  视频描述区域
+                // 视频描述区域
                 "ytd-text-inline-expander yt-attributed-string span",
                 "#description-inline-expander yt-attributed-string span",
                 "#description yt-formatted-string",
+                // about 页频道描述
+                "ytd-about-channel-renderer yt-attributed-string span",
             ].join(", "),
             minLen: 10
         },

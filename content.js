@@ -192,7 +192,7 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
     const isInstagram = location.hostname.includes('instagram.com');
     const clearStyle = isWiki ? 'none' : 'both';
     const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
-    const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
+    const isRTL = checkRTL(targetPrefix);
     const mountTarget = transEl.parentElement;
     let inheritedWhiteSpace = 'normal';
     if (mountTarget) {
@@ -1360,7 +1360,7 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
   }
   if (!forceRefresh && container.querySelector('.kt-paragraph-translation')) return true;
   const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
-  const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
+  const isRTL = checkRTL(targetPrefix);
   const isAlreadyTargetLang = (text) => {
     if (forceRefresh) return false;
     const cleanText = text
@@ -1876,7 +1876,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     transContainer.style.fontStyle = 'italic';
   }
   const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
-  const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
+  const isRTL = checkRTL(targetPrefix);
   if (isRTL) {
     transContainer.style.setProperty('direction', 'rtl', 'important');
     transContainer.style.setProperty('text-align', 'right', 'important');
@@ -4327,7 +4327,7 @@ function initSelectionTranslate() {
     shadowHost.setAttribute('data-current-word', wordText);
 
     const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
-    const isRTL = ['he', 'ar', 'fa'].includes(targetPrefix);
+    const isRTL = checkRTL(targetPrefix);
     const entry = await idb.vocabulary.get(wordText);
     const isSaved = !!(entry && !entry.deleted);
     let hintSourceLangNew = hintSourceLang;
@@ -4459,9 +4459,9 @@ function initSelectionTranslate() {
       if (!result) return;
       const currentWord = shadowHost?.getAttribute('data-current-word');
       if (text.trim() !== currentWord) return;
-      const isRTL = ['he', 'ar', 'fa'].includes(
-        (window.currentTargetL || '').toLowerCase().slice(0, 2)
-      );
+
+      const targetPrefix = (window.currentTargetL || '').toLowerCase().slice(0, 2);
+      const isRTL = checkRTL(targetPrefix);
       if (result.isPartial) {
         const pBasic = shadow.getElementById('p-basic');
         const pPhonetic = shadow.getElementById('p-phonetic');
@@ -4831,7 +4831,7 @@ function initSelectionTranslate() {
             tgtSpan.textContent = LANG_DISPLAY[langVal] || lang.value.toUpperCase().slice(0, 2);
           }
 
-          const newIsRTL = ['he', 'ar', 'fa'].includes(lang.value.toLowerCase().slice(0, 2));
+         const newIsRTL = checkRTL(lang.value);
           const contentContainer = shadow.getElementById('p-content-container');
           if (contentContainer) {
             contentContainer.style.direction = newIsRTL ? 'rtl' : 'ltr';
@@ -4910,11 +4910,7 @@ function initSelectionTranslate() {
         const currentWord = shadowHost?.getAttribute('data-current-word');
         if (text.trim() !== currentWord) return;
 
-        const isRTL = ['he', 'ar', 'fa'].includes(
-          (window.currentTargetL || '').toLowerCase().slice(0, 2)
-        );
-
-        //logger.log('前端渲染', result);
+        const isRTL = checkRTL(window.currentTargetL);
         if (result.isPartial) {
           const pBasic = shadow.getElementById('p-basic');
           const pPhonetic = shadow.getElementById('p-phonetic');
@@ -5916,9 +5912,7 @@ function initSelectionTranslate() {
           shadowHost._detailTimer = null;
           shadowHost._detailFullyRendered = true;
         }
-        const isRTL = ['he', 'ar', 'fa'].includes(
-          (window.currentTargetL || '').toLowerCase().slice(0, 2)
-        );
+        const isRTL = checkRTL(window.currentTargetL);
         fillPopupData(msg.result, shadow, msg.originalText, window.currentTargetL, isRTL);
       }
 
