@@ -243,11 +243,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateSelect(document.getElementById('lpSelA'), { includeAuto: true, selected: 'auto' });
   populateSelect(document.getElementById('lpSelB'), { selected: 'ja' });
 
-  function isRTLLang(langVal) {
-    const prefix = (langVal || '').toLowerCase().slice(0, 2);
-    return ['ar', 'he', 'fa', 'ku'].includes(prefix);
-  }
-
   // ── 语言对初始化
   async function initLangPair() {
     const r = await safeGetStorage(['lpLangA', 'lpLangB']);
@@ -260,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (selB) selB.value = langB;
     updateLpBadges();
 
-    const rtl = isRTLLang(langB);
+    const rtl = checkRTL(langB);
     const arrow = document.getElementById('lpArrow');
     const toggle = document.getElementById('langPairToggle');
     if (arrow) arrow.textContent = rtl ? '←' : '→';
@@ -290,7 +285,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     badgeB.textContent = getShortEn(selB.value);
     window.hintSourceLang = selA.value;
 
-    const rtl = isRTLLang(selB.value);
+    const rtl = checkRTL(selB.value);
     const arrow = document.getElementById('lpArrow');
     const toggle = document.getElementById('langPairToggle');
     if (arrow) arrow.textContent = rtl ? '←' : '→';
@@ -306,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       editEl.style.display = 'flex';
 
       const selB = document.getElementById('lpSelB');
-      const rtl = isRTLLang(selB?.value);
+      const rtl = checkRTL(selB?.value);
       editEl.style.flexDirection = rtl ? 'row-reverse' : 'row';
 
       const arrow = document.getElementById('lpArrow');
@@ -317,7 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateLpBadges();
 
       const selB = document.getElementById('lpSelB');
-      const rtl = isRTLLang(selB?.value);
+      const rtl = checkRTL(selB?.value);
       document.getElementById('langPairEdit').style.flexDirection = rtl ? 'row-reverse' : 'row';
 
       document.getElementById('langPairEdit').style.display = 'none';
@@ -335,7 +330,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       [a.value, b.value] = [b.value, a.value];
       updateLpBadges();
 
-      const rtl = isRTLLang(b.value);
+      const rtl = checkRTL(b.value);
       document.getElementById('langPairEdit').style.flexDirection = rtl ? 'row-reverse' : 'row';
     });
   }
@@ -1070,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!ytHint || !ytRow) return;
     // ---显示逻辑 ---
     const currentLang = ui_lang || 'en';
-    const isRTL = ['ar', 'fa', 'he'].includes(currentLang);
+    const isRTL = checkRTL(currentLang);
 
     if (isRTL) {
       ytHint.setAttribute('dir', 'rtl');

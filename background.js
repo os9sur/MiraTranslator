@@ -1472,6 +1472,22 @@ async function _buildDetailData(
         if (!detailData && existingDictData?.length > 0) {
             detailData = { dictData: existingDictData, phonetic: '', examples: [], wordForms: [] };
         }
+        //  Wiki 没有例句时，用 Google 的例句补充 
+        if (detailData && (!detailData.examples || detailData.examples.length === 0) && existingExamples?.length > 0) {
+            try {
+                const { examples: translatedExamples } = await translateDictContent(
+                    [],
+                    existingExamples,
+                    targetLang,
+                    '',
+                    ''
+                );
+                detailData.examples = translatedExamples;
+            } catch (e) {
+                // 翻译失败就用原始英文例句
+                detailData.examples = existingExamples;
+            }
+        }
     }
 
     if (detailData) {
@@ -1500,31 +1516,91 @@ async function _buildDetailData(
         meta: null, allPronunciations: [], source: sourceName
     };
 }
+
+
+function extractLemma(wikitext) {
+    const lemmaPatterns = [
+        /\{\{infl of\|[a-z]+\|([^|}\n]+)/i,                    // {{infl of|en|build||ed-form}}
+        /\{\{en-past of\|([^|}\n]+)/i,                          // {{en-past of|build}}
+        /\{\{en-third-person singular of\|([^|}\n]+)/i,         // {{en-third-person singular of|build}}
+        /\{\{present participle of\|[a-z]+\|([^|}\n]+)/i,       // {{present participle of|en|build}}
+        /\{\{plural of\|[a-z]+\|([^|}\n]+)/i,                   // {{plural of|en|word}}
+        /\{\{inflection of\|[a-z]+\|([^|}\n]+)/i,               // {{inflection of|en|build|...}}
+        /\{\{past participle of\|[a-z]+\|([^|}\n]+)/i,          // {{past participle of|en|build}}
+        /\{\{comparative of\|[a-z]+\|([^|}\n]+)/i,              // {{comparative of|en|big}}
+        /\{\{superlative of\|[a-z]+\|([^|}\n]+)/i,              // {{superlative of|en|big}}
+        /\{\{alt form of\|[a-z]+\|([^|}\n]+)/i,                 // {{alt form of|en|build}}
+    ];
+    logger.log('[extractLemma] wikitext snippet:', wikitext.substring(0, 500));
+    for (const pattern of lemmaPatterns) {
+        const m = wikitext.match(pattern);
+        logger.log('[extractLemma] pattern:', pattern, 'match:', m);
+        if (m) {
+            const lemma = m[1].trim().replace(/'{2,3}/g, '').replace(/\[\[|\]\]/g, '');
+            if (lemma && /^[a-zA-Z\s-]+$/.test(lemma)) return lemma;
+        }
+    }
+    return null;
+}
 /**
  * 从 Wiktionary 抓取目标语言的原生词典数据
  */
-async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
+async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang, isRetry = false) {
     try {
         const targetPrefix = targetLang.split('-')[0].toLowerCase();
         if (!/^[a-z]{2,3}$/.test(targetPrefix)) return null;
 
-        // 1. 定义根域名
         const baseUrl = `https://${targetPrefix}.wiktionary.org`;
-        // 2. 修改 API 请求地址
-        const url = `${baseUrl}/w/api.php?action=query&prop=revisions&rvprop=content&titles=${encodeURIComponent(word)}&format=json&origin=*`;
+        const targetUrl = `${baseUrl}/w/api.php?action=query&prop=revisions&rvprop=content&titles=${encodeURIComponent(word)}&format=json&origin=*`;
 
-        const res = await fetch(url);
-        if (!res.ok) return null;
+        // ── 并行请求 ──
+        let enContent = null;
+        let content = null;
+        let actualTitle = null;
+        let pageUrl = null;
 
-        const data = await res.json();
-        const pages = data.query?.pages;
-        if (!pages || pages["-1"]) return null;
+        if (sourceLang === 'en' && !isRetry) {
+            // 第1次：只查 target.wiktionary
+            const res = await fetch(targetUrl);
+            if (!res.ok) return null;
+            const data = await res.json();
+            const pages = data.query?.pages;
 
-        // 3. 提取页面真实标题和内容
-        const actualTitle = pages[Object.keys(pages)[0]].title;
-        const pageUrl = `${baseUrl}/wiki/${encodeURIComponent(actualTitle)}`;
+            if (pages && !pages["-1"]) {
+                // target 有内容，直接用，不查 en.wiktionary
+                actualTitle = pages[Object.keys(pages)[0]].title;
+                pageUrl = `${baseUrl}/wiki/${encodeURIComponent(actualTitle)}`;
+                content = pages[Object.keys(pages)[0]].revisions[0]['*'];
+            } else {
+                // target 没有内容，才去查 en.wiktionary 提取原形
+                const enUrl = `https://en.wiktionary.org/w/api.php?action=query&prop=revisions&rvprop=content&titles=${encodeURIComponent(word)}&format=json&origin=*`;
+                const enRes = await fetch(enUrl);
+                const enData = await enRes.json();
+                const enPages = enData.query?.pages;
+                if (enPages && !enPages["-1"]) {
+                    const enContent = enPages[Object.keys(enPages)[0]].revisions[0]['*'];
+                    const lemma = extractLemma(enContent);
+                    if (lemma && lemma.toLowerCase() !== word.toLowerCase()) {
+                        logger.log('[Wiktionary] 检测到变形词, 原形:', lemma);
+                        const lemmaResult = await fetchNativeWiktionaryDetail(lemma, sourceLang, targetLang, true);
+                        if (lemmaResult) return lemmaResult;
+                    }
+                }
+                // en 也没找到原形，彻底放弃
+                return null;
+            }
 
-        const content = pages[Object.keys(pages)[0]].revisions[0]['*'];
+        } else {
+            // isRetry 或非英语：直接查 target
+            const res = await fetch(targetUrl);
+            if (!res.ok) return null;
+            const data = await res.json();
+            const pages = data.query?.pages;
+            if (!pages || pages["-1"]) return null;
+            actualTitle = pages[Object.keys(pages)[0]].title;
+            pageUrl = `${baseUrl}/wiki/${encodeURIComponent(actualTitle)}`;
+            content = pages[Object.keys(pages)[0]].revisions[0]['*'];
+        }
         const dictData = [];
         const examples = [];
 
@@ -1549,6 +1625,7 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
                 .replace(/&nbsp;/g, ' ')
                 .replace(/^[、。，,]\s*/, '')
                 .replace(/\s+/g, ' ')
+                .replace(/\bAAA\b/g, '').replace(/\s{2,}/g, ' ')
                 .trim();
         };
 
@@ -1695,7 +1772,7 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
                 meanings = [];
                 continue;
             }
- 
+
             if (targetPrefix === 'ko' && (line.startsWith('::*') || line.startsWith(':*'))) {
                 const txt = clean(line.replace(/^[:*]+/, '').trim());
                 if (txt && txt.length > 1) {
@@ -1869,7 +1946,8 @@ const Translators = {
         preferredHost,
         preferredCache,
         cacheKey = null,
-        fromPopup = false
+        fromPopup = false,
+        existingExamples = []
     ) {
         //logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
         if (tabId || fromPopup) {
@@ -1898,7 +1976,8 @@ const Translators = {
                     const fullResult = await _buildDetailData(
                         basicText, originalText, targetLang, sourceName,
                         sourcePhonetic, targetPhonetic, sourceLang,
-                        existingDictData, preferredHost, preferredCache
+                        existingDictData, preferredHost, preferredCache,
+                        existingExamples
                     );
                     if (tabId) {
                         pushDetailUpdate(tabId, fullResult, originalText, cacheKey);
@@ -1917,10 +1996,12 @@ const Translators = {
             return partialResult;
         }
 
-        // 无 tabId（popup 等）：同步完整流程
+        // 无 tabId 同步流程
         return await _buildDetailData(
             basicText, originalText, targetLang, sourceName,
-            sourcePhonetic, targetPhonetic, sourceLang, existingDictData
+            sourcePhonetic, targetPhonetic, sourceLang,
+            existingDictData, undefined, undefined,
+            existingExamples
         );
     },
 
@@ -2266,7 +2347,8 @@ const Translators = {
                 '',
                 '',
                 cacheKey,
-                fromPopup
+                fromPopup,
+                examples
             );
 
         } catch (e) {
@@ -4394,6 +4476,7 @@ async function getClientId() {
 
 // 上报事件
 async function trackEvent(eventName, params = {}) {
+    if (IS_DEV) return;
     const clientId = await getClientId();
     fetch(
         `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
@@ -4437,6 +4520,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 // ============ 卸载时配置 ============
 async function updateUninstallURL(count = null) {
+    if (IS_DEV) return;
     const version = chrome.runtime.getManifest().version;
     const lang = getBrowserLang();
     const supported = ['zh-CN', 'zh-TW', 'ja'];
@@ -4453,8 +4537,9 @@ async function updateUninstallURL(count = null) {
 
     const { browser, browser_version, os, timezone } = getDeviceInfo();
 
+    const timestamp = Date.now();
     chrome.runtime.setUninstallURL(
-        `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}`
+        `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}&t=${timestamp}`
     );
 }
 // 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 

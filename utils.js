@@ -109,6 +109,11 @@ const getBrowserLang = () => {
   }
 };
 
+const checkRTL = (lang) => {
+  const rtlSet = new Set(['he', 'ar', 'fa', 'ur', 'yi']);
+  return lang ? rtlSet.has(lang.toLowerCase().split('-')[0]) : false;
+};
+
 async function safeSendToTab(tabId, message) {
   if (!tabId || typeof tabId !== 'number' || !chrome.runtime?.id) return null;
   return new Promise((resolve) => {
