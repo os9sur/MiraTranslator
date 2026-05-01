@@ -97,6 +97,10 @@ async function initNoticeBar() {
     return;
   }
 
+if (noticeData.targetLangs?.length) {
+    const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
+    if (!noticeData.targetLangs.includes(currentTargetLang)) return;
+}
   if (!noticeData?.id || !noticeData?.title) return;
 
   const dismissedKey = NOTICE_DISMISSED_KEY + noticeData.id;

@@ -1455,17 +1455,20 @@ async function _buildDetailData(
     preferredHost, preferredCache,
     existingExamples = []
 ) {
+    logger.log('[_buildDetailData] called', originalText, targetLang, sourceLang);
     const isChineseTarget = targetLang.toLowerCase().includes('zh');
     const isEnglishSource = /^[a-zA-Z-]+$/.test(originalText.trim()) && (sourceLang === 'en');
     let detailData = null;
-
+    logger.log('[_buildDetailData] isEnglishSource:', isEnglishSource, 'isChineseTarget:', isChineseTarget);
     // 1. 中英互译 
     if (isEnglishSource && isChineseTarget) {
         detailData = await Translators._fetchBingDictDetail(originalText.trim());
     }
     // 2. 其他所有语言,直接走目标语种 Wiktionary,跳过二次翻译!
     else {
+        logger.log('[_buildDetailData] calling fetchNativeWiktionaryDetail...');
         detailData = await fetchNativeWiktionaryDetail(originalText.trim(), sourceLang, targetLang);
+        logger.log('[_buildDetailData] fetchNativeWiktionary result:', JSON.stringify(detailData)?.substring(0, 200));
         if (!detailData && existingDictData?.length > 0) {
             detailData = { dictData: existingDictData, phonetic: '', examples: [], wordForms: [] };
         }
@@ -1538,11 +1541,13 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
             } while (text !== prev);
 
             return text
+                .replace(/\[\[File:[^\]]+\]\]/gi, '')
                 .replace(/\[\[(?:[^\]|]*\|)?([^\]]+)\]\]/g, '$1')
+                .replace(/《[^》]*》/g, '')
                 .replace(/'{2,3}/g, '')
                 .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '')
                 .replace(/&nbsp;/g, ' ')
-                .replace(/^[、。，,]\s*/, '')  //  删除开头残留的标点
+                .replace(/^[、。，,]\s*/, '')
                 .replace(/\s+/g, ' ')
                 .trim();
         };
@@ -1581,9 +1586,17 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
             const reEnStyle = new RegExp(`^==\\s*${langNameEN}\\s*==$`, 'im');
             const reGenStyle = new RegExp(`^==\\s*\\{\\{(?:L\\|)?${sourceLang}\\}\\}\\s*==`, 'im');
 
+            // de.wiktionary: == word ({{Sprache|Englisch}}) ==
+            const DE_LANG_MAP = {
+                en: 'Englisch', fr: 'Französisch', de: 'Deutsch', es: 'Spanisch',
+                it: 'Italienisch', zh: 'Chinesisch', ja: 'Japanisch', ko: 'Koreanisch',
+                ru: 'Russisch', ar: 'Arabisch', pt: 'Portugiesisch'
+            };
+            const reDeStyle = new RegExp(`\\{\\{Sprache\\|${DE_LANG_MAP[sourceLang] || langNameEN}\\}\\}`, 'i');
+
             const parts = content.split(/(?=\n==[^=])/);
             for (const p of parts) {
-                if (reLocal.test(p) || reEnStyle.test(p) || reGenStyle.test(p)) { targetContent = p; break; }
+                if (reLocal.test(p) || reEnStyle.test(p) || reGenStyle.test(p) || reDeStyle.test(p)) { targetContent = p; break; }
             }
         }
 
@@ -1621,7 +1634,7 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
         // 非词性关键词（这些标题跳过）
         const NON_POS = /^(etym|pron|trans|rel|syn|ant|der|see|ref|hyp|coord|note|decl|conj|usage|alter|phrase|quot|abbr|suffix|prefix|infix|inter|part|det|num)/i;
         // 已知词性关键词
-        const KNOWN_POS = /^(noun|verb|adj|adjective|adv|adverb|pron|pronoun|prep|preposition|conj|conjunction|interj|interjection|article|det|determiner|num|numeral|abbr|suffix|prefix|infix|particle|nom|ver|名詞|動詞|形容詞|副詞|代名詞|前置詞|接続詞|感嘆詞)/i;
+        const KNOWN_POS = /^(noun|verb|adj|adjective|adv|adverb|pron|pronoun|prep|preposition|conj|conjunction|interj|interjection|article|det|determiner|num|numeral|abbr|suffix|prefix|infix|particle|nom|ver|名詞|動詞|形容詞|副詞|代名詞|前置詞|接続詞|感嘆詞|동사|명사|형용사|부사|대명사|조사|감탄사|수사)/i;
 
         const getPOS = (line) => {
             // fr.wiktionary: === {{S|nom|fr}} ===
@@ -1644,6 +1657,18 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
                 if (NON_POS.test(p)) return null;
                 if (KNOWN_POS.test(p)) return p;
             }
+            //西班牙语词性识别
+            const esMatch = line.match(/\{\{(verbo\s*\w*|sustantivo|adjetivo|adverbio)[^}]*\}\}/i);
+            if (esMatch) {
+                const p = esMatch[1].trim();
+                return p;
+            }
+            //德语
+            const deMatch = line.match(/\{\{Wortart\|([^|]+)\|/i);
+            if (deMatch) {
+                const p = deMatch[1].trim();
+                return NON_POS.test(p) ? null : p;
+            }
             return null;
         };
 
@@ -1651,6 +1676,10 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
         let currentPos = null;
         let meanings = [];
         const LANG_SECTION_END = /^==\s*(?:\{\{langue\|[^}]+\}\}|\{\{[a-z]{2,3}\}\}|[A-Z][a-z]+)\s*==$/;
+        let fallbackPos = '';
+        const categoryMatch = content.match(/\[\[분류:영어\s*(동사|명사|형용사|부사|대명사|전치사|접속사|감탄사)/);
+        let deSection = ''; // 'meanings' 或 'examples'
+        if (categoryMatch) fallbackPos = categoryMatch[1];
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
@@ -1666,7 +1695,50 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
                 meanings = [];
                 continue;
             }
+ 
+            if (targetPrefix === 'ko' && (line.startsWith('::*') || line.startsWith(':*'))) {
+                const txt = clean(line.replace(/^[:*]+/, '').trim());
+                if (txt && txt.length > 1) {
+                    const koreanIdx = txt.search(/\p{Script=Hangul}/u);
+                    if (koreanIdx > 10) {  // 英文部分至少10个字符，过滤掉短标注行
+                        const en = txt.slice(0, koreanIdx).trim();
+                        const cn = txt.slice(koreanIdx).trim();
+                        examples.push(en && cn ? { en, cn } : txt);
+                    }
+                }
+                continue;
+            }
+            if (line.startsWith(';') && line.includes(':')) {
+                const txt = clean(line.replace(/^;\d+\s*:\s*/, '').trim());
+                if (txt && txt.length > 1) meanings.push(txt);
+                continue;
+            }
 
+            // de.wiktionary: 追踪当前所在的块
+
+            // 在循环里，检测块标记
+            if (targetPrefix === 'de') {
+                if (/\{\{Bedeutungen\}\}/i.test(line)) { deSection = 'meanings'; continue; }
+                if (/\{\{Beispiele\}\}/i.test(line)) { deSection = 'examples'; continue; }
+                if (/\{\{(?:Synonyme|Wortbildungen|Übersetzungen|Referenzen|Aussprache|Worttrennung)\}\}/i.test(line)) { deSection = ''; continue; }
+
+                if (line.match(/^::/) && deSection === 'examples') {
+                    const txt = clean(line.replace(/^::/, '').trim());
+                    if (txt && txt.length > 1 && examples.length > 0) {
+                        const last = examples[examples.length - 1];
+                        if (typeof last === 'string') examples[examples.length - 1] = { en: last, cn: txt };
+                    }
+                    continue;
+                }
+                if (line.match(/^:\[[\d,]+\]/)) {
+                    const txt = clean(line.replace(/^:\[[\d,]+\]\s*/, '').trim());
+                    if (txt && txt.length > 1) {
+                        if (deSection === 'meanings') meanings.push(txt);
+                        else if (deSection === 'examples') examples.push(txt);
+                    }
+                    continue;
+                }
+            }
             // 只处理 # 开头的行
             if (!line.startsWith('#')) continue;
             if (/(file:|音声|audio|IPA|Category:|\.ogg|\.mp3)/i.test(line)) continue;
@@ -1728,12 +1800,10 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
                 const exMatch = line.match(/\{\{\s*exemple\s*\|([^]*?)\}\}/i);
                 if (exMatch) {
                     const parts = exMatch[1].split('|').map(p => p.trim()).filter(Boolean);
-                    const textParts = parts.filter(p =>
-                        !p.includes('=') && !p.startsWith('{{') && p.length > 1
+                    const sentence = clean(
+                        (parts.find(p => !p.includes('=') && !p.startsWith('{{') && p.length > 1) || '')
                     );
-                    const sentence = clean(textParts[0] || '');
-                    const translation = clean(textParts[1] || '');
-                    if (sentence) examples.push(translation ? { en: sentence, cn: translation } : sentence);
+                    if (sentence && sentence.length > 1) examples.push(sentence);
                 }
             } else if (isJaExample) {
                 // ja.wiktionary: #* 是英文原句
@@ -1748,8 +1818,11 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang) {
         if (currentPos && meanings.length > 0)
             dictData.push({ pos: currentPos, meanings: [...meanings] });
 
-        if (dictData.length === 0) return null;
+        if (dictData.length === 0 && meanings.length > 0) {
+            dictData.push({ pos: fallbackPos || '', meanings: [...meanings] });
+        }
 
+        if (dictData.length === 0) return null;
         return { phonetic: '', dictData, examples, wordForms: [], source: 'Wiktionary Native', sourceUrl: pageUrl };
 
     } catch (e) {
@@ -4383,7 +4456,7 @@ async function updateUninstallURL(count = null) {
     chrome.runtime.setUninstallURL(
         `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}`
     );
-} 
+}
 // 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 
 chrome.runtime.onStartup.addListener(updateUninstallURL);
 chrome.runtime.onInstalled.addListener(updateUninstallURL);
