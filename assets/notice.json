@@ -23,6 +23,7 @@
     },
     "en": {
         "id": "notice_20260422_v3450",
+        "targetLangs": ["ko", "ja"],
         "title": "🎉 New Version v3.4.5.0 Available",
         "level": "info",
         "content": "Expanded language support, performance optimizations, and a host of new features. To update now: open chrome://extensions/, enable Developer Mode, then click Update.",
