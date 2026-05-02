@@ -290,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (!user) {
                     dot.classList.remove('checking');
                     dot.classList.add('error');
-                    dot.title = 'Mira Pro 未登录';
+                    dot.title = `Mira Pro · ${t('not_logged_in', targetLang)}`;
                     return;
                 }
 
@@ -298,13 +298,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const failed = !res?.balance || res.balance <= 0;
                 dot.classList.remove('checking');
                 dot.classList.add(failed ? 'error' : 'success');
-                dot.title = failed
-                    ? 'Mira Pro 余额不足'
-                    : `Mira Pro 正常 余额$${res.balance.toFixed(2)}`;
+
+                if (failed) {
+                    dot.title = res?.expired
+                        ? t('credits_expired', targetLang)
+                        : t('insufficient_balance', targetLang);
+                } else {
+                    const expiresAt = res?.expires_at ? new Date(res.expires_at) : null;
+                    const daysLeft = expiresAt
+                        ? Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24))
+                        : null;
+
+                    const statusNormal = `Mira Pro ${t('status_normal', targetLang)} · $${res.balance.toFixed(2)}`;
+
+                    if (daysLeft !== null && daysLeft <= 30) {
+                        const expireStr = t('expires_in_days', targetLang).replace('{days}', daysLeft);
+                        dot.title = `${statusNormal} · ${expireStr}`;
+                    } else if (daysLeft !== null) {
+                        const dateStr = expiresAt.toLocaleDateString();
+                        const validStr = t('valid_until', targetLang).replace('{date}', dateStr);
+                        dot.title = `${statusNormal} · ${validStr}`;
+                    } else {
+                        dot.title = statusNormal;
+                    }
+                }
             } catch (e) {
                 dot.classList.remove('checking');
                 dot.classList.add('error');
-                dot.title = 'Mira Pro 状态检查失败';
+                dot.title = `Mira Pro · ${t('status_check_failed', targetLang)}`;
             }
             return;
         }
@@ -418,6 +439,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 从 background.js 获取真实余额数据
             let balance = 0;
+            let expiresAt = null;
+            let expired = false;
             let usedTokens = 0;
             let usedCost = '0.00';
             try {
@@ -425,6 +448,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const balanceData = userData?.mira_user_balance;
                 if (balanceData?.balance !== undefined) {
                     balance = balanceData.balance;
+                    expiresAt = balanceData.expires_at || null;
+                    expired = balanceData.expired || false;
                 }
                 if (miraSaved[`data_mira_pro`]?.usedTokens !== undefined) {
                     usedTokens = miraSaved[`data_mira_pro`].usedTokens;
@@ -522,6 +547,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div>
                         <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', ui_lang) || 'Current Balance'}</div>
                         <div id="miraBalance" style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
+                        <div id="miraExpiryHint" style="font-size:11px;margin-top:4px;color:#8b949e;">
+                     ${expired
+                    ? `<span style="color:#ef4444">${t('credits_expired', ui_lang)}</span>`
+                    : expiresAt
+                        ? (() => {
+                            const daysLeft = Math.ceil((new Date(expiresAt) - Date.now()) / (1000 * 60 * 60 * 24));
+                            if (daysLeft <= 30) {
+                                return `<span style="color:#f59e0b">${t('expires_in_days', ui_lang).replace('{days}', daysLeft)}</span>`;
+                            } else {
+                                const dateStr = new Date(expiresAt).toLocaleDateString();
+                                return `<span style="color:#8b949e">${t('valid_until', ui_lang).replace('{date}', dateStr)}</span>`;
+                            }
+                        })()
+                        : ''
+                }
+                </div>
                     </div>
                     <button id="miraRechargeBtn"><span>+ ${t('recharge', ui_lang) || 'Recharge'}</span></button>
                 </div>
@@ -592,6 +633,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const balanceEl = document.getElementById('miraBalance');
                         if (balanceEl) balanceEl.textContent = '$0.00';
 
+                        // 过期提示也清空
+                        const expiryEl = document.getElementById('miraExpiryHint');
+                        if (expiryEl) expiryEl.textContent = '';
+
                         const wrap = document.getElementById('miraUserAvatar');
                         if (wrap) wrap.style.display = 'none';
 
@@ -599,6 +644,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else {
                         showMiraAvatar(newUser);
                         updateModalUserInfo(newUser);
+
+                        //  更新过期提示
+                        const expiryEl = document.getElementById('miraExpiryHint');
+                        if (expiryEl) {
+                            const { expires_at, expired } = newUser;
+                            if (expired) {
+                                expiryEl.textContent = t('credits_expired', ui_lang);
+                                expiryEl.style.color = '#ef4444';
+                            } else if (expires_at) {
+                                const daysLeft = Math.ceil((new Date(expires_at) - Date.now()) / (1000 * 60 * 60 * 24));
+                                if (daysLeft <= 30) {
+                                    expiryEl.textContent = t('expires_in_days', ui_lang).replace('{days}', daysLeft);
+                                    expiryEl.style.color = '#f59e0b';
+                                } else {
+                                    const dateStr = new Date(expires_at).toLocaleDateString();
+                                    expiryEl.textContent = t('valid_until', ui_lang).replace('{date}', dateStr);
+                                    expiryEl.style.color = '#8b949e';
+                                }
+                            }
+                        }
                     }
                 }
             };

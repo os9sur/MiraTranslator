@@ -1574,6 +1574,7 @@ const LANGS = [
   },
   { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
   { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
+  { value: 'mn', label: 'Монгол хэл (Mongolian)', en: 'Mongolian' },
 
   // --- 欧洲与美洲 Europe & America ——
   { type: 'sep', label: '—— Europe & America ——' },
@@ -1627,7 +1628,7 @@ const LANGS = [
   // --- 东南亚 Southeast Asia ---
   { type: 'sep', label: '—— Southeast Asia ——' },
   { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' },
-  { value: 'tl', label: 'Filipino (Filipino)', en: 'Filipino' },
+  { value: 'fil', label: 'Filipino (Filipino)', en: 'Filipino' },
   { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
   { value: 'jv', label: 'Basa Jawa (Javanese)', en: 'Javanese' },
   { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },

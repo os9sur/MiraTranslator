@@ -97,10 +97,10 @@ async function initNoticeBar() {
     return;
   }
 
-if (noticeData.targetLangs?.length) {
+  if (noticeData.targetLangs?.length) {
     const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
     if (!noticeData.targetLangs.includes(currentTargetLang)) return;
-}
+  }
   if (!noticeData?.id || !noticeData?.title) return;
 
   const dismissedKey = NOTICE_DISMISSED_KEY + noticeData.id;
@@ -1685,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
             </span>`;
         }
-        logger.log('wordForms: ',JSON.stringify(response.wordForms));
+        logger.log('wordForms: ', JSON.stringify(response.wordForms));
         wordForms.forEach(wf => {
           formsHtml += `
             <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
@@ -2908,6 +2908,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 150);
   });
 
+
+  function updateExpiryHint(expiresAt, expired) {
+    const hintEl = document.getElementById('balanceExpiryHint');
+    if (!hintEl) return;
+
+    hintEl.className = 'balance-expiry';
+
+    if (expired) {
+      hintEl.textContent = t('credits_expired');
+      hintEl.classList.add('danger');
+      return;
+    }
+
+    if (!expiresAt) {
+      hintEl.textContent = '';
+      return;
+    }
+
+    const daysLeft = Math.ceil((new Date(expiresAt) - Date.now()) / (1000 * 60 * 60 * 24));
+
+    if (daysLeft <= 30) {
+      hintEl.textContent = t('expires_in_days').replace('{days}', daysLeft);
+      hintEl.classList.add('warning');
+    } else {
+      const dateStr = new Date(expiresAt).toLocaleDateString();
+      hintEl.textContent = t('valid_until').replace('{date}', dateStr);
+    }
+  }
   // ── 初始化：读取登录状态 ───────────────────────────
 
   async function fetchBalance(uid) {
@@ -2928,15 +2956,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (res?.balance != null) {
       logger.log('[fetchBalance] 获取到余额:', res.balance);
       updateBalance(res.balance);
+
+      // 同步存储余额 + 过期时间
       const data = await safeGetStorage(['mira_user']);
       const existingUser = data?.mira_user || {};
       if (existingUser.uid) {
-        await safeSetStorage({ 'mira_user': { ...existingUser, balance: res.balance } });
+        await safeSetStorage({
+          'mira_user': {
+            ...existingUser,
+            balance: res.balance,
+            expires_at: res.expires_at || null,
+            expired: res.expired || false,
+          }
+        });
       }
+
+      // 显示过期提示
+      updateExpiryHint(res.expires_at, res.expired);
+
     } else {
       logger.warn('[fetchBalance] balance 为空, 使用本地缓存');
       if (userData && userData.balance != null) {
         updateBalance(userData.balance);
+        // 本地缓存也有过期时间，一并显示
+        updateExpiryHint(userData.expires_at, userData.expired);
       }
     }
   }

@@ -680,6 +680,7 @@
           style="width:100%;object-fit:cover;height:100%;border-radius:50%;display:none;">
         <span id="panelAvatarInitial"></span>
       </div>
+
       <div class="profile-meta">
         <div class="profile-name" id="panelName">—</div>
         <div class="profile-email" id="panelEmail">—</div>
@@ -687,8 +688,11 @@
     </div>
 
     <div class="balance-block">
-      <span class="balance-label" data-i18n="balance">余额</span>
-      <span class="balance-amount" id="panelBalance">¥ 0.00</span>
+      <div class="balance-left">
+        <span class="balance-label" data-i18n="balance">余额</span>
+        <span class="balance-expiry" id="balanceExpiryHint"></span>
+      </div>
+      <span class="balance-amount" id="panelBalance">$ 0.00</span>
     </div>
 
     <button class="btn-recharge" id="btnRecharge" data-i18n="recharge">充值</button>

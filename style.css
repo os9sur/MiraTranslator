@@ -2424,6 +2424,11 @@ yt-attributed-string+.kt-paragraph-translation {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+.balance-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
 
 .balance-label {
   font-size: 11px;
@@ -2438,6 +2443,21 @@ yt-attributed-string+.kt-paragraph-translation {
   font-weight: 700;
   color: #3fcfa0;
   text-shadow: 0 0 15px rgba(63, 207, 160, 0.2);
+}
+.balance-expiry {
+  font-size: 10px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+/* 30天内过期变橙色 */
+.balance-expiry.warning {
+  color: #f59e0b;
+}
+
+/* 已过期变红色 */
+.balance-expiry.danger {
+  color: #ef4444;
 }
 
 .btn-recharge {
