@@ -112,6 +112,7 @@ async function syncLocalState(storageData) {
   if (storageData.targetLanguage) {
     const lang = storageData.targetLanguage.replace('_', '-');
     window.currentTargetL = lang;
+    window.currentConfig.targetLanguage = lang; 
     applyI18n(lang);
   }
 
