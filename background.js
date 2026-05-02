@@ -4131,12 +4131,12 @@ async function handleDeleteAccount(sendResponse) {
 // ── 拉取余额  ──
 async function fetchUserBalance(uid, sendResponse) {
     try {
-        // 尝试读本地缓存（1分钟有效期）
+        // 1. 尝试读本地缓存（1分钟有效期）
         const cached = await safeGetStorage(['mira_user_balance']);
         if (cached?.mira_user_balance?.uid === uid) {
-            const { balance, updatedAt } = cached.mira_user_balance;
+            const { balance, expires_at, expired, updatedAt } = cached.mira_user_balance;
             if (Date.now() - updatedAt < 1 * 60 * 1000) {
-                sendResponse({ balance });
+                sendResponse({ balance, expires_at, expired });
                 return;
             }
         }
@@ -4145,12 +4145,10 @@ async function fetchUserBalance(uid, sendResponse) {
         const { mira_jwt } = await safeGetStorage(['mira_jwt']);
         if (!mira_jwt) throw new Error('No valid access token found, please log in again.');
 
-        // 3. 请求后端 
+        // 3. 请求后端
         const resp = await workerFetch('/api/balance', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${mira_jwt}`,
-            }
+            headers: { 'Authorization': `Bearer ${mira_jwt}` }
         });
 
         if (resp.status === 401) {
@@ -4162,15 +4160,25 @@ async function fetchUserBalance(uid, sendResponse) {
             const text = await resp.text();
             throw new Error(`Request failed: ${resp.status}: ${text}`);
         }
-        const { balance } = await resp.json();
-        await safeSetStorage({ mira_user_balance: { uid, balance, updatedAt: Date.now() } });
-        sendResponse({ balance });
+
+        const { balance, expires_at, expired } = await resp.json();
+
+        // 4. 过期：清除缓存，返回0
+        if (expired) {
+            await safeSetStorage({ mira_user_balance: null });
+            sendResponse({ balance: 0, expires_at, expired: true });
+            return;
+        }
+
+        // 5. 正常：缓存余额和过期时间
+        await safeSetStorage({
+            mira_user_balance: { uid, balance, expires_at, expired: false, updatedAt: Date.now() }
+        });
+        sendResponse({ balance, expires_at, expired: false });
 
     } catch (err) {
-        // 网络错误才切换域名
         if (err.message.includes('timeout') || err.message.includes('Failed to fetch')) {
             await markCurrentUrlFailed();
-            // logger.warn('[Mira] 域名不可达，已切换备用域名');
         }
         logger.error('[Mira-Auth] 获取余额失败:', err);
         sendResponse({ balance: null, error: err.message });
