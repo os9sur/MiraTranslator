@@ -1172,14 +1172,14 @@ const wordTranslationCache = new Map();
 async function getDetailedTranslation(text, forceRefresh = false, manualLang = null, options = {}, hintSourceLang = null) {
   if (!text) return null;
 
-const currentCount = await incrementUsageCount();
+  const currentCount = await incrementUsageCount();
 
-if ((currentCount <= 10 || currentCount % 10 === 0)) { 
-    safeSendMessage({ 
-        type: 'UPDATE_UNINSTALL_URL', 
-        usageCount: currentCount 
-    }).catch(() => {});
-}
+  if ((currentCount <= 10 || currentCount % 10 === 0)) {
+    safeSendMessage({
+      type: 'UPDATE_UNINSTALL_URL',
+      usageCount: currentCount
+    }).catch(() => { });
+  }
   const query = text.trim();
   if (!query) return null;
   if (/^\d+%?$/.test(query)) {
@@ -1441,6 +1441,8 @@ if ((currentCount <= 10 || currentCount % 10 === 0)) {
       displayMessage = `${i18nMsg || 'API Error'} (Code: ${match[0]})`;
     } else if (errorText.toLowerCase().includes("timeout")) {
       displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
+    } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {
+      displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
     } else {
       displayMessage = errorText || getSafeMessage("ERROR_GENERIC") || "Translation failed";
     }
@@ -1561,116 +1563,116 @@ const LANGS = [
 
   // --- 东亚 East Asia ---
   { type: 'sep', label: '—— East Asia ——' },
-  { value: 'zh-CN', label: '简体中文 (Chinese Simplified)', en: 'Chinese Simplified' },
+  { value: 'zh-CN', label: 'Chinese Simplified(简体中文)', en: 'Chinese Simplified' },
   {
     value: 'zh-TW',
-    label: '繁體中文 (Taiwan)',
+    label: 'Taiwan(繁體中文)',
     en: 'Traditional Chinese (Taiwan)'
   },
   {
     value: 'zh-HK',
-    label: '繁體中文 (Hong Kong)',
+    label: 'Hong Kong(繁體中文)',
     en: 'Traditional Chinese (Hong Kong)'
   },
-  { value: 'ja', label: '日本語 (Japanese)', en: 'Japanese' },
-  { value: 'ko', label: '한국어 (Korean)', en: 'Korean' },
-  { value: 'mn', label: 'Монгол хэл (Mongolian)', en: 'Mongolian' },
+  { value: 'ja', label: 'Japanese(日本語)', en: 'Japanese' },
+  { value: 'ko', label: 'Korean(한국어)', en: 'Korean' },
+  { value: 'mn', label: 'Mongolian(Монгол хэл)', en: 'Mongolian' },
 
   // --- 欧洲与美洲 Europe & America ——
   { type: 'sep', label: '—— Europe & America ——' },
-  { value: 'sq', label: 'Shqip (Albanian)', en: 'Albanian' },
-  { value: 'az', label: 'Azərbaycanca (Azerbaijani)', en: 'Azerbaijani' },
-  { value: 'eu', label: 'Euskara (Basque)', en: 'Basque' },
-  { value: 'bg', label: 'Български (Bulgarian)', en: 'Bulgarian' },
-  { value: 'ca', label: 'Català (Catalan)', en: 'Catalan' },
-  { value: 'hr', label: 'Hrvatski (Croatian)', en: 'Croatian' },
-  { value: 'cs', label: 'Čeština (Czech)', en: 'Czech' },
-  { value: 'da', label: 'Dansk (Danish)', en: 'Danish' },
-  { value: 'nl', label: 'Nederlands (Dutch)', en: 'Dutch' },
-  { value: 'en-CA', label: 'English (Canada)', en: 'English (Canada)' },
-  { value: 'en-IE', label: 'English (Ireland)', en: 'English (Ireland)' },
-  { value: 'en-GB', label: 'English (United Kingdom)', en: 'English (UK)' },
-  { value: 'en-US', label: 'English (United States)', en: 'English (US)' },
-  { value: 'et', label: 'Eesti (Estonian)', en: 'Estonian' },
-  { value: 'fi', label: 'Suomi (Finnish)', en: 'Finnish' },
-  { value: 'fr', label: 'Français (French)', en: 'French' },
-  { value: 'fr-CA', label: 'Français (French Canada)', en: 'French (Canada)' },
-  { value: 'gl', label: 'Galego (Galician)', en: 'Galician' },
-  { value: 'de', label: 'Deutsch (German)', en: 'German' },
-  { value: 'de-CH', label: 'Deutsch (German Switzerland)', en: 'German (Switzerland)' },
-  { value: 'el', label: 'Ελληνικά (Greek)', en: 'Greek' },
-  { value: 'hu', label: 'Magyar (Hungarian)', en: 'Hungarian' },
-  { value: 'is', label: 'Íslenska (Icelandic)', en: 'Icelandic' },
-  { value: 'ga', label: 'Gaeilge (Irish)', en: 'Irish' },
-  { value: 'it', label: 'Italiano (Italian)', en: 'Italian' },
-  { value: 'lv', label: 'Latviešu (Latvian)', en: 'Latvian' },
-  { value: 'la', label: 'Latina (Latin)', en: 'Latin' },
-  { value: 'lt', label: 'Lietuvių (Lithuanian)', en: 'Lithuanian' },
-  { value: 'no', label: 'Norsk (Norwegian)', en: 'Norwegian' },
-  { value: 'pl', label: 'Polski (Polish)', en: 'Polish' },
-  { value: 'pt', label: 'Português (Portuguese)', en: 'Portuguese' },
-  { value: 'pt-BR', label: 'Português (Portuguese Brazil)', en: 'Portuguese (Brazil)' },
-  { value: 'ro', label: 'Română (Romanian)', en: 'Romanian' },
-  { value: 'ru', label: 'Русский (Russian)', en: 'Russian' },
-  { value: 'sr', label: 'Srpski (Serbian)', en: 'Serbian' },
-  { value: 'sk', label: 'Slovenčina (Slovak)', en: 'Slovak' },
-  { value: 'sl', label: 'Slovenščina (Slovenian)', en: 'Slovenian' },
-  { value: 'es', label: 'Español (Spanish)', en: 'Spanish' },
-  { value: 'es-419', label: 'Español (Latinoamérica)', en: 'Spanish (Latin America)' },
-  { value: 'es-MX', label: 'Español (Spanish Mexico)', en: 'Spanish (Mexico)' },
-  { value: 'sv', label: 'Svenska (Swedish)', en: 'Swedish' },
-  { value: 'uk', label: 'Українська (Ukrainian)', en: 'Ukrainian' },
+  { value: 'sq', label: 'Albanian(Shqip)', en: 'Albanian' },
+  { value: 'az', label: 'Azerbaijani(Azərbaycanca)', en: 'Azerbaijani' },
+  { value: 'eu', label: 'Basque(Euskara)', en: 'Basque' },
+  { value: 'bg', label: 'Bulgarian(Български)', en: 'Bulgarian' },
+  { value: 'ca', label: 'Catalan(Català)', en: 'Catalan' },
+  { value: 'hr', label: 'Croatian(Hrvatski)', en: 'Croatian' },
+  { value: 'cs', label: 'Czech(Čeština)', en: 'Czech' },
+  { value: 'da', label: 'Danish(Dansk)', en: 'Danish' },
+  { value: 'nl', label: 'Dutch(Nederlands)', en: 'Dutch' },
+  { value: 'en-CA', label: 'Canada(English)', en: 'English (Canada)' },
+  { value: 'en-IE', label: 'Ireland(English)', en: 'English (Ireland)' },
+  { value: 'en-GB', label: 'United Kingdom(English)', en: 'English (UK)' },
+  { value: 'en-US', label: 'United States(English)', en: 'English (US)' },
+  { value: 'et', label: 'Estonian(Eesti)', en: 'Estonian' },
+  { value: 'fi', label: 'Finnish(Suomi)', en: 'Finnish' },
+  { value: 'fr', label: 'French(Français)', en: 'French' },
+  { value: 'fr-CA', label: 'French Canada(Français)', en: 'French (Canada)' },
+  { value: 'gl', label: 'Galician(Galego)', en: 'Galician' },
+  { value: 'de', label: 'German(Deutsch)', en: 'German' },
+  { value: 'de-CH', label: 'German Switzerland(Deutsch)', en: 'German (Switzerland)' },
+  { value: 'el', label: 'Greek(Ελληνικά)', en: 'Greek' },
+  { value: 'hu', label: 'Hungarian(Magyar)', en: 'Hungarian' },
+  { value: 'is', label: 'Icelandic(Íslenska)', en: 'Icelandic' },
+  { value: 'ga', label: 'Irish(Gaeilge)', en: 'Irish' },
+  { value: 'it', label: 'Italian(Italiano)', en: 'Italian' },
+  { value: 'lv', label: 'Latvian(Latviešu)', en: 'Latvian' },
+  { value: 'la', label: 'Latin(Latina)', en: 'Latin' },
+  { value: 'lt', label: 'Lithuanian(Lietuvių)', en: 'Lithuanian' },
+  { value: 'no', label: 'Norwegian(Norsk)', en: 'Norwegian' },
+  { value: 'pl', label: 'Polish(Polski)', en: 'Polish' },
+  { value: 'pt', label: 'Portuguese(Português)', en: 'Portuguese' },
+  { value: 'pt-BR', label: 'Portuguese Brazil(Português)', en: 'Portuguese (Brazil)' },
+  { value: 'ro', label: 'Romanian(Română)', en: 'Romanian' },
+  { value: 'ru', label: 'Russian(Русский)', en: 'Russian' },
+  { value: 'sr', label: 'Serbian(Srpski)', en: 'Serbian' },
+  { value: 'sk', label: 'Slovak(Slovenčina)', en: 'Slovak' },
+  { value: 'sl', label: 'Slovenian(Slovenščina)', en: 'Slovenian' },
+  { value: 'es', label: 'Spanish(Español)', en: 'Spanish' },
+  { value: 'es-419', label: 'Latinoamérica(Español)', en: 'Spanish (Latin America)' },
+  { value: 'es-MX', label: 'Spanish Mexico(Español)', en: 'Spanish (Mexico)' },
+  { value: 'sv', label: 'Swedish(Svenska)', en: 'Swedish' },
+  { value: 'uk', label: 'Ukrainian(Українська)', en: 'Ukrainian' },
 
   // --- 澳洲与大洋洲 Australia & Oceania ---
   { type: 'sep', label: '—— Australia & Oceania ——' },
-  { value: 'en-AU', label: 'English (Australia)', en: 'English (Australia)' },
-  { value: 'en-NZ', label: 'English (New Zealand)', en: 'English (New Zealand)' },
+  { value: 'en-AU', label: 'Australia(English)', en: 'English (Australia)' },
+  { value: 'en-NZ', label: 'New Zealand(English)', en: 'English (New Zealand)' },
   // --- 东南亚 Southeast Asia ---
   { type: 'sep', label: '—— Southeast Asia ——' },
-  { value: 'my', label: 'မြန်မာဘာသာ (Burmese)', en: 'Burmese' },
-  { value: 'fil', label: 'Filipino (Filipino)', en: 'Filipino' },
-  { value: 'id', label: 'Bahasa Indonesia (Indonesian)', en: 'Indonesian' },
-  { value: 'jv', label: 'Basa Jawa (Javanese)', en: 'Javanese' },
-  { value: 'km', label: 'ភាសាខ្មែរ (Khmer)', en: 'Khmer' },
-  { value: 'ms', label: 'Bahasa Melayu (Malay)', en: 'Malay' },
-  { value: 'su', label: 'Basa Sunda (Sundanese)', en: 'Sundanese' },
-  { value: 'th', label: 'ไทย (Thai)', en: 'Thai' },
-  { value: 'vi', label: 'Tiếng Việt (Vietnamese)', en: 'Vietnamese' },
-  { value: 'zh-SG', label: '简体中文 (Singapore)', en: 'Simplified Chinese (Singapore)' },
+  { value: 'my', label: 'Burmese(မြန်မာဘာသာ)', en: 'Burmese' },
+  { value: 'fil', label: 'Filipino(Filipino)', en: 'Filipino' },
+  { value: 'id', label: 'Indonesian(Bahasa Indonesia)', en: 'Indonesian' },
+  { value: 'jv', label: 'Javanese(Basa Jawa)', en: 'Javanese' },
+  { value: 'km', label: 'Khmer(ភាសាខ្មែរ)', en: 'Khmer' },
+  { value: 'ms', label: 'Malay(Bahasa Melayu)', en: 'Malay' },
+  { value: 'su', label: 'Sundanese(Basa Sunda)', en: 'Sundanese' },
+  { value: 'th', label: 'Thai(ไทย)', en: 'Thai' },
+  { value: 'vi', label: 'Vietnamese(Tiếng Việt)', en: 'Vietnamese' },
+  { value: 'zh-SG', label: 'Singapore(简体中文)', en: 'Simplified Chinese (Singapore)' },
 
   // --- 中东与南亚 Middle East & South Asia ---
   { type: 'sep', label: '—— Middle East & South Asia ——' },
-  { value: 'ar', label: 'العربية (Arabic)', en: 'Arabic' },
-  { value: 'ar-SA', label: 'العربية (Arabic Saudi Arabia)', en: 'Arabic (Saudi Arabia)' },
-  { value: 'ar-AE', label: 'العربية (Arabic UAE)', en: 'Arabic (UAE)' },
-  { value: 'hy', label: 'Հայերեն (Armenian)', en: 'Armenian' },
-  { value: 'bn', label: 'বাংলা (Bengali)', en: 'Bengali' },
-  { value: 'en-IN', label: 'English (India)', en: 'English (India)' },
-  { value: 'gu', label: 'ગુજરાતી (Gujarati)', en: 'Gujarati' },
-  { value: 'ka', label: 'ქართული (Georgian)', en: 'Georgian' },
-  { value: 'he', label: 'עברית (Hebrew)', en: 'Hebrew' },
-  { value: 'hi', label: 'हिन्दी (Hindi)', en: 'Hindi' },
-  { value: 'kn', label: 'ಕನ್ನಡ (Kannada)', en: 'Kannada' },
-  { value: 'kk', label: 'Қазақ тілі (Kazakh)', en: 'Kazakh' },
-  { value: 'ml', label: 'മലയാളം (Malayalam)', en: 'Malayalam' },
-  { value: 'mr', label: 'मराठी (Marathi)', en: 'Marathi' },
-  { value: 'fa', label: 'فارسی (Persian)', en: 'Persian' },
-  { value: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)', en: 'Punjabi' },
-  { value: 'si', label: 'සිංහල (Sinhala)', en: 'Sinhala' },
-  { value: 'ta', label: 'தமிழ் (Tamil)', en: 'Tamil' },
-  { value: 'te', label: 'తెలుగు (Telugu)', en: 'Telugu' },
-  { value: 'tr', label: 'Türkçe (Turkish)', en: 'Turkish' },
-  { value: 'ur', label: 'اردو (Urdu)', en: 'Urdu' },
-  { value: 'uz', label: "O'zbek (Uzbek)", en: 'Uzbek' },
+  { value: 'ar', label: 'Arabic(العربية)', en: 'Arabic' },
+  { value: 'ar-SA', label: 'Arabic Saudi Arabia(العربية)', en: 'Arabic (Saudi Arabia)' },
+  { value: 'ar-AE', label: 'Arabic UAE(العربية)', en: 'Arabic (UAE)' },
+  { value: 'hy', label: 'Armenian(Հայերեն)', en: 'Armenian' },
+  { value: 'bn', label: 'Bengali(বাংলা)', en: 'Bengali' },
+  { value: 'en-IN', label: 'India(English)', en: 'English (India)' },
+  { value: 'gu', label: 'Gujarati(ગુજરાતી)', en: 'Gujarati' },
+  { value: 'ka', label: 'Georgian(ქართული)', en: 'Georgian' },
+  { value: 'he', label: 'Hebrew(עברית)', en: 'Hebrew' },
+  { value: 'hi', label: 'Hindi(हिन्दी)', en: 'Hindi' },
+  { value: 'kn', label: 'Kannada(ಕನ್ನಡ)', en: 'Kannada' },
+  { value: 'kk', label: 'Kazakh(Қазақ тілі)', en: 'Kazakh' },
+  { value: 'ml', label: 'Malayalam(മലയാളം)', en: 'Malayalam' },
+  { value: 'mr', label: 'Marathi(मराठी)', en: 'Marathi' },
+  { value: 'fa', label: 'Persian(فارسی)', en: 'Persian' },
+  { value: 'pa', label: 'Punjabi(ਪੰਜਾਬੀ)', en: 'Punjabi' },
+  { value: 'si', label: 'Sinhala(සිංහල)', en: 'Sinhala' },
+  { value: 'ta', label: 'Tamil(தமிழ்)', en: 'Tamil' },
+  { value: 'te', label: 'Telugu(తెలుగు)', en: 'Telugu' },
+  { value: 'tr', label: 'Turkish(Türkçe)', en: 'Turkish' },
+  { value: 'ur', label: 'Urdu(اردو)', en: 'Urdu' },
+  { value: 'uz', label: "Uzbek(O'zbek)", en: 'Uzbek' },
 
   // --- 非洲 Africa ---
   { type: 'sep', label: '—— Africa ——' },
-  { value: 'af', label: 'Afrikaans (Afrikaans)', en: 'Afrikaans' },
-  { value: 'am', label: 'አማርኛ (Amharic)', en: 'Amharic' },
-  { value: 'ha', label: 'Hausa (Hausa)', en: 'Hausa' },
-  { value: 'sw', label: 'Kiswahili (Swahili)', en: 'Swahili' },
-  { value: 'yo', label: 'Yorùbá (Yoruba)', en: 'Yoruba' },
-  { value: 'zu', label: 'IsiZulu (Zulu)', en: 'Zulu' },
+  { value: 'af', label: 'Afrikaans(Afrikaans)', en: 'Afrikaans' },
+  { value: 'am', label: 'Amharic(አማርኛ)', en: 'Amharic' },
+  { value: 'ha', label: 'Hausa(Hausa)', en: 'Hausa' },
+  { value: 'sw', label: 'Swahili(Kiswahili)', en: 'Swahili' },
+  { value: 'yo', label: 'Yoruba(Yorùbá)', en: 'Yoruba' },
+  { value: 'zu', label: 'Zulu(IsiZulu)', en: 'Zulu' },
 ];
 
 function getPromptLanguageName(langCode) {
@@ -1768,65 +1770,65 @@ const LANG_DISPLAY = {
   'zh-cn': 'ZH',
 };
 
-  /**
-   * 判断文本是否为单词（而非短语或句子）
-   */
-  function isWordText(text) {
-    const trimmed = text?.trim() || '';
-    if (!trimmed) return false;
+/**
+ * 判断文本是否为单词（而非短语或句子）
+ */
+function isWordText(text) {
+  const trimmed = text?.trim() || '';
+  if (!trimmed) return false;
 
-    // 含有空格 → 不是单词
-    if (trimmed.includes(' ')) return false;
+  // 含有空格 → 不是单词
+  if (trimmed.includes(' ')) return false;
 
-    // 检测是否为日语
-    const isJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(trimmed);
-    if (isJapanese) {
-      return trimmed.length <= 10;
-    }
-
-    // 检测是否为汉语（纯汉字）
-    const isChinese = /^\p{Script=Han}+$/u.test(trimmed);
-    if (isChinese) {
-      return trimmed.length <= 4;
-    }
-
-    // 检测是否为韩语
-    const isKorean = /\p{Script=Hangul}/u.test(trimmed);
-    if (isKorean) {
-      return trimmed.length <= 15;
-    }
-
-    // 检测是否为阿拉伯语
-    const isArabic = /\p{Script=Arabic}/u.test(trimmed);
-    if (isArabic) {
-      return trimmed.length <= 20;
-    }
-
-    // 检测是否为俄语（西里尔字母）
-    const isRussian = /\p{Script=Cyrillic}/u.test(trimmed);
-    if (isRussian) {
-      return trimmed.length <= 25;
-    }
-
-    // 检测是否为泰语
-    const isThai = /\p{Script=Thai}/u.test(trimmed);
-    if (isThai) {
-      return trimmed.length <= 20;
-    }
-
-    // 检测是否为希伯来语
-    const isHebrew = /\p{Script=Hebrew}/u.test(trimmed);
-    if (isHebrew) {
-      return trimmed.length <= 20;
-    }
-
-    // 检测是否为印地语（天城文）
-    const isDevanagari = /\p{Script=Devanagari}/u.test(trimmed);
-    if (isDevanagari) {
-      return trimmed.length <= 25;
-    }
-
-    // 默认：英文及其他拉丁字母，长度 <= 30
-    return trimmed.length <= 30;
+  // 检测是否为日语
+  const isJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(trimmed);
+  if (isJapanese) {
+    return trimmed.length <= 10;
   }
+
+  // 检测是否为汉语（纯汉字）
+  const isChinese = /^\p{Script=Han}+$/u.test(trimmed);
+  if (isChinese) {
+    return trimmed.length <= 4;
+  }
+
+  // 检测是否为韩语
+  const isKorean = /\p{Script=Hangul}/u.test(trimmed);
+  if (isKorean) {
+    return trimmed.length <= 15;
+  }
+
+  // 检测是否为阿拉伯语
+  const isArabic = /\p{Script=Arabic}/u.test(trimmed);
+  if (isArabic) {
+    return trimmed.length <= 20;
+  }
+
+  // 检测是否为俄语（西里尔字母）
+  const isRussian = /\p{Script=Cyrillic}/u.test(trimmed);
+  if (isRussian) {
+    return trimmed.length <= 25;
+  }
+
+  // 检测是否为泰语
+  const isThai = /\p{Script=Thai}/u.test(trimmed);
+  if (isThai) {
+    return trimmed.length <= 20;
+  }
+
+  // 检测是否为希伯来语
+  const isHebrew = /\p{Script=Hebrew}/u.test(trimmed);
+  if (isHebrew) {
+    return trimmed.length <= 20;
+  }
+
+  // 检测是否为印地语（天城文）
+  const isDevanagari = /\p{Script=Devanagari}/u.test(trimmed);
+  if (isDevanagari) {
+    return trimmed.length <= 25;
+  }
+
+  // 默认：英文及其他拉丁字母，长度 <= 30
+  return trimmed.length <= 30;
+}
 

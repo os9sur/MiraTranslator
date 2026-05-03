@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "Ошибка: Проверьте настройки API."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Войдите, чтобы использовать Mira AI Translator."
   }
 }

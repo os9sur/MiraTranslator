@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "Dịch thất bại: Kiểm tra cấu hình API."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Vui lòng đăng nhập để sử dụng Mira AI Translator."
   }
 }

@@ -63,10 +63,15 @@ const SiteRules = {
             ].join(", "),
             minLen: 8
         },
-        "wikipedia.org": {
-            selectors: "#content h1, #mw-content-text p, #mw-content-text h2, #mw-content-text h3, #mw-content-text li:not(:has(.autonym)), #mw-content-text figcaption,.thumbcaption",
-            minLen: 3
+        
+        "temu.com": {
+            selectors: [
+                "span._25g_jM0z:not(.HZ_BBbqn *)",
+                "div._2EO0yd2j",
+            ].join(", "),
+            minLen: 4
         },
+        
         "msn.com": {
             selectors: "p, h1.viewsHeaderText, span.image-caption",
             minLen: 3
@@ -226,7 +231,7 @@ const SiteRules = {
             "h2:not(button *)",
             "h3:not(button *)",
             "p:not(button *)",
-
+            "span:not(button *):not(nav *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *):not([class*='code'] *):not([class*='highlight'] *):not([class*='token'] *):not(td *):not(th *)",
             "article li",
             "section li",
             "main li",

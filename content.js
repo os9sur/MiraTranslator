@@ -112,7 +112,7 @@ async function syncLocalState(storageData) {
   if (storageData.targetLanguage) {
     const lang = storageData.targetLanguage.replace('_', '-');
     window.currentTargetL = lang;
-    window.currentConfig.targetLanguage = lang; 
+    window.currentConfig.targetLanguage = lang;
     applyI18n(lang);
   }
 
@@ -273,12 +273,16 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
     );
     const finalMargin = isInstagram ? '-5px 0px 2px 0px' : (isWikiUI ? '2px 0 0 0' : '6px 0 4px 0');
     const finalOverflow = isInstagram ? 'visible' : (isWikiUI ? 'hidden' : 'visible');
+    const useInline = transEl.tagName === 'SPAN' &&
+      transEl.classList.contains('kt-paragraph-translation') &&
+      transEl.dataset.forceInline !== 'false';
+
     let css = `
-        display: ${isWikiUI ? 'inline-block' : 'block'} !important;
-        clear: ${clearStyle} !important;
-        width: auto !important; 
+        display: ${useInline ? 'inline' : (isWikiUI ? 'inline-block' : 'block')} !important;
+        clear: ${useInline ? 'none' : clearStyle} !important;
+        width: ${useInline ? 'auto' : '100%'} !important;
         max-width: ${isWikiUI ? 'calc(100% - 2px)' : '100%'} !important;
-        margin: ${finalMargin} !important;
+        margin: ${useInline ? '0 0 0 4px' : finalMargin} !important;
         direction: ${isRTL ? 'rtl' : 'ltr'} !important;
         text-align: ${isRTL ? 'right' : sourceAlign} !important;
         unicode-bidi: ${isRTL ? 'plaintext' : 'normal'} !important;
@@ -385,6 +389,46 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
       css = css.replace(/font-style:[^;]+!important;/, 'font-style: italic !important;');
     }
     transEl.style.cssText = css;
+    const parentLI = transEl.parentElement?.tagName === 'LI' ? transEl.parentElement : null;
+    if (parentLI) {
+      transEl.style.setProperty('display', 'block', 'important');
+      transEl.style.setProperty('width', '100%', 'important');
+      transEl.style.setProperty('margin-top', '4px', 'important');
+      // 让 LI 自身换行
+      parentLI.style.setProperty('display', 'list-item', 'important');
+    }
+    const isAmazon = location.hostname.includes('amazon.');
+    if (isAmazon) {
+      const h1 = transEl.closest('h1');
+      if (h1 && h1.querySelector('#productTitle')) {
+        const titleSpan = h1.querySelector('#productTitle');
+        // 在样式应用完成后，直接给 h1 加 overflow:hidden 截断空白
+        h1.style.setProperty('overflow', 'hidden', 'important');
+        // trim 文本节点
+        Array.from(titleSpan.childNodes).forEach(node => {
+          if (node.nodeType === 3) {
+            node.textContent = node.textContent.trim();
+          }
+        });
+        // 强制 span 不产生多余高度
+        titleSpan.style.setProperty('display', 'block', 'important');
+        titleSpan.style.setProperty('white-space', 'normal', 'important');
+        titleSpan.style.setProperty('line-height', '1.3', 'important');
+        // 修正译文自身的 margin
+        transEl.style.setProperty('margin-top', '4px', 'important');
+      }
+    }
+    const isTemu = location.hostname.includes('temu.com');
+    if (isTemu) {
+      const outerFlex = transEl.closest('.NhsUfVvY');
+      if (outerFlex) {
+        outerFlex.style.setProperty('display', 'block', 'important');
+      }
+      transEl.style.setProperty('width', '100%', 'important');
+      transEl.style.setProperty('display', 'block', 'important');
+      transEl.style.setProperty('margin-top', '4px', 'important');
+    }
+
     if (borderType === 'marker') {
       const span = document.createElement('span');
       span.className = 'marker-span';
@@ -402,9 +446,26 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
           padding: 1px 5px !important;
         `;
     }
-    // if (originalFontSize) {
-    //   transEl.style.fontSize = originalFontSize;
-    // }
+    const parentEl = transEl.parentElement;
+    if (parentEl) {
+      const grandParent = parentEl.parentElement;
+      const grandParentDisplay = grandParent
+        ? window.getComputedStyle(grandParent).display
+        : '';
+      const isFlexChild = grandParentDisplay.includes('flex');
+      let ancestor = parentEl.parentElement;
+      for (let i = 0; i < 5 && ancestor && ancestor !== document.body; i++) {
+        const style = window.getComputedStyle(ancestor);
+        const isAncestorFlex = style.display.includes('flex');
+        if (!isAncestorFlex && (style.overflow === 'hidden' || style.webkitLineClamp !== 'none')) {
+          ancestor.style.setProperty('overflow', 'visible', 'important');
+          ancestor.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+          ancestor.style.setProperty('height', 'auto', 'important');
+          ancestor.style.setProperty('max-height', 'none', 'important');
+        }
+        ancestor = ancestor.parentElement;
+      }
+    }
   };
   try {
     const data = await safeGetStorage('userStyleConfig');
@@ -448,7 +509,8 @@ const DYNAMIC_WATCHER_SITES = [
 ];
 function ensureDynamicContentWatcher() {
   const host = location.hostname;
-  const needsWatcher = DYNAMIC_WATCHER_SITES.some(site => host.includes(site));
+  const needsWatcher = DYNAMIC_WATCHER_SITES.some(site => host.includes(site))
+    || !SiteRules.hasRule(host);  // generic 网站也监听
   if (!needsWatcher) return;
   if (window.__mira_dynamic_observer) return;
   // AI 对话页面用更长的 debounce，等流式输出结束
@@ -1222,6 +1284,8 @@ const TranslationBatcher = {
               : `API Error (Code: ${errorCode})`;
           } else if (errorText.toLowerCase().includes("timeout")) {
             displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
+          } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {   
+            displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
           } else {
             displayMessage = errorText.length < 100 ? errorText : "Translation failed";
           }
@@ -1543,8 +1607,15 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
-  //logger.log('[Mira] handleTranslateElement called', el, new Error().stack.split('\n')[2]);
+  //排除逻辑
   if (el.tagName === 'LI') {
+    // ✅ 新增：跳过 carousel 卡片，避免破坏轮播布局
+    if (el.classList.contains('a-carousel-card') || el.closest('.a-carousel')) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
     const rawText = el.innerText?.trim() || '';
     const hasSubMenu = !!el.querySelector('.jet-sub-mega-menu, .sub-menu, .dropdown-menu, [class*="mega-menu"]');
     const isTooLong = rawText.length > 500;
@@ -1554,6 +1625,42 @@ async function handleTranslateElement(el, forceRefresh = false) {
       _miraProcessingSet.delete(el);
       return;
     }
+    const liStyle = window.getComputedStyle(el);
+    const liIsFlex = ['flex', 'inline-flex'].includes(liStyle.display);
+    const hasMultipleBlockChildren = el.querySelectorAll(':scope > div, :scope > section, :scope > article').length > 1;
+    if (liIsFlex && hasMultipleBlockChildren) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
+  if (el.closest('.mira-kt-panel, .mira-font-family')) {
+    el.dataset.translated = 'true';
+    el.removeAttribute('data-mira-processing');
+    _miraProcessingSet.delete(el);
+    return;
+  }
+  if (el.tagName === 'SPAN' && el.parentElement) {
+    const parentDisplay = window.getComputedStyle(el.parentElement).display;
+    if (parentDisplay === 'flex' || parentDisplay === 'inline-flex') {
+      // 这个 span 是 flex 子项，跳过，交给父元素处理
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
+  if (
+    el.tagName === 'TR' ||
+    el.tagName === 'TABLE' ||
+    (el.closest('table') && ['DIV', 'SPAN'].includes(el.tagName) &&
+      el.querySelectorAll('td, th').length > 0)
+  ) {
+    el.dataset.translated = 'true';
+    el.removeAttribute('data-mira-processing');
+    _miraProcessingSet.delete(el);
+    return;
   }
   if (el.isContentEditable ||
     el.tagName === 'TEXTAREA' ||
@@ -1569,11 +1676,19 @@ async function handleTranslateElement(el, forceRefresh = false) {
     _miraProcessingSet.delete(el);
     return;
   }
+  if (el.closest('pre, code, [class*="code"], [class*="highlight"], [class*="hljs"]')) {
+    el.dataset.translated = 'true';
+    el.removeAttribute('data-mira-processing');
+    _miraProcessingSet.delete(el);
+    return;
+  }
   const isYoutube = location.hostname.includes('youtube.com');
   const isTwitter = location.hostname.includes('x.com');
   const isAmazon = location.hostname.includes('amazon.com');
   const isFacebook = location.hostname.includes('facebook.com');
   const isInstagram = location.hostname.includes('instagram.com');
+  const useInlineMode = !SiteRules.hasRule(location.hostname);
+  const isIndependent = ['P', 'LI'].includes(el.tagName);
   const parentH1 = isYoutube ? el.closest('h1') : null;
 
   //youtube的 yt-lockup-metadata-view-model__title 改成 ytLockupMetadataViewModelTitle 或 ytLockupMetadataViewModelHeadingReset了，先兼容一下
@@ -1582,8 +1697,33 @@ async function handleTranslateElement(el, forceRefresh = false) {
     el.closest('.ytLockupMetadataViewModelTitle') ||
     el.closest('.ytLockupMetadataViewModelHeadingReset')
   ) : null;
+  //排除逻辑
   const isHN = location.hostname.includes('news.ycombinator.com');
   const isGitHub = location.hostname.includes('github.com');
+  const isTemu = location.hostname.includes('temu.com');
+  if (isTemu) {
+    if (el.classList.contains('HZ_BBbqn') || el.closest('.HZ_BBbqn')) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+    if (el.classList.contains('_25g_jM0z') && !el.closest('.NhsUfVvY')) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
+  const isAmazon_early = location.hostname.includes('amazon.');
+  if (isAmazon_early) {
+    if (el.closest('.a-carousel, .a-carousel-card, [class*="p13n-sc"]')) {
+      el.dataset.translated = 'true';
+      el.removeAttribute('data-mira-processing');
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
   const fastRawText = Array.from(el.childNodes)
     .filter(n => {
       if (n.nodeType === Node.ELEMENT_NODE) {
@@ -1792,13 +1932,13 @@ async function handleTranslateElement(el, forceRefresh = false) {
     }
   }
   const isSubListItem = el.tagName === 'LI' && !!el.closest('ul')?.parentElement?.closest('li');
-  const isIndependent = ['P', 'LI'].includes(el.tagName);
   if (!isIndependent && !isSubListItem && el.parentElement) {
     const isAmazonReviewSpan = isAmazon && !!el.closest('[data-hook="review-collapsed"]');
     const isTrendTitle = isTwitter && !!el.closest('[data-testid="trend"]');
     const isAmazonCarouselTitle = isAmazon && el.tagName === 'SPAN';
+    const isInlineSpan = useInlineMode && el.tagName === 'SPAN';
 
-    if (!isAmazonReviewSpan && !isTrendTitle && !isAmazonCarouselTitle &&
+    if (!isAmazonReviewSpan && !isTrendTitle && !isAmazonCarouselTitle && !isInlineSpan &&
       el.parentElement.closest('[data-translating="true"], [data-translated="true"]')) {
       return;
     }
@@ -1863,14 +2003,20 @@ async function handleTranslateElement(el, forceRefresh = false) {
       return;
     }
   }
+
   el.dataset.translating = "true";
   el.setAttribute('data-mira-processing', 'true');
   _miraProcessingSet.add(el);
   let transContainer = existingContainer;
   if (!transContainer) {
-    transContainer = document.createElement('div');
+    const useSpan = useInlineMode && !['H1', 'H2', 'H3', 'H4', 'P'].includes(el.tagName);
+    if (useSpan) {
+      transContainer = document.createElement('span');
+    } else {
+      transContainer = document.createElement('div');
+    }
     transContainer.className = 'kt-paragraph-translation';
-    transContainer.style.setProperty('display', 'block', 'important');
+    transContainer.style.setProperty('display', useInlineMode ? 'inline' : 'block', 'important');
     transContainer.style.setProperty('white-space', 'pre-wrap', 'important');
     transContainer.innerText = t('loading');
     transContainer.style.color = 'gray';
@@ -1892,6 +2038,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const isReddit = location.hostname.includes('reddit.com');
     const isWiki = location.hostname.includes('wikipedia.org');
     const isGoogle = location.hostname.includes('google.com');
+    const isTemu = location.hostname.includes('temu.com');
     const isFB = location.hostname.includes('facebook.com');
     const finalCheckNode = isYoutube ? (parentH1 || youtubeListTitleLink || el) : mountTarget;
     if (!forceRefresh && isYoutube) {
@@ -1968,7 +2115,21 @@ async function handleTranslateElement(el, forceRefresh = false) {
       lineClampParent.style.setProperty('-webkit-line-clamp', 'unset', 'important');
       lineClampParent.style.setProperty('display', 'block', 'important');
       lineClampParent.style.setProperty('overflow', 'visible', 'important');
-    } else if (isAmazon) {
+    } else if (isTemu && el.classList.contains('_25g_jM0z')) {
+      const outerFlex = el.closest('.NhsUfVvY');
+      const innerWrapper = el.closest('._1Zf27vaY');
+
+      if (outerFlex && innerWrapper) {
+        outerFlex.style.setProperty('display', 'block', 'important');
+        innerWrapper.appendChild(transContainer);
+      } else {
+        el.insertAdjacentElement('afterend', transContainer);
+      }
+      transContainer.style.setProperty('display', 'block', 'important');
+      transContainer.style.setProperty('width', '100%', 'important');
+      transContainer.style.setProperty('margin-top', '4px', 'important');
+    }
+    else if (isAmazon) {
       if (el.id === 'productTitle') {
         Array.from(el.childNodes).forEach(node => {
           if (node.nodeType === 3) node.textContent = node.textContent.trim();
@@ -2046,6 +2207,15 @@ async function handleTranslateElement(el, forceRefresh = false) {
       }
       (insertTarget || finalCheckNode).insertAdjacentElement('afterend', transContainer);
     } else if (el.tagName === 'P') {
+      const pStyle = window.getComputedStyle(el);
+      const pIsFlex = ['flex', 'inline-flex'].includes(pStyle.display);
+      if (pIsFlex) {
+        // P 是 flex 容器，让译文换行占满整行
+        el.style.setProperty('flex-wrap', 'wrap', 'important');
+        transContainer.style.setProperty('flex-basis', '100%', 'important');
+        transContainer.style.setProperty('width', '100%', 'important');
+        transContainer.style.setProperty('margin-top', '4px', 'important');
+      }
       el.appendChild(transContainer);
     } else if (isHN) {
       const titleLine = el.closest('.titleline');
@@ -2129,26 +2299,35 @@ async function handleTranslateElement(el, forceRefresh = false) {
       if (postContainer) {
         transContainer.style.setProperty('font-size', '0.95em', 'important');
       }
-    }
-    else {
-      if (el.tagName === 'LI') {
-        const subList = el.querySelector(':scope > ul, :scope > ol');
-        if (subList) {
-          el.insertBefore(transContainer, subList);
-        } else {
-          el.appendChild(transContainer);
-        }
-      } else if (el.tagName === 'P' || el.tagName === 'DIV' || el.tagName === 'SPAN') {
-        if (el.tagName === 'SPAN') {
-          el.insertAdjacentElement('afterend', transContainer);
-        } else {
-          el.appendChild(transContainer);
-        }
+    } else {
+      const elStyle = window.getComputedStyle(el);
+      const elIsFlex = ['flex', 'inline-flex'].includes(elStyle.display);
+
+      if (elIsFlex) {
+        el.style.setProperty('flex-wrap', 'wrap', 'important');
+
+        // 创建一个占满整行的翻译容器
+        transContainer = document.createElement('div');
+        transContainer.className = 'kt-paragraph-translation';
+        transContainer.dataset.forceInline = 'true';
+        transContainer.style.setProperty('display', 'block', 'important');
+        transContainer.style.setProperty('width', '100%', 'important');  // 占满整行
+        transContainer.style.setProperty('flex-basis', '100%', 'important'); // flex换行后占满
+        transContainer.style.setProperty('margin-top', '4px', 'important');
+        el.appendChild(transContainer);
       } else {
-        mountTarget.insertAdjacentElement('afterend', transContainer);
+        const parentIsBlock = ['H1', 'H2', 'H3', 'H4', 'P', 'DIV', 'SECTION', 'ARTICLE']
+          .includes(el.parentElement?.tagName);
+        if (parentIsBlock) {
+          transContainer.dataset.forceInline = 'false';
+          transContainer.style.setProperty('display', 'block', 'important');
+          transContainer.style.setProperty('margin-top', '4px', 'important');
+        }
+        el.appendChild(transContainer);
       }
     }
   }
+
   el.removeAttribute('data-mira-container-pending');
   if (typeof applyUserStyles === 'function') {
     const originStyle = window.getComputedStyle(el);
@@ -2197,10 +2376,17 @@ async function handleTranslateElement(el, forceRefresh = false) {
       const h1 = el.closest('h1');
       if (h1) {
         Array.from(h1.childNodes).forEach(node => { if (node.nodeType === 3) node.remove(); });
-        h1.style.setProperty('display', 'flex', 'important');
-        h1.style.setProperty('flex-direction', 'column', 'important');
+        const titleSpan = h1.querySelector('#productTitle') || el;
+        Array.from(titleSpan.childNodes).forEach(node => {
+          if (node.nodeType === 3) {
+            node.textContent = node.textContent.trim();
+          }
+        });
+        h1.style.setProperty('display', 'block', 'important');
         h1.style.setProperty('line-height', '1.1', 'important');
         el.style.setProperty('display', 'block', 'important');
+        titleSpan.style.setProperty('white-space', 'normal', 'important');
+        titleSpan.style.setProperty('padding', '0', 'important');
         transContainer.style.setProperty('margin-top', '2px', 'important');
       }
     }
@@ -2737,7 +2923,17 @@ function resolveActiveSelectors(inputSelectors) {
   const isBasic = !inputSelectors
     || inputSelectors.trim() === ""
     || inputSelectors.trim() === "p";
-  if (!isBasic) return inputSelectors.trim();
+  if (!isBasic) {
+    // generic 网站始终合并 span selector，防止用户配置里没有 span
+    if (!hasSpecificRule) {
+      const spanSelector = "span:not(button *):not(nav *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag'])";
+      const existing = inputSelectors.trim();
+      if (!existing.includes('span')) {
+        return existing + ', ' + spanSelector;
+      }
+    }
+    return inputSelectors.trim();
+  }
   if (hasSpecificRule) {
     const rule = SiteRules.getRule(location.hostname);
     if (rule && rule.selectors) return rule.selectors;
@@ -2838,6 +3034,7 @@ async function executeReScan(config) {
           delete el.dataset.translating;
         }
         if (el.dataset.translated === 'true') {
+          if (el.dataset.transSkipped === 'true') continue;
           const hasRealContainer =
             el.nextElementSibling?.classList?.contains('kt-paragraph-translation') ||
             Array.from(el.children).some(c => c.classList.contains('kt-paragraph-translation'));
@@ -2980,6 +3177,16 @@ async function scanContent(forcedSelectors = null) {
 
       if (targetEl.dataset.translated === "true") return;
       if (targetEl.dataset.translating === "true" && !isAmazonReview) return;
+      //  p 内部有可翻译 span 就跳过 p 本身，防止重复翻译
+      if (targetEl.tagName === 'P' && !isSpecialSite && !SiteRules.hasRule(location.hostname)) {
+        const innerSpan = targetEl.querySelector(
+          "span:not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge'])"
+        );
+        if (innerSpan && innerSpan.textContent.trim().length > 0) {
+          targetEl.dataset.translated = 'true';
+          return;
+        }
+      }
       const textContent = (isAmazonReview || isYTComment) ? (targetEl.textContent || "") : (targetEl.innerText || targetEl.textContent || "");
       const cleanText = textContent.trim();
       if (cleanText.length < (isSpecialSite ? 1 : 2)) {
@@ -3006,7 +3213,8 @@ async function scanContent(forcedSelectors = null) {
         if (!isIndependent) {
           while (parent && parent !== document.documentElement) {
             if (typeof parent.matches === 'function' && parent.matches(finalSelectors)) {
-              if (parent.dataset.translated === "true" || parent.dataset.translating === "true") {
+              if ((parent.dataset.translated === "true" && parent.dataset.transSkipped !== 'true')
+                || parent.dataset.translating === "true") {
                 targetEl.dataset.translated = "true";
                 return;
               }
@@ -3018,6 +3226,11 @@ async function scanContent(forcedSelectors = null) {
       const rect = targetEl.getBoundingClientRect();
       const isInViewport = isSpecialSite || (rect.top < window.innerHeight + 1500 && rect.bottom > -1500);
       if (isInViewport && typeof handleTranslateElement === 'function') {
+        //  p 元素内部有可翻译的 span 就跳过 p 本身
+        if (!isSpecialSite && targetEl.tagName === 'P' && targetEl.querySelector(finalSelectors)) {
+          targetEl.dataset.translated = 'true';
+          return;
+        }
         handleTranslateElement(targetEl);
       } else {
         const obs = getObserver();
@@ -3235,7 +3448,7 @@ function initSelectionTranslate() {
 
     // 主面板
     popupEl = document.createElement('div');
-    popupEl.className = 'panel';
+    popupEl.className = 'mira-kt-panel';
     popupEl.style.cssText = 'display:none;position:fixed;visibility:hidden;width:0;height:0;';
     popupEl.innerHTML = buildPanelHTML();
     shadow.appendChild(popupEl);
@@ -3358,7 +3571,7 @@ function initSelectionTranslate() {
       }
 
       /* ── 主面板 ── */
-      .panel {
+      .mira-kt-panel {
         pointer-events:   auto;
         position:         fixed;
         color:            var(--p-text-main);
@@ -4550,15 +4763,27 @@ function initSelectionTranslate() {
         if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#6b7280';
 
         getDetailedTranslation(text, true, currentTargetLang, {
-          hintInputLang: currentSourceLang
+          hintInputLang: currentSourceLang,
         }, currentSourceLang)
           .then(result => {
+            if (basicEl) { basicEl.style.color = ''; basicEl.style.fontStyle = 'normal'; }
+            if (result?.isError) {
+              if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
+              clearTimeout(shadowHost?._detailTimer);
+              const pDetail = shadow.getElementById('p-detail');
+              if (pDetail) { pDetail.style.display = 'none'; pDetail.innerHTML = ''; }
+              setBasicError(basicEl, result.basic || 'Translation failed');
+              return;
+            }
             if (result?.isPartial && shadowHost?._detailFullyRendered) return;
             if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
             handleTranslationResult(result, text, shadow);
           })
           .catch(err => {
             if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
+            clearTimeout(shadowHost?._detailTimer);
+            const pDetail = shadow.getElementById('p-detail');
+            if (pDetail) { pDetail.style.display = 'none'; pDetail.innerHTML = ''; }
             setBasicError(basicEl, err.message || 'Network Error');
           })
           .finally(() => {
@@ -4832,7 +5057,7 @@ function initSelectionTranslate() {
             tgtSpan.textContent = LANG_DISPLAY[langVal] || lang.value.toUpperCase().slice(0, 2);
           }
 
-         const newIsRTL = checkRTL(lang.value);
+          const newIsRTL = checkRTL(lang.value);
           const contentContainer = shadow.getElementById('p-content-container');
           if (contentContainer) {
             contentContainer.style.direction = newIsRTL ? 'rtl' : 'ltr';
@@ -4903,10 +5128,19 @@ function initSelectionTranslate() {
     if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#6b7280';
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(text, false, manualLang, {
-      hintInputLang: hintSourceLangNew !== 'auto' ? hintSourceLangNew : null
+      hintInputLang: hintSourceLangNew !== 'auto' ? hintSourceLangNew : null,
     }, hintSourceLangNew !== 'auto' ? hintSourceLangNew : null)
       .then(result => {
+        if (basicEl) { basicEl.style.color = ''; basicEl.style.fontStyle = 'normal'; }
         if (!result) return;
+        if (result?.isError) {
+          if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
+          clearTimeout(shadowHost?._detailTimer);
+          const pDetail = shadow.getElementById('p-detail');
+          if (pDetail) { pDetail.style.display = 'none'; pDetail.innerHTML = ''; }
+          setBasicError(basicEl, result.basic || 'Translation failed');
+          return;
+        }
         if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
         const currentWord = shadowHost?.getAttribute('data-current-word');
         if (text.trim() !== currentWord) return;
@@ -4934,7 +5168,6 @@ function initSelectionTranslate() {
           if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#22c55e';
         } else {
           logger.log('result.isPartial 为 false', result);
-          // 缓存命中时清掉可能残留的计时器
           if (shadowHost) {
             clearTimeout(shadowHost._slowTimer);
             shadowHost._slowTimer = null;
@@ -4946,6 +5179,9 @@ function initSelectionTranslate() {
       })
       .catch(err => {
         if (shadowHost?._engineDotEl) shadowHost._engineDotEl.style.background = '#ef4444';
+        clearTimeout(shadowHost?._detailTimer);
+        const pDetail = shadow.getElementById('p-detail');
+        if (pDetail) { pDetail.style.display = 'none'; pDetail.innerHTML = ''; }
         logger.log('❌ getDetailedTranslation 报错', err);
         setBasicError(basicEl, err.message || '网络异常');
       });

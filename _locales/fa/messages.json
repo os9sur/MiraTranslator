@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "خطا در ترجمه: تنظیمات را بررسی کنید."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "برای استفاده از Mira AI Translator وارد شوید."
   }
 }
