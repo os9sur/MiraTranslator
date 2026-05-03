@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "翻訳失敗：API設定を確認してください。"
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Mira AI翻訳を使用するにはサインインしてください。"
   }
 }

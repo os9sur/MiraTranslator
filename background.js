@@ -1447,7 +1447,11 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
         return { dictData, originalDictData: null, examples };
     }
 }
-
+function decodeHtmlEntities(str) {
+  if (!str) return '';
+  return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+            .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+}
 // ── 构建详细数据 ───────────
 async function _buildDetailData(
     basicText, originalText, targetLang, sourceName,
@@ -1455,20 +1459,16 @@ async function _buildDetailData(
     preferredHost, preferredCache,
     existingExamples = []
 ) {
-    logger.log('[_buildDetailData] called', originalText, targetLang, sourceLang);
     const isChineseTarget = targetLang.toLowerCase().includes('zh');
     const isEnglishSource = /^[a-zA-Z-]+$/.test(originalText.trim()) && (sourceLang === 'en');
     let detailData = null;
-    logger.log('[_buildDetailData] isEnglishSource:', isEnglishSource, 'isChineseTarget:', isChineseTarget);
     // 1. 中英互译 
     if (isEnglishSource && isChineseTarget) {
         detailData = await Translators._fetchBingDictDetail(originalText.trim());
     }
     // 2. 其他所有语言,直接走目标语种 Wiktionary,跳过二次翻译!
     else {
-        logger.log('[_buildDetailData] calling fetchNativeWiktionaryDetail...');
         detailData = await fetchNativeWiktionaryDetail(originalText.trim(), sourceLang, targetLang);
-        logger.log('[_buildDetailData] fetchNativeWiktionary result:', JSON.stringify(detailData)?.substring(0, 200));
         if (!detailData && existingDictData?.length > 0) {
             detailData = { dictData: existingDictData, phonetic: '', examples: [], wordForms: [] };
         }
@@ -1493,7 +1493,7 @@ async function _buildDetailData(
     if (detailData) {
         return {
             basic: basicText,
-            phonetic: sourcePhonetic || detailData.phonetic || "",
+            phonetic: sourcePhonetic || decodeHtmlEntities(detailData.phonetic) || "",
             dictData: detailData.dictData || [],
             originalDictData: null,
             examples: detailData.examples || [],
@@ -2064,7 +2064,6 @@ const Translators = {
                 const bingBasic = data[0].translations[0].text;
                 const targetPhonetic = data[0].translations[0].transliteration?.text ?? '';
                 const sourcePhonetic = data[0].srcTranslit ?? '';
-
                 // 主翻译成功后，把已验证的 host/cache 透传，后台词典复用，无需重新刷 token
                 return await Translators._withDictDetail(
                     bingBasic, text, targetLang, 'Bing',
@@ -2226,6 +2225,9 @@ const Translators = {
     google: async (text, target, lightweight = false, hintSourceLang = null, tabId = null, cacheKey = null, fromPopup = false) => {
         if (!text || text.trim().length < 1) return null;
         const query = text.trim();
+        if (query.includes('-')) {
+            lightweight = true;
+        }
         const PATTERNS = {
             han: /\p{Script=Han}/u,
             kana: /[\p{Script=Hiragana}\p{Script=Katakana}]/u,
@@ -2290,13 +2292,8 @@ const Translators = {
                 }
             }
 
-            // Google 返回的数据里 data[2] 是检测到的源语言
             const detectedLang = data[2] || null;
-            // 条件：目标语言非中文 且 Google 没有返回词典数据 且 非轻量模式 且 查询词是单词
-            // Google 自己有 dictData 就传给 _withDictDetail，让它决定是否补充/二次翻译
-            logger.log('Google detected source lang:', detectedLang);
 
-            // 确定源语言，优先 hintSourceLang，其次 Google 检测结果
             const sourceLang = (hintSourceLang && hintSourceLang !== 'auto')
                 ? hintSourceLang
                 : (detectedLang ?? (sl !== 'auto' ? sl : 'en'));
@@ -2332,8 +2329,6 @@ const Translators = {
                     source: 'Google'
                 };
             }
-            logger.log('[Google] 准备调用 _withDictDetail, sourceLang:', sourceLang, 'target:', target, 'dictData:', dictData?.length, 'examples:', examples?.length);
-            // 走统一的 _withDictDetail，和 Bing 行为一致
             return await Translators._withDictDetail(
                 basic,          // 翻译结果
                 query,          // 原文
@@ -2381,9 +2376,17 @@ const Translators = {
         }
     },
     ai_family: async (text, target, config) => {
-        logger.log('AI Family called with text:', text);
         const controller = new AbortController();
-        const timeoutMs = 15000;
+        const host = (config.host || '').toLowerCase();
+        const isLocalModel = config.engine === 'custom_ai' ||
+            host.includes('localhost') ||
+            host.includes('127.0.0.1') ||
+            host.includes('0.0.0.0') ||
+            /https?:\/\/192\.168\./.test(host) ||
+            /https?:\/\/10\./.test(host) ||
+            /https?:\/\/172\.(1[6-9]|2\d|3[01])\./.test(host);
+
+        const timeoutMs = isLocalModel ? 60000 : 8000;
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         const isWord = text.trim().split(/\s+/).length === 1;
         const isSubtitle = !!(config.systemPrompt && config.systemPrompt.toLowerCase().includes('subtitle'));
@@ -2705,7 +2708,47 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
 
     if (isWord) {
         const isChineseTarget = targetLanguageName.includes('Chinese') || targetLanguageName.includes('中文');
-        const needsWordForms = isChineseTarget || targetLangBase === 'ja' || targetLangBase === 'ko';
+        const noMorphologyLangs = ['zh', 'th', 'vi', 'id', 'ms'];
+        const needsWordForms = !noMorphologyLangs.includes(hintInputLang);
+
+        const sourceLangLabel = hintInputLang
+            ? getFriendlyLanguageName(hintInputLang)
+            : 'source language';
+
+        // ── lightweight 模式：字幕 hover 快速查词 ──────────────────
+        if (req.lightweight) {
+            const lightJsonShape = [
+                `{`,
+                `  "phonetic": "<IPA of input word in ${sourceLangLabel}>",`,
+                `  "basic": "<1-2 primary meanings in ${targetLanguageName}>",`,
+                `  "dictData": [{"pos": "n./v./adj.", "definition": "<meanings in ${targetLanguageName}>"}]`,
+                `}`,
+            ].join('\n');
+
+            const lightExample = isChineseTarget
+                ? `{"phonetic":"rʌn","basic":"跑、运营","dictData":[{"pos":"v.","definition":"跑步、经营"},{"pos":"n.","definition":"跑步、运行"}]}`
+                : targetLangBase === 'ja'
+                    ? `{"phonetic":"rʌn","basic":"走る、運営する","dictData":[{"pos":"v.","definition":"走る、経営する"},{"pos":"n.","definition":"走り、運営"}]}`
+                    : targetLangBase === 'ko'
+                        ? `{"phonetic":"rʌn","basic":"달리다, 운영하다","dictData":[{"pos":"v.","definition":"달리다, 경영하다"},{"pos":"n.","definition":"달리기, 운영"}]}`
+                        : `{"phonetic":"rʌn","basic":"<meanings in ${targetLanguageName}>","dictData":[{"pos":"v.","definition":"<meanings in ${targetLanguageName}>"},{"pos":"n.","definition":"<meanings in ${targetLanguageName}>"}]}`;
+
+            systemPrompt = [
+                `You are a ${targetLanguageName} dictionary. Output PURE JSON only — no markdown, no backticks, no explanation.`,
+                `TARGET: ${targetLanguageName}. ALL "basic" and "definition" values MUST be in ${targetLanguageName} — NEVER in ${sourceLangLabel}.`,
+                hintInputLang ? `Source: ${sourceLangLabel}.` : '',
+                `OUTPUT:\n${lightJsonShape}`,
+                `EXAMPLE:\nInput: "run" → ${lightExample}`,
+                `RULES:`,
+                `- phonetic: Accurate IPA of the INPUT word in ${sourceLangLabel}. For Japanese use Hepburn Romaji.`,
+                `- dictData: max 3 entries, max 3 meanings per pos, all unique.`,
+                targetLangBase === 'ja' ? `- "basic" and "definition" MUST use Japanese script (漢字・ひらがな・カタカナ). Romaji is FORBIDDEN.` : '',
+                targetLangBase === 'ko' ? `- "basic" and "definition" MUST use Hangul (한글). Romanization is FORBIDDEN.` : '',
+                `- Start with '{', end with '}'.`,
+            ].filter(Boolean).join('\n');
+
+            return systemPrompt;
+        }
 
         // ── sourcePhoneticDesc ────────────────────────────────────────
         const sourcePhoneticDesc = (() => {
@@ -2724,18 +2767,22 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
         // ── wordForms instruction ────────────── 
         const wordFormsInstruction = `  "wordForms": [{"name": "form name in ${targetLanguageName}, e.g. past/conjugation", "value": "the form"}],`;
 
-        const sourceLangLabel = hintInputLang
-            ? getFriendlyLanguageName(hintInputLang)
-            : 'source language';
+        //  通用描述精简 + 只输出当前语言示例
 
-        const wordFormsRule = `- wordForms: Provide morphological forms of the INPUT word in its SOURCE language (${sourceLangLabel}). 
-                        - The "name" field is the grammatical label, written in ${targetLanguageName}.
-                        - The "value" field MUST be the actual inflected form in the SOURCE language (${sourceLangLabel}), NOT in ${targetLanguageName}.
-                        - Example: Input "run" (English→Japanese): [{"name":"過去形","value":"ran"},{"name":"現在分詞","value":"running"}] ← value is English, name is Japanese.
-                        - Example: Input "maintain" (English→Portuguese): [{"name":"particípio","value":"maintained"},{"name":"gerúndio","value":"maintaining"}] ← value is English, name is Portuguese.
-                        - EXCLUDE the base form/prototype itself from this array to avoid redundancy.
-                        - For languages without morphology (like Chinese/Thai), return [].
-                        - EVERY entry MUST have both "name" and "value". They must be DIFFERENT — never copy "value" into "name".`;
+        const wordFormsRule = [
+            `- wordForms: Most important morphological forms of the INPUT word in ${sourceLangLabel}.`,
+            `  "name": grammatical label in ${targetLanguageName}. "value": inflected form in ${sourceLangLabel} only.`,
+            `  EXCLUDE base form. Both "name" and "value" required and must differ.`,
+            `  Verbs: tenses/persons/participles. Nouns: ALWAYS provide plural (even irregular, e.g. œil→yeux) and gender. Adjectives: comparative/superlative/gender forms.`,
+            hintInputLang === 'ja' ? `  e.g. "食べる"→[{"name":"て形","value":"食べて"},{"name":"ます形","value":"食べます"}]` :
+                hintInputLang === 'ko' ? `  e.g. "먹다"→[{"name":"존댓말","value":"먹습니다"},{"name":"과거형","value":"먹었다"}]` :
+                    hintInputLang === 'de' ? `  e.g. "laufen"→[{"name":"Präsens 1Sg","value":"ich laufe"},{"name":"Präteritum","value":"lief"}]` :
+                        hintInputLang === 'fr' ? `  e.g. "aller"→[{"name":"présent","value":"je vais"},{"name":"participe","value":"allé"}]` :
+                            hintInputLang === 'es' ? `  e.g. "hablar"→[{"name":"presente","value":"hablo"},{"name":"pretérito","value":"hablé"}]` :
+                                hintInputLang === 'ru' ? `  e.g. "бежать"→[{"name":"1л.ед.","value":"бегу"},{"name":"прош.м.","value":"бежал"}]` :
+                                    hintInputLang === 'ar' ? `  e.g. "كتب"→[{"name":"جذر","value":"ك-ت-ب"},{"name":"اسم فاعل","value":"كاتب"}]` :
+                                        `  e.g. "run"→[{"name":"past","value":"ran"},{"name":"participle","value":"running"}]`,
+        ].join('\n');
 
         // ── Examples ────────────────────
         const baseExample = (() => {
@@ -2837,9 +2884,9 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
             // ⑥ Rules 
             `RULES:`,
             `- dictData: max 6 entries, each pos appears ONCE, max 5 meanings per pos, all unique.`,
-            `- phonetic: IPA (e.g. /dʑoːhoː/) or Hepburn Romaji (e.g. jōhō). Never Hiragana/Katakana.`,
-            `- examples: EXACTLY 2 DIFFERENT sentences. Format MUST be "English source sentence | ${targetLanguageName} translation". The two lines MUST be different from each other.`,
-            `- prototype & wordForms: If input is an inflected form (e.g. "recommended"→"recommend"), set prototype to the base form and wordForms to []. wordForms is ONLY for the BASE form showing its paradigm.`,
+            `- phonetic: Provide accurate IPA for the INPUT word in its SOURCE language (${sourceLangLabel}). Apply the correct phonological rules of ${sourceLangLabel} — do NOT approximate using English pronunciation patterns. For Japanese use Hepburn Romaji. Never use Hiragana/Katakana in phonetic field.`,
+            `- examples: EXACTLY 2 DIFFERENT sentences. Format MUST be "<${sourceLangLabel} sentence> | <${targetLanguageName} translation>". The source sentence MUST be in ${sourceLangLabel}, NOT in English unless ${sourceLangLabel} is English. The two examples MUST be different from each other.`,
+            `- prototype & wordForms: If input is a BASE form, set prototype to null and provide wordForms showing its paradigm. If input is an INFLECTED form (e.g. "souhaité"→"souhaiter", "running"→"run"), set prototype to the base form AND still provide wordForms of that BASE form (not the inflected input itself). wordForms should never be [] unless the source language has no morphology (Chinese/Thai/Vietnamese/Indonesian).`,
             wordFormsRule,
             targetLangBase === 'ja' ? `- CRITICAL for Japanese: "basic" and "definition" MUST use Japanese script (漢字・ひらがな・カタカナ). Romaji or English in these fields is STRICTLY FORBIDDEN.` : '',
             targetLangBase === 'ja' ? `- CRITICAL for Japanese: examples translation line MUST be in Japanese script. Romaji translation is STRICTLY FORBIDDEN.` : '',
@@ -3064,7 +3111,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             }
 
             if (!token) {
-                return { error: 'Please sign in to use Mira AI Translator' };
+                return { error: 'ERROR_NOT_SIGNED_IN' };
             }
 
             const miraData = await safeGetStorage('data_mira_pro');
@@ -3238,15 +3285,13 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
 
             const systemPrompt = buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPrompt);
 
-            logger.log('systemPrompt:', systemPrompt);
-            logger.log('engine:', engine);
-            logger.log('finalModel:', finalModel);
             rawResult = await Translators.ai_family(req.text, req.targetLang, {
                 engine: engine,
                 host: finalHost,
                 key: apiKey,
                 model: finalModel,
-                systemPrompt: systemPrompt
+                systemPrompt: systemPrompt,
+                fromPopup: req.fromPopup
             });
         }
         let finalData = {

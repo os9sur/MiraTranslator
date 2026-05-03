@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "Çeviri başarısız: API ayarlarını kontrol edin."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Mira AI Translator'ı kullanmak için giriş yapın."
   }
 }

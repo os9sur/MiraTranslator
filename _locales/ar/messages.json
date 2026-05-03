@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "فشلت الترجمة: تحقق من الإعدادات."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "يرجى تسجيل الدخول لاستخدام Mira AI Translator."
   }
 }

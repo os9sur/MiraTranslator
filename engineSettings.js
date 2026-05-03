@@ -1386,6 +1386,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     displayMessage = isLocalModel
                         ? t('timeoutLocalModel')
                         : (i18n.error_timeout || "Timeout ⌛");
+                } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {
+                    displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
                 } else if (errorText === "Same as Original") {
                     displayMessage = i18n.error_same_as_original || "API returned original text";
                 } else {

@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "การแปลล้มเหลว: โปรดตรวจสอบการตั้งค่า API"
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "กรุณาลงชื่อเข้าใช้เพื่อใช้งาน Mira AI Translator"
   }
 }

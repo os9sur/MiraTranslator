@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "Falha: Verifique a configuração da API."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Faça login para usar o Mira AI Translator."
   }
 }

@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "翻譯失敗：請檢查網路連線或 API 設定。"
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "請登入後使用 Mira AI 翻譯。"
   }
 }

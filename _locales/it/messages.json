@@ -34,5 +34,8 @@
   },
   "ERROR_GENERIC": {
     "message": "Traduzione fallita: Controlla la config API."
+  },
+  "ERROR_NOT_SIGNED_IN": {
+    "message": "Accedi per usare Mira AI Translator."
   }
 }
