@@ -1284,7 +1284,7 @@ const TranslationBatcher = {
               : `API Error (Code: ${errorCode})`;
           } else if (errorText.toLowerCase().includes("timeout")) {
             displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
-          } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {   
+          } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {
             displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
           } else {
             displayMessage = errorText.length < 100 ? errorText : "Translation failed";
@@ -2174,8 +2174,20 @@ async function handleTranslateElement(el, forceRefresh = false) {
         }
       }
     } else if (isReddit) {
-      const redditTitle = el.tagName === 'H1' || el.tagName === 'H2' || el.id.includes('post-title');
+      const redditTitle = el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3' || el.id.includes('post-title');
       if (redditTitle) {
+        // 解除 line-clamp 和 overflow 限制
+        el.style.setProperty('-webkit-line-clamp', 'unset', 'important');
+        el.style.setProperty('overflow', 'visible', 'important');
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('max-height', 'none', 'important');
+        // 同时处理父元素
+        let parent = el.parentElement;
+        for (let i = 0; i < 3 && parent && parent !== document.body; i++) {
+          parent.style.setProperty('overflow', 'visible', 'important');
+          parent.style.setProperty('max-height', 'none', 'important');
+          parent = parent.parentElement;
+        }
         el.appendChild(transContainer);
         transContainer.style.setProperty('display', 'block', 'important');
         transContainer.style.setProperty('margin-top', '8px', 'important');

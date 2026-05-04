@@ -63,7 +63,7 @@ const SiteRules = {
             ].join(", "),
             minLen: 8
         },
-        
+
         "temu.com": {
             selectors: [
                 "span._25g_jM0z:not(.HZ_BBbqn *)",
@@ -71,7 +71,7 @@ const SiteRules = {
             ].join(", "),
             minLen: 4
         },
-        
+
         "msn.com": {
             selectors: "p, h1.viewsHeaderText, span.image-caption",
             minLen: 3
@@ -92,11 +92,33 @@ const SiteRules = {
             minLen: 3
         },
         "stackoverflow.com": {
-            selectors: ".s-prose p, .s-prose li, .question-hyperlink",
+            selectors: [
+                ".s-prose p",
+                ".s-prose li",
+                ".question-hyperlink",
+                // 评论内容 - 正确选择器
+                "div[itemprop='text']",
+                // 问题标题详情页
+                "#question-header h1 a",
+                // 列表页问题标题
+                ".s-post-summary--content-title a",
+            ].join(", "),
             minLen: 5
         },
         "reddit.com": {
-            selectors: "shreddit-post p, [id^='post-title'], shreddit-comment div[id$='-post-rtjson-content'] > p, .comment p, #comment-tree .md p",
+            selectors: [
+                // 帖子正文
+                "shreddit-post p",
+                "div[slot='text-body'] p",
+                ".md p",
+                // 帖子标题（主列表）
+                "h2.inline-block a",
+                // 右侧侧边栏标题
+                "h3.i18n-list-item-post-title",
+                // 旧版兼容
+                ".comment p",
+                "#comment-tree .md p",
+            ].join(", "),
             minLen: 3
         },
         "google.com": {
