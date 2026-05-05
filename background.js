@@ -1448,9 +1448,9 @@ async function translateDictContent(dictData, examples, targetLang, preferredHos
     }
 }
 function decodeHtmlEntities(str) {
-  if (!str) return '';
-  return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
-            .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    if (!str) return '';
+    return str.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 }
 // ── 构建详细数据 ───────────
 async function _buildDetailData(
@@ -2103,8 +2103,10 @@ const Translators = {
             const html = await res.text();
 
             // 音标
-            const usPhoneMatch = html.match(/<div class="hd_prUS b_primtxt">[^[]*(\[[^\]]+\])/);
-            const ukPhoneMatch = html.match(/<div class="hd_pr b_primtxt">[^[]*(\[[^\]]+\])/);
+            const hdAreaMatch = html.match(/<div class="hd_p1_1"[^>]*>([\s\S]*?)<\/div>\s*<\/div>\s*<\/div>/);
+            const hdArea = hdAreaMatch?.[1] || '';
+            const usPhoneMatch = hdArea.match(/hd_prUS[^>]*>[\s\S]*?(\[[^\]]{1,30}\])/);
+            const ukPhoneMatch = hdArea.match(/hd_pr[^>]*>[\s\S]*?(\[[^\]]{1,30}\])/);
             const phonetic = (usPhoneMatch?.[1] || ukPhoneMatch?.[1] || '').trim();
 
             // 词性+释义，从权威英汉双解区域 #authid 提取
