@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Immersive Übersetzung & zweisprachige YouTube-Untertitel"
+    "message": "Mira Translator - KI-Webübersetzung & zweisprachige YouTube-Untertitel"
   },
   "appDesc": {
-    "message": "Immersive Übersetzung, zweisprachige YouTube-Untertitel, KI-Übersetzung, Wortsuche. Leicht & Open-Source. Google Drive/WebDAV."
+    "message": "Open-Source & sichere Webübersetzung, zweisprachige YouTube-Untertitel, Wortsuche. Unterstützt OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "API-Fehler: Ungültige Anfrage."

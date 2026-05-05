@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Tam sayfa çeviri ve YouTube çift dilli altyazı"
+    "message": "Mira Translator - AI Web Çevirisi & YouTube İki Dilli Altyazı"
   },
   "appDesc": {
-    "message": "Tam sayfa çeviri, YouTube çift dilli altyazı, yapay zeka çevirisi, kelime arama. Hafif & açık kaynak. Google Drive/WebDAV."
+    "message": "Açık kaynaklı ve güvenli web çevirisi, YouTube iki dilli altyazı, kelime arama. OpenAI, DeepL, Gemini, Claude, DeepSeek destekli."
   },
   "ERROR_400": {
     "message": "API Hatası: Geçersiz istek."

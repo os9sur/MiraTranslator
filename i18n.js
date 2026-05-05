@@ -606,7 +606,7 @@ self.i18nContent = {
 self.i18nEngineData = {
   "zh-CN": {
     engineListTitle: "引擎列表",
-    addTranslationService: "+ 添加翻译服务",
+    addTranslationService: "+ 添加自定义翻译服务（API Key）",
     initEngineTip: "请选择要初始化的引擎实例",
     builtin: "内置",
     ready: "已就绪",
@@ -632,7 +632,7 @@ self.i18nEngineData = {
   },
   "zh-TW": {
     engineListTitle: "引擎列表",
-    addTranslationService: "+ 添加翻譯服務",
+    addTranslationService: "+ 新增自訂翻譯服務（API Key）",
     initEngineTip: "請選擇要初始化的引擎實例",
     builtin: "內置",
     ready: "已就緒",
@@ -658,7 +658,7 @@ self.i18nEngineData = {
   },
   "en": {
     engineListTitle: "Engine List",
-    addTranslationService: "+ Add Translation Service",
+    addTranslationService: "+ Add Custom Translation Service (API Key)",
     initEngineTip: "Please select an engine instance to initialize",
     builtin: "Built-in",
     ready: "Ready",
@@ -684,7 +684,7 @@ self.i18nEngineData = {
   },
   "ja": {
     engineListTitle: "エンジンリスト",
-    addTranslationService: "+ 翻訳サービスを追加",
+    addTranslationService: "+ カスタム翻訳サービスを追加（API Key）",
     initEngineTip: "初期化するエンジンを選択してください",
     builtin: "内蔵",
     ready: "準備完了",
@@ -710,7 +710,7 @@ self.i18nEngineData = {
   },
   "ko": {
     engineListTitle: "엔진 목록",
-    addTranslationService: "+ 번역 서비스 추가",
+    addTranslationService: "+ 커스텀 번역 서비스 추가（API Key）",
     initEngineTip: "초기화할 엔진 인스턴스를 선택하십시오",
     builtin: "내장",
     ready: "준비됨",
@@ -736,7 +736,7 @@ self.i18nEngineData = {
   },
   "es": {
     engineListTitle: "Lista de motores",
-    addTranslationService: "+ Añadir servicio de traducción",
+    addTranslationService: "+ Agregar servicio de traducción personalizado (API Key)",
     initEngineTip: "Seleccione una instancia de motor para inicializar",
     builtin: "Integrado",
     ready: "Listo",
@@ -762,7 +762,7 @@ self.i18nEngineData = {
   },
   "fr": {
     engineListTitle: "Liste des moteurs",
-    addTranslationService: "+ Ajouter un service de traduction",
+    addTranslationService: "+ Ajouter un service de traduction personnalisé (API Key)",
     initEngineTip: "Veuillez sélectionner une instance de moteur à initialiser",
     builtin: "Intégré",
     ready: "Prêt",
@@ -788,7 +788,7 @@ self.i18nEngineData = {
   },
   "de": {
     engineListTitle: "Engine-Liste",
-    addTranslationService: "+ Übersetzungsdienst hinzufügen",
+    addTranslationService: "+ Eigenen Übersetzungsdienst hinzufügen (API Key)",
     initEngineTip: "Bitte wählen Sie eine Engine-Instanz zum Initialisieren aus",
     builtin: "Integriert",
     ready: "Bereit",
@@ -814,7 +814,7 @@ self.i18nEngineData = {
   },
   "ru": {
     engineListTitle: "Список движков",
-    addTranslationService: "+ Добавить сервис перевода",
+    addTranslationService: "+ Добавить пользовательский сервис перевода (API Key)",
     initEngineTip: "Пожалуйста, выберите экземпляр движка для инициализации",
     builtin: "Встроенный",
     ready: "Готово",
@@ -840,7 +840,7 @@ self.i18nEngineData = {
   },
   "pt": {
     engineListTitle: "Lista de motores",
-    addTranslationService: "+ Adicionar serviço de tradução",
+    addTranslationService: "+ Adicionar serviço de tradução personalizado (API Key)",
     initEngineTip: "Por favor, selecione uma instância de motor para inicializar",
     builtin: "Integrado",
     ready: "Pronto",
@@ -866,7 +866,7 @@ self.i18nEngineData = {
   },
   "it": {
     engineListTitle: "Elenco motori",
-    addTranslationService: "+ Aggiungi servizio di traduzione",
+    addTranslationService: "+ Aggiungi servizio di traduzione personalizzato (API Key)",
     initEngineTip: "Selezionare un'istanza del motore da inizializzare",
     builtin: "Integrato",
     ready: "Pronto",
@@ -892,7 +892,7 @@ self.i18nEngineData = {
   },
   "vi": {
     engineListTitle: "Danh sách công cụ",
-    addTranslationService: "+ Thêm dịch vụ dịch thuật",
+    addTranslationService: "+ Thêm dịch vụ dịch thuật tùy chỉnh (API Key)",
     initEngineTip: "Vui lòng chọn một phiên bản công cụ để khởi tạo",
     builtin: "Tích hợp",
     ready: "Sẵn sàng",
@@ -918,7 +918,7 @@ self.i18nEngineData = {
   },
   "th": {
     engineListTitle: "รายการเครื่องยนต์",
-    addTranslationService: "+ เพิ่มบริการแปลภาษา",
+    addTranslationService: "+ เพิ่มบริการแปลแบบกำหนดเอง (API Key)",
     initEngineTip: "โปรดเลือกอินสแตนซ์ของเครื่องยนต์ที่จะเริ่มต้น",
     builtin: "ในตัว",
     ready: "พร้อม",
@@ -944,7 +944,7 @@ self.i18nEngineData = {
   },
   "ar": {
     engineListTitle: "قائمة المحركات",
-    addTranslationService: "+ إضافة خدمة ترجمة",
+    addTranslationService: "+ إضافة خدمة ترجمة مخصصة (API Key)",
     initEngineTip: "يرجى تحديد مثيل للمحرك لتهيئته",
     builtin: "مدمج",
     ready: "جاهز",
@@ -970,7 +970,7 @@ self.i18nEngineData = {
   },
   "fa": {
     engineListTitle: "لیست موتورها",
-    addTranslationService: "+ افزودن سرویس ترجمه",
+    addTranslationService: "+ افزودن سرویس ترجمه سفارشی (API Key)",
     initEngineTip: "لطفاً یک نمونه موتور را برای راه‌اندازی انتخاب کنید",
     builtin: "داخلی",
     ready: "آماده",
@@ -996,7 +996,7 @@ self.i18nEngineData = {
   },
   "tr": {
     engineListTitle: "Motor Listesi",
-    addTranslationService: "+ Çeviri Servisi Ekle",
+    addTranslationService: "+ Özel çeviri servisi ekle (API Key)",
     initEngineTip: "Lütfen başlatmak için bir motor örneği seçin",
     builtin: "Yerleşik",
     ready: "Hazır",

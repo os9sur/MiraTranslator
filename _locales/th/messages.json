@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - แปลหน้าเว็บแบบ Immersive และซับ YouTube สองภาษา"
+    "message": "Mira Translator - แปลเว็บด้วย AI & ซับไตเติ้ล YouTube สองภาษา"
   },
   "appDesc": {
-    "message": "แปลเว็บแบบ Immersive ซับสองภาษา YouTube แปล AI ค้นหาคำศัพท์ โอเพนซอร์ส รองรับ Google Drive/WebDAV"
+    "message": "แปลเว็บโอเพนซอร์สและปลอดภัย, ซับไตเติ้ลสองภาษา YouTube, ค้นหาคำศัพท์. รองรับ OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "ข้อผิดพลาด API: คำขอไม่ถูกต้องหรือยอดเงินไม่พอ"
