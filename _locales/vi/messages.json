@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Dịch đắm chìm và phụ đề YouTube song ngữ"
+    "message": "Mira Translator - Dịch Web AI & Phụ đề Song ngữ YouTube"
   },
   "appDesc": {
-    "message": "Dịch web toàn trang, phụ đề song ngữ YouTube, dịch AI, tra từ. Nhẹ & mã nguồn mở. Hỗ trợ Google Drive/WebDAV."
+    "message": "Dịch web mã nguồn mở & bảo mật, phụ đề song ngữ YouTube, tra từ. Hỗ trợ OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "Lỗi API: Yêu cầu không hợp lệ hoặc hết số dư."

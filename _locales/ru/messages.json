@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Иммерсивный перевод и двуязычные субтитры YouTube"
+    "message": "Mira Translator - AI-перевод веб-страниц & двуязычные субтитры YouTube"
   },
   "appDesc": {
-    "message": "Иммерсивный перевод, двуязычные субтитры YouTube, ИИ-перевод, поиск слов. Лёгкий и открытый. Google Drive/WebDAV."
+    "message": "Безопасный перевод веб-страниц с открытым исходным кодом, двуязычные субтитры YouTube, поиск слов. Поддержка OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "Ошибка API: Неверный запрос."

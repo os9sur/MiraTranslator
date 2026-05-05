@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Tradução imersiva e legendas bilíngues no YouTube"
+    "message": "Mira Translator - Tradução Web com IA & Legendas Bilíngues no YouTube"
   },
   "appDesc": {
-    "message": "Tradução imersiva, legendas bilíngues YouTube, IA e pesquisa de palavras. Leve e open-source. Google Drive/WebDAV."
+    "message": "Tradução web open-source e segura, legendas bilíngues YouTube, pesquisa de palavras. Suporta OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "Erro de API: Solicitação inválida."

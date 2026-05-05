@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - ترجمه همه‌جانبه و زیرنویس دو زبانه یوتیوب"
+    "message": "Mira Translator - ترجمه وب با هوش مصنوعی & زیرنویس دو زبانه یوتیوب"
   },
   "appDesc": {
-    "message": "ترجمه غوطه‌ور، زیرنویس دوزبانه یوتیوب، ترجمه هوش مصنوعی، جستجوی کلمات. سبک و متن‌باز. Google Drive/WebDAV."
+    "message": "ترجمه وب متن‌باز و امن، زیرنویس دو زبانه یوتیوب، جستجوی کلمات. پشتیبانی از OpenAI، DeepL، Gemini، Claude، DeepSeek."
   },
   "ERROR_400": {
     "message": "خطای API: درخواست نامعتبر."

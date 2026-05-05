@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Immersive Web & YouTube Dual Subtitles"
+    "message": "Mira Translator - AI Web Translation & YouTube Bilingual Subtitles"
   },
   "appDesc": {
-    "message": "Immersive web translation, YouTube dual subtitles, AI translation & word lookup. Open-source & lightweight. Google Drive sync."
+    "message": "Open-source & secure webpage translation, YouTube bilingual subtitles. Supports OpenAI, DeepL, Gemini, Claude, DeepSeek."
   },
   "ERROR_400": {
     "message": "API Error: Invalid request or low balance."

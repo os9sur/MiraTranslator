@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - ترجمة غامرة وترجمة يوتيوب المزدوجة"
+    "message": "Mira Translator - ترجمة الويب بالذكاء الاصطناعي & ترجمة يوتيوب ثنائية اللغة"
   },
   "appDesc": {
-    "message": "ترجمة غامرة، يوتيوب ثنائي اللغة، ترجمة ذكاء اصطناعي، بحث عن كلمات. خفيف ومفتوح المصدر. Google Drive/WebDAV."
+    "message": "ترجمة ويب مفتوحة المصدر وآمنة، ترجمة يوتيوب ثنائية اللغة، بحث عن كلمات. يدعم OpenAI وDeepL وGemini وClaude وDeepSeek."
   },
   "ERROR_400": {
     "message": "خطأ في API: طلب غير صالح."
