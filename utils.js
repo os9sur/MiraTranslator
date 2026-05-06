@@ -470,11 +470,9 @@ function t(key, forcedLang) {
   if (!i18nDict || Object.keys(i18nDict).length === 0) return key;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
-  let lang = forcedLang
-    || root.currentTargetL
-    || langEl?.value
-    || root.currentConfig?.targetLanguage
-    || getBrowserLang()
+let lang = forcedLang
+    || root.globalUiLang           // 用户手动设置的UI语言
+    || getBrowserLang()            // 浏览器语言
     || 'en';
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];

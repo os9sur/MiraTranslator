@@ -1277,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (!hasBalance) {
-                    throw new Error(t('no_balance') || "Insufficient balance");
+                    throw new Error(t('insufficient_balance') || "Insufficient balance");
                 }
 
                 // 第二步：实际测试翻译功能

@@ -3524,7 +3524,7 @@ function initSelectionTranslate() {
         --p-header-shadow:    0 2px 8px rgba(0,0,0,0.3);
         --p-phonetic:         #07a457;
         --p-glow-opacity:     0.3;
-        --p-panel-anim:       eclipseHaloLightWarm;
+        --p-panel-anim:       eclipseHaloLightAlt;
         --p-link-hover-bg:    rgba(2, 132, 199, 0.1);
       }
 
@@ -3581,6 +3581,10 @@ function initSelectionTranslate() {
         0%,100% { box-shadow: 0 0 8px 2px rgba(74,222,128,0.3), 0 0 20px 4px rgba(134,239,172,0.2), 0 10px 30px var(--p-shadow); }
         50%     { box-shadow: 0 0 15px 4px rgba(74,222,128,0.6), 0 0 30px 8px rgba(134,239,172,0.4), 0 10px 30px var(--p-shadow); }
       }
+
+@keyframes panelFloatLight {
+  0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
+}
 
       /* ── 主面板 ── */
       .mira-kt-panel {
@@ -4108,7 +4112,7 @@ function initSelectionTranslate() {
             <line x1="12" y1="22" x2="12" y2="28"></line>
           </svg>
         </div>
-        <div id="close-p" class="close-btn">✕</div>
+        <div id="close-p" class="close-btn" title="${t('closeWindow')}">✕</div>
       </div>
       <div id="p-header-wrapper" style="pointer-events:auto;"></div>
       <div id="p-content-container" style="pointer-events:auto;"></div>
@@ -5462,7 +5466,7 @@ function initSelectionTranslate() {
             <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
               ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
             </div>
-           <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.55;">${cn}</div>
+           <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
           </div>`;
           }).join('');
         pE.style.display = 'block';
@@ -5613,7 +5617,7 @@ function initSelectionTranslate() {
   // ─── 工具函数 ────────────────────────────────────────────────────────────────
 
   function setBasicError(el, msg) {
-    el.innerText = `[${t('translate_failed')}: ${msg}]`;
+    el.innerText = `[⚠ ${t(msg,window.uiLanguage)} ]`;
     el.style.color = '#ff4d4f';
     el.style.fontStyle = 'italic';
   }
