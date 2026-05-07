@@ -298,7 +298,7 @@ async function applyUserStyles(transEl, directConfig = null, inheritFontSize = n
         box-sizing: border-box !important;
         transition: all 0.3s ease !important;
         border-radius: 3px;
-        animation: fadeIn 0.8s ease-out !important; 
+        animation: fadeIn 0.8s ease-out !important;
       `;
     let finalPadding = "0 0 0 8px";
     switch (borderType) {
@@ -1738,7 +1738,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   //youtube 排除列表
   if (isYoutube && el) {
     const isExcluded = el.closest(`
-    .yt-content-metadata-view-model__metadata-row, 
+    .yt-content-metadata-view-model__metadata-row,
     .yt-content-metadata-view-model__metadata-text,
     ytd-video-owner-renderer #channel-name,
     .ytd-channel-name,
@@ -2055,14 +2055,14 @@ async function handleTranslateElement(el, forceRefresh = false) {
       //youtube 的linkedList的标题改了, 兼容
       applyLayoutFix('youtube-layout-fix', `
         ytd-watch-metadata h1.style-scope.ytd-watch-metadata { height: auto !important; max-height: none !important; display: block !important; }
-        .yt-lockup-metadata-view-model__title-container, 
-        .ytLockupMetadataViewModelTitle,  
-        .ytLockupMetadataViewModelHeadingReset,    
+        .yt-lockup-metadata-view-model__title-container,
+        .ytLockupMetadataViewModelTitle,
+        .ytLockupMetadataViewModelHeadingReset,
         .yt-lockup-view-model__metadata,
-        .yt-lockup-metadata-view-model__heading-reset { 
-          height: auto !important; 
-          max-height: none !important; 
-          overflow: visible !important; 
+        .yt-lockup-metadata-view-model__heading-reset {
+          height: auto !important;
+          max-height: none !important;
+          overflow: visible !important;
           display: block !important;
         }
         .kt-paragraph-translation { display: block !important; clear: both !important; width: 100% !important; position: relative !important; }
@@ -3267,7 +3267,7 @@ async function scanContent(forcedSelectors = null) {
   }
 }
 /**
- * 监听：捕获来自拾取器（content_pick_script.js）的即时更新信号 
+ * 监听：捕获来自拾取器（content_pick_script.js）的即时更新信号
  */
 document.addEventListener('KT_CONFIG_UPDATED', (e) => {
   if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
@@ -3815,7 +3815,7 @@ function initSelectionTranslate() {
         line-height: 1;
         pointer-events: auto !important;
         -webkit-user-select: none; /* Chrome, Safari, Opera */
-        -moz-user-select: none;   
+        -moz-user-select: none;
         user-select: none;         /* 标准语法 */
       }
       .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
@@ -3957,30 +3957,30 @@ function initSelectionTranslate() {
         border-top:  1px solid var(--p-border);
         padding-top: 7px;
       }
-        #p-source {  
-        color: var(--p-text-main); 
+        #p-source {
+        color: var(--p-text-main);
         font-size: 11px;
         margin-top: 12px;
-        opacity: 0.7; 
+        opacity: 0.7;
       }
 
-    #p-source a {  
+    #p-source a {
       color: var(--p-accent);
       text-decoration: none;
       font-weight: 600;
-      
+
       border-bottom: 1.5px solid rgba(var(--p-accent-rgb), 0.4);
-      
+
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       padding: 1px 4px;
       margin-left: 2px;
     }
 
-    #p-source a:hover { 
-      opacity: 1;  
-      background: rgba(var(--p-accent-rgb), 0.25);  
-      filter: brightness(1.3);  
-      text-shadow: 0 0 5px rgba(var(--p-accent-rgb), 0.4);  
+    #p-source a:hover {
+      opacity: 1;
+      background: rgba(var(--p-accent-rgb), 0.25);
+      filter: brightness(1.3);
+      text-shadow: 0 0 5px rgba(var(--p-accent-rgb), 0.4);
       border-bottom-color: var(--p-accent);
       color: var(--p-accent);
     }
@@ -4205,7 +4205,7 @@ function initSelectionTranslate() {
       cambridgeA.onmouseout = () => { cambridgeA.style.color = caNormalColor; cambridgeA.style.background = caNormalBg; };
     }
 
-    // 更新 cambridge top 链接 
+    // 更新 cambridge top 链接
     const cambridgeTopA = shadow.querySelector('#p-cambridge-top a');
     if (cambridgeTopA) {
       const normalColor = isDark ? '#7dd3fc' : '#0369a1';
@@ -5215,7 +5215,7 @@ function initSelectionTranslate() {
     return `
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
-  
+
         <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
 
           <div id="p-lang-select" class="lang-tag-btn"
@@ -5259,7 +5259,7 @@ function initSelectionTranslate() {
             </svg>
           </div>
 
-          <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}" 
+          <div id="p-save" class="icon-btn save-btn ${isSaved ? 'is-saved' : ''}"
                title="${isSaved ? t('uncollect') : t('collect')}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
             <svg id="star-icon" width="18" height="18" viewBox="0 0 24 24"
                  fill="${isSaved ? '#facc15' : 'none'}"
@@ -5279,7 +5279,7 @@ function initSelectionTranslate() {
       </div>
 
       <div id="p-query-container"style="padding: 4px 2px 0;">
-        <div id="p-query"  class="mira-font-family" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); 
+        <div id="p-query"  class="mira-font-family" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main);
              word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
           ${text}
         </div>
@@ -5528,7 +5528,7 @@ function initSelectionTranslate() {
       pSource.style.display = (res.source || cambridgeHref) ? 'block' : 'none';
       pSource.innerHTML = '';
 
-      // 主题判断 
+      // 主题判断
       const curMode = localStorage.getItem('eclipse-theme') || 'auto';
       const appliedTheme = curMode === 'auto' ? getWebPageBrightness() : curMode;
       const isDark = appliedTheme === 'dark';
@@ -6835,7 +6835,7 @@ if (!document.getElementById('mira-global-style')) {
             flex-direction: column;
             align-items: center;
             padding: 12px 24px !important;
-            background: var(--kt-bg-rgba, rgba(0, 0, 0, 0.5)); 
+            background: var(--kt-bg-rgba, rgba(0, 0, 0, 0.5));
             border-radius: 12px;
             cursor: grab;
             user-select: none;
@@ -6844,42 +6844,42 @@ if (!document.getElementById('mira-global-style')) {
             transition: opacity 0.2s, visibility 0.2s, transform 0.3s ease-out;
         }
         #kt-yt-box:hover, #kt-yt-box.dragging {
-            background: rgba(0, 0, 0, 0.8); 
-            outline: 1px dashed rgba(255, 255, 255, 0.2); 
+            background: rgba(0, 0, 0, 0.8);
+            outline: 1px dashed rgba(255, 255, 255, 0.2);
         }
         #yt-o {
             color: var(--kt-origin-color, white) !important;
             font-size: var(--kt-origin-size, 24px) !important;
-            text-shadow: 2px 2px 4px black; 
-            font-weight: bold; 
-            margin: 0 auto; 
-            width: 100%; 
+            text-shadow: 2px 2px 4px black;
+            font-weight: bold;
+            margin: 0 auto;
+            width: 100%;
             line-height: 1.4;
             pointer-events: auto;
         }
         #yt-t {
-            font-size: var(--kt-trans-size, 22px) !important; 
-            color: var(--kt-trans-color, #38bdf8) !important; 
-            text-shadow: 2px 2px 4px black; 
-            font-weight: bold; 
-            margin: 8px auto 0; 
+            font-size: var(--kt-trans-size, 22px) !important;
+            color: var(--kt-trans-color, #38bdf8) !important;
+            text-shadow: 2px 2px 4px black;
+            font-weight: bold;
+            margin: 8px auto 0;
             width: 100%;
             line-height: 1.4;
         }
         .kt-word {
-            cursor: pointer; 
-            transition: color 0.2s; 
+            cursor: pointer;
+            transition: color 0.2s;
             display: inline-block;
         }
         .kt-word:hover {
             color: #facc15 !important;
         }
         #yt-t.kt-loading {
-        opacity: 0.6 !important;        
-        font-style: italic !important;  
-        color: #94a3b8 !important;     
-        text-shadow: none !important;  
-        font-size: 20px !important;   
+        opacity: 0.6 !important;
+        font-style: italic !important;
+        color: #94a3b8 !important;
+        text-shadow: none !important;
+        font-size: 20px !important;
         }
         #kt-yt-box.kt-settings-open {
         z-index: 100 !important;
@@ -7687,4 +7687,3 @@ function closeTooltipAndResume() {
     }
   }
 }
-
