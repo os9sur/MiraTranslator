@@ -469,7 +469,7 @@ function t(key, forcedLang) {
   if (!i18nDict || Object.keys(i18nDict).length === 0) return key;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
   const langEl = typeof document !== 'undefined' ? document.getElementById('targetLang') : null;
-let lang = forcedLang
+  let lang = forcedLang
     || root.globalUiLang           // 用户手动设置的UI语言
     || getBrowserLang()            // 浏览器语言
     || 'en';
@@ -1399,7 +1399,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           return unique.size <= 2;
         })();
 
-        if (!isJsonString && !isRepetitive) {
+        if (!isJsonString && !isRepetitive && !result.isPartial) {
           await idb.set({ [cacheKey]: result });
         } else {
           logger.warn('[Cache] 脏数据跳过写入:', result.basic?.substring(0, 60));

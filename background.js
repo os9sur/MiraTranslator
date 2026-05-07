@@ -1930,77 +1930,79 @@ function resetBingState(reason = '') {
 }
 // ── 翻译器 ───────────────────────────────────────────────────────────────────
 const Translators = {
-    _withDictDetail: async function (
-        basicText,
-        originalText,
-        targetLang,
-        sourceName,
-        sourcePhonetic,
-        targetPhonetic = '',
-        sourceLang = 'en',
-        existingDictData = [],
-        tabId = null,
-        preferredHost,
-        preferredCache,
-        cacheKey = null,
-        fromPopup = false,
-        existingExamples = []
-    ) {
-        //logger.log('[_withDictDetail] tabId:', tabId, 'fromPopup:', fromPopup);
-        if (tabId || fromPopup) {
-            const isWord = isWordText(originalText);
-            const partialResult = {
-                basic: basicText, phonetic: sourcePhonetic || '',
-                dictData: [], examples: [], wordForms: [],
-                sourcePhonetic, targetPhonetic,
-                source: sourceName, isPartial: true,
-                isWord
-            };
-            if (tabId) {
-                pushDetailUpdate(tabId, partialResult, originalText);
-            }
-            //  fromPopup 也推送 partial，让 content 启动 _detailTimer
-            if (fromPopup) {
-                safeSendMessage({
-                    action: 'TRANSLATE_DETAIL_UPDATE',
-                    result: partialResult,
-                    originalText
-                });
-            }
-
-            (async () => {
-                try {
-                    const fullResult = await _buildDetailData(
-                        basicText, originalText, targetLang, sourceName,
-                        sourcePhonetic, targetPhonetic, sourceLang,
-                        existingDictData, preferredHost, preferredCache,
-                        existingExamples
-                    );
-                    if (tabId) {
-                        pushDetailUpdate(tabId, fullResult, originalText, cacheKey);
-                    } else if (fromPopup) {
-                        safeSendMessage({
-                            action: 'TRANSLATE_DETAIL_UPDATE',
-                            result: fullResult,
-                            originalText
-                        });
-                    }
-                } catch (e) {
-                    logger.warn('[_withDictDetail] 后台词典加载失败:', e.message);
-                }
-            })();
-
-            return partialResult;
+   _withDictDetail: async function (
+    basicText,
+    originalText,
+    targetLang,
+    sourceName,
+    sourcePhonetic,
+    targetPhonetic = '',
+    sourceLang = 'en',
+    existingDictData = [],
+    tabId = null,
+    preferredHost,
+    preferredCache,
+    cacheKey = null,
+    fromPopup = false,
+    existingExamples = []
+) {
+    if (tabId || fromPopup) {
+        const isWord = isWordText(originalText);
+        const partialResult = {
+            basic: basicText, phonetic: sourcePhonetic || '',
+            dictData: [], examples: [], wordForms: [],
+            sourcePhonetic, targetPhonetic,
+            source: sourceName, isPartial: true,
+            isWord
+        };
+        if (tabId) {
+            pushDetailUpdate(tabId, partialResult, originalText);
+        }
+        if (fromPopup) {
+            safeSendMessage({
+                action: 'TRANSLATE_DETAIL_UPDATE',
+                result: partialResult,
+                originalText
+            });
         }
 
-        // 无 tabId 同步流程
-        return await _buildDetailData(
-            basicText, originalText, targetLang, sourceName,
-            sourcePhonetic, targetPhonetic, sourceLang,
-            existingDictData, undefined, undefined,
-            existingExamples
-        );
-    },
+        (async () => {
+            try {
+                const fullResult = await _buildDetailData(
+                    basicText, originalText, targetLang, sourceName,
+                    sourcePhonetic, targetPhonetic, sourceLang,
+                    existingDictData, preferredHost, preferredCache,
+                    existingExamples
+                );
+                if (tabId) {
+                    pushDetailUpdate(tabId, fullResult, originalText, cacheKey);
+                } else if (fromPopup) {
+                    safeSendMessage({
+                        action: 'TRANSLATE_DETAIL_UPDATE',
+                        result: fullResult,
+                        originalText
+                    });
+                    // 写缓存，避免下次重复请求
+                    if (cacheKey && fullResult.basic && !fullResult.isFallback) {
+                        handleIdbSet({ [cacheKey]: { ...fullResult, timestamp: Date.now() } })
+                            .catch(e => logger.warn('[_withDictDetail] 缓存写入失败:', e));
+                    }
+                }
+            } catch (e) {
+                logger.warn('[_withDictDetail] 后台词典加载失败:', e.message);
+            }
+        })();
+
+        return partialResult;
+    }
+
+    return await _buildDetailData(
+        basicText, originalText, targetLang, sourceName,
+        sourcePhonetic, targetPhonetic, sourceLang,
+        existingDictData, undefined, undefined,
+        existingExamples
+    );
+},
 
     bing: async function (text, targetLang, hintSourceLang = null, tabId = null, cacheKey = null) {
         if (!text) return null;
