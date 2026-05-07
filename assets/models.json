@@ -68,19 +68,6 @@
       }
     },
     {
-      "id": "qwen/qwen-turbo",
-      "label": "Qwen Turbo",
-      "tag": "Turbo",
-      "tagColor": "#16a34a",
-      "desc": {
-        "zh": "追求极致的生成速度",
-        "zh_TW": "追求極致的生成速度",
-        "en": "Optimized for maximum generation speed",
-        "ja": "究極の生成スピードを追求",
-        "ko": "극한의 생성 속도 추구"
-      }
-    },
-    {
       "id": "meta-llama/llama-3.3-70b-instruct",
       "label": "Llama 3.3 70B",
       "tag": "Open",
