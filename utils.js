@@ -309,7 +309,6 @@ const MIRA_FALLBACK_MODELS = [
   { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', tag: 'Stable', tagColor: '#b45309', desc: 'Highly stable with balanced overall performance' },
   { id: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', tag: 'Natural', tagColor: '#d946ef', desc: 'Excellent at natural context and nuance' },
   { id: 'qwen/qwen-plus', label: 'Qwen Plus', tag: 'Enhanced', tagColor: '#059669', desc: 'Enhanced Qwen model with stronger logic' },
-  { id: 'qwen/qwen-turbo', label: 'Qwen Turbo', tag: 'Turbo', tagColor: '#16a34a', desc: 'Optimized for maximum generation speed' },
   { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', tag: 'Open', tagColor: '#4b5563', desc: 'Meta\'s open-source flagship, fast and high quality' },
   { id: 'mistralai/mistral-small-3.2-24b-instruct', label: 'Mistral Small 3.2', tag: 'Europe', tagColor: '#0284c7', desc: 'European-built model, outstanding multilingual performance' }
 ];

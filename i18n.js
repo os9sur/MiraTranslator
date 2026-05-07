@@ -1103,7 +1103,7 @@ self.i18nStyleData = {
     engineConfig: "Select Translator",
     stylePreview: "Style Preview",
     translationExampleWeb: "Time flies",
-    translationExampleYTOrigin: "かけがえのない存在です！",
+    translationExampleYTOrigin: "大切な存在だよ！",
     translationExampleYTTrans: "You matter!",
     textColorPalette: "Text Color / Palette",
     fontSize: "Font Size",
