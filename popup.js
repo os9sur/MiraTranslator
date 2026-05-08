@@ -1983,8 +1983,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fromPopup: true
       });
 
-      clearTimeout(slowTimer);
-
+      clearTimeout(slowTimer); 
       //基本释义
       if (response) renderTranslationResult(response, text, ui_lang, langA, langB);
 
