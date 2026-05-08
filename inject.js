@@ -37,6 +37,8 @@ window.browser = (function () {
                                 text: ev.segs.map(s => s.utf8).join('').replace(/\n/g, ' ').trim()
                             }))
                             .filter(s => s.text.length > 0);
+
+                        subtitleFetchSuccess = true;
                         window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
 
                         const urlLang = (() => {
@@ -84,31 +86,33 @@ window.browser = (function () {
             }
         }, 1000);
     }
-    // 从 ytInitialPlayerResponse 直接读字幕列表，主动请求
-    async function fetchManualCaptions() {
+    let subtitleFetchSuccess = false;
+
+    async function fetchManualCaptions(retryCount = 0) {
+        if (subtitleFetchSuccess) return; //  成功过就不再重试
         try {
             const playerResponse = window.ytInitialPlayerResponse ||
                 JSON.parse(document.getElementById('scriptTag')?.textContent || 'null');
 
-            if (!playerResponse) return;
+            if (!playerResponse) {
+                if (retryCount < 5) setTimeout(() => fetchManualCaptions(retryCount + 1), 2000);
+                return;
+            }
 
             const captionTracks = playerResponse
                 ?.captions
                 ?.playerCaptionsTracklistRenderer
                 ?.captionTracks;
 
-            if (!captionTracks || captionTracks.length === 0) return;
+            if (!captionTracks || captionTracks.length === 0) {
+                if (retryCount < 5) setTimeout(() => fetchManualCaptions(retryCount + 1), 2000);
+                return;
+            }
 
-            logger.log('[KT] 发现字幕轨道:', captionTracks.map(t => t.languageCode));
-
-            // 优先选英文，其次第一条
             const track = captionTracks.find(t => t.kind !== 'asr') || captionTracks[0];
-
             if (!track?.baseUrl) return;
-            // 转成 json3 格式请求
-            const url = track.baseUrl + '&fmt=json3';
-            logger.log('[KT] 主动请求字幕:', url);
 
+            const url = track.baseUrl + '&fmt=json3';
             const res = await fetch(url);
             const data = await res.json();
 
@@ -123,21 +127,29 @@ window.browser = (function () {
                     .filter(s => s.text.length > 0);
 
                 if (cleanSubs.length > 0) {
+                    subtitleFetchSuccess = true; // ← 成功，后续不再重试
                     logger.log('[KT] 主动获取字幕成功:', cleanSubs.length, '条');
                     window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
-
-                    //  取第一条轨道作为源语言（最原始的语言）
                     const sourceLang = captionTracks[0]?.languageCode?.split('-')[0].toLowerCase();
                     if (sourceLang) {
-                        window.dispatchEvent(new CustomEvent('KT_SOURCE_LANG_READY', {
-                            detail: { lang: sourceLang }
-                        }));
-                        logger.log('[KT] fetchManual 源语言:', sourceLang);
+                        window.dispatchEvent(new CustomEvent('KT_SOURCE_LANG_READY', { detail: { lang: sourceLang } }));
                     }
+                } else {
+                    if (retryCount < 5) setTimeout(() => fetchManualCaptions(retryCount + 1), 2000);
                 }
             }
         } catch (e) {
             logger.warn('[KT] 主动获取字幕失败:', e.message);
+            if (retryCount < 3) {
+                const delay = 1500 * (retryCount + 1); // 1.5s, 3s, 4.5s，总共9秒
+                setTimeout(() => fetchManualCaptions(retryCount + 1), delay);
+            } else {
+                const hintEl = document.getElementById("kt-loading-hint");
+                if (hintEl) {
+                    hintEl.innerText = "Subtitles unavailable";
+                    setTimeout(() => hintEl?.remove(), 3000);
+                }
+            }
         }
     }
     // 扩展 pokePlayer，同时触发主动获取
@@ -155,7 +167,7 @@ window.browser = (function () {
         // 同时尝试主动获取
         fetchManualCaptions();
     }
- 
+
 
     function initCCButtonObserver() {
         const player = document.querySelector('.html5-video-player');
@@ -182,6 +194,7 @@ window.browser = (function () {
         new MutationObserver(() => {
             if (location.href !== lastUrl) {
                 lastUrl = location.href;
+                subtitleFetchSuccess = false;
                 setTimeout(fetchManualCaptions, 2000);
             }
         }).observe(document.body, { childList: true, subtree: true });

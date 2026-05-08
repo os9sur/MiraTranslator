@@ -4175,6 +4175,7 @@ function initSelectionTranslate() {
         --p-text-muted:       rgba(255,255,255,0.6);
         --p-text-detail:      rgba(255,255,255,0.6);
         --p-accent:           #38bdf8;
+        --arrowColor:         rgb(34, 197, 94);
         --p-border:           rgba(255,255,255,0.1);
         --p-shadow:           rgba(0,0,0,0.5);
         --p-content-bg:       rgba(39,39,50,0.39);
@@ -4195,6 +4196,7 @@ function initSelectionTranslate() {
         --p-text-muted:       #718096;
         --p-text-detail:      #4f5a6a;
         --p-accent:           #0284c7;
+        --arrowColor:         #2ecb3c;
         --p-border:           rgba(0,0,0,0.1);
         --p-shadow:           rgba(0,0,0,0.1);
         --p-content-bg:       rgba(245,249,249,0.79);
@@ -4215,6 +4217,7 @@ function initSelectionTranslate() {
           --p-text-muted:    #718096;
           --p-text-detail:   #4f5a6a;
           --p-accent:        #0284c7;
+          --arrowColor:      #2ecb3c;
           --p-border:        rgba(0,0,0,0.1);
           --p-shadow:        rgba(0,0,0,0.1);
           --p-content-bg:    rgba(245,249,249,0.79);
@@ -4233,7 +4236,8 @@ function initSelectionTranslate() {
         --p-text-detail:   rgba(255,255,255,0.6);
         --p-border:        rgba(255,255,255,0.1);
         --p-shadow:        rgba(0,0,0,0.5);
-        --p-accent:        #38bdf8;
+        --p-accent:        #38bdf8;  
+        --arrowColor:      rgb(34, 197, 94);
         --p-content-bg:    rgba(39,39,50,0.39);
         --p-header-bg:     rgba(31,31,35,0.34);
         --p-header-shadow: 0 2px 8px rgba(235,215,215,0.09);
@@ -5227,6 +5231,9 @@ function initSelectionTranslate() {
     shadow.getElementById("p-refresh")?.onclick({ stopPropagation: () => { } });
   }
   async function initEngineSelector(shadow) {
+    const engineBtn = shadow.getElementById("p-engine-btn");
+    if (engineBtn?._engineInitialized) return;  // 已初始化过，跳过
+    if (engineBtn) engineBtn._engineInitialized = true;
     // 1. 读取数据
     const data = await safeGetStorage([
       "userConfigs",
@@ -5290,48 +5297,44 @@ function initSelectionTranslate() {
 
     // 4. 按钮点击
     const btn = shadow.getElementById("p-engine-btn");
-    btn?.addEventListener("click", async (e) => {
+    btn.onclick = async (e) => {
       e.stopPropagation();
-      const latestData = await safeGetStorage([
-        "activeConfig",
-        "data_mira_pro",
-        "selectedEngine",
-        "_defaultEngine",
-      ]);
+      try {
+        const latestData = await safeGetStorage([
+          "activeConfig",
+          "data_mira_pro",
+          "selectedEngine",
+          "_defaultEngine",
+        ]);
 
-      const latestConfig = latestData?.activeConfig;
-      const latestId =
-        (latestData?.activeConfig?.id &&
-          userConfigs.find((c) => c.id === latestData.activeConfig.id)?.id) ||
-        (latestData?.selectedEngine &&
-          userConfigs.find((c) => c.engine === latestData.selectedEngine)
-            ?.id) ||
-        (latestData?._defaultEngine &&
-          userConfigs.find((c) => c.engine === latestData._defaultEngine)
-            ?.id) ||
-        "google_builtin";
-      const latestModel =
-        latestData?.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
+        const latestConfig = latestData?.activeConfig;
+        const latestId =
+          (latestData?.activeConfig?.id &&
+            userConfigs.find((c) => c.id === latestData.activeConfig.id)?.id) ||
+          (latestData?.selectedEngine &&
+            userConfigs.find((c) => c.engine === latestData.selectedEngine)?.id) ||
+          (latestData?._defaultEngine &&
+            userConfigs.find((c) => c.engine === latestData._defaultEngine)?.id) ||
+          "google_builtin";
+        const latestModel =
+          latestData?.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
 
-      createEngineDropdown(
-        btn,
-        shadow,
-        shadow.host,
-        userConfigs,
-        latestId,
-        latestModel,
-        async (cfg, model) => {
-          await switchEngineInPopup(
-            cfg,
-            model,
-            userConfigs,
-            shadow,
-            dotEl,
-            labelEl,
-          );
-        },
-      );
-    });
+        createEngineDropdown(
+          btn,
+          shadow,
+          shadow.host,
+          userConfigs,
+          latestId,
+          latestModel,
+          async (cfg, model) => {
+            await switchEngineInPopup(cfg, model, userConfigs, shadow, dotEl, labelEl);
+          },
+        );
+      } catch (err) {
+        logger.warn('[engine-btn] 下拉框加载失败:', err.message);
+        // 不做任何处理，下次点击依然可以重试
+      }
+    };
 
     // // 点击外部关闭
     // shadow.host?.ownerDocument?.addEventListener('click', () => {
@@ -5644,9 +5647,10 @@ function initSelectionTranslate() {
                 setBasicError(basicEl, result.basic || "Translation failed");
                 return;
               }
-              if (result?.isPartial && shadowHost?._detailFullyRendered) return;
               if (shadowHost?._engineDotEl)
                 shadowHost._engineDotEl.style.background = "#22c55e";
+
+              if (result?.isPartial && shadowHost?._detailFullyRendered) return;
               handleTranslationResult(result, text, shadow);
             })
             .catch((err) => {
@@ -6126,7 +6130,7 @@ function initSelectionTranslate() {
           }
           if (pDetail) {
             if (result.isWord) {
-              pDetail.innerHTML = `<span style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+              pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
               pDetail.style.display = "block";
             }
           }
@@ -6189,10 +6193,10 @@ function initSelectionTranslate() {
             <span id="p-lang-src" style="pointer-events:none;">AUTO</span>
           </div>
 
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--p-accent)"
-              stroke-width="2.5" style="opacity:0.4; flex-shrink:0; pointer-events:none; ${["ar", "he", "fa", "ku"].includes(targetLang.slice(0, 2)) ? "transform:scaleX(-1);" : ""}">
-            <path d="M5 12h14m-7-7 7 7-7 7"/>
-          </svg>
+         <svg width="14" height="12" viewBox="0 0 28 24" fill="none" stroke="var(--arrowColor)"
+            stroke-width="2.5" style="flex-shrink:0; pointer-events:none; ${["ar", "he", "fa", "ku"].includes(targetLang.slice(0, 2)) ? "transform:scaleX(-1);" : ""}">
+            <path d="M2 12h24m-9-8 9 8-9 8"/>
+        </svg>
 
           <div id="p-lang-tgt-btn" class="lang-tag-btn"
               style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
@@ -6200,23 +6204,23 @@ function initSelectionTranslate() {
           </div>
 
         </div>
-<!-- 引擎选择器 -->
-<div id="p-engine-wrap" class="mira-font-family" style="position:relative; display:flex; align-items:center; margin-left:4px;">
-  <div id="p-engine-btn"
-      style="display:flex; align-items:center; gap:4px; cursor:pointer;
-             padding:5px 7px; border-radius:8px; font-size:12px; font-weight:550;
-             color:var(--p-accent); background:color-mix(in srgb, var(--p-accent) 10%, transparent);
-             user-select:none; -webkit-user-select:none; white-space:nowrap;">
-    <span id="p-engine-dot"
-          style="width:6px; height:6px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
-    <span id="p-engine-label" style="max-width:72px; overflow:hidden; text-overflow:ellipsis;">···</span>
-    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
-      <path d="M6 9l6 6 6-6"/>
-    </svg>
-  </div>
+      <!-- 引擎选择器 -->
+      <div id="p-engine-wrap" class="mira-font-family" style="position:relative; display:flex; align-items:center; margin-left:4px;">
+        <div id="p-engine-btn"
+            style="display:flex; align-items:center; gap:4px; cursor:pointer;
+                  padding:5px 7px; border-radius:8px; font-size:12px; font-weight:550;
+                  color:var(--p-accent); background:color-mix(in srgb, var(--p-accent) 10%, transparent);
+                  user-select:none; -webkit-user-select:none; white-space:nowrap;">
+          <span id="p-engine-dot"
+                style="width:6px; height:6px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
+          <span id="p-engine-label" style="overflow:hidden; text-overflow:ellipsis;">···</span>
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" style="opacity:0.6; flex-shrink:0; pointer-events:none;">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </div>
 
-</div>
+      </div>
         <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
           <div id="p-speak" class="icon-btn speak-btn" title="${t("pronunciation")}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block;">
@@ -6405,7 +6409,7 @@ function initSelectionTranslate() {
 
             return `<div style="margin-bottom:4px;">
         <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
-          <b style="color:#319BCA;font-size:12px;margin-right:4px;flex-shrink:0;">${pos}</b>
+          <b class="mira-font-family" style="color:#319BCA;font-size:12px;margin-right:4px;flex-shrink:0;">${pos}</b>
           <span class="mira-font-family">${meanings}</span>
           ${enToggle}
         </div>
@@ -6435,7 +6439,7 @@ function initSelectionTranslate() {
           background:color-mix(in srgb,var(--p-text-main) 5%,transparent);
           border:0.5px solid color-mix(in srgb,var(--p-border) 60%,transparent);
           border-radius:6px;padding:3px 8px;font-size:12px;">
-        <span class="mira-font-family" style="color:var(--p-text-muted);font-size:11px;">${name}</span>
+          
         <span class="mira-font-family" style="color:var(--p-text-main);font-weight:500;">${esc(wf.value)}</span>
       </span>`;
         });
@@ -8299,24 +8303,6 @@ function syncSubtitleDisplay() {
   if (player && !document.getElementById("kt-yt-box")) {
     createSubtitleBox(player);
 
-    const tempHint = document.createElement("div");
-    tempHint.id = "kt-loading-hint";
-    tempHint.style.cssText = `
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 60px;
-        z-index: 2147483647;
-        color: #94a3b8;
-        font-size: 14px;
-        padding: 8px 16px;
-        background: rgba(0,0,0,0.5);
-        border-radius: 8px;
-        pointer-events: none;
-    `;
-    tempHint.innerText =
-      t("loadingSubtitles", window.uiLanguage) || "Loading subtitles...";
-    player.appendChild(tempHint);
     return;
   }
 
@@ -8497,6 +8483,25 @@ async function createSubtitleBox(player) {
     <div id="yt-t"></div>
 `;
   player.appendChild(box);
+
+  const tempHint = document.createElement("div");
+  tempHint.id = "kt-loading-hint";
+  tempHint.style.cssText = `
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 60px;
+    z-index: 2147483647;
+    color: #cbd5e1;
+    font-size: 17px;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 8px;
+    pointer-events: none;
+`;
+  tempHint.innerText =
+    t("loadingSubtitles", window.uiLanguage) || "Loading subtitles...";
+  player.appendChild(tempHint);
   try {
     const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings"]);
     if (!data) return;
