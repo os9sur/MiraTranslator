@@ -1402,7 +1402,11 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         if (!isJsonString && !isRepetitive && !result.isPartial) {
           await idb.set({ [cacheKey]: result });
         } else {
-          logger.warn('[Cache] 脏数据跳过写入:', result.basic?.substring(0, 60));
+          // logger.warn('[Cache] 脏数据跳过写入:', {
+          //   isJsonString,
+          //   isRepetitive,
+          //   basicPreview: result.basic?.substring(0, 160)
+          // });
         }
 
         if (forceRefresh) {

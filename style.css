@@ -178,12 +178,12 @@ select:hover {
 }
 
 .dot {
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
   background: #ffffff;
   border-radius: 50%;
   position: absolute;
-  top: 3px;
+  top: 2px;
   left: 3px;
   transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -197,7 +197,7 @@ select:hover {
 }
 
 .switch.on .dot {
-  left: 23px;
+  left: 22px;
 }
 
 .refresh-btn-ui {

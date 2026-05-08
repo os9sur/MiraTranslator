@@ -1930,79 +1930,93 @@ function resetBingState(reason = '') {
 }
 // ── 翻译器 ───────────────────────────────────────────────────────────────────
 const Translators = {
-   _withDictDetail: async function (
-    basicText,
-    originalText,
-    targetLang,
-    sourceName,
-    sourcePhonetic,
-    targetPhonetic = '',
-    sourceLang = 'en',
-    existingDictData = [],
-    tabId = null,
-    preferredHost,
-    preferredCache,
-    cacheKey = null,
-    fromPopup = false,
-    existingExamples = []
-) {
-    if (tabId || fromPopup) {
-        const isWord = isWordText(originalText);
-        const partialResult = {
-            basic: basicText, phonetic: sourcePhonetic || '',
-            dictData: [], examples: [], wordForms: [],
-            sourcePhonetic, targetPhonetic,
-            source: sourceName, isPartial: true,
-            isWord
-        };
-        if (tabId) {
-            pushDetailUpdate(tabId, partialResult, originalText);
-        }
-        if (fromPopup) {
-            safeSendMessage({
-                action: 'TRANSLATE_DETAIL_UPDATE',
-                result: partialResult,
-                originalText
-            });
-        }
-
-        (async () => {
-            try {
-                const fullResult = await _buildDetailData(
-                    basicText, originalText, targetLang, sourceName,
-                    sourcePhonetic, targetPhonetic, sourceLang,
-                    existingDictData, preferredHost, preferredCache,
-                    existingExamples
-                );
-                if (tabId) {
-                    pushDetailUpdate(tabId, fullResult, originalText, cacheKey);
-                } else if (fromPopup) {
-                    safeSendMessage({
-                        action: 'TRANSLATE_DETAIL_UPDATE',
-                        result: fullResult,
-                        originalText
-                    });
-                    // 写缓存，避免下次重复请求
-                    if (cacheKey && fullResult.basic && !fullResult.isFallback) {
-                        handleIdbSet({ [cacheKey]: { ...fullResult, timestamp: Date.now() } })
-                            .catch(e => logger.warn('[_withDictDetail] 缓存写入失败:', e));
-                    }
-                }
-            } catch (e) {
-                logger.warn('[_withDictDetail] 后台词典加载失败:', e.message);
+    _withDictDetail: async function (
+        basicText,
+        originalText,
+        targetLang,
+        sourceName,
+        sourcePhonetic,
+        targetPhonetic = '',
+        sourceLang = 'en',
+        existingDictData = [],
+        tabId = null,
+        preferredHost,
+        preferredCache,
+        cacheKey = null,
+        fromPopup = false,
+        existingExamples = []
+    ) {
+        if (tabId || fromPopup) {
+            const isWord = isWordText(originalText);
+            const partialResult = {
+                basic: basicText, phonetic: sourcePhonetic || '',
+                dictData: [], examples: [], wordForms: [],
+                sourcePhonetic, targetPhonetic,
+                source: sourceName, isPartial: true,
+                isWord
+            };
+            if (tabId) {
+                pushDetailUpdate(tabId, partialResult, originalText);
             }
-        })();
+            if (fromPopup) {
+                safeSendMessage({
+                    action: 'TRANSLATE_DETAIL_UPDATE',
+                    result: partialResult,
+                    originalText
+                });
+            }
 
-        return partialResult;
-    }
+            (async () => {
+                try {
+                    const fullResult = await _buildDetailData(
+                        basicText, originalText, targetLang, sourceName,
+                        sourcePhonetic, targetPhonetic, sourceLang,
+                        existingDictData, preferredHost, preferredCache,
+                        existingExamples
+                    );
+                    if (tabId) {
+                        pushDetailUpdate(tabId, fullResult, originalText, cacheKey);
+                        if (cacheKey && fullResult.basic && !fullResult.isFallback) {
+                            idb.set({ [cacheKey]: { ...fullResult, timestamp: Date.now() } })
+                                .catch(e => logger.warn('[_withDictDetail] tabId 缓存写入失败:', e));
+                        }
+                    } else if (fromPopup) {
+                        logger.log('[_withDictDetail] 推送完整结果:', fullResult.basic, 'dictData:', fullResult.dictData?.length);
 
-    return await _buildDetailData(
-        basicText, originalText, targetLang, sourceName,
-        sourcePhonetic, targetPhonetic, sourceLang,
-        existingDictData, undefined, undefined,
-        existingExamples
-    );
-},
+                        // 重试发送，直到 popup 收到
+                        (async () => {
+                            for (let i = 0; i < 5; i++) {
+                                const result = await safeSendMessage({
+                                    action: 'TRANSLATE_DETAIL_UPDATE',
+                                    result: fullResult,
+                                    originalText
+                                });
+                                if (result !== null) break;
+                                await new Promise(r => setTimeout(r, 300));
+                            }
+                        })();
+
+                        // 写缓存
+                        if (cacheKey && fullResult.basic && !fullResult.isFallback) {
+                            idb.set({ [cacheKey]: { ...fullResult, timestamp: Date.now() } })
+                                .catch(e => logger.warn('[_withDictDetail] 缓存写入失败:', e));
+                        }
+                    }
+                } catch (e) {
+                    logger.warn('[_withDictDetail] 后台词典加载失败:', e.message);
+                }
+            })();
+
+            return partialResult;
+        }
+
+        return await _buildDetailData(
+            basicText, originalText, targetLang, sourceName,
+            sourcePhonetic, targetPhonetic, sourceLang,
+            existingDictData, undefined, undefined,
+            existingExamples
+        );
+    },
 
     bing: async function (text, targetLang, hintSourceLang = null, tabId = null, cacheKey = null) {
         if (!text) return null;
@@ -2157,24 +2171,22 @@ const Translators = {
                 const protoMatch = inTipMatch[1].trim().match(/是\s+(\S+)\s+的\s+(.+)/);
                 if (protoMatch) {
                     prototype = protoMatch[1];
-                    wordForms.push({ label: protoMatch[2], value: query, isCurrentWord: true });
+                    wordForms.push({ name: protoMatch[2], value: query, isCurrentWord: true });
                 }
             }
 
-            // ② 从 hd_if 提取其他变形（复数、过去式、现在分词等）
-            const formPatterns = [
-                { label: '复数', regex: /複數：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '过去式', regex: /過去式：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '过去分词', regex: /過去分詞：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '现在分词', regex: /現在分詞：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '第三人称单数', regex: /簡單現在式：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '比较级', regex: /比較級：<\/span><a[^>]+>([^<]+)<\/a>/ },
-                { label: '最高级', regex: /最高級：<\/span><a[^>]+>([^<]+)<\/a>/ },
-            ];
-            formPatterns.forEach(({ label, regex }) => {
-                const m = html.match(regex);
-                if (m) wordForms.push({ label, value: m[1].trim() });
-            });
+            // ② 从 hd_if 提取所有变形
+            const hdIfMatch = html.match(/<div class="hd_if">([\s\S]*?)<\/div>/);
+            if (hdIfMatch) {
+                const hdIf = hdIfMatch[1];
+                const pairRegex = /<span class="b_primtxt">([^<]+)<\/span><a class="p1-5"[^>]*>([^<]+)<\/a>/g;
+                let m;
+                while ((m = pairRegex.exec(hdIf)) !== null) {
+                    const name = m[1].replace('：', '').replace(':', '').trim();
+                    const value = m[2].trim();
+                    wordForms.push({ name, value });
+                }
+            }
 
             // 例句：优先从 authid 区域取（有权威词典的词，如 system）
             // 降级从 sentenceSeg 取（变形词或无权威词典的词，如 maintained）
@@ -3135,7 +3147,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     })
                 }, 20000);
 
-                if (resp.status === 402) return { __error: 'insufficient_balance'};
+                if (resp.status === 402) return { __error: 'insufficient_balance' };
                 if (resp.status === 401) return { __error: 'loginExpired' };
                 if (!resp.ok) {
                     const errData = await resp.json().catch(() => ({}));

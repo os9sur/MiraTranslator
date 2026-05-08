@@ -1493,7 +1493,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     executeTranslation(text);
   }
   //shuaxin
-  async function triggerResRefresh() {
+let _refreshDebounceTimer = null;
+
+async function triggerResRefresh() {
+    if (_refreshDebounceTimer) return; // 防抖
+
+    _refreshDebounceTimer = setTimeout(() => {
+        _refreshDebounceTimer = null;
+    }, 2000); // 2秒内不允许重复点击
+
     const queryInput = document.getElementById('searchTextInput');
     const text = queryInput ? queryInput.value.trim() : "";
     if (!text) return;
@@ -1517,7 +1525,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (resContent) resContent.style.opacity = '1';
       }, 600);
     }
-  }
+}
 
   if (resRefreshBtn) {
     resRefreshBtn.onclick = triggerResRefresh;
@@ -1681,7 +1689,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (prototype && protoLower !== textLower) {
           formsHtml += `
             <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(99,179,237,0.1); border:0.5px solid rgba(99,179,237,0.4); border-radius:6px; padding:3px 8px; font-size:12px;">
-              <span style="color:#94a3b8; font-size:11px;">原型</span>
+              <span style="color:#94a3b8; font-size:11px;">Prototype</span>
               <span style="color:#38bdf8; font-weight:500;">${prototype}</span>
             </span>`;
         }
@@ -1689,7 +1697,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         wordForms.forEach(wf => {
           formsHtml += `
             <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(255,255,255,0.05); border:0.5px solid rgba(255,255,255,0.15); border-radius:6px; padding:3px 8px; font-size:12px;">
-              <span style="color:#94a3b8; font-size:11px;">${wf.label}</span>
               <span style="color:rgba(255,255,255,0.85); font-weight:500;">${wf.value}</span>
             </span>`;
         });
@@ -1871,6 +1878,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function executeTranslation(text, forceRefresh = false) {
+    // 清理上一次残留的 listener
+    if (window._detailUpdateListener) {
+      chrome.runtime.onMessage.removeListener(window._detailUpdateListener);
+      window._detailUpdateListener = null;
+    }
+
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
     let ui_lang = 'en';
     try {
@@ -1883,7 +1896,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       resContent.innerHTML = `<span style="color: #64748b; font-size: 11px;">${t('loading', ui_lang)}</span>`;
       resPhonetic.innerText = '';
       resVoiceHeader.style.display = 'none';
-      // ── 读取语言对 
       const langA = (document.getElementById('lpSelA').value || 'auto').replace('_', '-');
       const langB = (document.getElementById('lpSelB').value || 'ja').replace('_', '-');
       const baseA = langA.split('-')[0].toLowerCase();
@@ -1897,7 +1909,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       if (typeof currentEngine !== 'undefined') currentEngine = engine;
 
-      // ── 通用语言检测  
       function detectInputLang(str) {
         if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(str)) return 'ja';
         if (/\p{Script=Hangul}/u.test(str)) return 'ko';
@@ -1936,15 +1947,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         targetL = langB;
       }
 
-      // ── 纯汉字日语无法通过字符检测区分（无假名时 detectInputLang 返回 zh）
-      // 此时若语言对包含 ja，根据语言对配置做兜底：
-      // 若 A=ja 且 inputLang=zh → 实为日语，译成 B
-      // 若 B=ja 且 inputLang=zh → 实为日语，译成 A
-      // 由于无法确定，保持 fallback 到 B，但更新 currentConfig 中的 targetLanguage
       window.currentTargetL = targetL;
 
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", inputLang="${inputLang}", langA="${langA}", langB="${langB}", targetL="${targetL}", engine="${engine}"`);
-      //  启动超时计时器
       const TIMEOUT_MS = 8000;
       let timeoutTriggered = false;
       const slowTimer = setTimeout(() => {
@@ -1965,7 +1970,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           opacity:0.7;
         ">↺ ${t('retry', ui_lang) || 'Retry'}</button>
       </span>`;
-
         const retryBtn = resContent.querySelector('#res-content-retry');
         if (retryBtn) {
           retryBtn.onclick = (e) => {
@@ -1974,27 +1978,34 @@ document.addEventListener('DOMContentLoaded', async () => {
           };
         }
       }, TIMEOUT_MS);
-      // 翻译 
+
+      // 先注册 listener，再发请求
+      window._detailUpdateListener = (msg) => {
+        if (msg.action === 'TRANSLATE_DETAIL_UPDATE' && !msg.result?.isPartial) {
+          clearTimeout(slowTimer);
+          renderTranslationResult(msg.result, text, ui_lang, langA, langB);
+          chrome.runtime.onMessage.removeListener(window._detailUpdateListener);
+          window._detailUpdateListener = null;
+        }
+      };
+      chrome.runtime.onMessage.addListener(window._detailUpdateListener);
+
       const response = await getDetailedTranslation(text, forceRefresh, targetL, {
         needPhonetic: true,
         hintInputLang: resolvedLang,
         hintLangA: langA,
         hintLangB: langB,
-        fromPopup: true
+        fromPopup: false
       });
 
-      clearTimeout(slowTimer); 
-      //基本释义
+      clearTimeout(slowTimer);
       if (response) renderTranslationResult(response, text, ui_lang, langA, langB);
 
-      const detailUpdateListener = (msg) => {
-        if (msg.action === 'TRANSLATE_DETAIL_UPDATE' && !msg.result?.isPartial) {
-          clearTimeout(slowTimer);
-          renderTranslationResult(msg.result, text, ui_lang, langA, langB);
-          chrome.runtime.onMessage.removeListener(detailUpdateListener);
-        }
-      };
-      chrome.runtime.onMessage.addListener(detailUpdateListener);
+      if (!response?.isPartial) {
+        chrome.runtime.onMessage.removeListener(window._detailUpdateListener);
+        window._detailUpdateListener = null;
+      }
+
     } catch (err) {
       clearTimeout(slowTimer);
       logger.error('Popup Logic Error:', err);
