@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.5.2.7-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.5.2.8-blue" alt="Version">
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;
@@ -21,17 +21,9 @@
 </p>
 
 <p align="center">
-  <a href="https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn">
-    <img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome">
-  </a>
-  &nbsp;
-  <a href="https://addons.mozilla.org/firefox/addon/mira-translator/">
-    <img src="https://img.shields.io/badge/Firefox-FF7139?logo=firefoxbrowser&logoColor=white" alt="Firefox">
-  </a>
-  &nbsp;
-  <a href="https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife">
-    <img src="https://custom-icon-badges.demolab.com/badge/Microsoft_Edge-2771D8?logo=edge-white&logoColor=white" alt="Microsoft Edge">
-  </a>
+  <a href="https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn"><img src="https://img.shields.io/badge/Chrome-4285F4?logo=googlechrome&logoColor=white" alt="Chrome"></a>
+  <a href="https://addons.mozilla.org/firefox/addon/mira-translator/"><img src="https://img.shields.io/badge/Firefox-FF7139?logo=firefoxbrowser&logoColor=white" alt="Firefox"></a>
+  <a href="https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife"><img src="https://custom-icon-badges.demolab.com/badge/Microsoft_Edge-2771D8?logo=edge-white&logoColor=white" alt="Microsoft Edge"></a>
 </p>
 
 <br>
@@ -89,6 +81,7 @@ Edit `private_config.js` and fill in your `CLIENT_ID`, `MANIFEST_KEY`.
 | --- | --- |
 | `pnpm dev` | **Chrome** |
 | `pnpm dev:edge` | **Edge** |
+| `pnpm dev:firefox` | **Firefox** |
 
 ---
 © 2026 **David Bai**. Licensed under the [AGPL-3.0 License](LICENSE).
