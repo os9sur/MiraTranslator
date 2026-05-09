@@ -69,13 +69,32 @@ async function initOnboarding() {
   }
 }
 
+function getReviewUrl() {
+  const ua = navigator.userAgent;
+
+  // Firefox：双重验证
+  if (typeof browser !== 'undefined' && /Firefox/.test(ua)) {
+    return "https://addons.mozilla.org/firefox/addon/mira-translator/";
+  }
+
+  // Edge：UA 有专属 Edg/ 标识
+  if (ua.includes("Edg/")) {
+    return "https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife";
+  }
+
+  // 默认 Chrome
+  return "https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn";
+}
+
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
 async function initNoticeBar() {
-  const GITHUB_NOTICE_URL =
+  const GITHUB_NOTICE_URL = IS_DEV ? 'https://os9sur.github.io/mira-trans/notice.json' :
     'https://os9sur.github.io/MiraTranslator/assets/notice.json';
 
   let noticeData = null;
+  let minDays = 0;    // 默认0，普通公告不受限制
+  let openReview = false; // 默认不跳转商店
 
   try {
     const resp = await fetch(`${GITHUB_NOTICE_URL}?t=${Date.now()}`, {
@@ -84,6 +103,10 @@ async function initNoticeBar() {
     if (!resp.ok) return;
     const json = await resp.json();
     if (!json.enabled) return;
+
+    // 读取顶层配置
+    minDays = json.minDays ?? 0;
+    openReview = json.openReview || false;
 
     const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
     const langShort = uiLang.split('-')[0];
@@ -96,6 +119,12 @@ async function initNoticeBar() {
   } catch (e) {
     return;
   }
+
+  // 安装时间判断
+  const installData = await safeGetStorage('install_time');
+  const installTime = installData?.install_time || Date.now();
+  const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+  if (daysSinceInstall < minDays) return;
 
   if (noticeData.targetLangs?.length) {
     const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
@@ -162,10 +191,20 @@ async function initNoticeBar() {
     if (!isExpanded) bar.classList.remove('mira-pulsing');
   });
 
-  // 知道了：持久化 + 淡出
+  // 知道了：持久化 + 按需跳转 + 淡出
   gotItBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
     await safeSetStorage({ [dismissedKey]: true });
+
+    // 普通公告：不跳转
+    // link字段：跳转指定链接
+    // openReview：跳转商店评价页
+    if (noticeData.link) {
+      chrome.tabs.create({ url: noticeData.link });
+    } else if (openReview) {
+      chrome.tabs.create({ url: getReviewUrl() });
+    }
+
     bar.style.transition = 'opacity 0.3s ease';
     bar.style.opacity = '0';
     setTimeout(() => { bar.style.display = 'none'; }, 300);
@@ -1493,13 +1532,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     executeTranslation(text);
   }
   //shuaxin
-let _refreshDebounceTimer = null;
+  let _refreshDebounceTimer = null;
 
-async function triggerResRefresh() {
+  async function triggerResRefresh() {
     if (_refreshDebounceTimer) return; // 防抖
 
     _refreshDebounceTimer = setTimeout(() => {
-        _refreshDebounceTimer = null;
+      _refreshDebounceTimer = null;
     }, 2000); // 2秒内不允许重复点击
 
     const queryInput = document.getElementById('searchTextInput');
@@ -1525,7 +1564,7 @@ async function triggerResRefresh() {
         if (resContent) resContent.style.opacity = '1';
       }, 600);
     }
-}
+  }
 
   if (resRefreshBtn) {
     resRefreshBtn.onclick = triggerResRefresh;
@@ -3028,22 +3067,6 @@ async function triggerResRefresh() {
   checkEngineStatus();
 
 
-  function getReviewUrl() {
-    const ua = navigator.userAgent;
-
-    // Firefox：双重验证
-    if (typeof browser !== 'undefined' && /Firefox/.test(ua)) {
-      return "https://addons.mozilla.org/firefox/addon/mira-translator/";
-    }
-
-    // Edge：UA 有专属 Edg/ 标识
-    if (ua.includes("Edg/")) {
-      return "https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife";
-    }
-
-    // 默认 Chrome
-    return "https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn";
-  }
   document.querySelector("#reviewLink").href = getReviewUrl();
 
 });
