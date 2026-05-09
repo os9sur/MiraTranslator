@@ -3569,7 +3569,7 @@ self.i18nAttach10 = {
     cpHint: "⚠ Style hint only, e.g. formal / concise / medical terms",
     cpSave: "Save",
     cpClear: "Clear",
-    footerReview: "⭐ Rate Us",
+    footerReview: "⭐ Rate on Store",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Restore default rules",
     aiTranslationTip: "AI translation produces better results, but is slower than traditional engines (Google, Bing) due to the heavier computation involved in model inference and token-by-token generation.",
