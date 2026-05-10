@@ -206,7 +206,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
     if (daysSinceInstall >= 7) {
       await safeSetStorage({ review_page_shown_v1: true });
-      trackEvent('review_page_shown');
+      const { browser, timezone } = getDeviceInfo();
+      trackEvent('review_page_shown', {
+        browser_lang: navigator.language,
+        timezone,
+        browser,
+        days_since_install: Math.floor(daysSinceInstall)
+      });
       chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
     }
   }
