@@ -114,6 +114,23 @@ const checkRTL = (lang) => {
   return lang ? rtlSet.has(lang.toLowerCase().split('-')[0]) : false;
 };
 
+function getReviewUrl() {
+  const ua = navigator.userAgent;
+
+  // Firefox：双重验证
+  if (typeof browser !== 'undefined' && /Firefox/.test(ua)) {
+    return "https://addons.mozilla.org/firefox/addon/mira-translator/";
+  }
+
+  // Edge：UA 有专属 Edg/ 标识
+  if (ua.includes("Edg/")) {
+    return "https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife";
+  }
+
+  // 默认 Chrome
+  return "https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn";
+}
+
 async function safeSendToTab(tabId, message) {
   if (!tabId || typeof tabId !== 'number' || !chrome.runtime?.id) return null;
   return new Promise((resolve) => {
@@ -131,6 +148,21 @@ async function safeSendToTab(tabId, message) {
       resolve(null);
     }
   });
+}
+// 上报事件
+async function trackEvent(eventName, params = {}) {
+    if (IS_DEV) return;
+    const clientId = await getClientId();
+    fetch(
+        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+        {
+            method: 'POST',
+            body: JSON.stringify({
+                client_id: clientId,
+                events: [{ name: eventName, params }],
+            }),
+        }
+    ).catch(() => { });
 }
 
 async function safeSetIcon(tabId, imageData) {

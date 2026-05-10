@@ -69,22 +69,7 @@ async function initOnboarding() {
   }
 }
 
-function getReviewUrl() {
-  const ua = navigator.userAgent;
 
-  // Firefox：双重验证
-  if (typeof browser !== 'undefined' && /Firefox/.test(ua)) {
-    return "https://addons.mozilla.org/firefox/addon/mira-translator/";
-  }
-
-  // Edge：UA 有专属 Edg/ 标识
-  if (ua.includes("Edg/")) {
-    return "https://microsoftedge.microsoft.com/addons/detail/ofhlbeoigddhlpompkgbmbdhpbffmife";
-  }
-
-  // 默认 Chrome
-  return "https://chromewebstore.google.com/detail/mira-translator-immersive/hmmllfdmkbmmfffjekhmmbhhfhhnocmn";
-}
 
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
@@ -104,6 +89,8 @@ async function initNoticeBar() {
     const json = await resp.json();
     if (!json.enabled) return;
 
+    const openReview = json.openReview || false;
+    if (openReview) return;
     // 读取顶层配置
     minDays = json.minDays ?? 0;
     openReview = json.openReview || false;
@@ -212,7 +199,20 @@ async function initNoticeBar() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const shown = await safeGetStorage('review_page_shown_v1');
+  if (!shown?.review_page_shown_v1) {
+    const installData = await safeGetStorage('install_time');
+    const installTime = installData?.install_time || Date.now();
+    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+    if (daysSinceInstall >= 7) {
+      await safeSetStorage({ review_page_shown_v1: true });
+      trackEvent('review_page_shown');
+      chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+    }
+  }
+
   initNoticeBar();
+
   await initOnboarding();
   const btnLogin = document.getElementById('btnLogin');
   const btnAvatar = document.getElementById('btnAvatar');
