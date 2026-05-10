@@ -4540,21 +4540,7 @@ async function getClientId() {
     return id;
 }
 
-// 上报事件
-async function trackEvent(eventName, params = {}) {
-    if (IS_DEV) return;
-    const clientId = await getClientId();
-    fetch(
-        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
-        {
-            method: 'POST',
-            body: JSON.stringify({
-                client_id: clientId,
-                events: [{ name: eventName, params }],
-            }),
-        }
-    ).catch(() => { });
-}
+
 
 // ============ 安装时 ============
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -4584,6 +4570,24 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
         // 打开欢迎页
         chrome.tabs.create({ url: "https://os9sur.github.io/mira-trans/welcome.html" });
+    }
+    if (details.reason === "update") {
+        try {
+            const stored = await safeGetStorage('install_time');
+            const installTime = stored?.install_time || Date.now();
+            const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+            if (daysSinceInstall < 7) return;
+
+            const shownKey = 'review_page_shown_v1';
+            const shown = await safeGetStorage(shownKey);
+            if (shown?.[shownKey]) return;
+
+            await safeSetStorage({ [shownKey]: true, review_page_pending: true });
+            trackEvent('review_page_shown');
+            chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+        } catch (e) {
+            return;
+        }
     }
 });
 
