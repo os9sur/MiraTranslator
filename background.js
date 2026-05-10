@@ -4582,8 +4582,14 @@ chrome.runtime.onInstalled.addListener(async (details) => {
             const shown = await safeGetStorage(shownKey);
             if (shown?.[shownKey]) return;
 
-            await safeSetStorage({ [shownKey]: true, review_page_pending: true });
-            trackEvent('review_page_shown');
+            await safeSetStorage({ [shownKey]: true });
+            const { browser, timezone } = getDeviceInfo();
+            trackEvent('review_page_shown', {
+                browser_lang: navigator.language,
+                timezone,
+                browser,
+                days_since_install: Math.floor(daysSinceInstall)
+            });
             chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
         } catch (e) {
             return;
