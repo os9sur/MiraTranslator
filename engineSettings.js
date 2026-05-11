@@ -173,8 +173,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!data) return;
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
-        const builtInEngines = [
+        const builtInEngines = enable_pro_features ? [
             { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
+            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
+            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
+        ] : [
+            // { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
             { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
             { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
         ];
@@ -873,7 +877,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         // ----  isBuiltIn 逻辑（google / bing）----
         if (tpl.isBuiltIn) {
             actions.classList.add('hidden');
-            container.innerHTML = `
+            const githubLink = '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>';
+
+            // 渲染时识别 ---
+const noticeLines = t('builtInNoticeBody', uiLanguage, githubLink)
+  .split('\n')
+  .filter(line => line.trim())
+  .map(line => {
+    if (line.trim() === '---') {
+      return `<hr style="border:0;border-top:2px solid #30363d;margin:12px 0;">`;
+    }
+    return `
+      <p style="display:flex;gap:6px;color:#b0bac6;font-size:14px;line-height:1.8;margin:0 0 10px 0;">
+        <span style="flex-shrink:0;">${line.match(/^\p{Emoji}/u)?.[0] ?? ''}</span>
+        <span>${line.replace(/^\p{Emoji}\s*/u, '')}</span>
+      </p>`;
+  }).join('');
+            const builtInTemplate = enable_pro_features ? `
+                <div class="main-header">
+                <h2 style="margin:0">${displayAlias}</h2>
+            </div>
+            <div class="form-container">
+                <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                    <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
+                    <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
+                    <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
+                    ${noticeLines}
+                </div>
+                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
+                    ${t('enableEngineNow', uiLanguage)}
+                </button>
+            </div>` : `
                 <div class="main-header">
                     <h2 style="margin:0">${displayAlias}</h2>
                 </div>
@@ -883,28 +917,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
                         <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
                         <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
-                        <p style="color:#d1d5da;font-size:12px;margin-top:8px;">✨ ${t('wantBetterExperience', uiLanguage)} <span style="color:#f2cc60;font-size:larger;">${t('clickBottomTip', uiLanguage)}</span></p>
-<hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
-<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 6px 0;">
-    ❤️ ${(t('devNote', uiLanguage) || '').replace('{0}', '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>')}
-</p>
-<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:0;">
-    💡 ${t('aiTranslationTip', uiLanguage) || 'AI translation produces better results, but is slower than traditional engines (Google, Bing).'}
-</p>
-<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 0 0;">
-    🔑 ${t('byokTip', uiLanguage) || 'You can configure your own AI API key, or use <span style="color:#f2cc60;">Mira Pro</span> with no setup required — recommended for non-technical users.'}
-</p>
-<p style="color:#b0bac6;font-size:12px;line-height:1.8;margin:8px 0 0 0;">
-    💡 ${t('aiModelTip', uiLanguage) || 'AI translation produces better results, but is slower than traditional engines (Google, Bing).'}
-</p>
-
-
                     </div>
                     <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
                         ${t('enableEngineNow', uiLanguage)}
                     </button>
                 </div>`;
-
+            container.innerHTML = builtInTemplate;
             const checkConnectivity = async () => {
 
                 if (myVersion !== switchVersion) return;

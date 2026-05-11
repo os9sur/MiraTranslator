@@ -1065,9 +1065,9 @@ document.addEventListener("MIRA_INTERNAL_RESCAN", (e) => {
         .filter(Boolean);
   }
   const globalConf = data.globalConfig || {
-    page: true,
-    select: true,
-    yt: true,
+    page: globalDefault_Page,
+    select: globalDefault_Select,
+    yt: globalDefault_YT,
   };
   const siteConf = data.siteSettings || {};
   const finalConfig = siteConf[domain] ? siteConf[domain] : globalConf;

@@ -3534,10 +3534,13 @@ self.i18nAttach10 = {
     footerReview: "⭐ 好评支持",
     footerFeedback: "✉️ 问题反馈",
     restoreRules: "恢复默认规则",
-    aiTranslationTip: "AI 翻译效果更好，但由于模型推理计算量较大且逐字生成，速度比传统机器翻译（Google、Bing）慢。",
-    byokTip: "也可自行前往各大 AI 平台申请 API Key 进行配置。",
-    devNote: "这是一款开源翻译工具 {0}，由作者利用业余时间开发维护。Mira AI Translator Pro 是为希望免去 API Key 配置、直接使用 AI 翻译的用户提供的付费选项。",
-    aiModelTip: "友情提醒：AI 翻译并非模型越新越好。翻译不需要复杂推理，普通 AI 模型已完全胜任，而最新模型的价格往往高出数倍甚至更多。",
+    builtInNoticeBody: `此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥。
+---
+    💡 AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，这是正常现象。
+    💰 注意：AI 翻译并非模型越新越好。翻译任务不需要复杂推理，主流模型已完全胜任，最新模型的价格往往高出数倍。
+    🔑 如需使用 AI 翻译，可前往各大 AI 平台自行申请 API Key 并配置。若本地显卡性能较好，也可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度比商业 AI 大模型明显慢。
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是为希望省去配置步骤、直接使用 AI 翻译的用户提供的付费选项。
+    ❤️ 这是一个开源翻译项目 {0}，目前由作者利用业余时间独立开发维护。`,
   },
   "zh-TW": {
     cpTitle: "自訂提示詞",
@@ -3553,10 +3556,13 @@ self.i18nAttach10 = {
     footerReview: "⭐ 好評支持",
     footerFeedback: "✉️ 問題回饋",
     restoreRules: "恢復預設規則",
-    aiTranslationTip: "AI 翻譯效果較佳，但由於模型推理計算量較大且逐字生成，速度比傳統機器翻譯（Google、Bing）慢。",
-    byokTip: "也可自行前往各大 AI 平台申請 API Key 進行設定。",
-    devNote: "這是一款開源翻譯工具 {0}，由作者利用業餘時間開發維護。Mira AI Translator Pro 是為希望免去 API Key 設定、直接使用 AI 翻譯的用戶提供的付費選項。",
-    aiModelTip: "友情提醒：AI 翻譯並非模型越新越好。翻譯不需要複雜推理，普通 AI 模型已完全勝任，而最新模型的價格往往高出數倍甚至更多。",
+    builtInNoticeBody: `此接口透過公共網路請求實現，僅供個人學習與非商業使用，無需配置密鑰。
+---
+    💡 AI 翻譯效果更自然，但由於模型逐字生成的機制，速度比 Google、Bing 等傳統引擎慢，這是正常現象。
+    💰 注意：AI 翻譯並非模型越新越好。翻譯任務不需要複雜推理，主流模型已完全勝任，最新模型的價格往往高出數倍。
+    🔑 如需使用 AI 翻譯，可前往各大 AI 平台自行申請 API Key 並配置。若本機顯示卡效能較好，也可部署本地 AI 模型，無需連網、無限次免費使用，但翻譯速度比商業 AI 大模型明顯慢。
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是為希望省去配置步驟、直接使用 AI 翻譯的用戶提供的付費選項。
+    ❤️ 這是一個開源翻譯專案 {0}，目前由作者利用業餘時間獨立開發維護。`,
   },
   "en": {
     cpTitle: "Custom Prompt",
@@ -3572,11 +3578,13 @@ self.i18nAttach10 = {
     footerReview: "⭐ Rate on Store",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Restore default rules",
-    aiTranslationTip: "AI translation produces better results, but is slower than traditional engines (Google, Bing) due to the heavier computation involved in model inference and token-by-token generation.",
-    byokTip: "Alternatively, you can obtain an API key from any major AI platform and configure it yourself.",
-    devNote: "This is an open-source translation tool {0}, developed and maintained in the developer's spare time. Mira AI Translator Pro is a paid option for users who want AI translation without the hassle of configuring API keys.",
-    aiModelTip: "Note: Newer AI models are not necessarily better for translation. Translation does not require complex reasoning — standard models are more than capable, while the latest models can cost significantly more.",
-
+    builtInNoticeBody: `This interface operates via public network requests. It is intended for personal learning and non-commercial use only. No API key required.
+---
+    💡 AI translation produces more natural results, but is slower than traditional engines like Google or Bing — this is expected behavior due to the token-by-token generation process.
+    💰 Note: A newer AI model does not mean better translation. Translation requires no complex reasoning — mainstream models are more than sufficient, while the latest ones can cost several times more.
+    🔑 To use AI translation, you can obtain an API key from any major AI provider and configure it yourself. If your local GPU is powerful enough, you can also deploy a local AI model — no internet required, free to use unlimited times — though translation speed will be noticeably slower than commercial AI services.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> is a paid option for users who want to use AI translation without the hassle of configuration.
+    ❤️ This is an open-source project {0}, independently developed and maintained by the author in their spare time.`,
   },
   "ja": {
     cpTitle: "カスタムプロンプト",
@@ -3592,10 +3600,13 @@ self.i18nAttach10 = {
     footerReview: "⭐ レビューする",
     footerFeedback: "✉️ フィードバック",
     restoreRules: "デフォルト規則に戻す",
-    aiTranslationTip: "AI翻訳は精度が高いですが、モデルの推論計算量が多く逐字生成のため、従来の機械翻訳（Google、Bing）より速度が遅くなります。",
-    byokTip: "各 AI プラットフォームで API Key を取得して、自分で設定することもできます。",
-    devNote: "これは開発者が業務外の時間を使って開発・保守しているオープンソースの翻訳拡張機能 {0} です。Mira AI Translator Pro は、API Key の設定なしで AI 翻訳をすぐに使いたい方向けの有料オプションです。",
-    aiModelTip: "ご参考：AI 翻訳において、モデルが新しいほど優れているとは限りません。翻訳に複雑な推論は不要であり、標準的な AI モデルで十分対応できます。最新モデルはコストが大幅に高くなる場合があります。",
+    builtInNoticeBody: `このインターフェースは公開ネットワーク経由で動作します。個人学習および非商業利用を目的としており、API Key の設定は不要です。
+---
+    💡 AI 翻訳はより自然な訳文を生成しますが、トークン単位の生成処理という仕組み上、Google や Bing などの従来エンジンより速度が遅くなります。これは正常な動作です。
+    💰 注意：AI 翻訳においてモデルが新しいほど優れているわけではありません。翻訳には複雑な推論は不要であり、主流モデルで十分対応できます。最新モデルは数倍以上のコストがかかる場合があります。
+    🔑 AI 翻訳を利用するには、各 AI プラットフォームで API Key を取得して設定してください。ローカル GPU の性能が十分であれば、ローカル AI モデルをデプロイすることも可能です。インターネット不要で無制限に無料利用できますが、翻訳速度は商用 AI サービスより明らかに遅くなります。
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> は、設定なしで AI 翻訳をすぐに使いたい方向けの有料オプションです。
+    ❤️ これは作者が業務外の時間を使って個人で開発・保守しているオープンソースの翻訳ツール {0} です。`,
   },
   "ko": {
     cpTitle: "커스텀 프롬프트",
@@ -3611,10 +3622,13 @@ self.i18nAttach10 = {
     footerReview: "⭐ 평가하기",
     footerFeedback: "✉️ 피드백",
     restoreRules: "기본 규칙으로 복구",
-    aiTranslationTip: "AI 번역은 품질이 더 좋지만, 모델 추론 연산량이 크고 토큰 단위로 생성되기 때문에 기존 기계 번역(Google, Bing)보다 속도가 느립니다.",
-    byokTip: "각 AI 플랫폼에서 직접 API Key를 발급받아 설정할 수도 있습니다.",
-    devNote: "이 확장 프로그램은 개발자가 개인 시간을 활용해 개발·유지 관리하는 오픈소스 번역 도구 {0} 입니다。Mira AI Translator Pro는 API Key 설정 없이 바로 AI 번역을 사용하고 싶은 분들을 위한 유료 옵션입니다.",
-    aiModelTip: "참고: AI 번역에서 최신 모델이 반드시 더 좋은 것은 아닙니다. 번역에는 복잡한 추론이 필요하지 않으며 일반 AI 모델로도 충분히 대응할 수 있습니다. 최신 모델은 비용이 크게 높아질 수 있습니다.",
+    builtInNoticeBody: `이 인터페이스는 공개 네트워크를 통해 동작하며, 개인 학습 및 비상업적 용도로만 사용할 수 있습니다. API Key 설정은 필요하지 않습니다.
+---
+    💡 AI 번역은 더 자연스러운 결과를 제공하지만, 토큰 단위로 생성되는 특성상 Google, Bing 등 기존 엔진보다 속도가 느립니다. 이는 정상적인 동작입니다.
+    💰 참고: AI 번역에서 최신 모델이 반드시 더 좋은 것은 아닙니다. 번역에는 복잡한 추론이 필요하지 않으며 주류 모델로도 충분히 대응할 수 있습니다. 최신 모델은 몇 배 이상의 비용이 발생할 수 있습니다.
+    🔑 AI 번역을 사용하려면 주요 AI 플랫폼에서 API Key를 발급받아 직접 설정하시면 됩니다. 로컬 GPU 성능이 충분하다면 로컬 AI 모델을 배포할 수도 있습니다. 인터넷 없이 무제한 무료로 사용할 수 있지만, 번역 속도는 상용 AI 서비스보다 눈에 띄게 느립니다。
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 는 설정 없이 AI 번역을 바로 사용하고 싶은 분들을 위한 유료 옵션입니다.
+    ❤️ 이 프로젝트는 작자가 개인 시간을 활용해 독립적으로 개발·유지 관리하고 있는 오픈소스 번역 도구 {0} 입니다.`,
   },
 };
 
