@@ -68,8 +68,7 @@ async function initOnboarding() {
     if (labelEl) labelEl.style.display = 'block';
   }
 }
-
-
+ 
 
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
@@ -199,6 +198,8 @@ async function initNoticeBar() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // initRetirement();
+  // return;
   const shown = await safeGetStorage('review_page_shown_v1');
   if (!shown?.review_page_shown_v1) {
     const installData = await safeGetStorage('install_time');
@@ -224,6 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const btnAvatar = document.getElementById('btnAvatar');
   if (btnLogin) btnLogin.style.display = 'none';
   if (btnAvatar) btnAvatar.style.display = 'none';
+  
   function showPanel(panelId) {
     const allPanels = [
       'mainContainer',
@@ -953,7 +955,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initUILanguage();
   const data = await safeGetStorage({
     activeConfig: { engine: _defaultEngine, data: {} },
-    globalConfig: { page: true, select: true, yt: true },
+    globalConfig: { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT },
     siteSettings: {},
     targetLanguage: targetLang,
     scanConfig: {
@@ -2253,7 +2255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.currentConfig.scanConfig.global = {};
       }
       const siteSettings = storage.siteSettings || {};
-      const globalConfig = storage.globalConfig || { page: true, select: true, yt: true };
+      const globalConfig = storage.globalConfig || { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };
       const conf = (currentMode === 'current' && siteSettings[window.domain])
         ? siteSettings[window.domain]
         : globalConfig;
@@ -2531,7 +2533,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await safeGetStorage(['siteSettings', 'globalConfig']);
       if (!data) return;
       let ss = data.siteSettings || {};
-      let gc = data.globalConfig || { page: true, select: true, yt: true };
+      let gc = data.globalConfig || { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };
       if (currentMode === 'current' && !ss[domain]) {
         ss[domain] = JSON.parse(JSON.stringify(gc));
         if (!domain.includes('youtube.com')) {

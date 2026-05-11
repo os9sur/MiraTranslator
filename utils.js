@@ -6,6 +6,10 @@
  */
 
 const IS_DEV = true;
+const globalDefault_Page=true;
+const globalDefault_Select=true;
+const globalDefault_YT=true;
+const enable_pro_features = true; 
 const api = (typeof chrome !== 'undefined' && chrome.runtime?.id)
   ? (typeof browser !== 'undefined' ? browser : chrome)
   : {};
@@ -265,7 +269,7 @@ function getCurrentLang() {
 }
 
 let cachedSiteSettings = {};
-let cachedGlobalConfig = { page: false, select: true, yt: true };
+let cachedGlobalConfig = { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };
 if (typeof chrome !== 'undefined' && chrome.storage) {
   safeGetStorage(['siteSettings', 'globalConfig'], true).then(res => {
     if (res?.siteSettings) cachedSiteSettings = res.siteSettings;
@@ -508,7 +512,10 @@ function t(key, forcedLang) {
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
-  return dict[key] || i18nDict["en"]?.[key] || key;
+  
+  const raw = dict[key] || i18nDict["en"]?.[key] || key;
+  const replacements = Array.prototype.slice.call(arguments, 2);
+  return replacements.reduce((s, val, i) => s.replace(`{${i}}`, val), raw);
 }
 
 function applyI18n(forcedLang) {

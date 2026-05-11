@@ -4605,6 +4605,8 @@ async function updateUninstallURL(count = null) {
     const supported = ['zh-CN', 'zh-TW', 'ja'];
     const langParam = supported.includes(lang) ? lang : 'en';
 
+    const clientId = await getClientId();
+
     const stored = await safeGetStorage(['install_time', 'usage_count'], true);
     const installTime = stored?.install_time;
 
@@ -4618,7 +4620,7 @@ async function updateUninstallURL(count = null) {
 
     const timestamp = Date.now();
     chrome.runtime.setUninstallURL(
-        `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}&t=${timestamp}`
+        `https://os9sur.github.io/mira-trans/uninstall.html?lang=${langParam}&version=${version}&days_used=${daysUsed}&minutes_used=${minutesUsed}&usage_count=${usageCount}&browser=${browser}&browser_version=${browser_version}&os=${os}&timezone=${encodeURIComponent(timezone)}&browser_lang=${encodeURIComponent(navigator.language)}&client_id=${clientId}&t=${timestamp}`
     );
 }
 // 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 
