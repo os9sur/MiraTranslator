@@ -200,23 +200,26 @@ async function initNoticeBar() {
 document.addEventListener('DOMContentLoaded', async () => {
   // initRetirement();
   // return;
-  const shown = await safeGetStorage('review_page_shown_v1');
-  if (!shown?.review_page_shown_v1) {
+const shown = await safeGetStorage('review_page_shown_v1');
+if (!shown?.review_page_shown_v1) {
     const installData = await safeGetStorage('install_time');
     const installTime = installData?.install_time || Date.now();
-    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24); 
     if (daysSinceInstall >= 7) {
-      await safeSetStorage({ review_page_shown_v1: true });
-      const { browser, timezone } = getDeviceInfo();
-      trackEvent('review_page_shown', {
-        browser_lang: navigator.language,
-        timezone,
-        browser,
-        days_since_install: Math.floor(daysSinceInstall)
-      });
-      chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+        await safeSetStorage({ review_page_shown_v1: true });
+        const { browser, timezone } = getDeviceInfo();
+        const usageData = await safeGetStorage('usage_count');
+        trackEvent('review_page_shown', {
+            browser_lang: navigator.language,
+            timezone,
+            browser,
+            days_since_install: Math.floor(daysSinceInstall),
+            usage_count: usageData?.usage_count || 0,
+            trigger: 'popup',
+        });
+        chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
     }
-  }
+}
 
   initNoticeBar();
 

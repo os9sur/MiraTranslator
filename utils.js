@@ -118,6 +118,38 @@ const checkRTL = (lang) => {
   return lang ? rtlSet.has(lang.toLowerCase().split('-')[0]) : false;
 };
 
+const GA_MEASUREMENT_ID = "{{GA_MEASUREMENT_ID}}";
+const GA_API_SECRET = "{{GA_API_SECRET}}";
+
+// 公共设备信息
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    return {
+        browser: ua.includes('Edg/') ? 'edge'
+            : ua.includes('Firefox/') ? 'firefox'
+                : 'chrome',
+        browser_version: (
+            /Edg\/(\d+)/.exec(ua) ||
+            /Firefox\/(\d+)/.exec(ua) ||
+            /Chrome\/(\d+)/.exec(ua)
+        )?.[1] || 'unknown',
+        os: ua.includes('Windows') ? 'windows'
+            : ua.includes('Mac') ? 'mac'
+                : ua.includes('Linux') ? 'linux'
+                    : 'unknown',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+}
+
+// 生成/获取唯一用户ID
+async function getClientId() {
+    const result = await safeGetStorage('ga_client_id', true);
+    if (result?.ga_client_id) return result.ga_client_id;
+    const id = crypto.randomUUID();
+    await safeSetStorage({ ga_client_id: id });
+    return id;
+}
+
 function getReviewUrl() {
   const ua = navigator.userAgent;
 
@@ -455,6 +487,8 @@ function showUpdateNotice() {
     isNoticeShowing = false;
   }
 }
+
+
 let i18nDict = {};
 let isSynced = false;
 function syncI18nDict(force = false) {
