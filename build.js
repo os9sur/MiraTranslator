@@ -84,7 +84,9 @@ async function build() {
                     "if (btnGoogle) btnGoogle.style.display = 'none'"
                 );
             }
-
+            if (targetBrowser === 'firefox' && file === 'background.js') {
+                content = content.replace(/^importScripts\([^)]*\);?\s*$/gm, '');
+            }
             // --- File-Specific Logic (Manifest) ---
             if (file === 'manifest.json') {
                 let manifest = JSON.parse(content);

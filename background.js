@@ -4285,7 +4285,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
-
+    if (request.type === 'getClientId') {
+        getClientId().then(safeSendResponse);
+        return true;
+    }
+    if (request.type === 'trackEvent') {
+        trackEvent(request.name, request.params);
+        return;
+    }
     // ── 用户账号 Auth（独立于云同步）──────────────────
     if (request.action === 'getMiraToken') {
         // 获取 Google token 供 Worker 验证身份
@@ -4508,37 +4515,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 //============= 监控
 // ============ GA4 配置 ============
-const GA_MEASUREMENT_ID = "{{GA_MEASUREMENT_ID}}";
-const GA_API_SECRET = "{{GA_API_SECRET}}";
 
-// 公共设备信息
-function getDeviceInfo() {
-    const ua = navigator.userAgent;
-    return {
-        browser: ua.includes('Edg/') ? 'edge'
-            : ua.includes('Firefox/') ? 'firefox'
-                : 'chrome',
-        browser_version: (
-            /Edg\/(\d+)/.exec(ua) ||
-            /Firefox\/(\d+)/.exec(ua) ||
-            /Chrome\/(\d+)/.exec(ua)
-        )?.[1] || 'unknown',
-        os: ua.includes('Windows') ? 'windows'
-            : ua.includes('Mac') ? 'mac'
-                : ua.includes('Linux') ? 'linux'
-                    : 'unknown',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    };
-}
-
-// 生成/获取唯一用户ID
-async function getClientId() {
-    const result = await safeGetStorage('ga_client_id', true);
-    if (result?.ga_client_id) return result.ga_client_id;
-    const id = crypto.randomUUID();
-    await safeSetStorage({ ga_client_id: id });
-    return id;
-}
 
 
 
@@ -4572,29 +4549,36 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         chrome.tabs.create({ url: "https://os9sur.github.io/mira-trans/welcome.html" });
     }
     if (details.reason === "update") {
-        try {
-            const stored = await safeGetStorage('install_time');
-            const installTime = stored?.install_time || Date.now();
-            const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-            if (daysSinceInstall < 7) return;
+    try { 
+        const stored = await safeGetStorage(['install_time', 'usage_count']);
+        const installTime = stored?.install_time || Date.now();
+        const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+        if (daysSinceInstall < 7) return;
 
-            const shownKey = 'review_page_shown_v1';
-            const shown = await safeGetStorage(shownKey);
-            if (shown?.[shownKey]) return;
+        const shownKey = 'review_page_shown_v1';
+        const shown = await safeGetStorage(shownKey);
+        if (shown?.[shownKey]) return;
 
-            await safeSetStorage({ [shownKey]: true });
-            const { browser, timezone } = getDeviceInfo();
-            trackEvent('review_page_shown', {
-                browser_lang: navigator.language,
-                timezone,
-                browser,
-                days_since_install: Math.floor(daysSinceInstall)
-            });
-            chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
-        } catch (e) {
-            return;
-        }
+        await safeSetStorage({ [shownKey]: true });
+ 
+        const { browser, timezone } = getDeviceInfo();
+        const clientId = await getClientId();
+        trackEvent('review_page_shown', {
+            browser_lang: navigator.language,
+            timezone,
+            browser,
+            days_since_install: Math.floor(daysSinceInstall),
+            usage_count: stored?.usage_count || 0,
+            previous_version: details.previousVersion,
+            update_version: chrome.runtime.getManifest().version,
+            client_id: clientId,
+            trigger: 'update', 
+        });
+        chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+    } catch (e) {
+        return;
     }
+}
 });
 
 // ============ 卸载时配置 ============
