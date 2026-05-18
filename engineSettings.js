@@ -880,20 +880,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const githubLink = '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>';
 
             // 渲染时识别 ---
-const noticeLines = t('builtInNoticeBody', uiLanguage, githubLink)
-  .split('\n')
-  .filter(line => line.trim())
-  .map(line => {
-    if (line.trim() === '---') {
-      return `<hr style="border:0;border-top:2px solid #30363d;margin:12px 0;">`;
-    }
-    return `
+            const noticeLines = t('builtInNoticeBody', uiLanguage, githubLink)
+                .split('\n')
+                .filter(line => line.trim())
+                .filter(line => {
+                    if (!enable_pro_features && line.includes('🪄')) return false;
+                    return true;
+                })
+                .map(line => {
+                    if (line.trim() === '---') {
+                        return `<hr style="border:0;border-top:2px solid #30363d;margin:12px 0;">`;
+                    }
+                    return `
       <p style="display:flex;gap:6px;color:#b0bac6;font-size:14px;line-height:1.8;margin:0 0 10px 0;">
         <span style="flex-shrink:0;">${line.match(/^\p{Emoji}/u)?.[0] ?? ''}</span>
         <span>${line.replace(/^\p{Emoji}\s*/u, '')}</span>
       </p>`;
-  }).join('');
-            const builtInTemplate = enable_pro_features ? `
+                }).join('');
+            const builtInTemplate =   `
                 <div class="main-header">
                 <h2 style="margin:0">${displayAlias}</h2>
             </div>
@@ -907,21 +911,7 @@ const noticeLines = t('builtInNoticeBody', uiLanguage, githubLink)
                 <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
                     ${t('enableEngineNow', uiLanguage)}
                 </button>
-            </div>` : `
-                <div class="main-header">
-                    <h2 style="margin:0">${displayAlias}</h2>
-                </div>
-                <div class="form-container">
-                    <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
-                        <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
-                        <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                        <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
-                        <p style="color:#8b949e;font-size:12px;line-height:1.6;margin:0">${t('freeInterfaceTipsInfo', uiLanguage)}</p>
-                    </div>
-                    <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
-                        ${t('enableEngineNow', uiLanguage)}
-                    </button>
-                </div>`;
+            </div>`;
             container.innerHTML = builtInTemplate;
             const checkConnectivity = async () => {
 

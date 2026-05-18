@@ -10,8 +10,9 @@
   <em>Ultra-lightweight (~300KB) AI Gateway — Pure Native JS for immersive web reading, YouTube bilingual subtitles, and cross-site word highlighting. Zero-bloat, privacy-first.</em>
 </p>
 
+
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.5.3.5-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.5.3.8-blue" alt="Version">
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;

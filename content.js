@@ -2206,6 +2206,34 @@ async function handleTranslateElement(el, forceRefresh = false) {
       }
     }
   }
+
+  // 处理 Twitter Article 页面
+  if (isTwitter && (
+    el.classList?.contains("public-DraftStyleDefault-block") ||
+    el.classList?.contains("longform-header-two")
+  )) {
+    const text = el.innerText?.trim();
+    if (!text || text.length < 3) return;
+    if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
+    if (!forceRefresh && el.dataset.translated === "true") return;
+    if (el.dataset.translating === "true") return;
+    el.dataset.translating = "true";
+    const transContainer = document.createElement("div");
+    transContainer.className = "kt-paragraph-translation";
+    transContainer.style.setProperty("display", "block", "important");
+    transContainer.style.setProperty("white-space", "pre-wrap", "important");
+    transContainer.style.setProperty("margin-top", "4px", "important");
+    transContainer.style.setProperty("line-height", "1.5", "important");
+    transContainer.style.setProperty("color", "gray", "important");
+    transContainer.style.setProperty("font-style", "italic", "important");
+    transContainer.innerText = t("loading");
+    el.insertAdjacentElement("afterend", transContainer);
+    TranslationBatcher.add(
+      { el: el, text: text, container: transContainer, linkMap: [] },
+      forceRefresh
+    );
+    return;
+  }
   if (isTwitter) {
     const isSystemUI =
       ((el.matches('[role="heading"]') || el.closest('[role="heading"]')) &&
@@ -2218,12 +2246,13 @@ async function handleTranslateElement(el, forceRefresh = false) {
       el.closest('[data-testid="User-Name"]') ||
       el.closest('[data-testid="pillLabel"]') ||
       el.closest('a[href*="followers_you_follow"]') ||
-      el.closest("h2") ||
+      (el.closest("h2") && !el.closest("h2.longform-header-two")) ||
       (el.closest('[data-testid="cellInnerDiv"]') &&
         !el.closest('[data-testid="tweetText"]') &&
         !el.closest('[data-testid="UserDescription"]') &&
         !el.closest('[data-testid="trend"]') &&
-        !el.closest('[data-testid="trendMetadata"]'));
+        !el.closest('[data-testid="trendMetadata"]') &&
+        !el.closest('[data-editor]'));
     if (isSystemUI) {
       el.dataset.translated = "true";
       return;
@@ -2255,6 +2284,13 @@ async function handleTranslateElement(el, forceRefresh = false) {
     ) {
       const handled = handleTwitterMultiParagraph(el, forceRefresh);
       if (handled) return;
+    }
+    if (
+      el.classList?.contains("public-DraftStyleDefault-block") ||
+      el.classList?.contains("longform-header-two")
+    ) {
+      const text = el.innerText?.trim();
+      if (!text || text.length < 3) return;
     }
   }
   const isSubListItem =
@@ -5082,10 +5118,12 @@ function initSelectionTranslate() {
         padding:6px 10px; font-size:12px; font-weight:600;
         color:${colors.textMuted}; user-select:none;
     `;
+    if(enable_pro_features){
         header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator
         <span style="margin-left:auto; background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6)) !important; color:#fff;
             font-size:9px; padding:1px 5px; border-radius:8px;">Pro</span>`;
         dropdown.appendChild(header);
+    }
 
         //  创建子项容器
         const miraContainer = document.createElement("div");
@@ -5125,12 +5163,14 @@ function initSelectionTranslate() {
           });
         };
 
-        buildMiraItems(MIRA_FALLBACK_MODELS);
+        if (enable_pro_features) {
+          buildMiraItems(MIRA_FALLBACK_MODELS);
 
-        getMiraModels().then((models) => {
-          if (!shadowRoot.getElementById("p-engine-dropdown")) return;
-          buildMiraItems(models);
-        });
+          getMiraModels().then((models) => {
+            if (!shadowRoot.getElementById("p-engine-dropdown")) return;
+            buildMiraItems(models);
+          });
+        }
       } else {
         // 普通引擎
         const isActive = isEngineActive;

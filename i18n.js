@@ -3632,3 +3632,41 @@ self.i18nAttach10 = {
   },
 };
 
+self.i18nAttach11 = {
+  "zh-CN": {
+    "notice.title": "服务通知",
+    "notice.bold": "Mira 翻译服务更新",
+    "notice.body": "请及时导出您的生词本数据。",
+    "notice.export": "导出数据 ({0})",
+    "notice.close": "确认"
+  },
+  "zh-TW": {
+    "notice.title": "服務通知",
+    "notice.bold": "Mira 翻譯服務更新",
+    "notice.body": "請及時匯出您的生詞本資料。",
+    "notice.export": "匯出資料 ({0})",
+    "notice.close": "確認"
+  },
+  "en": {
+    "notice.title": "Service Notice",
+    "notice.bold": "Mira Update",
+    "notice.body": "Please export your vocabulary data below.",
+    "notice.export": "Export Data ({0})",
+    "notice.close": "Close"
+  },
+  "ja": {
+    "notice.title": "サービス通知",
+    "notice.bold": "Mira 翻訳の更新",
+    "notice.body": "単語帳のデータをエクスポートしてください。",
+    "notice.export": "エクスポート ({0})",
+    "notice.close": "確認"
+  },
+  "ko": {
+    "notice.title": "서비스 안내",
+    "notice.bold": "Mira 번역기 업데이트",
+    "notice.body": "단어장 데이터를 내보내기 해주세요.",
+    "notice.export": "내보내기 ({0})",
+    "notice.close": "확인"
+  }
+};
+

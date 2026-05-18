@@ -4548,37 +4548,37 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         // 打开欢迎页
         chrome.tabs.create({ url: "https://os9sur.github.io/mira-trans/welcome.html" });
     }
-    if (details.reason === "update") {
-    try { 
-        const stored = await safeGetStorage(['install_time', 'usage_count']);
-        const installTime = stored?.install_time || Date.now();
-        const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-        if (daysSinceInstall < 7) return;
+//     if (details.reason === "update") {
+//     try { 
+//         const stored = await safeGetStorage(['install_time', 'usage_count']);
+//         const installTime = stored?.install_time || Date.now();
+//         const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+//         if (daysSinceInstall < 7) return;
 
-        const shownKey = 'review_page_shown_v1';
-        const shown = await safeGetStorage(shownKey);
-        if (shown?.[shownKey]) return;
+//         const shownKey = 'review_page_shown_v1';
+//         const shown = await safeGetStorage(shownKey);
+//         if (shown?.[shownKey]) return;
 
-        await safeSetStorage({ [shownKey]: true });
+//         await safeSetStorage({ [shownKey]: true });
  
-        const { browser, timezone } = getDeviceInfo();
-        const clientId = await getClientId();
-        trackEvent('review_page_shown', {
-            browser_lang: navigator.language,
-            timezone,
-            browser,
-            days_since_install: Math.floor(daysSinceInstall),
-            usage_count: stored?.usage_count || 0,
-            previous_version: details.previousVersion,
-            update_version: chrome.runtime.getManifest().version,
-            client_id: clientId,
-            trigger: 'update', 
-        });
-        chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
-    } catch (e) {
-        return;
-    }
-}
+//         const { browser, timezone } = getDeviceInfo();
+//         const clientId = await getClientId();
+//         trackEvent('review_page_shown', {
+//             browser_lang: navigator.language,
+//             timezone,
+//             browser,
+//             days_since_install: Math.floor(daysSinceInstall),
+//             usage_count: stored?.usage_count || 0,
+//             previous_version: details.previousVersion,
+//             update_version: chrome.runtime.getManifest().version,
+//             client_id: clientId,
+//             trigger: 'update', 
+//         });
+//         chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+//     } catch (e) {
+//         return;
+//     }
+// }
 });
 
 // ============ 卸载时配置 ============
