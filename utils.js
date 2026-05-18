@@ -6,10 +6,7 @@
  */
 
 const IS_DEV = true;
-const globalDefault_Page=true;
-const globalDefault_Select=true;
-const globalDefault_YT=true;
-const enable_pro_features = true; 
+
 const api = (typeof chrome !== 'undefined' && chrome.runtime?.id)
   ? (typeof browser !== 'undefined' ? browser : chrome)
   : {};
@@ -300,6 +297,12 @@ function getCurrentLang() {
     'en';
 }
 
+const showNotice = false; 
+let globalDefault_Page    = !showNotice;
+let globalDefault_Select  = !showNotice;
+let globalDefault_YT      = !showNotice;
+let enable_pro_features   = false;
+
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };
 if (typeof chrome !== 'undefined' && chrome.storage) {
@@ -494,7 +497,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10','i18nAttach11'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];

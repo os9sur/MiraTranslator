@@ -68,7 +68,7 @@ async function initOnboarding() {
     if (labelEl) labelEl.style.display = 'block';
   }
 }
- 
+
 
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
 
@@ -197,29 +197,138 @@ async function initNoticeBar() {
   });
 }
 
+async function initUpdateNotify() {
+  let activeVocab = [];
+  try {
+    const vocabulary = await idb.vocabulary.getAll();
+    activeVocab = vocabulary.filter(item => !item.deleted);
+  } catch (e) {
+    console.error("Failed to fetch vocabulary", e);
+  }
+
+  const guideEl = document.getElementById('welcome-guide');
+  if (!guideEl) return;
+
+  const exportBtnHtml = activeVocab.length > 0 ? `
+  <button id="notice-export-btn" style="
+    background: #fcfcfc;
+    color: #555;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    width: 100%;
+    pointer-events: auto;
+    transition: all 0.2s;
+  ">${t('notice.export', null, activeVocab.length)}</button>
+` : '';
+
+
+  guideEl.innerHTML = `
+  <div style="
+    background: #fff;
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    max-width: 320px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.18);
+  ">
+    <div style="font-size: 40px; margin-bottom: 20px;">✨</div>
+    <h3 style="margin: 0 0 14px; font-size: 16px; font-weight: 600; color: #1a1a1a;">
+      ${t('notice.title')}
+    </h3>
+    <div style="font-size: 13px; color: #555; line-height: 1.8; margin: 0 0 24px; text-align: left;">
+      <p style="margin: 0 0 10px;"><strong> </strong></p>
+      <p style="margin: 0;">${t('notice.body')}</p>
+    </div>
+    ${exportBtnHtml}
+    <button id="notice-close-btn" style="
+      background: #1890ff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      pointer-events: auto;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(24,144,255,0.2);
+    ">${t('notice.close')}</button>
+  </div>
+`;
+
+  guideEl.style.display = 'flex';
+  guideEl.style.opacity = '1';
+  guideEl.style.zIndex = '9999'; // 确保遮罩层在最上面
+
+  // 绑定导出逻辑 (这部分你的代码很完美，不用动)
+  if (activeVocab.length > 0) {
+    const exportBtn = document.getElementById('notice-export-btn');
+    exportBtn.addEventListener('click', async () => {
+      activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
+      let csvContent = `\ufeff${t('word')},${t('meaning')},${t('note')},Source,URL,${t('addTime')}\n`;
+
+      activeVocab.forEach(item => {
+        let transText = "";
+        if (typeof item.trans === 'object' && item.trans !== null) {
+          const basic = item.trans.basic || "";
+          const detail = (item.trans.dictData || []).map(d => `${d.pos ? d.pos + ' ' : ''}${Array.isArray(d.meanings) ? d.meanings.join(' ') : (d.meanings || "")}`).join(' | ');
+          transText = basic + (detail ? ` [${detail}]` : "");
+        } else {
+          transText = item.trans || "";
+        }
+
+        const f = (val) => `"${(val || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ')}"`;
+        csvContent += `${f(item.word)},${f(transText)},${f(item.note)},${f(item.title)},${f(item.src)},${f(new Date(item.date).toLocaleString())}\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Mira_Vocabulary_Backup_${new Date().toISOString().slice(0, 10)}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    exportBtn.addEventListener('mouseenter', () => exportBtn.style.background = '#f0f0f0');
+    exportBtn.addEventListener('mouseleave', () => exportBtn.style.background = '#fcfcfc');
+  }
+
+  // 将跳转卸载页改为纯粹的关闭弹窗
+  document.getElementById('notice-close-btn').onclick = () => {
+    window.close();
+  };
+}
 document.addEventListener('DOMContentLoaded', async () => {
-  // initRetirement();
-  // return;
-const shown = await safeGetStorage('review_page_shown_v1');
-if (!shown?.review_page_shown_v1) {
+  if (showNotice) {
+    initUpdateNotify();
+    return;
+  }
+  const shown = await safeGetStorage('review_page_shown_v1');
+  if (!shown?.review_page_shown_v1) {
     const installData = await safeGetStorage('install_time');
     const installTime = installData?.install_time || Date.now();
-    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24); 
+    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
     if (daysSinceInstall >= 7) {
-        await safeSetStorage({ review_page_shown_v1: true });
-        const { browser, timezone } = getDeviceInfo();
-        const usageData = await safeGetStorage('usage_count');
-        trackEvent('review_page_shown', {
-            browser_lang: navigator.language,
-            timezone,
-            browser,
-            days_since_install: Math.floor(daysSinceInstall),
-            usage_count: usageData?.usage_count || 0,
-            trigger: 'popup',
-        });
-        chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+      await safeSetStorage({ review_page_shown_v1: true });
+      const { browser, timezone } = getDeviceInfo();
+      const usageData = await safeGetStorage('usage_count');
+      trackEvent('review_page_shown', {
+        browser_lang: navigator.language,
+        timezone,
+        browser,
+        days_since_install: Math.floor(daysSinceInstall),
+        usage_count: usageData?.usage_count || 0,
+        trigger: 'popup',
+      });
+      chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
     }
-}
+  }
 
   initNoticeBar();
 
@@ -228,7 +337,7 @@ if (!shown?.review_page_shown_v1) {
   const btnAvatar = document.getElementById('btnAvatar');
   if (btnLogin) btnLogin.style.display = 'none';
   if (btnAvatar) btnAvatar.style.display = 'none';
-  
+
   function showPanel(panelId) {
     const allPanels = [
       'mainContainer',
@@ -2795,6 +2904,7 @@ if (!shown?.review_page_shown_v1) {
   // ── Auth UI 状态管理 ──────────────────────────────
   let userData = null;
   function updateAuthUI(user) {
+    if(!enable_pro_features) return;
     userData = user;
     const btnLogin = document.getElementById('btnLogin');
     const btnAvatar = document.getElementById('btnAvatar');
@@ -2920,9 +3030,10 @@ if (!shown?.review_page_shown_v1) {
     }
   }
 
-  document.getElementById('btnGoogleLogin').addEventListener('click', () => doLogin('google'));
-  document.getElementById('btnMicrosoftLogin').addEventListener('click', () => doLogin('microsoft'));
-
+  if (enable_pro_features) {
+    document.getElementById('btnGoogleLogin').addEventListener('click', () => doLogin('google'));
+    document.getElementById('btnMicrosoftLogin').addEventListener('click', () => doLogin('microsoft'));
+  }
 
   document.getElementById('btnLogout').addEventListener('click', async () => {
     await safeSendMessage({ action: 'logout' });
