@@ -771,6 +771,7 @@ function getCacheKey(text, engine, lang) {
   }
   return `tr_${safeEngine}_${contentPart}_${safeLang}`;
 }
+
 /**
  * 获取详细翻译结果
  * 适配多级数据结构：基础译文、音标、详细词典释义

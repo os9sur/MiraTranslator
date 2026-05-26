@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     data-word="${displayWord}"
                     data-note="${(item.note || '').replace(/"/g, '&quot;')}"
                     style="color:#94a3b8; font-size:13px; cursor:pointer; 
-                          display:block; word-break:break-all; white-space:normal;">
+                          display:block; word-break:break-word; white-space:normal;">
                 ${item.note}
               </span>`
           : `<span class="note-text note-empty"

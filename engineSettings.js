@@ -897,7 +897,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <span>${line.replace(/^\p{Emoji}\s*/u, '')}</span>
       </p>`;
                 }).join('');
-            const builtInTemplate =   `
+            const builtInTemplate = `
                 <div class="main-header">
                 <h2 style="margin:0">${displayAlias}</h2>
             </div>
@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
                 </div>
                 <div class="form-container">
-                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;">⚡ ${tpl.tip}</p>` : ''}
+                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;-webkit-user-select:text !important; user-select:text !important; cursor:text !important;">⚡ ${tpl.tip}</p>` : ''}
                     ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
                     ${(tpl.fields || []).map(f => getRow(f)).join('')}
                 </div>`;
