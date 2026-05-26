@@ -95,9 +95,10 @@ async function applySyncResultToLocal(mergedData) {
                 src: item.src || item.url || (existing ? existing.src : ""),
                 title: item.title || (existing ? existing.title : ""),
                 date: Number(item.date || item.updated || Date.now()),
-                updated: Number(item.updated || Date.now()),
+                updated: Number(item.updated || 0),
                 deleted: !!item.deleted,
-                lv: item.lv || 0
+                lv: item.lv || 0,
+                note: item.note || (existing ? existing.note : ""),
             };
             if (!existing || (newItem.updated >= (existing.updated || 0))) {
                 combinedMap.set(key, newItem);
@@ -3784,9 +3785,55 @@ function drawText(ctx, text, x, y, color) {
     ctx.fillText(text, x, y + 10);
 }
 
+//自动清理缓存
+async function cleanExpiredCache() {
+    const EXPIRE_MS = 60 * 24 * 60 * 60 * 1000;
+    const MAX_COUNT = 50000;
+    const CLEAN_INTERVAL = 24 * 60 * 60 * 1000;
+    //const CLEAN_INTERVAL=0; //测试
 
+    logger.log('[Cache] cleanExpiredCache 开始执行');
 
-chrome.runtime.onStartup.addListener(() => detectAndCacheDefaultEngine(false));
+    const lastClean = await handleIdbGet(['_cacheCleanTs']);
+    const lastTs = lastClean?.['_cacheCleanTs'] || 0;
+    logger.log('[Cache] 上次清理时间:', lastTs, '距今:', Date.now() - lastTs, 'ms');
+    if (Date.now() - lastTs < CLEAN_INTERVAL) {
+        logger.log('[Cache] 未到清理间隔，跳过');
+        return;
+    }
+
+    const all = await handleIdbGetAll('tr_');
+    const now = Date.now();
+    const entries = Object.entries(all || {});
+    logger.log('[Cache] 读取到 tr_ 条数:', entries.length);
+
+    const getTs = (v) => v?.ts || v?.timestamp || 0;  //  兼容两个字段名
+
+    const expired = entries
+        .filter(([, v]) => getTs(v) && (now - getTs(v)) > EXPIRE_MS)
+        .map(([k]) => k);
+    logger.log('[Cache] 过期条数:', expired.length);
+    for (const k of expired) await handleIdbRemove(k);
+
+    const remaining = entries
+        .filter(([k, v]) => !expired.includes(k) && getTs(v))
+        .sort(([, a], [, b]) => getTs(a) - getTs(b));
+    logger.log('[Cache] 剩余条数:', remaining.length, '上限:', MAX_COUNT);
+
+    if (remaining.length > MAX_COUNT) {
+        const toDelete = remaining.slice(0, remaining.length - MAX_COUNT);
+        logger.log('[Cache] 超出上限，额外删除:', toDelete.length);
+        for (const [k] of toDelete) await handleIdbRemove(k);
+    }
+
+    await handleIdbSet({ '_cacheCleanTs': Date.now() });
+    logger.log('[Cache] 清理完成');
+}
+
+chrome.runtime.onStartup.addListener(() => {
+    detectAndCacheDefaultEngine(false);
+    setTimeout(() => cleanExpiredCache(), 5000);
+});
 
 async function detectAndCacheDefaultEngine(force = false) {
     if (!force) {
@@ -4548,37 +4595,37 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         // 打开欢迎页
         chrome.tabs.create({ url: "https://os9sur.github.io/mira-trans/welcome.html" });
     }
-//     if (details.reason === "update") {
-//     try { 
-//         const stored = await safeGetStorage(['install_time', 'usage_count']);
-//         const installTime = stored?.install_time || Date.now();
-//         const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-//         if (daysSinceInstall < 7) return;
+    //     if (details.reason === "update") {
+    //     try { 
+    //         const stored = await safeGetStorage(['install_time', 'usage_count']);
+    //         const installTime = stored?.install_time || Date.now();
+    //         const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
+    //         if (daysSinceInstall < 7) return;
 
-//         const shownKey = 'review_page_shown_v1';
-//         const shown = await safeGetStorage(shownKey);
-//         if (shown?.[shownKey]) return;
+    //         const shownKey = 'review_page_shown_v1';
+    //         const shown = await safeGetStorage(shownKey);
+    //         if (shown?.[shownKey]) return;
 
-//         await safeSetStorage({ [shownKey]: true });
- 
-//         const { browser, timezone } = getDeviceInfo();
-//         const clientId = await getClientId();
-//         trackEvent('review_page_shown', {
-//             browser_lang: navigator.language,
-//             timezone,
-//             browser,
-//             days_since_install: Math.floor(daysSinceInstall),
-//             usage_count: stored?.usage_count || 0,
-//             previous_version: details.previousVersion,
-//             update_version: chrome.runtime.getManifest().version,
-//             client_id: clientId,
-//             trigger: 'update', 
-//         });
-//         chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
-//     } catch (e) {
-//         return;
-//     }
-// }
+    //         await safeSetStorage({ [shownKey]: true });
+
+    //         const { browser, timezone } = getDeviceInfo();
+    //         const clientId = await getClientId();
+    //         trackEvent('review_page_shown', {
+    //             browser_lang: navigator.language,
+    //             timezone,
+    //             browser,
+    //             days_since_install: Math.floor(daysSinceInstall),
+    //             usage_count: stored?.usage_count || 0,
+    //             previous_version: details.previousVersion,
+    //             update_version: chrome.runtime.getManifest().version,
+    //             client_id: clientId,
+    //             trigger: 'update', 
+    //         });
+    //         chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
+    //     } catch (e) {
+    //         return;
+    //     }
+    // }
 });
 
 // ============ 卸载时配置 ============
