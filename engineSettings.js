@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
                     ${noticeLines}
                 </div>
-                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px;margin-left:155px;width:100%;display:none;">
+                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px; display:none;">
                     ${t('enableEngineNow', uiLanguage)}
                 </button>
             </div>`;
@@ -947,13 +947,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isOk) {
                     icon.innerText = '✓'; icon.style.color = '#3fb950';
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
-                    btn.style.display = 'block';
+                    btn.style.display = 'flex';
                     await safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 } else {
                     icon.innerText = '✕'; icon.style.color = '#f85149';
                     const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
                     text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px;opacity:0.7;display:block;margin-top:11px;line-height:1.4;">${friendlyError}</span>` : ''}`;
-                    btn.style.display = 'block'; btn.style.opacity = '0.6';
+                    btn.style.display = 'flex'; btn.style.opacity = '0.6';
                     await safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
                 }
             };
@@ -1012,10 +1012,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         let html = `
                 <div class="main-header">
-                    <h2 style="margin:0">${t('engineConfig', uiLanguage)}：${displayAlias}</h2>
+                    <h2 style="margin:0">${t('engineConfig', uiLanguage)}: ${displayAlias}</h2>
                 </div>
                 <div class="form-container">
-                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;-webkit-user-select:text !important; user-select:text !important; cursor:text !important;">⚡ ${tpl.tip}</p>` : ''}
+                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;-webkit-user-select:text !important; user-select:text !important; cursor:text !important;">${tpl.tip}</p>` : ''}
                     ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
                     ${(tpl.fields || []).map(f => getRow(f)).join('')}
                 </div>`;
@@ -1809,14 +1809,17 @@ function _buildAIPromptHTML(saved) {
                     spellcheck="false"
                 >${_escapeHtml(webVal)}</textarea>
                 <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
-                <div class="ai-prompt-style-hint">${t('cpHint')}</div>
+                
             </div>
 
             <div class="ai-prompt-item">
                 <div class="ai-prompt-item-header">
                     <div class="ai-prompt-item-label">
-                        🎬 <span>${t('cpSub')}</span>
-                    </div>
+                    <svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align: middle; margin-right: 6px;">
+                <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
+                <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
+                </svg>YouTube<span>${t('cpSub')}</span>
+                </div>
                     <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
                             data-target="ai-prompt-subtitle">${t('cpClear')}</button>
                 </div>

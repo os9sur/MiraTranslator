@@ -331,6 +331,7 @@ async function applyUserStyles(
         word-break: break-word !important;
         white-space: ${isTwitter || isFBC || inheritedWhiteSpace === "pre-wrap" ? "pre-wrap" : "normal"} !important;
         line-height: 1.5 !important;
+        writing-mode: horizontal-tb !important;
         overflow: ${finalOverflow} !important;
         color: ${color} !important;
         background: transparent !important;
@@ -479,7 +480,13 @@ async function applyUserStyles(
       transEl.style.setProperty("display", "block", "important");
       transEl.style.setProperty("margin-top", "4px", "important");
     }
-
+    if (isTwitter) {
+      const parent = transEl.parentElement;
+      if (parent) {
+        parent.style.setProperty("flex-direction", "column", "important");
+        parent.style.setProperty("align-items", "flex-start", "important");
+      }
+    }
     if (borderType === "marker") {
       const span = document.createElement("span");
       span.className = "marker-span";
@@ -524,6 +531,7 @@ async function applyUserStyles(
         ancestor = ancestor.parentElement;
       }
     }
+    transEl.style.setProperty("writing-mode", "horizontal-tb", "important");
   };
   try {
     const data = await safeGetStorage("userStyleConfig");
@@ -1892,7 +1900,6 @@ const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
   //排除逻辑
   if (el.tagName === "LI") {
-    // ✅ 新增：跳过 carousel 卡片，避免破坏轮播布局
     if (el.classList.contains("a-carousel-card") || el.closest(".a-carousel")) {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
@@ -2816,16 +2823,11 @@ async function handleTranslateElement(el, forceRefresh = false) {
     // YouTube 优先取 a 标签字体，其他直接取 el
     let originFontSize = originStyle.fontSize;
     if (isYoutube) {
-      const elSize = parseFloat(originFontSize);
-      // 只有当 el 本身字体异常小（h3 的 11.7px 这种情况）才往内部找 a
-      if (elSize < 12) {
-        const innerA = el.querySelector("a");
-        if (innerA) {
-          const innerSize = parseFloat(
-            window.getComputedStyle(innerA).fontSize,
-          );
-          if (innerSize > elSize) originFontSize = innerSize + "px";
-        }
+      const innerA = el.querySelector("a");
+      if (innerA) {
+        const innerSize = parseFloat(window.getComputedStyle(innerA).fontSize);
+        const elSize = parseFloat(originFontSize);
+        if (innerSize > elSize) originFontSize = innerSize + "px";
       }
     }
     if (isFacebook) {
@@ -4021,6 +4023,9 @@ const getTextFragmentAnchor = (word) => {
 };
 function initSelectionTranslate() {
   const logoBase64 = ASSETS.logoBase64;
+  
+  let _capturedContext = "";
+  let _capturedContextTranslation = "";
   window.addEventListener(
     "scroll",
     () => {
@@ -4715,31 +4720,31 @@ function initSelectionTranslate() {
     }
 
       .lang-tag-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 10px;
-  cursor: pointer;
-  border-radius: 6px;
-  border: none !important;
-  outline: none;
-  background: transparent !important;
-  box-shadow: none;
-  transition: background 0.2s ease;
-  min-width: unset;
-  width: auto;
-  height: auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-}
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none !important;
+      outline: none;
+      background: transparent !important;
+      box-shadow: none;
+      transition: background 0.2s ease;
+      min-width: unset;
+      width: auto;
+      height: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
 
-.lang-tag-btn:hover {
-  background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
-  transform: none;
-}
+    .lang-tag-btn:hover {
+      background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
+      transform: none;
+    }
 
-.lang-tag-btn:active {
-  background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
-}
+    .lang-tag-btn:active {
+      background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
+    }
         /* ── 原文展开按钮 ── */
       .p-orig-toggle {
         display:        inline-flex;
@@ -4789,21 +4794,44 @@ function initSelectionTranslate() {
       }
 
       #p-engine-wrap:hover,
-.p-eng-item:hover,
-.p-eng-subitem:hover {
-  background: rgba(99, 102, 241, 0.12);
-  border-radius: 7px;
-}
-#p-engine-dropdown::-webkit-scrollbar {
-  width: 4px;
-}
-#p-engine-dropdown::-webkit-scrollbar-track {
-  background: transparent;
-}
-#p-engine-dropdown::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--p-accent) 40%, transparent);
-  border-radius: 4px;
-}
+      .p-eng-item:hover,
+      .p-eng-subitem:hover {
+        background: rgba(99, 102, 241, 0.12);
+        border-radius: 7px;
+      }
+      #p-engine-dropdown::-webkit-scrollbar {
+        width: 4px;
+      }
+      #p-engine-dropdown::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #p-engine-dropdown::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--p-accent) 40%, transparent);
+        border-radius: 4px;
+      }
+
+      /* 例句喇叭 */
+    .mira-example-speak {
+      position: relative;
+      transition: all 0.2s;
+    }
+    .mira-example-speak.is-speaking {
+      color: #38bdf8 !important;
+      filter: drop-shadow(0 0 4px rgba(56,189,248,0.8));
+    }
+    .mira-example-speak.is-speaking::before,
+    .mira-example-speak.is-speaking::after {
+      content: "";
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%; height: 100%;
+      border: 1.5px solid #38bdf8;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .mira-example-speak.is-speaking::before { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite; }
+    .mira-example-speak.is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
       `;
 
     return style;
@@ -5118,12 +5146,12 @@ function initSelectionTranslate() {
         padding:6px 10px; font-size:12px; font-weight:600;
         color:${colors.textMuted}; user-select:none;
     `;
-    if(enable_pro_features){
-        header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator
+        if (enable_pro_features) {
+          header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator
         <span style="margin-left:auto; background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6)) !important; color:#fff;
             font-size:9px; padding:1px 5px; border-radius:8px;">Pro</span>`;
-        dropdown.appendChild(header);
-    }
+          dropdown.appendChild(header);
+        }
 
         //  创建子项容器
         const miraContainer = document.createElement("div");
@@ -5738,24 +5766,23 @@ function initSelectionTranslate() {
 
       let fullTranslation;
       if (snapshot?.word?.toLowerCase().trim() === wordLower) {
+        const isWord = !wordText.includes(" ") && wordText.length <= 30;// 判断是否单词
         fullTranslation = {
           basic: cleanText(snapshot.basic),
           phonetic: snapshot.phonetic,
+          sourcePhonetic: snapshot.sourcePhonetic || "",
           dictData: snapshot.dictData,
-        };
-      } else if (
-        lastTranslationResult?.word?.toLowerCase().trim() === wordLower
-      ) {
-        fullTranslation = {
-          basic: cleanText(lastTranslationResult.basic || ""),
-          phonetic: lastTranslationResult.phonetic || "",
-          dictData: lastTranslationResult.dictData || [],
+          examples: snapshot.examples || [],
+          sourceLang: snapshot.sourceLang || "",
+          context: isWord ? (snapshot.context || "") : "",
+          contextTranslation: isWord ? (snapshot.contextTranslation || "") : "",
         };
       } else {
         fullTranslation = {
           basic: cleanText(shadow.getElementById("p-basic")?.innerText || ""),
           phonetic: shadow.getElementById("p-phonetic")?.innerText || "",
           dictData: [],
+          examples: [],
         };
       }
 
@@ -6391,8 +6418,8 @@ function initSelectionTranslate() {
     // 音标
     const pPhonetic = shadow.getElementById("p-phonetic");
     if (pPhonetic)
-      pPhonetic.innerText = res.phonetic
-        ? `/${res.phonetic.replace(/[\[\]\/]/g, "")}/`
+      pPhonetic.innerText = (res.phonetic || res.sourcePhonetic)
+        ? `/${(res.phonetic || res.sourcePhonetic).replace(/[\[\]\/]/g, "")}/`
         : "";
 
     // 基本释义
@@ -6518,14 +6545,25 @@ function initSelectionTranslate() {
     // 保存快照
     const saveBtn = shadow.getElementById("p-save");
     if (saveBtn) {
+      const detectSourceLang = (text) => {
+        if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return "ja";
+        if (/[\u4E00-\u9FAF]/.test(text)) return "zh";
+        if (/[\uAC00-\uD7AF]/.test(text)) return "ko";
+        return "en";
+      };
       saveBtn._miraSnapshot = {
         word: text,
         basic: res.basic || "",
         phonetic: res.phonetic || "",
+        sourcePhonetic: res.sourcePhonetic || "",
         dictData: res.dictData || [],
         examples: res.examples || [],
         prototype: res.prototype || null,
+        sourceLang: res.langInfo?.code || detectSourceLang(text),
+        context: _capturedContext  || "",
+        contextTranslation: _capturedContextTranslation  || "",
       };
+      logger.log('[snapshot]', saveBtn._miraSnapshot);
       saveBtn._miraReady = true;
     }
 
@@ -6561,16 +6599,54 @@ function initSelectionTranslate() {
                 ),
               );
               const dir = isRTL ? "rtl" : "ltr";
+              const safeEn = en.replace(/'/g, "\\'");
               return `<div class="mira-font-family" style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
                        border-radius:2px;word-break:break-word;direction:${dir};text-align:${dir === "rtl" ? "right" : "left"};">
-            <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;">
-              ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
-            </div>
-           <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
-          </div>`;
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
+            ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
+          </div>
+          <span class="mira-example-speak" data-sentence="${safeEn}"
+            style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;
+                   transition:color 0.2s;opacity:0.6;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </span>
+        </div>
+        <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
+      </div>`;
             })
             .join("");
         pE.style.display = "block";
+
+        // 绑定例句发音
+        pE.querySelectorAll(".mira-example-speak").forEach(btn => {
+          btn.addEventListener("mouseenter", () => {
+            btn.style.color = "#38bdf8";
+            btn.style.opacity = "1";
+            btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))";
+          });
+          btn.addEventListener("mouseleave", () => {
+            if (!btn.classList.contains("is-speaking")) {
+              btn.style.color = "var(--p-text-muted)";
+              btn.style.opacity = "0.6";
+              btn.style.filter = "";
+            }
+          });
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const sentence = btn.getAttribute("data-sentence");
+            if (!sentence) return;
+
+            btn.style.transform = "scale(0.8)";
+            setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
+
+            speakText(sentence, btn, "en");
+          });
+        });
       } else {
         pE.style.display = "none";
       }
@@ -6936,6 +7012,53 @@ function initSelectionTranslate() {
           }
           const detectedSourceLang =
             currentSource || detectSourceLang(finalQuery) || "auto";
+
+          //上下文
+          if (!shadowHost) initShadowDOM();
+          try {
+            const range = selection.getRangeAt(0);
+            const container = range.commonAncestorContainer;
+
+            // 找到原文所在段落
+            const paragraph = container.nodeType === Node.TEXT_NODE
+              ? container.parentElement
+              : container;
+            const block = paragraph.closest('[data-translated]') || paragraph;
+
+            // 原文文本
+            const fullText = (block.textContent || "").replace(/\s+/g, " ").trim();
+            const selectedText = finalQuery;
+            const idx = fullText.indexOf(selectedText);
+
+            if (idx !== -1) {
+              const start = Math.max(0, idx - 80);
+              const end = Math.min(fullText.length, idx + selectedText.length + 80);
+              let context = fullText.slice(start, end).trim();
+              if (start > 0) context = "..." + context;
+              if (end < fullText.length) context = context + "...";
+              _capturedContext = context;
+              _capturedContextTranslation = "";
+            } else {
+              _capturedContext = fullText.slice(0, 160) || "";
+            }
+
+            // 找相邻译文
+            const nextEl = block.nextElementSibling;
+            if (nextEl && nextEl.classList.contains("kt-paragraph-translation")) {
+              _capturedContextTranslation = nextEl.textContent.trim();
+            } else {
+              // 也找父元素下一个兄弟
+              const parentNext = block.parentElement?.nextElementSibling;
+              if (parentNext && parentNext.classList.contains("kt-paragraph-translation")) {
+                _capturedContextTranslation = parentNext.textContent.trim();
+              } else {
+                _capturedContextTranslation = "";
+              }
+            }
+          } catch (e) {
+            _capturedContext = "";
+            _capturedContextTranslation = "";
+          }
           await renderAndShowPopup(
             finalQuery,
             { clientX: mouseX, clientY: mouseY },
@@ -7886,7 +8009,7 @@ function injectDownloadButton() {
     .kt-dl-btn {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.25);
-      color: white; border-radius: 6px;
+      color: white; border-radius: 12px;
       padding: 3px 10px; font-size: 13px;
       cursor: pointer; transition: background 0.2s;
       white-space: nowrap;
@@ -8971,9 +9094,49 @@ function repositionTooltip(tipEl, targetEl) {
 }
 async function handleWordDblClick(e, word) {
   e.stopPropagation();
-  const cleanWord = word;
+  const cleanWord = word
+    .replace(/["""«»\[\]{}()|\\/<>!?.,;:@#$%^&*+=~`。，！？、【】《》]/g, "")
+    .trim();
   if (!cleanWord) return;
   const wordLower = cleanWord.toLowerCase();
+
+  let subtitleContext = "";
+  try {
+    const ytO = document.getElementById("yt-o");
+    const ytT = document.getElementById("yt-t");
+
+    const cleanSubtitle = (text) => {
+      return text
+        .replace(/^[\s\-–—>>\|]+/g, "")
+        .replace(/[\-–—>>\|]+$/g, "")
+        .replace(/\s*\|\s*/g, ". ")
+        .replace(/\s+-\s+/g, " ")           // 只去掉前后有空格的 - （避免误删 couldn't）
+        .replace(/\[.*?\]/g, "")            // 去掉 [...] 
+        .replace(/["""«»]/g, "")            // 去掉特殊引号
+        .replace(/\s+/g, " ")
+        .trim();
+    };
+
+    const originalText = ytO
+      ? Array.from(ytO.querySelectorAll(".kt-word"))
+        .map(el => el.textContent.trim())
+        .filter(Boolean)
+        .join(" ")
+      : "";
+    const translationText = ytT ? ytT.textContent.trim() : "";
+    const cleanEnding = (text) => {
+      return text
+        .replace(/[.\s]+$/g, "")   // 去掉结尾所有句号和空格
+        .trim();
+    };
+    const cleanedOriginal = cleanSubtitle(originalText);
+    const cleanedTranslation = cleanSubtitle(translationText);
+
+    subtitleContext = [cleanedOriginal, cleanedTranslation].filter(Boolean).join(". ");
+  } catch (err) {
+    logger.warn("[Mira] 获取字幕上下文失败:", err);
+  }
+
   let fullTranslation = null;
   const storage = await safeGetStorage(["targetLanguage"]);
   const currentLang = storage?.targetLanguage || getBrowserLang() || "en";
@@ -8983,10 +9146,14 @@ async function handleWordDblClick(e, word) {
     fullTranslation = {
       basic: res.basic || "",
       phonetic: res.phonetic || "",
+      sourcePhonetic: res.sourcePhonetic || "",
       dictData: (res.dictData || []).map((item) => ({
         ...item,
         pos: localizePos(item.pos, currentLang),
       })),
+      examples: res.examples || [],
+      sourceLang: res.langInfo?.code || "",
+      context: subtitleContext,
     };
   }
   if (!fullTranslation) return;

@@ -86,8 +86,9 @@ body {
 
 .app-container {
     display: flex;
-    width: 990px;
-    height: 80%;
+    width: 1000px;
+    max-width: 1150px;
+    height: 88%;
     background: rgba(15, 23, 42, 0.9) !important;
     backdrop-filter: blur(25px) saturate(150%);
     -webkit-backdrop-filter: blur(25px) saturate(150%);
@@ -321,7 +322,7 @@ body {
 
 .main-content {
     flex: 1;
-    padding: 73px 19px 16px 30px;
+    padding: 60px 19px 16px 30px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -329,18 +330,20 @@ body {
 }
 
 #dynamic-form-container {
-    flex: 1;
+    flex: 0 1 auto;   
+    min-height: 0;   
     padding-right: 16px;
     padding-bottom: 16px;
     overflow-y: auto;
     margin-bottom: 0;
 }
 
-.form-group {
-    display: flex;
-    flex-direction: column;
+#global-actions {
+    flex-shrink: 0;
+    margin-top: 16px;
+    overflow: visible;  
+    padding-bottom: 8px;  
 }
-
 .form-group label {
     font-size: 11px;
     color: var(--neon-blue);
@@ -377,7 +380,6 @@ body {
     padding: 16px 20px;
     position: relative;
     border-top: none !important;
-    margin-top: auto;
     flex-shrink: 0;
     min-height: 90px;
     justify-content: center;
@@ -397,14 +399,17 @@ body {
     box-shadow: 0 -2px 10px rgba(59, 130, 246, 0.2);
     opacity: 0.6;
 }
-
+#activateBuiltIn {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
 .button-group {
     display: flex;
     flex-direction: row;
     gap: 12px;
     justify-content: center;
     margin-top: 12px;
-    width: 100%;
+    width: 100% !important; 
     flex-wrap: wrap;
 }
 
@@ -501,7 +506,7 @@ body {
 .btn-save:hover {
     filter: brightness(1.2);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(56, 189, 248, 0.6) !important;
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45) !important;
 }
 
 .btn-save:active,
@@ -539,13 +544,15 @@ body {
     inset: -2px;
     border-radius: 12px;
     background: linear-gradient(90deg, 
-        rgba(255,255,255,0.05) 0%,
-        rgba(59, 130, 246, 0.8) 40%,
-        rgba(147, 51, 234, 0.8) 60%,
-        rgba(255,255,255,0.05) 100%
+        rgba(255, 255, 255, 0) 0%,
+        #00f0ff 30%, 
+        #3b82f6 50%, 
+        #bd00ff 70%, 
+        rgba(255, 255, 255, 0) 100%
     );
     background-size: 200% 100%;
-    animation: borderRun 2s linear infinite;
+    animation: borderRun 2s linear infinite; 
+    filter: blur(1px) drop-shadow(0 0 4px rgba(0, 240, 255, 0.6));
     z-index: -1;
 }
 
@@ -717,7 +724,7 @@ body {
 
 .close-btn {
     position: absolute;
-    top: 10px;
+    top: 1px;
     right: 20px;
     width: 60px;
     height: 60px;

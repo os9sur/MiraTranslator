@@ -3538,7 +3538,7 @@ self.i18nAttach10 = {
 ---
     💡 AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，这是正常现象。
     💰 注意：AI 翻译并非模型越新越好。翻译任务不需要复杂推理，主流模型已完全胜任，最新模型的价格往往高出数倍。
-    🔑 如需使用 AI 翻译，可前往各大 AI 平台自行申请 API Key 并配置。若本地显卡性能较好，也可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度比商业 AI 大模型明显慢。
+    🔑 如需使用 AI 翻译，可前往各大 AI 平台自行申请 API Key 并点击左下角按钮进行配置。若本地显卡性能较好，也可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度比商业 AI 大模型明显慢。
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是为希望省去配置步骤、直接使用 AI 翻译的用户提供的付费选项。
     ❤️ 这是一个开源翻译项目 {0}，目前由作者利用业余时间独立开发维护。`,
   },
@@ -3560,7 +3560,7 @@ self.i18nAttach10 = {
 ---
     💡 AI 翻譯效果更自然，但由於模型逐字生成的機制，速度比 Google、Bing 等傳統引擎慢，這是正常現象。
     💰 注意：AI 翻譯並非模型越新越好。翻譯任務不需要複雜推理，主流模型已完全勝任，最新模型的價格往往高出數倍。
-    🔑 如需使用 AI 翻譯，可前往各大 AI 平台自行申請 API Key 並配置。若本機顯示卡效能較好，也可部署本地 AI 模型，無需連網、無限次免費使用，但翻譯速度比商業 AI 大模型明顯慢。
+    🔑 如需使用 AI 翻譯，可前往各大 AI 平台自行申請 API Key，並點擊左下角按鈕進行設定。若本機顯示卡效能較佳，也可部署本地 AI 模型，無需連網、不限次數免費使用，但翻譯速度會比商業 AI 大型模型明顯較慢。
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是為希望省去配置步驟、直接使用 AI 翻譯的用戶提供的付費選項。
     ❤️ 這是一個開源翻譯專案 {0}，目前由作者利用業餘時間獨立開發維護。`,
   },
@@ -3582,9 +3582,9 @@ self.i18nAttach10 = {
 ---
     💡 AI translation produces more natural results, but is slower than traditional engines like Google or Bing — this is expected behavior due to the token-by-token generation process.
     💰 Note: A newer AI model does not mean better translation. Translation requires no complex reasoning — mainstream models are more than sufficient, while the latest ones can cost several times more.
-    🔑 To use AI translation, you can obtain an API key from any major AI provider and configure it yourself. If your local GPU is powerful enough, you can also deploy a local AI model — no internet required, free to use unlimited times — though translation speed will be noticeably slower than commercial AI services.
+    🔑 To use AI translation, obtain an API key from your preferred AI platform and configure it via the button in the bottom-left corner. If you have a capable local GPU, you can also run a local AI model — no internet required, unlimited and free — though translation speed will be noticeably slower than commercial AI services.
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> is a paid option for users who want to use AI translation without the hassle of configuration.
-    ❤️ This is an open-source project {0}, independently developed and maintained by the author in their spare time.`,
+    ❤️ This is an open-source project {0}, independently developed and maintained by the author in spare time.`,
   },
   "ja": {
     cpTitle: "カスタムプロンプト",
@@ -3604,7 +3604,7 @@ self.i18nAttach10 = {
 ---
     💡 AI 翻訳はより自然な訳文を生成しますが、トークン単位の生成処理という仕組み上、Google や Bing などの従来エンジンより速度が遅くなります。これは正常な動作です。
     💰 注意：AI 翻訳においてモデルが新しいほど優れているわけではありません。翻訳には複雑な推論は不要であり、主流モデルで十分対応できます。最新モデルは数倍以上のコストがかかる場合があります。
-    🔑 AI 翻訳を利用するには、各 AI プラットフォームで API Key を取得して設定してください。ローカル GPU の性能が十分であれば、ローカル AI モデルをデプロイすることも可能です。インターネット不要で無制限に無料利用できますが、翻訳速度は商用 AI サービスより明らかに遅くなります。
+    🔑 AI翻訳を利用するには、各AIプラットフォームでAPIキーを取得し、左下のボタンから設定してください。ローカルGPUの性能が十分であれば、ローカルAIモデルを導入することも可能です。インターネット不要・回数無制限で無料利用できますが、商用AIモデルと比べて翻訳速度は遅くなります。
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> は、設定なしで AI 翻訳をすぐに使いたい方向けの有料オプションです。
     ❤️ これは作者が業務外の時間を使って個人で開発・保守しているオープンソースの翻訳ツール {0} です。`,
   },
@@ -3626,9 +3626,141 @@ self.i18nAttach10 = {
 ---
     💡 AI 번역은 더 자연스러운 결과를 제공하지만, 토큰 단위로 생성되는 특성상 Google, Bing 등 기존 엔진보다 속도가 느립니다. 이는 정상적인 동작입니다.
     💰 참고: AI 번역에서 최신 모델이 반드시 더 좋은 것은 아닙니다. 번역에는 복잡한 추론이 필요하지 않으며 주류 모델로도 충분히 대응할 수 있습니다. 최신 모델은 몇 배 이상의 비용이 발생할 수 있습니다.
-    🔑 AI 번역을 사용하려면 주요 AI 플랫폼에서 API Key를 발급받아 직접 설정하시면 됩니다. 로컬 GPU 성능이 충분하다면 로컬 AI 모델을 배포할 수도 있습니다. 인터넷 없이 무제한 무료로 사용할 수 있지만, 번역 속도는 상용 AI 서비스보다 눈에 띄게 느립니다。
+    🔑 AI 번역을 사용하려면 각 AI 플랫폼에서 API 키를 발급받아 좌측 하단 버튼을 통해 설정하세요. 로컬 GPU 성능이 충분하다면 로컬 AI 모델을 직접 배포할 수도 있습니다. 인터넷 연결 없이 무제한 무료로 사용할 수 있지만, 상용 AI 모델보다 번역 속도가 눈에 띄게 느립니다.
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 는 설정 없이 AI 번역을 바로 사용하고 싶은 분들을 위한 유료 옵션입니다.
     ❤️ 이 프로젝트는 작자가 개인 시간을 활용해 독립적으로 개발·유지 관리하고 있는 오픈소스 번역 도구 {0} 입니다.`,
+  },
+  "pt-BR": {
+    cpTitle: "Prompt Personalizado",
+    cpOptional: "Opcional",
+    translate_failed: "Falha na tradução",
+    cpWeb: "Tradução de Páginas",
+    cpSub: "Tradução de Legendas",
+    cpWebPH: "Ex: Use um tom formal. Mantenha os termos técnicos em inglês.",
+    cpSubPH: "Ex: Mantenha um tom coloquial. Evite traduções literais demais.",
+    cpHint: "⚠ Apenas dicas de estilo, ex: tom formal / conciso / termos médicos",
+    cpSave: "Salvar",
+    cpClear: "Limpar",
+    footerReview: "⭐ Avaliar na Loja",
+    footerFeedback: "✉️ Feedback",
+    restoreRules: "Restaurar regras padrão",
+    builtInNoticeBody: `Esta interface funciona por meio de requisições em rede pública. É destinada exclusivamente para aprendizado pessoal e uso não comercial. Não é necessário configurar nenhuma chave de API.
+---
+    💡 A tradução por IA gera resultados mais naturais, mas é mais lenta que os motores tradicionais como Google ou Bing — este é um comportamento normal devido ao processo de geração palavra por palavra (tokens).
+    💰 Nota: Um modelo de IA mais recente não significa necessariamente uma tradução melhor. Tarefas de tradução não exigem raciocínio complexo — os modelos principais já dão conta do recado perfeitamente, enquanto os mais recentes chegam a custar várias vezes mais.
+    🔑 Para usar a tradução por IA, obtenha uma chave de API na sua plataforma de IA de preferência e configure-a clicando no botão no canto inferior esquerdo. Se você tiver uma placa de vídeo (GPU) local potente, também poderá rodar um modelo de IA local — sem necessidade de internet, ilimitado e gratuito — embora a velocidade de tradução seja visivelmente mais lenta do que a dos serviços comerciais de IA.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> é uma opção paga para usuários que desejam usar a tradução por IA direto, sem o incômodo de ter que configurar tudo.
+    ❤️ Este é um projeto de código aberto {0}, desenvolvido e mantido de forma independente pelo autor em seu tempo livre.`,
+  },
+  "es": {
+    cpTitle: "Prompt Personalizado",
+    cpOptional: "Opcional",
+    translate_failed: "Error al traducir",
+    cpWeb: "Traducción Web",
+    cpSub: "Traducción de Subtítulos",
+    cpWebPH: "p. ej., Usar tono formal. Mantener la terminología técnica en inglés.",
+    cpSubPH: "p. ej., Mantener un tono conversacional. Evitar traducciones demasiado literales.",
+    cpHint: "⚠ Solo indicaciones de estilo, p. ej., formal / conciso / términos médicos",
+    cpSave: "Guardar",
+    cpClear: "Borrar",
+    footerReview: "⭐ Calificar en la Tienda",
+    footerFeedback: "✉️ Comentarios",
+    restoreRules: "Restaurar reglas por defecto",
+    builtInNoticeBody: `Esta interfaz funciona mediante solicitudes de red pública. Está destinada únicamente para el aprendizaje personal y uso no comercial. No se requiere clave de API.
+---
+    💡 La traducción por IA produce resultados más naturales, pero es más lenta que los motores tradicionales como Google o Bing; este comportamiento es normal debido al proceso de generación palabra por palabra (tokens).
+    💰 Nota: Un modelo de IA más reciente no significa una mejor traducción. Las tareas de traducción no requieren un razonamiento complejo; los modelos principales son más que suficientes, mientras que los más recientes pueden costar varias veces más.
+    🔑 Para usar la traducción por IA, obtén una clave de API de tu plataforma de IA preferida y configúrala mediante el botón en la esquina inferior izquierda. Si tienes una tarjeta gráfica local potente, también puedes implementar un modelo de IA local: sin necesidad de internet, ilimitado y gratuito, aunque la velocidad de traducción será notablemente más lenta que la de los servicios de IA comerciales.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> es una opción de pago para los usuarios que desean utilizar la traducción por IA sin la molestia de la configuración.
+    ❤️ Este es un proyecto de código abierto {0}, desarrollado y mantenido de forma independiente por el autor en el tiempo libre.`,
+  },
+  "fr": {
+    cpTitle: "Prompt Personnalisé",
+    cpOptional: "Optionnel",
+    translate_failed: "Échec de la traduction",
+    cpWeb: "Traduction Web",
+    cpSub: "Traduction de Sous-titres",
+    cpWebPH: "ex. Utiliser un ton formel. Conserver la terminologie technique en anglais.",
+    cpSubPH: "ex. Garder un ton familier. Éviter les traductions trop littérales.",
+    cpHint: "⚠ Indications de style uniquement, ex. formel / concis / termes médicaux",
+    cpSave: "Enregistrer",
+    cpClear: "Effacer",
+    footerReview: "⭐ Évaluer sur le Store",
+    footerFeedback: "✉️ Commentaires",
+    restoreRules: "Restaurer les règles par défaut",
+    builtInNoticeBody: `Cette interface fonctionne via des requêtes réseau publiques. Elle est destinée uniquement à l'apprentissage personnel et à un usage non commercial. Aucune clé API n'est requise.
+---
+    💡 La traduction par IA produit des résultats mais plus naturels, mais elle est plus lente que les moteurs traditionnels comme Google ou Bing — c'est un comportement normal dû au processus de génération mot à mot (tokens).
+    💰 Remarque : Un modèle d'IA plus récent ne garantit pas une meilleure traduction. Les tâches de traduction ne nécessitent pas de raisonnement complexe — les modèles grand public sont amplement suffisants, tandis que les plus récents coûtent souvent plusieurs fois plus cher.
+    🔑 Pour utiliser la traduction par IA, obtenez une clé API auprès de votre plateforme d'IA préférée et configurez-la via le bouton en bas à gauche. Si vous disposez d'une carte graphique locale performante, vous pouvez également déployer un modèle d'IA local — sans connexion Internet, illimité et gratuit — bien que la vitesse de traduction soit nettement plus lente que celle des services d'IA commerciaux.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> est une option payante pour les utilisateurs qui souhaitent utiliser la traduction par IA sans se soucier de la configuration.
+    ❤️ Il s'agit d'un projet open-source {0}, développé et maintenu indépendamment par l'auteur sur le temps libre.`,
+  },
+  "de": {
+    cpTitle: "Benutzerdefinierter Prompt",
+    cpOptional: "Optional",
+    translate_failed: "Übersetzung fehlgeschlagen",
+    cpWeb: "Web-Übersetzung",
+    cpSub: "Untertitel-Übersetzung",
+    cpWebPH: "z. B. Formalen Ton verwenden. Technische Fachbegriffe auf Englisch belassen.",
+    cpSubPH: "z. B. Umgangssprachlich halten. Zu wörtliche Übersetzungen vermeiden.",
+    cpHint: "⚠ Nur Stil-Hinweise, z. B. formal / prägnant / medizinische Fachbegriffe",
+    cpSave: "Speichern",
+    cpClear: "Leeren",
+    footerReview: "⭐ Im Store bewerten",
+    footerFeedback: "✉️ Feedback",
+    restoreRules: "Standardregeln wiederherstellen",
+    builtInNoticeBody: `Diese Schnittstelle läuft über öffentliche Netzwerkanfragen. Sie ist nur für das persönliche Lernen und die nicht-kommerzielle Nutzung bestimmt. Kein API-Key erforderlich.
+---
+    💡 KI-Übersetzungen liefern natürlichere Ergebnisse, sind aber langsamer als herkömmliche Engines wie Google oder Bing – dies ist aufgrund der blockweisen Generierung (Token-by-Token) ein normales Verhalten.
+    💰 Hinweis: Ein neueres KI-Modell bedeutet nicht automatisch eine bessere Übersetzung. Übersetzungsaufgaben erfordern keine komplexe Logik – gängige Modelle sind völlig ausreichend, während die neuesten oft um ein Vielfaches teurer sind.
+    🔑 Um die KI-Übersetzung zu nutzen, fordere einen API-Key bei deiner bevorzugten KI-Plattform an und konfiguriere ihn über die Schaltfläche unten links. Wenn du über eine leistungsstarke lokale Grafikkarte verfügst, kannst du auch ein lokales KI-Modell betreiben – ohne Internet, unbegrenzt und kostenlos – obwohl die Übersetzungsgeschwindigkeit spürbar langsamer ist als bei kommerziellen KI-Diensten.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> ist eine kostenpflichtige Option für Nutzer, die KI-Übersetzungen ohne den Konfigurationsaufwand direkt nutzen möchten.
+    ❤️ Dies ist ein Open-Source-Projekt {0}, das vom Autor in der Freizeit unabhängig entwickelt und gepflegt wird.`,
+  },
+  "ru": {
+    cpTitle: "Пользовательский промпт",
+    cpOptional: "Необязательно",
+    translate_failed: "Ошибка перевода",
+    cpWeb: "Перевод веб-страниц",
+    cpSub: "Перевод субтитров",
+    cpWebPH: "Пример: Использовать официальный тон. Сохранять технические термины на английском.",
+    cpSubPH: "Пример: Сохранять разговорный стиль. Избегать слишком буквального перевода.",
+    cpHint: "⚠ Только указания по стилю, например: официальный тон / кратко / медицинские термины",
+    cpSave: "Сохранить",
+    cpClear: "Очистить",
+    footerReview: "⭐ Оценить в магазине",
+    footerFeedback: "✉️ Обратная связь",
+    restoreRules: "Восстановить настройки по умолчанию",
+    builtInNoticeBody: `Этот интерфейс работает через публичные сетевые запросы. Он предназначен только для личного обучения и некоммерческого использования. API-ключ не требуется.
+---
+    💡 ИИ-перевод дает более естественный результат, но работает медленнее традиционных движков вроде Google или Bing — это нормальное поведение, связанное с посимвольной генерацией текста (токенов).
+    💰 Примечание: Новее — не значит лучше для перевода. Задачи перевода не требуют сложной логики, поэтому популярных моделей более чем достаточно, тогда как новейшие могут стоить в разы дороже.
+    🔑 Чтобы использовать ИИ-перевод, получите API-ключ на выбранной вами ИИ-платформе и настройте его с помощью кнопки в левом нижнем углу. Если у вас мощная локальная видеокарта, вы также можете развернуть локальную ИИ-модель — без интернета, безлимитно и бесплатно, хотя скорость перевода будет заметно ниже, чем у коммерческих сервисов.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> — это платный вариант для тех, кто хочет использовать ИИ-перевод сразу, без необходимости возиться с настройками.
+    ❤️ Это проект с открытым исходным кодом {0}, который автор независимо развивает и поддерживает в свободное время.`,
+  },
+  "vi": {
+    cpTitle: "Prompt Tùy Chỉnh",
+    cpOptional: "Tùy chọn",
+    translate_failed: "Dịch thất bại",
+    cpWeb: "Dịch Trang Web",
+    cpSub: "Dịch Phụ Đề",
+    cpWebPH: "Ví dụ: Sử dụng giọng điệu trang trọng. Giữ nguyên thuật ngữ kỹ thuật bằng tiếng Anh.",
+    cpSubPH: "Ví dụ: Giữ giọng điệu tự nhiên, gần gũi. Tránh dịch quá sát nghĩa đen.",
+    cpHint: "⚠ Chỉ hỗ trợ mô tả phong cách, ví dụ: giọng điệu trang trọng / ngắn gọn / thuật ngữ y học",
+    cpSave: "Lưu",
+    cpClear: "Xóa",
+    footerReview: "⭐ Đánh giá trên Store",
+    footerFeedback: "✉️ Phản hồi",
+    restoreRules: "Khôi phục quy tắc mặc định",
+    builtInNoticeBody: `Giao diện này hoạt động thông qua các yêu cầu mạng công cộng. Nó chỉ được dùng cho mục đích học tập cá nhân và phi thương mại. Không cần cấu hình mã API.
+---
+    💡 Dịch thuật bằng AI mang lại kết quả tự nhiên hơn, nhưng tốc độ sẽ chậm hơn các công cụ truyền thống như Google hay Bing — đây là hiện tượng bình thường do cơ chế tạo văn bản theo từng ký tự (token).
+    💰 Lưu ý: Trong dịch thuật, không phải mô hình AI càng mới thì càng tốt. Nhiệm vụ dịch không đòi hỏi lập luận phức tạp — các mô hình phổ biến hiện tại đã hoàn toàn đáp ứng tốt, trong khi các mô hình mới nhất thường có giá cao gấp nhiều lần.
+    🔑 Để sử dụng dịch thuật AI, bạn có thể lấy mã API từ nền tảng AI yêu thích và cấu hình bằng nút ở góc dưới bên trái. Nếu card đồ họa (GPU) máy bạn đủ mạnh, bạn cũng có thể tự triển khai mô hình AI cục bộ — không cần internet, không giới hạn và hoàn toàn miễn phí — mặc dù tốc độ dịch sẽ chậm hơn rõ rệt so với các dịch vụ AI thương mại.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> là tùy chọn trả phí dành cho những người dùng muốn sử dụng dịch thuật AI ngay lập tức mà không muốn gặp rắc rối với các bước cấu hình.
+    ❤️ Đây là một dự án mã nguồn mở {0}, được tác giả độc lập phát triển và bảo trì trong thời gian rảnh rỗi.`,
   },
 };
 

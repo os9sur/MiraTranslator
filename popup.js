@@ -263,27 +263,59 @@ async function initUpdateNotify() {
 
   guideEl.style.display = 'flex';
   guideEl.style.opacity = '1';
-  guideEl.style.zIndex = '9999'; // 确保遮罩层在最上面
+  guideEl.style.zIndex = '9999';  
 
-  // 绑定导出逻辑 (这部分你的代码很完美，不用动)
   if (activeVocab.length > 0) {
     const exportBtn = document.getElementById('notice-export-btn');
     exportBtn.addEventListener('click', async () => {
       activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
-      let csvContent = `\ufeff${t('word')},${t('meaning')},${t('note')},Source,URL,${t('addTime')}\n`;
+      let csvContent = `\ufeff${_t('word')},${_t('meaning')},${_t('note')},Context,Source,URL,${_t('addTime')}\n`;
 
       activeVocab.forEach(item => {
         let transText = "";
         if (typeof item.trans === 'object' && item.trans !== null) {
           const basic = item.trans.basic || "";
-          const detail = (item.trans.dictData || []).map(d => `${d.pos ? d.pos + ' ' : ''}${Array.isArray(d.meanings) ? d.meanings.join(' ') : (d.meanings || "")}`).join(' | ');
+          let detail = "";
+          if (Array.isArray(item.trans.dictData)) {
+            detail = item.trans.dictData.map(d => {
+              const pos = d.pos ? `${d.pos} ` : "";
+              const meanings = Array.isArray(d.meanings)
+                ? d.meanings.join(' ')
+                : (d.meanings || d.definition || "");
+              return `${pos}${meanings}`;
+            }).join(' | ');
+          }
           transText = basic + (detail ? ` [${detail}]` : "");
+
+          //  例句
+          if (Array.isArray(item.trans.examples) && item.trans.examples.length > 0) {
+            const exampleText = item.trans.examples.slice(0, 3).map(s => {
+              const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
+              const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
+              return cn ? `${en} (${cn})` : en;
+            }).join(' / ');
+            transText += ` | Examples: ${exampleText}`;
+          }
+
         } else {
           transText = item.trans || "";
         }
 
-        const f = (val) => `"${(val || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ')}"`;
-        csvContent += `${f(item.word)},${f(transText)},${f(item.note)},${f(item.title)},${f(item.src)},${f(new Date(item.date).toLocaleString())}\n`;
+        //  上下文
+        const context = item.trans?.context || "";
+        const contextTranslation = item.trans?.contextTranslation || "";
+        const contextText = context
+          ? (contextTranslation ? `${context} (${contextTranslation})` : context)
+          : "";
+
+        const safeWord = (item.word || "").replace(/"/g, '""');
+        const safeTrans = transText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
+        const safeNote = (item.note || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
+        const safeTitle = (item.title || "").replace(/"/g, '""');
+        const safeUrl = (item.src || "").replace(/"/g, '""');
+        const safeContext = contextText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');  
+        const time = new Date(item.date).toLocaleString().replace(/,/g, ' ');
+        csvContent += `"${safeWord}","${safeTrans}","${safeNote}","${safeContext}","${safeTitle}","${safeUrl}","${time}"\n`;
       });
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -2230,12 +2262,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         fullTranslation = {
           basic: cachedData.basic || "",
           phonetic: cachedData.phonetic || "",
-          dictData: cachedData.dictData || []
+          dictData: cachedData.dictData || [],
+          examples: cachedData.examples || [],
+          sourceLang: cachedData.langInfo?.code || "",
         };
         logger.log("[Popup] 成功从内存 Map 中提取完整词典数据");
       } else {
         const pBasic = document.getElementById('p-basic')?.innerText || "";
-        fullTranslation = { basic: pBasic, phonetic: "", dictData: [] };
+        fullTranslation = { basic: pBasic, phonetic: "", dictData: [], examples: [], };
         logger.warn("[Popup] 内存未命中，降级为纯文本收藏");
       }
       this.classList.add('status-protect');
@@ -2904,7 +2938,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ── Auth UI 状态管理 ──────────────────────────────
   let userData = null;
   function updateAuthUI(user) {
-    if(!enable_pro_features) return;
+    if (!enable_pro_features) return;
     userData = user;
     const btnLogin = document.getElementById('btnLogin');
     const btnAvatar = document.getElementById('btnAvatar');
@@ -3120,7 +3154,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       logger.warn('[fetchBalance] res 为 null，请求失败');
       return;
     }
-
+    if (res?.error === 'token_expired') {
+      logger.warn('[fetchBalance] token 已过期，需要重新登录');
+      await safeSendMessage({ action: 'logout' });  // 清除后端存储
+      profilePanel.style.display = 'none';
+      updateAuthUI(null);  // 切回登录 UI
+      return;
+    }
     const balanceEl = document.getElementById('panelBalance');
     if (balanceEl) balanceEl.style.opacity = '1';
 
