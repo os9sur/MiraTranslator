@@ -18,7 +18,7 @@
 
     .container {
       width: 100%;
-      max-width: 1100px;
+      max-width: 1250px;
     }
 
     .header {
@@ -223,7 +223,7 @@
     }
 
     #vocabBody tr:hover {
-      background-color: rgba(56, 189, 248, 0.1) !important;
+      background-color: rgba(56, 191, 248, 0.031) !important;
     }
 
     .source-wrapper {
@@ -404,6 +404,37 @@
       white-space: normal;
       overflow-wrap: break-word;
     }
+
+/* ========================================================
+   1. 稳住表格结构：强制表格和列顺序维持正常的从左往右（LTR）
+   ======================================================== */
+html[lang="ar"] #vocabTable,
+html[lang="fa"] #vocabTable {
+    direction: ltr !important;
+}
+
+html[lang="ar"] #vocabTable th,
+html[lang="ar"] #vocabTable td,
+html[lang="fa"] #vocabTable th,
+html[lang="fa"] #vocabTable td {
+    text-align: left;
+}
+
+/* ========================================================
+   2. 精准修复文本：强迫所有按钮、输入框、搜索框的内部文本走正确的 RTL 顺序
+   ======================================================== */
+html[lang="ar"] .btn,
+html[lang="ar"] .add-box button,
+html[lang="ar"] input,          /* 👈 补充：让生词和释义输入框走 RTL，省略号回左边 */
+html[lang="ar"] #searchInp,     /* 👈 补充：让搜索框走 RTL，省略号和标点完美靠左 */
+html[lang="fa"] .btn,
+html[lang="fa"] .add-box button,
+html[lang="fa"] input,          /* 👈 补充：波斯语同理 */
+html[lang="fa"] #searchInp,     /* 👈 补充：波斯语同理 */
+[dir="rtl"] {
+    direction: rtl !important;
+    unicode-bidi: isolate;
+}
   </style>
 </head>
 
@@ -431,7 +462,8 @@
       </div>
 
       <!--  高亮开关 -->
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;border-radius: 20px !important;padding: 10px 64px !important;white-space:nowrap;border: 1px solid #647690;border-radius:8px;padding:6px 10px;">
+      <label
+        style="display:flex;align-items:center;gap:8px;cursor:pointer;border-radius: 20px !important;padding: 10px 76px !important;white-space:nowrap;border: 1.5px solid #647690;border-radius:8px;padding:6px 10px;">
         <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
         <div id="highlightToggle" style="
       width:36px; height:20px; border-radius:999px; 
@@ -451,7 +483,7 @@
       <table id="vocabTable">
         <thead>
           <tr>
-            <th data-i18n="word">单词/句子</th>
+            <th style="width: 250px;" data-i18n="word">单词/句子</th>
             <th data-i18n="meaning">释义</th>
             <th data-i18n="note">备注</th>
             <th data-i18n="source">来源</th>

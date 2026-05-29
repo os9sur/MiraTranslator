@@ -120,31 +120,31 @@ const GA_API_SECRET = "{{GA_API_SECRET}}";
 
 // 公共设备信息
 function getDeviceInfo() {
-    const ua = navigator.userAgent;
-    return {
-        browser: ua.includes('Edg/') ? 'edge'
-            : ua.includes('Firefox/') ? 'firefox'
-                : 'chrome',
-        browser_version: (
-            /Edg\/(\d+)/.exec(ua) ||
-            /Firefox\/(\d+)/.exec(ua) ||
-            /Chrome\/(\d+)/.exec(ua)
-        )?.[1] || 'unknown',
-        os: ua.includes('Windows') ? 'windows'
-            : ua.includes('Mac') ? 'mac'
-                : ua.includes('Linux') ? 'linux'
-                    : 'unknown',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    };
+  const ua = navigator.userAgent;
+  return {
+    browser: ua.includes('Edg/') ? 'edge'
+      : ua.includes('Firefox/') ? 'firefox'
+        : 'chrome',
+    browser_version: (
+      /Edg\/(\d+)/.exec(ua) ||
+      /Firefox\/(\d+)/.exec(ua) ||
+      /Chrome\/(\d+)/.exec(ua)
+    )?.[1] || 'unknown',
+    os: ua.includes('Windows') ? 'windows'
+      : ua.includes('Mac') ? 'mac'
+        : ua.includes('Linux') ? 'linux'
+          : 'unknown',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  };
 }
 
 // 生成/获取唯一用户ID
 async function getClientId() {
-    const result = await safeGetStorage('ga_client_id', true);
-    if (result?.ga_client_id) return result.ga_client_id;
-    const id = crypto.randomUUID();
-    await safeSetStorage({ ga_client_id: id });
-    return id;
+  const result = await safeGetStorage('ga_client_id', true);
+  if (result?.ga_client_id) return result.ga_client_id;
+  const id = crypto.randomUUID();
+  await safeSetStorage({ ga_client_id: id });
+  return id;
 }
 
 function getReviewUrl() {
@@ -184,18 +184,18 @@ async function safeSendToTab(tabId, message) {
 }
 // 上报事件
 async function trackEvent(eventName, params = {}) {
-    if (IS_DEV) return;
-    const clientId = await getClientId();
-    fetch(
-        `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
-        {
-            method: 'POST',
-            body: JSON.stringify({
-                client_id: clientId,
-                events: [{ name: eventName, params }],
-            }),
-        }
-    ).catch(() => { });
+  if (IS_DEV) return;
+  const clientId = await getClientId();
+  fetch(
+    `https://www.google-analytics.com/mp/collect?measurement_id=${GA_MEASUREMENT_ID}&api_secret=${GA_API_SECRET}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        client_id: clientId,
+        events: [{ name: eventName, params }],
+      }),
+    }
+  ).catch(() => { });
 }
 
 async function safeSetIcon(tabId, imageData) {
@@ -297,11 +297,11 @@ function getCurrentLang() {
     'en';
 }
 
-const showNotice = false; 
-let globalDefault_Page    = !showNotice;
-let globalDefault_Select  = !showNotice;
-let globalDefault_YT      = !showNotice;
-let enable_pro_features   = false;
+const showNotice = false;
+let globalDefault_Page = !showNotice;
+let globalDefault_Select = !showNotice;
+let globalDefault_YT = !showNotice;
+let enable_pro_features = false;
 
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };
@@ -497,7 +497,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10','i18nAttach11'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10', 'i18nAttach11'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
@@ -525,11 +525,22 @@ function t(key, forcedLang) {
       'default': 'Local model timeout. A dedicated GPU is required. Consider using a cloud API instead.'
     },
     'customApiTip': {
-      'zh': '兼容 OpenAI API 格式的服务均可使用（云端或本地）。使用本地模型（Ollama / LM Studio 等）需注意：① 需独立显卡，核显/CPU 会严重超时 ② 需开启跨域：Ollama 设置环境变量 OLLAMA_ORIGINS=*，LM Studio / Jan 在设置页开启 CORS 选项',
-      'zh-tw': '相容 OpenAI API 格式的服務均可使用。本地模型需注意：① 需獨立顯卡，核顯/CPU 會嚴重逾時 ② 需開啟 CORS：Ollama 設定 OLLAMA_ORIGINS=*，LM Studio / Jan 在設定頁開啟 CORS',
-      'ja': 'OpenAI API形式に対応したサービスであれば利用可能です（クラウド・ローカル問わず）。ローカルモデル（Ollama / LM Studio など）をご利用の場合：① 専用GPUが必要です。内蔵GPU/CPUのみではタイムアウトが頻発します ② CORSの有効化が必要です：OllamaはOLLAMA_ORIGINS=*を環境変数に設定、LM Studio / JanはCORSオプションをオンにしてください',
-      'default': 'Compatible with any OpenAI API format (cloud or local). For local models (Ollama / LM Studio etc.): ① Dedicated GPU required, CPU/iGPU causes severe timeouts ② Enable CORS: set OLLAMA_ORIGINS=* for Ollama, or enable CORS in settings for LM Studio / Jan'
-    },
+  'zh': '<span style="display: block; padding-left: 20px;">兼容 OpenAI API 格式的服务均可使用（云端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">使用本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需独立显卡，核显/CPU 会严重超时。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需开启跨域：Ollama 设置环境变量 OLLAMA_ORIGINS=*，LM Studio / Jan 在设置页开启 CORS 选项。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型无需 API Key，留空即可。</span>',
+
+  'zh-tw': '<span style="display: block; padding-left: 20px;">相容 OpenAI API 格式的服務均可使用（雲端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需獨立顯示卡，內顯/CPU 會嚴重逾時。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需開啟 CORS：Ollama 設定 OLLAMA_ORIGINS=*，LM Studio / Jan 在設定頁開啟 CORS 選項。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型無需 API Key，留空即可。</span>',
+
+  'ja': '<span style="display: block; padding-left: 20px;">OpenAI API 形式に対応したサービスであれば利用可能です（クラウド/ローカル問わず）。</span><br /><span style="display: block; padding-left: 20px;">ローカルモデル（Ollama / LM Studio など）をご利用の場合：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 専用 GPU が必要です。内蔵 GPU/CPU のみではタイムアウトが頻発します。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② CORS の有効化が必要です：Ollama は OLLAMA_ORIGINS=* を環境変数に設定、LM Studio / Jan は設定ページで CORS オプションをオンにしてください。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ ローカルモデルは API Key 不要です。空欄のままで構いません。</span>',
+
+  'en': '<span style="display: block; padding-left: 20px;">Compatible with any OpenAI API format (cloud or local).</span><br /><span style="display: block; padding-left: 20px;">For local models (Ollama / LM Studio etc.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Dedicated GPU required (iGPU/CPU causes severe timeouts).</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Enable CORS: set OLLAMA_ORIGINS=* for Ollama, or enable CORS in settings for LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ No API key needed for local models — leave it blank.</span>',
+
+  'ko': '<span style="display: block; padding-left: 20px;">OpenAI API 형식을 지원하는 모든 서비스(클라우드 또는 로컬)를 사용할 수 있습니다.</span><br /><span style="display: block; padding-left: 20px;">로컬 모델(Ollama / LM Studio 등) 사용 시 주의사항:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 외장 그래픽 카드가 필수이며, 내장 그래픽/CPU 사용 시 심각한 시간 초과가 발생할 수 있습니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 교차 출처(CORS) 활성화 필요: Ollama는 환경 변수 OLLAMA_ORIGINS=* 설정, LM Studio / Jan은 설정 페이지에서 CORS 옵션을 켜야 합니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 로컬 모델은 API Key가 필요 없습니다. 비워두면 됩니다.</span>',
+
+  'ru': '<span style="display: block; padding-left: 20px;">Совместимо с любыми сервисами в формате OpenAI API (облачными или локальными).</span><br /><span style="display: block; padding-left: 20px;">При использовании локальных моделей (Ollama / LM Studio и др.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Требуется дискретная видеокарта, использование встроенной графики или CPU приведет к серьезным таймаутам.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Необходимо включить CORS: установите переменную окружения OLLAMA_ORIGINS=* для Ollama или включите CORS в настройках для LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Для локальных моделей API Key не нужен — оставьте поле пустым.</span>',
+
+  'pt-BR': '<span style="display: block; padding-left: 20px;">Compatível com qualquer serviço no formato OpenAI API (em nuvem ou local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locais (Ollama / LM Studio, etc.), atente-se ao seguinte:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① É necessária uma placa de vídeo dedicada; o uso de gráficos integrados ou CPU causará tempos limite (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② É necessário habilitar o CORS: defina a variável de ambiente OLLAMA_ORIGINS=* para o Ollama ou ative a opção CORS nas configurações do LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Modelos locais não precisam de API Key — deixe o campo em branco.</span>',
+
+  'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>'
+},
   };
 
   if (localModelTips[key]) {
@@ -549,7 +560,7 @@ function t(key, forcedLang) {
   const target = lang.replace('_', '-').toLowerCase();
   const short = target.split('-')[0];
   const dict = i18nDict[target] || i18nDict[short] || i18nDict["en"] || {};
-  
+
   const raw = dict[key] || i18nDict["en"]?.[key] || key;
   const replacements = Array.prototype.slice.call(arguments, 2);
   return replacements.reduce((s, val, i) => s.replace(`{${i}}`, val), raw);
@@ -1121,7 +1132,50 @@ let lastUtterance = null;
 function speakText(text, speakBtn, forcedLang) {
   if (!window.speechSynthesis || !text) return;
 
-  window.speechSynthesis.cancel();
+  // 根据语言清理无关字符
+  const base = (forcedLang || '').split('-')[0].toLowerCase();
+
+  // 中文字符范围
+  const isChinese = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
+  // 日文字符范围  
+  const isJapanese = /[\u3040-\u309F\u30A0-\u30FF]/;
+  // 韩文字符范围
+  const isKorean = /[\uAC00-\uD7AF]/;
+  // 西文字符范围
+  const isLatin = /[a-zA-Z]/;
+
+  const cleanCommon = (str) => str
+    .replace(/-+/g, " ")
+    .replace(/\.{2,}/g, ".")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!base || base === 'en') {
+    // 英语：去掉中文、日文、韩文
+    text = text
+      .replace(/[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF。，！？、]+/g, "");
+  } else if (base === 'zh') {
+    // 中文：去掉日文假名、韩文、拉丁字母（保留数字）
+    text = text
+      .replace(/[\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, "")
+      .replace(/[a-zA-Z]+/g, "");
+  } else if (base === 'ja') {
+    // 日语：去掉韩文、纯拉丁（保留数字和中文，日语里常混汉字）
+    text = text
+      .replace(/[\uAC00-\uD7AF]/g, "")
+      .replace(/[a-zA-Z]+/g, "");
+  } else if (base === 'ko') {
+    // 韩语：去掉日文假名、拉丁字母
+    text = text
+      .replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "")
+      .replace(/[a-zA-Z]+/g, "");
+  } else {
+    // 其他语言（法/德/西/俄等）：去掉中文、日文、韩文
+    text = text
+      .replace(/[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF。，！？、]+/g, "");
+  }
+
+  text = cleanCommon(text);
 
   if (speakBtn) {
     speakBtn.classList.remove('is-speaking', 'speaking-wave');
@@ -1158,7 +1212,7 @@ function speakText(text, speakBtn, forcedLang) {
 
   if (targetLang.startsWith('ja')) lastUtterance.rate = 0.6;
   else if (targetLang.startsWith('zh')) lastUtterance.rate = 0.85;
-  else lastUtterance.rate = 0.8;
+  else lastUtterance.rate = 0.7;
 
   const forceReset = new SpeechSynthesisUtterance("");
   window.speechSynthesis.speak(forceReset);

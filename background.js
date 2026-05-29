@@ -31,6 +31,7 @@ const brands = navigator.userAgentData?.brands?.map(b => b.brand) || [];
 const isEdge = brands.includes('Microsoft Edge');
 const identityAPI = isFirefox ? browser.identity : chrome.identity;
 const SYNC_FILE_NAME = 'mira_sync.json';
+const VOCAB_CLEANUP_DAYS = 60;
 const baseKeys = STORAGE_KEYS.sync();
 
 async function ensureRemoteDir(config) {
@@ -73,7 +74,13 @@ async function prepareLocalPayload() {
         result = { ...result, ...dynamicData };
     }
     const rawVocab = await handleIdbGetAll('vb_');
-    const localVocabulary = Object.values(rawVocab || {});
+    //  上传前过滤掉超期假删除
+    const hardCutoff = Date.now() - VOCAB_CLEANUP_DAYS * 24 * 60 * 60 * 1000;
+    const localVocabulary = Object.values(rawVocab || {}).filter(item => {
+        if (item.deleted && item.updated && item.updated < hardCutoff) return false;
+        return true;
+    });
+
     return { ...result, vocabulary: localVocabulary };
 }
 
@@ -82,6 +89,15 @@ async function applySyncResultToLocal(mergedData) {
     if (!mergedData) return;
     if (Array.isArray(mergedData.vocabulary)) {
         logger.log("[Sync-Local] 开始写入 IndexedDB...");
+        //  过滤超过90天的假删除，不写入本地
+        const hardCutoff = Date.now() - VOCAB_CLEANUP_DAYS * 24 * 60 * 60 * 1000;
+        const filteredVocabulary = mergedData.vocabulary.filter(item => {
+            if (item.deleted && item.updated && item.updated < hardCutoff) {
+                logger.log(`[Sync-Local] 跳过超期假删除: ${item.word}`);
+                return false;
+            }
+            return true;
+        });
         const combinedMap = new Map();
         const mergeItem = (item) => {
             const wordValue = item.word || item.w;
@@ -104,7 +120,7 @@ async function applySyncResultToLocal(mergedData) {
                 combinedMap.set(key, newItem);
             }
         };
-        mergedData.vocabulary.forEach(mergeItem);
+        filteredVocabulary.forEach(mergeItem);
         const itemsToSet = {};
         for (const [key, val] of combinedMap.entries()) {
             itemsToSet[`vb_${key}`] = val;
@@ -794,10 +810,19 @@ async function syncWithOneDrive(token, direction) {
         throw err;
     }
 }
+
 function mergeVocabulary(local, remote) {
     logger.group("--- [Mira-Debug] 开始合并生词 ---");
-    const safeLocal = Array.isArray(local) ? local : [];
-    const safeRemote = Array.isArray(remote) ? remote : [];
+
+    //  两边都过滤掉超期假删除
+    const hardCutoff = Date.now() - VOCAB_CLEANUP_DAYS * 24 * 60 * 60 * 1000;
+    const safeLocal = (Array.isArray(local) ? local : []).filter(item =>
+        !(item.deleted && Number(item.updated || item.date || 0) < hardCutoff)
+    );
+    const safeRemote = (Array.isArray(remote) ? remote : []).filter(item =>
+        !(item.deleted && Number(item.updated || item.date || 0) < hardCutoff)
+    );
+
     logger.log(`本地条数: ${safeLocal.length}, 云端条数: ${safeRemote.length}`);
     if (safeRemote.length > 0) {
         logger.log("云端第一条数据样本:", JSON.stringify(safeRemote[0]));
@@ -806,10 +831,7 @@ function mergeVocabulary(local, remote) {
     safeLocal.forEach(item => {
         const word = (item.word || item.w || "").toLowerCase().trim();
         if (word) {
-            map.set(word, {
-                ...item,
-                word: word
-            });
+            map.set(word, { ...item, word: word });
         }
     });
     let addedCount = 0;
@@ -833,6 +855,11 @@ function mergeVocabulary(local, remote) {
                 ignoredCount++;
             }
         } else {
+            //  本地没有这条记录，且云端标记为已删除 → 不同步回本地
+            if (remoteItem.deleted) {
+                ignoredCount++;
+                return;
+            }
             map.set(word, { ...remoteItem, word: word });
             addedCount++;
         }
@@ -2343,6 +2370,7 @@ const Translators = {
                     source: 'Google'
                 };
             }
+            logger.log('[Google] 翻译结果:', basic, 'phonetic:', phonetic, 'dictData:', dictData, 'examples:', examples, 'sourcePhonetic:', sourcePhonetic, 'targetPhonetic:', targetPhonetic);
             return await Translators._withDictDetail(
                 basic,          // 翻译结果
                 query,          // 原文
@@ -3829,10 +3857,43 @@ async function cleanExpiredCache() {
     await handleIdbSet({ '_cacheCleanTs': Date.now() });
     logger.log('[Cache] 清理完成');
 }
+//清理假删除数据
+async function cleanupDeletedVocab() {
+    try {
+        const res = await safeGetStorage('lastSyncTime');
+        const lastSync = res?.lastSyncTime || 0;
 
+        // 从未同步过，或距上次同步不足7天，跳过
+        if (lastSync === 0 || Date.now() - lastSync < 7 * 24 * 60 * 60 * 1000) return;
+
+        const hardCutoff = Date.now() - VOCAB_CLEANUP_DAYS * 24 * 60 * 60 * 1000;
+        const cutoff = hardCutoff;
+
+        if (cutoff <= 0) return;
+
+        const vocabulary = await handleIdbGetAll('vb_');
+        if (!vocabulary) return;
+
+        let count = 0;
+        for (const [key, item] of Object.entries(vocabulary)) {
+            if (item.deleted && item.updated && item.updated < cutoff) {
+                await handleIdbRemove(key);
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            logger.log(`[Vocab] 清理了 ${count} 条假删除词条`);
+        }
+    } catch (err) {
+        logger.warn('[Vocab] 清理假删除失败:', err);
+    }
+}
+// 启动时检测默认翻译引擎并缓存结果，减少后续请求延迟
 chrome.runtime.onStartup.addListener(() => {
     detectAndCacheDefaultEngine(false);
     setTimeout(() => cleanExpiredCache(), 5000);
+    setTimeout(() => cleanupDeletedVocab(), 10000);
 });
 
 async function detectAndCacheDefaultEngine(force = false) {
@@ -4232,11 +4293,35 @@ async function handleDeleteAccount(sendResponse) {
         sendResponse({ ok: false, error: err.message });
     }
 }
+async function silentReLogin(uid) {
+    try {
+        // Chrome: interactive: false = 完全静默，不弹任何窗口
+        const token = await new Promise((resolve, reject) => {
+            chrome.identity.getAuthToken({ interactive: false }, (t) => {
+                if (chrome.runtime.lastError || !t) {
+                    reject(new Error(chrome.runtime.lastError?.message || 'silent_login_failed'));
+                } else {
+                    resolve(t);
+                }
+            });
+        });
 
+        // 用 Google token 重新换取后端 jwt
+        await syncUserToBackend({ uid }, token);
+
+        const { mira_jwt } = await safeGetStorage(['mira_jwt']);
+        logger.log('[silentReLogin] 静默重新登录成功');
+        return mira_jwt;
+
+    } catch (err) {
+        logger.warn('[silentReLogin] 静默登录失败，需要手动登录:', err.message);
+        return null;
+    }
+}
 // ── 拉取余额  ──
 async function fetchUserBalance(uid, sendResponse) {
     try {
-        // 1. 尝试读本地缓存（1分钟有效期）
+        // 1. 本地缓存（1分钟有效期）
         const cached = await safeGetStorage(['mira_user_balance']);
         if (cached?.mira_user_balance?.uid === uid) {
             const { balance, expires_at, expired, updatedAt } = cached.mira_user_balance;
@@ -4246,9 +4331,16 @@ async function fetchUserBalance(uid, sendResponse) {
             }
         }
 
-        // 2. 缓存失效，从后端请求最新数据
-        const { mira_jwt } = await safeGetStorage(['mira_jwt']);
-        if (!mira_jwt) throw new Error('No valid access token found, please log in again.');
+        // 2. 检查 jwt，没有就静默重新登录
+        let { mira_jwt } = await safeGetStorage(['mira_jwt']);
+        if (!mira_jwt) {
+            logger.warn('[fetchBalance] jwt 为空，尝试静默重新登录...');
+            mira_jwt = await silentReLogin(uid);
+            if (!mira_jwt) {
+                sendResponse({ balance: null, error: 'token_expired' });
+                return;
+            }
+        }
 
         // 3. 请求后端
         const resp = await workerFetch('/api/balance', {
@@ -4257,7 +4349,23 @@ async function fetchUserBalance(uid, sendResponse) {
         });
 
         if (resp.status === 401) {
-            logger.warn('通行证已过期');
+            logger.warn('[fetchBalance] jwt 过期，尝试静默重新登录...');
+            const newJwt = await silentReLogin(uid);
+            if (!newJwt) {
+                sendResponse({ error: 'token_expired' });
+                return;
+            }
+            // 用新 jwt 重试一次
+            const retryResp = await workerFetch('/api/balance', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${newJwt}` }
+            });
+            if (!retryResp.ok) {
+                sendResponse({ error: 'token_expired' });
+                return;
+            }
+            const data = await retryResp.json();
+            sendResponse({ balance: data.balance, expires_at: data.expires_at, expired: data.expired });
             return;
         }
 
@@ -4287,6 +4395,8 @@ async function fetchUserBalance(uid, sendResponse) {
         }
         logger.error('[Mira-Auth] 获取余额失败:', err);
         sendResponse({ balance: null, error: err.message });
+    } finally {
+        sendResponse({ balance: null, error: 'no_response' });
     }
 }
 
