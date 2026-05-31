@@ -228,23 +228,25 @@ const SiteRules = {
             minLen: 3
         },
         "instagram.com": {
-            selectors: [
-                // 评论和帖子描述的核心 class 
+            selectors: [ 
                 "span._ap3a._aaco._aacu._aacx._aad7._aade",
-                "span._aacl._aaco._aacw._aacx._aad6._aade",
-
-                // 帖子标题/描述
+                "span._aacl._aaco._aacw._aacx._aad6._aade", 
                 "h1[dir='auto']",
-                "h2[dir='auto']",
-
-                // 个人介绍
+                "h2[dir='auto']", 
                 "header span[dir='auto']:not([role='button'])",
-                "ul li div span[dir='auto']",
-                // 对话框内容
+                "ul li div span[dir='auto']", 
                 "[role='dialog'] span[dir='auto']:not([role='button'])",
                 "[role='dialog'] h1[dir='auto']",
             ].join(", "),
             minLen: 2
+        },
+        "steamcommunity.com": {
+            selectors: ".content, .commentthread_comment_text, .topic, .forum_topic_name",
+            minLen: 3
+        },
+        "store.steampowered.com": {
+            selectors: "div._1zbKizfCRpoX2D_zOLQes0",
+            minLen: 5
         }
     },
     generic: {

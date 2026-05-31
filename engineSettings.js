@@ -1815,7 +1815,7 @@ function _buildAIPromptHTML(saved) {
             <div class="ai-prompt-item">
                 <div class="ai-prompt-item-header">
                     <div class="ai-prompt-item-label">
-                    <svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align: middle; margin-right: 6px;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align: middle;">
                 <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
                 <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
                 </svg>YouTube<span>${t('cpSub')}</span>

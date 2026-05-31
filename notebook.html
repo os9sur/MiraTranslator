@@ -328,6 +328,37 @@
       transition: all 0.3s ease-in-out;
     }
 
+    @keyframes tts-loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .tts-loading {
+      position: relative;
+    }
+
+    .tts-loading::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -3px;
+      right: 0;
+      bottom: 0;
+      margin: auto;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: tts-loading-spin 0.7s linear infinite;
+    }
+
+    .tts-loading svg {
+      opacity: 0.3;
+    }
+
     .speaker-btn:hover {
       color: #38bdf8 !important;
       transform: scale(1.1);
@@ -405,36 +436,32 @@
       overflow-wrap: break-word;
     }
 
-/* ========================================================
-   1. 稳住表格结构：强制表格和列顺序维持正常的从左往右（LTR）
-   ======================================================== */
-html[lang="ar"] #vocabTable,
-html[lang="fa"] #vocabTable {
-    direction: ltr !important;
-}
 
-html[lang="ar"] #vocabTable th,
-html[lang="ar"] #vocabTable td,
-html[lang="fa"] #vocabTable th,
-html[lang="fa"] #vocabTable td {
-    text-align: left;
-}
+    html[lang="ar"] #vocabTable,
+    html[lang="fa"] #vocabTable {
+      direction: ltr !important;
+    }
 
-/* ========================================================
-   2. 精准修复文本：强迫所有按钮、输入框、搜索框的内部文本走正确的 RTL 顺序
-   ======================================================== */
-html[lang="ar"] .btn,
-html[lang="ar"] .add-box button,
-html[lang="ar"] input,          /* 👈 补充：让生词和释义输入框走 RTL，省略号回左边 */
-html[lang="ar"] #searchInp,     /* 👈 补充：让搜索框走 RTL，省略号和标点完美靠左 */
-html[lang="fa"] .btn,
-html[lang="fa"] .add-box button,
-html[lang="fa"] input,          /* 👈 补充：波斯语同理 */
-html[lang="fa"] #searchInp,     /* 👈 补充：波斯语同理 */
-[dir="rtl"] {
-    direction: rtl !important;
-    unicode-bidi: isolate;
-}
+    html[lang="ar"] #vocabTable th,
+    html[lang="ar"] #vocabTable td,
+    html[lang="fa"] #vocabTable th,
+    html[lang="fa"] #vocabTable td {
+      text-align: left;
+    }
+
+
+    html[lang="ar"] .btn,
+    html[lang="ar"] .add-box button,
+    html[lang="ar"] input,
+    html[lang="ar"] #searchInp,
+    html[lang="fa"] .btn,
+    html[lang="fa"] .add-box button,
+    html[lang="fa"] input,
+    html[lang="fa"] #searchInp,
+    [dir="rtl"] {
+      direction: rtl !important;
+      unicode-bidi: isolate;
+    }
   </style>
 </head>
 

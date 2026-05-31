@@ -4442,6 +4442,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
+    if (request.type === 'FETCH_TTS_AUDIO') {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
+        fetch(request.url)
+            .then(res => {
+                clearTimeout(timeoutId);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.arrayBuffer();
+            })
+            .then(buffer => {
+                const bytes = new Uint8Array(buffer);
+                let binary = '';
+                const chunkSize = 8192;
+                for (let i = 0; i < bytes.length; i += chunkSize) {
+                    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+                }
+                const base64 = btoa(binary);
+
+                sendResponse({ success: true, base64 });
+            })
+            .catch(err => {
+                clearTimeout(timeoutId);
+                sendResponse({ success: false, error: err.message });
+            });
+        return true; // 保持异步
+    }
     if (request.type === 'getClientId') {
         getClientId().then(safeSendResponse);
         return true;
