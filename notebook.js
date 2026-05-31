@@ -99,19 +99,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).join('');
   }
 
-  function formatExamples(examples) {
-    if (!Array.isArray(examples) || examples.length === 0) return "";
-    return `
+  function formatExamples(examples, word) {  
+  if (!Array.isArray(examples) || examples.length === 0) return "";
+  
+  const highlightWord = (text, w) => {
+    if (!text || !w) return text;
+    const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const stem = w.length > 3
+      ? w.replace(/[ey]$/, "").replace(/([bcdfghjklmnpqrstvwxz])\1$/, "$1")
+      : w;
+    const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b(${safe}[a-z]*|${safeStem}[a-z]*)\\b`, "gi");
+    return text.replace(regex, '<span style="color:#38bdf8;font-weight:600;">$1</span>');
+  };
+
+  return `
     <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
       <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;">EXAMPLES</div>
-      ${examples.slice(0, 3).map((s, idx) => {
-      const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
-      const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
-      const safeEn = en.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
-      return `
-          <div style="margin-bottom: 8px; border-left: 2px solid #25cbf6ab;border-radius:2px; padding-left: 8px;">
+      ${examples.slice(0, 3).map((s) => {
+        const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
+        const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
+        const safeEn = en.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
+        return `
+          <div style="margin-bottom: 8px; border-left: 2px solid #25cbf6ab; border-radius:1.5px; padding-left: 8px;">
             <div style="display:flex; align-items:center; gap:6px;">
-              <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4;">${en}</div>
+              <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4;">
+                ${highlightWord(en, word)}  
+              </div>
               <span class="example-speaker-btn" data-sentence="${safeEn}"
                 style="cursor:pointer; color:#637793; flex-shrink:0; display:flex; transition:color 0.2s;position:relative;overflow:visible;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -121,11 +135,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </svg>
               </span>
             </div>
-            ${cn ? `<div style="font-size: 12px; color: #7589a4; margin-top: 2px;">${cn}</div>` : ""}
+            ${cn ? `<div style="font-size: 11px; color: #637793; margin-top: 2px;">${cn}</div>` : ""}
           </div>`;
-    }).join("")}
+      }).join("")}
     </div>`;
-  }
+}
   const searchInp = document.getElementById('searchInp');
   if (searchInp) {
     searchInp.oninput = (e) => {
@@ -210,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof item.trans === 'object' && item.trans !== null) {
         const { basic, dictData, detail, examples } = item.trans;
         const detailContent = dictData ? formatDetail(dictData) : (detail || "");
-        const examplesContent = formatExamples(examples);
+       const examplesContent = formatExamples(examples, displayWord);   
         displayTrans = `
       <div class="vocab-trans-container">
         <div class="v-basic" style="font-weight: 600; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;">${basic || ''}</div>
@@ -403,18 +417,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         <textarea class="note-inp" maxlength="300"
         placeholder="${targetLanguage === 'zh-CN' ? '四级/托福/语境...' : ''}"
         style="background:#020617; 
-       border: none;
-       color:white; padding:4px 8px; border-radius:6px; 
-       width:100%; font-size:12px; box-sizing:border-box;
-       resize:none; overflow:hidden; 
-       font-family: system-ui, -apple-system, sans-serif;
-       outline: none;
-       box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8),
-                   0 0 6px rgba(56, 189, 248, 0.6),
-                   0 0 12px rgba(56, 189, 248, 0.4),
-                   0 0 20px rgba(56, 189, 248, 0.2),
-                   0 0 35px rgba(56, 189, 248, 0.1);"
-        rows="1">${current}</textarea>
+        border: none;
+        color:white; padding:4px 8px; border-radius:6px; 
+        width:100%; font-size:12px; box-sizing:border-box;
+        resize:vertical;          
+        min-height:32px;          
+        font-family: system-ui, -apple-system, sans-serif;
+        outline: none;
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8),
+                    0 0 6px rgba(56, 189, 248, 0.6),
+                    0 0 12px rgba(56, 189, 248, 0.4),
+                    0 0 20px rgba(56, 189, 248, 0.2),
+                    0 0 35px rgba(56, 189, 248, 0.1);"
+        rows="3">${current}</textarea>
       `;
 
         const inp = cell.querySelector('.note-inp');

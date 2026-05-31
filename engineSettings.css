@@ -1374,7 +1374,6 @@ body {
 .ai-prompt-item-label {
     display: flex;
     align-items: center;
-    gap: 6px;
     font-size: 12px;
     color: #8b949e;
     font-weight: 500;

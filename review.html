@@ -61,6 +61,15 @@
             animation: fadeUp 0.6s cubic-bezier(.22, 1, .36, 1) both;
         }
 
+        html[dir="rtl"] .card {
+            text-align: right;
+        }
+
+        html[dir="rtl"] #starsLink {
+            unicode-bidi: bidi-override;
+            direction: ltr;
+        }
+
         @keyframes fadeUp {
             from {
                 opacity: 0;
@@ -102,32 +111,22 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-.subtitle-highlight {
-    background: linear-gradient(135deg, #fff 30%, #a78bfa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 19px;
-    font-weight: 600;
-    display: block;
-    margin-bottom: 8px;
-}
+
+        .subtitle-highlight {
+            background: linear-gradient(135deg, #fff 30%, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 19px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
         .subtitle {
             font-size: 17px;
             color: var(--muted);
             line-height: 1.6;
-            margin-bottom: 36px;
-        }
-
-        .stars {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 36px;
-        }
-
-        .stars {
-            font-size: 48px;
             margin-bottom: 36px;
         }
 
@@ -201,8 +200,7 @@
         <img src="icons/icon-128.png" style="width: 72px; height: 72px; border-radius: 16px; margin-bottom: 24px;" />
         <h1>Enjoying Mira Translator?</h1>
         <p class="subtitle">
-            Mira is an open-source project built by an indie developer.<br>
-            Your rating means a lot to me. 🙏
+            This is an open-source project I build and maintain solo — your support is what keeps me going. ✨
         </p>
 
         <a id="starsLink" href="#" target="_blank"
@@ -216,7 +214,7 @@
 
 
     </div>
-<script src="utils.js"></script> 
+    <script src="utils.js"></script>
     <script src="review.js"></script>
 
 </body>

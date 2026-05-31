@@ -532,6 +532,19 @@ async function applyUserStyles(
       }
     }
     transEl.style.setProperty("writing-mode", "horizontal-tb", "important");
+    const isSteam = location.hostname.includes("steamcommunity.com");
+    if (isSteam && transEl.parentElement?.classList.contains("forum_topic_name")) {
+      transEl.style.setProperty("display", "inline", "important");
+      transEl.style.setProperty("margin", "0 0 0 6px", "important");
+      transEl.style.setProperty("font-size", "0.9em", "important");
+      transEl.style.setProperty("clear", "none", "important");
+      transEl.style.setProperty("width", "auto", "important");
+    } else if (isSteam) {
+      transEl.style.setProperty("margin-top", "0", "important");
+      transEl.style.setProperty("margin-bottom", "0", "important");
+      transEl.style.setProperty("margin-left", "0", "important");
+      transEl.style.setProperty("padding-left", "0", "important");
+    }
   };
   try {
     const data = await safeGetStorage("userStyleConfig");
@@ -2002,6 +2015,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isHN = location.hostname.includes("news.ycombinator.com");
   const isGitHub = location.hostname.includes("github.com");
   const isTemu = location.hostname.includes("temu.com");
+  const isSteamCommunity = location.hostname.includes("steamcommunity.com");
   if (isTemu) {
     if (el.classList.contains("HZ_BBbqn") || el.closest(".HZ_BBbqn")) {
       el.dataset.translated = "true";
@@ -2731,6 +2745,21 @@ async function handleTranslateElement(el, forceRefresh = false) {
       transContainer.style.marginTop = "8px";
       transContainer.style.setProperty("white-space", "pre-wrap", "important");
       transContainer.style.setProperty("line-height", "1.5", "important");
+    }
+    else if (isSteamCommunity) {
+      if (el.classList.contains("forum_topic_name")) {
+        el.appendChild(transContainer);
+        transContainer.style.setProperty("display", "inline", "important");
+        transContainer.style.setProperty("font-size", "0.9em", "important");
+        transContainer.style.setProperty("margin-left", "6px", "important");
+        transContainer.style.setProperty("clear", "none", "important");
+        transContainer.style.setProperty("width", "auto", "important");
+      } else {
+        el.appendChild(transContainer);
+        transContainer.style.setProperty("display", "block", "important");
+        transContainer.style.setProperty("margin-top", "4px", "important");
+        transContainer.style.setProperty("margin-bottom", "0", "important");
+      }
     } else if (isGitHub) {
       if (
         el.tagName === "A" &&
@@ -3139,9 +3168,8 @@ function initInstagramDeepWatcher() {
 }
 
 initInstagramDeepWatcher();
-/**
- * 局部扫描函数：只扫描特定容器内的无翻译内容
- */
+
+//局部扫描函数：只扫描特定容器内的无翻译内容
 async function scanArticleContentOnly(article, selectors) {
   if (!article || !selectors) return;
   try {
@@ -3511,9 +3539,7 @@ async function scanInstagramComments(commentContainer) {
   }
 }
 
-/**
- * 穿透函数：递归搜索所有 Shadow DOM 中的目标
- */
+//穿透函数：递归搜索所有 Shadow DOM 中的目标
 function querySelectorAllDeep(selector, root = document) {
   let nodes = Array.from(root.querySelectorAll(selector));
   const allElements = root.querySelectorAll("*");
@@ -4023,7 +4049,7 @@ const getTextFragmentAnchor = (word) => {
 };
 function initSelectionTranslate() {
   const logoBase64 = ASSETS.logoBase64;
-  
+
   let _capturedContext = "";
   let _capturedContextTranslation = "";
   window.addEventListener(
@@ -4508,7 +4534,7 @@ function initSelectionTranslate() {
       #p-refresh:hover     { background: rgba(34,197,94,0.2) !important; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
       #p-refresh:hover svg { stroke: #4ade80 !important; }
       @keyframes res-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      .spinning svg        { animation: res-rotate .6s linear infinite; }
+      .spinning svg        { animation: res-rotate .6s linear infinite; stroke: #4ade80 !important;}
 
       /* 固定按钮 */
       #p-pin {
@@ -4609,9 +4635,41 @@ function initSelectionTranslate() {
         from { transform: rotate(0deg); }
         to   { transform: rotate(360deg); }
       }
-.mira-font-family{
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+
+      
+@keyframes tts-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
+
+.tts-loading {
+  position: relative;
+}
+
+.tts-loading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -3px;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: tts-loading-spin 0.7s linear infinite;
+}
+
+.tts-loading svg {
+  opacity: 0.3;
+}
+      .mira-font-family{
+          font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important;
+      }
       .speak-btn {
         position:   relative;
         width:      32px;
@@ -4633,7 +4691,7 @@ function initSelectionTranslate() {
       /* 播放中状态 */
       .speak-btn.is-speaking svg {
         animation: speak-jump-fancy .5s ease-in-out infinite;
-        stroke:    #ffffffdc !important;
+        stroke:    #38bdf8  !important;
         filter:    drop-shadow(0 0 5px #38bdf8);
       }
       .speak-btn.is-speaking::before,
@@ -4745,53 +4803,6 @@ function initSelectionTranslate() {
     .lang-tag-btn:active {
       background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
     }
-        /* ── 原文展开按钮 ── */
-      .p-orig-toggle {
-        display:        inline-flex;
-        align-items:    center;
-        font-size:      9px;
-        font-weight:    700;
-        color:          var(--p-accent);
-        opacity:        0.5;
-        cursor:         pointer;
-        margin-left:    6px;
-        border:         1px solid var(--p-accent);
-        border-radius:  3px;
-        padding:        1px 4px;
-        vertical-align: middle;
-        user-select:    none;
-        flex-shrink:    0;
-        transition:     opacity 0.2s, background 0.2s;
-        line-height:    1.4;
-      }
-      .p-orig-toggle:hover {
-        opacity:    1 !important;
-        background: color-mix(in srgb, var(--p-accent) 15%, transparent);
-      }
-      .p-orig-toggle.is-open {
-        opacity:    1;
-        background: color-mix(in srgb, var(--p-accent) 20%, transparent);
-      }
-
-      /* ── 原文展开内容 ── */
-      .p-orig-text {
-        display:       none;
-        margin-top:    4px;
-        padding:       4px 8px;
-        border-left:   2px solid var(--p-accent);
-        border-radius: 2px;
-        font-size:     11px;
-        color:         var(--p-text-muted);
-        font-style:    italic;
-        line-height:   1.5;
-        opacity:       0.8;
-        background:    color-mix(in srgb, var(--p-accent) 5%, transparent);
-        word-break:    break-word;
-        transition:    opacity 0.2s;
-      }
-      .p-orig-text.is-visible {
-        display: block;
-      }
 
       #p-engine-wrap:hover,
       .p-eng-item:hover,
@@ -4814,9 +4825,18 @@ function initSelectionTranslate() {
     .mira-example-speak {
       position: relative;
       transition: all 0.2s;
+      opacity: 0.6;
+    }
+      .mira-example-speak:hover {
+      opacity: 1;
     }
     .mira-example-speak.is-speaking {
+      opacity: 1;
       color: #38bdf8 !important;
+      filter: drop-shadow(0 0 4px rgba(56,189,248,0.8));
+    }
+      .mira-example-speak.is-speaking svg {
+      stroke: #38bdf8 !important;
       filter: drop-shadow(0 0 4px rgba(56,189,248,0.8));
     }
     .mira-example-speak.is-speaking::before,
@@ -5410,7 +5430,33 @@ function initSelectionTranslate() {
     // });
   }
   // ─── 渲染并展示翻译面板 ───────────────────────────────────────────────────────
+  function setActionBtns(shadow, enabled) {
+    ["p-speak", "p-save", "p-refresh"].forEach(id => {
+      const btn = shadow.getElementById(id);
+      if (!btn) return;
+      btn.style.opacity = enabled ? "" : "0.4";
+      btn.style.filter = enabled ? "" : "grayscale(1)";
+      btn.style.pointerEvents = enabled ? "" : "none";
+    });
+  }
+  function stopSpeech() {
+    currentSpeakId++; // 让所有进行中的任务失效
 
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.src = "";
+      currentAudio = null;
+    }
+    if (currentTimeoutId) {
+      clearTimeout(currentTimeoutId);
+      currentTimeoutId = null;
+    }
+    window.speechSynthesis?.cancel();
+    if (window._currentSpeakBtn) {
+      window._currentSpeakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+      window._currentSpeakBtn = null;
+    }
+  }
   async function renderAndShowPopup(
     text,
     pos,
@@ -5483,7 +5529,7 @@ function initSelectionTranslate() {
       height: "auto",
       minWidth: "280px",
       minHeight: "100px",
-      visibility: "visible",
+      visibility: "hidden",
     });
 
     // 初始化 saveBtn 状态
@@ -5547,7 +5593,7 @@ function initSelectionTranslate() {
         if (shadowHost.getAttribute("data-pinned") !== "true")
           popupEl.style.display = "none";
       }, 200);
-      window.speechSynthesis?.cancel();
+      stopSpeech();
     };
 
     // 固定
@@ -5563,14 +5609,12 @@ function initSelectionTranslate() {
       updatePinUI(shadowHost.getAttribute("data-pinned") !== "true");
     };
 
-    // 发音
+    // 发音 
     shadow.getElementById("p-speak").onclick = (e) => {
       e.stopPropagation();
-      speakText(
-        text,
-        shadow.getElementById("p-speak"),
-        window.hintSourceLang || hintSourceLangNew,
-      );
+      const lang = (window.hintSourceLang || hintSourceLangNew);
+      const finalLang = (!lang || lang === 'auto') ? null : lang;
+      speakText(text, shadow.getElementById("p-speak"), finalLang);
     };
     function handleTranslationResult(result, text, shadow) {
       if (!result) return;
@@ -5699,6 +5743,7 @@ function initSelectionTranslate() {
             currentSourceLang,
           )
             .then((result) => {
+
               if (basicEl) {
                 basicEl.style.color = "";
                 basicEl.style.fontStyle = "normal";
@@ -6140,7 +6185,8 @@ function initSelectionTranslate() {
     }
     // 显示 loading 状态
     basicEl.innerHTML = `<span style="opacity:0.5;font-size:13px;font-style:italic;">${t("loading")}...</span>`;
-
+    // 翻译未完成前禁用发音按钮
+    setActionBtns(shadow, false);
     const pDetail = shadow.getElementById("p-detail");
     if (pDetail) {
       pDetail.style.display = "none";
@@ -6158,6 +6204,8 @@ function initSelectionTranslate() {
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
       .then((result) => {
+        // 翻译完成，恢复发音按钮
+        setActionBtns(shadow, true);
         if (basicEl) {
           basicEl.style.color = "";
           basicEl.style.fontStyle = "normal";
@@ -6204,7 +6252,7 @@ function initSelectionTranslate() {
           if (shadowHost?._engineDotEl)
             shadowHost._engineDotEl.style.background = "#22c55e";
         } else {
-          logger.log("result.isPartial 为 false", result);
+          // logger.log("result.isPartial 为 false", result);
           if (shadowHost) {
             clearTimeout(shadowHost._slowTimer);
             shadowHost._slowTimer = null;
@@ -6222,6 +6270,8 @@ function initSelectionTranslate() {
         }
       })
       .catch((err) => {
+        // 翻译失败， 恢复发音按钮
+        setActionBtns(shadow, true);
         if (shadowHost?._engineDotEl)
           shadowHost._engineDotEl.style.background = "#ef4444";
         clearTimeout(shadowHost?._detailTimer);
@@ -6306,7 +6356,7 @@ function initSelectionTranslate() {
             </svg>
           </div>
 
-          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:0;">
+          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:1px 0 0 0;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
               <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
@@ -6324,7 +6374,7 @@ function initSelectionTranslate() {
       </div>
 
       <div id="p-result-container" style="display:flex; flex-direction:column; gap:6px;">
-        <div id="p-basic" class="basic" style="font-size:18px; color:var(--p-accent); font-weight:500;">Loading...</div>
+       <div id="p-basic" class="basic" style="font-size:18px;font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important; color:var(--p-accent); font-weight:500;">Loading...</div>
         <div id="p-detail" class="detail" style="display:none; margin-top:2px;"></div>
         <div id="p-examples" style="display:none; margin-top:4px;"></div>
       </div>
@@ -6560,10 +6610,10 @@ function initSelectionTranslate() {
         examples: res.examples || [],
         prototype: res.prototype || null,
         sourceLang: res.langInfo?.code || detectSourceLang(text),
-        context: _capturedContext  || "",
-        contextTranslation: _capturedContextTranslation  || "",
+        context: _capturedContext || "",
+        contextTranslation: _capturedContextTranslation || "",
       };
-      logger.log('[snapshot]', saveBtn._miraSnapshot);
+      //logger.log('[snapshot]', saveBtn._miraSnapshot);
       saveBtn._miraReady = true;
     }
 
@@ -6602,49 +6652,49 @@ function initSelectionTranslate() {
               const safeEn = en.replace(/'/g, "\\'");
               return `<div class="mira-font-family" style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
                        border-radius:2px;word-break:break-word;direction:${dir};text-align:${dir === "rtl" ? "right" : "left"};">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
-            ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
-          </div>
-          <span class="mira-example-speak" data-sentence="${safeEn}"
-            style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;
-                   transition:color 0.2s;opacity:0.6;">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            </svg>
-          </span>
-        </div>
-        <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
-      </div>`;
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
+                          ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
+                        </div>
+                        <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${res.langInfo?.code || 'en'}"
+                          style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;
+                                transition:color 0.2s;">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                          </svg>
+                        </span>
+                      </div>
+                      <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
+                    </div>`;
             })
             .join("");
         pE.style.display = "block";
-
-        // 绑定例句发音
+        //例句发音
         pE.querySelectorAll(".mira-example-speak").forEach(btn => {
           btn.addEventListener("mouseenter", () => {
             btn.style.color = "#38bdf8";
-            btn.style.opacity = "1";
             btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))";
           });
           btn.addEventListener("mouseleave", () => {
             if (!btn.classList.contains("is-speaking")) {
               btn.style.color = "var(--p-text-muted)";
-              btn.style.opacity = "0.6";
               btn.style.filter = "";
             }
           });
           btn.addEventListener("click", (e) => {
             e.stopPropagation();
             const sentence = btn.getAttribute("data-sentence");
+            const lang = btn.getAttribute("data-lang") || null;
             if (!sentence) return;
 
             btn.style.transform = "scale(0.8)";
             setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
 
-            speakText(sentence, btn, "en");
+            const finalLang = (!lang || lang === 'auto') ? null : lang;
+            logger.log('播放例句发音', { sentence, finalLang });
+            speakText(sentence, btn, finalLang);
           });
         });
       } else {
@@ -7087,7 +7137,7 @@ function initSelectionTranslate() {
       shadowHost.getAttribute("data-pinned") !== "true" &&
       typeof popupEl !== "undefined"
     ) {
-      window.speechSynthesis?.cancel();
+      stopSpeech();
       if (popupEl) popupEl.classList.add("is-hidden");
       setTimeout(() => {
         popupEl.style.display = "none";
@@ -7099,7 +7149,7 @@ function initSelectionTranslate() {
     "keydown",
     (e) => {
       if (e.key === "Escape" && popupEl?.style.display !== "none") {
-        window.speechSynthesis?.cancel();
+        stopSpeech();
         if (popupEl) popupEl.classList.add("is-hidden");
         setTimeout(() => {
           if (popupEl) popupEl.style.display = "none";

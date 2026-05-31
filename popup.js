@@ -263,7 +263,7 @@ async function initUpdateNotify() {
 
   guideEl.style.display = 'flex';
   guideEl.style.opacity = '1';
-  guideEl.style.zIndex = '9999';  
+  guideEl.style.zIndex = '9999';
 
   if (activeVocab.length > 0) {
     const exportBtn = document.getElementById('notice-export-btn');
@@ -313,7 +313,7 @@ async function initUpdateNotify() {
         const safeNote = (item.note || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
         const safeTitle = (item.title || "").replace(/"/g, '""');
         const safeUrl = (item.src || "").replace(/"/g, '""');
-        const safeContext = contextText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');  
+        const safeContext = contextText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
         const time = new Date(item.date).toLocaleString().replace(/,/g, ' ');
         csvContent += `"${safeWord}","${safeTrans}","${safeNote}","${safeContext}","${safeTitle}","${safeUrl}","${time}"\n`;
       });
@@ -341,20 +341,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     initUpdateNotify();
     return;
   }
+
   const shown = await safeGetStorage('review_page_shown_v1');
   if (!shown?.review_page_shown_v1) {
     const installData = await safeGetStorage('install_time');
     const installTime = installData?.install_time || Date.now();
     const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-    if (daysSinceInstall >= 7) {
+    const usageData = await safeGetStorage('usage_count');
+    const activeDaysData = await safeGetStorage('active_days');
+    const activeDaysCount = activeDaysData?.active_days?.length || 0;
+
+    const MIN_DAYS = 10;
+    const MIN_ACTIVE_DAYS = 5;
+
+    if (daysSinceInstall >= MIN_DAYS && activeDaysCount >= MIN_ACTIVE_DAYS) {
       await safeSetStorage({ review_page_shown_v1: true });
       const { browser, timezone } = getDeviceInfo();
-      const usageData = await safeGetStorage('usage_count');
       trackEvent('review_page_shown', {
         browser_lang: navigator.language,
         timezone,
         browser,
         days_since_install: Math.floor(daysSinceInstall),
+        active_days: activeDaysCount,
         usage_count: usageData?.usage_count || 0,
         trigger: 'popup',
       });
@@ -1840,31 +1848,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           const origItem = response.originalDictData?.[posIdx];
           const origMeanings = origItem?.meanings?.join(', ') || '';
-          const hasOrig = origMeanings && origMeanings !== item.meanings.join(', ');
 
           return `
           <div style="margin-bottom:6px;">
             <div style="display:flex; align-items:baseline; flex-wrap:wrap; gap:4px; line-height:1.4;">
               <span style="color:#94a3b8; font-size:11px; font-weight:bold; margin-right:4px; min-width:32px; flex-shrink:0;">${displayPos}</span>
               <span style="color:#38bdf8; font-size:13px;">${item.meanings.join(', ')}</span>
-              ${hasOrig ? `
-                <span class="ql-orig-toggle" data-posidx="${posIdx}"
-                      style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;
-                            color:#38bdf8;opacity:0.5;cursor:pointer;margin-left:4px;
-                            border:1px solid #38bdf8;border-radius:3px;padding:1px 4px;
-                            vertical-align:middle;user-select:none;flex-shrink:0;
-                            transition:opacity 0.2s,background 0.2s;">EN</span>
-              ` : ''}
             </div>
-            ${hasOrig ? `
-              <div class="ql-orig-text" data-posidx="${posIdx}"
-                  style="display:none;margin-top:4px;padding:4px 8px;
-                          border-left:2px solid #38bdf8;border-radius:2px 4px 4px 2px;
-                          font-size:11px;color:#94a3b8;font-style:italic;
-                          line-height:1.5;background:rgba(56,189,248,0.05);">
-                ${origMeanings}
-              </div>
-            ` : ''}
           </div>`;
         }).join('');
       }
@@ -1894,21 +1884,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         html += `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:6px;">${formsHtml}</div>`;
       }
 
-      // 例句
+      // 例句 
+      const sourceLang = document.getElementById('lpSelA')?.value || 'en';
       if (examples.length > 0) {
         html += `
-          <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
-            <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
-            ${examples.map(ex => {
+        <div style="margin-top:12px; border-top:1px dashed rgba(255,255,255,0.1); padding-top:10px; user-select:text !important;">
+          <div style="color:#94a3b8; font-size:10px; margin-bottom:5px; text-transform:uppercase;">Examples</div>
+          ${examples.map(ex => {
           const src = typeof ex === 'string' ? ex : (ex.en || '');
           const tgt = typeof ex === 'object' ? (ex.cn || '') : '';
+          const safeSrc = src.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
           return `
-                <div style="margin-bottom:8px;">
-                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic;">"${src}"</div>
-                  ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
-                </div>`;
+              <div style="margin-bottom:8px;">
+                <div style="display:flex; align-items:flex-start; gap:6px;">
+                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic; flex:1;">"${src}"</div>
+                  <span class="popup-example-speak" data-sentence="${safeSrc}" data-lang="${sourceLang || 'en'}"
+                    style="cursor:pointer; color:#64748b; flex-shrink:0; display:flex; margin-top:2px;
+                          transition:color 0.2s; position:relative; overflow:visible;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                  </span>
+                </div>
+                ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
+              </div>`;
         }).join('')}
-          </div>`;
+        </div>`;
       }
 
       // source 和 Cambridge 
@@ -1919,30 +1922,27 @@ document.addEventListener('DOMContentLoaded', async () => {
               color:#64748b;">
       </div>`;
       }
-
       resContent.innerHTML = html || 'No translation found.';
-
-      // 绑定 EN 展开按钮
-      resContent.querySelectorAll('.ql-orig-toggle').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const idx = btn.getAttribute('data-posidx');
-          const origText = resContent.querySelector(`.ql-orig-text[data-posidx="${idx}"]`);
-          if (!origText) return;
-          const isOpen = btn.getAttribute('data-open') === 'true';
-          if (isOpen) {
-            btn.setAttribute('data-open', 'false');
-            btn.textContent = 'EN';
-            btn.style.opacity = '0.5';
-            btn.style.background = '';
-            origText.style.display = 'none';
-          } else {
-            btn.setAttribute('data-open', 'true');
-            btn.textContent = 'EN ▲';
-            btn.style.opacity = '1';
-            btn.style.background = 'rgba(56,189,248,0.15)';
-            origText.style.display = 'block';
+      resContent.querySelectorAll('.popup-example-speak').forEach(btn => {
+        btn.addEventListener("mouseenter", () => {
+          btn.style.color = "#38bdf8";
+          btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))";
+        });
+        btn.addEventListener("mouseleave", () => {
+          if (!btn.classList.contains("is-speaking")) {
+            btn.style.color = "#64748b";
+            btn.style.filter = "";
           }
+        });
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const sentence = btn.getAttribute("data-sentence");
+          const lang = btn.getAttribute("data-lang") || null;
+          if (!sentence) return;
+          btn.style.transform = "scale(0.8)";
+          setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
+          const finalLang = (!lang || lang === 'auto') ? null : lang;
+          speakText(sentence, btn, finalLang);
         });
       });
 
@@ -2319,7 +2319,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       input.style.borderColor = '';
     }, 150);
 
-    speakText(text, this, langA);
+    const finalLang = (!langA || langA === 'auto') ? null : langA;
+    speakText(text, this, finalLang);
   };
 
   // ── 译文发音
@@ -2339,7 +2340,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       resultArea.style.borderColor = originalBorderColor;
     }, 150);
 
-    speakText(text, this, langB);
+    const finalLang = (!langB || langB === 'auto') ? null : langB;
+    speakText(text, this, finalLang);
   };
 
   async function triggerRefresh(btnElement, actionName) {

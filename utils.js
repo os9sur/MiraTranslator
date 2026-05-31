@@ -525,22 +525,22 @@ function t(key, forcedLang) {
       'default': 'Local model timeout. A dedicated GPU is required. Consider using a cloud API instead.'
     },
     'customApiTip': {
-  'zh': '<span style="display: block; padding-left: 20px;">兼容 OpenAI API 格式的服务均可使用（云端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">使用本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需独立显卡，核显/CPU 会严重超时。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需开启跨域：Ollama 设置环境变量 OLLAMA_ORIGINS=*，LM Studio / Jan 在设置页开启 CORS 选项。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型无需 API Key，留空即可。</span>',
+      'zh': '<span style="display: block; padding-left: 20px;">兼容 OpenAI API 格式的服务均可使用（云端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">使用本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需独立显卡，核显/CPU 会严重超时。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需开启跨域：Ollama 设置环境变量 OLLAMA_ORIGINS=*，LM Studio / Jan 在设置页开启 CORS 选项。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型无需 API Key，留空即可。</span>',
 
-  'zh-tw': '<span style="display: block; padding-left: 20px;">相容 OpenAI API 格式的服務均可使用（雲端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需獨立顯示卡，內顯/CPU 會嚴重逾時。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需開啟 CORS：Ollama 設定 OLLAMA_ORIGINS=*，LM Studio / Jan 在設定頁開啟 CORS 選項。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型無需 API Key，留空即可。</span>',
+      'zh-tw': '<span style="display: block; padding-left: 20px;">相容 OpenAI API 格式的服務均可使用（雲端 or 本地）。</span><br /><span style="display: block; padding-left: 20px;">本地模型（Ollama / LM Studio 等）需注意：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 需獨立顯示卡，內顯/CPU 會嚴重逾時。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 需開啟 CORS：Ollama 設定 OLLAMA_ORIGINS=*，LM Studio / Jan 在設定頁開啟 CORS 選項。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 本地模型無需 API Key，留空即可。</span>',
 
-  'ja': '<span style="display: block; padding-left: 20px;">OpenAI API 形式に対応したサービスであれば利用可能です（クラウド/ローカル問わず）。</span><br /><span style="display: block; padding-left: 20px;">ローカルモデル（Ollama / LM Studio など）をご利用の場合：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 専用 GPU が必要です。内蔵 GPU/CPU のみではタイムアウトが頻発します。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② CORS の有効化が必要です：Ollama は OLLAMA_ORIGINS=* を環境変数に設定、LM Studio / Jan は設定ページで CORS オプションをオンにしてください。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ ローカルモデルは API Key 不要です。空欄のままで構いません。</span>',
+      'ja': '<span style="display: block; padding-left: 20px;">OpenAI API 形式に対応したサービスであれば利用可能です（クラウド/ローカル問わず）。</span><br /><span style="display: block; padding-left: 20px;">ローカルモデル（Ollama / LM Studio など）をご利用の場合：</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 専用 GPU が必要です。内蔵 GPU/CPU のみではタイムアウトが頻発します。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② CORS の有効化が必要です：Ollama は OLLAMA_ORIGINS=* を環境変数に設定、LM Studio / Jan は設定ページで CORS オプションをオンにしてください。</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ ローカルモデルは API Key 不要です。空欄のままで構いません。</span>',
 
-  'en': '<span style="display: block; padding-left: 20px;">Compatible with any OpenAI API format (cloud or local).</span><br /><span style="display: block; padding-left: 20px;">For local models (Ollama / LM Studio etc.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Dedicated GPU required (iGPU/CPU causes severe timeouts).</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Enable CORS: set OLLAMA_ORIGINS=* for Ollama, or enable CORS in settings for LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ No API key needed for local models — leave it blank.</span>',
+      'en': '<span style="display: block; padding-left: 20px;">Compatible with any OpenAI API format (cloud or local).</span><br /><span style="display: block; padding-left: 20px;">For local models (Ollama / LM Studio etc.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Dedicated GPU required (iGPU/CPU causes severe timeouts).</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Enable CORS: set OLLAMA_ORIGINS=* for Ollama, or enable CORS in settings for LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ No API key needed for local models — leave it blank.</span>',
 
-  'ko': '<span style="display: block; padding-left: 20px;">OpenAI API 형식을 지원하는 모든 서비스(클라우드 또는 로컬)를 사용할 수 있습니다.</span><br /><span style="display: block; padding-left: 20px;">로컬 모델(Ollama / LM Studio 등) 사용 시 주의사항:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 외장 그래픽 카드가 필수이며, 내장 그래픽/CPU 사용 시 심각한 시간 초과가 발생할 수 있습니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 교차 출처(CORS) 활성화 필요: Ollama는 환경 변수 OLLAMA_ORIGINS=* 설정, LM Studio / Jan은 설정 페이지에서 CORS 옵션을 켜야 합니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 로컬 모델은 API Key가 필요 없습니다. 비워두면 됩니다.</span>',
+      'ko': '<span style="display: block; padding-left: 20px;">OpenAI API 형식을 지원하는 모든 서비스(클라우드 또는 로컬)를 사용할 수 있습니다.</span><br /><span style="display: block; padding-left: 20px;">로컬 모델(Ollama / LM Studio 등) 사용 시 주의사항:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① 외장 그래픽 카드가 필수이며, 내장 그래픽/CPU 사용 시 심각한 시간 초과가 발생할 수 있습니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② 교차 출처(CORS) 활성화 필요: Ollama는 환경 변수 OLLAMA_ORIGINS=* 설정, LM Studio / Jan은 설정 페이지에서 CORS 옵션을 켜야 합니다.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ 로컬 모델은 API Key가 필요 없습니다. 비워두면 됩니다.</span>',
 
-  'ru': '<span style="display: block; padding-left: 20px;">Совместимо с любыми сервисами в формате OpenAI API (облачными или локальными).</span><br /><span style="display: block; padding-left: 20px;">При использовании локальных моделей (Ollama / LM Studio и др.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Требуется дискретная видеокарта, использование встроенной графики или CPU приведет к серьезным таймаутам.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Необходимо включить CORS: установите переменную окружения OLLAMA_ORIGINS=* для Ollama или включите CORS в настройках для LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Для локальных моделей API Key не нужен — оставьте поле пустым.</span>',
+      'ru': '<span style="display: block; padding-left: 20px;">Совместимо с любыми сервисами в формате OpenAI API (облачными или локальными).</span><br /><span style="display: block; padding-left: 20px;">При использовании локальных моделей (Ollama / LM Studio и др.):</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Требуется дискретная видеокарта, использование встроенной графики или CPU приведет к серьезным таймаутам.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Необходимо включить CORS: установите переменную окружения OLLAMA_ORIGINS=* для Ollama или включите CORS в настройках для LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Для локальных моделей API Key не нужен — оставьте поле пустым.</span>',
 
-  'pt-BR': '<span style="display: block; padding-left: 20px;">Compatível com qualquer serviço no formato OpenAI API (em nuvem ou local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locais (Ollama / LM Studio, etc.), atente-se ao seguinte:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① É necessária uma placa de vídeo dedicada; o uso de gráficos integrados ou CPU causará tempos limite (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② É necessário habilitar o CORS: defina a variável de ambiente OLLAMA_ORIGINS=* para o Ollama ou ative a opção CORS nas configurações do LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Modelos locais não precisam de API Key — deixe o campo em branco.</span>',
+      'pt-BR': '<span style="display: block; padding-left: 20px;">Compatível com qualquer serviço no formato OpenAI API (em nuvem ou local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locais (Ollama / LM Studio, etc.), atente-se ao seguinte:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① É necessária uma placa de vídeo dedicada; o uso de gráficos integrados ou CPU causará tempos limite (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② É necessário habilitar o CORS: defina a variável de ambiente OLLAMA_ORIGINS=* para o Ollama ou ative a opção CORS nas configurações do LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Modelos locais não precisam de API Key — deixe o campo em branco.</span>',
 
-  'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>'
-},
+      'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>'
+    },
   };
 
   if (localModelTips[key]) {
@@ -1127,22 +1127,46 @@ function getPhoneticLabel(langCode) {
   return labels[base] || 'Ph';
 }
 
-let lastUtterance = null;
+
+// speak 全局变量
+let currentAudio = null;
+let currentTimeoutId = null;
+let currentSpeakId = 0;
+let googleTTSAvailable = null;
+let googleTTSFailCount = 0;
+const MAX_FAIL_COUNT = 3;
 
 function speakText(text, speakBtn, forcedLang) {
-  if (!window.speechSynthesis || !text) return;
+  console.log('[TTS] speakText called, text:', text, 'forcedLang:', forcedLang);
+  if (!text) {
+    console.log('[TTS] text 为空，直接 return');
+    return;
+  }
 
-  // 根据语言清理无关字符
+  // 每次调用生成新的 speakId，过期任务自动失效
+  const speakId = ++currentSpeakId;
+
+  // 清理上一次的音频和定时器
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.src = "";
+    currentAudio = null;
+  }
+  if (currentTimeoutId) {
+    clearTimeout(currentTimeoutId);
+    currentTimeoutId = null;
+  }
+  window.speechSynthesis?.cancel();
+
+  // 清理上一个按钮的 UI 状态
+  if (window._currentSpeakBtn && window._currentSpeakBtn !== speakBtn) {
+    window._currentSpeakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+    window._currentSpeakBtn.querySelector?.('svg')?.classList.remove('icon-active');
+  }
+  window._currentSpeakBtn = speakBtn;
+
+  // --- 1. 语言检测与文本清理 ---
   const base = (forcedLang || '').split('-')[0].toLowerCase();
-
-  // 中文字符范围
-  const isChinese = /[\u4E00-\u9FFF\u3400-\u4DBF]/;
-  // 日文字符范围  
-  const isJapanese = /[\u3040-\u309F\u30A0-\u30FF]/;
-  // 韩文字符范围
-  const isKorean = /[\uAC00-\uD7AF]/;
-  // 西文字符范围
-  const isLatin = /[a-zA-Z]/;
 
   const cleanCommon = (str) => str
     .replace(/-+/g, " ")
@@ -1150,41 +1174,20 @@ function speakText(text, speakBtn, forcedLang) {
     .replace(/\s+/g, " ")
     .trim();
 
-  if (!base || base === 'en') {
-    // 英语：去掉中文、日文、韩文
-    text = text
-      .replace(/[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF。，！？、]+/g, "");
+  if (base === 'en') {
+    text = text.replace(/[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF。，！？、]+/g, "");
   } else if (base === 'zh') {
-    // 中文：去掉日文假名、韩文、拉丁字母（保留数字）
-    text = text
-      .replace(/[\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, "")
-      .replace(/[a-zA-Z]+/g, "");
+    text = text.replace(/[\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/g, "");
   } else if (base === 'ja') {
-    // 日语：去掉韩文、纯拉丁（保留数字和中文，日语里常混汉字）
-    text = text
-      .replace(/[\uAC00-\uD7AF]/g, "")
-      .replace(/[a-zA-Z]+/g, "");
+    text = text.replace(/[\uAC00-\uD7AF]/g, "");
   } else if (base === 'ko') {
-    // 韩语：去掉日文假名、拉丁字母
-    text = text
-      .replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "")
-      .replace(/[a-zA-Z]+/g, "");
-  } else {
-    // 其他语言（法/德/西/俄等）：去掉中文、日文、韩文
-    text = text
-      .replace(/[\u4E00-\u9FFF\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF。，！？、]+/g, "");
+    text = text.replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "");
   }
 
   text = cleanCommon(text);
+  if (!text) return;
 
-  if (speakBtn) {
-    speakBtn.classList.remove('is-speaking', 'speaking-wave');
-    speakBtn.classList.add('is-loading', 'tts-loading');
-  }
-
-  lastUtterance = new SpeechSynthesisUtterance(text);
-  lastUtterance.volume = 1.0;
-
+  // --- 2. 确定目标语言代码 ---
   const langMap = {
     'ja': 'ja-JP', 'zh': 'zh-CN', 'en': 'en-US', 'ko': 'ko-KR',
     'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU'
@@ -1192,12 +1195,8 @@ function speakText(text, speakBtn, forcedLang) {
 
   let targetLang = '';
   if (forcedLang) {
-    const base = forcedLang.split('-')[0].toLowerCase();
     targetLang = langMap[base] || forcedLang;
-  }
-
-  // 如果没有强制指定语言，走正则识别
-  if (!targetLang) {
+  } else {
     if (/[\u3040-\u30ff]/.test(text)) targetLang = 'ja-JP';
     else if (/\p{Script=Hangul}/u.test(text)) targetLang = 'ko-KR';
     else if (/\p{Script=Han}/u.test(text)) targetLang = /[繁體國語]/.test(text) ? 'zh-TW' : 'zh-CN';
@@ -1205,36 +1204,228 @@ function speakText(text, speakBtn, forcedLang) {
     else if (/[éàèâîôûçëïüÿœæ]/.test(text)) targetLang = 'fr-FR';
     else if (/[ñ¿¡]/.test(text)) targetLang = 'es-ES';
     else if (/\p{Script=Cyrillic}/u.test(text)) targetLang = 'ru-RU';
-    else targetLang = 'en-US'; // 默认
+    else targetLang = 'en-US';
   }
 
-  lastUtterance.lang = targetLang;
-
-  if (targetLang.startsWith('ja')) lastUtterance.rate = 0.6;
-  else if (targetLang.startsWith('zh')) lastUtterance.rate = 0.85;
-  else lastUtterance.rate = 0.7;
-
+  // --- 3. UI 初始状态 ---
+  if (speakBtn) {
+    speakBtn.classList.remove('is-speaking', 'speaking-wave');
+    speakBtn.classList.add('is-loading', 'tts-loading');
+  }
+  window.speechSynthesis.cancel();
   const forceReset = new SpeechSynthesisUtterance("");
   window.speechSynthesis.speak(forceReset);
 
-  setTimeout(() => {
-    window.speechSynthesis.speak(lastUtterance);
-  }, 50);
+  // --- 4. 兜底函数 ---
+  let isFallbackTriggered = false;
 
-  if (speakBtn) {
-    lastUtterance.onstart = () => {
-      speakBtn.classList.remove('is-loading', 'tts-loading');
-      speakBtn.classList.add('is-speaking', 'speaking-wave');
-      speakBtn.querySelector('svg')?.classList.add('icon-active');
+  const triggerFallback = (markUnavailable = false) => {
+    if (speakId !== currentSpeakId) return;
+    if (isFallbackTriggered) return;
+    isFallbackTriggered = true;
+
+    if (markUnavailable) {
+      googleTTSFailCount++;
+      if (googleTTSFailCount >= MAX_FAIL_COUNT) {
+        googleTTSAvailable = false;
+        logger.log('[TTS] Google TTS 连续失败3次，本次会话禁用');
+      }
+    }
+
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.src = "";
+      currentAudio = null;
+    }
+
+    if (!window.speechSynthesis) {
+      if (speakBtn) {
+        speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+        speakBtn.querySelector?.('svg')?.classList.remove('icon-active');
+      }
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.volume = 1.0;
+    utterance.lang = targetLang;
+
+    if (targetLang.startsWith('ja')) utterance.rate = 0.6;
+    else if (targetLang.startsWith('zh')) utterance.rate = 0.85;
+    else utterance.rate = 0.7;
+
+    if (speakBtn) {
+      utterance.onstart = () => {
+        if (speakId !== currentSpeakId) return;
+        speakBtn.classList.remove('is-loading', 'tts-loading');
+        speakBtn.classList.add('is-speaking', 'speaking-wave');
+        speakBtn.querySelector('svg')?.classList.add('icon-active');
+      };
+      const stopUI = () => {
+        speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+        speakBtn.querySelector('svg')?.classList.remove('icon-active');
+        window._currentSpeakBtn = null;
+      };
+      utterance.onend = stopUI;
+      utterance.onerror = stopUI;
+    }
+
+    setTimeout(() => {
+      if (speakId !== currentSpeakId) return;
+
+      window.speechSynthesis.cancel();
+
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.volume = 1.0;
+      utt.lang = targetLang;
+      if (targetLang.startsWith('ja')) utt.rate = 0.6;
+      else if (targetLang.startsWith('zh')) utt.rate = 0.85;
+      else utt.rate = 0.7;
+
+      utt.onstart = () => {
+        if (speakId !== currentSpeakId) return;
+        if (speakBtn) {
+          speakBtn.classList.remove('is-loading', 'tts-loading');
+          speakBtn.classList.add('is-speaking', 'speaking-wave');
+          speakBtn.querySelector('svg')?.classList.add('icon-active');
+        }
+      };
+      const stopUI = () => {
+        if (speakBtn) {
+          speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+          speakBtn.querySelector('svg')?.classList.remove('icon-active');
+        }
+        window._currentSpeakBtn = null;
+      };
+      utt.onend = stopUI;
+      utt.onerror = (e) => {
+        logger.log('[TTS] 系统TTS onerror:', e.error);
+        stopUI();
+      };
+
+      // 先 speak 空 utterance 热身，再 speak 真正内容
+      const forceReset = new SpeechSynthesisUtterance("");
+      window.speechSynthesis.speak(forceReset);
+      setTimeout(() => {
+        if (speakId !== currentSpeakId) return;
+        window.speechSynthesis.speak(utt);
+      }, 50);
+    }, 50);
+  };
+
+  // --- 5. Google TTS 已知不可用，直接降级 ---
+  if (googleTTSAvailable === false) {
+    logger.log('[TTS] Google TTS 已标记不可用，直接使用 speechSynthesis');
+    triggerFallback(false);
+    return;
+  }
+  // --- 6. 尝试 Google TTS ---
+  const safeText = encodeURIComponent(text.slice(0, 200));
+  const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${targetLang}&q=${safeText}`;
+
+  // 超时兜底
+  currentTimeoutId = setTimeout(() => {
+    if (speakId !== currentSpeakId) return;
+    logger.log('[TTS] Google TTS 超时，降级到 speechSynthesis');
+    triggerFallback(true);
+  }, 5000);
+
+  const setupAudio = (audioSrc) => {
+    if (speakId !== currentSpeakId) return;
+
+    currentAudio = new Audio(audioSrc);
+
+    currentAudio.oncanplaythrough = () => {
+      logger.log('[TTS] audio duration:', currentAudio.duration, 'src length:', currentAudio.src.length);
+      if (speakId !== currentSpeakId) return;
+      if (isFallbackTriggered) return;
+      clearTimeout(currentTimeoutId);
+      currentTimeoutId = null;
+      googleTTSAvailable = true;
+      googleTTSFailCount = 0;
+      logger.log('[TTS] Google TTS 可用');
+
+      if (speakBtn) {
+        speakBtn.classList.remove('is-loading', 'tts-loading');
+        speakBtn.classList.add('is-speaking', 'speaking-wave');
+        speakBtn.querySelector('svg')?.classList.add('icon-active');
+      }
+
+      if (targetLang.startsWith('zh')) currentAudio.playbackRate = 1.1;
+
+      const tryPlay = () => {
+        currentAudio.play()
+          .then(() => logger.log('[TTS] play() 成功'))
+          .catch((e) => {
+            logger.log('[TTS] play() 失败:', e.name, e.message);
+            if (speakId !== currentSpeakId) return;
+            triggerFallback(false);
+          });
+      };
+
+      //  先 resume AudioContext 解除自动播放限制
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        audioCtx.resume().then(() => {
+          audioCtx.close();
+          tryPlay();
+        }).catch(() => tryPlay());
+      } catch (e) {
+        tryPlay();
+      }
     };
 
-    const stop = () => {
-      speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
-      speakBtn.querySelector('svg')?.classList.remove('icon-active');
+    currentAudio.onerror = () => {
+      if (speakId !== currentSpeakId) return;
+      clearTimeout(currentTimeoutId);
+      currentTimeoutId = null;
+      logger.log('[TTS] Google TTS 错误，降级到 speechSynthesis');
+      triggerFallback(true);
     };
 
-    lastUtterance.onend = stop;
-    lastUtterance.onerror = stop;
+    currentAudio.onended = () => {
+      if (speakId !== currentSpeakId) return;
+      if (speakBtn) {
+        speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
+        speakBtn.querySelector('svg')?.classList.remove('icon-active');
+      }
+      window._currentSpeakBtn = null;
+    };
+  };
+
+  // 判断是否在 content script / popup 环境，需要通过 background 中转
+  const isExtensionPage = typeof location !== 'undefined' && (
+    location.href.startsWith('chrome-extension://') ||  // Chrome
+    location.href.startsWith('moz-extension://') ||     // Firefox
+    location.href.startsWith('extension://')            // Edge
+  );
+
+  if (isExtensionPage) {
+    // 生词本等扩展页面：直接使用 URL
+    setupAudio(googleUrl);
+  } else {
+    // content script / popup：通过 background 中转获取 base64 
+    const fetchTimeout = setTimeout(() => {
+      if (speakId !== currentSpeakId) return;
+      logger.log('[TTS] fetch 请求超时，直接 fallback');
+      triggerFallback(true);
+    }, 4000);
+
+    safeSendMessage({ type: 'FETCH_TTS_AUDIO', url: googleUrl })
+      .then(res => {
+        clearTimeout(fetchTimeout);
+        if (speakId !== currentSpeakId) return;
+        if (!res?.success) throw new Error(res?.error || 'fetch failed');
+        setupAudio(`data:audio/mpeg;base64,${res.base64}`);
+      })
+      .catch(err => {
+        clearTimeout(fetchTimeout);
+        if (speakId !== currentSpeakId) return;
+        clearTimeout(currentTimeoutId);
+        currentTimeoutId = null;
+        logger.log('[TTS] background 中转失败:', err.message);
+        triggerFallback(true);
+      });
   }
 }
 
@@ -1291,8 +1482,19 @@ function mergeDictData(dictData) {
 async function incrementUsageCount() {
   const result = await safeGetStorage('usage_count', true);
   const count = (result?.usage_count || 0) + 1;
-  await safeSetStorage({ usage_count: count });
-  return count; // 返回 count，让调用者知道当前进度
+
+  // 记录活跃天数
+  const activeDaysData = await safeGetStorage('active_days');
+  const activeDays = new Set(activeDaysData?.active_days || []);
+  const today = new Date().toISOString().slice(0, 10); // "2026-01-15"
+  activeDays.add(today);
+
+  await safeSetStorage({ 
+    usage_count: count,
+    active_days: [...activeDays],
+  });
+
+  return count;
 }
 //通用翻译
 let lastTranslationResult = null;

@@ -1704,6 +1704,30 @@ select:hover {
   color: #38bdf8;
   overflow: visible !important;
 }
+.tts-loading {
+  position: relative;
+}
+
+.tts-loading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -3px;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: tts-loading-spin 0.7s linear infinite;
+}
+
+.tts-loading svg {
+  opacity: 0.3;
+}
 
 @keyframes tts-loading-spin {
   to {
