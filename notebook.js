@@ -416,7 +416,7 @@ pageData.forEach(item => {
         if (!hiragana) return;
         kanaEl.innerHTML = `
             <span style="cursor:pointer; user-select:none;" 
-                  title="点击切换片假名"
+                  title="${_t('toggleKatakana')}"
                   data-hiragana="${hiragana}" 
                   data-katakana="${katakana}"
                   data-mode="hiragana">

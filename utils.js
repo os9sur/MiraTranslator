@@ -856,6 +856,7 @@ function detectLatinLanguage(cleanText, cleanChars, targetPrefix) {
   return false;
 }
 function detectIsAlreadyTarget(text, targetLang) {
+  logger.log("【MIRA拦截测试】", { text, targetLang });
   if (!text) return true;
 
   if (/^\s*[\d.,\s\-+%$€¥£#@!?]+\s*$/.test(text)) return true;
@@ -1612,7 +1613,17 @@ logger.log('[getDetailedTranslation] query:', query, 'hintInputLang:', hintInput
         const detected = detection.languages[0].language.toLowerCase();
         // 外部有hint时，不信任chrome检测结果
         if (!hintInputLang && detected === targetBase) {
-          return { basic: query, isSameLang: true, timestamp: Date.now() };
+          const hasTargetScript = (() => {
+            if (targetBase === 'zh') return /[\p{Script=Han}]/u.test(query);
+            if (targetBase === 'ja') return /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query);
+            if (targetBase === 'ko') return /[\p{Script=Hangul}]/u.test(query);
+            if (targetBase === 'ar') return /[\p{Script=Arabic}]/u.test(query);
+            if (targetBase === 'he') return /[\p{Script=Hebrew}]/u.test(query);
+            return true;
+          })();
+          if (hasTargetScript) {
+            return { basic: query, isSameLang: true, timestamp: Date.now() };
+          }
         }
       }
     } catch (e) { }

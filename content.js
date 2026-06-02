@@ -1911,6 +1911,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
+
   //排除逻辑
   if (el.tagName === "LI") {
     if (el.classList.contains("a-carousel-card") || el.closest(".a-carousel")) {
@@ -1986,15 +1987,21 @@ async function handleTranslateElement(el, forceRefresh = false) {
     _miraProcessingSet.delete(el);
     return;
   }
-  if (
-    el.closest(
-      'pre, code, [class*="code"], [class*="highlight"], [class*="hljs"]',
-    )
-  ) {
-    el.dataset.translated = "true";
-    el.removeAttribute("data-mira-processing");
-    _miraProcessingSet.delete(el);
-    return;
+  // wikipedia 维基百科的代码块很多都是用 class 包裹的，而不是 pre/code 标签， 特殊处理 
+  // wikipedia 维基百科的法语版本不会翻译的问题
+  const isWikipedia = location.hostname.includes("wikipedia.org");
+
+  const isCodeBlock = el.closest('pre, code, [class*="highlight"], [class*="hljs"]');
+  const isClassCode = !isWikipedia && el.closest('[class*="code"]');
+
+  if (isCodeBlock || isClassCode) {
+    if (isWikipedia && !el.closest('pre, code')) {
+    } else {
+      el.dataset.translated = "true";
+      el.removeAttribute("data-mira-processing");
+      _miraProcessingSet.delete(el);
+      return;
+    }
   }
   const isYoutube = location.hostname.includes("youtube.com");
   const isTwitter = location.hostname.includes("x.com");
@@ -3761,6 +3768,7 @@ async function executeReScan(config) {
   }
 }
 async function scanContent(forcedSelectors = null) {
+
   if (typeof isPageScanEnabled !== "undefined" && !isPageScanEnabled) return;
   if (forcedSelectors === null && currentActiveSelectors === "__LOADING__")
     return;
@@ -4060,6 +4068,7 @@ const getTextFragmentAnchor = (word) => {
 };
 let _capturedContext = "";
 let _capturedContextTranslation = "";
+
 function initSelectionTranslate() {
   const logoBase64 = ASSETS.logoBase64;
 
@@ -6285,9 +6294,49 @@ function initSelectionTranslate() {
     if (shadowHost?._engineDotEl)
       shadowHost._engineDotEl.style.background = "#6b7280";
 
-    const effectiveHintLang = (hintSourceLangNew && hintSourceLangNew !== "auto")
-      ? hintSourceLangNew
-      : detectedHintLang;
+    const hasDiacritics = (str) => /\p{M}/u.test(str);
+
+    const isEnglish = (langCode) => {
+      if (!langCode) return false;
+      const baseLang = langCode.split('-')[0].toLowerCase();
+      return baseLang === 'en';
+    };
+
+    const detectedFromContext = (() => {
+      try {
+        return detectSourceLang(_capturedContext || '') || null;
+      } catch (e) {
+        return null;
+      }
+    })();
+
+    const detectedFromText = (() => {
+      try {
+        return detectSourceLang(text || '') || null;
+      } catch (e) {
+        return null;
+      }
+    })();
+
+    let effectiveHintLang = null;
+
+    if (hintSourceLangNew && hintSourceLangNew !== 'auto') {
+      effectiveHintLang = hintSourceLangNew;
+    } else {
+      if (detectedFromText && !isEnglish(detectedFromText)) {
+        effectiveHintLang = detectedFromText;
+      } else if (detectedFromText && isEnglish(detectedFromText) && hasDiacritics(text || '')) {
+        effectiveHintLang = detectedFromText;
+      } else if (detectedFromContext && !isEnglish(detectedFromContext)) {
+        effectiveHintLang = detectedFromContext;
+      } else if (detectedFromContext && isEnglish(detectedFromContext) && hasDiacritics(_capturedContext || '')) {
+        effectiveHintLang = detectedFromContext;
+      } else if (detectedFromText && isEnglish(detectedFromText)) {
+        effectiveHintLang = detectedFromText;
+      } else {
+        effectiveHintLang = null;
+      }
+    }
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(
       text,
@@ -6508,12 +6557,6 @@ function initSelectionTranslate() {
     const cleanMarker = (s) =>
       typeof s === "string" ? s.replace(/\[\[\d+\]\]\s*/g, "").trim() : s;
 
-    const detectSourceLang = (t) => {
-      if (/[\u3040-\u309F\u30A0-\u30FF]/.test(t)) return "ja";
-      if (/[\u4E00-\u9FAF]/.test(t)) return "zh";
-      if (/[\uAC00-\uD7AF]/.test(t)) return "ko";
-      return "en";
-    };
     // 合并相同词性
     const mergedDict = (res.dictData || [])
       .reduce((acc, item) => {
@@ -7168,7 +7211,7 @@ function initSelectionTranslate() {
           showUpdateNotice();
           return;
         }
-        forceHideLogo();
+        // ❌ 不要在这里隐藏，要在成功显示窗口后才隐藏
         try {
           const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
           const currentSource = storage?.lpLangA || "auto";
@@ -7265,6 +7308,7 @@ function initSelectionTranslate() {
               _capturedContextTranslation = translationEl ? translationEl.textContent.trim() : "";
             }
           } catch (e) {
+            logger.warn("[context-capture] 上下文捕获失败:", e);
             _capturedContext = "";
             _capturedContextTranslation = "";
           }
@@ -7276,12 +7320,17 @@ function initSelectionTranslate() {
             currentTarget,
             detectedSourceLang
           );
+
+          //  成功显示窗口后，才隐藏小按钮
+          forceHideLogo();
         } catch (e) {
           if (e.message?.includes("context invalidated")) {
+            logger.warn("[mouseenter] Context invalidated, 扩展已更新");
             showUpdateNotice();
             return;
           }
-          logger.error("显示翻译窗口失败:", e);
+          logger.error("[mouseenter] 显示翻译窗口失败:", e.message, e.stack);
+          //  错误发生时不隐藏小按钮，保留让用户重试
         }
       };
     }, 150);
