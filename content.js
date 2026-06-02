@@ -5745,6 +5745,8 @@ function initSelectionTranslate() {
           text.trim(),
           window.currentTargetL,
           isRTL,
+          null,
+          effectiveHintLang,
         );
         if (shadowHost) shadowHost._detailFullyRendered = true;
       }
@@ -6318,25 +6320,40 @@ function initSelectionTranslate() {
       }
     })();
 
+    const fromText = detectSourceLang(text);
+    const fromCtx = detectSourceLang(_capturedContext);
+    const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(text);
+
     let effectiveHintLang = null;
 
-    if (hintSourceLangNew && hintSourceLangNew !== 'auto') {
-      effectiveHintLang = hintSourceLangNew;
+    if (hasKana) {
+      // 文本含假名，必然是日语
+      effectiveHintLang = 'ja';
+    } else if (fromCtx === 'ja') {
+      // 上下文是日语（纯汉字词在日语段落里）
+      effectiveHintLang = 'ja';
+    } else if (fromCtx) {
+      effectiveHintLang = fromCtx;
     } else {
-      if (detectedFromText && !isEnglish(detectedFromText)) {
-        effectiveHintLang = detectedFromText;
-      } else if (detectedFromText && isEnglish(detectedFromText) && hasDiacritics(text || '')) {
-        effectiveHintLang = detectedFromText;
-      } else if (detectedFromContext && !isEnglish(detectedFromContext)) {
-        effectiveHintLang = detectedFromContext;
-      } else if (detectedFromContext && isEnglish(detectedFromContext) && hasDiacritics(_capturedContext || '')) {
-        effectiveHintLang = detectedFromContext;
-      } else if (detectedFromText && isEnglish(detectedFromText)) {
-        effectiveHintLang = detectedFromText;
-      } else {
-        effectiveHintLang = null;
-      }
+      effectiveHintLang = fromText;
     }
+
+    const isLikelyConfused = (effectiveHintLang === 'zh') &&
+      /[a-zA-Z]/.test(text) &&
+      !/[\u4e00-\u9fa5]/u.test(text);
+
+    if (isLikelyConfused) {
+      effectiveHintLang = null;
+    }
+    shadowHost._effectiveHintLang = effectiveHintLang;
+    logger.log("🔍 [MIRA 调试] 翻译参数:", {
+      text: text,
+      manualLang: manualLang,
+      effectiveHintLang: effectiveHintLang,
+      detectedFromText: detectedFromText,
+      detectedFromContext: detectedFromContext,
+      finalSource: hintSourceLangNew !== "auto" ? hintSourceLangNew : null
+    });
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(
       text,
@@ -6408,6 +6425,8 @@ function initSelectionTranslate() {
             text.trim(),
             window.currentTargetL,
             isRTL,
+            null,
+            shadowHost._effectiveHintLang || msg.result?.langInfo?.code || null,
           );
         }
       })
@@ -6541,6 +6560,7 @@ function initSelectionTranslate() {
     targetLang,
     isRTL = false,
     state = null,
+    sourceLang = null,
   ) {
     if (!shadow || !res) return;
 
@@ -6606,14 +6626,14 @@ function initSelectionTranslate() {
           pPhonetic.style.display = "none";
         }
 
-        if (rawPhonetic && isJapanese(text)) {
+        logger.log('[kana debug] sourceLang:', sourceLang, 'rawPhonetic:', rawPhonetic);
+        if (rawPhonetic && sourceLang === 'ja') {
           getKana(rawPhonetic).then(({ hiragana, katakana }) => {
             if (!hiragana) {
               pToggleJa.style.display = "none";
               pJaExtension.style.display = "none";
               return;
             }
-
             pHiragana.innerText = hiragana;
             pKatakana.innerText = katakana;
             pToggleJa.style.display = "inline-block";
@@ -6630,6 +6650,7 @@ function initSelectionTranslate() {
             };
           });
         } else {
+          // 源语言不是日语，一律隐藏
           pToggleJa.style.display = "none";
           pJaExtension.style.display = "none";
         }
@@ -7079,14 +7100,22 @@ function initSelectionTranslate() {
     }
     return winSel;
   }
-  // 只取原文，排除翻译段落
+  // 只取原文上下文，排除翻译段落
   const getOriginalText = (el) => {
     let text = "";
+
+    //  黑名单：排除掉大概率包含语言列表、导航、页脚的标签
+    const blackList = ['NAV', 'ASIDE', 'FOOTER', 'HEADER', 'SCRIPT', 'STYLE'];
+
     Array.from(el.childNodes).forEach(node => {
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent;
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        if (!node.classList.contains("kt-paragraph-translation")) {
+        // 检查黑名单和已翻译标记
+        const isBlacklisted = blackList.includes(node.tagName);
+        const isTranslated = node.classList.contains("kt-paragraph-translation");
+
+        if (!isBlacklisted && !isTranslated) {
           text += getOriginalText(node);
         }
       }
@@ -7211,7 +7240,6 @@ function initSelectionTranslate() {
           showUpdateNotice();
           return;
         }
-        // ❌ 不要在这里隐藏，要在成功显示窗口后才隐藏
         try {
           const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
           const currentSource = storage?.lpLangA || "auto";
@@ -7754,6 +7782,8 @@ function initSelectionTranslate() {
           msg.originalText,
           window.currentTargetL,
           isRTL,
+          null,
+          shadowHost._effectiveHintLang || msg.result?.langInfo?.code || null,
         );
       }
 

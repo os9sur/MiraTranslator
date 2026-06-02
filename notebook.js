@@ -398,21 +398,24 @@ ${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; col
     }).join('');
 
     // 日语假名异步填充
-pageData.forEach(item => {
-    const phonetic = (typeof item.trans === 'object' && item.trans !== null)
+    pageData.forEach(item => {
+      const phonetic = (typeof item.trans === 'object' && item.trans !== null)
         ? (item.trans.phonetic || item.trans.sourcePhonetic || '')
         : '';
-    const context = (typeof item.trans === 'object') ? (item.trans.context || '') : '';
-    
-    // 判断是否日语：上下文或原词含日文字符
-    const hasJapanese = /[\u3040-\u30FF\u4e00-\u9fff]/.test(context || item.word || '');
-    
-    if (!phonetic || !hasJapanese) return;
-    
-    const kanaEl = document.getElementById(`kana-${item.id}`);
-    if (!kanaEl) return;
-    
-    getKana(phonetic).then(({ hiragana, katakana }) => {
+      // logger.log('[kana debug] sourceLang:', item.trans?.sourceLang, 'word:', item.word);
+      const context = (typeof item.trans === 'object') ? (item.trans.context || '') : '';
+
+      // 判断是否日语：上下文或原词含日文字符
+      const isJapanese = item.trans?.sourceLang === 'ja' ||
+        /[\u3040-\u30FF]/.test(item.word || '') ||
+        /[\u3040-\u30FF]/.test(context || '');
+
+      if (!phonetic || !isJapanese) return;
+
+      const kanaEl = document.getElementById(`kana-${item.id}`);
+      if (!kanaEl) return;
+
+      getKana(phonetic).then(({ hiragana, katakana }) => {
         if (!hiragana) return;
         kanaEl.innerHTML = `
             <span style="cursor:pointer; user-select:none;" 
@@ -424,20 +427,20 @@ pageData.forEach(item => {
             </span>
         `;
         kanaEl.style.display = 'block';
-        
+
         // 点击切换平假名/片假名
         kanaEl.querySelector('span').onclick = (e) => {
-            const el = e.currentTarget;
-            if (el.dataset.mode === 'hiragana') {
-                el.innerText = el.dataset.katakana;
-                el.dataset.mode = 'katakana';
-            } else {
-                el.innerText = el.dataset.hiragana;
-                el.dataset.mode = 'hiragana';
-            }
+          const el = e.currentTarget;
+          if (el.dataset.mode === 'hiragana') {
+            el.innerText = el.dataset.katakana;
+            el.dataset.mode = 'katakana';
+          } else {
+            el.innerText = el.dataset.hiragana;
+            el.dataset.mode = 'hiragana';
+          }
         };
+      });
     });
-});
     document.querySelectorAll('.btn-danger').forEach(btn => {
       btn.onclick = (e) => {
         const id = e.currentTarget.getAttribute('data-id');
