@@ -1176,6 +1176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ytRow = document.getElementById('youtube-option-container');
   const targetLangCombox = document.getElementById('targetLangCombox');
   const inspectContainer = document.getElementById('inspectContainer');
+  const minCharsContainer = document.getElementById('minCharsContainer');
   document.getElementById('tab-web').onclick = () => toggleStyleTab('web');
   document.getElementById('tab-yt').onclick = () => toggleStyleTab('yt');
   const ytSizeInput = document.getElementById('yt-style-fontSize');
@@ -1310,6 +1311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         webTranslationOptionContainer,
         targetLangCombox,
         selectTextOptionContainer,
+        minCharsContainer,
         ytHint
       ].forEach(el => {
         if (el) el.style.display = 'none';
@@ -1354,6 +1356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (inspectContainer) inspectContainer.style.display = '';
       if (webTranslationOptionContainer) webTranslationOptionContainer.style.display = '';
       if (selectTextOptionContainer) selectTextOptionContainer.style.display = '';
+      if (minCharsContainer) minCharsContainer.style.display = '';
     }
   }
   initPopupUI();

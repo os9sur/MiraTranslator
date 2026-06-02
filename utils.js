@@ -2062,7 +2062,7 @@ function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {})
       const opt = document.createElement('option');
       opt.disabled = true;
       opt.textContent = lang.label;
-      opt.style.cssText = 'background:#21262d; color:#8b949e;';
+      opt.style.cssText = 'background:#21262d; color:rgb(149 158 167);';
       opt.style.fontStyle = 'italic';
       selectEl.appendChild(opt);
     } else {
