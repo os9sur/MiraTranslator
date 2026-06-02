@@ -1612,7 +1612,17 @@ logger.log('[getDetailedTranslation] query:', query, 'hintInputLang:', hintInput
         const detected = detection.languages[0].language.toLowerCase();
         // 外部有hint时，不信任chrome检测结果
         if (!hintInputLang && detected === targetBase) {
-          return { basic: query, isSameLang: true, timestamp: Date.now() };
+          const hasTargetScript = (() => {
+            if (targetBase === 'zh') return /[\p{Script=Han}]/u.test(query);
+            if (targetBase === 'ja') return /[\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Han}]/u.test(query);
+            if (targetBase === 'ko') return /[\p{Script=Hangul}]/u.test(query);
+            if (targetBase === 'ar') return /[\p{Script=Arabic}]/u.test(query);
+            if (targetBase === 'he') return /[\p{Script=Hebrew}]/u.test(query);
+            return true;
+          })();
+          if (hasTargetScript) {
+            return { basic: query, isSameLang: true, timestamp: Date.now() };
+          }
         }
       }
     } catch (e) { }
@@ -1899,26 +1909,37 @@ const NOTICE_THEMES = {
 
 function detectSourceLang(text) {
   if (!text) return null;
-  // 已有的非拉丁脚本检测
+
+  // 1. 【强特征脚本】(无需上下文，直接确认)
   if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text)) return 'ja';
-  if (/\p{Script=Han}/u.test(text)) return 'zh';
   if (/\p{Script=Hangul}/u.test(text)) return 'ko';
   if (/\p{Script=Thai}/u.test(text)) return 'th';
   if (/\p{Script=Cyrillic}/u.test(text)) return 'ru';
   if (/\p{Script=Arabic}/u.test(text)) return 'ar';
 
-  // 拉丁语系：通过特征字符区分
-  if (/[äöüßÄÖÜ]/.test(text)) return 'de';           // 德语
-  if (/[àâæçéèêëîïôœùûüÿ]/i.test(text)) return 'fr'; // 法语
-  if (/[áéíóúüñ¿¡]/i.test(text)) return 'es';         // 西班牙语
-  if (/[àèéìíîòóùú]/i.test(text)) return 'it';        // 意大利语
-  if (/[ãõáéíóúâêô]/i.test(text)) return 'pt';        // 葡萄牙语
-  if (/[åäöÅÄÖ]/.test(text)) return 'sv';             // 瑞典语/芬兰语
+  // 2. 【拉丁语系特征】(优先级高于纯汉字)
+  if (/[äöüßÄÖÜ]/.test(text)) return 'de';
+  if (/[àâæçéèêëîïôœùûüÿ]/i.test(text)) return 'fr';
+  if (/[áéíóúüñ¿¡]/i.test(text)) return 'es';
+  if (/[àèéìíîòóùú]/i.test(text)) return 'it';
+  if (/[ãõáéíóúâêô]/i.test(text)) return 'pt';
+  if (/[åäöÅÄÖ]/.test(text)) return 'sv';
 
-  // 纯拉丁字母，默认英语
-  if (/^[a-zA-Z\s'-]+$/.test(text)) return 'en';
+  // 3. 【歧义】汉字处理
+  // 如果包含了明显的英文特征（例如大写开头，或者纯拉丁词汇），拒绝返回 'zh'
+  const hasLatin = /[a-zA-Z]/.test(text);
+  const isPureLatin = /^[a-zA-Z\s'-]+$/.test(text);
+  
+  if (isPureLatin) return 'en';
+  
+  // 此时 text 含有汉字或特殊脚本
+  if (/\p{Script=Han}/u.test(text)) {
+    //  如果 text 中含有拉丁字母，且不是日语假名，
+    // 且要么在上下文检测中看到了 'ja'，要么返回 null 让 API 去 auto
+    return 'zh'; 
+  }
 
-  return null; // 无法判断
+  return null;
 }
 
 const LANGS = [
@@ -2062,7 +2083,7 @@ function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {})
       const opt = document.createElement('option');
       opt.disabled = true;
       opt.textContent = lang.label;
-      opt.style.cssText = 'background:#21262d; color:#8b949e;';
+      opt.style.cssText = 'background:#21262d; color:rgb(149 158 167);';
       opt.style.fontStyle = 'italic';
       selectEl.appendChild(opt);
     } else {

@@ -2737,82 +2737,98 @@ self.i18nAttach3 = {
   "zh-CN": {
     note: "备注",
     notePlaceholder: "四级/托福/语境...",
-    highlightVocab: "在网页高亮生词"
+    highlightVocab: "在网页高亮生词",
+    toggleKatakana: "点击切换片假名"
   },
   "zh-TW": {
     note: "備註",
     notePlaceholder: "",
-    highlightVocab: "在網頁高亮生詞"
+    highlightVocab: "在網頁高亮生詞",
+    toggleKatakana: "點擊切換片假名"
   },
   "en": {
     note: "Note",
     notePlaceholder: "",
-    highlightVocab: "Highlight on page"
+    highlightVocab: "Highlight on page",
+    toggleKatakana: "Click to toggle Katakana"
   },
   "ja": {
     note: "メモ",
     notePlaceholder: "",
-    highlightVocab: "ページ上で単語を強調"
+    highlightVocab: "ページ上で単語を強調",
+    toggleKatakana: "クリックでカタカナに切り替え"
   },
   "ko": {
     note: "메모",
     notePlaceholder: "",
-    highlightVocab: "페이지에서 단어 강조"
+    highlightVocab: "페이지에서 단어 강조",
+    toggleKatakana: "클릭하여 가타카나로 전환"
   },
   "es": {
     note: "Nota",
     notePlaceholder: "",
-    highlightVocab: "Resaltar en la página"
+    highlightVocab: "Resaltar en la página",
+    toggleKatakana: "Haz clic para cambiar a Katakana"
   },
   "fr": {
     note: "Note",
     notePlaceholder: "",
-    highlightVocab: "Surligner sur la page"
+    highlightVocab: "Surligner sur la page",
+    toggleKatakana: "Cliquez pour basculer en katakana"
   },
   "de": {
     note: "Notiz",
     notePlaceholder: "",
-    highlightVocab: "Auf Seite hervorheben"
+    highlightVocab: "Auf Seite hervorheben",
+    toggleKatakana: "Klicken, um zu Katakana zu wechseln"
   },
   "ru": {
     note: "Заметка",
     notePlaceholder: "",
-    highlightVocab: "Выделить на странице"
+    highlightVocab: "Выделить на странице",
+    toggleKatakana: "Нажмите, чтобы переключить на катакану"
   },
   "pt": {
     note: "Nota",
     notePlaceholder: "",
-    highlightVocab: "Destacar na página"
+    highlightVocab: "Destacar na página",
+    toggleKatakana: "Clique para alternar para Katakana"
   },
   "it": {
     note: "Nota",
     notePlaceholder: "",
-    highlightVocab: "Evidenzia nella pagina"
+    highlightVocab: "Evidenzia nella pagina",
+    toggleKatakana: "Clicca per passare a Katakana"
   },
   "vi": {
     note: "Ghi chú",
     notePlaceholder: "",
-    highlightVocab: "Làm nổi bật trên trang"
+    highlightVocab: "Làm nổi bật trên trang",
+    toggleKatakana: "Nhấp để chuyển sang Katakana"
   },
   "th": {
     note: "บันทึก",
     notePlaceholder: "",
-    highlightVocab: "เน้นคำบนหน้าเว็บ"
+    highlightVocab: "เน้นคำบนหน้าเว็บ",
+    toggleKatakana: "คลิกเพื่อสลับเป็นคาตาคานะ"
   },
   "ar": {
     note: "ملاحظة",
     notePlaceholder: "",
-    highlightVocab: "تمييز على الصفحة"
+    highlightVocab: "تمييز على الصفحة",
+    toggleKatakana: "انقر للتبديل إلى الكاتاكانا"
   },
   "fa": {
     note: "یادداشت",
     notePlaceholder: "",
-    highlightVocab: "برجسته در صفحه"
+    highlightVocab: "برجسته در صفحه",
+    toggleKatakana: "برای تغییر به کاتاکانا کلیک کنید"
   },
   "tr": {
     note: "Not",
     notePlaceholder: "",
-    highlightVocab: "Sayfada vurgula"
+    highlightVocab: "Sayfada vurgula",
+    toggleKatakana: "Katakana'ya geçmek için tıklayın"
   }
 };
 self.i18nAttach4 = {
