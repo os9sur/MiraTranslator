@@ -36,7 +36,7 @@ const SiteRules = {
                 // about 页频道描述
                 "ytd-about-channel-renderer yt-attributed-string span",
             ].join(", "),
-            minLen: 10
+            minLen: 3
         },
         "news.ycombinator.com": {
             selectors: "p, li, td.title, div.commtext.c00",

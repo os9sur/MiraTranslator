@@ -1759,10 +1759,41 @@ document.addEventListener('DOMContentLoaded', async () => {
       const sourcePhonetic = response.sourcePhonetic || '';
       logger.log("sourcePhonetic: ", sourcePhonetic);
       if (resPhonetic) {
-        resPhonetic.innerText = sourcePhonetic
-          ? `[${sourcePhonetic}]`
-          : '';
-      }
+    resPhonetic.innerText = sourcePhonetic
+        ? `[${sourcePhonetic}]`
+        : '';
+    
+    // 日语假名显示
+    const kanaDiv = document.getElementById('resKana');
+    if (kanaDiv) {
+        if (sourcePhonetic && langA === 'ja') {
+            getKana(sourcePhonetic).then(({ hiragana, katakana }) => {
+                if (!hiragana) { kanaDiv.style.display = 'none'; return; }
+                kanaDiv.innerHTML = `
+                    <span style="cursor:pointer; user-select:none;"
+                          data-hiragana="${hiragana}"
+                          data-katakana="${katakana}"
+                          data-mode="hiragana">
+                        ${hiragana}
+                    </span>
+                `;
+                kanaDiv.style.display = 'block';
+                kanaDiv.querySelector('span').onclick = (e) => {
+                    const el = e.currentTarget;
+                    if (el.dataset.mode === 'hiragana') {
+                        el.innerText = el.dataset.katakana;
+                        el.dataset.mode = 'katakana';
+                    } else {
+                        el.innerText = el.dataset.hiragana;
+                        el.dataset.mode = 'hiragana';
+                    }
+                };
+            });
+        } else {
+            kanaDiv.style.display = 'none';
+        }
+    }
+}
 
       let html = '';
       const src = (langA || 'en').toLowerCase();

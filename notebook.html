@@ -32,6 +32,22 @@
       position: relative;
       margin-bottom: 12px;
       display: inline-block;
+      border-radius: 999px;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .search-bar-wrapper:hover,
+    .search-bar-wrapper:focus-within {
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6), 0 0 20px rgba(56, 189, 248, 0.3);
+      border-radius: 999px;
+    }
+
+    .highlight-label {
+      transition: box-shadow 0.2s ease;
+    }
+
+    .highlight-label:hover {
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6), 0 0 20px rgba(56, 189, 248, 0.3);
     }
 
     .search-bar-icon {
@@ -107,6 +123,26 @@
       background: #22c55e;
       color: white;
       margin-right: 10px;
+    }
+
+    .btn {
+      --glow-color: rgba(56, 189, 248, 0.6);
+      --glow-spread: rgba(56, 189, 248, 0.3);
+      transition: box-shadow 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn-danger {
+      --glow-color: rgba(239, 68, 68, 0.6);
+      --glow-spread: rgba(239, 68, 68, 0.3);
+      background: #ef4444;
+      color: white;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px var(--glow-color), 0 0 20px var(--glow-spread);
     }
 
     .add-box {
@@ -250,11 +286,15 @@
       color: #64748b;
       font-size: 10px;
       line-height: 1.3;
+
       overflow: hidden;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      line-clamp: 2;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 6;
+      line-clamp: 6;
+
+      overflow-wrap: normal;
+      word-break: keep-all;
     }
 
     #pagination {
@@ -489,7 +529,7 @@
       </div>
 
       <!--  高亮开关 -->
-      <label
+      <label class="highlight-label"
         style="display:flex;align-items:center;gap:8px;cursor:pointer;border-radius: 20px !important;padding: 10px 76px !important;white-space:nowrap;border: 1.5px solid #647690;border-radius:8px;padding:6px 10px;">
         <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
         <div id="highlightToggle" style="
@@ -525,6 +565,9 @@
     <div id="pagination">
       <button id="prevPage" class="btn" style="background: #334155; color: white;">&lt;</button>
       <span id="pageInfo" style="font-size: 14px; color: #94a3b8; font-family: monospace;">Page 1 / 1</span>
+      <input id="jumpInp" type="number" min="1" placeholder="Go..." style="width:60px; background:#0f172a; border:1px solid #334155;
+         color:#fff; border-radius:6px; padding:4px 8px;
+         font-size:13px; text-align:center; outline:none;">
       <button id="nextPage" class="btn" style="background: #334155; color: white;">&gt;</button>
     </div>
   </div>

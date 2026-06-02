@@ -38,7 +38,7 @@
     }
 
     .footer-link {
-      color: #989595c2;
+      color: #989595;
       text-decoration: none;
       transition: color 0.2s;
     }
@@ -239,6 +239,10 @@
           <!-- 第二行：罗马音 -->
           <div id="resPhonetic" class="allow-select"
             style="color: #94a3b8; font-size: 11px; font-family: sans-serif; margin-top: 2px; margin-bottom: 6px;">
+          </div>
+          <!-- 假名行 -->
+          <div id="resKana" class="allow-select"
+            style="display:none; color:#7dd3fc; font-size:12px; margin-top:2px; margin-bottom:6px; cursor:pointer;">
           </div>
           <!-- 第三行：按钮组 -->
           <div style="display: flex; gap: 4px; align-items: center;">
@@ -566,7 +570,8 @@
           style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; white-space: nowrap !important; font-family: monospace;resize: none !important;">
       </textarea>
       </div>
-      <div class="row" style="margin-bottom: 3px;margin-top: 3px;">
+    </div>
+      <div class="row" style="margin-bottom: 3px;margin-top: 3px;padding-left: 8px;padding-right:5px;">
         <label data-i18n="minChars" style="font-size: 11px;color:#94a3b8;">最小字数</label>
         <input type="number" id="conf-minlen" min="0" style="
     width: 60px;
@@ -583,7 +588,6 @@
   " this.style.boxShadow='0 0 10px rgba(56, 189, 248, 0.5), inset 0 0 4px rgba(56, 189, 248, 0.2)' ;"
           this.style.boxShadow='none' ;">
       </div>
-    </div>
     <div class="row" style="margin-top: 3px; border-top: 1px solid #334155; padding-top: 8px;">
       <button id="openNotebook" class="openNotebook" style="height: 35px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -893,7 +897,8 @@
         <!-- <div
           style="font-size: 11px; color: #64748b; margin-bottom: 4px; border-left: 2px solid #334155; padding-left: 8px;">
           The climate is changing.</div> -->
-        <div id="webPreviewText" data-i18n="translationExampleWeb" style="transition: all 0.3s ease;">Time flies...</div>
+        <div id="webPreviewText" data-i18n="translationExampleWeb" style="transition: all 0.3s ease;">Time flies...
+        </div>
       </div>
       <div id="preview-yt-box" style="display: none; width: 100%; text-align: center;">
         <div data-i18n="translationExampleYTOrigin"

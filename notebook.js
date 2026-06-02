@@ -6,6 +6,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+
+  const highlight = (text, query) => {
+    if (!query || !text) return text;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return String(text).replace(
+      new RegExp(escaped, 'gi'),
+      match => `<span style="background:#00fff5;color:#000000;border-radius:3px;padding:0 3px;">${match}</span>`
+    );
+  };
   const style = document.createElement('style');
   style.textContent = `
     @keyframes wave-ripple {
@@ -75,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof applyI18n === 'function') {
     applyI18n(targetLanguage);
   }
-  function formatDetail(dictData) {
+  function formatDetail(dictData, query = "") {
     if (!Array.isArray(dictData) || dictData.length === 0) return "";
     return dictData.map(item => {
       const pos = localizePos(item.pos, targetLanguage) || item.pos || "";
@@ -93,38 +102,38 @@ document.addEventListener('DOMContentLoaded', async () => {
       return `
       <div class="v-detail-line" style="margin-top: 2px; display: flex; gap: 6px;">
         <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
-        <span class="v-def" style="color: #94a3b8;">${meanings}</span>
+        <span class="v-def" style="color: #94a3b8;">${query ? highlight(meanings, query) : meanings}</span>
       </div>
     `;
     }).join('');
   }
 
-  function formatExamples(examples, word) {  
-  if (!Array.isArray(examples) || examples.length === 0) return "";
-  
-  const highlightWord = (text, w) => {
-    if (!text || !w) return text;
-    const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const stem = w.length > 3
-      ? w.replace(/[ey]$/, "").replace(/([bcdfghjklmnpqrstvwxz])\1$/, "$1")
-      : w;
-    const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(`\\b(${safe}[a-z]*|${safeStem}[a-z]*)\\b`, "gi");
-    return text.replace(regex, '<span style="color:#38bdf8;font-weight:600;">$1</span>');
-  };
+  function formatExamples(examples, word, query = "") {
+    if (!Array.isArray(examples) || examples.length === 0) return "";
 
-  return `
+    const highlightWord = (text, w) => {
+      if (!text || !w) return text;
+      const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const stem = w.length > 3
+        ? w.replace(/[ey]$/, "").replace(/([bcdfghjklmnpqrstvwxz])\1$/, "$1")
+        : w;
+      const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`\\b(${safe}[a-z]*|${safeStem}[a-z]*)\\b`, "gi");
+      return text.replace(regex, '<span style="color:#38bdf8;font-weight:600;">$1</span>');
+    };
+
+    return `
     <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
       <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;">EXAMPLES</div>
       ${examples.slice(0, 3).map((s) => {
-        const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
-        const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
-        const safeEn = en.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
-        return `
+      const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
+      const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
+      const safeEn = en.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
+      return `
           <div style="margin-bottom: 8px; border-left: 2px solid #25cbf6ab; border-radius:1.5px; padding-left: 8px;">
             <div style="display:flex; align-items:center; gap:6px;">
               <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4;">
-                ${highlightWord(en, word)}  
+               ${query ? highlight(en, query) : highlightWord(en, word)}
               </div>
               <span class="example-speaker-btn" data-sentence="${safeEn}"
                 style="cursor:pointer; color:#637793; flex-shrink:0; display:flex; transition:color 0.2s;position:relative;overflow:visible;">
@@ -135,12 +144,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </svg>
               </span>
             </div>
-            ${cn ? `<div style="font-size: 11px; color: #637793; margin-top: 2px;">${cn}</div>` : ""}
+            ${cn ? `<div style="font-size: 11px; color: #637793; margin-top: 2px;">${query ? highlight(cn, query) : cn}</div>` : ""}
           </div>`;
-      }).join("")}
+    }).join("")}
     </div>`;
-}
+  }
   const searchInp = document.getElementById('searchInp');
+  // 搜索
   if (searchInp) {
     searchInp.oninput = (e) => {
       searchQuery = e.target.value.toLowerCase().trim();
@@ -160,7 +170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let transText = "";
         if (typeof item.trans === 'object' && item.trans !== null) {
-          transText = (item.trans.basic || "") + (item.trans.detail || "") + JSON.stringify(item.trans.dictData || "");
+          transText = (item.trans.basic || "") + (item.trans.detail || "");
 
           // 例句原文和译文
           const examples = item.trans.examples || [];
@@ -174,14 +184,42 @@ document.addEventListener('DOMContentLoaded', async () => {
           transText = item.trans || "";
         }
 
-        const noteMatch = (item.note || "").toLowerCase().includes(searchQuery);  //  备注
-        const srcMatch = (item.src || "").toLowerCase().includes(searchQuery);    //  来源URL
-        const titleMatch = (item.title || "").toLowerCase().includes(searchQuery); // 来源标题
-        const contextMatch = (typeof item.trans === 'object' ? (item.trans.context || "") : "").toLowerCase().includes(searchQuery); // context
-        return wordMatch || transText.toLowerCase().includes(searchQuery) || noteMatch || srcMatch || titleMatch || contextMatch;
+        // 单独搜 dictData 的 meanings 文本，避免 JSON.stringify 误匹配
+        const dictText = (item.trans?.dictData || []).map(d => {
+          const meanings = Array.isArray(d.meanings) ? d.meanings.join(' ') : (d.meanings || d.definition || '');
+          return meanings;
+        }).join(' ');
+
+        const noteMatch = (item.note || "").toLowerCase().includes(searchQuery);
+        const srcMatch = (item.src || "").toLowerCase().includes(searchQuery);
+        // 短于2个字符不搜标题，避免单字母误匹配
+        const titleMatch = searchQuery.length >= 2
+          ? (item.title || "").toLowerCase().includes(searchQuery)
+          : false;
+        const contextMatch = (typeof item.trans === 'object' ? (item.trans.context || "") : "").toLowerCase().includes(searchQuery);
+        const contextTranslationMatch = (typeof item.trans === 'object' ? (item.trans.contextTranslation || "") : "").toLowerCase().includes(searchQuery);
+
+        return wordMatch
+          || transText.toLowerCase().includes(searchQuery)
+          || dictText.toLowerCase().includes(searchQuery)
+          || noteMatch || srcMatch || titleMatch || contextMatch || contextTranslationMatch;
       });
     }
-    activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
+    if (searchQuery) {
+      activeVocab.sort((a, b) => {
+        const aExact = a.word.toLowerCase() === searchQuery;
+        const bExact = b.word.toLowerCase() === searchQuery;
+        const aStarts = a.word.toLowerCase().startsWith(searchQuery);
+        const bStarts = b.word.toLowerCase().startsWith(searchQuery);
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return (b.date || 0) - (a.date || 0);
+      });
+    } else {
+      activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
+    }
     const total = activeVocab.length;
     const totalPages = Math.ceil(total / pageSize) || 1;
     if (currentPage > totalPages) currentPage = totalPages;
@@ -198,16 +236,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     vocabBody.innerHTML = pageData.map((item) => {
       const displayWord = item.word || "";
+      const displayWordHL = searchQuery ? highlight(displayWord, searchQuery) : displayWord;
       const safeWordForSpeech = displayWord.replace(/'/g, "\\'");
       const srcLang = item.trans?.sourceLang || "";
-      const langCode = srcLang.startsWith("ja") ? "ja-JP"
-        : srcLang.startsWith("zh") ? "zh-CN"
-          : srcLang.startsWith("ko") ? "ko-KR"
-            : "en-US";
+      const context = (typeof item.trans === 'object') ? (item.trans.context || "") : "";
+
+      // 优先用上下文检测语言 
+      const detectLangFromContext = (ctx) => {
+        if (!ctx) return null;
+        if (/[\u3040-\u30FF]/.test(ctx)) return "ja-JP";
+        if (/[\uAC00-\uD7AF]/.test(ctx)) return "ko-KR";
+        return null; // 无法判断，返回 null
+      };
+
+      const contextLang = detectLangFromContext(context);
+
+      const langMap = { ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', en: 'en-US' };
+      const detectedLang = detectSourceLang(context || item.word || "");
+      const langCode = detectedLang ? (langMap[detectedLang] || null) : null;
       const phonetic = (typeof item.trans === 'object' && item.trans !== null)
         ? (item.trans.phonetic || item.trans.sourcePhonetic || "")
         : "";//音标
-      const context = (typeof item.trans === 'object') ? (item.trans.context || "") : "";
       const contextTranslation = (typeof item.trans === 'object') ? (item.trans.contextTranslation || "") : "";
       const contextWord = item.word || "";
 
@@ -223,11 +272,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       let displayTrans = "";
       if (typeof item.trans === 'object' && item.trans !== null) {
         const { basic, dictData, detail, examples } = item.trans;
-        const detailContent = dictData ? formatDetail(dictData) : (detail || "");
-       const examplesContent = formatExamples(examples, displayWord);   
+        const detailContent = dictData ? formatDetail(dictData, searchQuery) : (detail || "");
+        const examplesContent = formatExamples(examples, displayWord, searchQuery);
         displayTrans = `
       <div class="vocab-trans-container">
-        <div class="v-basic" style="font-weight: 600; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;">${basic || ''}</div>
+        <div class="v-basic" style="font-weight: 500; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;">${searchQuery ? highlight(basic || '', searchQuery) : (basic || '')}</div>
         ${detailContent ? `<div class="v-detail-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 4px;">${detailContent}</div>` : ''}
         ${examplesContent}
       </div>
@@ -259,14 +308,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                   </svg>
                   <span style="font-weight: bold; font-family: monospace;">${timeLabel || 'Play'}</span>
                 </a>
-                <div class="source-title" title="${item.title || ''}">${item.title || ''}</div>
+                <div class="source-title" title="${item.title || ''}">${searchQuery ? highlight(item.title || '', searchQuery) : (item.title || '')}</div>
               </div>
             `;
           } else {
             domain = `
         <div class="source-wrapper">
           <a href="${item.src}" target="_blank" class="source-link" style="color: #94a3b8;">🌐 ${domain}</a>
-          <div class="source-title" title="${item.title || ''}">${item.title || ''}</div>
+          <div class="source-title" title="${item.title || ''}">${searchQuery ? highlight(item.title || '', searchQuery) : (item.title || '')}</div>
         </div>
       `;
           }
@@ -278,7 +327,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <tr style="border-bottom: 1px solid #1e293b;">
           <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="word-text">${displayWord}</span>
+            <span class="word-text">${displayWordHL}</span>
             <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
               style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
@@ -289,12 +338,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             </span>
           </div>
           ${phonetic ? `<div style="color: #909fb3; font-size: 12px; margin-top: 4px; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
+${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; color:#7dd3fc; margin-top:2px;"></div>` : ''}
           ${context ? `
           <div style="margin-top:6px;font-size:12px;color:#798ca7;line-height:1.5;
                       border-top:2px solid #334155;padding-top:6px;font-style:italic;
                       max-width:250px;word-break:break-word;">
             <div style="display:flex;align-items:flex-start;gap:6px;">
-              <div style="flex:1;">${highlightContext(context, contextWord)}</div>
+              <div style="flex:1;">${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}</div>
               <span class="context-speaker-btn" 
                 data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
                 data-lang="${langCode}"
@@ -309,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             ${contextTranslation ? `
           <div style="font-size:12px;color:#98aac5;margin-top:3px;font-style:normal;opacity:0.8;">
-            ${contextTranslation}
+            ${searchQuery ? highlight(contextTranslation, searchQuery) : contextTranslation}
           </div>` : ''}
       </div>` : ''}
         </td>
@@ -322,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     data-note="${(item.note || '').replace(/"/g, '&quot;')}"
                     style="color:#94a3b8; font-size:13px; cursor:pointer; 
                           display:block; word-break:break-word; white-space:normal;">
-                ${item.note}
+               ${searchQuery ? highlight(item.note, searchQuery) : item.note}
               </span>`
           : `<span class="note-text note-empty"
                     data-id="${item.id}"
@@ -346,6 +396,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         </tr>
     `;
     }).join('');
+
+    // 日语假名异步填充
+pageData.forEach(item => {
+    const phonetic = (typeof item.trans === 'object' && item.trans !== null)
+        ? (item.trans.phonetic || item.trans.sourcePhonetic || '')
+        : '';
+    const context = (typeof item.trans === 'object') ? (item.trans.context || '') : '';
+    
+    // 判断是否日语：上下文或原词含日文字符
+    const hasJapanese = /[\u3040-\u30FF\u4e00-\u9fff]/.test(context || item.word || '');
+    
+    if (!phonetic || !hasJapanese) return;
+    
+    const kanaEl = document.getElementById(`kana-${item.id}`);
+    if (!kanaEl) return;
+    
+    getKana(phonetic).then(({ hiragana, katakana }) => {
+        if (!hiragana) return;
+        kanaEl.innerHTML = `
+            <span style="cursor:pointer; user-select:none;" 
+                  title="点击切换片假名"
+                  data-hiragana="${hiragana}" 
+                  data-katakana="${katakana}"
+                  data-mode="hiragana">
+                ${hiragana}
+            </span>
+        `;
+        kanaEl.style.display = 'block';
+        
+        // 点击切换平假名/片假名
+        kanaEl.querySelector('span').onclick = (e) => {
+            const el = e.currentTarget;
+            if (el.dataset.mode === 'hiragana') {
+                el.innerText = el.dataset.katakana;
+                el.dataset.mode = 'katakana';
+            } else {
+                el.innerText = el.dataset.hiragana;
+                el.dataset.mode = 'hiragana';
+            }
+        };
+    });
+});
     document.querySelectorAll('.btn-danger').forEach(btn => {
       btn.onclick = (e) => {
         const id = e.currentTarget.getAttribute('data-id');
@@ -357,9 +449,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.onclick = (e) => {
         e.stopPropagation();
         const word = e.currentTarget.getAttribute('data-word');
-        const lang = e.currentTarget.getAttribute('data-lang') || 'en-US';
-        //logger.log('speak:', word, lang);
-        speakText(word, e.currentTarget, lang);
+        const lang = e.currentTarget.getAttribute('data-lang');
+        const finalLang = (!lang || lang === 'null') ? null : lang;
+        speakText(word, e.currentTarget, finalLang);
       };
     });
     document.querySelectorAll('.context-speaker-btn').forEach(btn => {
@@ -374,12 +466,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.onclick = (e) => {
         e.stopPropagation();
         const sentence = e.currentTarget.getAttribute('data-sentence');
-        const lang = e.currentTarget.getAttribute('data-lang') || 'en-US';
+        const lang = e.currentTarget.getAttribute('data-lang');
+        const finalLang = (!lang || lang === 'null') ? null : lang;
+
         btn.style.transform = "scale(0.8)";
         btn.style.color = "#38bdf8";
         btn.style.filter = "drop-shadow(0 0 6px rgba(56,189,248,0.9))";
         setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
-        speakText(sentence, btn, lang);
+        speakText(sentence, btn, null);
       };
     });
     document.querySelectorAll('.example-speaker-btn').forEach(btn => {
@@ -478,6 +572,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderTable();
     }
   };
+
+  // 跳转页码
+  document.getElementById('jumpInp').addEventListener('keydown', async (e) => {
+    if (e.key !== 'Enter') return;
+    const vocabulary = await idb.vocabulary.getAll();
+    const activeCount = vocabulary.filter(v => !v.deleted).length;
+    const totalPages = Math.ceil(activeCount / pageSize) || 1;
+    const val = parseInt(e.target.value);
+    if (!isNaN(val) && val >= 1 && val <= totalPages) {
+      currentPage = val;
+      e.target.value = '';
+      renderTable();
+    }
+  });
   const undoTimers = {};
   async function deleteWord(id, word) {
     const cell = document.getElementById(`action-cell-${id}`);
