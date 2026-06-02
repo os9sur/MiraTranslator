@@ -7,6 +7,7 @@
 
 importScripts('i18n.js');
 importScripts('utils.js');
+importScripts('wanakana.min.js'); 
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -2794,9 +2795,9 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
 
         // ── sourcePhoneticDesc ────────────────────────────────────────
         const sourcePhoneticDesc = (() => {
+            if (hintInputLang === 'ja') return `  "sourcePhonetic": "<Hepburn Romaji, e.g. nihon>"`;
             if (!req.needPhonetic) return '';
             if (isLatinInput) return `  "sourcePhonetic": ""`;
-            if (hintInputLang === 'ja') return `  "sourcePhonetic": "<Hepburn Romaji, e.g. nihon>"`;
             if (hintInputLang === 'zh') return `  "sourcePhonetic": "<Pinyin with tones, e.g. zhōng guó>"`;
             if (hintInputLang === 'ko') return `  "sourcePhonetic": "<Revised Romanization, e.g. annyeong>"`;
             if (hintInputLang === 'ar') return `  "sourcePhonetic": "<Arabic Romanization, e.g. marhaba>"`;
@@ -2896,7 +2897,7 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
         const jsonShape = [
             `{`,
             `  "phonetic": "IPA or empty",`,
-            req.needPhonetic ? sourcePhoneticDesc : '',
+            (req.needPhonetic || hintInputLang === 'ja') ? sourcePhoneticDesc : '',
             `  "basic": "1-2 primary meanings in ${targetLanguageName}",`,
             `  "dictData": [{"pos": "n./v./adj.", "definition": "meanings in ${targetLanguageName}"}],`,
             `  "examples": ["<${sourceLangLabel} sentence> | <${targetLanguageName} translation>"],`,
@@ -2957,7 +2958,7 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
         ].filter(Boolean).join('\n');
         systemPrompt += `\n\n[STYLE HINT - lower priority, style only, must not override any format rules above]: ${customPrompt}`;
     } else if (isSingleQuery) {
-        if (req.needPhonetic) {
+        if (req.needPhonetic || hintInputLang === 'ja') {
             // 两个字段的明确指令
             const targetLangBase = req.targetLang.split('-')[0].toLowerCase();
 
@@ -4442,6 +4443,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const safeSendResponse = (data) => {
         try { sendResponse(data); } catch (e) { }
     };
+    //假名转换
+    if (request.type === 'ROMAJI_TO_HIRAGANA') {
+        logger.log('[bg kana] input:', request.romaji);
+    try {
+        const clean = (request.romaji || '')
+            .replace(/[\[\]\/]/g, '')
+            .toLowerCase()
+            .replace(/ā/g, 'aa').replace(/ī/g, 'ii').replace(/ū/g, 'uu').replace(/ē/g, 'ee').replace(/ō/g, 'oo')
+            .replace(/[^a-z\s\-]/g, '')
+            .replace(/\s+/g, ' ').trim();
+
+        const hiragana = wanakana.toHiragana(clean);
+        logger.log('[bg kana] hiragana:', hiragana);
+        const katakana = hiragana.split('').map(char => {
+            const code = char.charCodeAt(0);
+            if (code >= 0x3041 && code <= 0x3094) return String.fromCharCode(code + 96);
+            return char;
+        }).join('');
+
+        safeSendResponse({ success: true, hiragana, katakana });
+    } catch (e) {
+        safeSendResponse({ success: false, hiragana: '', katakana: '' });
+    }
+    return true;
+}
     if (request.type === 'FETCH_TTS_AUDIO') {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
@@ -4610,10 +4636,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         // 脚本检测日语，优先级低于用户手动指定
         if (!request.hintSourceLang || request.hintSourceLang === 'auto') {
-            const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(text);
-            const hasJpSpecific = /[\u3005\u3007\u303B々ヶ]|訳|込|対|実|関|気|駅|図|楽|願|枠|締|銭|渋|録|覧|匂|畑|峠|働|済|摂|択|変|継/.test(text);
-            if (targetLang === 'zh' && (hasKana || hasJpSpecific)) {
-                request.hintSourceLang = 'ja';
+            // 优先使用 hintInputLang
+            if (request.hintInputLang && request.hintInputLang !== 'auto') {
+                request.hintSourceLang = request.hintInputLang;
+            } else {
+                const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(text);
+                const hasJpSpecific = /[\u3005\u3007\u303B々ヶ]|訳|込|対|実|関|気|駅|図|楽|願|枠|締|銭|渋|録|覧|匂|畑|峠|働|済|摂|択|変|継/.test(text);
+                if (targetLang === 'zh' && (hasKana || hasJpSpecific)) {
+                    request.hintSourceLang = 'ja';
+                }
             }
         }
 

@@ -3628,6 +3628,12 @@ async function executeReScan(config) {
     if (window.observer) {
       window.observer.disconnect();
     }
+
+    const storage = await safeGetStorage(["scanConfig"]);
+    const domain = window.location.hostname.replace("www.", "");
+    const configData = storage?.scanConfig;
+    const currentMinLen = configData?.custom?.[domain]?.minLen ?? configData?.global?.minLen ?? 2;
+
     const selectors = config?.selectors || currentActiveSelectors || "";
     const activeRules = resolveActiveSelectors(selectors);
     currentActiveSelectors = activeRules;
@@ -3662,7 +3668,7 @@ async function executeReScan(config) {
       typeof querySelectorAllDeep === "function"
         ? querySelectorAllDeep(scanRules)
         : Array.from(document.querySelectorAll(scanRules));
-    allElements = sortElementsByPriority(allElements, scanRules); // ← 加这行
+    allElements = sortElementsByPriority(allElements, scanRules);
     let triggered = 0;
     const tasks = [];
     const targets = [];
@@ -3674,6 +3680,11 @@ async function executeReScan(config) {
         )
           continue;
         const text = el.innerText || el.textContent || "";
+
+        if (text.trim().length < currentMinLen) {
+          continue;
+        }
+
         const isCssLike = (text.match(/[{};:]/g) || []).length > 5;
         if (isCssLike) continue;
         if (el.closest("style, script, pre, code, [contenteditable]")) continue;
@@ -4047,11 +4058,11 @@ const getTextFragmentAnchor = (word) => {
     return "";
   }
 };
+let _capturedContext = "";
+let _capturedContextTranslation = "";
 function initSelectionTranslate() {
   const logoBase64 = ASSETS.logoBase64;
 
-  let _capturedContext = "";
-  let _capturedContextTranslation = "";
   window.addEventListener(
     "scroll",
     () => {
@@ -4076,18 +4087,16 @@ function initSelectionTranslate() {
     const vh = window.visualViewport?.height || window.innerHeight;
     let left = rect.left;
     let top = rect.top;
-    if (rect.right > vw - margin) {
-      left = vw - rect.width - margin;
-    }
-    if (left < margin) {
-      left = margin;
-    }
-    if (rect.bottom > vh - margin) {
-      top = vh - rect.height - margin;
-    }
-    if (top < margin) {
-      top = margin;
-    }
+
+    if (rect.right > vw - margin) left = vw - rect.width - margin;
+    if (left < margin) left = margin;
+
+    //  底部超出：向上移
+    if (rect.bottom > vh - margin) top = vh - rect.height - margin;
+
+    //  顶部超出：强制贴顶
+    if (top < margin) top = margin;
+
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
   }
@@ -4227,6 +4236,14 @@ function initSelectionTranslate() {
     });
 
     enablePanelResize(popupEl);
+
+    // 监听面板尺寸变化，自动修正位置
+    const resizeObserver = new ResizeObserver(() => {
+      if (popupEl.style.display !== 'none') {
+        clampPopupToViewport(popupEl);
+      }
+    });
+    resizeObserver.observe(popupEl);
   }
 
   // ─── 样式表构建 ──────────────────────────────────────────────────────────────
@@ -4251,7 +4268,9 @@ function initSelectionTranslate() {
         --p-phonetic:         #38bdf8;
         --p-glow-opacity:     0.8;
         --p-panel-anim:       eclipseHalo;
-        --p-link-hover-bg:   rgba(56, 189, 248, 0.15);
+        --p-link-hover-bg:    rgba(56, 189, 248, 0.15);
+        --p-link-kana-bg:     #064e3b;
+          --p-link-kana:     #dae2da; 
       }
 
       /* ── 亮色变量── */
@@ -4273,6 +4292,8 @@ function initSelectionTranslate() {
         --p-glow-opacity:     0.3;
         --p-panel-anim:       eclipseHaloLightAlt;
         --p-link-hover-bg:    rgba(2, 132, 199, 0.1);
+        --p-link-kana-bg:     #66f16f69;
+          --p-link-kana:     #030303; 
       }
 
       /* 仅在系统偏好亮色且未手动设置 dark 时生效 */
@@ -4292,6 +4313,8 @@ function initSelectionTranslate() {
           --p-header-shadow: 0 2px 8px rgba(0,0,0,0.3);
           --p-phonetic:      #07a457;
           --p-panel-anim:    eclipseHaloLightWarm;
+          --p-link-kana-bg:  #66f16f69;
+          --p-link-kana:     #dae2da; 
         }
       }
 
@@ -4310,6 +4333,8 @@ function initSelectionTranslate() {
         --p-header-shadow: 0 2px 8px rgba(235,215,215,0.09);
         --p-phonetic:      #38bdf8;
         --p-panel-anim:    eclipseHalo;
+        --p-link-kana-bg: #064e3b;
+        --p-link-kana:     #dae2da; 
       }
 
       /* ── 光晕动画 ── */
@@ -4777,32 +4802,34 @@ function initSelectionTranslate() {
       }
     }
 
-      .lang-tag-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3px 10px;
-      cursor: pointer;
-      border-radius: 6px;
-      border: none !important;
-      outline: none;
-      background: transparent !important;
-      box-shadow: none;
-      transition: background 0.2s ease;
-      min-width: unset;
-      width: auto;
-      height: auto;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    }
+    .lang-tag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none !important;
+  outline: none;
+  background: transparent !important;
+  box-shadow: none; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: unset;
+  width: auto;
+  height: auto;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
 
-    .lang-tag-btn:hover {
-      background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
-      transform: none;
-    }
+.lang-tag-btn:hover { 
+  background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--p-accent) 50%, transparent);
+  transform: none;
+}
 
-    .lang-tag-btn:active {
-      background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
-    }
+.lang-tag-btn:active { 
+  background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
+  box-shadow: 0 0 4px color-mix(in srgb, var(--p-accent) 50%, transparent);
+}
 
       #p-engine-wrap:hover,
       .p-eng-item:hover,
@@ -4852,6 +4879,50 @@ function initSelectionTranslate() {
     }
     .mira-example-speak.is-speaking::before { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite; }
     .mira-example-speak.is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
+  
+.mira-neon-btn {
+    display: none;
+    font-size: 11px;
+    color: var(--p-link-kana);
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 6px; 
+    border-radius: 7px;
+    background: var(--p-link-kana-bg);  
+    margin-left: 8px;
+    white-space: nowrap;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+ 
+.mira-neon-btn:hover {
+    color: #ffffff; 
+    border-color: #34d399; 
+    background-color: #059669; 
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 
+                0 0 20px rgba(52, 211, 153, 0.3);
+}
+
+.neon-engine-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 5px 7px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 550;
+    color: var(--p-accent);
+    background: color-mix(in srgb, var(--p-accent) 10%, transparent);
+    user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.neon-engine-btn:hover {
+    background: color-mix(in srgb, var(--p-accent) 25%, transparent);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 50%, transparent);
+}
       `;
 
     return style;
@@ -5457,6 +5528,12 @@ function initSelectionTranslate() {
       window._currentSpeakBtn = null;
     }
   }
+  // 用上下文辅助检测源语言
+  const detectedHintLang = (() => {
+    const ctx = _capturedContext || "";
+    if (ctx.length < 20) return null;
+    return detectSourceLang(ctx) || null;
+  })();
   async function renderAndShowPopup(
     text,
     pos,
@@ -5486,7 +5563,7 @@ function initSelectionTranslate() {
     <div id="p-header">
       <div style="display:flex;align-items:center;gap:5px;user-select:none;">
         <img src="${logoBase64}" style="width:23px;height:23px;border-radius:2px;filter:drop-shadow(0 0 4px var(--p-accent));">
-        <span style="opacity:0.6;font-size:11px;font-weight:bold;letter-spacing:2px;color:var(--p-text-main);font-style:italic;">${t("appName", window.uiLanguage) || APP_NAME}</span>
+        <span class="mira-font-family" style="opacity:0.6;font-size:11px;font-weight:bold;letter-spacing:2px;color:var(--p-text-main);font-style:italic;">${t("appName", window.uiLanguage) || APP_NAME}</span>
       </div>
       <div style="display:flex;gap:4px;align-items:center;height:40px;position:relative;z-index:30;right:-15px;">
         <div id="p-theme-toggle" class="icon-btn theme" title="">
@@ -5613,7 +5690,17 @@ function initSelectionTranslate() {
     shadow.getElementById("p-speak").onclick = (e) => {
       e.stopPropagation();
       const lang = (window.hintSourceLang || hintSourceLangNew);
-      const finalLang = (!lang || lang === 'auto') ? null : lang;
+      let finalLang = (!lang || lang === 'auto') ? null : lang;
+      logger.log('[p-speak] 点击发音，hintSourceLangNew:', hintSourceLangNew, 'window.hintSourceLang:', window.hintSourceLang, '最终判断的 lang:', finalLang);
+      logger.log('[p-speak] capturedContext:', _capturedContext?.slice(0, 50));
+      // 如果没有明确语言，用上下文辅助判断
+      if (!finalLang) {
+        const ctx = _capturedContext || "";
+        const detected = detectSourceLang(ctx || text);
+        const langMap = { ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', en: 'en-US' };
+        finalLang = detected ? (langMap[detected] || null) : null;
+      }
+      logger.log('[p-speak] 经过上下文辅助判断后的最终发音语言:', finalLang);
       speakText(text, shadow.getElementById("p-speak"), finalLang);
     };
     function handleTranslationResult(result, text, shadow) {
@@ -5667,8 +5754,9 @@ function initSelectionTranslate() {
       }
 
       const currentTargetLang = window.currentTargetL || state.targetLang;
-      const currentSourceLang =
-        state.sourceLang === "auto" ? null : state.sourceLang;
+      const currentSourceLang = state.sourceLang === "auto"
+        ? (detectedHintLang || null)
+        : state.sourceLang;
 
       // 判断是单词还是句子（单词：无空格且长度<=30）
       const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
@@ -5811,21 +5899,24 @@ function initSelectionTranslate() {
 
       let fullTranslation;
       if (snapshot?.word?.toLowerCase().trim() === wordLower) {
-        const isWord = !wordText.includes(" ") && wordText.length <= 30;// 判断是否单词
+        const isWord = !wordText.includes(" ") && wordText.length <= 30;
+
         fullTranslation = {
           basic: cleanText(snapshot.basic),
           phonetic: snapshot.phonetic,
           sourcePhonetic: snapshot.sourcePhonetic || "",
-          dictData: snapshot.dictData,
-          examples: snapshot.examples || [],
+          dictData: isWord ? snapshot.dictData : [],        // 只有单词才存词典数据
+          examples: isWord ? snapshot.examples || [] : [],  // 只有单词才存例句
           sourceLang: snapshot.sourceLang || "",
-          context: isWord ? (snapshot.context || "") : "",
-          contextTranslation: isWord ? (snapshot.contextTranslation || "") : "",
+          context: snapshot.context || "",                  // 单词/短语/句子都存
+          contextTranslation: snapshot.contextTranslation || "",
         };
       } else {
         fullTranslation = {
           basic: cleanText(shadow.getElementById("p-basic")?.innerText || ""),
           phonetic: shadow.getElementById("p-phonetic")?.innerText || "",
+          hiragana: shadow.getElementById("p-hiragana")?.innerText || "",
+          katakana: shadow.getElementById("p-katakana")?.innerText || "",
           dictData: [],
           examples: [],
         };
@@ -6193,14 +6284,16 @@ function initSelectionTranslate() {
     }
     if (shadowHost?._engineDotEl)
       shadowHost._engineDotEl.style.background = "#6b7280";
+
+    const effectiveHintLang = (hintSourceLangNew && hintSourceLangNew !== "auto")
+      ? hintSourceLangNew
+      : detectedHintLang;
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(
       text,
       false,
       manualLang,
-      {
-        hintInputLang: hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
-      },
+      { hintInputLang: effectiveHintLang },
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
       .then((result) => {
@@ -6323,11 +6416,7 @@ function initSelectionTranslate() {
         </div>
       <!-- 引擎选择器 -->
       <div id="p-engine-wrap" class="mira-font-family" style="position:relative; display:flex; align-items:center; margin-left:4px;">
-        <div id="p-engine-btn"
-            style="display:flex; align-items:center; gap:4px; cursor:pointer;
-                  padding:5px 7px; border-radius:8px; font-size:12px; font-weight:550;
-                  color:var(--p-accent); background:color-mix(in srgb, var(--p-accent) 10%, transparent);
-                  user-select:none; -webkit-user-select:none; white-space:nowrap;">
+        <div id="p-engine-btn" class="neon-engine-btn">
           <span id="p-engine-dot"
                 style="width:6px; height:6px; border-radius:50%; background:#6b7280; flex-shrink:0;"></span>
           <span id="p-engine-label" style="overflow:hidden; text-overflow:ellipsis;">···</span>
@@ -6365,13 +6454,24 @@ function initSelectionTranslate() {
         </div>
       </div>
 
-      <div id="p-query-container"style="padding: 4px 2px 0;">
-        <div id="p-query"  class="mira-font-family" style="font-size:${isMultiline ? "18px" : "22px"}; font-weight:700; color:var(--p-text-main);
-             word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
-          ${text}
-        </div>
-        <div id="p-phonetic" style="margin-top:4px; color:var(--p-phonetic); font-size:13px; opacity:0.8; font-family:sans-serif;"></div>
+    <div id="p-query-container" style="padding: 4px 2px 0;">
+      <div id="p-query" class="mira-font-family" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
+        ${text}
       </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+        <div id="p-phonetic" style="color:var(--p-phonetic); font-size:13px; opacity:0.6; font-family:sans-serif;  word-break:break-word;"></div>
+        
+    <span id="mira-toggle-ja" class="mira-neon-btn">
+        Kana ▾
+    </span>
+   </div>
+
+  <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155;">
+    <div id="p-hiragana" style="color:#22afb7; font-size:14px; font-weight:500; line-height:1.2; word-break:break-word; letter-spacing:0.5px; margin-bottom: 4px;"></div>
+    <div id="p-katakana" style="color:#8c8c8c; font-size:14px; font-weight:500; line-height:1.2; word-break:break-word; letter-spacing:0.5px;"></div>
+  </div>
+</div>
 
       <div id="p-result-container" style="display:flex; flex-direction:column; gap:6px;">
        <div id="p-basic" class="basic" style="font-size:18px;font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important; color:var(--p-accent); font-weight:500;">Loading...</div>
@@ -6408,33 +6508,14 @@ function initSelectionTranslate() {
     const cleanMarker = (s) =>
       typeof s === "string" ? s.replace(/\[\[\d+\]\]\s*/g, "").trim() : s;
 
+    const detectSourceLang = (t) => {
+      if (/[\u3040-\u309F\u30A0-\u30FF]/.test(t)) return "ja";
+      if (/[\u4E00-\u9FAF]/.test(t)) return "zh";
+      if (/[\uAC00-\uD7AF]/.test(t)) return "ko";
+      return "en";
+    };
     // 合并相同词性
     const mergedDict = (res.dictData || [])
-      .reduce((acc, item) => {
-        const meanings = item.meanings?.length
-          ? item.meanings
-          : item.definition
-            ? [
-              ...new Set(
-                item.definition
-                  .split(",")
-                  .map((s) => s.trim())
-                  .filter(Boolean),
-              ),
-            ]
-            : [];
-        const found = acc.find((d) => d.pos === item.pos);
-        if (found) found.meanings.push(...meanings);
-        else acc.push({ ...item, meanings });
-        return acc;
-      }, [])
-      .map((i) => ({
-        ...i,
-        meanings: [...new Set(i.meanings.map((m) => m.trim()).filter(Boolean))],
-      }));
-
-    // 同步合并 originalDictData，保持和 dictData 相同的 pos 顺序
-    const mergedOriginal = (res.originalDictData || [])
       .reduce((acc, item) => {
         const meanings = item.meanings?.length
           ? item.meanings
@@ -6461,12 +6542,62 @@ function initSelectionTranslate() {
     res = {
       ...res,
       dictData: mergedDict,
-      originalDictData:
-        mergedOriginal.length > 0 ? mergedOriginal : res.originalDictData,
     };
-
-    // 音标
+    // ====== 全语言音标与日语假名逻辑 ======
     const pPhonetic = shadow.getElementById("p-phonetic");
+    const pToggleJa = shadow.getElementById("mira-toggle-ja");
+    const pJaExtension = shadow.getElementById("p-ja-extension");
+    const pHiragana = shadow.getElementById("p-hiragana");
+    const pKatakana = shadow.getElementById("p-katakana");
+    const saveBtn = shadow.getElementById("p-save");
+
+    if (pPhonetic && pToggleJa && pJaExtension && pHiragana && pKatakana) {
+      try {
+        const rawPhonetic = res.sourcePhonetic || res.phonetic || "";
+
+        logger.log('[kana debug] rawPhonetic:', rawPhonetic, 'text:', text, 'isJapanese:', isJapanese(text));
+        if (rawPhonetic) {
+          pPhonetic.innerText = rawPhonetic;
+          pPhonetic.style.display = "block";
+        } else {
+          pPhonetic.style.display = "none";
+        }
+
+        if (rawPhonetic && isJapanese(text)) {
+          getKana(rawPhonetic).then(({ hiragana, katakana }) => {
+            if (!hiragana) {
+              pToggleJa.style.display = "none";
+              pJaExtension.style.display = "none";
+              return;
+            }
+
+            pHiragana.innerText = hiragana;
+            pKatakana.innerText = katakana;
+            pToggleJa.style.display = "inline-block";
+            pToggleJa.onclick = null;
+            pToggleJa.onclick = (e) => {
+              e.stopPropagation();
+              if (pJaExtension.style.display === "none") {
+                pJaExtension.style.display = "block";
+                pToggleJa.innerText = "Hide ▴";
+              } else {
+                pJaExtension.style.display = "none";
+                pToggleJa.innerText = "Kana ▾";
+              }
+            };
+          });
+        } else {
+          pToggleJa.style.display = "none";
+          pJaExtension.style.display = "none";
+        }
+      } catch (error) {
+        logger.error("通用音标与假名处理失败:", error);
+        pToggleJa.style.display = "none";
+        pJaExtension.style.display = "none";
+      }
+    }
+    // 音标
+    // const pPhonetic = shadow.getElementById("p-phonetic");
     if (pPhonetic)
       pPhonetic.innerText = (res.phonetic || res.sourcePhonetic)
         ? `/${(res.phonetic || res.sourcePhonetic).replace(/[\[\]\/]/g, "")}/`
@@ -6495,43 +6626,18 @@ function initSelectionTranslate() {
         const hasOriginal = res.originalDictData?.length > 0;
 
         let html = res.dictData
-          .map((item, posIdx) => {
+          .map((item) => {
             const pos = esc(localizePos(item.pos, targetLang) || "");
             const meanings = (item.meanings || [])
               .map((m) => esc(cleanMarker(m)))
               .join(", ");
 
-            // 原文 meanings（同一词性）
-            const origItem = hasOriginal ? res.originalDictData[posIdx] : null;
-            const origMeanings = origItem
-              ? (origItem.meanings || [])
-                .map((m) => esc(cleanMarker(m)))
-                .join(", ")
-              : "";
-
-            const enToggle =
-              hasOriginal && origMeanings && origMeanings !== meanings
-                ? `<span class="p-orig-toggle" data-posidx="${posIdx}"
-                style="display:inline-flex;align-items:center;font-size:9px;font-weight:700;
-                       color:var(--p-accent);opacity:0.5;cursor:pointer;margin-left:6px;
-                       border:1px solid var(--p-accent);border-radius:7px;padding:1px 4px;
-                       vertical-align:middle;user-select:none;flex-shrink:0;
-                       transition:opacity 0.2s;">EN</span>`
-                : "";
-
-            const origBlock =
-              hasOriginal && origMeanings && origMeanings !== meanings
-                ? `<div class="p-orig-text" data-posidx="${posIdx}">${origMeanings}</div>`
-                : "";
-
             return `<div style="margin-bottom:4px;">
-        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
-          <b class="mira-font-family" style="color:#319BCA;font-size:12px;margin-right:4px;flex-shrink:0;">${pos}</b>
-          <span class="mira-font-family">${meanings}</span>
-          ${enToggle}
-        </div>
-        ${origBlock}
-      </div>`;
+                  <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
+                    <b class="mira-font-family" style="color:#319BCA;font-size:12px;font-weight:500;margin-right:4px;flex-shrink:0;">${pos}</b>
+                    <span class="mira-font-family">${meanings}</span>
+                  </div>
+                </div>`;
           })
           .join("");
 
@@ -6566,46 +6672,20 @@ function initSelectionTranslate() {
         pD.innerHTML = html;
         pD.style.display = "block";
 
-        // 绑定 EN 展开/收起事件
-        pD.querySelectorAll(".p-orig-toggle").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const idx = btn.getAttribute("data-posidx");
-            const origText = pD.querySelector(
-              `.p-orig-text[data-posidx="${idx}"]`,
-            );
-            if (!origText) return;
-            const isOpen = btn.classList.contains("is-open");
-            if (isOpen) {
-              btn.classList.remove("is-open");
-              btn.textContent = "EN";
-              origText.classList.remove("is-visible");
-            } else {
-              btn.classList.add("is-open");
-              btn.textContent = "EN ▲";
-              origText.classList.add("is-visible");
-            }
-          });
-        });
       } else {
         pD.style.display = "none";
       }
     }
 
-    // 保存快照
-    const saveBtn = shadow.getElementById("p-save");
     if (saveBtn) {
-      const detectSourceLang = (text) => {
-        if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return "ja";
-        if (/[\u4E00-\u9FAF]/.test(text)) return "zh";
-        if (/[\uAC00-\uD7AF]/.test(text)) return "ko";
-        return "en";
-      };
+
       saveBtn._miraSnapshot = {
         word: text,
         basic: res.basic || "",
         phonetic: res.phonetic || "",
         sourcePhonetic: res.sourcePhonetic || "",
+        hiragana: "",
+        katakana: "",
         dictData: res.dictData || [],
         examples: res.examples || [],
         prototype: res.prototype || null,
@@ -6615,6 +6695,15 @@ function initSelectionTranslate() {
       };
       //logger.log('[snapshot]', saveBtn._miraSnapshot);
       saveBtn._miraReady = true;
+    }
+
+    // 例句
+    const langMap = { ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', en: 'en-US' };
+    const hintLang = window.hintSourceLang || null;
+    let exampleLang = (hintLang && hintLang !== 'auto') ? hintLang : null;
+    if (!exampleLang) {
+      const detected = detectSourceLang(_capturedContext || text);
+      exampleLang = langMap[detected] || null;
     }
 
     // 例句
@@ -6656,7 +6745,7 @@ function initSelectionTranslate() {
                         <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
                           ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
                         </div>
-                        <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${res.langInfo?.code || 'en'}"
+                        <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${exampleLang || ''}" 
                           style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;
                                 transition:color 0.2s;">
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -6947,6 +7036,20 @@ function initSelectionTranslate() {
     }
     return winSel;
   }
+  // 只取原文，排除翻译段落
+  const getOriginalText = (el) => {
+    let text = "";
+    Array.from(el.childNodes).forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (!node.classList.contains("kt-paragraph-translation")) {
+          text += getOriginalText(node);
+        }
+      }
+    });
+    return text;
+  };
   window.addEventListener("mouseup", (e) => {
     if (typeof isDragging !== "undefined") isDragging = false;
     if (
@@ -6957,18 +7060,25 @@ function initSelectionTranslate() {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
     const mouseX = e.clientX;
     const mouseY = e.clientY;
+
     setTimeout(async () => {
       const selection = getSmartSelection();
       if (!selection) return;
       const text = selection.toString().trim();
       if (!text || text.length > 1000) return;
-      // 确保语言已加载
+
+      //  立即克隆 Range，此时 selection 还有效
+      let savedRange = null;
+      try {
+        if (selection.rangeCount > 0) {
+          savedRange = selection.getRangeAt(0).cloneRange();
+        }
+      } catch (e) { }
+
       if (!window.__LANG_READY__) {
         await window.__LANG_PROMISE__;
       }
       const targetLang = window.currentTargetL || getBrowserLang() || "en";
-
-      //  读取源语言：优先用已缓存的全局变量，避免重复请求 storage
       const storage = await safeGetStorage(["targetLanguage", "lpLangA"]);
       const sourceLang = storage?.lpLangA || "auto";
       const targetPrefix = targetLang.toLowerCase().slice(0, 2);
@@ -6979,10 +7089,25 @@ function initSelectionTranslate() {
         sourcePrefix === "ja" &&
         targetPrefix === "zh"
       ) {
-        // 源语言明确是日语，目标是中文，直接信任用户设置放行
         isAlreadyTarget = false;
       } else {
         isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+
+        // 如果判断为同语言，但上下文是日文，说明是日文里的汉字，不应该跳过
+        if (isAlreadyTarget && savedRange) {
+          try {
+            let block = savedRange.commonAncestorContainer;
+            if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
+            let tries = 0;
+            while (block.textContent.trim().length < 30 && block.parentElement && tries < 3) {
+              block = block.parentElement;
+              tries++;
+            }
+            const ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
+            const ctxLang = detectSourceLang(ctxText);
+            if (ctxLang === 'ja') isAlreadyTarget = false; // 日文上下文，强制翻译
+          } catch (e) { }
+        }
       }
 
       if (isAlreadyTarget) {
@@ -7032,7 +7157,7 @@ function initSelectionTranslate() {
         forceHideLogo();
       }, 3000);
 
-      // 鼠标移上按钮显示翻译划词翻译窗口
+
       logoBtn.onmouseenter = async () => {
         try {
           if (!chrome.runtime?.id) {
@@ -7045,9 +7170,7 @@ function initSelectionTranslate() {
         }
         forceHideLogo();
         try {
-          // 复用已读取的 storage，不再重复请求
-          const currentTarget =
-            storage?.targetLanguage || getBrowserLang() || "en";
+          const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
           const currentSource = storage?.lpLangA || "auto";
           let finalQuery = text;
           const hasHan = /[\u4e00-\u9fa5]/.test(text);
@@ -7060,61 +7183,98 @@ function initSelectionTranslate() {
               finalQuery = text.replace(/[\u4e00-\u9fa5]/g, "").trim();
             }
           }
-          const detectedSourceLang =
-            currentSource || detectSourceLang(finalQuery) || "auto";
+          // 修复 detectSourceLang 顺序后，用上下文辅助检测
+          let ctxForDetect = _capturedContext || "";
+          if (ctxForDetect.length < 20) {
+            try {
+              if (savedRange) {
+                let block = savedRange.commonAncestorContainer;
+                if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
+                let tries = 0;
+                while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
+                  block = block.parentElement;
+                  tries++;
+                }
+                //  排除译文
+                ctxForDetect = getOriginalText(block).replace(/\s+/g, " ").trim();
+              }
+            } catch (e) { }
+          }
 
-          //上下文
+          const detectedSourceLang = currentSource !== 'auto'
+            ? currentSource
+            : (detectSourceLang(ctxForDetect || finalQuery) || "auto");
+
+          //  上下文捕获：使用提前克隆好的 savedRange
           if (!shadowHost) initShadowDOM();
           try {
-            const range = selection.getRangeAt(0);
-            const container = range.commonAncestorContainer;
+            if (savedRange) {
+              const container = savedRange.commonAncestorContainer;
+              const paragraph =
+                container.nodeType === Node.TEXT_NODE
+                  ? container.parentElement
+                  : container;
+              let block = paragraph.closest("[data-translated]") || paragraph;
 
-            // 找到原文所在段落
-            const paragraph = container.nodeType === Node.TEXT_NODE
-              ? container.parentElement
-              : container;
-            const block = paragraph.closest('[data-translated]') || paragraph;
-
-            // 原文文本
-            const fullText = (block.textContent || "").replace(/\s+/g, " ").trim();
-            const selectedText = finalQuery;
-            const idx = fullText.indexOf(selectedText);
-
-            if (idx !== -1) {
-              const start = Math.max(0, idx - 80);
-              const end = Math.min(fullText.length, idx + selectedText.length + 80);
-              let context = fullText.slice(start, end).trim();
-              if (start > 0) context = "..." + context;
-              if (end < fullText.length) context = context + "...";
-              _capturedContext = context;
-              _capturedContextTranslation = "";
-            } else {
-              _capturedContext = fullText.slice(0, 160) || "";
-            }
-
-            // 找相邻译文
-            const nextEl = block.nextElementSibling;
-            if (nextEl && nextEl.classList.contains("kt-paragraph-translation")) {
-              _capturedContextTranslation = nextEl.textContent.trim();
-            } else {
-              // 也找父元素下一个兄弟
-              const parentNext = block.parentElement?.nextElementSibling;
-              if (parentNext && parentNext.classList.contains("kt-paragraph-translation")) {
-                _capturedContextTranslation = parentNext.textContent.trim();
-              } else {
-                _capturedContextTranslation = "";
+              // 如果捕获的文本太短，向上找更大的容器
+              let tries = 0;
+              while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
+                block = block.parentElement;
+                tries++;
               }
+
+              const fullText = getOriginalText(block).replace(/\s+/g, " ").trim();
+
+              //  对 finalQuery 做同样的空白规范化，避免多余空格导致 indexOf 失败
+              const selectedText = finalQuery.replace(/\s+/g, " ").trim();
+
+              let idx = fullText.indexOf(selectedText);
+              //  兜底：忽略大小写再找一次
+              if (idx === -1) {
+                idx = fullText
+                  .toLowerCase()
+                  .indexOf(selectedText.toLowerCase());
+              }
+
+              if (idx !== -1) {
+                const start = Math.max(0, idx - 80);
+                const end = Math.min(
+                  fullText.length,
+                  idx + selectedText.length + 80
+                );
+
+                logger.log('[context] fullText slice:', fullText?.slice(0, 100));
+                logger.log('[context] selectedText:', selectedText);
+                logger.log('[context] idx:', idx);
+                let context = fullText.slice(start, end).trim();
+                if (start > 0) context = "..." + context;
+                if (end < fullText.length) context = context + "...";
+                _capturedContext = context;
+                _capturedContextTranslation = "";
+              } else {
+                _capturedContext = fullText.slice(0, 160) || "";
+              }
+
+              const translationEl =
+                block.querySelector(".kt-paragraph-translation") ||
+                (block.nextElementSibling?.classList.contains("kt-paragraph-translation")
+                  ? block.nextElementSibling : null) ||
+                (block.parentElement?.nextElementSibling?.classList.contains("kt-paragraph-translation")
+                  ? block.parentElement.nextElementSibling : null);
+
+              _capturedContextTranslation = translationEl ? translationEl.textContent.trim() : "";
             }
           } catch (e) {
             _capturedContext = "";
             _capturedContextTranslation = "";
           }
+
           await renderAndShowPopup(
             finalQuery,
             { clientX: mouseX, clientY: mouseY },
             shadowHost.shadowRoot,
             currentTarget,
-            detectedSourceLang,
+            detectedSourceLang
           );
         } catch (e) {
           if (e.message?.includes("context invalidated")) {
@@ -8063,22 +8223,43 @@ function injectDownloadButton() {
       padding: 3px 10px; font-size: 13px;
       cursor: pointer; transition: background 0.2s;
       white-space: nowrap;
+      position: relative;
     }
     .kt-dl-btn:hover { background: rgba(255,255,255,0.25); }
+      .kt-dl-btn .kt-tooltip {
+      position: absolute;
+      bottom: calc(100% + 28px);  /* 加大偏移  */
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(28, 28, 28, 0.68);  
+      border-radius: 8px;
+      color: #fff;
+      font-size: 12px;
+      padding: 5px 10px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
+    .kt-dl-btn:hover .kt-tooltip {
+      opacity: 1;
+    }
   `;
   document.head.appendChild(style);
 
   const btnOriginal = document.createElement("button");
   btnOriginal.className = "kt-dl-btn";
   btnOriginal.textContent = "⬇ TXT";
-  btnOriginal.title = t("dlOriginal", window.uiLanguage); //下载原文字幕
+  btnOriginal.title = '';
+  btnOriginal.innerHTML = `⬇ TXT<span class="kt-tooltip">${t("dlOriginal", window.uiLanguage)}</span>`; //下载原文字幕
   btnOriginal.onclick = () => downloadSubtitles(false);
 
   const btnBilingual = document.createElement("button");
   btnBilingual.id = "kt-download-btn";
   btnBilingual.className = "kt-dl-btn";
   btnBilingual.textContent = `⬇ ${t("bilingual", window.uiLanguage)} TXT`; //双语
-  btnBilingual.title = t("dlBilingual", window.uiLanguage); //下载双语字幕（含翻译）
+  btnBilingual.title = '';
+  btnBilingual.innerHTML = `⬇ ${t("bilingual", window.uiLanguage)} TXT<span class="kt-tooltip">${t("dlBilingual", window.uiLanguage)}</span>`; //下载双语字幕（含翻译）
   btnBilingual.onclick = () => downloadSubtitles(true);
 
   wrapper.appendChild(btnOriginal);
@@ -8491,7 +8672,12 @@ window.addEventListener("KT_SOURCE_LANG_READY", (e) => {
 });
 
 function getVideoSourceLang() {
-  return __ktSourceLang;
+  if (__ktSourceLang) return __ktSourceLang;
+
+  // 兜底：用字幕文字检测
+  const subtitleEl = document.querySelector('.ytp-caption-segment, .caption-window');
+  const ctx = subtitleEl?.textContent || "";
+  return ctx.length > 5 ? detectSourceLang(ctx) : null;
 }
 function syncSubtitleDisplay() {
   const video = document.querySelector("video");
@@ -8601,9 +8787,9 @@ function syncSubtitleDisplay() {
       const sourceLang = getVideoSourceLang();
       if (oEl) renderWords(group.text, oEl, sourceLang);
       if (tEl) {
-        logger.log(
-          `[Subtitle Display] Source Lang: ${sourceLang}, Target Lang: ${currentTargetL}`,
-        );
+        // logger.log(
+        //   `[Subtitle Display] Source Lang: ${sourceLang}, Target Lang: ${currentTargetL}`,
+        // );
         const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
         const isSameLang =
           sourceLang && targetLang && sourceLang === targetLang;
@@ -8855,64 +9041,103 @@ setTimeout(initSubtitleAvoidance, 2000);
 function renderWords(text, container, sourceLang = null) {
   if (!container) return;
   container.innerHTML = "";
-  const cjkRegex =
-    /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
-  const isCJK = cjkRegex.test(text);
-  let words;
-  if (isCJK) {
-    words =
-      text.match(
-        /[\u4e00-\u9fa5]+|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[a-zA-Z0-9']+|[^\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff\s]/g,
-      ) || [];
-  } else {
-    words = text.split(/(\s+)/);
+
+  let words = [];
+  let currentLang = sourceLang;
+
+  // 1. 自动判定语种（仅用于传给分词器）
+  if (!currentLang) {
+    if (/[\u3040-\u30ff]/.test(text)) currentLang = 'ja';
+    else if (/[\u4e00-\u9fff]/.test(text)) currentLang = 'zh';
+    else if (/[\u0E00-\u0E7F]/.test(text)) currentLang = 'th';
+    else if (/[\u1000-\u109F]/.test(text)) currentLang = 'my';
+    else if (/[\u1780-\u17FF]/.test(text)) currentLang = 'km';
+    else currentLang = 'en'; // 英文、德语、法语等西方语言统一默认 en
   }
+
+  // 2. 全语种统一使用 Intl.Segmenter 分词 
+  if (typeof Intl !== 'undefined' && Intl.Segmenter) {
+    try {
+      const segmenter = new Intl.Segmenter(currentLang, { granularity: 'word' });
+      words = [...segmenter.segment(text)]
+        .map(s => s.segment)
+        .filter(s => s && s.length > 0);
+    } catch (e) {
+      words = [];
+    }
+  }
+
+  // 3. 统一的高质量正则兜底（老旧浏览器）
+  if (!words || words.length === 0) {
+    words = text.match(
+      /[\u4e00-\u9fa5]+|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[a-zA-Z0-9']+|[^\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff\s]+|\s+/g
+    ) || [];
+  }
+
+  // 判断是否属于紧凑布局语种，仅用于控制 span 的 margin 样式
+  const isCompactStyle = ['ja', 'zh', 'th', 'my', 'km'].some(l => currentLang?.startsWith(l));
+
+  // 4. 统一渲染逻辑
   words.forEach((word) => {
     const trimmed = word.trim();
-    if (trimmed.length > 0) {
-      const cleanWord = trimmed.replace(
-        /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」]/g,
-        "",
-      );
 
-      const span = document.createElement("span");
-      span.className = "kt-word";
-      span.innerText = word;
+    // 过滤掉所有标点符号，拿到纯净的查词文本
+    const cleanWord = trimmed.replace(
+      /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」【】『』""''\s]/g,
+      ""
+    );
 
-      // 高亮判断
-      if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
-        span.style.color = "#facc15";
-        span.style.borderBottom = "1px solid rgba(250, 204, 21, 0.6)";
-      }
+    //  如果 trimmed 为空（说明是空格）或者 cleanWord 为空（说明整个词全是标点符号）
+    if (trimmed.length === 0 || cleanWord.length === 0) {
+      // 统统作为纯文本节点渲染，不绑定任何交互事件，完美保留排版，同时防止标点符号被点击
+      container.appendChild(document.createTextNode(word));
+      return;
+    }
 
-      if (isCJK) {
-        span.style.margin = "0 0.5px";
-        span.style.display = "inline-block";
-      }
-      span.onmouseenter = (e) => {
+    const span = document.createElement("span");
+    span.className = "kt-word";
+    span.innerText = word;
+
+    span.style.display = "inline-block";
+    span.style.margin = isCompactStyle ? "0 0.5px" : "0 1px";
+
+    if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
+      span.style.color = "#facc15";
+      span.style.borderBottom = "1px solid rgba(250, 204, 21, 0.6)";
+    }
+
+    // 鼠标悬停事件（防抖）
+    span.onmouseenter = (e) => {
+      const el = e.target;
+      el._hoverTimer = setTimeout(() => {
         if (typeof handleWordMouseEnter === "function")
           handleWordMouseEnter(e, trimmed);
-      };
-      span.onmouseleave = (e) => {
-        if (typeof handleWordMouseLeave === "function") handleWordMouseLeave(e);
-      };
-      span.ondblclick = (e) => {
-        if (typeof handleWordDblClick === "function")
-          handleWordDblClick(e, cleanWord);
-      };
-      span.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (typeof speakText === "function")
-          speakText(cleanWord, span, sourceLang);
-        const originalColor = span.style.color;
-        span.style.color = "#facc15";
-        setTimeout(() => (span.style.color = originalColor || ""), 200);
-      };
-      container.appendChild(span);
-    } else if (!isCJK) {
-      container.appendChild(document.createTextNode(word));
-    }
+      }, 80);
+    };
+
+    span.onmouseleave = (e) => {
+      clearTimeout(e.target._hoverTimer);
+      if (typeof handleWordMouseLeave === "function") handleWordMouseLeave(e);
+    };
+
+    span.ondblclick = (e) => {
+      if (typeof handleWordDblClick === "function")
+        handleWordDblClick(e, cleanWord);
+    };
+
+    // 单击发音与闪烁
+    span.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof speakText === "function")
+        speakText(cleanWord, span, currentLang);
+
+      const originalColor = span.style.color;
+      span.style.color = "#facc15";
+      setTimeout(() => (span.style.color = originalColor || ""), 200);
+    };
+
+    container.appendChild(span);
   });
 }
 function applySubtitleSettings(settings) {
@@ -9004,6 +9229,7 @@ async function handleWordMouseEnter(e, word) {
   tooltip.style.visibility = "visible";
   repositionTooltip(tooltip, e.target);
 
+  // logger.log('[getVideoSourceLang] result:', getVideoSourceLang());
   try {
     const res = await getDetailedTranslation(cleanWord, false, currentLang, {
       lightweight: true,
@@ -9182,7 +9408,8 @@ async function handleWordDblClick(e, word) {
     const cleanedOriginal = cleanSubtitle(originalText);
     const cleanedTranslation = cleanSubtitle(translationText);
 
-    subtitleContext = [cleanedOriginal, cleanedTranslation].filter(Boolean).join(". ");
+    subtitleContext = cleanedOriginal;
+    window.__currentTranslationTemp = cleanedTranslation; // 临时存一份用于后续赋值
   } catch (err) {
     logger.warn("[Mira] 获取字幕上下文失败:", err);
   }
@@ -9204,6 +9431,7 @@ async function handleWordDblClick(e, word) {
       examples: res.examples || [],
       sourceLang: res.langInfo?.code || "",
       context: subtitleContext,
+      contextTranslation: window.__currentTranslationTemp || "",
     };
   }
   if (!fullTranslation) return;

@@ -1206,7 +1206,7 @@ function speakText(text, speakBtn, forcedLang) {
     else if (/\p{Script=Cyrillic}/u.test(text)) targetLang = 'ru-RU';
     else targetLang = 'en-US';
   }
-
+  if (forcedLang === 'null') forcedLang = null;
   // --- 3. UI 初始状态 ---
   if (speakBtn) {
     speakBtn.classList.remove('is-speaking', 'speaking-wave');
@@ -1489,13 +1489,38 @@ async function incrementUsageCount() {
   const today = new Date().toISOString().slice(0, 10); // "2026-01-15"
   activeDays.add(today);
 
-  await safeSetStorage({ 
+  await safeSetStorage({
     usage_count: count,
     active_days: [...activeDays],
   });
 
   return count;
 }
+//假名
+async function getKana(romaji) {
+    if (!romaji) return { hiragana: '', katakana: '' };
+    logger.log('[getKana] input:', romaji);
+    try {
+        const res = await chrome.runtime.sendMessage({
+            type: 'ROMAJI_TO_HIRAGANA',
+            romaji
+        });
+        logger.log('[getKana] response:', res);
+        return {
+            hiragana: res?.hiragana || '',
+            katakana: res?.katakana || ''
+        };
+    } catch (e) {
+        logger.log('[getKana] error:', e);
+        return { hiragana: '', katakana: '' };
+    }
+}
+
+// isJapanese  用正则代替 wanakana
+function isJapanese(text) {
+    return /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(text);
+}
+
 //通用翻译
 let lastTranslationResult = null;
 const wordTranslationCache = new Map();
@@ -1549,6 +1574,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   //logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
   if (!isBatch) {
     let isSame = false;
+logger.log('[getDetailedTranslation] query:', query, 'hintInputLang:', hintInputLang, 'hintSourceLang:', hintSourceLang, 'targetBase:', targetBase);
 
     // 如果外部明确传入了输入语言，且与目标语言不同，跳过所有isSame检测
     if (hintInputLang && hintInputLang !== targetBase) {
@@ -1874,8 +1900,8 @@ const NOTICE_THEMES = {
 function detectSourceLang(text) {
   if (!text) return null;
   // 已有的非拉丁脚本检测
-  if (/\p{Script=Han}/u.test(text)) return 'zh';
   if (/[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(text)) return 'ja';
+  if (/\p{Script=Han}/u.test(text)) return 'zh';
   if (/\p{Script=Hangul}/u.test(text)) return 'ko';
   if (/\p{Script=Thai}/u.test(text)) return 'th';
   if (/\p{Script=Cyrillic}/u.test(text)) return 'ru';
