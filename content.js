@@ -5842,7 +5842,12 @@ function initSelectionTranslate() {
             currentSourceLang,
           )
             .then((result) => {
-
+              // logger.log('[refresh]', {
+              //   isWord: result?.isWord,
+              //   isPartial: result?.isPartial,
+              //   dictData: result?.dictData,
+              //   basic: result?.basic,
+              // });
               if (basicEl) {
                 basicEl.style.color = "";
                 basicEl.style.fontStyle = "normal";
@@ -7448,15 +7453,36 @@ function initSelectionTranslate() {
             e.stopPropagation();
           });
           span.addEventListener("click", (e) => {
-            // 如果在字幕容器里，不弹出 Shadow DOM 窗口
             if (e.target.closest("#kt-yt-box")) return;
             e.stopPropagation();
             if (!shadowHost) initShadowDOM();
+
+            // 取上下文：往上找最近的块级容器
+            const contextEl = e.target.closest("p, li, div, td, blockquote")
+              || e.target.parentNode;
+            const contextText = getOriginalText(contextEl);
+
+            const fromText = detectSourceLang(entry.word);
+            const fromCtx = detectSourceLang(contextText);
+            const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(entry.word);
+
+            let effectiveHintLang = null;
+            if (hasKana) {
+              effectiveHintLang = 'ja';
+            } else if (fromCtx === 'ja') {
+              effectiveHintLang = 'ja';
+            } else if (fromCtx) {
+              effectiveHintLang = fromCtx;
+            } else {
+              effectiveHintLang = fromText;
+            }
+
             renderAndShowPopup(
               entry.word,
               { clientX: e.clientX, clientY: e.clientY },
               shadowHost.shadowRoot,
               window.currentTargetL || "en",
+              effectiveHintLang,
             );
           });
         }
