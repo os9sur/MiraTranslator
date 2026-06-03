@@ -2596,18 +2596,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         resetBtn.style.display = hasBuiltinRule ? 'inline-block' : 'none';
         resetBtn.innerText = t('resetBuildinRules');
         resetBtn.title = t('restoreRules');
-
-        resetBtn.addEventListener('mouseover', () => {
-          resetBtn.style.background = '#3b82f6';
-          resetBtn.style.color = '#fff';
-          resetBtn.style.boxShadow = '0 0 8px rgba(59,130,246,0.5)';
-        });
-        resetBtn.addEventListener('mouseout', () => {
-          resetBtn.style.background = 'transparent';
-          resetBtn.style.color = '#3b82f6';
-          resetBtn.style.boxShadow = 'none';
-        });
-
         resetBtn.onclick = async () => {
           const rule = SiteRules.getRule(domain);
           const builtinSelectors = rule.selectors;

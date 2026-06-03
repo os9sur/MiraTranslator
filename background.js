@@ -4657,6 +4657,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         };
         //logger.log("[BG] Received TRANSLATE request:", { text, targetLang, hintSourceLang: request.hintSourceLang, cacheKey: request.cacheKey });
         getTabId().then(async tabId => {
+    //         logger.log('[BG TRANSLATE]', {
+    //     text: request.text,
+    //     hintSourceLang: request.hintSourceLang,
+    //     hintInputLang: request.hintInputLang,
+    //     cacheKey: request.cacheKey,
+    // });
             processTranslate(request, tabId, request.cacheKey)
                 .then(res => {
                     const finalResult = res?.result || res || {};
