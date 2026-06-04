@@ -6807,25 +6807,29 @@ function initSelectionTranslate() {
                 ),
               );
               const dir = isRTL ? "rtl" : "ltr";
+              // 定义边框样式变量
+              const borderStyle = isRTL ? "border-right:3px solid #25cbf6ab;" : "border-left:3px solid #25cbf6ab;";
+              const paddingStyle = isRTL ? "padding:0 10px 0 5px;" : "padding:0 5px 0 10px;";
+
               const safeEn = en.replace(/'/g, "\\'");
-              return `<div class="mira-font-family" style="margin-bottom:10px;border-left:3px solid #25cbf6ab;padding:0 5px 0 10px;
-                       border-radius:2px;word-break:break-word;direction:${dir};text-align:${dir === "rtl" ? "right" : "left"};">
-                      <div style="display:flex;align-items:center;gap:6px;">
-                        <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
-                          ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
-                        </div>
-                        <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${exampleLang || ''}" 
-                          style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;
-                                transition:color 0.2s;">
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                          </svg>
-                        </span>
-                      </div>
-                      <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
-                    </div>`;
+
+              return `<div class="mira-font-family" style="margin-bottom:10px;${borderStyle}${paddingStyle}
+              border-radius:2px;word-break:break-word;direction:${dir};text-align:${isRTL ? "right" : "left"};">
+              <div style="display:flex;align-items:center;gap:6px;flex-direction:${isRTL ? "row-reverse" : "row"};">
+                <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
+                  ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
+                </div>
+                <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${exampleLang || ''}" 
+                  style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;transition:color 0.2s;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                  </svg>
+                </span>
+              </div>
+              <div class="mira-font-family" style="font-size:12px;font-style:italic;color:var(--p-text-muted);margin-top:3px;opacity:0.65;">${cn}</div>
+            </div>`;
             })
             .join("");
         pE.style.display = "block";

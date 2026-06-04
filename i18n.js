@@ -438,14 +438,14 @@ self.i18nData = {
     word: "كلمة/جملة",
     meaning: "معنى",
     addTime: "وقت الإضافة",
-    operation: "عملية",
+    operation: "إجراءات",
     noCollection: "لا توجد كلمات محفوظة",
     completeContent: "يرجى ملء كافة الحقول",
     noExportWords: "لا توجد بيانات للتصدير",
     currentSite: "الموقع الحالي",
     globalSetting: "الإعداد العام",
     personalizedScan: "تخصيص مناطق الترجمة (حفظ تلقائي)",
-    smartPicker: "انقر لاختيار مناطق الترجمة\n\u200F(ESC / نقرة يمين للخروج)",
+   smartPicker: "انقر لاختيار مناطق الترجمة\n\u202D(ESC / نقرة يمين للخروج)\u202C",
     matchSelector: "العناصر النشطة (محددات CSS)",
     minChars: "تخطي الجمل القصيرة (أدنى حروف)",
     loading: "جاري الترجمة...",
@@ -619,8 +619,7 @@ self.i18nEngineData = {
     testConnection: "测试连接",
     confirmDelete: "确认删除？",
     confirmClose: "确认关闭？",
-    customAiInterface: "自定义 AI 接口",
-    accessService: "接入 {0} 服务",
+    customAiInterface: "自定义 AI 接口 (支持本地模型)",
     newBadge: "新",
     testing: "测试中...",
     success: "成功",
@@ -645,8 +644,7 @@ self.i18nEngineData = {
     testConnection: "測試連線",
     confirmDelete: "確認刪除？",
     confirmClose: "確認關閉？",
-    customAiInterface: "自定義 AI 介面",
-    accessService: "接入 {0} 服務",
+    customAiInterface: "自訂 AI 介面 (支援本地模型)",
     newBadge: "新",
     testing: "測試中...",
     success: "成功",
@@ -671,8 +669,7 @@ self.i18nEngineData = {
     testConnection: "Test Connection",
     confirmDelete: "Confirm Delete?",
     confirmClose: "Confirm Close?",
-    customAiInterface: "Custom AI Interface",
-    accessService: "Access {0} Service",
+    customAiInterface: "Custom AI Interface (Supports local models)",
     newBadge: "New",
     testing: "Testing...",
     success: "Success",
@@ -697,8 +694,7 @@ self.i18nEngineData = {
     testConnection: "接続テスト",
     confirmDelete: "削除しますか？",
     confirmClose: "閉じてもよろしいですか？",
-    customAiInterface: "カスタムAIインターフェース",
-    accessService: "{0} サービスに接続",
+    customAiInterface: "カスタムAIインターフェース (ローカルモデル対応)",
     newBadge: "新",
     testing: "テスト中...",
     success: "成功",
@@ -723,8 +719,7 @@ self.i18nEngineData = {
     testConnection: "연결 테스트",
     confirmDelete: "삭제하시겠습니까?",
     confirmClose: "창을 닫으시겠습니까?",
-    customAiInterface: "사용자 지정 AI 인터페이스",
-    accessService: "{0} 서비스 연결",
+    customAiInterface: "사용자 정의 AI 인터페이스 (로컬 모델 지원)",
     newBadge: "NEW",
     testing: "테스트 중...",
     success: "성공",
@@ -749,8 +744,7 @@ self.i18nEngineData = {
     testConnection: "Probar conexión",
     confirmDelete: "¿Confirmar eliminación?",
     confirmClose: "¿Confirmar cierre?",
-    customAiInterface: "Interfaz AI personalizada",
-    accessService: "Acceder al servicio {0}",
+    customAiInterface: "Interfaz de IA personalizada (modelos locales)",
     newBadge: "Nuevo",
     testing: "Probando...",
     success: "Éxito",
@@ -775,8 +769,7 @@ self.i18nEngineData = {
     testConnection: "Tester la connexion",
     confirmDelete: "Confirmer la suppression ?",
     confirmClose: "Confirmer la fermeture ?",
-    customAiInterface: "Interface IA personnalisée",
-    accessService: "Accéder au service {0}",
+    customAiInterface: "Interface IA personnalisée (modèles locaux)",
     newBadge: "Nouveau",
     testing: "Test en cours...",
     success: "Succès",
@@ -801,8 +794,7 @@ self.i18nEngineData = {
     testConnection: "Verbindung testen",
     confirmDelete: "Löschen bestätigen?",
     confirmClose: "Schließen bestätigen?",
-    customAiInterface: "Benutzerdefinierte KI-Schnittstelle",
-    accessService: "{0}-Dienst verbinden",
+    customAiInterface: "Benutzerdefinierte KI-Schnittstelle (lokale Modelle)",
     newBadge: "Neu",
     testing: "Testen...",
     success: "Erfolg",
@@ -827,8 +819,7 @@ self.i18nEngineData = {
     testConnection: "Проверить соединение",
     confirmDelete: "Подтвердить удаление?",
     confirmClose: "Подтвердить закрытие?",
-    customAiInterface: "Пользовательский интерфейс ИИ",
-    accessService: "Доступ к сервису {0}",
+    customAiInterface: "Пользовательский интерфейс ИИ (локальные модели)",
     newBadge: "Новый",
     testing: "Тестирование...",
     success: "Успешно",
@@ -853,8 +844,7 @@ self.i18nEngineData = {
     testConnection: "Testar conexão",
     confirmDelete: "Confirmar exclusão?",
     confirmClose: "Confirmar fechamento?",
-    customAiInterface: "Interface de IA personalizada",
-    accessService: "Acessar serviço {0}",
+    customAiInterface: "Interface de IA personalizada (modelos locais)",
     newBadge: "Novo",
     testing: "Testando...",
     success: "Sucesso",
@@ -879,8 +869,7 @@ self.i18nEngineData = {
     testConnection: "Testa connessione",
     confirmDelete: "Conferma eliminazione?",
     confirmClose: "Conferma chiusura?",
-    customAiInterface: "Interfaccia IA personalizzata",
-    accessService: "Accedi al servizio {0}",
+    customAiInterface: "Interfaccia IA personalizzata (modelli locali)",
     newBadge: "Nuovo",
     testing: "Test in corso...",
     success: "Successo",
@@ -905,8 +894,7 @@ self.i18nEngineData = {
     testConnection: "Kiểm tra kết nối",
     confirmDelete: "Xác nhận xóa?",
     confirmClose: "Xác nhận đóng?",
-    customAiInterface: "Giao diện AI tùy chỉnh",
-    accessService: "Truy cập dịch vụ {0}",
+    customAiInterface: "Giao diện AI tùy chỉnh (Hỗ trợ mô hình cục bộ)",
     newBadge: "Mới",
     testing: "Đang kiểm tra...",
     success: "Thành công",
@@ -931,8 +919,7 @@ self.i18nEngineData = {
     testConnection: "ทดสอบการเชื่อมต่อ",
     confirmDelete: "ยืนยันการลบ?",
     confirmClose: "ยืนยันการปิด?",
-    customAiInterface: "อินเตอร์เฟซ AI ที่กำหนดเอง",
-    accessService: "เข้าถึงบริการ {0}",
+    customAiInterface: "อินเทอร์เฟซ AI (รองรับโมเดลท้องถิ่น)",
     newBadge: "ใหม่",
     testing: "กำลังทดสอบ...",
     success: "สำเร็จ",
@@ -957,8 +944,7 @@ self.i18nEngineData = {
     testConnection: "اختبار الاتصال",
     confirmDelete: "تأكيد الحذف؟",
     confirmClose: "تأكيد الإغلاق؟",
-    customAiInterface: "واجهة ذكاء اصطناعي مخصصة",
-    accessService: "الوصول إلى خدمة {0}",
+    customAiInterface: "واجهة ذكاء اصطناعي مخصصة (تدعم النماذج المحلية)",
     newBadge: "جديد",
     testing: "جارٍ الاختبار...",
     success: "تم بنجاح",
@@ -983,8 +969,7 @@ self.i18nEngineData = {
     testConnection: "تست اتصال",
     confirmDelete: "تأیید حذف؟",
     confirmClose: "تأیید بستن؟",
-    customAiInterface: "رابط هوش مصنوعی سفارشی",
-    accessService: "دسترسی به سرویس {0}",
+    customAiInterface: "رابط هوش مصنوعی سفارشی (پشتیبانی از مدل‌های محلی)",
     newBadge: "جدید",
     testing: "در حال تست...",
     success: "موفقیت",
@@ -1009,8 +994,7 @@ self.i18nEngineData = {
     testConnection: "Bağlantıyı Test Et",
     confirmDelete: "Silmeyi onayla?",
     confirmClose: "Kapatmayı onayla?",
-    customAiInterface: "Özel AI Arayüzü",
-    accessService: "{0} Servisine Eriş",
+    customAiInterface: "Özel YZ Arayüzü (Yerel modelleri destekler)",
     newBadge: "Yeni",
     testing: "Test ediliyor...",
     success: "Başarılı",
@@ -1506,7 +1490,7 @@ self.i18nStyleData = {
   "ar": {
     pinUnpin: "تثبيت / فك",
     instantTranslation: "ترجمة سريعة",
-    inputAndEnter: "↵...Enter اكتب واضغط",
+    inputAndEnter: "\u200F↵...Enter اكتب واضغط",
     styleCustomization: "تخصيص النمط",
     engineConfig: "إعدادات المحرك",
     stylePreview: "معاينة",
@@ -1543,7 +1527,7 @@ self.i18nStyleData = {
   "fa": {
     pinUnpin: "پین / رها کردن",
     instantTranslation: "ترجمه سریع",
-    inputAndEnter: "↵...تایپ و اینتر",
+    inputAndEnter: "\u200F↵...تایپ و اینتر",
     styleCustomization: "سفارشی‌سازی ظاهر",
     engineConfig: "تنظیمات موتور",
     stylePreview: "پیش‌نمایش",
@@ -2738,97 +2722,129 @@ self.i18nAttach3 = {
     note: "备注",
     notePlaceholder: "四级/托福/语境...",
     highlightVocab: "在网页高亮生词",
-    toggleKatakana: "点击切换片假名"
+    toggleKatakana: "点击切换片假名",
+    pagination: "第 {current} / {total} 页",
+    goPlaceholder: "跳转..."
   },
   "zh-TW": {
     note: "備註",
-    notePlaceholder: "",
-    highlightVocab: "在網頁高亮生詞",
-    toggleKatakana: "點擊切換片假名"
+    notePlaceholder: "例：檢定/托福/語境...",
+    highlightVocab: "在網頁上標示生字",
+    toggleKatakana: "點擊切換片假名",
+    pagination: "第 {current} / {total} 頁",
+    goPlaceholder: "跳轉..."
   },
   "en": {
     note: "Note",
-    notePlaceholder: "",
-    highlightVocab: "Highlight on page",
-    toggleKatakana: "Click to toggle Katakana"
+    notePlaceholder: "e.g. TOEFL/Context...",
+    highlightVocab: "Highlight words on page",
+    toggleKatakana: "Click to toggle Katakana",
+    pagination: "Page {current} / {total}",
+    goPlaceholder: "Go..."
   },
   "ja": {
     note: "メモ",
-    notePlaceholder: "",
+    notePlaceholder: "例：TOEIC/文脈...",
     highlightVocab: "ページ上で単語を強調",
-    toggleKatakana: "クリックでカタカナに切り替え"
+    toggleKatakana: "クリックでカタカナに切り替え",
+    pagination: "{current} / {total} ページ",
+    goPlaceholder: "移動..."
   },
   "ko": {
     note: "메모",
-    notePlaceholder: "",
+    notePlaceholder: "예: 토익/문맥...",
     highlightVocab: "페이지에서 단어 강조",
-    toggleKatakana: "클릭하여 가타카나로 전환"
+    toggleKatakana: "클릭하여 가타카나로 전환",
+    pagination: "{current} / {total} 페이지",
+    goPlaceholder: "이동..."
   },
   "es": {
     note: "Nota",
-    notePlaceholder: "",
+    notePlaceholder: "ej. TOEFL/Contexto...",
     highlightVocab: "Resaltar en la página",
-    toggleKatakana: "Haz clic para cambiar a Katakana"
+    toggleKatakana: "Haz clic para cambiar a Katakana",
+    pagination: "Pág. {current} / {total}",
+    goPlaceholder: "Ir..."
   },
   "fr": {
     note: "Note",
-    notePlaceholder: "",
+    notePlaceholder: "ex: TOEFL/Contexte...",
     highlightVocab: "Surligner sur la page",
-    toggleKatakana: "Cliquez pour basculer en katakana"
+    toggleKatakana: "Cliquez pour basculer en katakana",
+    pagination: "Page {current} / {total}",
+    goPlaceholder: "Aller..."
   },
   "de": {
     note: "Notiz",
-    notePlaceholder: "",
+    notePlaceholder: "z.B. TOEFL/Kontext...",
     highlightVocab: "Auf Seite hervorheben",
-    toggleKatakana: "Klicken, um zu Katakana zu wechseln"
+    toggleKatakana: "Klicken, um zu Katakana zu wechseln",
+    pagination: "Seite {current} / {total}",
+    goPlaceholder: "Gehe zu..."
   },
   "ru": {
     note: "Заметка",
-    notePlaceholder: "",
+    notePlaceholder: "напр. TOEFL/Контекст...",
     highlightVocab: "Выделить на странице",
-    toggleKatakana: "Нажмите, чтобы переключить на катакану"
+    toggleKatakana: "Нажмите, чтобы переключить на катакану",
+    pagination: "Стр. {current} / {total}",
+    goPlaceholder: "Перейти..."
   },
   "pt": {
     note: "Nota",
-    notePlaceholder: "",
+    notePlaceholder: "ex: TOEFL/Contexto...",
     highlightVocab: "Destacar na página",
-    toggleKatakana: "Clique para alternar para Katakana"
+    toggleKatakana: "Clique para alternar para Katakana",
+    pagination: "Pág. {current} / {total}",
+    goPlaceholder: "Ir..."
   },
   "it": {
     note: "Nota",
-    notePlaceholder: "",
+    notePlaceholder: "es. TOEFL/Contesto...",
     highlightVocab: "Evidenzia nella pagina",
-    toggleKatakana: "Clicca per passare a Katakana"
+    toggleKatakana: "Clicca per passare a Katakana",
+    pagination: "Pag. {current} / {total}",
+    goPlaceholder: "Vai..."
   },
   "vi": {
     note: "Ghi chú",
-    notePlaceholder: "",
-    highlightVocab: "Làm nổi bật trên trang",
-    toggleKatakana: "Nhấp để chuyển sang Katakana"
+    notePlaceholder: "ví dụ: TOEFL/Ngữ cảnh...",
+    highlightVocab: "Làm nổi bật từ vựng",
+    toggleKatakana: "Nhấp để chuyển sang Katakana",
+    pagination: "Trang {current} / {total}",
+    goPlaceholder: "Đi đến..."
   },
   "th": {
     note: "บันทึก",
-    notePlaceholder: "",
+    notePlaceholder: "เช่น TOEFL/บริบท...",
     highlightVocab: "เน้นคำบนหน้าเว็บ",
-    toggleKatakana: "คลิกเพื่อสลับเป็นคาตาคานะ"
+    toggleKatakana: "คลิกเพื่อสลับเป็นคาตาคานะ",
+    pagination: "หน้า {current} / {total}",
+    goPlaceholder: "ไปที่..."
   },
   "ar": {
     note: "ملاحظة",
-    notePlaceholder: "",
+    notePlaceholder: "مثال: TOEFL/سياق...",
     highlightVocab: "تمييز على الصفحة",
-    toggleKatakana: "انقر للتبديل إلى الكاتاكانا"
+    toggleKatakana: "انقر للتبديل إلى الكاتاكانا",
+    pagination: "{total} / {current} صفحة ",
+    goPlaceholder: "اذهب..."
   },
   "fa": {
     note: "یادداشت",
-    notePlaceholder: "",
+    notePlaceholder: "مثال: TOEFL/زمینه...",
     highlightVocab: "برجسته در صفحه",
-    toggleKatakana: "برای تغییر به کاتاکانا کلیک کنید"
+    toggleKatakana: "برای تغییر به کاتاکانا کلیک کنید",
+    pagination: "{total} / {current} صفحه",
+    goPlaceholder: "برو..."
   },
   "tr": {
     note: "Not",
-    notePlaceholder: "",
+    notePlaceholder: "örn: TOEFL/Bağlam...",
     highlightVocab: "Sayfada vurgula",
-    toggleKatakana: "Katakana'ya geçmek için tıklayın"
+    toggleKatakana: "Katakana'ya geçmek için tıklayın",
+    pagination: "Sayfa {current} / {total}",
+    goPlaceholder: "Git..."
   }
 };
 self.i18nAttach4 = {
@@ -3777,6 +3793,28 @@ self.i18nAttach10 = {
     🔑 Để sử dụng dịch thuật AI, bạn có thể lấy mã API từ nền tảng AI yêu thích và cấu hình bằng nút ở góc dưới bên trái. Nếu card đồ họa (GPU) máy bạn đủ mạnh, bạn cũng có thể tự triển khai mô hình AI cục bộ — không cần internet, không giới hạn và hoàn toàn miễn phí — mặc dù tốc độ dịch sẽ chậm hơn rõ rệt so với các dịch vụ AI thương mại.
     🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> là tùy chọn trả phí dành cho những người dùng muốn sử dụng dịch thuật AI ngay lập tức mà không muốn gặp rắc rối với các bước cấu hình.
     ❤️ Đây là một dự án mã nguồn mở {0}, được tác giả độc lập phát triển và bảo trì trong thời gian rảnh rỗi.`,
+  },
+  "ar": {
+    cpTitle: "موجه مخصص",
+    cpOptional: "اختياري",
+    translate_failed: "تعذّر الترجمة",
+    cpWeb: "ترجمة الويب",
+    cpSub: "ترجمة الترجمات",
+    cpWebPH: "مثال: استخدم أسلوبًا رسميًا. ركّز على المصطلحات الطبية.",
+    cpSubPH: "مثال: اجعلها محادثة. تجنّب الترجمة الحرفية.",
+    cpHint: "⚠ تلميح أسلوبي فقط، مثل: رسمي / موجز / مصطلحات طبية",
+    cpSave: "حفظ",
+    cpClear: "مسح",
+    footerReview: "⭐ قيّم في المتجر",
+    footerFeedback: "✉️ ملاحظات",
+    restoreRules: "استعادة القواعد الافتراضية",
+    builtInNoticeBody: `تعمل هذه الواجهة عبر طلبات الشبكة العامة. مخصصة للتعلم الشخصي والاستخدام غير التجاري فقط. لا يلزم مفتاح API.
+---
+    💡 تنتج ترجمة الذكاء الاصطناعي نتائج أكثر طبيعية، لكنها أبطأ من المحركات التقليدية كـ Google أو Bing — وهذا سلوك متوقع بسبب عملية التوليد رمزًا بعد رمز.
+    💰 ملاحظة: النموذج الأحدث لا يعني بالضرورة ترجمة أفضل. الترجمة لا تتطلب استدلالًا معقدًا — النماذج السائدة أكثر من كافية، بينما قد تكلّف الأحدث أضعافًا مضاعفة.
+    🔑 لاستخدام ترجمة الذكاء الاصطناعي، احصل على مفتاح API من منصة الذكاء الاصطناعي المفضلة لديك وقم بتهيئته عبر الزر في الزاوية السفلية. إذا كان لديك GPU محلي قوي، يمكنك أيضًا تشغيل نموذج ذكاء اصطناعي محلي — بدون إنترنت، غير محدود ومجاني — وإن كانت سرعة الترجمة ستكون أبطأ من خدمات الذكاء الاصطناعي التجارية.
+    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> خيار مدفوع للمستخدمين الذين يريدون استخدام ترجمة الذكاء الاصطناعي دون عناء الإعداد.
+    ❤️ هذا مشروع مفتوح المصدر {0}، طوّره المؤلف وصانه بشكل مستقل في وقت فراغه.`,
   },
 };
 

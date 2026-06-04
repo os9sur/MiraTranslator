@@ -608,13 +608,6 @@ body {
     letter-spacing: 1px;
 }
 
-.template-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    padding-right: 10px;
-}
 
 .tpl-btn {
     width: 100%;
@@ -771,8 +764,10 @@ body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
+    overflow-y: auto;
+    padding-inline-end: 16px;
 }
-
+ 
 .group-label {
     grid-column: 1 / -1;
     font-size: 11px;
@@ -799,7 +794,7 @@ body {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    padding: 24px 20px;
+    padding: 38px 20px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -828,7 +823,7 @@ body {
     font-weight: bold;
     font-family: monospace;
     color: var(--accent-color);
-    opacity: 0.5;
+    opacity: 0.8;
 }
 
 .tpl-card:hover {
@@ -839,15 +834,14 @@ body {
 }
 
 .tpl-card .name {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 20px;
     color: #fff;
     margin-bottom: 6px;
 }
 
 .tpl-card .desc {
     font-size: 11px;
-    color: #94a3b8;
+    color: #24df0a;
     line-height: 1.4;
 }
 

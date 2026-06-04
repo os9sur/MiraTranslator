@@ -164,7 +164,7 @@ select:hover {
 
 .switch {
   width: 42px;
-  height: 22px;
+  height: 23px;
   background: #334155;
   border-radius: 20px;
   flex-shrink: 0;
@@ -739,7 +739,7 @@ select:hover {
   outline: none;
   white-space: pre-wrap;
   word-break: break-word;
-
+  text-align: start;
   height: 36px;
   max-height: 80px;
   overflow-y: auto;
@@ -1026,24 +1026,28 @@ select:hover {
 }
 
 @keyframes ice-active-breath {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 4px rgba(0, 229, 255, 0.2);
     background: rgba(0, 229, 255, 0.05);
   }
+
   50% {
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.5),
-                0 0 20px rgba(0, 229, 255, 0.2);
+      0 0 20px rgba(0, 229, 255, 0.2);
     background: rgba(0, 229, 255, 0.12);
   }
 }
+
 /* .btn-login,
 #advancedSettingsBtn {
   height: 29px;
   border-radius: 20px;
 } */
 #advancedSettingsBtn.icon-action-btn {
-  border: 1px solid rgba(0, 229, 255, 0.3) !important;  
-  background: rgba(0, 229, 255, 0.05);            
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
+  background: rgba(0, 229, 255, 0.05);
   width: 30px;
   height: 30px;
   display: flex;
@@ -1060,9 +1064,9 @@ select:hover {
 
 #advancedSettingsBtn.icon-action-btn:hover {
   animation: none;
-  background: rgba(0, 229, 255, 0.15);    
+  background: rgba(0, 229, 255, 0.15);
   border: 1px solid rgba(0, 229, 255, 0.6) !important;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5); 
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
 }
 
 #advancedSettingsBtn.icon-action-btn svg {
@@ -1080,7 +1084,7 @@ select:hover {
 }
 
 #advancedSettingsBtn.icon-action-btn:hover svg {
-  color: #00e5ff !important; 
+  color: #00e5ff !important;
   filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.8));
 }
 
@@ -1354,23 +1358,6 @@ select:hover {
 
 #quickSearchBtn:active,
 #openSettings:active {
-  transform: scale(0.95);
-}
-
-#pagination .btn {
-  padding: 5px 12px;
-  border: 1px solid #334155;
-  background: transparent;
-  color: #94a3b8;
-}
-
-#pagination .btn:hover:not(:disabled) {
-  border-color: #38bdf8;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-}
-
-#pagination .btn:active {
   transform: scale(0.95);
 }
 
@@ -1704,6 +1691,7 @@ select:hover {
   color: #38bdf8;
   overflow: visible !important;
 }
+
 .tts-loading {
   position: relative;
 }
@@ -2448,6 +2436,7 @@ yt-attributed-string+.kt-paragraph-translation {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+
 .balance-left {
   display: flex;
   flex-direction: column;
@@ -2468,6 +2457,7 @@ yt-attributed-string+.kt-paragraph-translation {
   color: #3fcfa0;
   text-shadow: 0 0 15px rgba(63, 207, 160, 0.2);
 }
+
 .balance-expiry {
   font-size: 10px;
   font-weight: 400;

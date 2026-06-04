@@ -483,23 +483,37 @@
     }
 
     html[lang="ar"] #vocabTable th,
-    html[lang="ar"] #vocabTable td,
-    html[lang="fa"] #vocabTable th,
-    html[lang="fa"] #vocabTable td {
-      text-align: left;
+    html[lang="fa"] #vocabTable th {
+      text-align: right !important;
     }
 
+    html[lang="ar"] .search-bar-icon,
+    html[lang="fa"] .search-bar-icon {
+      left: auto;
+      right: 16px;
+    }
 
-    html[lang="ar"] .btn,
+    html[lang="ar"] .search-bar-input,
+    html[lang="fa"] .search-bar-input {
+      padding: 10px 42px 10px 16px;
+    }
+
+    html[lang="ar"] .btn:not(#pagination .btn),
     html[lang="ar"] .add-box button,
-    html[lang="ar"] input,
+    html[lang="ar"] input:not(#pagination input),
     html[lang="ar"] #searchInp,
-    html[lang="fa"] .btn,
+    html[lang="fa"] .btn:not(#pagination .btn),
     html[lang="fa"] .add-box button,
-    html[lang="fa"] input,
-    html[lang="fa"] #searchInp,
-    [dir="rtl"] {
+    html[lang="fa"] input:not(#pagination input),
+    html[lang="fa"] #searchInp {
       direction: rtl !important;
+      unicode-bidi: isolate;
+    }
+
+    #pagination,
+    #pagination .btn,
+    #pagination input {
+      direction: ltr !important;
       unicode-bidi: isolate;
     }
   </style>
@@ -562,7 +576,7 @@
         </tbody>
       </table>
     </div>
-    <div id="pagination">
+    <div id="pagination" style="direction: ltr; unicode-bidi: isolate;">
       <button id="prevPage" class="btn" style="background: #334155; color: white;">&lt;</button>
       <span id="pageInfo" style="font-size: 14px; color: #94a3b8; font-family: monospace;">Page 1 / 1</span>
       <input id="jumpInp" type="number" min="1" placeholder="Go..." style="width:60px; background:#0f172a; border:1px solid #334155;

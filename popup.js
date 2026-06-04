@@ -1370,15 +1370,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     userConfigs: res.userConfigs || []
   };
   window.currentTargetL = normalizeLang(window.currentTargetL || getBrowserLang() || 'en');
-
   const langEl = document.getElementById('targetLang');
   if (langEl) {
     const raw = currentConfig.targetLanguage || getBrowserLang() || 'en';
-
     let value = raw.startsWith('zh')
       ? (raw === 'zh-TW' || raw === 'zh-HK' ? 'zh-TW' : 'zh-CN')
       : raw.split('-')[0];
-
     langEl.value = value;
     if (!langEl.value) langEl.value = 'en';
   }
@@ -1394,25 +1391,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   const borderColorInput = document.getElementById('style-borderColor');
   const blurSwitch = document.getElementById('switch-blur');
   let isBlur = false;
+
   function updatePreview() {
     const isWeb = document.getElementById('tab-web').classList.contains('active');
     const webPreview = document.getElementById('webPreviewText');
     const ytPreview = document.getElementById('ytPreviewText');
+
     if (isWeb) {
+      const currentLang = document.getElementById('targetLang')?.value || 'en';
+      const isRTL = checkRTL(currentLang);
       const color = colorInput.value;
       const size = fontSizeInput.value;
       const borderColor = borderColorInput.value;
       const borderType = borderTypeSelect.value;
       const isBlur = blurSwitch.classList.contains('on');
+
       document.getElementById('fontSizeVal').innerText = size + 'px';
       const resetStyles = {
         color: color,
         fontSize: size + 'px',
         border: 'none',
         borderLeft: 'none',
+        borderRight: 'none',
         borderBottom: 'none',
         borderTop: 'none',
         padding: '4px 0',
+        direction: isRTL ? 'rtl' : 'ltr',
+        textAlign: isRTL ? 'right' : 'left',
         backgroundColor: 'transparent',
         backgroundImage: 'none',
         textDecoration: 'none',
@@ -1424,9 +1429,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         filter: isBlur ? 'blur(4px)' : 'none'
       };
       Object.assign(webPreview.style, resetStyles);
+
       if (borderType === 'left') {
-        webPreview.style.borderLeft = `4px solid ${borderColor}`;
-        webPreview.style.padding = '4px 12px';
+        if (isRTL) {
+          webPreview.style.borderRight = `4px solid ${borderColor}`;
+          webPreview.style.padding = '4px 12px 4px 4px';
+        } else {
+          webPreview.style.borderLeft = `4px solid ${borderColor}`;
+          webPreview.style.padding = '4px 4px 4px 12px';
+        }
         webPreview.style.borderRadius = '3px';
       } else if (borderType === 'solid') {
         webPreview.style.border = `1px solid ${borderColor}`;
@@ -1437,6 +1448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         webPreview.style.padding = '8px';
         webPreview.style.borderRadius = '6px';
       }
+
       switch (borderType) {
         case 'dashedUnderline':
           webPreview.style.borderBottom = `1px dashed ${borderColor}`;
@@ -1484,6 +1496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           webPreview.style.textDecorationColor = borderColor;
           break;
       }
+
       if (isBlur) {
         webPreview.style.filter = 'blur(4px)';
         webPreview.style.cursor = 'help';
@@ -1762,17 +1775,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const sourcePhonetic = response.sourcePhonetic || '';
       logger.log("sourcePhonetic: ", sourcePhonetic);
       if (resPhonetic) {
-    resPhonetic.innerText = sourcePhonetic
-        ? `[${sourcePhonetic}]`
-        : '';
-    
-    // 日语假名显示
-    const kanaDiv = document.getElementById('resKana');
-    if (kanaDiv) {
-        if (sourcePhonetic && langA === 'ja') {
+        resPhonetic.innerText = sourcePhonetic
+          ? `[${sourcePhonetic}]`
+          : '';
+
+        // 日语假名显示
+        const kanaDiv = document.getElementById('resKana');
+        if (kanaDiv) {
+          if (sourcePhonetic && langA === 'ja') {
             getKana(sourcePhonetic).then(({ hiragana, katakana }) => {
-                if (!hiragana) { kanaDiv.style.display = 'none'; return; }
-                kanaDiv.innerHTML = `
+              if (!hiragana) { kanaDiv.style.display = 'none'; return; }
+              kanaDiv.innerHTML = `
                     <span style="cursor:pointer; user-select:none;"
                           data-hiragana="${hiragana}"
                           data-katakana="${katakana}"
@@ -1780,23 +1793,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${hiragana}
                     </span>
                 `;
-                kanaDiv.style.display = 'block';
-                kanaDiv.querySelector('span').onclick = (e) => {
-                    const el = e.currentTarget;
-                    if (el.dataset.mode === 'hiragana') {
-                        el.innerText = el.dataset.katakana;
-                        el.dataset.mode = 'katakana';
-                    } else {
-                        el.innerText = el.dataset.hiragana;
-                        el.dataset.mode = 'hiragana';
-                    }
-                };
+              kanaDiv.style.display = 'block';
+              kanaDiv.querySelector('span').onclick = (e) => {
+                const el = e.currentTarget;
+                if (el.dataset.mode === 'hiragana') {
+                  el.innerText = el.dataset.katakana;
+                  el.dataset.mode = 'katakana';
+                } else {
+                  el.innerText = el.dataset.hiragana;
+                  el.dataset.mode = 'hiragana';
+                }
+              };
             });
-        } else {
+          } else {
             kanaDiv.style.display = 'none';
+          }
         }
-    }
-}
+      }
 
       let html = '';
       const src = (langA || 'en').toLowerCase();
@@ -1931,7 +1944,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           return `
               <div style="margin-bottom:8px;">
                 <div style="display:flex; align-items:flex-start; gap:6px;">
-                  <div style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic; flex:1;">"${src}"</div>
+                  <div dir="auto" style="color:rgba(255,255,255,0.6); font-size:12px; font-style:italic; flex:1;">"${src}"</div>
                   <span class="popup-example-speak" data-sentence="${safeSrc}" data-lang="${sourceLang || 'en'}"
                     style="cursor:pointer; color:#64748b; flex-shrink:0; display:flex; margin-top:2px;
                           transition:color 0.2s; position:relative; overflow:visible;">
@@ -1942,7 +1955,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </svg>
                   </span>
                 </div>
-                ${tgt ? `<div style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
+                ${tgt ? `<div dir="auto" style="color:rgba(255,255,255,0.4); font-size:11px; font-style:italic; margin-top:2px;">${tgt}</div>` : ''}
               </div>`;
         }).join('')}
         </div>`;
@@ -2549,6 +2562,45 @@ document.addEventListener('DOMContentLoaded', async () => {
       const domainLabel = document.getElementById('domainIndicator');
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
+
+if (checkRTL(uiLangSelect.value)) {    
+    // inspectElementLabel 右对齐
+    const label = document.getElementById('inspectElementLabel');
+    if (label) {
+        label.style.textAlign = 'right';
+        label.style.display = 'block';
+        label.style.width = '100%';
+    }
+
+    // inspectElement 图标移到右边
+    const inspectBtn = document.getElementById('inspectElement');
+    if (inspectBtn) {
+        inspectBtn.style.display = 'flex';
+        inspectBtn.style.flexDirection = 'row-reverse';
+        const icon = inspectBtn.querySelector('span:first-child');
+        if (icon) {
+            icon.style.position = 'absolute';
+            icon.style.left = 'auto';
+            icon.style.right = '6px';
+        }
+    }
+
+    // matchSelector label 右对齐
+    const matchLabel = document.querySelector('label[data-i18n="matchSelector"]');
+    if (matchLabel) {
+        matchLabel.style.textAlign = 'right';
+        matchLabel.style.display = 'block';
+        matchLabel.style.width = '100%';
+    }
+
+    // label行反转
+    const labelRow = document.querySelector('#inspectContainer .row > div:first-child');
+    if (labelRow) {
+        labelRow.style.flexDirection = 'row-reverse';
+        labelRow.style.width = '100%';
+    }
+}
+
       if (inspectBtn && inspectLabelBtn) {
         if (currentMode === 'global') {
           inspectBtn.classList.add('hidden-fade');
