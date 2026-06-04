@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     return dictData.map(item => {
       const pos = localizePos(item.pos, targetLanguage) || item.pos || "";
 
-      // 兼容 meanings（数组）和 definition（字符串）两种格式
       let meanings = "";
       if (Array.isArray(item.meanings)) {
         meanings = item.meanings.join(', ');
@@ -100,11 +99,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       return `
-      <div class="v-detail-line" style="margin-top: 2px; display: flex; gap: 6px;">
-        <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
-        <span class="v-def" style="color: #94a3b8;">${query ? highlight(meanings, query) : meanings}</span>
-      </div>
-    `;
+  <div class="v-detail-line" dir="ltr" style="margin-top: 2px; display: flex; gap: 6px;
+    ${isRTLText(meanings) ? 'flex-direction: row-reverse; text-align: right;' : ''}">
+    <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
+    <span class="v-def" style="color: #94a3b8;">${query ? highlight(meanings, query) : meanings}</span>
+  </div>
+`;
     }).join('');
   }
 
@@ -123,31 +123,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     return `
-    <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
-      <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;">EXAMPLES</div>
-      ${examples.slice(0, 3).map((s) => {
+  <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
+    <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;
+  ${isRTLText(examples.map(s => typeof s === 'object' ? (s.cn || '') : '').join('')) ? 'text-align: right;' : ''}">
+  EXAMPLES
+</div>
+    ${examples.slice(0, 3).map((s) => {
       const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
       const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
       const safeEn = en.replace(/'/g, '&apos;').replace(/"/g, '&quot;');
       return `
-          <div style="margin-bottom: 8px; border-left: 2px solid #25cbf6ab; border-radius:1.5px; padding-left: 8px;">
-            <div style="display:flex; align-items:center; gap:6px;">
-              <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4;">
-               ${query ? highlight(en, query) : highlightWord(en, word)}
-              </div>
-              <span class="example-speaker-btn" data-sentence="${safeEn}"
-                style="cursor:pointer; color:#637793; flex-shrink:0; display:flex; transition:color 0.2s;position:relative;overflow:visible;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-              </span>
+        <div style="margin-bottom: 8px; border-inline-start: 2px solid #25cbf6ab; border-radius:1.5px; padding-inline-start: 8px;">
+          <div dir="ltr" style="display:flex; align-items:center; gap:6px;">
+            <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4; flex: 1;">
+              ${query ? highlight(en, query) : highlightWord(en, word)}
             </div>
-            ${cn ? `<div style="font-size: 11px; color: #637793; margin-top: 2px;">${query ? highlight(cn, query) : cn}</div>` : ""}
-          </div>`;
+            <span class="example-speaker-btn" data-sentence="${safeEn}"
+              style="cursor:pointer; color:#637793; flex-shrink:0; display:flex; transition:color 0.2s; position:relative; overflow:visible;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </span> 
+          </div>
+         ${cn ? `<div dir="auto" style="font-size: 11px; color: #637793; margin-top: 2px;
+          ${isRTLText(cn) ? 'text-align: right;' : ''}
+        ">${query ? highlight(cn, query) : cn}</div>` : ""}
+        </div>`;
     }).join("")}
-    </div>`;
+  </div>`;
   }
   const searchInp = document.getElementById('searchInp');
   // 搜索
@@ -222,14 +227,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const total = activeVocab.length;
     const totalPages = Math.ceil(total / pageSize) || 1;
+
+    // 边界检查
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
+
     const start = (currentPage - 1) * pageSize;
     const pageData = activeVocab.slice(start, start + pageSize);
+
     const pageInfoEl = document.getElementById('pageInfo');
     if (pageInfoEl) {
-      pageInfoEl.innerText = `Page ${currentPage} / ${totalPages}`;
+      const template = _t('pagination');
+      pageInfoEl.innerText = template
+        .replace('{current}', currentPage)
+        .replace('{total}', totalPages);
     }
+
+    const goInputEl = document.getElementById('jumpInp');
+    if (goInputEl) {
+      goInputEl.placeholder = _t('goPlaceholder');
+    }
+
     if (total === 0) {
       vocabBody.innerHTML = `<tr><td colspan="5" class="empty">${_t('noCollection')}</td></tr>`;
       return;
@@ -275,16 +293,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         const detailContent = dictData ? formatDetail(dictData, searchQuery) : (detail || "");
         const examplesContent = formatExamples(examples, displayWord, searchQuery);
         displayTrans = `
-      <div class="vocab-trans-container">
-        <div class="v-basic" style="font-weight: 500; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;">${searchQuery ? highlight(basic || '', searchQuery) : (basic || '')}</div>
+      <div class="vocab-trans-container" dir="auto">
+        <div class="v-basic" style="font-weight: 500; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;
+          ${isRTLText(basic || '') ? 'text-align: right;' : ''}">
+          ${searchQuery ? highlight(basic || '', searchQuery) : (basic || '')}
+        </div>
         ${detailContent ? `<div class="v-detail-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 4px;">${detailContent}</div>` : ''}
         ${examplesContent}
       </div>
     `;
       } else {
-        displayTrans = `<div class="v-basic" style="color: #e2e8f0; font-size: 15px;">${item.trans || ''}</div>`;
+        displayTrans = `<div class="v-basic" style="color: #e2e8f0; font-size: 15px;
+        ${isRTLText(item.trans || '') ? 'text-align: right;' : ''}">
+        ${item.trans || ''}
+      </div>`;
       }
-      const dateStr = item.date ? new Date(item.date).toLocaleString() : "Unknown";
+      const dateStr = item.date ? new Date(item.date).toLocaleString('en-CA', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }) : "Unknown";
       let domain = '-';
       if (item.src) {
         try {
@@ -300,101 +331,116 @@ document.addEventListener('DOMContentLoaded', async () => {
               const secs = totalSeconds % 60;
               timeLabel = `${mins}:${secs.toString().padStart(2, '0')}`;
             }
+            const titleText = item.title || '';
             domain = `
-              <div class="source-wrapper">
-                <a href="${item.src}" target="_blank" class="source-link" style="color: #ef4444; display: flex; align-items: center; gap: 4px;">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                  <span style="font-weight: bold; font-family: monospace;">${timeLabel || 'Play'}</span>
-                </a>
-                <div class="source-title" title="${item.title || ''}">${searchQuery ? highlight(item.title || '', searchQuery) : (item.title || '')}</div>
+            <div class="source-wrapper">
+              <a href="${item.src}" target="_blank" class="source-link" style="color: #ef4444; display: flex; align-items: center; gap: 4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                <span style="font-weight: bold; font-family: monospace;">${timeLabel || 'Play'}</span>
+              </a>
+              <div class="source-title" dir="auto"
+                style="${isRTLText(titleText) ? 'text-align:right;' : ''}"
+                title="${titleText}">
+                ${searchQuery ? highlight(titleText, searchQuery) : titleText}
               </div>
-            `;
+            </div>
+          `;
           } else {
+            const titleText = item.title || '';
             domain = `
-        <div class="source-wrapper">
-          <a href="${item.src}" target="_blank" class="source-link" style="color: #94a3b8;">🌐 ${domain}</a>
-          <div class="source-title" title="${item.title || ''}">${searchQuery ? highlight(item.title || '', searchQuery) : (item.title || '')}</div>
-        </div>
-      `;
+            <div class="source-wrapper">
+              <a href="${item.src}" target="_blank" class="source-link" style="color: #94a3b8;">🌐 ${domain}</a>
+              <div class="source-title" dir="auto"
+                style="${isRTLText(titleText) ? 'text-align:right;' : ''}"
+                title="${titleText}">
+                ${searchQuery ? highlight(titleText, searchQuery) : titleText}
+              </div>
+            </div>
+          `;
           }
         } catch (e) {
           domain = `<a href="${item.src}" target="_blank" class="source-link">Link</a>`;
         }
-      }
-      return `
-        <tr style="border-bottom: 1px solid #1e293b;">
-          <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="word-text">${displayWordHL}</span>
-            <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
-              style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              </svg>
-            </span>
+      } return `
+  <tr style="border-bottom: 1px solid #1e293b;">
+    <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
+      <div style="display: flex; align-items: center; gap: 8px;
+        ${isRTLText(displayWord) ? 'flex-direction: row-reverse; justify-content: flex-start;' : ''}">
+        <span class="word-text" dir="auto">${displayWordHL}</span>
+        <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
+          style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+        </span>
+      </div>
+      ${phonetic ? `<div style="color: #909fb3; font-size: 12px; margin-top: 4px; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
+      ${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; color:#7dd3fc; margin-top:2px;"></div>` : ''}
+      ${context ? `
+      <div style="margin-top:6px;font-size:12px;color:#798ca7;line-height:1.5;
+                  border-top:2px solid #334155;padding-top:6px;font-style:italic;
+                  max-width:250px;word-break:break-word;">
+        <div style="display:flex;align-items:flex-start;gap:6px;
+          ${isRTLText(context) ? 'flex-direction:row-reverse;' : ''}">
+          <div style="flex:1; ${isRTLText(context) ? 'text-align:right;' : ''}" dir="auto">
+            ${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}
           </div>
-          ${phonetic ? `<div style="color: #909fb3; font-size: 12px; margin-top: 4px; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
-${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; color:#7dd3fc; margin-top:2px;"></div>` : ''}
-          ${context ? `
-          <div style="margin-top:6px;font-size:12px;color:#798ca7;line-height:1.5;
-                      border-top:2px solid #334155;padding-top:6px;font-style:italic;
-                      max-width:250px;word-break:break-word;">
-            <div style="display:flex;align-items:flex-start;gap:6px;">
-              <div style="flex:1;">${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}</div>
-              <span class="context-speaker-btn" 
-                data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
-                data-lang="${langCode}"
-                style="cursor:pointer;color:#64748b;flex-shrink:0;display:flex;
-                      margin-top:1px;transition:color 0.2s;position:relative;overflow:visible;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-              </span>
-            </div>
-            ${contextTranslation ? `
-          <div style="font-size:12px;color:#98aac5;margin-top:3px;font-style:normal;opacity:0.8;">
-            ${searchQuery ? highlight(contextTranslation, searchQuery) : contextTranslation}
-          </div>` : ''}
+          <span class="context-speaker-btn" 
+            data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
+            data-lang="${langCode}"
+            style="cursor:pointer;color:#64748b;flex-shrink:0;display:flex;
+                  margin-top:1px;transition:color 0.2s;position:relative;overflow:visible;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+          </span>
+        </div>
+        ${contextTranslation ? `
+        <div dir="auto" style="font-size:12px;color:#98aac5;margin-top:3px;font-style:normal;opacity:0.8;
+          ${isRTLText(contextTranslation) ? 'text-align:right;' : ''}">
+          ${searchQuery ? highlight(contextTranslation, searchQuery) : contextTranslation}
+        </div>` : ''}
       </div>` : ''}
-        </td>
-          <td style="vertical-align: top; padding: 12px 16px;">${displayTrans}</td>
-          <td style="vertical-align: top; padding: 8px 12px; max-width: 130px;">
-          ${item.note
-          ? `<span class="note-text"
-                    data-id="${item.id}"
-                    data-word="${displayWord}"
-                    data-note="${(item.note || '').replace(/"/g, '&quot;')}"
-                    style="color:#94a3b8; font-size:13px; cursor:pointer; 
-                          display:block; word-break:break-word; white-space:normal;">
-               ${searchQuery ? highlight(item.note, searchQuery) : item.note}
-              </span>`
+    </td>
+    <td style="vertical-align: top; padding: 12px 16px;">${displayTrans}</td>
+    <td style="vertical-align: top; padding: 8px 12px; max-width: 130px;">
+      ${item.note
+          ? `<span class="note-text" dir="auto"
+                  data-id="${item.id}"
+                  data-word="${displayWord}"
+                  data-note="${(item.note || '').replace(/"/g, '&quot;')}"
+                  style="color:#94a3b8; font-size:13px; cursor:pointer; 
+                        display:block; word-break:break-word; white-space:normal;">
+             ${searchQuery ? highlight(item.note, searchQuery) : item.note}
+            </span>`
           : `<span class="note-text note-empty"
-                    data-id="${item.id}"
-                    data-word="${displayWord}"
-                    data-note="">
-                ＋ ${_t('note')}
-              </span>`
+          data-id="${item.id}"
+          data-word="${displayWord}"
+          data-note=""
+          style="direction: ${isRTLText(_t('note')) ? 'rtl' : 'ltr'};">
+      ＋ ${_t('note')}
+    </span>`
         }
-        </td>
-          <td style="vertical-align: top; padding: 12px 16px;">
-            ${domain} 
-          </td>
-          <td style="color: #637793; font-size: 12px; vertical-align: top; padding: 15px 16px; font-family: monospace;">
-            ${dateStr}
-          </td>        
-          <td style="vertical-align: top; padding: 12px 16px;" id="action-cell-${item.id}">
-            <button class="btn btn-danger delete-btn" data-id="${item.id}" data-word="${displayWord}">
-              ${_t('delete')}
-            </button>
-          </td>
-        </tr>
-    `;
+    </td>
+    <td style="vertical-align: top; padding: 12px 16px;">
+      ${domain} 
+    </td>
+    <td style="color: #637793; font-size: 12px; vertical-align: top; padding: 15px 16px; font-family: monospace;" dir="ltr">
+      ${dateStr}
+    </td>       
+    <td style="vertical-align: top; padding: 12px 16px;" id="action-cell-${item.id}">
+      <button class="btn btn-danger delete-btn" data-id="${item.id}" data-word="${displayWord}">
+        ${_t('delete')}
+      </button>
+    </td>
+  </tr>
+`.trim();
     }).join('');
 
     // 日语假名异步填充
@@ -511,20 +557,15 @@ ${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; col
 
         //最多100字符
         cell.innerHTML = `
-        <textarea class="note-inp" maxlength="300"
-        placeholder="${targetLanguage === 'zh-CN' ? '四级/托福/语境...' : ''}"
-        style="background:#020617; 
-        border: none;
-        color:white; padding:4px 8px; border-radius:6px; 
-        width:100%; font-size:12px; box-sizing:border-box;
-        resize:vertical;          
-        min-height:32px;          
-        font-family: system-ui, -apple-system, sans-serif;
-        outline: none;
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8),
-                    0 0 6px rgba(56, 189, 248, 0.6),
-                    0 0 12px rgba(56, 189, 248, 0.4),
-                    0 0 20px rgba(56, 189, 248, 0.2),
+        <textarea class="note-inp" maxlength="300" dir="auto"
+        placeholder="${_t('notePlaceholder')}"
+        style="background:#020617; border: none; color:white; padding:4px 8px; border-radius:6px; 
+        width:100%; font-size:12px; box-sizing:border-box; resize:vertical; min-height:32px;
+        font-family: system-ui, -apple-system, sans-serif; outline: none;
+        direction: ${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'rtl' : 'ltr'};
+        text-align: ${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'right' : 'left'};
+        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8), 0 0 6px rgba(56, 189, 248, 0.6),
+                    0 0 12px rgba(56, 189, 248, 0.4), 0 0 20px rgba(56, 189, 248, 0.2),
                     0 0 35px rgba(56, 189, 248, 0.1);"
         rows="3">${current}</textarea>
       `;

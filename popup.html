@@ -227,11 +227,11 @@
     </div>
 
     <div style="position: relative; margin-bottom:8px;">
-      <textarea id="searchTextInput" data-i18n="inputAndEnter" placeholder="Word or sentence..."
+      <textarea dir="auto" id="searchTextInput" data-i18n="inputAndEnter" placeholder="Word or sentence..."
         class="mira-input-terminal"></textarea>
       <button id="searchSubmitBtn" style="
             position: absolute;
-            right: 4px;
+            inset-inline-end: 4px;
             bottom: 6px;
             width: 16px;
             height: 25px;
@@ -298,7 +298,7 @@
 
         </div>
       </div>
-      <div id="resContent" class="allow-select"
+      <div dir="auto" id="resContent" class="allow-select"
         style="color: #38bdf8; font-size: 12px; line-height: 1.6;user-select: auto !important;"></div>
     </div>
     <div id="actionArea" style="margin-top: 12px; display: none; flex-shrink: 0;">
@@ -488,7 +488,7 @@
       </p>
     </div>
     <!-- 单选按钮开始 -->
-    <div class="row-text" id="webTranslationOptionContainer">
+    <div class="row-text" id="webTranslationOptionContainer" dir="auto">
       <label for="autoSwitchPage" data-i18n="pageTrans" style="font-size: 14px;">网页翻译</label>
       <div style="display: flex; align-items: center; gap: 4px;">
         <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" title="重新翻译此页" style="display: none; padding: 2px;">
@@ -503,7 +503,7 @@
       </div>
     </div>
 
-    <div class="row-text" id="selectTextOptionContainer">
+    <div class="row-text" id="selectTextOptionContainer" dir="auto">
       <label for="autoSwitchSelectText" data-i18n="selectTrans" style="font-size: 14px;">划词翻译</label>
       <div style="display: flex; align-items: center; gap: 4px;">
         <div id="autoSwitchSelectText" class="switch">
@@ -512,7 +512,7 @@
       </div>
     </div>
 
-    <div class="row-text" id="youtube-option-container">
+    <div class="row-text" id="youtube-option-container" dir="auto">
       <label for="autoSwitchYT" data-i18n="ytTrans" style="font-size: 14px;">Youtube双语字幕</label>
       <div style="display: flex; align-items: center; gap: 4px;">
         <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" title="重新预翻译字幕" style="display: none; padding: 2px;">
@@ -556,18 +556,18 @@
 
     <div id="targetLangCombox"
       style="display: flex; flex-direction: column; align-items: stretch; gap: 4px;padding: 5px 0;">
-      <label data-i18n="targetLang" id="targetLangLabelText"
+      <label data-i18n="targetLang" id="targetLangLabelText" dir="auto"
         style="color: #e6e9ee; font-size: 12px; font-weight: 500; padding-left: 2px; line-height: 1;margin-bottom: 7px !important;">
         目标语言
       </label>
 
       <select id="targetLang"
         style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;"></select>
-    </div>
+    </div> 
     <div id="inspectContainer" class="row-group"
       style="margin-top: 1px; border-top: 1px solid #334155; padding-top: 8px;">
-      <div id="inspectElementLabel" data-i18n="personalizedScan"
-        style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">个性化扫描配置 (失去焦点自动保存)
+      <div id="inspectElementLabel" data-i18n="personalizedScan" dir="auto"
+        style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;" dir="auto">个性化扫描配置 (失去焦点自动保存)
       </div>
       <button id="inspectElement"
         style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; padding-right: 1px; cursor: pointer;">
@@ -593,7 +593,7 @@
       </textarea>
       </div>
     </div>
-    <div id="minCharsContainer" class="row" style="margin-bottom: 3px;margin-top: 3px;">
+    <div id="minCharsContainer" dir="auto" class="row" style="margin-bottom: 3px;margin-top: 3px;">
       <label data-i18n="minChars" style="font-size: 11px;color:#94a3b8;">最小字数</label>
       <input type="number" id="conf-minlen" min="0" style="
     width: 60px;
@@ -731,7 +731,7 @@
   <!-- 充值界面结束 -->
 
   <div id="advancedMenu" class="advancedMenu" style="min-width: 180px;">
-    <div class="menu-ui-setting">
+    <div class="menu-ui-setting" dir="auto">
       <div class="ui-lang-label">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           style="width:13px; height:13px; opacity:0.6;">
@@ -763,7 +763,7 @@
 
     <div style="height: 1px; background: rgba(255,255,255,0.08); margin: 0 12px 8px 12px;"></div>
 
-    <div class="menu-item" id="btnGoStyle">
+    <div class="menu-item" id="btnGoStyle" dir="auto">
       <svg viewBox="0 0 24 24">
         <path class="icon-main" d="M2.5 21.5l14-14 1.5 1.5-14 14z" />
         <path class="icon-main" d="M16 6.5l2-2 1.5 1.5-2 2z" />
@@ -777,14 +777,14 @@
       </svg>
       <span data-i18n="styleCustomization">样式自定义</span>
     </div>
-    <div class="menu-item engine-item" id="btnGoEngine">
+    <div class="menu-item engine-item" id="btnGoEngine" dir="auto">
       <svg viewBox="0 0 24 24" fill="currentColor" class="icon-main" style="width: 22px; height: 22px;">
         <path d="M2.5,19L7.8,5h3.4l5.3,14h-2.8l-1.2-3.5H6.5L5.3,19H2.5z M8.9,13.2h3.2l-1.6-4.5L8.9,13.2z" />
         <path d="M18,5h3v14h-3V5z" />
       </svg>
       <span data-i18n="engineConfig">引擎配置</span>
     </div>
-    <div class="menu-item" id="openSyncPanel">
+    <div class="menu-item" id="openSyncPanel" dir="auto">
       <svg class="cloud-icon" viewBox="0 0 24 24">
         <path class="icon-main cloud-a" opacity="0.6"
           d="M7.5,13c-1.9,0-3.5-1.6-3.5-3.5S5.6,6,7.5,6c0.4,0,0.8,0.1,1.1,0.2C9.5,4.1,11.6,2.5,14,2.5c3.3,0,6,2.7,6,6c0,0.3,0,0.6-0.1,0.9c1.5,0.6,2.6,2.1,2.6,3.8c0,2.4-1.9,4.3-4.3,4.3H7.5z" />
@@ -827,7 +827,7 @@
           <option value="webdav">WebDAV (NAS...)</option>
           <option data-i18n="manualExportImport" value="local">手动导出/导入 (JSON)</option>
         </select>
-        <div
+        <div dir="auto"
           style="margin-top: 8px; padding: 0 4px; font-size: 12px; color: #94a3b8; display: flex; gap: 6px; align-items: flex-start; flex-wrap: wrap;">
           <span data-i18n="syncContent" style="opacity: 0.8;">同步内容</span>
           <span style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
@@ -843,7 +843,7 @@
         <input type="text" id="webdavUser" placeholder="Username" style="margin-bottom: 8px;" class="api-input-field">
         <input type="password" id="webdavPass" placeholder="App Password" class="api-input-field">
       </div>
-      <div
+      <div dir="auto"
         style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
         <div class="row" style="margin-bottom: 12px; border-bottom: none; padding-top: 0;">
           <label data-i18n="autoBackgroundSync" style="font-size: 13px; color: #f1f5f9;">自动后台同步</label>
@@ -932,7 +932,7 @@
       </div>
     </div>
     <div id="webStyleControls" style="display: block;">
-      <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
+      <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155;" dir="auto">
         <label data-i18n="textColorPalette"
           style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -948,7 +948,7 @@
             style="border:none; width:42px; height:24px; background:none; cursor:pointer; padding:0;">
         </div>
       </div>
-      <div style="margin-bottom: 12px; display: none;">
+      <div style="margin-bottom: 12px; display: none;" dir="auto">
         <div style="display: flex; justify-content: space-between;">
           <label data-i18n="fontSize" style="font-size: 12px; color: #94a3b8;">字体大小</label>
           <span id="fontSizeVal" style="font-size: 11px; color: #38bdf8;">16px</span>
@@ -956,7 +956,7 @@
         <input type="range" id="style-fontSize" min="8" max="40" step="1" value="16"
           style="width: 100%; accent-color: #38bdf8;">
       </div>
-      <div style="margin-bottom: 12px; display: flex; gap: 10px;align-items: flex-end;">
+      <div style="margin-bottom: 12px; display: flex; gap: 10px;align-items: flex-end;" dir="auto">
         <div style="flex: 1;">
           <label data-i18n="borderStyle"
             style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">边框样式</label>
@@ -986,14 +986,14 @@
         </div>
       </div>
       <div class="row"
-        style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155;">
+        style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155;" dir="auto">
         <label data-i18n="studyMode" style="font-size: 12px; color: #f1f5f9;">学习模式 (悬停显示内容)</label>
         <div id="switch-blur" class="switch" style="transform: scale(0.8);">
           <div class="dot"></div>
         </div>
       </div>
     </div>
-    <div id="ytStyleControls" style="display: none;">
+    <div id="ytStyleControls" style="display: none;" dir="auto">
       <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #334155;">
         <label data-i18n="textColorPalette"
           style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
@@ -1090,7 +1090,7 @@
   <footer style="
     text-align: center;
     font-size: 10px;
-    color: #858484;
+    color: #a9a1a1;
     padding: 8px 0 0 0;
     font-family: ui-monospace;
     margin: 2px 0 0px 0;

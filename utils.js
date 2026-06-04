@@ -115,6 +115,11 @@ const checkRTL = (lang) => {
   return lang ? rtlSet.has(lang.toLowerCase().split('-')[0]) : false;
 };
 
+// 检测阿拉伯语、希伯来语、波斯语等RTL字符 
+const isRTLText = (text) => {
+  if (!text) return false;
+  return /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/.test(text);
+};
 const GA_MEASUREMENT_ID = "{{GA_MEASUREMENT_ID}}";
 const GA_API_SECRET = "{{GA_API_SECRET}}";
 
@@ -539,7 +544,9 @@ function t(key, forcedLang) {
 
       'pt-BR': '<span style="display: block; padding-left: 20px;">Compatível com qualquer serviço no formato OpenAI API (em nuvem ou local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locais (Ollama / LM Studio, etc.), atente-se ao seguinte:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① É necessária uma placa de vídeo dedicada; o uso de gráficos integrados ou CPU causará tempos limite (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② É necessário habilitar o CORS: defina a variável de ambiente OLLAMA_ORIGINS=* para o Ollama ou ative a opção CORS nas configurações do LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Modelos locais não precisam de API Key — deixe o campo em branco.</span>',
 
-      'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>'
+      'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>',
+      
+      'ar': '<span style="display: block; padding-right: 20px;">متوافق مع أي تنسيق OpenAI API (سحابي أو محلي).</span><br /><span style="display: block; padding-right: 20px;">للنماذج المحلية (Ollama / LM Studio وغيرها):</span><span style="display: block; padding-right: 20px; margin-top: 4px;">① مطلوب GPU مخصص (iGPU/CPU يسبب انتهاء مهلة شديد).</span><span style="display: block; padding-right: 20px; margin-top: 2px;">② تفعيل CORS: اضبط OLLAMA_ORIGINS=* لـ Ollama، أو فعّل CORS في الإعدادات لـ LM Studio / Jan.</span><span style="display: block; padding-right: 20px; margin-top: 2px;">③ لا يلزم مفتاح API للنماذج المحلية — اتركه فارغًا.</span>',
     },
   };
 
@@ -1190,7 +1197,8 @@ function speakText(text, speakBtn, forcedLang) {
   // --- 2. 确定目标语言代码 ---
   const langMap = {
     'ja': 'ja-JP', 'zh': 'zh-CN', 'en': 'en-US', 'ko': 'ko-KR',
-    'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU'
+    'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU',
+    'ar': 'ar-SA', 'fa': 'fa-IR', 'he': 'he-IL',
   };
 
   let targetLang = '';
@@ -1204,6 +1212,10 @@ function speakText(text, speakBtn, forcedLang) {
     else if (/[éàèâîôûçëïüÿœæ]/.test(text)) targetLang = 'fr-FR';
     else if (/[ñ¿¡]/.test(text)) targetLang = 'es-ES';
     else if (/\p{Script=Cyrillic}/u.test(text)) targetLang = 'ru-RU';
+    else if (/\p{Script=Hebrew}/u.test(text)) targetLang = 'he-IL';
+    else if (/\p{Script=Arabic}/u.test(text)) {
+      targetLang = /[پچژگک]/.test(text) ? 'fa-IR' : 'ar-SA';
+    }
     else targetLang = 'en-US';
   }
   if (forcedLang === 'null') forcedLang = null;
@@ -1498,27 +1510,27 @@ async function incrementUsageCount() {
 }
 //假名
 async function getKana(romaji) {
-    if (!romaji) return { hiragana: '', katakana: '' };
-    logger.log('[getKana] input:', romaji);
-    try {
-        const res = await chrome.runtime.sendMessage({
-            type: 'ROMAJI_TO_HIRAGANA',
-            romaji
-        });
-        logger.log('[getKana] response:', res);
-        return {
-            hiragana: res?.hiragana || '',
-            katakana: res?.katakana || ''
-        };
-    } catch (e) {
-        logger.log('[getKana] error:', e);
-        return { hiragana: '', katakana: '' };
-    }
+  if (!romaji) return { hiragana: '', katakana: '' };
+  logger.log('[getKana] input:', romaji);
+  try {
+    const res = await chrome.runtime.sendMessage({
+      type: 'ROMAJI_TO_HIRAGANA',
+      romaji
+    });
+    logger.log('[getKana] response:', res);
+    return {
+      hiragana: res?.hiragana || '',
+      katakana: res?.katakana || ''
+    };
+  } catch (e) {
+    logger.log('[getKana] error:', e);
+    return { hiragana: '', katakana: '' };
+  }
 }
 
 // isJapanese  用正则代替 wanakana
 function isJapanese(text) {
-    return /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(text);
+  return /[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]/.test(text);
 }
 
 //通用翻译
@@ -1574,7 +1586,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   //logger.log("[getDetailedTranslation] hintInputLang:", hintInputLang, "targetBase:", targetBase);
   if (!isBatch) {
     let isSame = false;
-logger.log('[getDetailedTranslation] query:', query, 'hintInputLang:', hintInputLang, 'hintSourceLang:', hintSourceLang, 'targetBase:', targetBase);
+    logger.log('[getDetailedTranslation] query:', query, 'hintInputLang:', hintInputLang, 'hintSourceLang:', hintSourceLang, 'targetBase:', targetBase);
 
     // 如果外部明确传入了输入语言，且与目标语言不同，跳过所有isSame检测
     if (hintInputLang && hintInputLang !== targetBase) {
@@ -1929,14 +1941,14 @@ function detectSourceLang(text) {
   // 如果包含了明显的英文特征（例如大写开头，或者纯拉丁词汇），拒绝返回 'zh'
   const hasLatin = /[a-zA-Z]/.test(text);
   const isPureLatin = /^[a-zA-Z\s'-]+$/.test(text);
-  
+
   if (isPureLatin) return 'en';
-  
+
   // 此时 text 含有汉字或特殊脚本
   if (/\p{Script=Han}/u.test(text)) {
     //  如果 text 中含有拉丁字母，且不是日语假名，
     // 且要么在上下文检测中看到了 'ja'，要么返回 null 让 API 去 auto
-    return 'zh'; 
+    return 'zh';
   }
 
   return null;

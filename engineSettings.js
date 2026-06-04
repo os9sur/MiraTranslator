@@ -22,6 +22,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const ui_lang = window.currentConfig.ui_language;
 
+    // RTL布局调整
+
+    if (checkRTL(ui_lang)) {
+        const panel = document.querySelector('.cache-status-panel');
+        if (panel) panel.style.flexDirection = 'row-reverse';
+
+        const cacheLabel = document.querySelector('.cache-label');
+        if (cacheLabel) {
+            cacheLabel.style.flexDirection = 'row-reverse';
+            cacheLabel.style.marginRight = '0';
+            cacheLabel.style.marginLeft = 'auto';
+        }
+    }
     const titleSuffix = t('engineListTitle', ui_lang);
     document.title = `Mira - ${titleSuffix}`;
 
@@ -253,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const proTag = tpl.isPro ? `<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">Pro</span>` : '';
 
             return `
-    <div class="engine-item ${isEditing ? 'active' : ''} ${isMiraPro ? 'item-gold-pro' : ''}" data-id="${c.id}">
+    <div dir="auto" class="engine-item ${isEditing ? 'active' : ''} ${isMiraPro ? 'item-gold-pro' : ''}" data-id="${c.id}">
         <div class="engine-info">
             ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
             <span class="engine-name">${c.alias}</span>${proTag}
@@ -891,18 +904,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (line.trim() === '---') {
                         return `<hr style="border:0;border-top:2px solid #30363d;margin:12px 0;">`;
                     }
+                    const isRTL = checkRTL(uiLanguage);
                     return `
-      <p style="display:flex;gap:6px;color:#b0bac6;font-size:14px;line-height:1.8;margin:0 0 10px 0;">
-        <span style="flex-shrink:0;">${line.match(/^\p{Emoji}/u)?.[0] ?? ''}</span>
-        <span>${line.replace(/^\p{Emoji}\s*/u, '')}</span>
-      </p>`;
+                    <p dir="${isRTL ? 'rtl' : 'ltr'}" 
+                        style="color:#b0bac6; font-size:14px; line-height:1.8; margin:0 0 10px 0;
+                        ${isRTL ? 'text-align:right;' : ''}">
+                        ${line.match(/^\p{Emoji}/u)?.[0] ?? ''} ${line.replace(/^\p{Emoji}\s*/u, '')}
+                    </p>`;
                 }).join('');
             const builtInTemplate = `
                 <div class="main-header">
-                <h2 style="margin:0">${displayAlias}</h2>
+                <h2 dir="auto" style="margin:0">${displayAlias}</h2>
             </div>
             <div class="form-container">
-                <div class="built-in-notice" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                <div class="built-in-notice" dir="auto" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
                     <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
                     <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
                     <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
@@ -1012,10 +1027,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         let html = `
                 <div class="main-header">
-                    <h2 style="margin:0">${t('engineConfig', uiLanguage)}: ${displayAlias}</h2>
+                    <h2 dir="auto" style="margin:0">${t('engineConfig', uiLanguage)}: ${displayAlias}</h2>
                 </div>
                 <div class="form-container">
-                    ${tpl.tip ? `<p class="tip-yellow" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;-webkit-user-select:text !important; user-select:text !important; cursor:text !important;">${tpl.tip}</p>` : ''}
+                    ${tpl.tip ? `<p class="tip-yellow" dir="auto" style="color:#fbbf24; font-size:11px; margin-bottom:15px; opacity:0.9;-webkit-user-select:text !important; user-select:text !important; cursor:text !important;">${tpl.tip}</p>` : ''}
                     ${getRow({ k: 'alias', l: t('configAlias', uiLanguage) })} 
                     ${(tpl.fields || []).map(f => getRow(f)).join('')}
                 </div>`;
@@ -1125,11 +1140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const color = tpl.color || '#38bdf8';
                         const rgb = hexToRgb(color);
                         const meta = tpl.meta || key.toUpperCase().substring(0, 6);
-                        const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
+                       //const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
+                       const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : '';
                         html += `
                     <div class="tpl-card" 
                          data-type="${key}" 
-                         data-meta="${meta}"
+                         
                          style="--accent-color: ${color}; --accent-rgb: ${rgb};">
                         <span class="name">${tpl.name}</span>
                         <span class="desc">${desc}</span>
@@ -1605,7 +1621,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             btn.dataset.confirmed = "true";
             btn.dataset.originalText = btn.innerText;
-            const formattedCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
+            const rawCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
+            const formattedCount = `\u2066${rawCount}\u2069`;
             btn.innerText = t("confirm", ui_lang).replace('{0}', formattedCount);
             btn.style.setProperty('background', 'rgba(248, 113, 113, 0.2)', 'important');
             btn.style.setProperty('border-color', '#f87171', 'important');
@@ -1767,6 +1784,14 @@ async function renderAIPromptSection() {
     }
 
     _bindAIPromptEvents(section, saved);
+
+    const isRTL = checkRTL(window.currentConfig.ui_language);
+    document.querySelectorAll('.ai-prompt-textarea').forEach(el => {
+        if (isRTL) {
+            el.style.textAlign = 'right';
+            el.style.direction = 'rtl';
+        }
+    });
 }
 
 function _buildAIPromptHTML(saved) {
@@ -1774,7 +1799,7 @@ function _buildAIPromptHTML(saved) {
     const subVal = saved.subtitle || '';
 
     return `
-        <div class="ai-prompt-header" id="ai-prompt-toggle">
+        <div class="ai-prompt-header" id="ai-prompt-toggle" dir="auto">
             <div class="ai-prompt-header-left">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1793,60 +1818,57 @@ function _buildAIPromptHTML(saved) {
 
         <div class="ai-prompt-body ${webVal || subVal ? 'open' : ''}" id="ai-prompt-body">
 
-            <div class="ai-prompt-item">
-                <div class="ai-prompt-item-header">
-                    <div class="ai-prompt-item-label">
-                        🌐 <span>${t('cpWeb')}</span>
-                    </div>
-                    <button class="ai-prompt-clear-btn ${webVal ? 'visible' : ''}"
-                            data-target="ai-prompt-web">${t('cpClear')}</button>
-                </div>
-                <textarea
-                    id="ai-prompt-web"
-                    class="ai-prompt-textarea"
-                    maxlength="150"
-                    placeholder="${t('cpWebPH')}"
-                    spellcheck="false"
-                >${_escapeHtml(webVal)}</textarea>
-                <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
-                
-            </div>
+  <div class="ai-prompt-item">
+    <div class="ai-prompt-item-header" 
+      style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
+      <div class="ai-prompt-item-label" 
+        style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
+        🌐 <span>${t('cpWeb')}</span>
+      </div>
+      <button class="ai-prompt-clear-btn ${webVal ? 'visible' : ''}"
+        data-target="ai-prompt-web">${t('cpClear')}</button>
+    </div>
+    <textarea id="ai-prompt-web" dir="auto" class="ai-prompt-textarea"
+      maxlength="150" placeholder="${t('cpWebPH')}" spellcheck="false"
+    >${_escapeHtml(webVal)}</textarea>
+    <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
+  </div>
 
-            <div class="ai-prompt-item">
-                <div class="ai-prompt-item-header">
-                    <div class="ai-prompt-item-label">
-                    <svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align: middle;">
-                <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
-                <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
-                </svg>YouTube<span>${t('cpSub')}</span>
-                </div>
-                    <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
-                            data-target="ai-prompt-subtitle">${t('cpClear')}</button>
-                </div>
-                <textarea
-                    id="ai-prompt-subtitle"
-                    class="ai-prompt-textarea"
-                    maxlength="150"
-                    placeholder="${t('cpSubPH')}"
-                    spellcheck="false"
-                >${_escapeHtml(subVal)}</textarea>
-                <div class="ai-prompt-char-count" id="ai-prompt-subtitle-count">${subVal.length} / 150</div>
-                <div class="ai-prompt-style-hint">${t('cpHint')}</div>
-            </div>
+  <div class="ai-prompt-item">
+    <div class="ai-prompt-item-header" 
+      style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
+      <div class="ai-prompt-item-label" 
+        style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
+        <svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align: middle;">
+          <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
+          <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
+        </svg>
+        YouTube<span>${t('cpSub')}</span>
+      </div>
+      <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
+        data-target="ai-prompt-subtitle">${t('cpClear')}</button>
+    </div>
+    <textarea id="ai-prompt-subtitle" dir="auto" class="ai-prompt-textarea"
+      maxlength="150" placeholder="${t('cpSubPH')}" spellcheck="false"
+    >${_escapeHtml(subVal)}</textarea>
+    <div class="ai-prompt-char-count" id="ai-prompt-subtitle-count">${subVal.length} / 150</div>
+    <div class="ai-prompt-style-hint" dir="auto">${t('cpHint')}</div>
+  </div>
 
-            <div class="ai-prompt-footer">
-                <button class="ai-prompt-save-btn" id="ai-prompt-save-btn" disabled>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2.5"
-                         stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                        <polyline points="7 3 7 8 15 8"/>
-                    </svg>
-                    ${t('cpSave')}
-                </button>
-            </div>
-        </div>
+  <div class="ai-prompt-footer">
+    <button class="ai-prompt-save-btn" id="ai-prompt-save-btn" disabled>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      ${t('cpSave')}
+    </button>
+  </div>
+
+</div>
     `;
 }
 
