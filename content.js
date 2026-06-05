@@ -6329,27 +6329,22 @@ function initSelectionTranslate() {
     const fromCtx = detectSourceLang(_capturedContext);
     const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(text);
 
+    const textIsAmbiguousCJK = fromText === 'zh' &&
+      !/[\u3040-\u309F\u30A0-\u30FF]/.test(text) &&
+      /^[\u4e00-\u9fa5\s\p{P}]+$/u.test(text);
+
     let effectiveHintLang = null;
 
     if (hasKana) {
-      // 文本含假名，必然是日语
       effectiveHintLang = 'ja';
-    } else if (fromCtx === 'ja') {
-      // 上下文是日语（纯汉字词在日语段落里）
+    } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
       effectiveHintLang = 'ja';
+    } else if (fromText) {
+      effectiveHintLang = fromText;
     } else if (fromCtx) {
       effectiveHintLang = fromCtx;
-    } else {
-      effectiveHintLang = fromText;
     }
 
-    const isLikelyConfused = (effectiveHintLang === 'zh') &&
-      /[a-zA-Z]/.test(text) &&
-      !/[\u4e00-\u9fa5]/u.test(text);
-
-    if (isLikelyConfused) {
-      effectiveHintLang = null;
-    }
     shadowHost._effectiveHintLang = effectiveHintLang;
     logger.log("🔍 [MIRA 调试] 翻译参数:", {
       text: text,
@@ -7470,15 +7465,19 @@ function initSelectionTranslate() {
             const fromCtx = detectSourceLang(contextText);
             const hasKana = /[\u3040-\u309F\u30A0-\u30FF]/.test(entry.word);
 
+            const textIsAmbiguousCJK = fromText === 'zh' &&
+              !/[\u3040-\u309F\u30A0-\u30FF]/.test(entry.word) &&
+              /^[\u4e00-\u9fa5\s\p{P}]+$/u.test(entry.word);
+
             let effectiveHintLang = null;
             if (hasKana) {
               effectiveHintLang = 'ja';
-            } else if (fromCtx === 'ja') {
+            } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
               effectiveHintLang = 'ja';
+            } else if (fromText) {
+              effectiveHintLang = fromText;
             } else if (fromCtx) {
               effectiveHintLang = fromCtx;
-            } else {
-              effectiveHintLang = fromText;
             }
 
             renderAndShowPopup(

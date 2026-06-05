@@ -645,11 +645,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const updateUndoUI = (secs) => {
         cell.innerHTML = `
-    <div class="undo-container">
-      <span class="delete-countdown">${secs}s</span>
-      <a href="javascript:void(0)" class="undo-link">${_t('recall')}</a>
-    </div>
-  `;
+          <div class="undo-container">
+            <span class="delete-countdown">${secs}s</span>
+            <a href="javascript:void(0)" class="undo-link">${_t('recall')}</a>
+          </div>
+        `;
         cell.querySelector('.undo-link').onclick = async (e) => {
           e.preventDefault();
           clearInterval(countdownInterval);
@@ -677,14 +677,30 @@ document.addEventListener('DOMContentLoaded', async () => {
       undoTimers[id] = setTimeout(async () => {
         const row = cell.closest('tr');
         if (row) {
-          row.classList.add('row-fade-out');
+          row.style.opacity = '0';
+          row.style.transform = 'translateX(20px)';
+          row.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
+
           setTimeout(() => {
-            row.classList.add('row-collapse');
+            const tds = row.querySelectorAll('td');
+            const rowHeight = row.offsetHeight;
+            tds.forEach(td => {
+              td.style.overflow = 'hidden';
+              td.style.maxHeight = rowHeight + 'px';
+              td.style.transition = 'max-height 0.3s ease-in-out, padding 0.3s ease-in-out';
+            });
+
+            requestAnimationFrame(() => {
+              tds.forEach(td => {
+                td.style.maxHeight = '0';
+                td.style.paddingTop = '0';
+                td.style.paddingBottom = '0';
+              });
+            });
+
             setTimeout(() => {
               row.remove();
               delete undoTimers[id];
-              if (Object.keys(undoTimers).length === 0) {
-              }
             }, 300);
           }, 400);
         }
