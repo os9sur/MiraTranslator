@@ -364,20 +364,20 @@ document.addEventListener('DOMContentLoaded', async () => {
           domain = `<a href="${item.src}" target="_blank" class="source-link">Link</a>`;
         }
       } return `
-  <tr style="border-bottom: 1px solid #1e293b;">
-    <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
-      <div style="display: flex; align-items: center; gap: 8px;
-        ${isRTLText(displayWord) ? 'flex-direction: row-reverse; justify-content: flex-start;' : ''}">
-        <span class="word-text" dir="auto">${displayWordHL}</span>
-        <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
-          style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        </span>
-      </div>
+      <tr style="border-bottom: 1px solid #1e293b; background-color: #1b1b1b61;">
+        <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
+          <div style="display: flex; align-items: center; gap: 8px;
+            ${isRTLText(displayWord) ? 'flex-direction: row-reverse; justify-content: flex-start;' : ''}">
+            <span class="word-text" dir="auto">${displayWordHL}</span>
+            <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
+              style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </span>
+          </div>
       ${phonetic ? `<div style="color: #909fb3; font-size: 12px; margin-top: 4px; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
       ${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; color:#7dd3fc; margin-top:2px;"></div>` : ''}
       ${context ? `
