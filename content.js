@@ -6431,7 +6431,7 @@ function initSelectionTranslate() {
             window.currentTargetL,
             isRTL,
             null,
-            shadowHost._effectiveHintLang || msg.result?.langInfo?.code || null,
+            shadowHost._effectiveHintLang || result?.langInfo?.code || null,
           );
         }
       })
