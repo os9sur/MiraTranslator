@@ -5667,6 +5667,9 @@ function initSelectionTranslate() {
         clampPopupToViewport(popupEl);
         popupEl.style.visibility = "visible"; //  定位完成后再显示
       });
+
+    } else {
+      popupEl.style.visibility = "visible";
     }
 
     // ── 事件绑定 ─────────────────────────────────────────────────────────────
@@ -6453,7 +6456,7 @@ function initSelectionTranslate() {
         setBasicError(basicEl, err.message || "网络异常");
       });
 
-    requestAnimationFrame(() => clampPopupToViewport?.(popupEl));
+    requestAnimationFrame(() => { clampPopupToViewport?.(popupEl); });
   }
 
   // ─── 内容 HTML 模板 ──
@@ -7238,6 +7241,7 @@ function initSelectionTranslate() {
       const btnSize = 32;
       l = Math.max(10, Math.min(l, window.innerWidth - btnSize - 10));
       t = Math.max(10, Math.min(t, window.innerHeight - btnSize - 10));
+
       logoBtn.style.left = l + "px";
       logoBtn.style.top = t + "px";
       logoBtn.style.setProperty("display", "flex", "important");
@@ -9293,7 +9297,7 @@ function applySubtitleSettings(settings) {
     "opacity 0.2s ease-in-out, background 0.3s, transform 0.3s ease-out";
 }
 let isVideoManuallyPaused = false;
-let extensionDidPause = false; 
+let extensionDidPause = false;
 let currentHoveredElement = null;
 let __currentHoverToken = null;
 async function handleWordMouseEnter(e, word) {
