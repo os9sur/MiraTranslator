@@ -2602,22 +2602,22 @@ self.i18nThemeData = {
   }
 };
 self.i18nAttach1 = {
-  "zh-CN": { source: "来源", delete: "删除", recall: "撤回", searchVocabulary: "搜索原文、释义、备注或网址...", appliedAndSaved: "已应用并保存" },
-  "zh-TW": { source: "來源", delete: "刪除", recall: "撤回", searchVocabulary: "搜尋原文、釋義、備註或網址...", appliedAndSaved: "已應用並保存" },
-  "en": { source: "Source", delete: "Delete", recall: "Recall", searchVocabulary: "Search words, notes, or URLs...", appliedAndSaved: "Applied and saved" },
-  "ja": { source: "ソース", delete: "削除", recall: "取消", searchVocabulary: "原文、備考、またはURLで検索...", appliedAndSaved: "適用して保存済み" },
-  "ko": { source: "출처", delete: "삭제", recall: "실행 취소", searchVocabulary: "원문, 메모 또는 URL로 검색...", appliedAndSaved: "적용 및 저장됨" },
-  "es": { source: "Fuente", delete: "Eliminar", recall: "Anular", searchVocabulary: "Buscar por palabra, nota o URL...", appliedAndSaved: "Aplicado y guardado" },
-  "fr": { source: "Source", delete: "Supprimer", recall: "Annuler", searchVocabulary: "Chercher par mot, note ou URL...", appliedAndSaved: "Appliqué et enregistré" },
-  "de": { source: "Quelle", delete: "Löschen", recall: "Widerrufen", searchVocabulary: "Suche nach Wort, Notiz oder URL...", appliedAndSaved: "Angewendet und gespeichert" },
-  "ru": { source: "Источник", delete: "Удалить", recall: "Отозвать", searchVocabulary: "Поиск по слову, заметке или URL...", appliedAndSaved: "Применено и сохранено" },
-  "pt": { source: "Fonte", delete: "Excluir", recall: "Anular", searchVocabulary: "Pesquisar por palavra, nota ou URL...", appliedAndSaved: "Aplicado e salvo" },
-  "it": { source: "Fonte", delete: "Elimina", recall: "Annulla", searchVocabulary: "Cerca per parola, nota o URL...", appliedAndSaved: "Applicato e salvato" },
-  "vi": { source: "Nguồn", delete: "Xóa", recall: "Thu hồi", searchVocabulary: "Tìm theo từ, ghi chú hoặc URL...", appliedAndSaved: "Đã áp dụng và lưu" },
-  "th": { source: "ที่มา", delete: "ลบ", recall: "ยกเลิก", searchVocabulary: "ค้นหาคำ บันทึก หรือ URL...", appliedAndSaved: "ประยุกต์ใช้และบันทึกแล้ว" },
-  "ar": { source: "المصدر", delete: "حذف", recall: "استرجاع", searchVocabulary: "بحث بالكلمة، الملاحظة أو الرابط...", appliedAndSaved: "تم التطبيق والحفظ" },
-  "fa": { source: "منبع", delete: "حذف", recall: "واگردانی", searchVocabulary: "جستجو با واژه، یادداشت یا آدرس...", appliedAndSaved: "اعمال و ذخیره شد" },
-  "tr": { source: "Kaynak", delete: "Sil", recall: "Geri çek", searchVocabulary: "Kelime, not veya URL ile ara...", appliedAndSaved: "Uygulandı ve kaydedildi" }
+  "zh-CN": { source: "来源", delete: "删除", recall: "撤回", searchVocabulary: "搜索原文、上下文、释义、例句、备注或网址...", appliedAndSaved: "已应用并保存" },
+  "zh-TW": { source: "來源", delete: "刪除", recall: "撤回", searchVocabulary: "搜尋原文、上下文、釋義、例句、備註或網址...", appliedAndSaved: "已應用並保存" },
+  "en":    { source: "Source", delete: "Delete", recall: "Recall", searchVocabulary: "Search words, context, definitions, examples, notes, or URLs...", appliedAndSaved: "Applied and saved" },
+  "ja":    { source: "ソース", delete: "削除", recall: "取消", searchVocabulary: "原文・文脈・意味・例文・メモ・URLで検索...", appliedAndSaved: "適用して保存済み" },
+  "ko":    { source: "출처", delete: "삭제", recall: "실행 취소", searchVocabulary: "원문, 문맥, 뜻, 예문, 메모 또는 URL로 검색...", appliedAndSaved: "적용 및 저장됨" },
+  "es":    { source: "Fuente", delete: "Eliminar", recall: "Anular", searchVocabulary: "Buscar por palabra, contexto, definición, ejemplo, nota o URL...", appliedAndSaved: "Aplicado y guardado" },
+  "fr":    { source: "Source", delete: "Supprimer", recall: "Annuler", searchVocabulary: "Chercher par mot, contexte, définition, exemple, note ou URL...", appliedAndSaved: "Appliqué et enregistré" },
+  "de":    { source: "Quelle", delete: "Löschen", recall: "Widerrufen", searchVocabulary: "Suche nach Wort, Kontext, Bedeutung, Beispiel, Notiz oder URL...", appliedAndSaved: "Angewendet und gespeichert" },
+  "ru":    { source: "Источник", delete: "Удалить", recall: "Отозвать", searchVocabulary: "Поиск по слову, контексту, значению, примеру, заметке или URL...", appliedAndSaved: "Применено и сохранено" },
+  "pt":    { source: "Fonte", delete: "Excluir", recall: "Anular", searchVocabulary: "Pesquisar por palavra, contexto, definição, exemplo, nota ou URL...", appliedAndSaved: "Aplicado e salvo" },
+  "it":    { source: "Fonte", delete: "Elimina", recall: "Annulla", searchVocabulary: "Cerca per parola, contesto, definizione, esempio, nota o URL...", appliedAndSaved: "Applicato e salvato" },
+  "vi":    { source: "Nguồn", delete: "Xóa", recall: "Thu hồi", searchVocabulary: "Tìm theo từ, ngữ cảnh, nghĩa, ví dụ, ghi chú hoặc URL...", appliedAndSaved: "Đã áp dụng và lưu" },
+  "th":    { source: "ที่มา", delete: "ลบ", recall: "ยกเลิก", searchVocabulary: "ค้นหาคำ บริบท ความหมาย ตัวอย่าง บันทึก หรือ URL...", appliedAndSaved: "ประยุกต์ใช้และบันทึกแล้ว" },
+  "ar":    { source: "المصدر", delete: "حذف", recall: "استرجاع", searchVocabulary: "بحث بالكلمة، السياق، المعنى، المثال، الملاحظة أو الرابط...", appliedAndSaved: "تم التطبيق والحفظ" },
+  "fa":    { source: "منبع", delete: "حذف", recall: "واگردانی", searchVocabulary: "جستجو با واژه، زمینه، معنی، مثال، یادداشت یا آدرس...", appliedAndSaved: "اعمال و ذخیره شد" },
+  "tr":    { source: "Kaynak", delete: "Sil", recall: "Geri çek", searchVocabulary: "Kelime, bağlam, anlam, örnek, not veya URL ile ara...", appliedAndSaved: "Uygulandı ve kaydedildi" }
 };
 self.i18nAttach2 = {
   "zh-CN": {
