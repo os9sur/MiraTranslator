@@ -29,11 +29,15 @@
     }
 
     .search-bar-wrapper {
+      flex: 1;
+      max-width: 600px;
       position: relative;
-      margin-bottom: 12px;
+      margin-bottom: 0;
       display: inline-block;
       border-radius: 999px;
       transition: box-shadow 0.2s ease;
+      box-shadow: 0 0 6px rgba(56, 189, 248, 0.4),
+        0 0 16px rgba(56, 189, 248, 0.15);
     }
 
     .search-bar-wrapper:hover,
@@ -43,11 +47,17 @@
     }
 
     .highlight-label {
-      transition: box-shadow 0.2s ease;
+      border: 1.2px solid rgba(21, 155, 226, 0.5);
+      border-radius: 999px;
+      padding: 8px 25px;
+      gap: 12px;
+      box-shadow: 0 0 6px rgba(34, 197, 94, 0.3),
+        0 0 16px rgba(34, 197, 94, 0.1);
     }
 
     .highlight-label:hover {
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.6), 0 0 20px rgba(56, 189, 248, 0.3);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5),
+        0 0 20px rgba(34, 197, 94, 0.2);
     }
 
     .search-bar-icon {
@@ -60,9 +70,9 @@
     }
 
     .search-bar-input {
-      width: 300px;
+      width: 100%;
       background: rgb(23 40 81 / 64%);
-      border: 1.5px solid #687e9c;
+      border: 1.2px solid rgba(56, 189, 248, 0.5);
       color: white;
       padding: 10px 16px 10px 42px;
       border-radius: 999px;
@@ -73,11 +83,11 @@
     }
 
     .search-bar-input:focus {
-      width: 400px;
       border-color: #38bdf8;
-      border-width: 2px;
+      border-width: 1.2px;
       background: #020617;
-      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+      outline: 2px solid rgba(56, 189, 248, 0.3);
+      outline-offset: 0px;
     }
 
     .btn {
@@ -120,7 +130,7 @@
     }
 
     .btn-export {
-      background: #22c55e;
+      background: #127538;
       color: white;
       margin-right: 10px;
     }
@@ -146,14 +156,15 @@
     }
 
     .add-box {
-      background: #1e293b;
-      padding: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: none;
+      padding: 12px;
       border-radius: 12px;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
-      border: 1px solid #334155;
     }
 
     input {
@@ -171,11 +182,23 @@
     }
 
     #wordInp {
-      flex: 0 0 180px;
+      flex: 0.382 1 0;
     }
 
     #transInp {
-      flex: 1;
+      flex: 0.618 1 0;
+    }
+
+    #wordInp,
+    #transInp {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    #wordInp:focus,
+    #transInp:focus {
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(56, 189, 248, 0.04);
     }
 
     table {
@@ -480,10 +503,14 @@
       overflow-wrap: break-word;
     }
 
+    html[lang="ar"] .source-wrapper,
+    html[lang="fa"] .source-wrapper {
+      align-items: flex-end;
+    }
 
     html[lang="ar"] #vocabTable,
     html[lang="fa"] #vocabTable {
-      direction: ltr !important;
+      direction: rtl;
     }
 
     html[lang="ar"] #vocabTable th,
@@ -525,19 +552,22 @@
 
 <body>
   <div class="container">
-    <div class="header">
+    <div dir="auto" class="header">
       <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
       <div style="display: flex; gap: 12px; align-items: center;">
         <button id="exportBtn" class="btn btn-export" data-i18n="exportCSV">导出 CSV</button>
       </div>
     </div>
-    <div class="add-box">
+    <div class="add-box" dir="auto">
       <input type="text" id="wordInp" data-i18n="word" data-i18n-type="placeholder" placeholder="New word...">
       <input type="text" id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning...">
       <button id="addBtn" class="btn btn-primary" data-i18n="manualAdd">手动添加</button>
     </div>
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+    <div dir="auto" style="display:flex; align-items:center; 
+            justify-content:space-between; 
+            gap:16px;          
+            margin-bottom:12px;">
 
       <!-- 搜索框 -->
       <div class="search-bar-wrapper" style="margin-bottom:0;">
@@ -548,7 +578,7 @@
 
       <!--  高亮开关 -->
       <label class="highlight-label"
-        style="display:flex;align-items:center;gap:8px;cursor:pointer;border-radius: 20px !important;padding: 10px 76px !important;white-space:nowrap;border: 1.5px solid #647690;border-radius:8px;padding:6px 10px;">
+        style="display:flex;align-items:center;gap:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;">
         <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
         <div id="highlightToggle" style="
       width:36px; height:20px; border-radius:999px; 

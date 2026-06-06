@@ -4889,49 +4889,49 @@ function initSelectionTranslate() {
     .mira-example-speak.is-speaking::before { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite; }
     .mira-example-speak.is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
   
-.mira-neon-btn {
-    display: none;
-    font-size: 11px;
-    color: var(--p-link-kana);
-    cursor: pointer;
-    user-select: none;
-    padding: 2px 6px; 
-    border-radius: 6px;
-    background: var(--p-link-kana-bg);  
-    margin-left: 8px;
-    white-space: nowrap;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
- 
-.mira-neon-btn:hover {
-    color: #ffffff; 
-    border-color: #34d399; 
-    background-color: #059669; 
-    box-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 
-                0 0 20px rgba(52, 211, 153, 0.3);
-}
+    .mira-neon-btn {
+        display: none;
+        font-size: 11px;
+        color: var(--p-link-kana);
+        cursor: pointer;
+        user-select: none;
+        padding: 2px 6px; 
+        border-radius: 6px;
+        background: var(--p-link-kana-bg);  
+        margin-left: 8px;
+        white-space: nowrap;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  
+    .mira-neon-btn:hover {
+        color: #ffffff; 
+        border-color: #34d399; 
+        background-color: #059669; 
+        box-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 
+                    0 0 20px rgba(52, 211, 153, 0.3);
+    }
 
-.neon-engine-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    padding: 5px 7px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 550;
-    color: var(--p-accent);
-    background: color-mix(in srgb, var(--p-accent) 10%, transparent);
-    user-select: none;
-    -webkit-user-select: none;
-    white-space: nowrap;
-    transition: all 0.3s ease;
-}
+    .neon-engine-btn {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 5px 7px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 550;
+        color: var(--p-accent);
+        background: color-mix(in srgb, var(--p-accent) 10%, transparent);
+        user-select: none;
+        -webkit-user-select: none;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
 
-.neon-engine-btn:hover {
-    background: color-mix(in srgb, var(--p-accent) 25%, transparent);
-    box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 50%, transparent);
-}
+    .neon-engine-btn:hover {
+        background: color-mix(in srgb, var(--p-accent) 25%, transparent);
+        box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 50%, transparent);
+    }
       `;
 
     return style;
@@ -9293,6 +9293,7 @@ function applySubtitleSettings(settings) {
     "opacity 0.2s ease-in-out, background 0.3s, transform 0.3s ease-out";
 }
 let isVideoManuallyPaused = false;
+let extensionDidPause = false; 
 let currentHoveredElement = null;
 let __currentHoverToken = null;
 async function handleWordMouseEnter(e, word) {
@@ -9306,7 +9307,12 @@ async function handleWordMouseEnter(e, word) {
   const video = document.querySelector("video");
   if (video) {
     isVideoManuallyPaused = video.paused;
-    if (!video.paused) video.pause();
+    if (!video.paused) {
+      video.pause();
+      extensionDidPause = true;
+    } else {
+      extensionDidPause = false;
+    }
   }
   e.target.style.background = "rgba(56, 189, 248, 0.4)";
   e.target.style.borderRadius = "4px";
@@ -9447,9 +9453,10 @@ function handleWordMouseLeave(e) {
   e.target.style.background = "transparent";
   e.target.style.borderRadius = "0";
   const video = document.querySelector("video");
-  if (video && !isVideoManuallyPaused) {
+  if (video && extensionDidPause && !isVideoManuallyPaused) {
     video.play();
   }
+  extensionDidPause = false;
   if (currentHoveredElement === e.target) {
     currentHoveredElement = null;
   }
