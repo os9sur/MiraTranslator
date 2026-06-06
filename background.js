@@ -7,7 +7,7 @@
 
 importScripts('i18n.js');
 importScripts('utils.js');
-importScripts('wanakana.min.js'); 
+importScripts('wanakana.min.js');
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
@@ -1650,8 +1650,14 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang, isRetry
                 .replace(/<ref[^>]*>[\s\S]*?<\/ref>/g, '')
                 .replace(/&nbsp;/g, ' ')
                 .replace(/^[、。，,]\s*/, '')
+                .replace(/\bAAA\b/g, '')
                 .replace(/\s+/g, ' ')
-                .replace(/\bAAA\b/g, '').replace(/\s{2,}/g, ' ')
+                // 清理日语释义里的多余标点（只影响含日文字符的内容）
+                .replace(/。\s*,\s*/g, '、')   // 。, → 、（只含。才触发，其他语言安全）
+                .replace(/、\s*,\s*/g, '、')   // 、, → 、（只含、才触发，其他语言安全）
+                .replace(/,\s*,/g, ',')        // 连续逗号 
+                .replace(/。$/, '')             // 行尾句号（只含。才触发，其他语言安全）
+                .replace(/([\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF])\s*,\s*(?=[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF])/g, '$1、') // 日文间逗号→顿号
                 .trim();
         };
 
@@ -1714,7 +1720,7 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang, isRetry
             .replace(/\{\{trans-top[\s\S]*?\{\{trans-bottom\}\}/gi, '')
             .replace(/\{\{top\}\}[\s\S]*?\{\{bottom\}\}/gi, '')
             .replace(/<!--[\s\S]*?-->/g, '');
-
+        //logger.log('[Wiktionary targetContent]', targetContent.slice(0, 3000));
         // ── 预处理：合并括号未闭合的跨行模板 ──
         const rawLines = targetContent.split('\n');
         const lines = [];
@@ -1909,9 +1915,22 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang, isRetry
                     if (sentence && sentence.length > 1) examples.push(sentence);
                 }
             } else if (isJaExample) {
-                // ja.wiktionary: #* 是英文原句
-                const txt = clean(line.replace(/^[#*]+/, ''));
-                if (txt && txt.length > 1) examples.push(txt);
+                const raw = line.replace(/^[#*]+/, '');
+                const txt = clean(raw).replace(/^[：:\s]+/, '').trim();
+                if (txt && txt.length > 1) {
+                    const jaIdx = txt.search(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/);
+                    if (jaIdx > 5) {
+                        const enPart = txt.slice(0, jaIdx).trim();
+                        const cnPart = txt.slice(jaIdx).trim();
+                        if (enPart && cnPart) {
+                            examples.push({ en: enPart, cn: cnPart });
+                        } else {
+                            examples.push(txt);
+                        }
+                    } else {
+                        examples.push(txt);
+                    }
+                }
             } else {
                 const txt = clean(line.replace(/^#+/, ''));
                 if (txt && txt.length > 1) meanings.push(txt);
@@ -1926,6 +1945,7 @@ async function fetchNativeWiktionaryDetail(word, sourceLang, targetLang, isRetry
         }
 
         if (dictData.length === 0) return null;
+        logger.log('[examples]', JSON.stringify(examples.slice(0, 3)));
         return { phonetic: '', dictData, examples, wordForms: [], source: 'Wiktionary Native', sourceUrl: pageUrl };
 
     } catch (e) {
@@ -4446,28 +4466,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     //假名转换
     if (request.type === 'ROMAJI_TO_HIRAGANA') {
         logger.log('[bg kana] input:', request.romaji);
-    try {
-        const clean = (request.romaji || '')
-            .replace(/[\[\]\/]/g, '')
-            .toLowerCase()
-            .replace(/ā/g, 'aa').replace(/ī/g, 'ii').replace(/ū/g, 'uu').replace(/ē/g, 'ee').replace(/ō/g, 'oo')
-            .replace(/[^a-z\s\-]/g, '')
-            .replace(/\s+/g, ' ').trim();
+        try {
+            const clean = (request.romaji || '')
+                .replace(/[\[\]\/]/g, '')
+                .toLowerCase()
+                .replace(/ā/g, 'aa').replace(/ī/g, 'ii').replace(/ū/g, 'uu').replace(/ē/g, 'ee').replace(/ō/g, 'oo')
+                .replace(/[^a-z\s\-]/g, '')
+                .replace(/\s+/g, ' ').trim();
 
-        const hiragana = wanakana.toHiragana(clean);
-        logger.log('[bg kana] hiragana:', hiragana);
-        const katakana = hiragana.split('').map(char => {
-            const code = char.charCodeAt(0);
-            if (code >= 0x3041 && code <= 0x3094) return String.fromCharCode(code + 96);
-            return char;
-        }).join('');
+            const hiragana = wanakana.toHiragana(clean);
+            logger.log('[bg kana] hiragana:', hiragana);
+            const katakana = hiragana.split('').map(char => {
+                const code = char.charCodeAt(0);
+                if (code >= 0x3041 && code <= 0x3094) return String.fromCharCode(code + 96);
+                return char;
+            }).join('');
 
-        safeSendResponse({ success: true, hiragana, katakana });
-    } catch (e) {
-        safeSendResponse({ success: false, hiragana: '', katakana: '' });
+            safeSendResponse({ success: true, hiragana, katakana });
+        } catch (e) {
+            safeSendResponse({ success: false, hiragana: '', katakana: '' });
+        }
+        return true;
     }
-    return true;
-}
     if (request.type === 'FETCH_TTS_AUDIO') {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒超时
@@ -4657,12 +4677,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         };
         //logger.log("[BG] Received TRANSLATE request:", { text, targetLang, hintSourceLang: request.hintSourceLang, cacheKey: request.cacheKey });
         getTabId().then(async tabId => {
-    //         logger.log('[BG TRANSLATE]', {
-    //     text: request.text,
-    //     hintSourceLang: request.hintSourceLang,
-    //     hintInputLang: request.hintInputLang,
-    //     cacheKey: request.cacheKey,
-    // });
+            //         logger.log('[BG TRANSLATE]', {
+            //     text: request.text,
+            //     hintSourceLang: request.hintSourceLang,
+            //     hintInputLang: request.hintInputLang,
+            //     cacheKey: request.cacheKey,
+            // });
             processTranslate(request, tabId, request.cacheKey)
                 .then(res => {
                     const finalResult = res?.result || res || {};

@@ -4290,7 +4290,7 @@ function initSelectionTranslate() {
         --p-text-query:       #2d3748;
         --p-text-muted:       #718096;
         --p-text-detail:      #4f5a6a;
-        --p-accent:           #0284c7;
+        --p-accent:           #465359;
         --arrowColor:         #2ecb3c;
         --p-border:           rgba(0,0,0,0.1);
         --p-shadow:           rgba(0,0,0,0.1);
@@ -4896,7 +4896,7 @@ function initSelectionTranslate() {
     cursor: pointer;
     user-select: none;
     padding: 2px 6px; 
-    border-radius: 7px;
+    border-radius: 6px;
     background: var(--p-link-kana-bg);  
     margin-left: 8px;
     white-space: nowrap;
@@ -5587,7 +5587,7 @@ function initSelectionTranslate() {
     const contentContainer = popupEl.querySelector("#p-content-container");
     contentContainer.style.cssText = `
     display:block;width:100%;box-sizing:border-box;
-    overflow-y:auto;padding:0 15px 15px 24px;
+    overflow-y:auto;padding:0 15px 15px 21px;
     direction:${isRTL ? "rtl" : "ltr"};
     text-align:${isRTL ? "right" : "left"};`;
 
@@ -5633,7 +5633,13 @@ function initSelectionTranslate() {
 
     // 调整查询词字号
     const pQuery = shadow.getElementById("p-query");
-    if (!pQuery?.style) return;
+    if (!pQuery?.style) {
+      // DOM 不完整，重新构建内容区
+      contentContainer.innerHTML = buildContentHTML(text, isSaved);
+      // 重新获取
+      const pQueryRetry = shadow.getElementById("p-query");
+      if (!pQueryRetry?.style) return;
+    }
     const len = text.length;
     pQuery.style.fontSize =
       len > 100 ? "12px" : len > 40 ? "14px" : len > 10 ? "16px" : "22px";
@@ -6335,7 +6341,9 @@ function initSelectionTranslate() {
 
     let effectiveHintLang = null;
 
-    if (hasKana) {
+    if (hintSourceLang && hintSourceLang !== 'auto') {
+      effectiveHintLang = hintSourceLang; // 外部传入的直接用，不再覆盖
+    } else if (hasKana) {
       effectiveHintLang = 'ja';
     } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
       effectiveHintLang = 'ja';
@@ -6461,7 +6469,7 @@ function initSelectionTranslate() {
       LANG_DISPLAY[targetLang] || targetLang.toUpperCase().slice(0, 2);
 
     return `
-    <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;">
+    <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;margin-top:4px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
 
         <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
@@ -6535,9 +6543,9 @@ function initSelectionTranslate() {
     </span>
    </div>
 
-  <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #334155;">
-    <div id="p-hiragana" style="color:#22afb7; font-size:14px; font-weight:500; line-height:1.2; word-break:break-word; letter-spacing:0.5px; margin-bottom: 4px;"></div>
-    <div id="p-katakana" style="color:#8c8c8c; font-size:14px; font-weight:500; line-height:1.2; word-break:break-word; letter-spacing:0.5px;"></div>
+  <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-bottom: 6px; padding-top: 6px; border-bottom: 1px dashed rgb(51, 65, 85);">
+    <div id="p-hiragana" style="color:#22afb7; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px; margin-bottom: 4px;"></div>
+    <div id="p-katakana" style="color:#8c8c8c; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px;"></div>
   </div>
 </div>
 
@@ -6692,9 +6700,16 @@ function initSelectionTranslate() {
         let html = res.dictData
           .map((item) => {
             const pos = esc(localizePos(item.pos, targetLang) || "");
+
+            const isJaContent = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(
+              (item.meanings || []).join('')
+            );
             const meanings = (item.meanings || [])
-              .map((m) => esc(cleanMarker(m)))
-              .join(", ");
+              .map(m => esc(cleanMarker(m))
+                .replace(/。(?!$)/g, '、')
+                .replace(/\s*、\s*/g, '、')
+              )
+              .join(isJaContent ? '、' : ', ');
 
             return `<div style="margin-bottom:4px;">
                   <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
@@ -7160,17 +7175,16 @@ function initSelectionTranslate() {
       const targetPrefix = targetLang.toLowerCase().slice(0, 2);
       const sourcePrefix = sourceLang.toLowerCase().slice(0, 2);
 
-      if (
-        sourceLang !== "auto" &&
-        sourcePrefix === "ja" &&
-        targetPrefix === "zh"
-      ) {
-        isAlreadyTarget = false;
-      } else {
-        isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+      let isAlreadyTarget = false;
 
-        // 如果判断为同语言，但上下文是日文，说明是日文里的汉字，不应该跳过
-        if (isAlreadyTarget && savedRange) {
+      if (sourceLang !== "auto") {
+        // 优先级1：用户已明确指定源语言，直接比对
+        isAlreadyTarget = (sourcePrefix === targetPrefix);
+      } else {
+        // 优先级2：从上下文检测语言
+        let ctxLang = null;
+        let ctxText = "";
+        if (savedRange) {
           try {
             let block = savedRange.commonAncestorContainer;
             if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
@@ -7179,10 +7193,19 @@ function initSelectionTranslate() {
               block = block.parentElement;
               tries++;
             }
-            const ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
-            const ctxLang = detectSourceLang(ctxText);
-            if (ctxLang === 'ja') isAlreadyTarget = false; // 日文上下文，强制翻译
+            ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
+            if (ctxText.length >= 15) {
+              ctxLang = detectSourceLang(ctxText);
+            }
           } catch (e) { }
+        }
+
+        if (ctxLang !== null && !LATIN_BASED_LANGS.has(ctxLang)) {
+          // 非拉丁语系（日、韩、中、俄等） 直接信任
+          isAlreadyTarget = (ctxLang === targetPrefix);
+        } else {
+          // 拉丁语系或上下文检测失败：降级到选中文字判断
+          isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
         }
       }
 
@@ -7456,10 +7479,12 @@ function initSelectionTranslate() {
             e.stopPropagation();
             if (!shadowHost) initShadowDOM();
 
-            // 取上下文：往上找最近的块级容器
+            // 取上下文，同时更新 _capturedContext 供 renderAndShowPopup 内部使用
             const contextEl = e.target.closest("p, li, div, td, blockquote")
               || e.target.parentNode;
             const contextText = getOriginalText(contextEl);
+            _capturedContext = contextText;
+            _capturedContextTranslation = "";         // 重置译文上下文
 
             const fromText = detectSourceLang(entry.word);
             const fromCtx = detectSourceLang(contextText);
@@ -7470,14 +7495,16 @@ function initSelectionTranslate() {
               /^[\u4e00-\u9fa5\s\p{P}]+$/u.test(entry.word);
 
             let effectiveHintLang = null;
-            if (hasKana) {
+            if (entry.trans?.sourceLang && entry.trans.sourceLang !== 'auto' && entry.trans.sourceLang !== 'zh') {
+              effectiveHintLang = entry.trans.sourceLang;
+            } else if (hasKana) {
               effectiveHintLang = 'ja';
             } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
               effectiveHintLang = 'ja';
-            } else if (fromText) {
+            } else if (fromText && fromText !== 'zh') {
               effectiveHintLang = fromText;
             } else if (fromCtx) {
-              effectiveHintLang = fromCtx;
+              effectiveHintLang = fromCtx;   // 日文上下文兜底
             }
 
             renderAndShowPopup(
