@@ -41,25 +41,24 @@
 
 ---
 
-## Technical Philosophy
+## Technical Overview
 
-**Mira Translate** is an immersive translation browser extension reimagined for performance and autonomy. Built with **pure native JavaScript**, it operates as a flexible **AI Translation Gateway**, allowing you to bypass "black-box" services and take full control of translation quality and cost using your own API keys.
+**Mira Translate** is a browser extension designed for translation tasks using user-provided API keys. It functions as an interface between the browser and translation services, allowing users to manage their own API configurations.
 
-Unlike bloated alternatives, Mira prioritizes a near-zero resource footprint and an intuitive **What You See Is What You Get (WYSIWYG)** user experience.
+This tool was created to fill the need for a functional, open-source bilingual translation utility that prioritizes simplicity and efficiency. It was developed in spare time for personal use, featuring a streamlined interface designed around specific, subjective workflows. As it is a personal project, it does not aim to cater to every preference or provide the polish of commercial software.
 
-### Key Advantages
+> **Note:** This tool serves strictly as an assistant for AI-powered translation. Due to limited maintenance time, bug fixes may not be immediate, and universal compatibility with all websites is not guaranteed.
 
-* **Performance //** Engineered with zero heavy frameworks. The entire core is approximately **200KB**, ensuring lightning-fast execution without slowing down your browser.
-* **WYSIWYG Control //** True visual feedback. Adjust translation styles, colors, and layouts via the visual panel and see the effects on the webpage instantly.
-* **Refined UI/UX //** A modern, aesthetic interface designed for clarity. Sophisticated power meets a minimalist, easy-to-configure design.
-* **YouTube Toolkit //** Advanced dual-language rendering with integrated player styling and **one-click subtitle downloads**.
-* **Zero-Trace Privacy //** Your API keys stay encrypted in your local browser. No intermediary servers, no data logging, no telemetry.
+### Features
 
-### Core Capabilities
-
-* **Multi-Engine Support //** Native integration for OpenAI, Claude, Gemini, DeepL, and SiliconFlow. Supports fully customizable API endpoints.
-* **Visual Element Selector //** Precision-targeted translation. Intuitively pick or exclude specific webpage elements using the visual selector tool.
-* **Cloud Sync //** Seamlessly synchronize your vocabulary and configurations via Google Drive or WebDAV.
+* **Performance:** The extension is built using native JavaScript with a core size of approximately 300KB, aimed at minimizing browser resource usage.
+* **Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied to the webpage.
+* **YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, and a feature to download subtitles.
+* **Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
+* **Multi-Engine Support:** Compatible with OpenAI, Claude, Gemini, DeepL, and SiliconFlow. Users can also configure custom API endpoints.
+* **Element Selection:** Allows users to select or exclude specific areas of a webpage for translation.
+* **Data Synchronization:** Supports syncing configurations and saved vocabulary via Google Drive or WebDAV.
+* **Vocabulary Learning:** Enables users to save words or phrases directly from translated text into a local list, allowing for future review, editing, and cross-device synchronization.
 
 ---
 
