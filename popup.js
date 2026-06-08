@@ -2425,6 +2425,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     triggerRefresh(this, "REFRESH_YT");
   };
+// ====== 个性化扫描配置面板逻辑 开始 ======
+  {
+    //  初始化读取状态
+    const initInspectState = () => {
+      const content = document.getElementById('inspectContent');
+      const arrow = document.getElementById('inspectArrow');
+      if (!content || !arrow) return;
+
+      const savedState = localStorage.getItem('inspectContainerState') || 'collapsed';
+      if (savedState === 'expanded') {
+        content.style.display = 'flex';
+        arrow.classList.add('arrow-expanded');  
+      } else {
+        content.style.display = 'none';
+        arrow.classList.remove('arrow-expanded');
+      }
+    };
+ 
+    initInspectState();
+ 
+    document.addEventListener('click', function(e) {
+      const header = e.target.closest('#inspectHeader');
+      if (!header) return;  
+
+      const content = document.getElementById('inspectContent');
+      const arrow = document.getElementById('inspectArrow');
+      if (!content || !arrow) return;
+
+      const isHidden = content.style.display === 'none';
+
+      if (isHidden) {
+        // 展开
+        content.style.display = 'flex';
+        arrow.classList.add('arrow-expanded');
+        localStorage.setItem('inspectContainerState', 'expanded');
+      } else {
+        // 折叠
+        content.style.display = 'none';
+        arrow.classList.remove('arrow-expanded');
+        localStorage.setItem('inspectContainerState', 'collapsed');
+      }
+    });
+  }
+  // ====== 个性化扫描配置面板逻辑 结束 ======
   const refreshUI = async () => {
     try {
       const tab = await getActiveTab();
@@ -2604,11 +2648,11 @@ if (checkRTL(uiLangSelect.value)) {
       if (inspectBtn && inspectLabelBtn) {
         if (currentMode === 'global') {
           inspectBtn.classList.add('hidden-fade');
-          inspectLabelBtn.classList.add('hidden-fade');
+         // inspectLabelBtn.classList.add('hidden-fade');
           if (domainLabel) domainLabel.classList.add('hidden-fade');
         } else {
           inspectBtn.classList.remove('hidden-fade');
-          inspectLabelBtn.classList.remove('hidden-fade');
+         // inspectLabelBtn.classList.remove('hidden-fade');
           if (domainLabel) domainLabel.classList.remove('hidden-fade');
         }
       }

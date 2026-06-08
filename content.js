@@ -263,12 +263,16 @@ async function applyUserStyles(
     if (!config) {
       const verticalMargin = isInstagram ? "0px" : "6px";
       const bottomMargin = isInstagram ? "2px" : "4px";
+      const useInline =
+      (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
+      transEl.classList.contains("kt-paragraph-translation") &&
+      transEl.dataset.forceInline !== "false";
       let defaultCss = `
-        display: block !important;
+        display: ${shouldInline ? "inline" : "block"} !important;
         width: auto !important;
-        clear: ${clearStyle} !important;
-        margin: ${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft} !important;
-        padding-left: ${sourcePaddingLeft} !important;
+        clear: ${shouldInline ? "none" : clearStyle} !important;
+        margin: ${shouldInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
+        padding-left: ${shouldInline ? "0" : sourcePaddingLeft} !important;
         text-align: ${isRTL ? "right" : sourceAlign} !important;
         color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
         font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;
@@ -314,7 +318,7 @@ async function applyUserStyles(
         ? "hidden"
         : "visible";
     const useInline =
-      transEl.tagName === "SPAN" &&
+      (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
       transEl.classList.contains("kt-paragraph-translation") &&
       transEl.dataset.forceInline !== "false";
 
@@ -1908,7 +1912,84 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
     );
   }
 }
+function shouldSkipTextNode(node) {
+  let el = node.parentElement;
+  if (!el) return true;
+  // 跳过不可见元素
+  if (el.offsetParent === null && el.tagName !== 'BODY') return true;
+  // 跳过脚本/样式
+  if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'].includes(el.tagName)) return true;
+  // 跳过代码块
+  if (el.closest('pre, code, [class*="highlight"], [class*="hljs"]')) return true;
+  // 跳过已翻译
+  if (el.closest('[data-translated="true"]')) return true;
+  // 跳过译文容器本身
+  if (el.closest('.kt-paragraph-translation')) return true;
+  // 跳过可编辑区域
+  if (el.isContentEditable || el.closest('[contenteditable="true"]')) return true;
+  return false;
+}
 
+function startGenericTranslation() {
+  // 先整体翻译块级元素
+  const blockEls = document.querySelectorAll(
+    'p, h1, h2, h3, h4, li, td, th, blockquote, figcaption'
+  );
+  const coveredNodes = new Set();
+
+  blockEls.forEach(el => {
+    if (shouldSkipTextNode({ parentElement: el })) return;
+    const text = el.innerText?.trim();
+    if (!text || text.length < 5) return;
+    if (el.querySelector('.kt-paragraph-translation')) return;
+    if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
+
+    const font = document.createElement('font');
+    font.className = 'kt-paragraph-translation';
+    font.dataset.forceInline = "false";
+    font.style.setProperty('display', 'block', 'important');
+    font.style.setProperty('margin-top', '4px', 'important');
+    font.style.setProperty('color', 'gray', 'important');
+    font.style.setProperty('font-style', 'italic', 'important');
+    font.innerText = t('loading');
+    el.appendChild(font);
+
+    // 标记该元素下所有文本节点已处理
+    el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
+    coveredNodes.add(el);
+
+    TranslationBatcher.add({ el, text, container: font, linkMap: [] });
+  });
+
+  // 再处理剩余纯文本节点（span等inline元素）
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  let node;
+  while (node = walker.nextNode()) {
+    const text = node.textContent.trim();
+    if (text.length < 5) continue;
+    if (shouldSkipTextNode(node)) continue;
+    if (coveredNodes.has(node.parentElement)) continue;
+    nodes.push(node);
+  }
+
+  nodes.forEach(textNode => {
+    const el = textNode.parentElement;
+    if (!el) return;
+    if (el.querySelector('.kt-paragraph-translation')) return;
+    if (detectIsAlreadyTarget(textNode.textContent.trim(), window.currentTargetL || getBrowserLang())) return;
+
+    const font = document.createElement('font');
+    font.className = 'kt-paragraph-translation'; 
+    font.style.setProperty('display', 'inline', 'important');
+    font.style.setProperty('margin-left', '4px', 'important');
+    font.style.setProperty('color', 'gray', 'important');
+    font.style.setProperty('font-style', 'italic', 'important');
+    font.innerText = t('loading');
+    textNode.parentNode.insertBefore(font, textNode.nextSibling);
+    TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
+  });
+}
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
 
@@ -3796,6 +3877,10 @@ async function scanContent(forcedSelectors = null) {
       } else {
         currentActiveSelectors = presetSelectors;
       }
+    } else {
+      // generic 网站：用 TreeWalker 翻译文本节点
+      startGenericTranslation();
+      return;
     }
   }
   try {
