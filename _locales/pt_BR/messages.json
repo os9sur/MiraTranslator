@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Tradução Web com IA & Legendas Bilíngues no YouTube"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Tradução web open-source e segura, legendas bilíngues YouTube, pesquisa de palavras. Suporta OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Tradução web open-source e segura, legendas bilíngues YouTube"
   },
   "ERROR_400": {
     "message": "Erro de API: Solicitação inválida."
@@ -36,6 +36,6 @@
     "message": "Falha: Verifique a configuração da API."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Faça login para usar o Mira AI Translator."
+    "message": "Faça login para usar o Mira Translator."
   }
 }

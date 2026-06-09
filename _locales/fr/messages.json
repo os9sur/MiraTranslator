@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Traduction Web par IA & Sous-titres Bilingues YouTube"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Traduction web open-source et sécurisée, sous-titres bilingues YouTube, recherche de mots. Compatible avec OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Traduction web open-source et sécurisée, sous-titres bilingues YouTube"
   },
   "ERROR_400": {
     "message": "Erreur API : Requête invalide."
@@ -36,6 +36,6 @@
     "message": "Échec : Vérifiez la config API."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Veuillez vous connecter pour utiliser Mira AI Translator."
+    "message": "Veuillez vous connecter pour utiliser Mira Translator."
   }
 }

@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻译 - AI 沉浸式翻译 & YouTube 双语字幕"
+    "message": "Mira 翻译"
   },
   "appDesc": {
-    "message": "开源安全的网页翻译、YouTube 双语字幕、划词查词。支持 OpenAI、DeepL、Gemini、Claude、DeepSeek。"
+    "message": "开源安全的网页对照翻译、YouTube 双语字幕"
   },
   "ERROR_400": {
     "message": "接口提示：请求无效或账户余额不足。"
@@ -36,6 +36,6 @@
     "message": "翻译失败：请检查网络连接或 API 配置。"
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "请登录后使用 Mira AI 翻译。"
+    "message": "请登录后使用 Mira 翻译。"
   }
 }

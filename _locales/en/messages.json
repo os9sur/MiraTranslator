@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - AI Web Translation & YouTube Bilingual Subtitles"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Open-source & secure webpage translation, YouTube bilingual subtitles. Supports OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Open-source & secure webpage translation, YouTube bilingual subtitles"
   },
   "ERROR_400": {
     "message": "API Error: Invalid request or low balance."
@@ -36,6 +36,6 @@
     "message": "Translation Failed: Check API configuration."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Please sign in to use Mira AI Translator."
+    "message": "Please sign in to use Mira Translator."
   }
 }

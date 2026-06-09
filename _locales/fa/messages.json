@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - ترجمه وب با هوش مصنوعی & زیرنویس دو زبانه یوتیوب"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "ترجمه وب متن‌باز و امن، زیرنویس دو زبانه یوتیوب، جستجوی کلمات. پشتیبانی از OpenAI، DeepL، Gemini، Claude، DeepSeek."
+    "message": "ترجمه وب متن‌باز و امن، زیرنویس دو زبانه یوتیوب"
   },
   "ERROR_400": {
     "message": "خطای API: درخواست نامعتبر."
@@ -36,6 +36,6 @@
     "message": "خطا در ترجمه: تنظیمات را بررسی کنید."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "برای استفاده از Mira AI Translator وارد شوید."
+    "message": "برای استفاده از Mira Translator وارد شوید."
   }
 }

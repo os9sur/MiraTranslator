@@ -127,7 +127,7 @@ let userMeta = {};
 
 if (chrome && chrome.storage) {
     Promise.all([
-        safeGetStorage.get(['usage_count', 'active_days', 'install_time']),
+        safeGetStorage(['usage_count', 'active_days', 'install_time']),
     ]).then(([data]) => {
         const installTime = data?.install_time || Date.now();
         userMeta = {

@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - ترجمة الويب بالذكاء الاصطناعي & ترجمة يوتيوب ثنائية اللغة"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "ترجمة ويب مفتوحة المصدر وآمنة، ترجمة يوتيوب ثنائية اللغة، بحث عن كلمات. يدعم OpenAI وDeepL وGemini وClaude وDeepSeek."
+    "message": "ترجمة ويب مفتوحة المصدر وآمنة، ترجمة يوتيوب ثنائية اللغة"
   },
   "ERROR_400": {
     "message": "خطأ في API: طلب غير صالح."
@@ -36,6 +36,6 @@
     "message": "فشلت الترجمة: تحقق من الإعدادات."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "يرجى تسجيل الدخول لاستخدام Mira AI Translator."
+    "message": "يرجى تسجيل الدخول لاستخدام Mira Translator."
   }
 }
