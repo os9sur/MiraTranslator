@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻訳 - AI 没入型翻訳 & YouTube バイリンガル字幕"
+    "message": "Mira 翻訳"
   },
   "appDesc": {
-    "message": "安全・オープンソースのウェブ翻訳、YouTubeバイリンガル字幕、単語検索。OpenAI・DeepL・Gemini・Claude・DeepSeek対応。"
+    "message": "安全・オープンソースのウェブ翻訳、YouTubeバイリンガル字幕"
   },
   "ERROR_400": {
     "message": "APIエラー：無効なリクエストまたは残高不足。"
@@ -36,6 +36,6 @@
     "message": "翻訳失敗：API設定を確認してください。"
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Mira AI翻訳を使用するにはサインインしてください。"
+    "message": "Mira 翻訳を使用するにはサインインしてください。"
   }
 }

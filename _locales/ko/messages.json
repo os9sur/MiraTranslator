@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 번역 - AI 웹 번역 & YouTube 이중 자막"
+    "message": "Mira 번역"
   },
   "appDesc": {
-    "message": "안전하고 오픈소스인 웹 번역, YouTube 이중 자막, 단어 검색. OpenAI, DeepL, Gemini, Claude, DeepSeek 지원."
+    "message": "안전하고 오픈소스인 웹 번역, YouTube 이중 자막"
   },
   "ERROR_400": {
     "message": "API 오류: 잘못된 요청 또는 잔액 부족."
@@ -36,6 +36,6 @@
     "message": "번역 실패: API 설정을 확인하세요."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Mira AI 번역을 사용하려면 로그인하세요."
+    "message": "Mira 번역을 사용하려면 로그인하세요."
   }
 }

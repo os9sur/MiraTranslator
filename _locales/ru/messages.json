@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - AI-перевод веб-страниц & двуязычные субтитры YouTube"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Безопасный перевод веб-страниц с открытым исходным кодом, двуязычные субтитры YouTube, поиск слов. Поддержка OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Безопасный перевод веб-страниц с открытым исходным кодом, двуязычные субтитры YouTube"
   },
   "ERROR_400": {
     "message": "Ошибка API: Неверный запрос."
@@ -36,6 +36,6 @@
     "message": "Ошибка: Проверьте настройки API."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Войдите, чтобы использовать Mira AI Translator."
+    "message": "Войдите, чтобы использовать Mira Translator."
   }
 }

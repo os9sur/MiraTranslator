@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - Dịch Web AI & Phụ đề Song ngữ YouTube"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Dịch web mã nguồn mở & bảo mật, phụ đề song ngữ YouTube, tra từ. Hỗ trợ OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Dịch web mã nguồn mở & bảo mật, phụ đề song ngữ YouTube"
   },
   "ERROR_400": {
     "message": "Lỗi API: Yêu cầu không hợp lệ hoặc hết số dư."
@@ -36,6 +36,6 @@
     "message": "Dịch thất bại: Kiểm tra cấu hình API."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Vui lòng đăng nhập để sử dụng Mira AI Translator."
+    "message": "Vui lòng đăng nhập để sử dụng Mira Translator."
   }
 }

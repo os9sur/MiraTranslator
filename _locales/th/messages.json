@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - แปลเว็บด้วย AI & ซับไตเติ้ล YouTube สองภาษา"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "แปลเว็บโอเพนซอร์สและปลอดภัย, ซับไตเติ้ลสองภาษา YouTube, ค้นหาคำศัพท์. รองรับ OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "แปลเว็บโอเพนซอร์สและปลอดภัย, ซับไตเติ้ลสองภาษา YouTube"
   },
   "ERROR_400": {
     "message": "ข้อผิดพลาด API: คำขอไม่ถูกต้องหรือยอดเงินไม่พอ"
@@ -36,6 +36,6 @@
     "message": "การแปลล้มเหลว: โปรดตรวจสอบการตั้งค่า API"
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "กรุณาลงชื่อเข้าใช้เพื่อใช้งาน Mira AI Translator"
+    "message": "กรุณาลงชื่อเข้าใช้เพื่อใช้งาน Mira Translator"
   }
 }

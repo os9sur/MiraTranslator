@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator - KI-Webübersetzung & zweisprachige YouTube-Untertitel"
+    "message": "Mira Translator"
   },
   "appDesc": {
-    "message": "Open-Source & sichere Webübersetzung, zweisprachige YouTube-Untertitel, Wortsuche. Unterstützt OpenAI, DeepL, Gemini, Claude, DeepSeek."
+    "message": "Open-Source & sichere Webübersetzung, zweisprachige YouTube-Untertitel"
   },
   "ERROR_400": {
     "message": "API-Fehler: Ungültige Anfrage."
@@ -36,6 +36,6 @@
     "message": "Fehler: API-Konfiguration prüfen."
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "Bitte anmelden, um Mira AI Translator zu verwenden."
+    "message": "Bitte anmelden, um Mira Translator zu verwenden."
   }
 }

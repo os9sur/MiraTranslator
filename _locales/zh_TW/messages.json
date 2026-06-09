@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻譯 - AI 沉浸式翻譯 & YouTube 雙語字幕"
+    "message": "Mira 翻譯"
   },
   "appDesc": {
-    "message": "開源安全的網頁翻譯、YouTube 雙語字幕、劃詞查詞。支援 OpenAI、DeepL、Gemini、Claude、DeepSeek。"
+    "message": "開源安全的網頁對照翻譯、YouTube 雙語字幕"
   },
   "ERROR_400": {
     "message": "介面提示：請求無效或帳戶餘額不足。"
@@ -36,6 +36,6 @@
     "message": "翻譯失敗：請檢查網路連線或 API 設定。"
   },
   "ERROR_NOT_SIGNED_IN": {
-    "message": "請登入後使用 Mira AI 翻譯。"
+    "message": "請登入後使用 Mira 翻譯。"
   }
 }
