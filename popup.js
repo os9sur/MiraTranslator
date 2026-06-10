@@ -14,60 +14,60 @@ const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
 
-//新用户蒙层
-async function initOnboarding() {
-  const tab = await getActiveTab();
-  const url = tab?.url || "";
+// //新用户蒙层
+// async function initOnboarding() {
+//   const tab = await getActiveTab();
+//   const url = tab?.url || "";
 
-  // 受限页面，直接退出，不显示蒙层
-  if (MiraUtils.isRestrictedUrl(url)) {
-    return;
-  }
-  const guideEl = document.getElementById('welcome-guide');
-  const targetBox = document.getElementById('targetLangCombox');
-  const labelEl = document.getElementById('targetLangLabelText');
-  const selectEl = document.getElementById('targetLang');
-  const storageKey = 'mira_onboarding_v1';
+//   // 受限页面，直接退出，不显示蒙层
+//   if (MiraUtils.isRestrictedUrl(url)) {
+//     return;
+//   }
+//   const guideEl = document.getElementById('welcome-guide');
+//   const targetBox = document.getElementById('targetLangCombox');
+//   const labelEl = document.getElementById('targetLangLabelText');
+//   const selectEl = document.getElementById('targetLang');
+//   const storageKey = 'mira_onboarding_v1';
 
-  const completeOnboarding = () => {
-    if (!guideEl || guideEl.style.display === 'none') return;
-    if (labelEl) labelEl.style.display = 'block';
-    localStorage.setItem(storageKey, 'true');
-    guideEl.style.transition = 'opacity 0.4s ease';
-    guideEl.style.opacity = '0';
+//   const completeOnboarding = () => {
+//     if (!guideEl || guideEl.style.display === 'none') return;
+//     if (labelEl) labelEl.style.display = 'block';
+//     localStorage.setItem(storageKey, 'true');
+//     guideEl.style.transition = 'opacity 0.4s ease';
+//     guideEl.style.opacity = '0';
 
-    setTimeout(() => {
-      guideEl.style.display = 'none';
-      targetBox.classList.remove('first-time-highlight');
-      //  蒙层消失时，恢复原生高度，不再占用多余空间
-      // document.body.style.minHeight = '';
-    }, 400);
-  };
+//     setTimeout(() => {
+//       guideEl.style.display = 'none';
+//       targetBox.classList.remove('first-time-highlight');
+//       //  蒙层消失时，恢复原生高度，不再占用多余空间
+//       // document.body.style.minHeight = '';
+//     }, 400);
+//   };
 
-  if (!localStorage.getItem(storageKey)) {
-    if (labelEl) labelEl.style.display = 'none';
-    //  强制撑开 popup 窗口，保证蒙层内容完全展示
-    //document.body.style.minHeight = '0';
+//   if (!localStorage.getItem(storageKey)) {
+//     if (labelEl) labelEl.style.display = 'none';
+//     //  强制撑开 popup 窗口，保证蒙层内容完全展示
+//     //document.body.style.minHeight = '0';
 
-    guideEl.style.display = 'flex';
-    targetBox.classList.add('first-time-highlight');
-    document.getElementById('close-guide-btn').onclick = completeOnboarding;
+//     guideEl.style.display = 'flex';
+//     targetBox.classList.add('first-time-highlight');
+//     document.getElementById('close-guide-btn').onclick = completeOnboarding;
 
-    if (selectEl) {
-      selectEl.addEventListener('mousedown', () => {
-        // 500ms 后自动关掉蒙层 
-        setTimeout(completeOnboarding, 500);
-      });
-    }
-    // 点击蒙层背景关闭 
-    guideEl.addEventListener('click', (e) => {
-      if (e.target === guideEl) completeOnboarding();
-    });
-  } else {
-    // 非第一次加载，Label 显示
-    if (labelEl) labelEl.style.display = 'block';
-  }
-}
+//     if (selectEl) {
+//       selectEl.addEventListener('mousedown', () => {
+//         // 500ms 后自动关掉蒙层 
+//         setTimeout(completeOnboarding, 500);
+//       });
+//     }
+//     // 点击蒙层背景关闭 
+//     guideEl.addEventListener('click', (e) => {
+//       if (e.target === guideEl) completeOnboarding();
+//     });
+//   } else {
+//     // 非第一次加载，Label 显示
+//     if (labelEl) labelEl.style.display = 'block';
+//   }
+// }
 
 
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   initNoticeBar();
 
-  await initOnboarding();
+  //await initOnboarding();
   const btnLogin = document.getElementById('btnLogin');
   const btnAvatar = document.getElementById('btnAvatar');
   if (btnLogin) btnLogin.style.display = 'none';

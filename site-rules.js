@@ -5,6 +5,9 @@
  * Contact: mira.studio@proton.me
  */
 
+// 提取公共排除规则
+const ignoreMenu = ":not(nav *):not(menu *):not([class*='menu'] *):not([class*='nav'] *)";
+
 const SiteRules = {
     defaults: {
         "x.com": {
@@ -210,10 +213,7 @@ const SiteRules = {
             selectors: "h1, h2, h3, p, span[data-testid='TitleHeading'], [class*='nav-dropdown'] li, article li",
             minLen: 10
         },
-        "linkedin.com": {
-            selectors: "h1, h2, h3, p, span, li, a, [class*='feed-shared-text'], [class*='attributed-text'], [class*='job-card-list__title'], [class*='entity-result__title'], [class*='profile-section-card__title'], [class*='artdeco-entity-lockup__title']",
-            minLen: 10
-        },
+
         "notion.so": {
             selectors: [
                 "main h1",
@@ -228,13 +228,13 @@ const SiteRules = {
             minLen: 3
         },
         "instagram.com": {
-            selectors: [ 
+            selectors: [
                 "span._ap3a._aaco._aacu._aacx._aad7._aade",
-                "span._aacl._aaco._aacw._aacx._aad6._aade", 
+                "span._aacl._aaco._aacw._aacx._aad6._aade",
                 "h1[dir='auto']",
-                "h2[dir='auto']", 
+                "h2[dir='auto']",
                 "header span[dir='auto']:not([role='button'])",
-                "ul li div span[dir='auto']", 
+                "ul li div span[dir='auto']",
                 "[role='dialog'] span[dir='auto']:not([role='button'])",
                 "[role='dialog'] h1[dir='auto']",
             ].join(", "),
@@ -249,21 +249,23 @@ const SiteRules = {
             minLen: 5
         }
     },
+
     generic: {
         selectors: [
-            "h1:not(button *)",
-            "h2:not(button *)",
-            "h3:not(button *)",
-            "p:not(button *)",
-            "span:not(button *):not(nav *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *):not([class*='code'] *):not([class*='highlight'] *):not([class*='token'] *):not(td *):not(th *)",
-            "article li",
-            "section li",
-            "main li",
-            "[role='main'] li",
-            ".content li",
-            ".post li",
-            ".entry li",
-            "li:not(nav *):not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']):not([role='listbox'] *):not([role='combobox'] *):not([class*='menu'] *):not([class*='sidebar'] *):not([class*='nav'] *)"
+            `h1:not(button *)${ignoreMenu}`,
+            `h2:not(button *)${ignoreMenu}`,
+            `h3:not(button *)${ignoreMenu}`,
+            `p:not(button *)${ignoreMenu}`,
+            `span:not(button *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *):not([class*='code'] *):not([class*='highlight'] *):not([class*='token'] *):not(td *):not(th *)${ignoreMenu}`,
+            `article li${ignoreMenu}`,
+            `section li${ignoreMenu}`,
+            `main li${ignoreMenu}`,
+            `[role='main'] li${ignoreMenu}`,
+            `.content li${ignoreMenu}`,
+            `.post li${ignoreMenu}`,
+            `.entry li${ignoreMenu}`,
+            //  通用菜单排除
+            `li:not(header *):not(footer *):not([role='menuitem']):not([role='option']):not([role='tab']):not([role='listbox'] *):not([role='combobox'] *):not([class*='sidebar'] *)${ignoreMenu}`
         ].join(", "),
         minLen: 5
     },
