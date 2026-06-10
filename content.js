@@ -264,15 +264,15 @@ async function applyUserStyles(
       const verticalMargin = isInstagram ? "0px" : "6px";
       const bottomMargin = isInstagram ? "2px" : "4px";
       const useInline =
-      (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
-      transEl.classList.contains("kt-paragraph-translation") &&
-      transEl.dataset.forceInline !== "false";
+        (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
+        transEl.classList.contains("kt-paragraph-translation") &&
+        transEl.dataset.forceInline !== "false";
       let defaultCss = `
-        display: ${shouldInline ? "inline" : "block"} !important;
+        display: ${useInline ? "inline" : "block"} !important;
         width: auto !important;
-        clear: ${shouldInline ? "none" : clearStyle} !important;
-        margin: ${shouldInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
-        padding-left: ${shouldInline ? "0" : sourcePaddingLeft} !important;
+        clear: ${useInline ? "none" : clearStyle} !important;
+        margin: ${useInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
+        padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
         text-align: ${isRTL ? "right" : sourceAlign} !important;
         color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
         font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;
@@ -1931,11 +1931,16 @@ function shouldSkipTextNode(node) {
 }
 
 function startGenericTranslation() {
-  // 先整体翻译块级元素
-  const blockEls = document.querySelectorAll(
-    'p, h1, h2, h3, h4, li, td, th, blockquote, figcaption'
-  );
-  const coveredNodes = new Set();
+  if (!window.__mira_generic_covered) window.__mira_generic_covered = new Set();
+  const coveredNodes = window.__mira_generic_covered;
+
+  const domain = window.location.hostname.replace('www.', '');
+  const customSelectors = window.__MIRA_SCAN_CONFIG?.custom?.[domain]?.selectors;
+  const globalSelectors = window.__MIRA_SCAN_CONFIG?.global?.selectors;
+  const blockSelector = customSelectors || globalSelectors || SiteRules.generic.selectors;
+
+  const blockEls = document.querySelectorAll(blockSelector);
+
 
   blockEls.forEach(el => {
     if (shouldSkipTextNode({ parentElement: el })) return;
@@ -1954,14 +1959,12 @@ function startGenericTranslation() {
     font.innerText = t('loading');
     el.appendChild(font);
 
-    // 标记该元素下所有文本节点已处理
-    el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
     coveredNodes.add(el);
+    el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
 
     TranslationBatcher.add({ el, text, container: font, linkMap: [] });
   });
 
-  // 再处理剩余纯文本节点（span等inline元素）
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const nodes = [];
   let node;
@@ -1969,18 +1972,30 @@ function startGenericTranslation() {
     const text = node.textContent.trim();
     if (text.length < 5) continue;
     if (shouldSkipTextNode(node)) continue;
-    if (coveredNodes.has(node.parentElement)) continue;
+    const el = node.parentElement;
+    if (!el) continue;
+    try {
+      if (!el.matches(blockSelector) && !el.closest(blockSelector)) continue;
+    } catch (e) { continue; }
+    let ancestor = node.parentElement;
+    let covered = false;
+    while (ancestor && ancestor !== document.body) {
+      if (coveredNodes.has(ancestor)) { covered = true; break; }
+      ancestor = ancestor.parentElement;
+    }
+    if (covered) continue;
     nodes.push(node);
   }
 
   nodes.forEach(textNode => {
     const el = textNode.parentElement;
     if (!el) return;
+    if (coveredNodes.has(el)) return;
     if (el.querySelector('.kt-paragraph-translation')) return;
     if (detectIsAlreadyTarget(textNode.textContent.trim(), window.currentTargetL || getBrowserLang())) return;
 
     const font = document.createElement('font');
-    font.className = 'kt-paragraph-translation'; 
+    font.className = 'kt-paragraph-translation';
     font.style.setProperty('display', 'inline', 'important');
     font.style.setProperty('margin-left', '4px', 'important');
     font.style.setProperty('color', 'gray', 'important');
@@ -2024,6 +2039,16 @@ async function handleTranslateElement(el, forceRefresh = false) {
       return;
     }
   }
+  // LinkedIn profile 名字在 h2 里是纯文本节点，跳过
+  if (location.hostname.includes("linkedin.com") && el.tagName === "H2") {
+    const hasOnlyText = el.children.length === 0 && el.childNodes.length === 1 && el.childNodes[0].nodeType === 3;
+    if (hasOnlyText) {
+      el.dataset.translated = "true";
+      el.removeAttribute("data-mira-processing");
+      _miraProcessingSet.delete(el);
+      return;
+    }
+  }
   if (el.closest(".mira-kt-panel, .mira-font-family")) {
     el.dataset.translated = "true";
     el.removeAttribute("data-mira-processing");
@@ -2037,6 +2062,11 @@ async function handleTranslateElement(el, forceRefresh = false) {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
       _miraProcessingSet.delete(el);
+      return;
+    }
+    const parentTag = el.parentElement.tagName;
+    if (["H1", "H2", "H3"].includes(parentTag)) {
+      el.dataset.translated = "true";
       return;
     }
   }
@@ -3726,6 +3756,7 @@ async function executeReScan(config) {
     const activeRules = resolveActiveSelectors(selectors);
     currentActiveSelectors = activeRules;
     if (config && config.forceAll) {
+      window.__mira_generic_covered = new Set();
       document.querySelectorAll(".kt-paragraph-translation").forEach((node) => {
         try {
           node.remove();
@@ -4471,8 +4502,8 @@ function initSelectionTranslate() {
         box-sizing:       border-box;
         min-height:       150px;
         max-height:       85vh;
-        min-width:        280px;
-        max-width:        450px;
+        max-width:        min(450px, calc(100vw - 20px)) !important;
+        min-width:        min(280px, calc(100vw - 20px)) !important;
         width:            fit-content;
         display:          flex;
         flex-direction:   column;
@@ -5712,8 +5743,11 @@ function initSelectionTranslate() {
 
     // 应用用户尺寸配置
     const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
-    popupEl.style.width = settings.width || "360px";
-    popupEl.style.maxWidth = settings.width || "360px";
+    const vw = window.visualViewport?.width || window.innerWidth;
+    const savedWidth = parseInt(settings.width) || 360;
+    const finalWidth = Math.min(savedWidth, vw - 20);
+    popupEl.style.width = finalWidth + "px";
+    popupEl.style.maxWidth = finalWidth + "px";
     popupEl.style.maxHeight = settings.height || "50vh";
 
     // 调整查询词字号
