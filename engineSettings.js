@@ -895,22 +895,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 渲染时识别 ---
             const noticeLines = t('builtInNoticeBody', uiLanguage, githubLink)
                 .split('\n')
-                .filter(line => line.trim())
+                .map(line => line.trim())
+                .filter(line => line)
                 .filter(line => {
                     if (!enable_pro_features && line.includes('🪄')) return false;
                     return true;
                 })
                 .map(line => {
-                    if (line.trim() === '---') {
-                        return `<hr style="border:0;border-top:2px solid #30363d;margin:12px 0;">`;
+                    if (line === '---') {
+                        //return `<hr style="border:0;border-top:1px solid #30363d;margin:32px 0;">`;
+                        return `<div class="bottom-bar" style="min-height:20px;" id="global-actions"></div>`;
                     }
+
                     const isRTL = checkRTL(uiLanguage);
+
+                    const emojiMatch = line.match(/^\p{Emoji}\uFE0F?/u);
+                    const emoji = emojiMatch ? emojiMatch[0] : '';
+                    const textWithoutEmoji = line.replace(/^\p{Emoji}\uFE0F?\s*/u, '');
+                    const finalizedText = textWithoutEmoji.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #f0f6fc; font-weight: 600;">$1</strong>');
+
                     return `
-                    <p dir="${isRTL ? 'rtl' : 'ltr'}" 
-                        style="color:#b0bac6; font-size:14px; line-height:1.8; margin:0 0 10px 0;
-                        ${isRTL ? 'text-align:right;' : ''}">
-                        ${line.match(/^\p{Emoji}/u)?.[0] ?? ''} ${line.replace(/^\p{Emoji}\s*/u, '')}
-                    </p>`;
+                        <p dir="${isRTL ? 'rtl' : 'ltr'}" 
+                            style="color:#b0bac6; font-size:14px; line-height:1.8; margin:0 0 10px 0;
+                            ${isRTL ? 'text-align:right;' : ''}">
+                            ${emoji ? `<span style="margin-right:6px;">${emoji}</span>` : ''}${finalizedText}
+                        </p>`;
                 }).join('');
             const builtInTemplate = `
                 <div class="main-header">
@@ -921,7 +930,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
                     <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
                     <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
-                    ${noticeLines}
+                    
+                    <div style="max-height: 460px;cursor: default; overflow-y: auto; padding-right: 5px;">
+                        ${noticeLines}
+                    </div>
+                    
                 </div>
                 <button id="activateBuiltIn" class="btn-save" style="margin-top:25px; display:none;">
                     ${t('enableEngineNow', uiLanguage)}
@@ -1140,8 +1153,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const color = tpl.color || '#38bdf8';
                         const rgb = hexToRgb(color);
                         const meta = tpl.meta || key.toUpperCase().substring(0, 6);
-                       //const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
-                       const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : '';
+                        //const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
+                        const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : '';
                         html += `
                     <div class="tpl-card" 
                          data-type="${key}" 

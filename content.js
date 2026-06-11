@@ -4960,7 +4960,7 @@ function initSelectionTranslate() {
       .p-eng-item:hover,
       .p-eng-subitem:hover {
         background: rgba(99, 102, 241, 0.12);
-        border-radius: 7px;
+        border-radius: 28px;
       }
       #p-engine-dropdown::-webkit-scrollbar {
         width: 4px;
@@ -5033,7 +5033,7 @@ function initSelectionTranslate() {
         gap: 4px;
         cursor: pointer;
         padding: 5px 7px;
-        border-radius: 8px;
+        border-radius: 28px;
         font-size: 12px;
         font-weight: 550;
         color: var(--p-accent);
@@ -6289,20 +6289,22 @@ function initSelectionTranslate() {
           ev.stopPropagation();
           dropdown.remove();
 
-          state.sourceLang = lang.value;
-          await safeSetStorage({ lpLangA: lang.value });
-          window.hintSourceLang = lang.value;
+          const selectedValue = (lang.value !== "auto" &&
+            lang.value.toLowerCase() === (window.currentTargetL || "").toLowerCase())
+            ? "auto"
+            : lang.value;
+
+          state.sourceLang = selectedValue;
+          await safeSetStorage({ lpLangA: selectedValue });
+          window.hintSourceLang = selectedValue;
 
           const srcSpan = shadow.getElementById("p-lang-src");
           if (srcSpan)
-            srcSpan.textContent =
-              lang.value === "auto"
-                ? "AUTO"
-                : lang.value.toUpperCase().slice(0, 2);
+            srcSpan.textContent = selectedValue === "auto"
+              ? "AUTO"
+              : selectedValue.toUpperCase().slice(0, 2);
 
-          shadow
-            .getElementById("p-refresh")
-            ?.onclick({ stopPropagation: () => { } });
+          shadow.getElementById("p-refresh")?.onclick({ stopPropagation: () => { } });
         });
         if (isCurrent && lang.type !== "sep") {
           el.style.color = colors.accent;
@@ -6343,6 +6345,16 @@ function initSelectionTranslate() {
           window.currentTargetL = lang.value;
           await safeSetStorage({ targetLanguage: lang.value });
 
+          const currentSrc = state.sourceLang || "auto";
+          if (currentSrc !== "auto" &&
+            currentSrc.toLowerCase() === lang.value.toLowerCase()) {
+            state.sourceLang = "auto";
+            window.hintSourceLang = "auto";
+            await safeSetStorage({ lpLangA: "auto" });
+            const srcSpan = shadow.getElementById("p-lang-src");
+            if (srcSpan) srcSpan.textContent = "AUTO";
+          }
+
           const tgtSpan = shadow.getElementById("p-lang-tgt-btn");
           if (tgtSpan) {
             const langVal = lang.value.toLowerCase();
@@ -6357,9 +6369,7 @@ function initSelectionTranslate() {
             contentContainer.style.textAlign = newIsRTL ? "right" : "left";
           }
 
-          shadow
-            .getElementById("p-refresh")
-            ?.onclick({ stopPropagation: () => { } });
+          shadow.getElementById("p-refresh")?.onclick({ stopPropagation: () => { } });
         });
 
         if (isCurrent && lang.type !== "sep") {
@@ -6594,7 +6604,7 @@ function initSelectionTranslate() {
     <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;margin-top:4px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
 
-        <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:8px; padding:3px;">
+        <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:28px; padding:3px;">
 
           <div id="p-lang-select" class="lang-tag-btn"
               style="font-size:11px; font-weight:700; color:var(--p-accent); user-select:none; -webkit-user-select:none;">
@@ -6693,7 +6703,10 @@ function initSelectionTranslate() {
     sourceLang = null,
   ) {
     if (!shadow || !res) return;
-
+    logger.log('[fillPopupData]', {
+      sourceLang,
+      rawPhonetic: res.sourcePhonetic || res.phonetic,
+    });
     const esc = (s) =>
       typeof s !== "string"
         ? ""
@@ -7300,8 +7313,7 @@ function initSelectionTranslate() {
       let isAlreadyTarget = false;
 
       if (sourceLang !== "auto") {
-        // 优先级1：用户已明确指定源语言，直接比对
-        isAlreadyTarget = (sourcePrefix === targetPrefix);
+        isAlreadyTarget = (sourceLang.toLowerCase() === targetLang.toLowerCase());
       } else {
         // 优先级2：从上下文检测语言
         let ctxLang = null;
@@ -7323,14 +7335,25 @@ function initSelectionTranslate() {
         }
 
         if (ctxLang !== null && !LATIN_BASED_LANGS.has(ctxLang)) {
-          // 非拉丁语系（日、韩、中、俄等） 直接信任
-          isAlreadyTarget = (ctxLang === targetPrefix);
+          const textLang = detectSourceLang(text);
+          if (textLang && textLang !== ctxLang) {
+            const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(text);
+            if (ctxLang === 'ja' && isPureCJK && targetPrefix === 'ja') {
+              isAlreadyTarget = true;
+            } else if (ctxLang === 'ja' && isPureCJK) {
+              // 上下文是日语，纯汉字大概率是日语词，不应该被 detectIsAlreadyTarget 误判为中文
+              // 直接认为不是目标语言，弹出翻译
+              isAlreadyTarget = false;
+            } else {
+              isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+            }
+          } else {
+            isAlreadyTarget = (ctxLang === targetPrefix);
+          }
         } else {
-          // 拉丁语系或上下文检测失败：降级到选中文字判断
           isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
         }
       }
-
       if (isAlreadyTarget) {
         forceHideLogo();
         return;
@@ -7422,9 +7445,23 @@ function initSelectionTranslate() {
             } catch (e) { }
           }
 
-          const detectedSourceLang = currentSource !== 'auto'
-            ? currentSource
-            : (detectSourceLang(ctxForDetect || finalQuery) || "auto");
+          const textLang = detectSourceLang(finalQuery);
+          const ctxLang = detectSourceLang(ctxForDetect || '');
+
+          let detectedSourceLang;
+          if (currentSource !== 'auto') {
+            detectedSourceLang = currentSource;
+          } else if (textLang && ctxLang && textLang !== ctxLang) {
+            const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(finalQuery);
+            if (ctxLang === 'ja' && isPureCJK) {
+              // 日语上下文里的纯汉字，应该是日语词，不是中文
+              detectedSourceLang = 'ja';
+            } else {
+              detectedSourceLang = textLang;
+            }
+          } else {
+            detectedSourceLang = ctxLang || textLang || "auto";
+          }
 
           //  上下文捕获：使用提前克隆好的 savedRange
           if (!shadowHost) initShadowDOM();

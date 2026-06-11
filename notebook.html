@@ -30,7 +30,7 @@
 
     .search-bar-wrapper {
       flex: 1;
-      max-width: 600px;
+      max-width: 485px;
       position: relative;
       margin-bottom: 0;
       display: inline-block;
@@ -92,7 +92,7 @@
 
     .btn {
       padding: 8px 16px;
-      border-radius: 6px;
+      border-radius: 28px;
       border: none;
       cursor: pointer;
       font-weight: 500;
@@ -157,7 +157,7 @@
 
     .add-box {
       background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(235, 234, 234, 0.11);
       box-shadow: none;
       padding: 12px;
       border-radius: 12px;
@@ -187,7 +187,25 @@
 
     #transInp {
       flex: 0.618 1 0;
+      resize: none;
+      overflow: hidden;
+      transition: height 0.2s;
+      background: #020617;
+      border: 1px solid #334155;
+      color: white;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+      margin: 0;
+      height: 40px;
+      min-height: 40px;
     }
+
 
     #wordInp,
     #transInp {
@@ -199,6 +217,7 @@
     #transInp:focus {
       border-color: rgba(56, 189, 248, 0.5);
       background: rgba(56, 189, 248, 0.04);
+      outline: none;
     }
 
     table {
@@ -358,7 +377,7 @@
       gap: 6px;
       background: rgba(239, 68, 68, 0.1);
       border: 1px dashed #ef4444;
-      border-radius: 4px;
+      border-radius: 28px;
       padding: 4px;
       width: 85px;
       box-sizing: border-box;
@@ -555,12 +574,14 @@
     <div dir="auto" class="header">
       <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
       <div style="display: flex; gap: 12px; align-items: center;">
+        <span id="syncStatus" style="font-size: 12px; color: #94a3b8;"></span>
         <button id="exportBtn" class="btn btn-export" data-i18n="exportCSV">导出 CSV</button>
       </div>
     </div>
     <div class="add-box" dir="auto">
       <input type="text" id="wordInp" data-i18n="word" data-i18n-type="placeholder" placeholder="New word...">
-      <input type="text" id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning...">
+      <textarea id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning..." rows="1"
+        style="resize: none; overflow: hidden; transition: height 0.2s; field-sizing: content;"></textarea>
       <button id="addBtn" class="btn btn-primary" data-i18n="manualAdd">手动添加</button>
     </div>
 
@@ -579,7 +600,7 @@
       <!--  高亮开关 -->
       <label class="highlight-label"
         style="display:flex;align-items:center;gap:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;">
-        <span style="color:#94a3b8; font-size:15px;" data-i18n="highlightVocab">在网页高亮生词</span>
+        <span style="color:#94a3b8; font-size:14px;" data-i18n="highlightVocab">在网页高亮生词</span>
         <div id="highlightToggle" style="
       width:36px; height:20px; border-radius:999px; 
       background:#334155; cursor:pointer; position:relative;

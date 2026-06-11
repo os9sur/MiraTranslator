@@ -18,7 +18,7 @@
     --text-dim: #94a3b8;
     --glow-blue: 0 0 15px rgba(56, 189, 248, 0.3);
     --radius-m: 10px;
-    --radius-s: 7px;
+    --radius-s: 28px;
     --radius-L: 50px;
 }
 
@@ -86,7 +86,7 @@ body {
 
 .app-container {
     display: flex;
-    width: 1000px;
+    width: 1150px;
     max-width: 1150px;
     height: 88%;
     background: rgba(15, 23, 42, 0.9) !important;
@@ -270,7 +270,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.025);
+    background: rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-s);
     margin-bottom: 16px;
     border: 1px solid rgba(255, 255, 255, 0.03);
@@ -524,7 +524,7 @@ body {
     height: 44px;
     background: rgba(15, 23, 42, 0.6) !important;
     border: none !important;
-    border-radius: 12px !important;
+    border-radius: 28px !important;
     color: rgba(148, 163, 184, 1) !important;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -542,7 +542,7 @@ body {
     content: '';
     position: absolute;
     inset: -2px;
-    border-radius: 12px;
+    border-radius: 28px;
     background: linear-gradient(90deg, 
         rgba(255, 255, 255, 0) 0%,
         #00f0ff 30%, 
@@ -560,7 +560,7 @@ body {
     content: '';
     position: absolute;
     inset: 2px;
-    border-radius: 10px;
+    border-radius: 28px;
     background: rgba(15, 23, 42, 0.95);
     z-index: -1;
 }
@@ -570,6 +570,7 @@ body {
     color: #ffffff !important;
     border: 1px solid rgba(59, 130, 246, 0.3) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 28px;
 }
 
 .btn-add-trigger:active {
@@ -1403,7 +1404,7 @@ body {
     box-sizing: border-box;
     background: #0d1117;
     border: 1px solid #30363d;
-    border-radius: 8px;
+    border-radius: 20px;
     color: #c9d1d9;
     font-size: 12.5px;
     font-family: inherit;
@@ -1472,7 +1473,7 @@ body {
     align-items: center;
     gap: 6px;
     padding: 7px 16px;
-    border-radius: 8px;
+    border-radius: 28px;
     border: none;
     cursor: pointer;
     font-size: 12.5px;

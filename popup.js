@@ -1051,6 +1051,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateSyncProgressUI(btn.id, '', false);
     }
   }
+  
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.lastSyncTime) {
+        updateSyncStatusUI(changes.lastSyncTime.newValue);
+    }
+});
   function updateSyncStatusUI(time) {
     const statusEl = document.getElementById('syncStatus');
     if (!statusEl) return;
