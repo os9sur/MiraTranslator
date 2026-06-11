@@ -363,11 +363,27 @@ async function handleSyncFlow(message, sendResponse) {
             if (!token) throw new Error("Unauthorized, please connect your Google account first.");
             logger.log("[Mira-TRACE] 3. 执行 Google Drive 同步...");
             resultData = await syncWithGoogleDrive(token, direction);
-        } else if (method === 'oneDrive') {
-            let token = data.onedrive_token;
-            if (!token) throw new Error("Unauthorized, please connect your Microsoft account first.");
-            logger.log("[Mira-TRACE] 3. 执行 OneDrive 同步...");
-            resultData = await syncWithOneDrive(token, direction);
+        }
+        else if (config.method === 'oneDrive') {
+            try {
+                let token = data.onedrive_token;
+                if (!token) throw new Error('Unauthorized');
+                await syncWithOneDrive(token, 'push');
+                notifySyncSuccess('onedrive');
+            } catch (e) {
+                if (e.message.includes('401') || e.message.includes('Unauthorized')) {
+                    try {
+                        const newToken = await getOneDriveTokenSilent();
+                        await safeSetStorage({ onedrive_token: newToken });
+                        await syncWithOneDrive(newToken, 'push');
+                        notifySyncSuccess('onedrive');
+                    } catch (silentErr) {
+                        logger.warn("❌ [Mira-Sync] OneDrive 静默刷新失败，需要重新登录");
+                    }
+                } else {
+                    throw e;
+                }
+            }
         } else if (method === 'webdav') {
             logger.log("[Mira-TRACE] 3. 执行 WebDAV 同步...");
             resultData = await syncWithWebDAV(config, direction);
@@ -2391,7 +2407,7 @@ const Translators = {
                     source: 'Google'
                 };
             }
-            logger.log('[Google] 翻译结果:', basic, 'phonetic:', phonetic, 'dictData:', dictData, 'examples:', examples, 'sourcePhonetic:', sourcePhonetic, 'targetPhonetic:', targetPhonetic);
+            //  logger.log('[Google] 翻译结果:', basic, 'phonetic:', phonetic, 'dictData:', dictData, 'examples:', examples, 'sourcePhonetic:', sourcePhonetic, 'targetPhonetic:', targetPhonetic);
             return await Translators._withDictDetail(
                 basic,          // 翻译结果
                 query,          // 原文
@@ -3478,7 +3494,9 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         return { error: e.message || "Translation failed" };
     }
 }
-checkStatusAndSetup();
+
+// Auto Sync 逻辑
+
 async function checkStatusAndSetup() {
     try {
         const data = await safeGetStorage(null);
@@ -3494,7 +3512,7 @@ async function checkStatusAndSetup() {
         const isAuto = data.autoSync === true || data.autoSync === 'true';
         if (isAuto) {
             logger.log("✅ [状态确认] 自动同步开关为【开启】状态");
-            setupAlarmLogic(data.syncConfig);
+            await setupAlarmLogic(data.syncConfig);
         } else {
             logger.log("zzz [状态确认] 自动同步开关为【关闭】状态");
             if (chrome.alarms && chrome.runtime?.id) {
@@ -3509,19 +3527,31 @@ async function checkStatusAndSetup() {
         }
     }
 }
-function setupAlarmLogic(syncConfig) {
-    chrome.alarms.clear('autoSyncAlarm');
+checkStatusAndSetup();
+async function setupAlarmLogic(syncConfig) {
     let freq = 60;
     if (syncConfig && syncConfig.frequency) {
         freq = parseInt(syncConfig.frequency) || 60;
     }
-    chrome.alarms.create('autoSyncAlarm', { periodInMinutes: freq });
+
+    const existing = await chrome.alarms.get('autoSyncAlarm');
+    if (existing && existing.periodInMinutes === freq) {
+        logger.log(`📅 [定时器] 闹钟已存在，无需重建，周期: ${freq} 分钟`);
+        return;
+    }
+
+    await chrome.alarms.clear('autoSyncAlarm');
+    chrome.alarms.create('autoSyncAlarm', {
+        delayInMinutes: freq,
+        periodInMinutes: freq
+    });
     logger.log(`📅 [定时器] 闹钟已设定，周期: ${freq} 分钟`);
 }
+
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local' && (changes.autoSync || changes.syncConfig)) {
         checkStatusAndSetup();
-        if (changes.autoSync?.newValue === true) {
+        if (changes.autoSync?.newValue === true || changes.autoSync?.newValue === 'true') {
             logger.log("🚀 [指令] 用户刚刚开启开关，立即执行同步...");
             executeSyncTask();
         }
@@ -3532,6 +3562,10 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         executeSyncTask();
     }
 });
+
+function notifySyncSuccess() {
+    chrome.storage.local.set({ lastSyncTime: Date.now() });
+}
 async function executeSyncTask() {
     logger.log("🔄 [Mira-Sync] S0. 触发自动同步检查...");
     const data = await safeGetStorage(['syncConfig', 'autoSync']);
@@ -3541,7 +3575,8 @@ async function executeSyncTask() {
         autoSync: data.autoSync
     });
     const config = data.syncConfig;
-    if (!data.autoSync || !config) {
+    const isAuto = data.autoSync === true || data.autoSync === 'true';
+    if (!isAuto || !config) {
         logger.warn("🛑 [Mira-Sync] 同步跳过: 未开启或配置缺失");
         return;
     }
@@ -3549,8 +3584,9 @@ async function executeSyncTask() {
         if (config.method === 'webdav') {
             logger.log("📡 [Mira-Sync] S2. 进入 WebDAV 路径");
             await syncWithWebDAV(config, 'push');
+            notifySyncSuccess('webdav');
         }
-        else if (config.method === 'google') {
+        else if (config.method === 'google' || config.method === 'googleDrive') {
             logger.log("📡 [Mira-Sync] S2. 进入 Google Drive 路径");
             if (typeof chrome.identity !== 'undefined' && chrome.runtime?.id) {
                 chrome.identity.getAuthToken({ interactive: false }, async (token) => {
@@ -3561,6 +3597,7 @@ async function executeSyncTask() {
                     }
                     if (token) {
                         await syncWithGoogleDrive(token, 'push');
+                        notifySyncSuccess('google');
                     }
                 });
             }

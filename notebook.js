@@ -46,10 +46,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   const wordInp = document.getElementById('wordInp');
   const transInp = document.getElementById('transInp');
   const storage = await safeGetStorage('ui_language');
+  requestAnimationFrame(() => {
+    transInp.style.height = wordInp.offsetHeight + 'px';
+    transInp.style.minHeight = wordInp.offsetHeight + 'px';
+  });
+  transInp.addEventListener('focus', () => {
+    transInp.rows = 4;
+  });
+
+  transInp.addEventListener('blur', () => {
+    if (!transInp.value.trim()) {
+      transInp.rows = 1;
+    }
+  });
+
+  // 自动撑高（输入内容超过4行时继续增高）
+  transInp.addEventListener('input', () => {
+    transInp.style.height = 'auto';
+    transInp.style.height = transInp.scrollHeight + 'px';
+  });
+
   // 读取高亮开关状态
   const highlightStorage = await safeGetStorage('vocabHighlight');
   let highlightEnabled = highlightStorage?.vocabHighlight || false;
 
+  const syncRes = await safeGetStorage('lastSyncTime');
+  if (syncRes?.lastSyncTime) {
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = `${t('lastSync')} ${new Date(syncRes.lastSyncTime).toLocaleString()}`;
+  }
   const toggle = document.getElementById('highlightToggle');
   const thumb = document.getElementById('highlightThumb');
 
@@ -792,6 +817,141 @@ document.addEventListener('DOMContentLoaded', async () => {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.lastSyncTime) {
+      renderTable();
+      const el = document.getElementById('syncStatus');
+      if (el) el.textContent = `${t('lastSync')} ${new Date(changes.lastSyncTime.newValue).toLocaleString()}`;
+    }
+  });
+
+  // 鼠标手势
+  let mouseGesture = { active: false, startX: 0, startY: 0 };
+  let gesturePath = null;
+  let gestureArrow = null;
+  let gestureLabel = null;
+  let gestureSvg = null;
+  let gesturePoints = [];
+
+  function createGestureOverlay() {
+    // SVG 路径层
+    gestureSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    Object.assign(gestureSvg.style, {
+      position: 'fixed', top: 0, left: 0,
+      width: '100%', height: '100%',
+      pointerEvents: 'none', zIndex: 99999
+    });
+    gesturePath = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    gesturePath.setAttribute('fill', 'none');
+    gesturePath.setAttribute('stroke', '#39ff14');
+    gesturePath.setAttribute('stroke-width', '2.5');
+    gesturePath.setAttribute('stroke-linecap', 'round');
+    gesturePath.setAttribute('stroke-linejoin', 'round');
+    gesturePath.setAttribute('opacity', '0.85');
+    gestureSvg.appendChild(gesturePath);
+    document.body.appendChild(gestureSvg);
+
+    // 箭头提示
+    gestureArrow = document.createElement('div');
+    Object.assign(gestureArrow.style, {
+      position: 'fixed', pointerEvents: 'none', zIndex: 100000,
+      fontSize: '28px', lineHeight: 1, opacity: 0,
+      transition: 'opacity 0.15s',
+      filter: 'drop-shadow(0 0 6px #39ff14)',
+      color: '#39ff14',
+    });
+    document.body.appendChild(gestureArrow);
+
+    // 文字提示
+    gestureLabel = document.createElement('div');
+    Object.assign(gestureLabel.style, {
+      position: 'fixed', pointerEvents: 'none', zIndex: 100000,
+      fontSize: '13px', fontFamily: 'monospace',
+      color: '#39ff14', opacity: 0,
+      transition: 'opacity 0.15s',
+      background: 'rgba(0,0,0,0.55)',
+      padding: '3px 10px', borderRadius: '6px',
+      border: '1px solid #39ff1455',
+      letterSpacing: '0.04em',
+      filter: 'drop-shadow(0 0 4px #39ff1488)',
+    });
+    document.body.appendChild(gestureLabel);
+  }
+
+  function removeGestureOverlay() {
+    gestureSvg?.remove();
+    gestureArrow?.remove();
+    gestureLabel?.remove();
+    gestureSvg = gesturePath = gestureArrow = gestureLabel = null;
+    gesturePoints = [];
+  }
+
+  function updateGestureUI(curX, curY) {
+    if (!gesturePath) return;
+    gesturePoints.push(`${curX},${curY}`);
+    gesturePath.setAttribute('points', gesturePoints.join(' '));
+
+    const dy = curY - mouseGesture.startY;
+    const dx = curX - mouseGesture.startX;
+    const isVertical = Math.abs(dy) > Math.abs(dx);
+    const triggered = Math.abs(dy) >= 60 && isVertical;
+
+    // 箭头
+    if (triggered) {
+      gestureArrow.textContent = dy < 0 ? '↑' : '↓';
+      gestureArrow.style.opacity = '0';
+      gestureArrow.style.left = `${curX + 16}px`;
+      gestureArrow.style.top = `${curY - 18}px`;
+
+      gestureLabel.textContent = dy < 0 ? '⬆ Scroll to Top of notebook' : '⬇ Scroll to Bottom of notebook';
+      gestureLabel.style.opacity = '1';
+      gestureLabel.style.left = `${curX + 16}px`;
+      gestureLabel.style.top = `${curY + 10}px`;
+    } else {
+      gestureArrow.style.opacity = '0';
+      gestureLabel.style.opacity = '0';
+    }
+  }
+
+  document.addEventListener('mousedown', (e) => {
+    if (e.button !== 2) return;
+    mouseGesture.active = true;
+    mouseGesture.startX = e.clientX;
+    mouseGesture.startY = e.clientY;
+    gesturePoints = [];
+    createGestureOverlay();
+    updateGestureUI(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    if (!mouseGesture.active) return;
+    updateGestureUI(e.clientX, e.clientY);
+  });
+
+  document.addEventListener('mouseup', (e) => {
+    if (!mouseGesture.active || e.button !== 2) return;
+    const dy = e.clientY - mouseGesture.startY;
+    const dx = e.clientX - mouseGesture.startX;
+    mouseGesture.active = false;
+    removeGestureOverlay();
+
+    if (Math.abs(dy) < 60 || Math.abs(dx) > Math.abs(dy)) return;
+    if (dy < 0) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  });
+
+  document.addEventListener('contextmenu', (e) => {
+    const dy = e.clientY - mouseGesture.startY;
+    const dx = e.clientX - mouseGesture.startX;
+    if (Math.abs(dy) >= 60 && Math.abs(dy) > Math.abs(dx)) {
+      e.preventDefault();
+    }
+  });
+
   function appendDots() {
     const targets = ['wordInp', 'transInp'];
     targets.forEach(id => {

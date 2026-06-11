@@ -545,7 +545,7 @@ function t(key, forcedLang) {
       'pt-BR': '<span style="display: block; padding-left: 20px;">Compatível com qualquer serviço no formato OpenAI API (em nuvem ou local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locais (Ollama / LM Studio, etc.), atente-se ao seguinte:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① É necessária uma placa de vídeo dedicada; o uso de gráficos integrados ou CPU causará tempos limite (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② É necessário habilitar o CORS: defina a variável de ambiente OLLAMA_ORIGINS=* para o Ollama ou ative a opção CORS nas configurações do LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Modelos locais não precisam de API Key — deixe o campo em branco.</span>',
 
       'es': '<span style="display: block; padding-left: 20px;">Compatible con cualquier servicio en formato OpenAI API (en la nube o local).</span><br /><span style="display: block; padding-left: 20px;">Para modelos locales (Ollama / LM Studio, etc.), tenga en cuenta lo siguiente:</span><span style="display: block; padding-left: 20px; margin-top: 4px;">① Se requiere una tarjeta gráfica dedicada; el uso de gráficos integrados o CPU provocará tiempos de espera (timeouts) severos.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">② Es necesario habilitar el CORS: configure la variable de entorno OLLAMA_ORIGINS=* para Ollama o active la opción CORS en los ajustes de LM Studio / Jan.</span><span style="display: block; padding-left: 20px; margin-top: 2px;">③ Los modelos locales no requieren API Key — deje el campo en blanco.</span>',
-      
+
       'ar': '<span style="display: block; padding-right: 20px;">متوافق مع أي تنسيق OpenAI API (سحابي أو محلي).</span><br /><span style="display: block; padding-right: 20px;">للنماذج المحلية (Ollama / LM Studio وغيرها):</span><span style="display: block; padding-right: 20px; margin-top: 4px;">① مطلوب GPU مخصص (iGPU/CPU يسبب انتهاء مهلة شديد).</span><span style="display: block; padding-right: 20px; margin-top: 2px;">② تفعيل CORS: اضبط OLLAMA_ORIGINS=* لـ Ollama، أو فعّل CORS في الإعدادات لـ LM Studio / Jan.</span><span style="display: block; padding-right: 20px; margin-top: 2px;">③ لا يلزم مفتاح API للنماذج المحلية — اتركه فارغًا.</span>',
     },
   };
@@ -1962,20 +1962,11 @@ const LANGS = [
   // --- 东亚 East Asia ---
   { type: 'sep', label: '—— East Asia ——' },
   { value: 'zh-CN', label: 'Chinese Simplified (简体中文)', en: 'Chinese Simplified' },
-  {
-    value: 'zh-TW',
-    label: 'Taiwan (繁體中文)',
-    en: 'Traditional Chinese (Taiwan)'
-  },
-  {
-    value: 'zh-HK',
-    label: 'Hong Kong (繁體中文)',
-    en: 'Traditional Chinese (Hong Kong)'
-  },
+  { value: 'zh-HK', label: 'Hong Kong (繁體中文)', en: 'Traditional Chinese (Hong Kong)'},
   { value: 'ja', label: 'Japanese (日本語)', en: 'Japanese' },
   { value: 'ko', label: 'Korean (한국어)', en: 'Korean' },
   { value: 'mn', label: 'Mongolian (Монгол хэл)', en: 'Mongolian' },
-
+  { value: 'zh-TW', label: 'Taiwan (繁體中文)', en: 'Traditional Chinese (Taiwan)' },
   // --- 欧洲与美洲 Europe & America ——
   { type: 'sep', label: '—— Europe & America ——' },
   { value: 'sq', label: 'Albanian (Shqip)', en: 'Albanian' },

@@ -104,10 +104,15 @@
       user-select: text !important;
     }
 
+    .style-tab {
+      border-radius: 28px;
+    }
+
     .style-tab.active {
       background: #38bdf8 !important;
       color: #020617 !important;
       font-weight: bold;
+      border-radius: 28px;
     }
 
     @keyframes eclipse-glow-refined {
@@ -149,12 +154,34 @@
       background: rgba(59, 130, 246, 0.25);
       transform: scale(0.95);
     }
+
+    .rounded-color-input {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 39px;
+      height: 21px;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+      border: none;
+      border-radius: 28px;
+      overflow: hidden;
+    }
+
+    .rounded-color-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .rounded-color-input::-webkit-color-swatch {
+      border: none;
+      border-radius: 28px;
+    }
   </style>
 </head>
 
 <body>
   <!-- 第一次使用欢迎提示 -->
-  <div id="welcome-guide"
+  <!-- <div id="welcome-guide"
     style="display: none; position: fixed; inset: 0; background: rgba(13, 17, 23, 0.95); backdrop-filter: blur(10px); z-index: 10000; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; box-sizing: border-box; overflow-y: auto;">
 
     <div style="text-align: center; margin-top: 7vh; margin-bottom: 20px; width: 100%;">
@@ -184,10 +211,10 @@
       <p data-i18n="changeSetting" style="color: #484f58; font-size: 11px; margin-top: 20px;">You can change this
         anytime in settings.</p>
     </div>
-  </div>
+  </div> -->
   <!-- 查单词开始 -->
   <div id="searchPanel"
-    style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 110; display: none; padding: 8px; box-sizing: border-box; flex-direction: column; border-radius: 10px;">
+    style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 110; display: none; padding: 8px; box-sizing: border-box; flex-direction: column; border-radius: 28px;">
     <div
       style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
       <div style="display: flex; align-items: center; gap: 6px;">
@@ -374,8 +401,8 @@
             <span id="avatarInitial"></span>
           </button>
 
-          <div id="advancedSettingsBtn" class="icon-action-btn" style="border-width: 1.3px !important;" data-i18n="moreSettings" data-i18n-title
-            title="Advanced settings">
+          <div id="advancedSettingsBtn" class="icon-action-btn" style="border-width: 1.3px !important;"
+            data-i18n="moreSettings" data-i18n-title title="Advanced settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -477,7 +504,7 @@
       🌐 <span id="currentDomain">loading...</span>
     </div>
     <div id="restrictedHint"
-      style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px 20px; text-align: center;">
+      style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 11px 20px; text-align: center;">
       <svg viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round" style="width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5;">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -563,43 +590,45 @@
 
       <select id="targetLang"
         style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;"></select>
-    </div> 
-<div id="inspectContainer" class="row-group" style="margin-top: 3px;margin-bottom: 10px; border-top: 1.5px dashed #334155; padding-top: 8px;">
-  
-  <div id="inspectHeader" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 5px 6px; user-select: none;border-radius:6px;">
-    <div id="inspectElementLabel" data-i18n="personalizedScan" dir="auto" style="font-size: 13px;">
-      个性化扫描配置 (失去焦点自动保存)
     </div>
-    <span id="inspectArrow">▶</span>
-    
-  </div>
+    <div id="inspectContainer" class="row-group"
+      style="margin-top: 3px;margin-bottom: 10px; border-top: 1.5px dashed #334155; padding-top: 8px;">
 
-  <div id="inspectContent" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
-    <button id="inspectElement"
-      style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; padding-right: 1px; cursor: pointer;">
-      <span style="position: absolute; left: 6px; font-size: 1.2rem; line-height: 1; pointer-events: none;">
-        🔍
-      </span>
-      <span data-i18n="smartPicker" dir="auto"
-        style="display: block; font-size: 13px; text-align: center; line-height: 1.3; unicode-bidi: plaintext;">
-        开启智能拾取器<br>(ESC/右键 退出)
-      </span>
-    </button>
-    <div class="row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <label data-i18n="matchSelector" style="font-size: 11px; color: #94a3b8;">生效列表 (CSS 选择器)</label>
-        <span id="builtinRuleHint" data-i18n="builtinRuleHint" data-i18n-title title="此网站已有内置规则，当前配置优先于全局默认"
-          style="display:none; width:14px; height:14px; border-radius:50%; background:rgb(59 130 246 / 78%); color:rgb(252 246 246 / 80%); font-size:10px; font-weight:bold; text-align:center; line-height:14px; cursor:help; font-style:normal; flex-shrink:0; vertical-align:middle; position:relative;box-shadow: 0 0 4px 1px rgba(59,130,246,0.35), 0 0 8px 2px rgba(59,130,246,0.15);animation: mira-pulse 2s ease-in-out infinite;">?</span>
-        <button id="btnResetToBuiltin" title="reset" data-i18n="resetBuildinRules" style="display:none;">
-          ↺ reset
-        </button>
+      <div id="inspectHeader"
+        style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 5px 6px; user-select: none;border-radius:6px;">
+        <div id="inspectElementLabel" data-i18n="personalizedScan" dir="auto" style="font-size: 13px;">
+          个性化扫描配置 (失去焦点自动保存)
+        </div>
+        <span id="inspectArrow">▶</span>
+
       </div>
-      <textarea id="conf-selectors" class="mira-input-terminal"
-        style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; white-space: nowrap !important; font-family: monospace;resize: none !important; width: 100%; box-sizing: border-box;">
+
+      <div id="inspectContent" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
+        <button id="inspectElement"
+          style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; padding-right: 1px; cursor: pointer;">
+          <span style="position: absolute; left: 6px; font-size: 1.2rem; line-height: 1; pointer-events: none;">
+            🔍
+          </span>
+          <span data-i18n="smartPicker" dir="auto"
+            style="display: block; font-size: 13px; text-align: center; line-height: 1.3; unicode-bidi: plaintext;">
+            开启智能拾取器<br>(ESC/右键 退出)
+          </span>
+        </button>
+        <div class="row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <label data-i18n="matchSelector" style="font-size: 11px; color: #94a3b8;">生效列表 (CSS 选择器)</label>
+            <span id="builtinRuleHint" data-i18n="builtinRuleHint" data-i18n-title title="此网站已有内置规则，当前配置优先于全局默认"
+              style="display:none; width:14px; height:14px; border-radius:50%; background:rgb(59 130 246 / 78%); color:rgb(252 246 246 / 80%); font-size:10px; font-weight:bold; text-align:center; line-height:14px; cursor:help; font-style:normal; flex-shrink:0; vertical-align:middle; position:relative;box-shadow: 0 0 4px 1px rgba(59,130,246,0.35), 0 0 8px 2px rgba(59,130,246,0.15);animation: mira-pulse 2s ease-in-out infinite;">?</span>
+            <button id="btnResetToBuiltin" title="reset" data-i18n="resetBuildinRules" style="display:none;">
+              ↺ reset
+            </button>
+          </div>
+          <textarea id="conf-selectors" class="mira-input-terminal"
+            style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; white-space: nowrap !important; font-family: monospace;resize: none !important; width: 100%; box-sizing: border-box;">
     </textarea>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
     <div id="minCharsContainer" dir="auto" class="row" style="margin-bottom: 3px;margin-top: 3px;">
       <label data-i18n="minChars" style="font-size: 11px;color:#94a3b8;">最小字数</label>
       <input type="number" id="conf-minlen" min="0" style="
@@ -828,7 +857,7 @@
           style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">STORAGE
           PROVIDER</label>
         <select id="syncMethod" class="select"
-          style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #e5e7eb; padding: 8px; border-radius: 6px;">
+          style="width: 100%; background: #0f172a; border: 1px solid #334155; color: #e5e7eb; padding: 8px; border-radius: 16px;">
           <option value="googleDrive">Google Drive</option>
           <option value="oneDrive">OneDrive</option>
           <option value="webdav">WebDAV (NAS...)</option>
@@ -851,7 +880,7 @@
         <input type="password" id="webdavPass" placeholder="App Password" class="api-input-field">
       </div>
       <div dir="auto"
-        style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(56, 189, 248, 0.2);">
+        style="background: rgba(56, 189, 248, 0.05); padding: 15px; border-radius: 28px; border: 1px solid rgba(56, 189, 248, 0.2);">
         <div class="row" style="margin-bottom: 12px; border-bottom: none; padding-top: 0;">
           <label data-i18n="autoBackgroundSync" style="font-size: 13px; color: #f1f5f9;">自动后台同步</label>
           <div id="autoSyncToggle" class="switch" style="transform: scale(0.85);">
@@ -862,7 +891,7 @@
           style="display: flex; justify-content: space-between; align-items: center; opacity: 0.5; pointer-events: none; transition: all 0.3s;">
           <label data-i18n="syncFrequency" style="font-size: 11px; color: #94a3b8;">同步频率</label>
           <select id="syncFrequency"
-            style="background: #0f172a; border: 1px solid #334155; color: #38bdf8; font-size: 11px; border-radius: 4px; padding: 2px 6px;">
+            style="background: #0f172a; border: 1px solid #334155; color: #38bdf8; font-size: 11px; border-radius: 16px; padding: 2px 6px;">
             <!-- <option   value="1">每 1 分钟</option> -->
             <option data-i18n="every15Minutes" value="15">每 15 分钟</option>
             <option data-i18n="everyHour" value="60">每小时</option>
@@ -876,12 +905,12 @@
         <div class="sync-actions-footer" style="margin-top: auto; padding-top: 15px;">
           <div style="display: flex; gap: 10px;">
             <button id="manualSyncPush" class="cool-test-btn"
-              style="flex: 1; margin: 0; font-size: 13px;border-width: 1.5px !important;border-radius: 10px; padding: 10px 5px; flex-direction: column;">
+              style="flex: 1; margin: 0; font-size: 13px;border-width: 1.5px !important;border-radius: 28px; padding: 10px 5px; flex-direction: column;">
               <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
               <div class="sync-log-scroller"></div>
             </button>
             <button id="manualSyncPull" class="cool-test-btn"
-              style="flex: 1; margin: 0; font-size: 13px; background: rgba(16, 185, 129, 0.1);border-width: 1.5px !important; border-radius: 10px; border-color: #10b981; color: #10b981; padding: 10px 5px; flex-direction: column;">
+              style="flex: 1; margin: 0; font-size: 13px; background: rgba(16, 185, 129, 0.1);border-width: 1.5px !important; border-radius: 28px; border-color: #10b981; color: #10b981; padding: 10px 5px; flex-direction: column;">
               <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
               <div class="sync-log-scroller"></div>
             </button>
@@ -910,23 +939,24 @@
         CUSTOMIZATION</span>
     </div>
     <div
-      style="display: flex; background: #0f172a; border-radius: 8px; padding: 3px; margin-bottom: 15px; border: 1px solid #334155; flex-shrink: 0;">
+      style="display: flex; background: #0f172a; border-radius: 28px; padding: 3px; margin-bottom: 15px; border: 1px solid #334155; flex-shrink: 0;">
       <div id="tab-web" class="style-tab active"
-        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer; border-radius:6px; transition:0.3s;">
+        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer; transition:0.3s;">
         <span data-i18n="webTranslation">网页翻译</span>
       </div>
       <div id="tab-yt" class="style-tab"
-        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer; border-radius:6px; transition:0.3s; color:#94a3b8;">
+        style="flex:1; text-align:center; padding:6px; font-size:11px; cursor:pointer;  transition:0.3s; color:#94a3b8;">
         <span data-i18n="youtubeSubtitles">YouTube 字幕</span>
       </div>
     </div>
     <div id="stylePreviewContainer"
-      style="background: #0f172a; padding: 15px; border-radius: 8px; margin-bottom: 15px; min-height: 85px; display: flex; align-items: center; justify-content: center; border: 1px dashed #334155; position: relative; overflow: hidden;">
+      style="background: #0f172a; padding: 15px; border-radius: 28px; margin-bottom: 15px; min-height: 85px; display: flex; align-items: center; justify-content: center; border: 1px dashed #334155; position: relative; overflow: hidden;">
       <div id="preview-web-box" style="display: block; width: 100%;">
         <!-- <div
           style="font-size: 11px; color: #64748b; margin-bottom: 4px; border-left: 2px solid #334155; padding-left: 8px;">
           The climate is changing.</div> -->
-        <div id="webPreviewText" data-i18n="translationExampleWeb" style="transition: all 0.3s ease;">Time flies...
+        <div id="webPreviewText" data-i18n="translationExampleWeb"
+          style="transition: all 0.3s ease;display: inline-block;">Time flies...
         </div>
       </div>
       <div id="preview-yt-box" style="display: none; width: 100%; text-align: center;">
@@ -944,15 +974,15 @@
           style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <div class="color-preset" data-color="#60a5fa"
-            style="width:20px; height:20px; border-radius:4px; background:#60a5fa; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#60a5fa; cursor:pointer;"></div>
           <div class="color-preset" data-color="#10b981"
-            style="width:20px; height:20px; border-radius:4px; background:#10b981; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#10b981; cursor:pointer;"></div>
           <div class="color-preset" data-color="#f59e0b"
-            style="width:20px; height:20px; border-radius:4px; background:#f59e0b; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#f59e0b; cursor:pointer;"></div>
           <div class="color-preset" data-color="#ef4444"
-            style="width:20px; height:20px; border-radius:4px; background:#ef4444; cursor:pointer;"></div>
-          <input type="color" id="style-color" value="#60a5fa"
-            style="border:none; width:42px; height:24px; background:none; cursor:pointer; padding:0;">
+            style="width:20px; height:20px; border-radius:28px; background:#ef4444; cursor:pointer;"></div>
+          <input type="color" id="style-color" class="rounded-color-input" value="#60a5fa"
+            style="border:none;background:none; cursor:pointer; padding:0;">
         </div>
       </div>
       <div style="margin-bottom: 12px; display: none;" dir="auto">
@@ -963,7 +993,7 @@
         <input type="range" id="style-fontSize" min="8" max="40" step="1" value="16"
           style="width: 100%; accent-color: #38bdf8;">
       </div>
-      <div style="margin-bottom: 12px; display: flex; gap: 10px;align-items: flex-end;" dir="auto">
+      <div style="margin-bottom: 12px; display: flex; gap: 13px;align-items: flex-end;" dir="auto">
         <div style="flex: 1;">
           <label data-i18n="borderStyle"
             style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">边框样式</label>
@@ -988,12 +1018,13 @@
         <div style="width: 100%;">
           <label data-i18n="borderColor"
             style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 4px;margin-left: 3px;">边框颜色</label>
-          <input type="color" id="style-borderColor" value="#38bdf8"
-            style="border:none; width:33%; height:26px; background:none; cursor:pointer;">
+          <input type="color" id="style-borderColor" class="rounded-color-input" value="#38bdf8"
+            style="border:none;  background:none; cursor:pointer;">
         </div>
       </div>
       <div class="row"
-        style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155;" dir="auto">
+        style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid #334155;"
+        dir="auto">
         <label data-i18n="studyMode" style="font-size: 12px; color: #f1f5f9;">学习模式 (悬停显示内容)</label>
         <div id="switch-blur" class="switch" style="transform: scale(0.8);">
           <div class="dot"></div>
@@ -1006,15 +1037,15 @@
           style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">文本颜色 / 调色板</label>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <div class="color-preset" data-color="#60a5fa"
-            style="width:20px; height:20px; border-radius:4px; background:#60a5fa; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#60a5fa; cursor:pointer;"></div>
           <div class="color-preset" data-color="#10b981"
-            style="width:20px; height:20px; border-radius:4px; background:#10b981; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#10b981; cursor:pointer;"></div>
           <div class="color-preset" data-color="#f59e0b"
-            style="width:20px; height:20px; border-radius:4px; background:#f59e0b; cursor:pointer;"></div>
+            style="width:20px; height:20px; border-radius:28px; background:#f59e0b; cursor:pointer;"></div>
           <div class="color-preset" data-color="#ef4444"
-            style="width:20px; height:20px; border-radius:4px; background:#ef4444; cursor:pointer;"></div>
-          <input type="color" id="yt-style-color" value="#60a5fa"
-            style="border:none; width:42px; height:24px; background:none; cursor:pointer; padding:0;">
+            style="width:20px; height:20px; border-radius:28px; background:#ef4444; cursor:pointer;"></div>
+          <input type="color" id="yt-style-color" class="rounded-color-input" value="#60a5fa"
+            style="border:none; background:none; cursor:pointer; padding:0;">
         </div>
       </div>
       <div style="margin-bottom: 15px;">
