@@ -8,17 +8,73 @@
 window.browser = (function () {
     return window.msBrowser || window.browser || window.chrome;
 })();
+
 (function () {
-    logger.log("KT-Translator: 网络拦截模块启动");
+    logger.log("KT-Translator: 网络拦截模块启动 (支持移动端 Fetch)");
+
+    let subtitleFetchSuccess = false;
+    const retryHistory = new Set();
+ 
+    const originalFetch = window.fetch;
+    window.fetch = async function (...args) {
+        const url = args[0];
+        if (typeof url === 'string' && (
+            url.includes('youtube.com/api/timedtext') ||
+            url.includes('&fmt=json3') ||
+            url.includes('pc=yt') ||
+            url.includes('/timedtext?')
+        )) {
+            try {
+                const response = await originalFetch.apply(this, args);
+                const cloneRes = response.clone();
+                cloneRes.json().then(data => {
+                    if (data && data.events) {
+                        const cleanSubs = data.events
+                            .filter(ev => ev.segs)
+                            .map(ev => ({
+                                start: ev.tStartMs / 1000,
+                                end: (ev.tStartMs + (ev.dDurationMs || 3000)) / 1000,
+                                text: ev.segs.map(s => s.utf8).join('').replace(/\n/g, ' ').trim()
+                            }))
+                            .filter(s => s.text.length > 0);
+
+                        if (cleanSubs.length > 0) {
+                            subtitleFetchSuccess = true;
+                            window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
+
+                            const urlLang = (() => {
+                                try {
+                                    const u = new URL(url, location.href);
+                                    return u.searchParams.get('lang') || u.searchParams.get('tlang') || null;
+                                } catch { return null; }
+                            })();
+                            if (urlLang) {
+                                window.dispatchEvent(new CustomEvent('KT_SOURCE_LANG_READY', {
+                                    detail: { lang: urlLang.split('-')[0].toLowerCase() }
+                                }));
+                                logger.log('[KT] Fetch 源语言:', urlLang);
+                            }
+                        }
+                    }
+                }).catch(e => logger.warn("KT: Fetch拦截数据解析失败", e.message));
+                
+                return response;
+            } catch (err) {
+                return originalFetch.apply(this, args);
+            }
+        }
+        return originalFetch.apply(this, args);
+    };
+ 
     const originalOpen = XMLHttpRequest.prototype.open;
     const originalSend = XMLHttpRequest.prototype.send;
-    const retryHistory = new Set();
+    
     XMLHttpRequest.prototype.open = function (method, url) {
         if (url && (
             url.includes('youtube.com/api/timedtext') ||
             url.includes('&fmt=json3') ||
-            url.includes('pc=yt') ||          // 人工字幕
-            url.includes('/timedtext?')        //  另一种格式
+            url.includes('pc=yt') ||
+            url.includes('/timedtext?')
         )) {
             this._ktUrl = url;
             this.addEventListener('load', function () {
@@ -66,6 +122,7 @@ window.browser = (function () {
         }
         return originalOpen.apply(this, arguments);
     };
+
     function handleRetry(url, reason) {
         if (url.includes('&kt_retry=1') || retryHistory.has(url)) {
             logger.log(`KT: 重试也失败或已达上限，放弃。原因: ${reason}`);
@@ -86,10 +143,9 @@ window.browser = (function () {
             }
         }, 1000);
     }
-    let subtitleFetchSuccess = false;
-
+ 
     async function fetchManualCaptions(retryCount = 0) {
-        if (subtitleFetchSuccess) return; //  成功过就不再重试
+        if (subtitleFetchSuccess) return; 
         try {
             const playerResponse = window.ytInitialPlayerResponse ||
                 JSON.parse(document.getElementById('scriptTag')?.textContent || 'null');
@@ -127,7 +183,7 @@ window.browser = (function () {
                     .filter(s => s.text.length > 0);
 
                 if (cleanSubs.length > 0) {
-                    subtitleFetchSuccess = true; // ← 成功，后续不再重试
+                    subtitleFetchSuccess = true; 
                     logger.log('[KT] 主动获取字幕成功:', cleanSubs.length, '条');
                     window.dispatchEvent(new CustomEvent('KT_DATA_READY', { detail: cleanSubs }));
                     const sourceLang = captionTracks[0]?.languageCode?.split('-')[0].toLowerCase();
@@ -141,7 +197,7 @@ window.browser = (function () {
         } catch (e) {
             logger.warn('[KT] 主动获取字幕失败:', e.message);
             if (retryCount < 3) {
-                const delay = 1500 * (retryCount + 1); // 1.5s, 3s, 4.5s，总共9秒
+                const delay = 1500 * (retryCount + 1); 
                 setTimeout(() => fetchManualCaptions(retryCount + 1), delay);
             } else {
                 const hintEl = document.getElementById("kt-loading-hint");
@@ -152,58 +208,44 @@ window.browser = (function () {
             }
         }
     }
-    // 扩展 pokePlayer，同时触发主动获取
-    function pokePlayer() {
-        const player = document.querySelector('.html5-video-player');
-        if (player && player.loadModule) {
-            try {
-                player.loadModule("captions");
-                const tracklist = player.getOption && player.getOption('captions', 'tracklist');
-                if (tracklist && tracklist.length > 0) {
-                    player.setOption('captions', 'track', tracklist[0]);
-                }
-            } catch (e) { }
-        }
-        // 同时尝试主动获取
-        fetchManualCaptions();
-    }
 
+    function initUltimateObserver() {
+        window.addEventListener('popstate', () => {
+            logger.log("[KT] 侦测到 popstate 路由变化");
+            triggerRefetch();
+        });
 
-    function initCCButtonObserver() {
-        const player = document.querySelector('.html5-video-player');
-        if (!player) {
-            setTimeout(initCCButtonObserver, 1000);
-            return;
-        }
-        player.addEventListener('click', (e) => {
-            const ccBtn = e.target.closest('.ytp-subtitles-button');
-            if (!ccBtn) return;
-            setTimeout(() => {
-                const isOn = ccBtn.getAttribute('aria-pressed') === 'true';
-                if (isOn) fetchManualCaptions();
-            }, 500);
+        const originalPushState = history.pushState;
+        history.pushState = function () {
+            originalPushState.apply(this, arguments);
+            logger.log("[KT] 侦测到 pushState 路由变化");
+            triggerRefetch();
+        };
+
+        const originalReplaceState = history.replaceState;
+        history.replaceState = function () {
+            originalReplaceState.apply(this, arguments);
+            logger.log("[KT] 侦测到 replaceState 路由变化");
+            triggerRefetch();
+        };
+        
+        window.addEventListener('yt-navigate-finish', () => {
+            logger.log("[KT] 侦测到 YouTube 官方 navigate 事件");
+            triggerRefetch();
         });
     }
 
-    function initUrlObserver() {
-        if (!document.body) {
-            setTimeout(initUrlObserver, 500);
-            return;
-        }
-        let lastUrl = location.href;
-        new MutationObserver(() => {
-            if (location.href !== lastUrl) {
-                lastUrl = location.href;
-                subtitleFetchSuccess = false;
-                setTimeout(fetchManualCaptions, 2000);
-            }
-        }).observe(document.body, { childList: true, subtree: true });
+    let refetchTimer = null;
+    function triggerRefetch() {
+        subtitleFetchSuccess = false;
+        if (refetchTimer) clearTimeout(refetchTimer);
+        refetchTimer = setTimeout(fetchManualCaptions, 2000);
     }
 
     setTimeout(() => {
-        pokePlayer();
-        initCCButtonObserver();
-    }, 3000);
+        logger.log("KT-Translator: 初始执行 fetchManualCaptions");
+        fetchManualCaptions();
+    }, 2500);
 
-    initUrlObserver();
+    initUltimateObserver();
 })();
