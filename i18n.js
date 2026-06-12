@@ -3835,6 +3835,7 @@ self.i18nAttach11 = {
     "notice.title": "服务通知",
     "notice.bold": "Mira 翻译服务更新",
     "notice.body": "请及时导出您的生词本数据。",
+    "notice.auth": "请切换授权页完成操作，授权后返回重试。",
     "notice.export": "导出数据 ({0})",
     "notice.close": "确认"
   },
@@ -3842,6 +3843,7 @@ self.i18nAttach11 = {
     "notice.title": "服務通知",
     "notice.bold": "Mira 翻譯服務更新",
     "notice.body": "請及時匯出您的生詞本資料。",
+    "notice.auth": "請切換授權頁完成操作，授權後返回重試。",
     "notice.export": "匯出資料 ({0})",
     "notice.close": "確認"
   },
@@ -3849,6 +3851,7 @@ self.i18nAttach11 = {
     "notice.title": "Service Notice",
     "notice.bold": "Mira Update",
     "notice.body": "Please export your vocabulary data below.",
+    "notice.auth": "Please complete the authorization in the new tab and return here to retry.",
     "notice.export": "Export Data ({0})",
     "notice.close": "Close"
   },
@@ -3856,6 +3859,7 @@ self.i18nAttach11 = {
     "notice.title": "サービス通知",
     "notice.bold": "Mira 翻訳の更新",
     "notice.body": "単語帳のデータをエクスポートしてください。",
+    "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。",
     "notice.export": "エクスポート ({0})",
     "notice.close": "確認"
   },
@@ -3863,6 +3867,7 @@ self.i18nAttach11 = {
     "notice.title": "서비스 안내",
     "notice.bold": "Mira 번역기 업데이트",
     "notice.body": "단어장 데이터를 내보내기 해주세요.",
+    "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요.",
     "notice.export": "내보내기 ({0})",
     "notice.close": "확인"
   }

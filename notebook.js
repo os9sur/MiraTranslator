@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   <div class="v-detail-line" dir="ltr" style="margin-top: 2px; display: flex; gap: 6px;
     ${isRTLText(meanings) ? 'flex-direction: row-reverse; text-align: right;' : ''}">
     <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
-    <span class="v-def" style="color: #94a3b8;">${query ? highlight(meanings, query) : meanings}</span>
+    <span class="v-def" style="color: #94a3b8;font-size: 12px;">${query ? highlight(meanings, query) : meanings}</span>
   </div>
 `;
     }).join('');
@@ -395,18 +395,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       <div class="vocab-cell">
         ${item.note
-              ? `<span class="note-text" dir="auto"
+          ? `<span class="note-text" dir="auto"
                   data-id="${item.id}" data-word="${displayWord}"
                   data-note="${(item.note || '').replace(/"/g, '&quot;')}"
                   style="color:#94a3b8;font-size:13px;cursor:pointer;display:block;word-break:break-word;white-space:normal;">
               ${searchQuery ? highlight(item.note, searchQuery) : item.note}
             </span>`
-              : `<span class="note-text note-empty"
+          : `<span class="note-text note-empty"
                 data-id="${item.id}" data-word="${displayWord}" data-note=""
                 style="direction:${isRTLText(_t('note')) ? 'rtl' : 'ltr'};">
               ＋ ${_t('note')}
             </span>`
-            }
+        }
       </div>
 
       <div class="vocab-cell">${domain}</div>
@@ -738,6 +738,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  //鼠标手势
   document.addEventListener('mousedown', (e) => {
     if (e.button !== 2) return;
     mouseGesture.active = true; mouseGesture.startX = e.clientX; mouseGesture.startY = e.clientY;
@@ -760,6 +761,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   document.addEventListener('contextmenu', (e) => {
+    if (!mouseGesture.active) return; // 没有正在进行的鼠标手势，不拦截
     const dy = e.clientY - mouseGesture.startY;
     const dx = e.clientX - mouseGesture.startX;
     if (Math.abs(dy) >= 60 && Math.abs(dy) > Math.abs(dx)) e.preventDefault();

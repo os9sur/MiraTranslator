@@ -7404,8 +7404,8 @@ function initSelectionTranslate() {
       if (isTouchEvent) {
         try {
           const rect = selection.getRangeAt(0).getBoundingClientRect();
-          l = rect.left;
-          t = rect.bottom + 8; // 放在选区下方，避开上方系统菜单
+          l = rect.left + (rect.width / 2) - 16; // 居中，16 是按钮半径
+          t = rect.bottom + 8;
         } catch (_) {
           l = mouseX - 16;
           t = mouseY + 24;
@@ -9215,6 +9215,7 @@ function syncSubtitleDisplay() {
 if (window.ktDisplayTimer) clearInterval(window.ktDisplayTimer);
 window.ktDisplayTimer = setInterval(syncSubtitleDisplay, 100);
 async function createSubtitleBox(player) {
+  if (!location.hostname.includes('youtube.com')) return;
   const box = document.createElement("div");
   box.id = "kt-yt-box";
   box.innerHTML = `
@@ -9264,6 +9265,8 @@ function enableYtBoxDrag(box) {
   let startY, startBottom;
   let rafId = null;
   if (!box) return;
+
+  // 桌面 mouse 事件
   box.addEventListener("mousedown", (e) => {
     if (e.target.closest(".kt-word") || e.target.closest(".icon-btn")) return;
     isDragging = true;
@@ -9275,14 +9278,13 @@ function enableYtBoxDrag(box) {
     box.style.top = "auto";
     e.preventDefault();
   });
+
   window.addEventListener("mousemove", (e) => {
     if (!isDragging) return;
     const deltaY = startY - e.clientY;
     const targetBottom = startBottom + deltaY;
     const videoPlayer = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
-    const maxHeight = videoPlayer
-      ? videoPlayer.offsetHeight * 0.9
-      : window.innerHeight * 0.8;
+    const maxHeight = videoPlayer ? videoPlayer.offsetHeight * 0.9 : window.innerHeight * 0.8;
     const currentBottom = Math.max(0, Math.min(targetBottom, maxHeight));
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(() => {
@@ -9290,6 +9292,7 @@ function enableYtBoxDrag(box) {
       rafId = null;
     });
   });
+
   window.addEventListener("mouseup", () => {
     if (isDragging) {
       isDragging = false;
@@ -9298,6 +9301,54 @@ function enableYtBoxDrag(box) {
       safeSetStorage({ ytBoxBottom: box.style.bottom });
     }
   });
+
+  // 移动端 touch 事件，绑在 document capture 阶段，绕过播放器的事件拦截
+  document.addEventListener("touchstart", (e) => {
+    const rect = box.getBoundingClientRect();
+    const touch = e.touches[0];
+    const insideBox = touch.clientX >= rect.left && touch.clientX <= rect.right
+      && touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+    if (!insideBox) return;
+    if (e.target.closest(".kt-word") || e.target.closest(".icon-btn")) return;
+
+    isDragging = false; // 先不设true，等touchmove确认
+    startY = touch.clientY;
+    const rawBottom = parseInt(box.style.bottom);
+    startBottom = isNaN(rawBottom) ? 80 : rawBottom;
+    box.style.top = "auto";
+    box._touchPending = true; // 标记有待确认的touch
+  }, { passive: false, capture: true });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!box._touchPending && !isDragging) return;
+    const deltaY = startY - e.touches[0].clientY;
+    if (!isDragging && Math.abs(deltaY) < 5) return; // 未超过阈值不算拖动
+
+    if (!isDragging) {
+      isDragging = true;
+      box._touchPending = false;
+      box.classList.add("dragging");
+    }
+    e.stopPropagation();
+    e.preventDefault();
+    const targetBottom = startBottom + deltaY;
+    const videoPlayer = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
+    const maxHeight = videoPlayer ? videoPlayer.offsetHeight * 0.9 : window.innerHeight * 0.8;
+    const currentBottom = Math.max(0, Math.min(targetBottom, maxHeight));
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(() => {
+      box.style.bottom = `${currentBottom}px`;
+      rafId = null;
+    });
+  }, { passive: false, capture: true });
+
+document.addEventListener("touchend", () => {
+    box._touchPending = false;
+    if (!isDragging) return;
+    isDragging = false;
+    box.classList.remove("dragging");
+    safeSetStorage({ ytBoxBottom: box.style.bottom });
+}, { capture: true });
 }
 function initSubtitleAvoidance() {
   if (window._ktAvoidanceInit) return;
@@ -9465,18 +9516,16 @@ function renderWords(text, container, sourceLang = null) {
         handleWordDblClick(e, cleanWord);
     };
 
-    // 单击发音与闪烁
+    // 单击发音与闪烁（桌面）
     span.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
       if (typeof speakText === "function")
         speakText(cleanWord, span, currentLang);
-
       const originalColor = span.style.color;
       span.style.color = "#facc15";
       setTimeout(() => (span.style.color = originalColor || ""), 200);
     };
-
     container.appendChild(span);
   });
 }
@@ -9562,9 +9611,14 @@ async function handleWordMouseEnter(e, word) {
       box-sizing: border-box; transition: top 0.15s ease-out;
       border: 1px solid #334155;
     `;
-    const moviePlayer =
-      (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement) || document.body;
-    moviePlayer.appendChild(tooltip);
+    const isMobile = window.innerWidth <= 768 || navigator.maxTouchPoints > 0;
+    const tooltipParent = isMobile ? document.body :
+      (document.querySelector(".html5-video-player") ||
+        document.querySelector("#player") ||
+        document.querySelector("ytm-app") ||
+        document.querySelector("video")?.parentElement ||
+        document.body);
+    tooltipParent.appendChild(tooltip);
   }
 
   tooltip.style.border = isCollected

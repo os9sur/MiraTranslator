@@ -171,7 +171,7 @@ async function build() {
                 );
 
                 // 4. 移除 Google Drive option
-                html = html.replace(/<option[^>]*value="googleDrive"[^>]*>.*?<\/option>/g, '');
+                //html = html.replace(/<option[^>]*value="googleDrive"[^>]*>.*?<\/option>/g, '');
 
                 fs.writeFileSync(htmlPath, html);
                 logger.log(`  └─ 已处理: ${htmlFile}`);
