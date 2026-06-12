@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       match => `<span style="background:#00fff5;color:#000000;border-radius:3px;padding:0 3px;">${match}</span>`
     );
   };
+
   const style = document.createElement('style');
   style.textContent = `
     @keyframes wave-ripple {
@@ -42,31 +43,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     .is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
   `;
   document.head.appendChild(style);
+
   const vocabBody = document.getElementById('vocabBody');
   const wordInp = document.getElementById('wordInp');
   const transInp = document.getElementById('transInp');
   const storage = await safeGetStorage('ui_language');
+
   requestAnimationFrame(() => {
     transInp.style.height = wordInp.offsetHeight + 'px';
     transInp.style.minHeight = wordInp.offsetHeight + 'px';
   });
-  transInp.addEventListener('focus', () => {
-    transInp.rows = 4;
-  });
 
-  transInp.addEventListener('blur', () => {
-    if (!transInp.value.trim()) {
-      transInp.rows = 1;
-    }
-  });
-
-  // 自动撑高（输入内容超过4行时继续增高）
+  transInp.addEventListener('focus', () => { transInp.rows = 4; });
+  transInp.addEventListener('blur', () => { if (!transInp.value.trim()) transInp.rows = 1; });
   transInp.addEventListener('input', () => {
     transInp.style.height = 'auto';
     transInp.style.height = transInp.scrollHeight + 'px';
   });
 
-  // 读取高亮开关状态
   const highlightStorage = await safeGetStorage('vocabHighlight');
   let highlightEnabled = highlightStorage?.vocabHighlight || false;
 
@@ -75,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const el = document.getElementById('syncStatus');
     if (el) el.textContent = `${t('lastSync')} ${new Date(syncRes.lastSyncTime).toLocaleString()}`;
   }
+
   const toggle = document.getElementById('highlightToggle');
   const thumb = document.getElementById('highlightThumb');
 
@@ -84,36 +79,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   updateToggleUI(highlightEnabled);
-
   toggle.onclick = async () => {
     highlightEnabled = !highlightEnabled;
     updateToggleUI(highlightEnabled);
     await safeSetStorage({ vocabHighlight: highlightEnabled });
   };
+
   if (storage === undefined) {
     if (typeof showUpdateNotice === 'function') showUpdateNotice();
     return;
   }
-  const targetLanguage =
-    storage?.ui_language ||
-    getBrowserLang() ||
-    'en';
-  const _t = (key) => {
-    return (typeof t === 'function') ? t(key, targetLanguage) : key;
-  };
 
-  const titleSuffix = _t('wordBook', targetLanguage);
-  document.title = `Mira - ${titleSuffix}`;
+  const targetLanguage = storage?.ui_language || getBrowserLang() || 'en';
+  const _t = (key) => (typeof t === 'function') ? t(key, targetLanguage) : key;
+
+  document.title = `Mira - ${_t('wordBook', targetLanguage)}`;
   const normLang = targetLanguage.replace('_', '-').toLowerCase();
   document.documentElement.lang = normLang;
-  if (typeof applyI18n === 'function') {
-    applyI18n(targetLanguage);
-  }
+  if (typeof applyI18n === 'function') applyI18n(targetLanguage);
+  document.documentElement.style.setProperty('--label-meaning', `"${_t('meaning')}"`);
+  document.documentElement.style.setProperty('--label-note', `"${_t('note')}"`);
+  document.documentElement.style.setProperty('--label-source', `"${_t('source')}"`);
+
   function formatDetail(dictData, query = "") {
     if (!Array.isArray(dictData) || dictData.length === 0) return "";
     return dictData.map(item => {
       const pos = localizePos(item.pos, targetLanguage) || item.pos || "";
-
       let meanings = "";
       if (Array.isArray(item.meanings)) {
         meanings = item.meanings.join(', ');
@@ -122,7 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (item.definition) {
         meanings = item.definition;
       }
-
       return `
   <div class="v-detail-line" dir="ltr" style="margin-top: 2px; display: flex; gap: 6px;
     ${isRTLText(meanings) ? 'flex-direction: row-reverse; text-align: right;' : ''}">
@@ -135,24 +125,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function formatExamples(examples, word, query = "") {
     if (!Array.isArray(examples) || examples.length === 0) return "";
-
     const highlightWord = (text, w) => {
       if (!text || !w) return text;
       const safe = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const stem = w.length > 3
-        ? w.replace(/[ey]$/, "").replace(/([bcdfghjklmnpqrstvwxz])\1$/, "$1")
-        : w;
+      const stem = w.length > 3 ? w.replace(/[ey]$/, "").replace(/([bcdfghjklmnpqrstvwxz])\1$/, "$1") : w;
       const safeStem = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const regex = new RegExp(`\\b(${safe}[a-z]*|${safeStem}[a-z]*)\\b`, "gi");
       return text.replace(regex, '<span style="color:#38bdf8;font-weight:600;">$1</span>');
     };
-
     return `
   <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
     <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;
-  ${isRTLText(examples.map(s => typeof s === 'object' ? (s.cn || '') : '').join('')) ? 'text-align: right;' : ''}">
-  EXAMPLES
-</div>
+      ${isRTLText(examples.map(s => typeof s === 'object' ? (s.cn || '') : '').join('')) ? 'text-align: right;' : ''}">
+      EXAMPLES
+    </div>
     ${examples.slice(0, 3).map((s) => {
       const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
       const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
@@ -170,17 +156,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                 <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
               </svg>
-            </span> 
+            </span>
           </div>
-         ${cn ? `<div dir="auto" style="font-size: 11px; color: #637793; margin-top: 2px;
-          ${isRTLText(cn) ? 'text-align: right;' : ''}
-        ">${query ? highlight(cn, query) : cn}</div>` : ""}
+          ${cn ? `<div dir="auto" style="font-size: 11px; color: #637793; margin-top: 2px;
+            ${isRTLText(cn) ? 'text-align: right;' : ''}
+          ">${query ? highlight(cn, query) : cn}</div>` : ""}
         </div>`;
     }).join("")}
   </div>`;
   }
+
   const searchInp = document.getElementById('searchInp');
-  // 搜索
   if (searchInp) {
     searchInp.oninput = (e) => {
       searchQuery = e.target.value.toLowerCase().trim();
@@ -188,53 +174,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderTable();
     };
   }
+
   let currentPage = 1;
   const pageSize = 10;
   let searchQuery = "";
+
   async function renderTable() {
     const vocabulary = await idb.vocabulary.getAll();
     let activeVocab = vocabulary.filter(item => item && !item.deleted && item.word);
+
     if (searchQuery) {
       activeVocab = activeVocab.filter(item => {
         const wordMatch = item.word.toLowerCase().includes(searchQuery);
-
         let transText = "";
         if (typeof item.trans === 'object' && item.trans !== null) {
           transText = (item.trans.basic || "") + (item.trans.detail || "");
-
-          // 例句原文和译文
           const examples = item.trans.examples || [];
           const exampleText = examples.map(s => {
             if (typeof s === 'string') return s;
             return (s.en || s.sentence || "") + " " + (s.cn || s.translation || "");
           }).join(" ");
           transText += " " + exampleText;
-
         } else {
           transText = item.trans || "";
         }
-
-        // 单独搜 dictData 的 meanings 文本，避免 JSON.stringify 误匹配
         const dictText = (item.trans?.dictData || []).map(d => {
           const meanings = Array.isArray(d.meanings) ? d.meanings.join(' ') : (d.meanings || d.definition || '');
           return meanings;
         }).join(' ');
-
         const noteMatch = (item.note || "").toLowerCase().includes(searchQuery);
         const srcMatch = (item.src || "").toLowerCase().includes(searchQuery);
-        // 短于2个字符不搜标题，避免单字母误匹配
-        const titleMatch = searchQuery.length >= 2
-          ? (item.title || "").toLowerCase().includes(searchQuery)
-          : false;
+        const titleMatch = searchQuery.length >= 2 ? (item.title || "").toLowerCase().includes(searchQuery) : false;
         const contextMatch = (typeof item.trans === 'object' ? (item.trans.context || "") : "").toLowerCase().includes(searchQuery);
         const contextTranslationMatch = (typeof item.trans === 'object' ? (item.trans.contextTranslation || "") : "").toLowerCase().includes(searchQuery);
-
-        return wordMatch
-          || transText.toLowerCase().includes(searchQuery)
-          || dictText.toLowerCase().includes(searchQuery)
+        return wordMatch || transText.toLowerCase().includes(searchQuery) || dictText.toLowerCase().includes(searchQuery)
           || noteMatch || srcMatch || titleMatch || contextMatch || contextTranslationMatch;
       });
     }
+
     if (searchQuery) {
       activeVocab.sort((a, b) => {
         const aExact = a.word.toLowerCase() === searchQuery;
@@ -250,10 +227,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
     }
+
     const total = activeVocab.length;
     const totalPages = Math.ceil(total / pageSize) || 1;
-
-    // 边界检查
     if (currentPage > totalPages) currentPage = totalPages;
     if (currentPage < 1) currentPage = 1;
 
@@ -262,56 +238,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const pageInfoEl = document.getElementById('pageInfo');
     if (pageInfoEl) {
-      const template = _t('pagination');
-      pageInfoEl.innerText = template
+      pageInfoEl.innerText = _t('pagination')
         .replace('{current}', currentPage)
         .replace('{total}', totalPages);
     }
 
     const goInputEl = document.getElementById('jumpInp');
-    if (goInputEl) {
-      goInputEl.placeholder = _t('goPlaceholder');
-    }
+    if (goInputEl) goInputEl.placeholder = _t('goPlaceholder');
 
     if (total === 0) {
-      vocabBody.innerHTML = `<tr><td colspan="5" class="empty">${_t('noCollection')}</td></tr>`;
+      vocabBody.innerHTML = `<div style="padding:24px;text-align:center;color:#475569;">${_t('noCollection')}</div>`;
       return;
     }
+
     vocabBody.innerHTML = pageData.map((item) => {
       const displayWord = item.word || "";
       const displayWordHL = searchQuery ? highlight(displayWord, searchQuery) : displayWord;
       const safeWordForSpeech = displayWord.replace(/'/g, "\\'");
-      const srcLang = item.trans?.sourceLang || "";
       const context = (typeof item.trans === 'object') ? (item.trans.context || "") : "";
 
-      // 优先用上下文检测语言 
       const detectLangFromContext = (ctx) => {
         if (!ctx) return null;
         if (/[\u3040-\u30FF]/.test(ctx)) return "ja-JP";
         if (/[\uAC00-\uD7AF]/.test(ctx)) return "ko-KR";
-        return null; // 无法判断，返回 null
+        return null;
       };
-
       const contextLang = detectLangFromContext(context);
-
       const langMap = { ja: 'ja-JP', zh: 'zh-CN', ko: 'ko-KR', fr: 'fr-FR', de: 'de-DE', es: 'es-ES', ru: 'ru-RU', en: 'en-US' };
       const detectedLang = detectSourceLang(context || item.word || "");
       const langCode = detectedLang ? (langMap[detectedLang] || null) : null;
+
       const phonetic = (typeof item.trans === 'object' && item.trans !== null)
-        ? (item.trans.phonetic || item.trans.sourcePhonetic || "")
-        : "";//音标
+        ? (item.trans.phonetic || item.trans.sourcePhonetic || "") : "";
       const contextTranslation = (typeof item.trans === 'object') ? (item.trans.contextTranslation || "") : "";
       const contextWord = item.word || "";
 
-      // 高亮单词
       const highlightContext = (ctx, word) => {
         if (!ctx) return "";
         const safe = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return ctx.replace(
-          new RegExp(`(${safe})`, "gi"),
-          '<span style="color:#38bdf8;font-weight:600;">$1</span>'
-        );
+        return ctx.replace(new RegExp(`(${safe})`, "gi"), '<span style="color:#38bdf8;font-weight:600;">$1</span>');
       };
+
       let displayTrans = "";
       if (typeof item.trans === 'object' && item.trans !== null) {
         const { basic, dictData, detail, examples } = item.trans;
@@ -319,28 +286,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const examplesContent = formatExamples(examples, displayWord, searchQuery);
         displayTrans = `
       <div class="vocab-trans-container" dir="auto">
-        <div class="v-basic" style="font-weight: 500; color: #e2e8f0; margin-bottom: 4px; font-size: 15px;
-          ${isRTLText(basic || '') ? 'text-align: right;' : ''}">
+        <div class="v-basic" style="font-weight:500;color:#e2e8f0;margin-bottom:4px;font-size:15px;
+          ${isRTLText(basic || '') ? 'text-align:right;' : ''}">
           ${searchQuery ? highlight(basic || '', searchQuery) : (basic || '')}
         </div>
-        ${detailContent ? `<div class="v-detail-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 4px;">${detailContent}</div>` : ''}
+        ${detailContent ? `<div class="v-detail-box" style="border-top:1px solid #3f5374;padding-top:6px;margin-top:4px;">${detailContent}</div>` : ''}
         ${examplesContent}
-      </div>
-    `;
-      } else {
-        displayTrans = `<div class="v-basic" style="color: #e2e8f0; font-size: 15px;
-        ${isRTLText(item.trans || '') ? 'text-align: right;' : ''}">
-        ${item.trans || ''}
       </div>`;
+      } else {
+        displayTrans = `<div class="v-basic" style="color:#e2e8f0;font-size:15px;
+          ${isRTLText(item.trans || '') ? 'text-align:right;' : ''}">${item.trans || ''}</div>`;
       }
+
       const dateStr = item.date ? new Date(item.date).toLocaleString('en-CA', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false
       }) : "Unknown";
+
       let domain = '-';
       if (item.src) {
         try {
@@ -348,10 +310,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           const isYouTube = urlObj.hostname.includes('youtube.com');
           domain = urlObj.hostname.replace('www.', '');
           if (isYouTube) {
-            const t = urlObj.searchParams.get('t');
+            const tParam = urlObj.searchParams.get('t');
             let timeLabel = "";
-            if (t) {
-              const totalSeconds = parseInt(t);
+            if (tParam) {
+              const totalSeconds = parseInt(tParam);
               const mins = Math.floor(totalSeconds / 60);
               const secs = totalSeconds % 60;
               timeLabel = `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -359,159 +321,135 @@ document.addEventListener('DOMContentLoaded', async () => {
             const titleText = item.title || '';
             domain = `
             <div class="source-wrapper">
-              <a href="${item.src}" target="_blank" class="source-link" style="color: #ef4444; display: flex; align-items: center; gap: 4px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                <span style="font-weight: bold; font-family: monospace;">${timeLabel || 'Play'}</span>
+              <a href="${item.src}" target="_blank" class="source-link" style="color:#ef4444;display:flex;align-items:center;gap:4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                <span style="font-weight:bold;font-family:monospace;">${timeLabel || 'Play'}</span>
               </a>
-              <div class="source-title" dir="auto"
-                style="${isRTLText(titleText) ? 'text-align:right;' : ''}"
-                title="${titleText}">
+              <div class="source-title" dir="auto" style="${isRTLText(titleText) ? 'text-align:right;' : ''}" title="${titleText}">
                 ${searchQuery ? highlight(titleText, searchQuery) : titleText}
               </div>
-            </div>
-          `;
+            </div>`;
           } else {
             const titleText = item.title || '';
             domain = `
             <div class="source-wrapper">
-              <a href="${item.src}" target="_blank" class="source-link" style="color: #94a3b8;">🌐 ${domain}</a>
-              <div class="source-title" dir="auto"
-                style="${isRTLText(titleText) ? 'text-align:right;' : ''}"
-                title="${titleText}">
+              <a href="${item.src}" target="_blank" class="source-link" style="color:#94a3b8;">🌐 ${domain}</a>
+              <div class="source-title" dir="auto" style="${isRTLText(titleText) ? 'text-align:right;' : ''}" title="${titleText}">
                 ${searchQuery ? highlight(titleText, searchQuery) : titleText}
               </div>
-            </div>
-          `;
+            </div>`;
           }
         } catch (e) {
           domain = `<a href="${item.src}" target="_blank" class="source-link">Link</a>`;
         }
-      } return `
-      <tr style="border-bottom: 1px solid #1e293b; background-color: #1b1b1b61;">
-        <td style="vertical-align: top; padding: 12px 16px;width: 230px; min-width: 250px;">
-          <div style="display: flex; align-items: center; gap: 8px;
-            ${isRTLText(displayWord) ? 'flex-direction: row-reverse; justify-content: flex-start;' : ''}">
-            <span class="word-text" dir="auto">${displayWordHL}</span>
-            <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}" 
-              style="cursor: pointer; color: #909fb3; display: flex; transition: color 0.2s;position:relative;overflow:visible;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-              </svg>
-            </span>
-          </div>
-      ${phonetic ? `<div style="color: #909fb3; font-size: 12px; margin-top: 4px; font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
-      ${phonetic ? `<div id="kana-${item.id}" style="display:none; font-size:12px; color:#7dd3fc; margin-top:2px;"></div>` : ''}
-      ${context ? `
-      <div style="margin-top:6px;font-size:12px;color:#798ca7;line-height:1.5;
-                  border-top:2px solid #334155;padding-top:6px;font-style:italic;
-                  max-width:250px;word-break:break-word;">
-        <div style="display:flex;align-items:flex-start;gap:6px;
-          ${isRTLText(context) ? 'flex-direction:row-reverse;' : ''}">
-          <div style="flex:1; ${isRTLText(context) ? 'text-align:right;' : ''}" dir="auto">
-            ${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}
-          </div>
-          <span class="context-speaker-btn" 
-            data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
-            data-lang="${langCode}"
-            style="cursor:pointer;color:#64748b;flex-shrink:0;display:flex;
-                  margin-top:1px;transition:color 0.2s;position:relative;overflow:visible;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      }
+
+      // ── 行模板：tr/td → div.vocab-row / div.vocab-cell ──
+      return `
+    <div class="vocab-row">
+
+      <div class="vocab-cell">
+        <div style="display:flex;align-items:center;gap:8px;padding-right: 55px; 
+          ${isRTLText(displayWord) ? 'flex-direction:row-reverse;justify-content:flex-start;' : ''}">
+          <span class="word-text" dir="auto">${displayWordHL}</span>
+          <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}"
+            style="cursor:pointer;color:#909fb3;display:flex;transition:color 0.2s;position:relative;overflow:visible;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
               <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
             </svg>
           </span>
         </div>
-        ${contextTranslation ? `
-        <div dir="auto" style="font-size:12px;color:#98aac5;margin-top:3px;font-style:normal;opacity:0.8;
-          ${isRTLText(contextTranslation) ? 'text-align:right;' : ''}">
-          ${searchQuery ? highlight(contextTranslation, searchQuery) : contextTranslation}
+        ${phonetic ? `<div style="color:#909fb3;font-size:12px;margin-top:4px;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
+        ${phonetic ? `<div id="kana-${item.id}" style="display:none;font-size:12px;color:#7dd3fc;margin-top:2px;"></div>` : ''}
+        ${context ? `
+        <div style="margin-top:6px;font-size:12px;color:#798ca7;line-height:1.5;
+                    border-top:2px solid #334155;padding-top:6px;font-style:italic;
+                    word-break:break-word;">
+          <div style="display:flex;align-items:flex-start;gap:6px;
+            ${isRTLText(context) ? 'flex-direction:row-reverse;' : ''}">
+            <div style="flex:1;${isRTLText(context) ? 'text-align:right;' : ''}" dir="auto">
+              ${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}
+            </div>
+            <span class="context-speaker-btn"
+              data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
+              data-lang="${langCode}"
+              style="cursor:pointer;color:#64748b;flex-shrink:0;display:flex;margin-top:1px;transition:color 0.2s;position:relative;overflow:visible;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </span>
+          </div>
+          ${contextTranslation ? `
+          <div dir="auto" style="font-size:12px;color:#98aac5;margin-top:3px;font-style:normal;opacity:0.8;
+            ${isRTLText(contextTranslation) ? 'text-align:right;' : ''}">
+            ${searchQuery ? highlight(contextTranslation, searchQuery) : contextTranslation}
+          </div>` : ''}
         </div>` : ''}
-      </div>` : ''}
-    </td>
-    <td style="vertical-align: top; padding: 12px 16px;">${displayTrans}</td>
-    <td style="vertical-align: top; padding: 8px 12px; max-width: 130px;">
-      ${item.note
-          ? `<span class="note-text" dir="auto"
-                  data-id="${item.id}"
-                  data-word="${displayWord}"
+      </div>
+
+      <div class="vocab-cell">${displayTrans}</div>
+
+      <div class="vocab-cell">
+        ${item.note
+              ? `<span class="note-text" dir="auto"
+                  data-id="${item.id}" data-word="${displayWord}"
                   data-note="${(item.note || '').replace(/"/g, '&quot;')}"
-                  style="color:#94a3b8; font-size:13px; cursor:pointer; 
-                        display:block; word-break:break-word; white-space:normal;">
-             ${searchQuery ? highlight(item.note, searchQuery) : item.note}
+                  style="color:#94a3b8;font-size:13px;cursor:pointer;display:block;word-break:break-word;white-space:normal;">
+              ${searchQuery ? highlight(item.note, searchQuery) : item.note}
             </span>`
-          : `<span class="note-text note-empty"
-          data-id="${item.id}"
-          data-word="${displayWord}"
-          data-note=""
-          style="direction: ${isRTLText(_t('note')) ? 'rtl' : 'ltr'};">
-      ＋ ${_t('note')}
-    </span>`
-        }
-    </td>
-    <td style="vertical-align: top; padding: 12px 16px;">
-      ${domain} 
-    </td>
-    <td style="color: #637793; font-size: 12px; vertical-align: top; padding: 15px 16px; font-family: monospace;" dir="ltr">
-      ${dateStr}
-    </td>       
-    <td style="vertical-align: top; padding: 12px 16px;" id="action-cell-${item.id}">
-      <button class="btn btn-danger delete-btn" data-id="${item.id}" data-word="${displayWord}">
-        ${_t('delete')}
-      </button>
-    </td>
-  </tr>
-`.trim();
+              : `<span class="note-text note-empty"
+                data-id="${item.id}" data-word="${displayWord}" data-note=""
+                style="direction:${isRTLText(_t('note')) ? 'rtl' : 'ltr'};">
+              ＋ ${_t('note')}
+            </span>`
+            }
+      </div>
+
+      <div class="vocab-cell">${domain}</div>
+
+      <div class="vocab-cell" style="color:#637793;font-size:12px;font-family:monospace;" dir="ltr">
+        ${dateStr}
+      </div>
+
+      <div class="vocab-cell" id="action-cell-${item.id}">
+        <button class="btn btn-danger delete-btn" data-id="${item.id}" data-word="${displayWord}">
+          ${_t('delete')}
+        </button>
+      </div>
+
+    </div>`.trim();
     }).join('');
 
     // 日语假名异步填充
     pageData.forEach(item => {
       const phonetic = (typeof item.trans === 'object' && item.trans !== null)
-        ? (item.trans.phonetic || item.trans.sourcePhonetic || '')
-        : '';
-      // logger.log('[kana debug] sourceLang:', item.trans?.sourceLang, 'word:', item.word);
+        ? (item.trans.phonetic || item.trans.sourcePhonetic || '') : '';
       const context = (typeof item.trans === 'object') ? (item.trans.context || '') : '';
-
-      // 判断是否日语：上下文或原词含日文字符
       const isJapanese = item.trans?.sourceLang === 'ja' ||
-        /[\u3040-\u30FF]/.test(item.word || '') ||
-        /[\u3040-\u30FF]/.test(context || '');
-
+        /[\u3040-\u30FF]/.test(item.word || '') || /[\u3040-\u30FF]/.test(context || '');
       if (!phonetic || !isJapanese) return;
-
       const kanaEl = document.getElementById(`kana-${item.id}`);
       if (!kanaEl) return;
-
       getKana(phonetic).then(({ hiragana, katakana }) => {
         if (!hiragana) return;
         kanaEl.innerHTML = `
-            <span style="cursor:pointer; user-select:none;" 
-                  title="${_t('toggleKatakana')}"
-                  data-hiragana="${hiragana}" 
-                  data-katakana="${katakana}"
-                  data-mode="hiragana">
-                ${hiragana}
-            </span>
-        `;
+          <span style="cursor:pointer;user-select:none;" title="${_t('toggleKatakana')}"
+                data-hiragana="${hiragana}" data-katakana="${katakana}" data-mode="hiragana">
+            ${hiragana}
+          </span>`;
         kanaEl.style.display = 'block';
-
-        // 点击切换平假名/片假名
         kanaEl.querySelector('span').onclick = (e) => {
           const el = e.currentTarget;
-          if (el.dataset.mode === 'hiragana') {
-            el.innerText = el.dataset.katakana;
-            el.dataset.mode = 'katakana';
-          } else {
-            el.innerText = el.dataset.hiragana;
-            el.dataset.mode = 'hiragana';
-          }
+          if (el.dataset.mode === 'hiragana') { el.innerText = el.dataset.katakana; el.dataset.mode = 'katakana'; }
+          else { el.innerText = el.dataset.hiragana; el.dataset.mode = 'hiragana'; }
         };
       });
     });
+
     document.querySelectorAll('.btn-danger').forEach(btn => {
       btn.onclick = (e) => {
         const id = e.currentTarget.getAttribute('data-id');
@@ -519,6 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         deleteWord(id, word);
       };
     });
+
     document.querySelectorAll('.speaker-btn').forEach(btn => {
       btn.onclick = (e) => {
         e.stopPropagation();
@@ -528,121 +467,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         speakText(word, e.currentTarget, finalLang);
       };
     });
+
     document.querySelectorAll('.context-speaker-btn').forEach(btn => {
-      btn.addEventListener("mouseenter", () => {
-        btn.style.color = "#38bdf8";
-        btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))";
-      });
-      btn.addEventListener("mouseleave", () => {
-        btn.style.color = "#64748b";
-        btn.style.filter = "";
-      });
+      btn.addEventListener("mouseenter", () => { btn.style.color = "#38bdf8"; btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))"; });
+      btn.addEventListener("mouseleave", () => { btn.style.color = "#64748b"; btn.style.filter = ""; });
       btn.onclick = (e) => {
         e.stopPropagation();
         const sentence = e.currentTarget.getAttribute('data-sentence');
         const lang = e.currentTarget.getAttribute('data-lang');
         const finalLang = (!lang || lang === 'null') ? null : lang;
-
-        btn.style.transform = "scale(0.8)";
-        btn.style.color = "#38bdf8";
+        btn.style.transform = "scale(0.8)"; btn.style.color = "#38bdf8";
         btn.style.filter = "drop-shadow(0 0 6px rgba(56,189,248,0.9))";
         setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
         speakText(sentence, btn, null);
       };
     });
+
     document.querySelectorAll('.example-speaker-btn').forEach(btn => {
-      btn.addEventListener("mouseenter", () => {
-        btn.style.color = "#38bdf8";
-        btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))";
-      });
-      btn.addEventListener("mouseleave", () => {
-        btn.style.color = "#637793";
-        btn.style.filter = "";
-      });
+      btn.addEventListener("mouseenter", () => { btn.style.color = "#38bdf8"; btn.style.filter = "drop-shadow(0 0 4px rgba(56,189,248,0.6))"; });
+      btn.addEventListener("mouseleave", () => { btn.style.color = "#637793"; btn.style.filter = ""; });
       btn.onclick = (e) => {
         e.stopPropagation();
         const sentence = e.currentTarget.getAttribute('data-sentence');
-        // 点击缩放动画
-        btn.style.transform = "scale(0.8)";
-        btn.style.color = "#38bdf8";
+        btn.style.transform = "scale(0.8)"; btn.style.color = "#38bdf8";
         btn.style.filter = "drop-shadow(0 0 6px rgba(56,189,248,0.9))";
-        setTimeout(() => {
-          btn.style.transform = "scale(1)";
-        }, 150);
+        setTimeout(() => { btn.style.transform = "scale(1)"; }, 150);
         speakText(sentence, btn);
       };
     });
+
     document.querySelectorAll('.note-text').forEach(el => {
       el.onclick = () => {
         const id = el.getAttribute('data-id');
         const word = el.getAttribute('data-word');
         const current = el.getAttribute('data-note') || '';
-        const cell = el.closest('td');
+        const cell = el.closest('.vocab-cell');
         if (!cell) return;
-
-        //最多100字符
         cell.innerHTML = `
         <textarea class="note-inp" maxlength="300" dir="auto"
-        placeholder="${_t('notePlaceholder')}"
-        style="background:#020617; border: none; color:white; padding:4px 8px; border-radius:6px; 
-        width:100%; font-size:12px; box-sizing:border-box; resize:vertical; min-height:32px;
-        font-family: system-ui, -apple-system, sans-serif; outline: none;
-        direction: ${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'rtl' : 'ltr'};
-        text-align: ${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'right' : 'left'};
-        box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.8), 0 0 6px rgba(56, 189, 248, 0.6),
-                    0 0 12px rgba(56, 189, 248, 0.4), 0 0 20px rgba(56, 189, 248, 0.2),
-                    0 0 35px rgba(56, 189, 248, 0.1);"
-        rows="3">${current}</textarea>
-      `;
-
+          placeholder="${_t('notePlaceholder')}"
+          style="background:#020617;border:none;color:white;padding:4px 8px;border-radius:6px;
+          width:100%;font-size:12px;box-sizing:border-box;resize:vertical;min-height:32px;
+          font-family:system-ui,-apple-system,sans-serif;outline:none;
+          direction:${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'rtl' : 'ltr'};
+          text-align:${document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa' ? 'right' : 'left'};
+          box-shadow:0 0 0 1px rgba(56,189,248,0.8),0 0 6px rgba(56,189,248,0.6),
+                     0 0 12px rgba(56,189,248,0.4),0 0 20px rgba(56,189,248,0.2),
+                     0 0 35px rgba(56,189,248,0.1);"
+          rows="3">${current}</textarea>`;
         const inp = cell.querySelector('.note-inp');
         inp.focus();
         inp.setSelectionRange(inp.value.length, inp.value.length);
-
-        // 自动撑高
-        const autoResize = () => {
-          inp.style.height = 'auto';
-          inp.style.height = inp.scrollHeight + 'px';
-        };
+        const autoResize = () => { inp.style.height = 'auto'; inp.style.height = inp.scrollHeight + 'px'; };
         autoResize();
         inp.oninput = autoResize;
-
         const save = async () => {
           const newNote = inp.value.trim();
           const entry = await idb.vocabulary.get(word);
-          if (entry) {
-            entry.note = newNote;
-            entry.updated = Date.now();
-            await idb.vocabulary.add(word, entry);
-          }
+          if (entry) { entry.note = newNote; entry.updated = Date.now(); await idb.vocabulary.add(word, entry); }
           renderTable();
         };
-
         inp.onblur = save;
-        inp.onkeydown = (e) => {
-          if (e.key === 'Enter') inp.blur();
-          if (e.key === 'Escape') renderTable();
-        };
+        inp.onkeydown = (e) => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') renderTable(); };
       };
     });
   }
+
   document.getElementById('prevPage').onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderTable();
-    }
+    if (currentPage > 1) { currentPage--; renderTable(); }
   };
+
   document.getElementById('nextPage').onclick = async () => {
     const vocabulary = await idb.vocabulary.getAll();
     const activeCount = vocabulary.filter(v => !v.deleted).length;
     const totalPages = Math.ceil(activeCount / pageSize);
-    if (currentPage < totalPages) {
-      currentPage++;
-      renderTable();
-    }
+    if (currentPage < totalPages) { currentPage++; renderTable(); }
   };
 
-  // 跳转页码
   document.getElementById('jumpInp').addEventListener('keydown', async (e) => {
     if (e.key !== 'Enter') return;
     const vocabulary = await idb.vocabulary.getAll();
@@ -655,7 +556,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderTable();
     }
   });
+
   const undoTimers = {};
+
   async function deleteWord(id, word) {
     const cell = document.getElementById(`action-cell-${id}`);
     if (!cell) return;
@@ -663,70 +566,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     let secondsLeft = 3;
     try {
       const entry = await idb.vocabulary.get(word);
-      if (entry) {
-        entry.deleted = true;
-        entry.updated = Date.now();
-        await idb.vocabulary.add(word, entry);
-      }
+      if (entry) { entry.deleted = true; entry.updated = Date.now(); await idb.vocabulary.add(word, entry); }
+
       const updateUndoUI = (secs) => {
         cell.innerHTML = `
           <div class="undo-container">
             <span class="delete-countdown">${secs}s</span>
             <a href="javascript:void(0)" class="undo-link">${_t('recall')}</a>
-          </div>
-        `;
+          </div>`;
         cell.querySelector('.undo-link').onclick = async (e) => {
           e.preventDefault();
           clearInterval(countdownInterval);
-          if (undoTimers[id]) {
-            clearTimeout(undoTimers[id]);
-            delete undoTimers[id];
-          }
+          if (undoTimers[id]) { clearTimeout(undoTimers[id]); delete undoTimers[id]; }
           const backEntry = await idb.vocabulary.get(word);
-          if (backEntry) {
-            backEntry.deleted = false;
-            backEntry.updated = Date.now();
-            await idb.vocabulary.add(word, backEntry);
-          }
+          if (backEntry) { backEntry.deleted = false; backEntry.updated = Date.now(); await idb.vocabulary.add(word, backEntry); }
           cell.innerHTML = originalContent;
           const btn = cell.querySelector('.btn-danger');
           if (btn) btn.onclick = () => deleteWord(id, word);
         };
       };
+
       updateUndoUI(secondsLeft);
       const countdownInterval = setInterval(() => {
         secondsLeft--;
         if (secondsLeft > 0) updateUndoUI(secondsLeft);
         else clearInterval(countdownInterval);
       }, 1000);
+
       undoTimers[id] = setTimeout(async () => {
-        const row = cell.closest('tr');
+        // ── tr → .vocab-row ──
+        const row = cell.closest('.vocab-row');
         if (row) {
           row.style.opacity = '0';
           row.style.transform = 'translateX(20px)';
           row.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
-
           setTimeout(() => {
-            const tds = row.querySelectorAll('td');
-            const rowHeight = row.offsetHeight;
-            tds.forEach(td => {
-              td.style.overflow = 'hidden';
-              td.style.maxHeight = rowHeight + 'px';
-              td.style.transition = 'max-height 0.3s ease-in-out, padding 0.3s ease-in-out';
-            });
-
-            requestAnimationFrame(() => {
-              tds.forEach(td => {
-                td.style.maxHeight = '0';
-                td.style.paddingTop = '0';
-                td.style.paddingBottom = '0';
-              });
-            });
-
-            setTimeout(() => {
-              row.remove();
-              delete undoTimers[id];
-            }, 300);
+            row.style.maxHeight = row.offsetHeight + 'px';
+            row.style.overflow = 'hidden';
+            row.style.transition = 'max-height 0.3s ease-in-out';
+            requestAnimationFrame(() => { row.style.maxHeight = '0'; });
+            setTimeout(() => { row.remove(); delete undoTimers[id]; }, 300);
           }, 400);
         }
       }, 3500);
@@ -735,33 +614,21 @@ document.addEventListener('DOMContentLoaded', async () => {
       cell.innerHTML = originalContent;
     }
   }
+
   document.getElementById('addBtn').onclick = async () => {
     const word = wordInp.value.trim();
     const trans = transInp.value.trim();
     if (!word || !trans) return alert(_t('completeContent'));
-    await idb.vocabulary.add(word, { trans: trans });
+    await idb.vocabulary.add(word, { trans });
     wordInp.value = ''; transInp.value = '';
     renderTable();
   };
-  // function speak(text, btnElement, lang = 'en-US') {
-  //   if (!text) return;
-  //   window.speechSynthesis.cancel();
-  //   const msg = new SpeechSynthesisUtterance();
-  //   msg.text = text;
-  //   msg.lang = lang;
-  //   msg.onstart = () => { if (btnElement) btnElement.classList.add('speaking'); };
-  //   msg.onend = () => { if (btnElement) btnElement.classList.remove('speaking'); };
-  //   msg.onerror = () => { if (btnElement) btnElement.classList.remove('speaking'); };
-  //   window.speechSynthesis.speak(msg);
-  // }
+
   document.getElementById('exportBtn').onclick = async () => {
     const vocabulary = await idb.vocabulary.getAll();
     const activeVocab = vocabulary.filter(item => !item.deleted);
     if (activeVocab.length === 0) return alert(_t('noExportWords') || "No data to export");
-
-    // 按时间倒序排列
     activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
-
     let csvContent = `\ufeff${_t('word')},${_t('meaning')},${_t('note')},Context,Source,URL,${_t('addTime')}\n`;
     activeVocab.forEach(item => {
       let transText = "";
@@ -771,15 +638,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (Array.isArray(item.trans.dictData)) {
           detail = item.trans.dictData.map(d => {
             const pos = d.pos ? `${d.pos} ` : "";
-            const meanings = Array.isArray(d.meanings)
-              ? d.meanings.join(' ')
-              : (d.meanings || d.definition || "");
+            const meanings = Array.isArray(d.meanings) ? d.meanings.join(' ') : (d.meanings || d.definition || "");
             return `${pos}${meanings}`;
           }).join(' | ');
         }
         transText = basic + (detail ? ` [${detail}]` : "");
-
-        //  例句
         if (Array.isArray(item.trans.examples) && item.trans.examples.length > 0) {
           const exampleText = item.trans.examples.slice(0, 3).map(s => {
             const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
@@ -788,18 +651,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           }).join(' / ');
           transText += ` | Examples: ${exampleText}`;
         }
-
       } else {
         transText = item.trans || "";
       }
-
-      //  上下文
       const context = item.trans?.context || "";
       const contextTranslation = item.trans?.contextTranslation || "";
-      const contextText = context
-        ? (contextTranslation ? `${context} (${contextTranslation})` : context)
-        : "";
-
+      const contextText = context ? (contextTranslation ? `${context} (${contextTranslation})` : context) : "";
       const safeWord = (item.word || "").replace(/"/g, '""');
       const safeTrans = transText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
       const safeNote = (item.note || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
@@ -822,26 +679,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (area === 'local' && changes.lastSyncTime) {
       renderTable();
       const el = document.getElementById('syncStatus');
-      if (el) el.textContent = `${t('lastSync')} ${new Date(changes.lastSyncTime.newValue).toLocaleString()}`;
+      if (el) el.textContent = `${t('lastSync') || 'Last Sync'} ${new Date(changes.lastSyncTime.newValue).toLocaleString()}`;
     }
   });
 
   // 鼠标手势
   let mouseGesture = { active: false, startX: 0, startY: 0 };
-  let gesturePath = null;
-  let gestureArrow = null;
-  let gestureLabel = null;
-  let gestureSvg = null;
-  let gesturePoints = [];
+  let gesturePath = null, gestureArrow = null, gestureLabel = null, gestureSvg = null, gesturePoints = [];
 
   function createGestureOverlay() {
-    // SVG 路径层
     gestureSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    Object.assign(gestureSvg.style, {
-      position: 'fixed', top: 0, left: 0,
-      width: '100%', height: '100%',
-      pointerEvents: 'none', zIndex: 99999
-    });
+    Object.assign(gestureSvg.style, { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 99999 });
     gesturePath = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
     gesturePath.setAttribute('fill', 'none');
     gesturePath.setAttribute('stroke', '#39ff14');
@@ -852,37 +700,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     gestureSvg.appendChild(gesturePath);
     document.body.appendChild(gestureSvg);
 
-    // 箭头提示
     gestureArrow = document.createElement('div');
-    Object.assign(gestureArrow.style, {
-      position: 'fixed', pointerEvents: 'none', zIndex: 100000,
-      fontSize: '28px', lineHeight: 1, opacity: 0,
-      transition: 'opacity 0.15s',
-      filter: 'drop-shadow(0 0 6px #39ff14)',
-      color: '#39ff14',
-    });
+    Object.assign(gestureArrow.style, { position: 'fixed', pointerEvents: 'none', zIndex: 100000, fontSize: '28px', lineHeight: 1, opacity: 0, transition: 'opacity 0.15s', filter: 'drop-shadow(0 0 6px #39ff14)', color: '#39ff14' });
     document.body.appendChild(gestureArrow);
 
-    // 文字提示
     gestureLabel = document.createElement('div');
-    Object.assign(gestureLabel.style, {
-      position: 'fixed', pointerEvents: 'none', zIndex: 100000,
-      fontSize: '13px', fontFamily: 'monospace',
-      color: '#39ff14', opacity: 0,
-      transition: 'opacity 0.15s',
-      background: 'rgba(0,0,0,0.55)',
-      padding: '3px 10px', borderRadius: '6px',
-      border: '1px solid #39ff1455',
-      letterSpacing: '0.04em',
-      filter: 'drop-shadow(0 0 4px #39ff1488)',
-    });
+    Object.assign(gestureLabel.style, { position: 'fixed', pointerEvents: 'none', zIndex: 100000, fontSize: '13px', fontFamily: 'monospace', color: '#39ff14', opacity: 0, transition: 'opacity 0.15s', background: 'rgba(0,0,0,0.55)', padding: '3px 10px', borderRadius: '6px', border: '1px solid #39ff1455', letterSpacing: '0.04em', filter: 'drop-shadow(0 0 4px #39ff1488)' });
     document.body.appendChild(gestureLabel);
   }
 
   function removeGestureOverlay() {
-    gestureSvg?.remove();
-    gestureArrow?.remove();
-    gestureLabel?.remove();
+    gestureSvg?.remove(); gestureArrow?.remove(); gestureLabel?.remove();
     gestureSvg = gesturePath = gestureArrow = gestureLabel = null;
     gesturePoints = [];
   }
@@ -891,19 +719,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!gesturePath) return;
     gesturePoints.push(`${curX},${curY}`);
     gesturePath.setAttribute('points', gesturePoints.join(' '));
-
     const dy = curY - mouseGesture.startY;
     const dx = curX - mouseGesture.startX;
     const isVertical = Math.abs(dy) > Math.abs(dx);
     const triggered = Math.abs(dy) >= 60 && isVertical;
-
-    // 箭头
     if (triggered) {
       gestureArrow.textContent = dy < 0 ? '↑' : '↓';
       gestureArrow.style.opacity = '0';
       gestureArrow.style.left = `${curX + 16}px`;
       gestureArrow.style.top = `${curY - 18}px`;
-
       gestureLabel.textContent = dy < 0 ? '⬆ Scroll to Top of notebook' : '⬇ Scroll to Bottom of notebook';
       gestureLabel.style.opacity = '1';
       gestureLabel.style.left = `${curX + 16}px`;
@@ -916,12 +740,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.addEventListener('mousedown', (e) => {
     if (e.button !== 2) return;
-    mouseGesture.active = true;
-    mouseGesture.startX = e.clientX;
-    mouseGesture.startY = e.clientY;
-    gesturePoints = [];
-    createGestureOverlay();
-    updateGestureUI(e.clientX, e.clientY);
+    mouseGesture.active = true; mouseGesture.startX = e.clientX; mouseGesture.startY = e.clientY;
+    gesturePoints = []; createGestureOverlay(); updateGestureUI(e.clientX, e.clientY);
   });
 
   document.addEventListener('mousemove', (e) => {
@@ -933,35 +753,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!mouseGesture.active || e.button !== 2) return;
     const dy = e.clientY - mouseGesture.startY;
     const dx = e.clientX - mouseGesture.startX;
-    mouseGesture.active = false;
-    removeGestureOverlay();
-
+    mouseGesture.active = false; removeGestureOverlay();
     if (Math.abs(dy) < 60 || Math.abs(dx) > Math.abs(dy)) return;
-    if (dy < 0) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    }
+    if (dy < 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   });
 
   document.addEventListener('contextmenu', (e) => {
     const dy = e.clientY - mouseGesture.startY;
     const dx = e.clientX - mouseGesture.startX;
-    if (Math.abs(dy) >= 60 && Math.abs(dy) > Math.abs(dx)) {
-      e.preventDefault();
-    }
+    if (Math.abs(dy) >= 60 && Math.abs(dy) > Math.abs(dx)) e.preventDefault();
   });
 
   function appendDots() {
-    const targets = ['wordInp', 'transInp'];
-    targets.forEach(id => {
+    ['wordInp', 'transInp'].forEach(id => {
       const el = document.getElementById(id);
-      if (el && el.placeholder && !el.placeholder.endsWith('...')) {
-        el.placeholder += '...';
-      }
+      if (el && el.placeholder && !el.placeholder.endsWith('...')) el.placeholder += '...';
     });
   }
+
   applyI18n(targetLanguage);
-  appendDots()
+  appendDots();
   renderTable();
 });

@@ -711,19 +711,20 @@ function ensureYouTubeNavigationListener() {
       ensureYouTubeReadyWatcher();
       const navUrl = location.href;
       let titleRetry = 0;
-      const titleElAtStart = document.querySelector(
-        "h1.ytd-watch-metadata yt-formatted-string",
-      );
+      const getTitleEl = () =>
+        document.querySelector("h1.ytd-watch-metadata yt-formatted-string") ||
+        document.querySelector("h2.slim-video-information-title span.ytAttributedStringHost");
+
+      const titleElAtStart = getTitleEl();
       let textAtNavStart = titleElAtStart?.innerText?.trim() || "";
+
       const titleFixer = setInterval(() => {
         titleRetry++;
         if (location.href !== navUrl) {
           clearInterval(titleFixer);
           return;
         }
-        const titleEl = document.querySelector(
-          "h1.ytd-watch-metadata yt-formatted-string",
-        );
+        const titleEl = getTitleEl();
         const currentText = titleEl?.innerText?.trim() || "";
         if (!currentText || currentText === textAtNavStart) {
           if (titleRetry > 20) clearInterval(titleFixer);
@@ -774,6 +775,7 @@ function ensureYouTubeReadyWatcher() {
     if (window.youTubeRescanObserver) return;
     const defaultSelectors = [
       "h1.ytd-watch-metadata yt-formatted-string",
+      "h2.slim-video-information-title span.ytAttributedStringHost", // 移动端标题
       "p",
       "li",
       "#description-inner span",
@@ -1113,9 +1115,21 @@ function normalizeText(text) {
     .replace(/\s+/g, " ");
 }
 function isYoutubeCaptionOn() {
-  const ccButton = document.querySelector(".ytp-subtitles-button");
-  if (!ccButton) return false;
-  return ccButton.getAttribute("aria-pressed") === "true";
+  // 桌面端
+  const desktopBtn = document.querySelector('.ytp-subtitles-button');
+  if (desktopBtn) {
+    return desktopBtn.getAttribute('aria-pressed') === 'true';
+  }
+
+  // 移动端 m.youtube.com
+  const mobileBtn = document.querySelector('.ytmClosedCaptioningButtonButton');
+  if (mobileBtn) {
+    return mobileBtn.getAttribute('aria-pressed') === 'true';
+  }
+
+  // 都找不到按钮时，不要直接返回 false 把字幕功能锁死
+  // 可以根据实际情况选择默认值，比如默认 true（假设用户开了字幕）
+  return true;
 }
 function toggleVisibility() {
   syncSubtitleDisplay();
@@ -2058,14 +2072,18 @@ async function handleTranslateElement(el, forceRefresh = false) {
   if (el.tagName === "SPAN" && el.parentElement) {
     const parentDisplay = window.getComputedStyle(el.parentElement).display;
     if (parentDisplay === "flex" || parentDisplay === "inline-flex") {
-      // 这个 span 是 flex 子项，跳过，交给父元素处理
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
       _miraProcessingSet.delete(el);
       return;
     }
     const parentTag = el.parentElement.tagName;
-    if (["H1", "H2", "H3"].includes(parentTag)) {
+    // 移动端 YouTube 标题：h2 > span.ytAttributedStringHost 是唯一文本节点，不跳过
+    const isMobileYTTitle =
+      location.hostname.includes("youtube.com") &&
+      el.classList.contains("ytAttributedStringHost") &&
+      el.parentElement.classList.contains("slim-video-information-title");
+    if (["H1", "H2", "H3"].includes(parentTag) && !isMobileYTTitle) {
       el.dataset.translated = "true";
       return;
     }
@@ -2578,8 +2596,13 @@ async function handleTranslateElement(el, forceRefresh = false) {
     const isGoogle = location.hostname.includes("google.com");
     const isTemu = location.hostname.includes("temu.com");
     const isFB = location.hostname.includes("facebook.com");
+    const isMobileYTTitleSpan =
+      isYoutube &&
+      el.classList.contains("ytAttributedStringHost") &&
+      el.parentElement?.classList.contains("slim-video-information-title");
+
     const finalCheckNode = isYoutube
-      ? parentH1 || youtubeListTitleLink || el
+      ? parentH1 || youtubeListTitleLink || (isMobileYTTitleSpan ? el.closest("h2") : el)
       : mountTarget;
     if (!forceRefresh && isYoutube) {
       const ytNextSibling = finalCheckNode.nextElementSibling;
@@ -4975,13 +4998,16 @@ function initSelectionTranslate() {
 
       /* 例句喇叭 */
     .mira-example-speak {
-      position: relative;
-      transition: all 0.2s;
-      opacity: 0.6;
-    }
-      .mira-example-speak:hover {
-      opacity: 1;
-    }
+    position: relative;
+    transition: all 0.2s;
+    opacity: 0.6;
+    display: inline-block;
+  }
+
+  .mira-example-speak:hover {
+    opacity: 1;
+    transform: scale(1.2);
+  }
     .mira-example-speak.is-speaking {
       opacity: 1;
       color: #38bdf8 !important;
@@ -7276,30 +7302,36 @@ function initSelectionTranslate() {
     });
     return text;
   };
-  window.addEventListener("mouseup", (e) => {
-    if (typeof isDragging !== "undefined") isDragging = false;
-    if (
-      e.button === 2 ||
-      (typeof isSelectEnabled !== "undefined" && !isSelectEnabled)
-    )
-      return;
-    if (shadowHost && e.composedPath().includes(shadowHost)) return;
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+  // mouseup（桌面）+ touchend（移动端）统一处理选词翻译
+  async function handleSelectionEnd(e) {
+    if (e.button === 2) return;
+    const isTouchEvent = e.type === "touchend";
+    if (!isTouchEvent && typeof isDragging !== "undefined") isDragging = false;
 
+    if (typeof isSelectEnabled !== "undefined" && !isSelectEnabled) return;
+    if (shadowHost && e.composedPath().includes(shadowHost)) return;
+
+    // touchend 的坐标在 changedTouches 里，touches 此时已清空
+    const touch = isTouchEvent ? e.changedTouches?.[0] : null;
+    const mouseX = touch ? touch.clientX : e.clientX;
+    const mouseY = touch ? touch.clientY : e.clientY;
+
+    if (!isTouchEvent && typeof isDragging !== "undefined") isDragging = false;
+
+    // 移动端选词结果有时在 touchend 后才稳定，保留 150ms 延迟
     setTimeout(async () => {
       const selection = getSmartSelection();
       if (!selection) return;
       const text = selection.toString().trim();
       if (!text || text.length > 1000) return;
 
-      //  立即克隆 Range，此时 selection 还有效
+      // 立即克隆 Range，此时 selection 还有效
       let savedRange = null;
       try {
         if (selection.rangeCount > 0) {
           savedRange = selection.getRangeAt(0).cloneRange();
         }
-      } catch (e) { }
+      } catch (_) { }
 
       if (!window.__LANG_READY__) {
         await window.__LANG_PROMISE__;
@@ -7308,16 +7340,12 @@ function initSelectionTranslate() {
       const storage = await safeGetStorage(["targetLanguage", "lpLangA"]);
       const sourceLang = storage?.lpLangA || "auto";
       const targetPrefix = targetLang.toLowerCase().slice(0, 2);
-      const sourcePrefix = sourceLang.toLowerCase().slice(0, 2);
 
       let isAlreadyTarget = false;
-
       if (sourceLang !== "auto") {
-        isAlreadyTarget = (sourceLang.toLowerCase() === targetLang.toLowerCase());
+        isAlreadyTarget = sourceLang.toLowerCase() === targetLang.toLowerCase();
       } else {
-        // 优先级2：从上下文检测语言
         let ctxLang = null;
-        let ctxText = "";
         if (savedRange) {
           try {
             let block = savedRange.commonAncestorContainer;
@@ -7327,33 +7355,30 @@ function initSelectionTranslate() {
               block = block.parentElement;
               tries++;
             }
-            ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
-            if (ctxText.length >= 15) {
-              ctxLang = detectSourceLang(ctxText);
-            }
-          } catch (e) { }
+            const ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
+            if (ctxText.length >= 15) ctxLang = detectSourceLang(ctxText);
+          } catch (_) { }
         }
 
         if (ctxLang !== null && !LATIN_BASED_LANGS.has(ctxLang)) {
           const textLang = detectSourceLang(text);
           if (textLang && textLang !== ctxLang) {
             const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(text);
-            if (ctxLang === 'ja' && isPureCJK && targetPrefix === 'ja') {
+            if (ctxLang === "ja" && isPureCJK && targetPrefix === "ja") {
               isAlreadyTarget = true;
-            } else if (ctxLang === 'ja' && isPureCJK) {
-              // 上下文是日语，纯汉字大概率是日语词，不应该被 detectIsAlreadyTarget 误判为中文
-              // 直接认为不是目标语言，弹出翻译
+            } else if (ctxLang === "ja" && isPureCJK) {
               isAlreadyTarget = false;
             } else {
               isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
             }
           } else {
-            isAlreadyTarget = (ctxLang === targetPrefix);
+            isAlreadyTarget = ctxLang === targetPrefix;
           }
         } else {
           isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
         }
       }
+
       if (isAlreadyTarget) {
         forceHideLogo();
         return;
@@ -7361,25 +7386,32 @@ function initSelectionTranslate() {
 
       if (!shadowHost) initShadowDOM();
       if (!logoBtn) return;
-      let rect = null;
-      try {
-        if (selection.rangeCount > 0) {
-          rect = selection.getRangeAt(0).getBoundingClientRect();
-        }
-      } catch (err) { }
+
       let l = mouseX + 2;
       let t = mouseY + 2;
-      if (rect && rect.width > 0) {
-        const isMouseInside =
-          mouseX >= rect.left &&
-          mouseX <= rect.right &&
-          mouseY >= rect.top &&
-          mouseY <= rect.bottom;
-        if (isMouseInside) {
-          l = mouseX + 10;
-          t = mouseY - 32;
+      try {
+        if (selection.rangeCount > 0) {
+          const rect = selection.getRangeAt(0).getBoundingClientRect();
+          if (rect?.width > 0) {
+            const inside = mouseX >= rect.left && mouseX <= rect.right &&
+              mouseY >= rect.top && mouseY <= rect.bottom;
+            if (inside) { l = mouseX + 10; t = mouseY - 32; }
+          }
+        }
+      } catch (_) { }
+
+      // 移动端按钮显示在手指上方，避免被遮挡
+      if (isTouchEvent) {
+        try {
+          const rect = selection.getRangeAt(0).getBoundingClientRect();
+          l = rect.left;
+          t = rect.bottom + 8; // 放在选区下方，避开上方系统菜单
+        } catch (_) {
+          l = mouseX - 16;
+          t = mouseY + 24;
         }
       }
+
       const btnSize = 32;
       l = Math.max(10, Math.min(l, window.innerWidth - btnSize - 10));
       t = Math.max(10, Math.min(t, window.innerHeight - btnSize - 10));
@@ -7398,25 +7430,20 @@ function initSelectionTranslate() {
       logoCenter = { x: l + 16, y: t + 16 };
       logoBtn.classList.add("show");
       clearTimeout(window.logoAutoTimer);
-      window.logoAutoTimer = setTimeout(() => {
-        forceHideLogo();
-      }, 3000);
+      window.logoAutoTimer = setTimeout(forceHideLogo, 3000);
 
-
-      logoBtn.onmouseenter = async () => {
+      // 桌面 hover / 移动端 tap 共用的翻译逻辑
+      async function triggerTranslation() {
         try {
-          if (!chrome.runtime?.id) {
-            showUpdateNotice();
-            return;
-          }
-        } catch (_) {
-          showUpdateNotice();
-          return;
-        }
+          if (!chrome.runtime?.id) { showUpdateNotice(); return; }
+        } catch (_) { showUpdateNotice(); return; }
+
         try {
           const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
           const currentSource = storage?.lpLangA || "auto";
           let finalQuery = text;
+
+          // 汉英混排且英文占多数时，去掉汉字再查
           const hasHan = /[\u4e00-\u9fa5]/.test(text);
           const hasEn = /[a-zA-Z]/.test(text);
           const hasJa = LANGUAGE_PATTERNS["ja"]?.test(text);
@@ -7427,7 +7454,7 @@ function initSelectionTranslate() {
               finalQuery = text.replace(/[\u4e00-\u9fa5]/g, "").trim();
             }
           }
-          // 修复 detectSourceLang 顺序后，用上下文辅助检测
+
           let ctxForDetect = _capturedContext || "";
           if (ctxForDetect.length < 20) {
             try {
@@ -7439,42 +7466,31 @@ function initSelectionTranslate() {
                   block = block.parentElement;
                   tries++;
                 }
-                //  排除译文
                 ctxForDetect = getOriginalText(block).replace(/\s+/g, " ").trim();
               }
-            } catch (e) { }
+            } catch (_) { }
           }
 
           const textLang = detectSourceLang(finalQuery);
-          const ctxLang = detectSourceLang(ctxForDetect || '');
-
+          const ctxLang = detectSourceLang(ctxForDetect || "");
           let detectedSourceLang;
-          if (currentSource !== 'auto') {
+          if (currentSource !== "auto") {
             detectedSourceLang = currentSource;
           } else if (textLang && ctxLang && textLang !== ctxLang) {
-            const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(finalQuery);
-            if (ctxLang === 'ja' && isPureCJK) {
-              // 日语上下文里的纯汉字，应该是日语词，不是中文
-              detectedSourceLang = 'ja';
-            } else {
-              detectedSourceLang = textLang;
-            }
+            // 日语上下文里的纯汉字按日语处理
+            detectedSourceLang = (ctxLang === "ja" && /^[\u4e00-\u9fa5]+$/.test(finalQuery))
+              ? "ja" : textLang;
           } else {
             detectedSourceLang = ctxLang || textLang || "auto";
           }
 
-          //  上下文捕获：使用提前克隆好的 savedRange
           if (!shadowHost) initShadowDOM();
           try {
             if (savedRange) {
               const container = savedRange.commonAncestorContainer;
-              const paragraph =
-                container.nodeType === Node.TEXT_NODE
-                  ? container.parentElement
-                  : container;
+              const paragraph = container.nodeType === Node.TEXT_NODE
+                ? container.parentElement : container;
               let block = paragraph.closest("[data-translated]") || paragraph;
-
-              // 如果捕获的文本太短，向上找更大的容器
               let tries = 0;
               while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
                 block = block.parentElement;
@@ -7482,28 +7498,16 @@ function initSelectionTranslate() {
               }
 
               const fullText = getOriginalText(block).replace(/\s+/g, " ").trim();
-
-              //  对 finalQuery 做同样的空白规范化，避免多余空格导致 indexOf 失败
               const selectedText = finalQuery.replace(/\s+/g, " ").trim();
-
               let idx = fullText.indexOf(selectedText);
-              //  兜底：忽略大小写再找一次
-              if (idx === -1) {
-                idx = fullText
-                  .toLowerCase()
-                  .indexOf(selectedText.toLowerCase());
-              }
+              if (idx === -1) idx = fullText.toLowerCase().indexOf(selectedText.toLowerCase());
 
               if (idx !== -1) {
                 const start = Math.max(0, idx - 80);
-                const end = Math.min(
-                  fullText.length,
-                  idx + selectedText.length + 80
-                );
-
-                logger.log('[context] fullText slice:', fullText?.slice(0, 100));
-                logger.log('[context] selectedText:', selectedText);
-                logger.log('[context] idx:', idx);
+                const end = Math.min(fullText.length, idx + selectedText.length + 80);
+                logger.log("[context] fullText slice:", fullText?.slice(0, 100));
+                logger.log("[context] selectedText:", selectedText);
+                logger.log("[context] idx:", idx);
                 let context = fullText.slice(start, end).trim();
                 if (start > 0) context = "..." + context;
                 if (end < fullText.length) context = context + "...";
@@ -7519,7 +7523,6 @@ function initSelectionTranslate() {
                   ? block.nextElementSibling : null) ||
                 (block.parentElement?.nextElementSibling?.classList.contains("kt-paragraph-translation")
                   ? block.parentElement.nextElementSibling : null);
-
               _capturedContextTranslation = translationEl ? translationEl.textContent.trim() : "";
             }
           } catch (e) {
@@ -7535,21 +7538,45 @@ function initSelectionTranslate() {
             currentTarget,
             detectedSourceLang
           );
-
-          //  成功显示窗口后，才隐藏小按钮
           forceHideLogo();
         } catch (e) {
           if (e.message?.includes("context invalidated")) {
-            logger.warn("[mouseenter] Context invalidated, 扩展已更新");
+            logger.warn("[trigger] Context invalidated, 扩展已更新");
             showUpdateNotice();
             return;
           }
-          logger.error("[mouseenter] 显示翻译窗口失败:", e.message, e.stack);
-          //  错误发生时不隐藏小按钮，保留让用户重试
+          logger.error("[trigger] 显示翻译窗口失败:", e.message, e.stack);
+          // 出错时保留 logo 供用户重试
         }
-      };
+      }
+
+      if (isTouchEvent) {
+        // 移动端：点击 logo 触发翻译（每次重新绑定以捕获最新闭包）
+        logoBtn.ontouchend = async (tapEvt) => {
+          tapEvt.stopPropagation();
+          tapEvt.preventDefault();
+          clearTimeout(window.logoAutoTimer);
+          await triggerTranslation();
+        };
+        // 兼容混合设备的 click 兜底
+        logoBtn.onclick = async (clickEvt) => {
+          clickEvt.stopPropagation();
+          clearTimeout(window.logoAutoTimer);
+          await triggerTranslation();
+        };
+      } else {
+        // 桌面：hover 触发
+        logoBtn.onmouseenter = async () => {
+          clearTimeout(window.logoAutoTimer);
+          await triggerTranslation();
+        };
+      }
     }, 150);
-  });
+  }
+
+  window.addEventListener("mouseup", handleSelectionEnd);
+  window.addEventListener("touchend", handleSelectionEnd, { passive: true });
+
   document.addEventListener("mousedown", (e) => {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
     const existingDropdown =
@@ -8861,7 +8888,25 @@ if (!document.getElementById("mira-global-style")) {
         z-index: 100 !important;
         opacity: 0.25 !important;
         transition: opacity 0.2s ease;
-       }
+       } 
+
+    @media (max-width: 768px), (max-height: 500px) {
+        :root {
+            --kt-origin-size: 16px !important;
+            --kt-trans-size: 15px !important;
+        }
+        #kt-yt-box {
+            padding: 6px 12px !important;
+            max-width: 95% !important;
+            border-radius: 8px;
+        }
+        #yt-t {
+            margin: 4px auto 0;  
+        }
+        #yt-t.kt-loading {
+            font-size: 14px !important;
+        }
+    }
     `;
   document.head.appendChild(style);
 }
@@ -8976,7 +9021,7 @@ function getVideoSourceLang() {
 }
 function syncSubtitleDisplay() {
   const video = document.querySelector("video");
-  const player = document.querySelector(".html5-video-player");
+  const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   const box = document.getElementById("kt-yt-box");
   const enabled = typeof isYTEnabled === "undefined" ? true : isYTEnabled;
   refreshIcon();
@@ -9234,7 +9279,7 @@ function enableYtBoxDrag(box) {
     if (!isDragging) return;
     const deltaY = startY - e.clientY;
     const targetBottom = startBottom + deltaY;
-    const videoPlayer = document.querySelector(".html5-video-player");
+    const videoPlayer = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
     const maxHeight = videoPlayer
       ? videoPlayer.offsetHeight * 0.9
       : window.innerHeight * 0.8;
@@ -9264,7 +9309,7 @@ function initSubtitleAvoidance() {
     return document.getElementById("kt-yt-box");
   }
   function isControlsVisible() {
-    const player = document.querySelector(".html5-video-player");
+    const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
     if (!player) return false;
     return !player.classList.contains("ytp-autohide");
   }
@@ -9295,7 +9340,7 @@ function initSubtitleAvoidance() {
     isAvoiding = false;
     box.style.transform = `translateX(-50%) translateY(0px)`;
   }
-  const player = document.querySelector(".html5-video-player");
+  const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   if (!player) return;
   new MutationObserver(() => {
     if (getBox()?.classList.contains("dragging")) return;
@@ -9309,7 +9354,7 @@ function initSubtitleAvoidance() {
   });
 }
 function initSettingsAvoidance() {
-  const player = document.querySelector(".html5-video-player");
+  const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   if (!player) return;
 
   function checkSettingsOpen() {
@@ -9438,19 +9483,28 @@ function renderWords(text, container, sourceLang = null) {
 function applySubtitleSettings(settings) {
   const box = document.getElementById("kt-yt-box");
   if (!box) return;
+
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768 ||
+    window.innerHeight <= 500; // 横屏时高度 
+
+  const scale = isMobile ? 0.6 : 1;
+  const baseFontSize = (settings.fontSize || 25) * scale;
+
   const config = {
-    fontSize: settings.fontSize || 25,
     color: settings.color || "#38bdf8",
     bgOpacity: settings.bgOpacity ?? 0.55,
     textShadow: settings.textShadow ?? "2px 2px 4px black",
     ...settings,
   };
-  box.style.setProperty("--kt-trans-size", `${config.fontSize}px`);
+
+  box.style.setProperty("--kt-trans-size", `${baseFontSize}px`);
   box.style.setProperty("--kt-trans-color", config.color);
   box.style.setProperty("--kt-bg-rgba", `rgba(0, 0, 0, ${config.bgOpacity})`);
-  box.style.setProperty("--kt-origin-size", `${config.fontSize * 0.85}px`);
-  box.style.transition =
-    "opacity 0.2s ease-in-out, background 0.3s, transform 0.3s ease-out";
+  box.style.setProperty("--kt-origin-size", `${baseFontSize * 0.85}px`);
+
+  box.style.transition = "opacity 0.2s ease-in-out, background 0.3s, transform 0.3s ease-out";
 }
 let isVideoManuallyPaused = false;
 let extensionDidPause = false;
@@ -9509,7 +9563,7 @@ async function handleWordMouseEnter(e, word) {
       border: 1px solid #334155;
     `;
     const moviePlayer =
-      document.querySelector(".html5-video-player") || document.body;
+      (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement) || document.body;
     moviePlayer.appendChild(tooltip);
   }
 
@@ -9646,7 +9700,7 @@ function repositionTooltip(tipEl, targetEl) {
   const spacing = 10;
 
   // 用播放器边界而不是 window 宽度
-  const player = document.querySelector(".html5-video-player");
+  const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   const playerRect = player ? player.getBoundingClientRect() : null;
   const rightBoundary = playerRect
     ? Math.min(playerRect.right - 10, window.innerWidth - 10)

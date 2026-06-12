@@ -38,6 +38,8 @@ const SiteRules = {
                 "#description yt-formatted-string",
                 // about 页频道描述
                 "ytd-about-channel-renderer yt-attributed-string span",
+                // 移动端 m.youtube.com 视频标题
+                "h2.slim-video-information-title.slim-video-metadata-title-modern span.ytAttributedStringHost",
             ].join(", "),
             minLen: 3
         },
