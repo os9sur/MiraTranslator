@@ -4,6 +4,13 @@
  * License: AGPL-3.0 (https://github.com/os9sur)
  * Contact: mira.studio@proton.me
  */
+if (typeof chrome.identity === 'undefined') {
+  chrome.identity = {
+    getRedirectURL: () => '',
+    launchWebAuthFlow: () => Promise.reject(new Error('identity not supported')),
+    getAuthToken: (_, cb) => cb && cb(null)
+  };
+}
 
 window.browser = (function () {
   return window.msBrowser || window.browser || window.chrome;
@@ -330,13 +337,21 @@ async function initUpdateNotify() {
     exportBtn.addEventListener('mouseenter', () => exportBtn.style.background = '#f0f0f0');
     exportBtn.addEventListener('mouseleave', () => exportBtn.style.background = '#fcfcfc');
   }
-
-  // 将跳转卸载页改为纯粹的关闭弹窗
+ 
   document.getElementById('notice-close-btn').onclick = () => {
     window.close();
   };
 }
 document.addEventListener('DOMContentLoaded', async () => {
+  if (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    document.body.style.width = '100vw';
+    document.body.style.maxWidth = '100vw';
+    document.body.style.minWidth = 'unset';
+    document.body.style.margin = '0';
+    document.body.style.padding = '12px';
+    document.body.style.borderRadius = '0';
+  }
+
   if (showNotice) {
     initUpdateNotify();
     return;
@@ -891,6 +906,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     //  OneDrive 无 token 时先授权
     if (method === 'oneDrive' && !data.onedrive_token) {
       updateSyncProgressUI(btnId, 'authorizing', true);
+
+      const isFirefoxAndroid = /Firefox/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
+      if (isFirefoxAndroid) {
+        showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
+      }
+
       safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((response) => {
         if (!response) { updateSyncProgressUI(btnId, '', false); return; }
         if (response.success) {
@@ -1051,12 +1072,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateSyncProgressUI(btn.id, '', false);
     }
   }
-  
+
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local' && changes.lastSyncTime) {
-        updateSyncStatusUI(changes.lastSyncTime.newValue);
+      updateSyncStatusUI(changes.lastSyncTime.newValue);
     }
-});
+  });
   function updateSyncStatusUI(time) {
     const statusEl = document.getElementById('syncStatus');
     if (!statusEl) return;
@@ -2431,7 +2452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     triggerRefresh(this, "REFRESH_YT");
   };
-// ====== 个性化扫描配置面板逻辑 开始 ======
+  // ====== 个性化扫描配置面板逻辑 开始 ======
   {
     //  初始化读取状态
     const initInspectState = () => {
@@ -2442,18 +2463,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       const savedState = localStorage.getItem('inspectContainerState') || 'collapsed';
       if (savedState === 'expanded') {
         content.style.display = 'flex';
-        arrow.classList.add('arrow-expanded');  
+        arrow.classList.add('arrow-expanded');
       } else {
         content.style.display = 'none';
         arrow.classList.remove('arrow-expanded');
       }
     };
- 
+
     initInspectState();
- 
-    document.addEventListener('click', function(e) {
+
+    document.addEventListener('click', function (e) {
       const header = e.target.closest('#inspectHeader');
-      if (!header) return;  
+      if (!header) return;
 
       const content = document.getElementById('inspectContent');
       const arrow = document.getElementById('inspectArrow');
@@ -2613,52 +2634,52 @@ document.addEventListener('DOMContentLoaded', async () => {
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
 
-if (checkRTL(uiLangSelect.value)) {    
-    // inspectElementLabel 右对齐
-    const label = document.getElementById('inspectElementLabel');
-    if (label) {
-        label.style.textAlign = 'right';
-        label.style.display = 'block';
-        label.style.width = '100%';
-    }
+      if (checkRTL(uiLangSelect.value)) {
+        // inspectElementLabel 右对齐
+        const label = document.getElementById('inspectElementLabel');
+        if (label) {
+          label.style.textAlign = 'right';
+          label.style.display = 'block';
+          label.style.width = '100%';
+        }
 
-    // inspectElement 图标移到右边
-    const inspectBtn = document.getElementById('inspectElement');
-    if (inspectBtn) {
-        inspectBtn.style.display = 'flex';
-        inspectBtn.style.flexDirection = 'row-reverse';
-        const icon = inspectBtn.querySelector('span:first-child');
-        if (icon) {
+        // inspectElement 图标移到右边
+        const inspectBtn = document.getElementById('inspectElement');
+        if (inspectBtn) {
+          inspectBtn.style.display = 'flex';
+          inspectBtn.style.flexDirection = 'row-reverse';
+          const icon = inspectBtn.querySelector('span:first-child');
+          if (icon) {
             icon.style.position = 'absolute';
             icon.style.left = 'auto';
             icon.style.right = '6px';
+          }
         }
-    }
 
-    // matchSelector label 右对齐
-    const matchLabel = document.querySelector('label[data-i18n="matchSelector"]');
-    if (matchLabel) {
-        matchLabel.style.textAlign = 'right';
-        matchLabel.style.display = 'block';
-        matchLabel.style.width = '100%';
-    }
+        // matchSelector label 右对齐
+        const matchLabel = document.querySelector('label[data-i18n="matchSelector"]');
+        if (matchLabel) {
+          matchLabel.style.textAlign = 'right';
+          matchLabel.style.display = 'block';
+          matchLabel.style.width = '100%';
+        }
 
-    // label行反转
-    const labelRow = document.querySelector('#inspectContainer .row > div:first-child');
-    if (labelRow) {
-        labelRow.style.flexDirection = 'row-reverse';
-        labelRow.style.width = '100%';
-    }
-}
+        // label行反转
+        const labelRow = document.querySelector('#inspectContainer .row > div:first-child');
+        if (labelRow) {
+          labelRow.style.flexDirection = 'row-reverse';
+          labelRow.style.width = '100%';
+        }
+      }
 
       if (inspectBtn && inspectLabelBtn) {
         if (currentMode === 'global') {
           inspectBtn.classList.add('hidden-fade');
-         // inspectLabelBtn.classList.add('hidden-fade');
+          // inspectLabelBtn.classList.add('hidden-fade');
           if (domainLabel) domainLabel.classList.add('hidden-fade');
         } else {
           inspectBtn.classList.remove('hidden-fade');
-         // inspectLabelBtn.classList.remove('hidden-fade');
+          // inspectLabelBtn.classList.remove('hidden-fade');
           if (domainLabel) domainLabel.classList.remove('hidden-fade');
         }
       }

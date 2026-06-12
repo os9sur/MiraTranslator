@@ -1700,7 +1700,11 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     }
     //透传 
     const data = response.currentTranslationResponse || response.result || response;
-
+// // 临时加
+// if (response.__debugError) {
+//     console.error('[DEBUG]', response.__debugError);
+//     // 或者直接 return { basic: response.__debugError, isError: true };
+// }
     let result = {
       basic: "",
       phonetic: "",
