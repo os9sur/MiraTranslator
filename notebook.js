@@ -614,7 +614,43 @@ document.addEventListener('DOMContentLoaded', async () => {
       cell.innerHTML = originalContent;
     }
   }
+function updateNbSyncUI(btnId, active) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    if (!active) {
+        btn.classList.remove('syncing');
+        btn.disabled = false;
+        return;
+    }
+    btn.classList.add('syncing');
+    btn.disabled = true;
+}
 
+async function notebookSync(direction) {
+    const btnId = direction === 'push' ? 'nbSyncPush' : 'nbSyncPull';
+    updateNbSyncUI(btnId, true);
+    try {
+        const res = await chrome.runtime.sendMessage({
+            type: 'SYNC_DATA',
+            direction
+        });
+        // 同步完成后显示结果
+        const scroller = document.getElementById(btnId)?.querySelector('.sync-log-scroller');
+        if (scroller) {
+            scroller.innerHTML = `<div style="font-size:13px;">${res?.success ? '✅' : '❌'}</div>`;
+        }
+        setTimeout(() => {
+            if (scroller) scroller.innerHTML = '';
+            updateNbSyncUI(btnId, false);
+        }, 2000);
+    } catch (e) {
+        logger.error('[notebookSync]', e);
+        updateNbSyncUI(btnId, false);
+    }
+}
+
+document.getElementById('nbSyncPush').onclick = () => notebookSync('push');
+document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
   document.getElementById('addBtn').onclick = async () => {
     const word = wordInp.value.trim();
     const trans = transInp.value.trim();

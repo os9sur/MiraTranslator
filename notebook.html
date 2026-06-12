@@ -26,7 +26,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
     }
 
     .search-bar-wrapper {
@@ -151,7 +151,6 @@
     .btn-export {
       background: #127538;
       color: white;
-      margin-right: 10px;
     }
 
     .add-box {
@@ -520,7 +519,11 @@
     /* ── 移动端 ── */
     @media (max-width: 768px) {
       body {
-        padding: 12px 12px 20px 12px ;
+        padding: 12px 12px 20px 12px;
+      }
+
+      #syncStatus {
+        align-self: flex-start;
       }
 
       .header {
@@ -534,12 +537,16 @@
         align-items: stretch;
         gap: 10px;
       }
+
       .search-bar-wrapper {
+        flex: 1 !important;
+        width: 90% !important;
         max-width: 100% !important;
       }
 
       .highlight-label {
         align-self: center;
+        padding: 5px 16px;
       }
 
       .add-box {
@@ -705,6 +712,61 @@
         line-clamp: 3;
       }
     }
+
+    .nb-sync-btn {
+      display: inline-flex;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nb-sync-btn .btn-label {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .nb-sync-btn .sync-log-scroller {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: top 0.3s ease;
+      pointer-events: none;
+    }
+
+    .nb-sync-btn.syncing .btn-label {
+      transform: translateY(-30px);
+      opacity: 0;
+    }
+
+    .nb-sync-btn.syncing .sync-log-scroller {
+      top: 0;
+    }
+
+    .nb-sync-btn.syncing .sync-log-scroller::after {
+      content: "";
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: nb-spin 0.7s linear infinite;
+    }
+
+    @keyframes nb-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .nb-sync-btn:disabled,
+    .nb-sync-btn.syncing {
+      cursor: wait;
+      filter: saturate(0.8);
+      pointer-events: none;
+    }
   </style>
 </head>
 
@@ -712,9 +774,22 @@
   <div class="container">
     <div dir="auto" class="header">
       <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <span id="syncStatus" style="font-size: 12px; color: #94a3b8;"></span>
-        <button id="exportBtn" class="btn btn-export" data-i18n="exportCSV">导出 CSV</button>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: nowrap;">
+          <button id="nbSyncPush" class="btn nb-sync-btn"
+            style="background:#127538; color:white; position:relative; overflow:hidden; padding:6px 10px; font-size:12px;">
+            <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
+            <div class="sync-log-scroller"></div>
+          </button>
+          <button id="nbSyncPull" class="btn nb-sync-btn"
+            style="background:rgba(16,185,129,0.1); border:1.5px solid #10b981; color:#10b981; position:relative; overflow:hidden; padding:5px 10px; font-size:12px;">
+            <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
+            <div class="sync-log-scroller"></div>
+          </button>
+          <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
+            data-i18n="exportCSV">导出 CSV</button>
+        </div>
+        <span id="syncStatus" style="font-size: 11px; color: #475569;"></span>
       </div>
     </div>
 

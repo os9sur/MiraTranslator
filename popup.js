@@ -337,13 +337,21 @@ async function initUpdateNotify() {
     exportBtn.addEventListener('mouseenter', () => exportBtn.style.background = '#f0f0f0');
     exportBtn.addEventListener('mouseleave', () => exportBtn.style.background = '#fcfcfc');
   }
-
-  // 将跳转卸载页改为纯粹的关闭弹窗
+ 
   document.getElementById('notice-close-btn').onclick = () => {
     window.close();
   };
 }
 document.addEventListener('DOMContentLoaded', async () => {
+  if (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
+    document.body.style.width = '100vw';
+    document.body.style.maxWidth = '100vw';
+    document.body.style.minWidth = 'unset';
+    document.body.style.margin = '0';
+    document.body.style.padding = '12px';
+    document.body.style.borderRadius = '0';
+  }
+
   if (showNotice) {
     initUpdateNotify();
     return;
