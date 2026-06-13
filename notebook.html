@@ -50,6 +50,7 @@
       border-radius: 999px;
       padding: 8px 25px;
       gap: 12px;
+      background: #13213a;
       box-shadow: 0 0 6px rgba(34, 197, 94, 0.3), 0 0 16px rgba(34, 197, 94, 0.1);
     }
 
@@ -156,9 +157,9 @@
     .add-box {
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(235, 234, 234, 0.11);
-      padding: 12px;
+      padding: 8px 10px;
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 9px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -516,6 +517,17 @@
       unicode-bidi: isolate;
     }
 
+    #syncHint {
+      text-align: right;
+      font-size: 12px;
+      color: #f87171;
+      max-height: 0;
+      margin-top: 3px;
+      margin-bottom: 3px;
+      opacity: 0;
+      transition: opacity 0.3s, max-height 0.3s, margin-bottom 0.3s;
+    }
+
     /* ── 移动端 ── */
     @media (max-width: 768px) {
       body {
@@ -711,6 +723,10 @@
         -webkit-line-clamp: 3;
         line-clamp: 3;
       }
+
+      #syncHint {
+        text-align: left;
+      }
     }
 
     .nb-sync-btn {
@@ -772,7 +788,7 @@
 
 <body>
   <div class="container">
-    <div dir="auto" class="header">
+<div dir="auto" class="header">
       <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: nowrap;">
@@ -786,14 +802,16 @@
             <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
             <div class="sync-log-scroller"></div>
           </button>
+          <button id="toggleAddBox" class="btn" style="background:#334155; color:white; padding:6px 10px; font-size:12px;" title="">＋</button>
           <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
             data-i18n="exportCSV">导出 CSV</button>
         </div>
-        <span id="syncStatus" style="font-size: 11px; color: #475569;"></span>
+        <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
       </div>
     </div>
+    <div dir="auto" id="syncHint"></div>
 
-    <div class="add-box" dir="auto">
+    <div class="add-box" id="addBox" dir="auto" style="display:none;">
       <input type="text" id="wordInp" data-i18n="word" data-i18n-type="placeholder" placeholder="New word...">
       <textarea id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning..." rows="1"
         style="resize: none; overflow: hidden; transition: height 0.2s; field-sizing: content;"></textarea>
@@ -844,8 +862,7 @@
                 text-align: center;
                 margin-top: 10px; 
                 font-size: 11px;
-                color: #334155;
-                letter-spacing: 0.05em;
+                color: #3d4c62; 
                 ">
       Created by David Bai
     </div>

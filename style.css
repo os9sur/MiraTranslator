@@ -325,6 +325,14 @@ select:hover {
   transition: background 0.1s;
 }
 
+#domainIndicatorWrapper {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, margin-bottom 0.3s ease;
+  max-height: 40px;
+  opacity: 1;
+  margin-bottom: 2px;
+}
+
 .domain-tag {
   display: inline-flex;
   align-items: center;
@@ -334,20 +342,20 @@ select:hover {
   background: rgba(56, 189, 248, 0.1);
   padding: 4px 10px;
   border-radius: 20px;
-  margin-bottom: 2px;
+  margin-bottom: 0;
   border: 1px solid rgba(56, 189, 248, 0.2);
   transition:
     opacity 0.3s ease,
-    max-height 0.4s ease,
     transform 0.3s ease,
     margin 0.3s ease,
     padding 0.3s ease,
-    visibility 0.3s;
+    border-width 0.3s ease,
+    font-size 0.3s ease,
+    line-height 0.3s ease;
   overflow: hidden;
   max-height: 30px;
   opacity: 1;
   transform: translateY(0);
-  visibility: visible;
 }
 
 #inspectElement {
@@ -357,7 +365,7 @@ select:hover {
   border: 1px dashed rgba(56, 189, 248, 0.7);
   color: #38bdf8;
   padding: 8px;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 11px;
   position: relative;
@@ -737,13 +745,17 @@ select:hover {
   border-radius: 8px;
   resize: vertical;
   outline: none;
-  white-space: pre-wrap;
-  word-break: break-word;
   text-align: start;
   height: 36px;
   max-height: 80px;
   overflow-y: auto;
   line-height: 1.4;
+  resize: vertical;
+  max-height: 400px;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: auto;
+  word-break: normal;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1188,14 +1200,18 @@ select:hover {
   font-weight: 500;
   letter-spacing: 0.3px;
 }
+
 #inspectHeader {
   position: relative;
   background-color: rgba(30, 41, 59, 0.4);
   backdrop-filter: blur(20px);
-  border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 16px;
+  border: 1px solid #2b3b4f;
+  padding: 10px;
+  border-radius: 11px;
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 #inspectHeader:hover {
@@ -1210,13 +1226,14 @@ select:hover {
   color: #22c55e;
   text-shadow: 0 0 4px rgba(34, 197, 94, 0.6);
   transition: transform 0.2s ease;
-  display: inline-block;  
+  display: inline-block;
 }
 
 
 .arrow-expanded {
   transform: rotate(90deg) !important;
 }
+
 #addToNotebookBtn {
   --current-bg: rgba(56, 189, 248, 0.1);
   --current-border: rgba(56, 189, 248, 0.4);
@@ -1666,7 +1683,7 @@ select:hover {
 
 #inspectElement,
 #inspectElementLabel {
-  display: inline-block;
+  flex: 1;
   vertical-align: middle;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 1;
@@ -1684,9 +1701,10 @@ select:hover {
   margin-bottom: 0 !important;
   border-top-width: 0 !important;
   border-bottom-width: 0 !important;
-  transform: translateY(-10px) !important;
   pointer-events: none !important;
-  visibility: hidden !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
 }
 
 .icon-btn {

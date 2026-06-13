@@ -6,7 +6,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-
   const highlight = (text, query) => {
     if (!query || !text) return text;
     const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -92,7 +91,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const targetLanguage = storage?.ui_language || getBrowserLang() || 'en';
   const _t = (key) => (typeof t === 'function') ? t(key, targetLanguage) : key;
+  const toggleAddBoxBtn = document.getElementById('toggleAddBox');
+  toggleAddBoxBtn.title = _t('manualAdd');
 
+  toggleAddBoxBtn.onclick = () => {
+    const box = document.getElementById('addBox');
+    const btn = document.getElementById('toggleAddBox');
+    const isOpen = box.style.display !== 'none';
+    if (isOpen) {
+      box.style.display = 'none';
+      btn.textContent = '＋';
+    } else {
+      box.style.display = 'flex';
+      btn.textContent = '✕';
+      // 展开后再量高度
+      requestAnimationFrame(() => {
+        const h = wordInp.offsetHeight;
+        transInp.style.height = h + 'px';
+        transInp.style.minHeight = h + 'px';
+        const computed = window.getComputedStyle(wordInp);
+        transInp.style.paddingTop = computed.paddingTop;
+        transInp.style.paddingBottom = computed.paddingBottom;
+        transInp.style.lineHeight = computed.lineHeight;
+      });
+    }
+  };
   document.title = `Mira - ${_t('wordBook', targetLanguage)}`;
   const normLang = targetLanguage.replace('_', '-').toLowerCase();
   document.documentElement.lang = normLang;
@@ -614,43 +637,94 @@ document.addEventListener('DOMContentLoaded', async () => {
       cell.innerHTML = originalContent;
     }
   }
-function updateNbSyncUI(btnId, active) {
+  function updateNbSyncUI(btnId, active) {
     const btn = document.getElementById(btnId);
     if (!btn) return;
     if (!active) {
-        btn.classList.remove('syncing');
-        btn.disabled = false;
-        return;
+      btn.classList.remove('syncing');
+      btn.disabled = false;
+      return;
     }
     btn.classList.add('syncing');
     btn.disabled = true;
-}
+  }
 
-async function notebookSync(direction) {
+  async function notebookSync(direction) {
     const btnId = direction === 'push' ? 'nbSyncPush' : 'nbSyncPull';
     updateNbSyncUI(btnId, true);
     try {
-        const res = await chrome.runtime.sendMessage({
-            type: 'SYNC_DATA',
-            direction
-        });
-        // 同步完成后显示结果
-        const scroller = document.getElementById(btnId)?.querySelector('.sync-log-scroller');
-        if (scroller) {
-            scroller.innerHTML = `<div style="font-size:13px;">${res?.success ? '✅' : '❌'}</div>`;
+      const res = await chrome.runtime.sendMessage({ type: 'SYNC_DATA', direction });
+      // 未配置同步方式
+      if (res?.error?.includes('configure')) {
+        const hint = document.getElementById('syncHint');
+        if (hint) {
+          hint.textContent = _t('notice.config') || 'Please configure your sync method in the main interface first.';
+          hint.style.maxHeight = '20px';
+          hint.style.marginBottom = '3px';
+          hint.style.opacity = '1';
+          setTimeout(() => {
+            hint.style.opacity = '0';
+            hint.style.maxHeight = '0';
+            hint.style.marginBottom = '0';
+          }, 3000);
         }
-        setTimeout(() => {
+        updateNbSyncUI(btnId, false);
+        return;
+      }
+// 需要重新认证
+      if (res?.error?.includes('Unauthorized') || res?.error?.includes('reauth_required')) {
+        // 根据同步方式选择认证类型
+        const configData = await chrome.storage.local.get('syncConfig');
+        const method = configData?.syncConfig?.method;
+        const authType = method === 'oneDrive' ? 'AUTH_ONEDRIVE' : 'AUTH_GOOGLE';
+
+        const authRes = await chrome.runtime.sendMessage({ type: authType });
+        if (authRes?.success) {
+          // 认证成功后自动重试同步
+          const retryRes = await chrome.runtime.sendMessage({ type: 'SYNC_DATA', direction });
+          const scroller = document.getElementById(btnId)?.querySelector('.sync-log-scroller');
+          if (scroller) {
+            scroller.innerHTML = `<div style="font-size:13px;">${retryRes?.success ? '✅' : '❌'}</div>`;
+          }
+          if (retryRes?.success && direction === 'pull') {
+            await renderTable();
+          }
+          setTimeout(() => {
             if (scroller) scroller.innerHTML = '';
             updateNbSyncUI(btnId, false);
-        }, 2000);
-    } catch (e) {
-        logger.error('[notebookSync]', e);
-        updateNbSyncUI(btnId, false);
-    }
-}
+          }, 2000);
+          return;
+        } else {
+          // 认证失败，提示用户去 popup 认证
+          const scroller = document.getElementById(btnId)?.querySelector('.sync-log-scroller');
+          if (scroller) {
+            scroller.innerHTML = `<div style="font-size:12px; color:#f87171;">请先在插件主界面完成账号授权</div>`;
+          }
+          setTimeout(() => {
+            if (scroller) scroller.innerHTML = '';
+            updateNbSyncUI(btnId, false);
+          }, 3000);
+          return;
+        }
+      }
 
-document.getElementById('nbSyncPush').onclick = () => notebookSync('push');
-document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
+      const scroller = document.getElementById(btnId)?.querySelector('.sync-log-scroller');
+      if (scroller) {
+        scroller.innerHTML = `<div style="font-size:13px;">${res?.success ? '✅' : '❌'}</div>`;
+      }
+      setTimeout(() => {
+        if (scroller) scroller.innerHTML = '';
+        updateNbSyncUI(btnId, false);
+      }, 2000);
+
+    } catch (e) {
+      logger.error('[notebookSync]', e);
+      updateNbSyncUI(btnId, false);
+    }
+  }
+
+  document.getElementById('nbSyncPush').onclick = () => notebookSync('push');
+  document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
   document.getElementById('addBtn').onclick = async () => {
     const word = wordInp.value.trim();
     const trans = transInp.value.trim();
@@ -658,6 +732,9 @@ document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
     await idb.vocabulary.add(word, { trans });
     wordInp.value = ''; transInp.value = '';
     renderTable();
+    // 添加成功后收起
+    document.getElementById('addBox').style.display = 'none';
+    document.getElementById('toggleAddBox').textContent = '＋';
   };
 
   document.getElementById('exportBtn').onclick = async () => {
@@ -775,14 +852,24 @@ document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
   }
 
   //鼠标手势
+  let gestureDidMove = false;
+
   document.addEventListener('mousedown', (e) => {
     if (e.button !== 2) return;
-    mouseGesture.active = true; mouseGesture.startX = e.clientX; mouseGesture.startY = e.clientY;
-    gesturePoints = []; createGestureOverlay(); updateGestureUI(e.clientX, e.clientY);
+    gestureDidMove = false;  // 重置
+    mouseGesture.active = true;
+    mouseGesture.startX = e.clientX;
+    mouseGesture.startY = e.clientY;
+    gesturePoints = [];
+    createGestureOverlay();
+    updateGestureUI(e.clientX, e.clientY);
   });
 
   document.addEventListener('mousemove', (e) => {
     if (!mouseGesture.active) return;
+    const dy = e.clientY - mouseGesture.startY;
+    const dx = e.clientX - mouseGesture.startX;
+    if (Math.abs(dy) >= 10 || Math.abs(dx) >= 10) gestureDidMove = true;  // 标记移动过
     updateGestureUI(e.clientX, e.clientY);
   });
 
@@ -790,17 +877,18 @@ document.getElementById('nbSyncPull').onclick = () => notebookSync('pull');
     if (!mouseGesture.active || e.button !== 2) return;
     const dy = e.clientY - mouseGesture.startY;
     const dx = e.clientX - mouseGesture.startX;
-    mouseGesture.active = false; removeGestureOverlay();
+    mouseGesture.active = false;
+    removeGestureOverlay();
     if (Math.abs(dy) < 60 || Math.abs(dx) > Math.abs(dy)) return;
     if (dy < 0) window.scrollTo({ top: 0, behavior: 'smooth' });
     else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
   });
 
   document.addEventListener('contextmenu', (e) => {
-    if (!mouseGesture.active) return; // 没有正在进行的鼠标手势，不拦截
-    const dy = e.clientY - mouseGesture.startY;
-    const dx = e.clientX - mouseGesture.startX;
-    if (Math.abs(dy) >= 60 && Math.abs(dy) > Math.abs(dx)) e.preventDefault();
+    if (gestureDidMove) {
+      e.preventDefault();  // 拖动过就不出菜单
+      gestureDidMove = false;
+    }
   });
 
   function appendDots() {

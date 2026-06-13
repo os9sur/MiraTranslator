@@ -3836,6 +3836,7 @@ self.i18nAttach11 = {
     "notice.bold": "Mira 翻译服务更新",
     "notice.body": "请及时导出您的生词本数据。",
     "notice.auth": "请切换授权页完成操作，授权后返回重试。",
+    "notice.config": "请先在插件主界面配置同步方式。",
     "notice.export": "导出数据 ({0})",
     "notice.close": "确认"
   },
@@ -3844,14 +3845,16 @@ self.i18nAttach11 = {
     "notice.bold": "Mira 翻譯服務更新",
     "notice.body": "請及時匯出您的生詞本資料。",
     "notice.auth": "請切換授權頁完成操作，授權後返回重試。",
+    "notice.config": "請先在插件主介面設定同步方式。",
     "notice.export": "匯出資料 ({0})",
     "notice.close": "確認"
   },
   "en": {
     "notice.title": "Service Notice",
     "notice.bold": "Mira Update",
-    "notice.body": "Please export your vocabulary data below.",
+    "notice.body": "Please export your vocabulary data.",
     "notice.auth": "Please complete the authorization in the new tab and return here to retry.",
+    "notice.config": "Please configure your sync method in the main interface first.",
     "notice.export": "Export Data ({0})",
     "notice.close": "Close"
   },
@@ -3860,6 +3863,7 @@ self.i18nAttach11 = {
     "notice.bold": "Mira 翻訳の更新",
     "notice.body": "単語帳のデータをエクスポートしてください。",
     "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。",
+    "notice.config": "メイン画面で同期方法を設定してください。",
     "notice.export": "エクスポート ({0})",
     "notice.close": "確認"
   },
@@ -3868,8 +3872,72 @@ self.i18nAttach11 = {
     "notice.bold": "Mira 번역기 업데이트",
     "notice.body": "단어장 데이터를 내보내기 해주세요.",
     "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요.",
+    "notice.config": "먼저 메인 화면에서 동기화 방식을 설정해 주세요.",
     "notice.export": "내보내기 ({0})",
     "notice.close": "확인"
+  },
+  "pt-BR": {
+    "notice.title": "Aviso de Serviço",
+    "notice.bold": "Atualização do Mira",
+    "notice.body": "Por favor, exporte seus dados de vocabulário.",
+    "notice.auth": "Conclua a autorização na nova aba e retorne para tentar novamente.",
+    "notice.config": "Por favor, configure o método de sincronização na interface principal primeiro.",
+    "notice.export": "Exportar Dados ({0})",
+    "notice.close": "Fechar"
+  },
+  "fr": {
+    "notice.title": "Avis de service",
+    "notice.bold": "Mise à jour de Mira",
+    "notice.body": "Veuillez exporter vos données de vocabulaire.",
+    "notice.auth": "Veuillez terminer l'autorisation dans le nouvel onglet et revenir ici pour réessayer.",
+    "notice.config": "Veuillez d'abord configurer la méthode de synchronisation dans l'interface principale.",
+    "notice.export": "Exporter les données ({0})",
+    "notice.close": "Fermer"
+  },
+  "ru": {
+    "notice.title": "Сервисное уведомление",
+    "notice.bold": "Обновление Mira",
+    "notice.body": "Пожалуйста, экспортируйте данные вашего словаря.",
+    "notice.auth": "Завершите авторизацию в новой вкладке и вернитесь, чтобы повторить попытку.",
+    "notice.config": "Пожалуйста, сначала настройте способ синхронизации в главном интерфейсе.",
+    "notice.export": "Экспорт данных ({0})",
+    "notice.close": "Закрыть"
+  },
+  "es": {
+    "notice.title": "Aviso de servicio",
+    "notice.bold": "Actualización de Mira",
+    "notice.body": "Por favor, exporte sus datos de vocabulario.",
+    "notice.auth": "Complete la autorización en la nueva pestaña y regrese aquí para reintentar.",
+    "notice.config": "Por favor, configure el método de sincronización en la interfaz principal primero.",
+    "notice.export": "Exportar datos ({0})",
+    "notice.close": "Cerrar"
+  },
+  "ar": {
+    "notice.title": "إشعار الخدمة",
+    "notice.bold": "تحديث Mira",
+    "notice.body": "يرجى تصدير بيانات المفردات الخاصة بك.",
+    "notice.auth": "يرجى إكمال التفويض في علامة التبويب الجديدة والعودة إلى هنا لإعادة المحاولة.",
+    "notice.config": "يرجى تكوين طريقة المزامنة في الواجهة الرئيسية أولاً.",
+    "notice.export": "تصدير البيانات ({0})",
+    "notice.close": "إغلاق"
+  },
+  "fa": {
+    "notice.title": "اطلاعیه خدمات",
+    "notice.bold": "به‌روزرسانی Mira",
+    "notice.body": "لطفاً داده‌های واژگان خود را صادر کنید.",
+    "notice.auth": "لطفاً احراز هویت را در برگه جدید تکمیل کرده و برای تلاش مجدد به اینجا بازگردید.",
+    "notice.config": "لطفاً ابتدا روش همگام‌سازی را در رابط کاربری اصلی تنظیم کنید.",
+    "notice.export": "صدور داده‌ها ({0})",
+    "notice.close": "بستن"
+  },
+  "he": {
+    "notice.title": "הודעת שירות",
+    "notice.bold": "עדכון Mira",
+    "notice.body": "אנא ייצא את נתוני אוצר המילים שלך.",
+    "notice.auth": "אנא השלם את ההרשאה בכרטיסייה החדשה וחזור לכאן כדי לנסות שוב.",
+    "notice.config": "אנא הגדר תחילה את שיטת הסנכרון בממשק הראשי.",
+    "notice.export": "ייצוא נתונים ({0})",
+    "notice.close": "סגור"
   }
 };
 
