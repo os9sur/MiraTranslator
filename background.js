@@ -4876,6 +4876,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         handleAuthFlow(safeSendResponse);
         return true;
     }
+    if (request.type === 'AUTH_GOOGLE') {
+        handleAuthFlow(safeSendResponse);
+        return true;
+    }
+    if (request.type === 'AUTH_ONEDRIVE') {
+    getOneDriveTokenSilent()
+        .then(token => safeSetStorage({ onedrive_token: token }))
+        .then(() => safeSendResponse({ success: true }))
+        .catch(err => safeSendResponse({ success: false, error: err.message }));
+    return true;
+}
     if (request.type === 'START_ONEDRIVE_AUTH') {
         handleOneDriveAuthFlow(safeSendResponse);
         return true;

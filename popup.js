@@ -337,7 +337,7 @@ async function initUpdateNotify() {
     exportBtn.addEventListener('mouseenter', () => exportBtn.style.background = '#f0f0f0');
     exportBtn.addEventListener('mouseleave', () => exportBtn.style.background = '#fcfcfc');
   }
- 
+
   document.getElementById('notice-close-btn').onclick = () => {
     window.close();
   };
@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const syncPanel = document.getElementById('syncSettingsPanel');
         if (syncPanel) {
           const realHeight = syncPanel.scrollHeight;
-          const finalHeight = Math.max(150, Math.min(realHeight, 600));
+          const finalHeight = Math.max(400, Math.min(realHeight, 600));
           document.body.style.height = `${finalHeight}px`;
           document.body.style.minHeight = `${finalHeight}px`;
           document.body.style.overflowY = realHeight > 600 ? 'auto' : 'hidden';
@@ -800,6 +800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.identity.getAuthToken({ interactive: false }, (token) => {
           if (chrome.runtime.lastError || !token) {
             logger.log("🔑 Chrome 需要用户手动授权...");
+            showToast(t('notice.auth') || 'Please complete the authorization in the new tab and return here to retry.', 'info');
             handleAuthFlow((response) => {
               if (response.success) {
                 logger.log("✅ Google Drive 授权成功");
@@ -820,6 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await safeGetStorage('onedrive_token');
       if (!data?.onedrive_token) {
         logger.log("🔑 OneDrive 需要用户手动授权...");
+        showToast(t('notice.auth') || 'Please complete the authorization in the new tab and return here to retry.', 'info');
         safeSendMessage({ type: 'START_ONEDRIVE_AUTH' }).then((response) => {
           if (response?.success) {
             logger.log("✅ OneDrive 授权成功");
@@ -869,8 +871,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!data) return;
     window.uiLanguage = data.ui_language || (getBrowserLang() || 'en').replace('_', '-');
     const config = data.syncConfig || {};
-    const method = config.method || 'local';
-    if (method === 'local') {
+    const method = config.method || 'googleDrive';
+    if (!method || !['googleDrive', 'oneDrive', 'webdav'].includes(method)) {
       showToast(t('manualModeNoSync', window.uiLanguage), 'info');
       updateSyncProgressUI(btnId, '', false);
       return;
