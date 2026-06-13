@@ -399,6 +399,27 @@ body {
     box-shadow: 0 -2px 10px rgba(59, 130, 246, 0.2);
     opacity: 0.6;
 }
+
+.notice-divider {
+    position: relative;
+    min-height: 32px;
+    margin: 8px 0;
+}
+
+.notice-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 1.5px;
+    background: linear-gradient(to right,
+            transparent,
+            var(--border-color) 50%,
+            transparent);
+    box-shadow: 0 -2px 10px rgba(59, 130, 246, 0.2);
+    opacity: 0.6;
+}
 #activateBuiltIn {
     margin-left: auto !important;
     margin-right: auto !important;

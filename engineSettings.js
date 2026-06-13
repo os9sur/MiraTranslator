@@ -424,9 +424,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('dynamic-form-container');
         const actions = document.getElementById('global-actions');
         container.innerHTML = '';
-        renderSidebar();
+        actions.classList.add('hidden');
+        await renderSidebar();
         const res = await safeGetStorage(`data_${id}`);
         if (!res) return;
+        if (myVersion !== switchVersion) return;
         const saved = res[`data_${id}`] || {};
         let activeEngine = config.engine;
         if (saved.geminiKey && activeEngine === 'google') {
@@ -904,7 +906,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .map(line => {
                     if (line === '---') {
                         //return `<hr style="border:0;border-top:1px solid #30363d;margin:32px 0;">`;
-                        return `<div class="bottom-bar" style="min-height:20px;" id="global-actions"></div>`;
+                        //return `<div class="bottom-bar" style="min-height:20px;" id="global-actions"></div>`;
+                       return `<div class="notice-divider"></div>`;
                     }
 
                     const isRTL = checkRTL(uiLanguage);
