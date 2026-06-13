@@ -1194,6 +1194,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (closeBtn) {
             closeBtn.onclick = () => modal.classList.add('hidden');
         }
+        modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+});
     }
     async function deleteItem(id, event) {
         const icon = event.target;

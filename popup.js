@@ -2454,9 +2454,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.stopPropagation();
     triggerRefresh(this, "REFRESH_YT");
   };
-  // ====== 个性化扫描配置面板逻辑 开始 ======
+  // 个性化扫描配置面板
   {
-    //  初始化读取状态
     const initInspectState = () => {
       const content = document.getElementById('inspectContent');
       const arrow = document.getElementById('inspectArrow');
@@ -2464,15 +2463,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const savedState = localStorage.getItem('inspectContainerState') || 'collapsed';
       if (savedState === 'expanded') {
-        content.style.display = 'flex';
+        content.style.transition = 'none';
+        content.style.maxHeight = '600px';
+        content.style.opacity = '1';
+        content.style.overflow = 'visible';
+        content.style.marginTop = '8px';
         arrow.classList.add('arrow-expanded');
       } else {
-        content.style.display = 'none';
+        content.style.transition = 'none';
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        content.style.overflow = 'hidden';
+        content.style.marginTop = '0px';
         arrow.classList.remove('arrow-expanded');
       }
     };
 
-    initInspectState();
+    setTimeout(initInspectState, 0);
 
     document.addEventListener('click', function (e) {
       const header = e.target.closest('#inspectHeader');
@@ -2482,22 +2489,38 @@ document.addEventListener('DOMContentLoaded', async () => {
       const arrow = document.getElementById('inspectArrow');
       if (!content || !arrow) return;
 
-      const isHidden = content.style.display === 'none';
+      const isCollapsed = content.style.maxHeight === '0px' || content.style.maxHeight === '';
 
-      if (isHidden) {
+      if (isCollapsed) {
         // 展开
-        content.style.display = 'flex';
+        content.style.transition = 'max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease';
+        content.style.maxHeight = '600px';
+        content.style.opacity = '1';
+        content.style.marginTop = '8px';
+        setTimeout(() => {
+          content.style.overflow = 'visible';
+          content.style.transition = 'none';
+        }, 300);
         arrow.classList.add('arrow-expanded');
         localStorage.setItem('inspectContainerState', 'expanded');
       } else {
-        // 折叠
-        content.style.display = 'none';
+        // 折叠 确保 transition 先生效再改属性, 避免顿挫
+        content.style.overflow = 'hidden';
+        content.style.transition = 'none';
+        requestAnimationFrame(() => {
+          content.style.transition = 'max-height 0.3s ease, opacity 0.25s ease, margin-top 0.3s ease';
+          requestAnimationFrame(() => {
+            content.style.maxHeight = '0px';
+            content.style.opacity = '0';
+            content.style.marginTop = '0px';
+          });
+        });
         arrow.classList.remove('arrow-expanded');
         localStorage.setItem('inspectContainerState', 'collapsed');
       }
     });
   }
-  // ====== 个性化扫描配置面板逻辑 结束 ======
+
   const refreshUI = async () => {
     try {
       const tab = await getActiveTab();
@@ -2548,7 +2571,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isYTDisabled = ytRow && (ytRow.classList.contains('disabled') || ytRow.style.display === 'none');
         const isYTOn = !!conf.yt;
 
-        // 更新开关 UI,确保按钮状态正确)
         ytSwitch.classList.toggle('on', isYTOn);
         btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
 
@@ -2632,7 +2654,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      const domainLabel = document.getElementById('domainIndicator');
+      const domainLabel = document.getElementById('domainIndicatorWrapper');
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
 
@@ -2674,15 +2696,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
+      function hideFade(el) {
+        if (!el) return;
+        el.classList.add('hidden-fade');
+        setTimeout(() => {
+          el.style.display = 'none';
+        }, 350);
+      }
+
+      function showFade(el) {
+        if (!el) return;
+        el.style.display = 'block';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            el.classList.remove('hidden-fade');
+          });
+        });
+      }
+
       if (inspectBtn && inspectLabelBtn) {
         if (currentMode === 'global') {
-          inspectBtn.classList.add('hidden-fade');
-          // inspectLabelBtn.classList.add('hidden-fade');
-          if (domainLabel) domainLabel.classList.add('hidden-fade');
+          hideFade(inspectBtn);
+          if (domainLabel) hideFade(domainLabel);
         } else {
-          inspectBtn.classList.remove('hidden-fade');
-          // inspectLabelBtn.classList.remove('hidden-fade');
-          if (domainLabel) domainLabel.classList.remove('hidden-fade');
+          showFade(inspectBtn);
+          if (domainLabel) showFade(domainLabel);
         }
       }
       const { activeConfig } = await safeGetStorage('activeConfig');

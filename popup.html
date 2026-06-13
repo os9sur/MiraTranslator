@@ -34,7 +34,7 @@
       overflow: visible;
       /* overflow-x: hidden;
       overflow-y: auto; */
-      transition: width 0.2s ease-in-out;
+      /* transition: width 0.2s ease-in-out; */
     }
 
     .footer-link {
@@ -354,7 +354,7 @@
   <!-- 查单词结束 -->
   <div id="mainContainer">
     <!-- 设置 -->
-    <div class="main-header" style="margin-bottom: 8px; display: flex; flex-direction: column; width: 100%;">
+    <div class="main-header" style="margin-bottom: 4px; display: flex; flex-direction: column; width: 100%;">
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; width: 100%;">
         <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
@@ -512,9 +512,11 @@
           data-i18n="globalSetting">全局默认</div>
       </div>
     </div>
+    <div id="domainIndicatorWrapper">
     <div id="domainIndicator" class="domain-tag">
-      🌐 <span id="currentDomain">loading...</span>
+        🌐 <span id="currentDomain">loading...</span>
     </div>
+</div>
     <div id="restrictedHint"
       style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 11px 20px; text-align: center;">
       <svg viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round"
@@ -596,7 +598,7 @@
     <div id="targetLangCombox"
       style="display: flex; flex-direction: column; align-items: stretch; gap: 4px;padding: 5px 0;">
       <label data-i18n="targetLang" id="targetLangLabelText" dir="auto"
-        style="color: #e6e9ee; font-size: 12px; font-weight: 500; padding-left: 2px; line-height: 1;margin-bottom: 7px !important;">
+        style="color: #e6e9ee; font-size: 12px; font-weight: 500; padding-left: 8px; line-height: 1;margin-bottom: 7px !important;">
         目标语言
       </label>
 
@@ -606,8 +608,7 @@
     <div id="inspectContainer" class="row-group"
       style="margin-top: 3px;margin-bottom: 10px; border-top: 1.5px dashed #334155; padding-top: 8px;">
 
-      <div id="inspectHeader"
-        style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 5px 6px; user-select: none;border-radius:6px;">
+      <div id="inspectHeader">
         <div id="inspectElementLabel" data-i18n="personalizedScan" dir="auto" style="font-size: 13px;">
           个性化扫描配置 (失去焦点自动保存)
         </div>
@@ -615,7 +616,8 @@
 
       </div>
 
-      <div id="inspectContent" style="display: none; flex-direction: column; gap: 8px; margin-top: 8px;">
+      <div id="inspectContent"
+        style="display: flex; max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.3s ease, opacity 0.25s ease; flex-direction: column; gap: 3px; margin-top: 8px;">
         <button id="inspectElement"
           style="position: relative; display: flex; align-items: center; justify-content: center; width: 100%; padding-right: 1px; cursor: pointer;">
           <span style="position: absolute; left: 6px; font-size: 1.2rem; line-height: 1; pointer-events: none;">
@@ -636,8 +638,8 @@
             </button>
           </div>
           <textarea id="conf-selectors" class="mira-input-terminal"
-            style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; white-space: nowrap !important; font-family: monospace;resize: none !important; width: 100%; box-sizing: border-box;">
-    </textarea>
+            style="height: 62px; min-height: 62px; color: #38bdf8; font-size: 13px; font-family: monospace; width: 100%; box-sizing: border-box; white-space: nowrap;">
+          </textarea>
         </div>
       </div>
     </div>
