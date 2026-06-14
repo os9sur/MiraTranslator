@@ -97,14 +97,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   toggleAddBoxBtn.onclick = () => {
     const box = document.getElementById('addBox');
     const btn = document.getElementById('toggleAddBox');
-    const isOpen = box.style.display !== 'none';
+    const isOpen = box.style.maxHeight !== '0px' && box.style.maxHeight !== '';
+
     if (isOpen) {
-      box.style.display = 'none';
+      // 折叠
+      box.style.overflow = 'hidden';
+      box.style.transition = 'none';
+      requestAnimationFrame(() => {
+        box.style.transition = 'max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease';
+        requestAnimationFrame(() => {
+          box.style.maxHeight = '0px';
+          box.style.opacity = '0';
+          box.style.padding = '0';
+          box.style.margin = '0';
+        });
+      });
       btn.textContent = '＋';
     } else {
-      box.style.display = 'flex';
+      // 展开
+      box.style.maxHeight = '200px';
+      box.style.opacity = '1';
+      box.style.padding = '';
+      box.style.marginBottom = '9px';
+      setTimeout(() => {
+        box.style.overflow = 'visible';
+        box.style.transition = 'none';
+      }, 300);
       btn.textContent = '✕';
-      // 展开后再量高度
+
       requestAnimationFrame(() => {
         const h = wordInp.offsetHeight;
         transInp.style.height = h + 'px';
@@ -273,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       vocabBody.innerHTML = `<div style="padding:24px;text-align:center;color:#475569;">${_t('noCollection')}</div>`;
       return;
     }
-
+    const isRTLUI = document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa';
     vocabBody.innerHTML = pageData.map((item) => {
       const displayWord = item.word || "";
       const displayWordHL = searchQuery ? highlight(displayWord, searchQuery) : displayWord;
@@ -372,8 +392,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     <div class="vocab-row">
 
       <div class="vocab-cell">
-        <div style="display:flex;align-items:center;gap:8px;padding-right: 55px; 
-          ${isRTLText(displayWord) ? 'flex-direction:row-reverse;justify-content:flex-start;' : ''}">
+        <div style="display:flex;align-items:center;gap:8px;
+  ${isRTLUI ? 'flex-direction:row-reverse;justify-content:flex-end;' : 'padding-right:55px;'}">
           <span class="word-text" dir="auto">${displayWordHL}</span>
           <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}"
             style="cursor:pointer;color:#909fb3;display:flex;transition:color 0.2s;position:relative;overflow:visible;">
@@ -671,7 +691,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateNbSyncUI(btnId, false);
         return;
       }
-// 需要重新认证
+      // 需要重新认证
       if (res?.error?.includes('Unauthorized') || res?.error?.includes('reauth_required')) {
         // 根据同步方式选择认证类型
         const configData = await chrome.storage.local.get('syncConfig');

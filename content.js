@@ -4392,6 +4392,39 @@ function initSelectionTranslate() {
       }
     });
     resizeObserver.observe(popupEl);
+
+    shadow.addEventListener("touchstart", (e) => {
+        const dragZone = e.target.closest("#drag-zone");
+        if (!dragZone) return;
+        console.log('[touchstart] drag-zone 触发');
+        
+        const point = e.touches[0];
+        startX = point.clientX;
+        startY = point.clientY;
+        const r = popupEl.getBoundingClientRect();
+        initialX = r.left;
+        initialY = r.top;
+        e.preventDefault();
+
+        const onTouchMove = (ev) => {
+            const touch = ev.touches[0];
+            isDragging = true;
+            popupEl.style.left = initialX + (touch.clientX - startX) + "px";
+            popupEl.style.top = initialY + (touch.clientY - startY) + "px";
+            if (typeof clampPopupToViewport === "function")
+                clampPopupToViewport(popupEl);
+            ev.preventDefault();
+        };
+
+        const onTouchEnd = () => {
+            isDragging = false;
+            shadow.removeEventListener("touchmove", onTouchMove);
+            shadow.removeEventListener("touchend", onTouchEnd);
+        };
+
+        shadow.addEventListener("touchmove", onTouchMove, { passive: false });
+        shadow.addEventListener("touchend", onTouchEnd);
+    }, { passive: false });
   }
 
   // ─── 样式表构建 ──────────────────────────────────────────────────────────────
@@ -6416,19 +6449,47 @@ function initSelectionTranslate() {
     };
 
     // 拖拽
-    const startDrag = (e) => {
-      if (e.target.closest(".icon-btn")) return;
-      isDragging = true;
-      startX = e.clientX;
-      startY = e.clientY;
-      const r = popupEl.getBoundingClientRect();
-      initialX = r.left;
-      initialY = r.top;
-      e.preventDefault();
-    };
+const startDrag = (e) => {
+  logger.log('[startDrag] 触发', e.type, e.touches?.length);
+    if (e.target.closest(".icon-btn")) return;
+    
+    const point = e.touches ? e.touches[0] : e;
+    startX = point.clientX;
+    startY = point.clientY;
+    const r = popupEl.getBoundingClientRect();
+    initialX = r.left;
+    initialY = r.top;
+    e.preventDefault();
+
+    if (e.touches) {
+        // 移动端,动态绑定，用完移除
+        const onTouchMove = (ev) => {
+            const touch = ev.touches[0];
+            isDragging = true;
+            popupEl.style.left = initialX + (touch.clientX - startX) + "px";
+            popupEl.style.top = initialY + (touch.clientY - startY) + "px";
+            if (typeof clampPopupToViewport === "function")
+                clampPopupToViewport(popupEl);
+            ev.preventDefault();
+        };
+
+        const onTouchEnd = () => {
+            isDragging = false;
+            window.removeEventListener("touchmove", onTouchMove);
+            window.removeEventListener("touchend", onTouchEnd);
+        };
+
+        window.addEventListener("touchmove", onTouchMove, { passive: false });
+        window.addEventListener("touchend", onTouchEnd);
+    } else {
+        // 桌面端
+        isDragging = true;
+    }
+};
     shadow.getElementById("drag-zone").onmousedown = startDrag;
     shadow.getElementById("p-header").onmousedown = startDrag;
-
+    shadow.getElementById("drag-zone").addEventListener("touchstart", startDrag, { passive: false });
+    shadow.getElementById("p-header").addEventListener("touchstart", startDrag, { passive: false });
     // 主题切换
     const themeBtn = shadow.getElementById("p-theme-toggle");
     themeBtn.onclick = (e) => {
@@ -7257,6 +7318,7 @@ function initSelectionTranslate() {
         clampPopupToViewport(popupEl);
     }
   });
+
   /**
    * 划词
    * 智能获取选区：优先普通 DOM，降级处理 Shadow DOM
@@ -7556,6 +7618,7 @@ function initSelectionTranslate() {
           tapEvt.stopPropagation();
           tapEvt.preventDefault();
           clearTimeout(window.logoAutoTimer);
+          window.getSelection()?.removeAllRanges();
           await triggerTranslation();
         };
         // 兼容混合设备的 click 兜底
@@ -7571,14 +7634,18 @@ function initSelectionTranslate() {
           await triggerTranslation();
         };
       }
-    }, 150);
+    }, isTouchEvent ? 300 : 150);
   }
 
   window.addEventListener("mouseup", handleSelectionEnd);
-  window.addEventListener("touchend", handleSelectionEnd, { passive: true });
+  window.addEventListener("touchend", handleSelectionEnd);
 
   document.addEventListener("mousedown", (e) => {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
+
+    const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && e.pointerType === '');
+    if (isTouch) return;
+
     const existingDropdown =
       shadowHost?.shadowRoot?.getElementById("p-lang-dropdown");
     if (existingDropdown) existingDropdown.remove();
@@ -7595,7 +7662,11 @@ function initSelectionTranslate() {
       }, 200);
     }
   });
-  document.addEventListener("contextmenu", forceHideLogo, true);
+  document.addEventListener("contextmenu", (e) => {
+    const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && e.pointerType === '');
+    if (isTouch) return;
+    forceHideLogo();
+  }, true);
   window.addEventListener(
     "keydown",
     (e) => {
@@ -9342,13 +9413,13 @@ function enableYtBoxDrag(box) {
     });
   }, { passive: false, capture: true });
 
-document.addEventListener("touchend", () => {
+  document.addEventListener("touchend", () => {
     box._touchPending = false;
     if (!isDragging) return;
     isDragging = false;
     box.classList.remove("dragging");
     safeSetStorage({ ytBoxBottom: box.style.bottom });
-}, { capture: true });
+  }, { capture: true });
 }
 function initSubtitleAvoidance() {
   if (window._ktAvoidanceInit) return;
