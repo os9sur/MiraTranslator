@@ -10,7 +10,11 @@
     body {
       background: #020617;
       color: #e5e7eb;
-      font-family: system-ui, -apple-system, sans-serif;
+      font-family:
+        -apple-system, BlinkMacSystemFont,
+        "PingFang SC", "Microsoft YaHei",
+        "Noto Sans CJK SC", "Source Han Sans SC",
+        sans-serif;
       margin: 0;
       padding: 40px;
       display: flex;
@@ -25,7 +29,7 @@
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 8px;
     }
 
@@ -487,6 +491,12 @@
       text-align: right;
     }
 
+    html[lang="ar"] .vocab-cell:nth-child(6),
+    html[lang="fa"] .vocab-cell:nth-child(6) {
+      right: auto;
+      left: 12px;
+    }
+
     html[lang="ar"] .search-bar-icon,
     html[lang="fa"] .search-bar-icon {
       left: auto;
@@ -537,11 +547,47 @@
       #syncStatus {
         align-self: flex-start;
       }
+    #btnGroup {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+        justify-content: flex-start;
+    }
 
+    #btnGroup #nbSyncPush,
+    #btnGroup #nbSyncPull {
+        flex: 1;
+        min-width: 0;
+    }
+
+    #btnGroup #toggleAddBox {
+        order: 3;
+    }
+
+    #btnGroup #exportBtn {
+        flex: 1;
+        order: 4;
+    }
       .header {
         flex-direction: column;
         align-items: flex-start;
         gap: 10px;
+      }
+
+      .header h1 {
+        display: inline-block;
+        white-space: nowrap;
+        font-size: 20px;
+      }
+
+      .header>div {
+        width: 100%;
+        align-items: flex-start !important;
+      }
+
+      .header>div>div {
+        justify-content: flex-start;
       }
 
       div[dir="auto"]:has(.search-bar-wrapper) {
@@ -788,30 +834,43 @@
 
 <body>
   <div class="container">
-<div dir="auto" class="header">
-      <h1 style="font-size: 24px; margin: 0;" data-i18n="myWordBook">📓 我的生词本</h1>
-      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: nowrap;">
-          <button id="nbSyncPush" class="btn nb-sync-btn"
+    <div dir="auto" class="header">
+      <h1 style="
+    font-size: 22px; 
+    margin: 0;
+    font-weight: 300;
+    white-space: nowrap;
+    background: linear-gradient(135deg, #38bdf8 0%, #ffffff 50%, #7c3aed 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+" data-i18n="myWordBook">📓 我的生词本</h1>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 100%;">
+    <div id="btnGroup" style="display: flex; gap: 6px; align-items: center; width: 100%; justify-content: flex-end;">
+        <button id="nbSyncPush" class="btn nb-sync-btn"
             style="background:#127538; color:white; position:relative; overflow:hidden; padding:6px 10px; font-size:12px;">
             <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
             <div class="sync-log-scroller"></div>
-          </button>
-          <button id="nbSyncPull" class="btn nb-sync-btn"
+        </button>
+        <button id="nbSyncPull" class="btn nb-sync-btn"
             style="background:rgba(16,185,129,0.1); border:1.5px solid #10b981; color:#10b981; position:relative; overflow:hidden; padding:5px 10px; font-size:12px;">
             <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
             <div class="sync-log-scroller"></div>
-          </button>
-          <button id="toggleAddBox" class="btn" style="background:#334155; color:white; padding:6px 10px; font-size:12px;" title="">＋</button>
-          <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
+        </button>
+        <button id="toggleAddBox" class="btn"
+            style="background:#334155; color:white; padding:6px 10px; font-size:12px;" title="">＋</button>
+        <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
             data-i18n="exportCSV">导出 CSV</button>
-        </div>
-        <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
-      </div>
+    </div>
+    <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
+</div>
     </div>
     <div dir="auto" id="syncHint"></div>
 
-    <div class="add-box" id="addBox" dir="auto" style="display:none;">
+    <div id="addBox" dir="auto" class="add-box"
+      style="max-height:0; opacity:0; overflow:hidden; padding:0; margin:0; transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.3s ease, margin 0.3s ease;">
       <input type="text" id="wordInp" data-i18n="word" data-i18n-type="placeholder" placeholder="New word...">
       <textarea id="transInp" data-i18n="meaning" data-i18n-type="placeholder" placeholder="Meaning..." rows="1"
         style="resize: none; overflow: hidden; transition: height 0.2s; field-sizing: content;"></textarea>
