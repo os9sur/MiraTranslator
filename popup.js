@@ -864,6 +864,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     //logger.log('[DEBUG] IS_MAIN_WORLD:', IS_MAIN_WORLD);
     const btn = document.getElementById(btnId);
     const originalText = btn.innerText;
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
     updateSyncProgressUI(btnId, 'initializing', true);
     await saveSyncConfig();
     const data = await safeGetStorage(['syncConfig', 'google_drive_token', 'ui_language', 'onedrive_token']);
@@ -887,7 +888,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (method === 'googleDrive' && !data.google_drive_token) {
       updateSyncProgressUI(btnId, 'authorizing', true);
       const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
+
       if (!isFirefox) {
+        if (isMobile) {
+          showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
+        }
         safeSendMessage({ type: 'START_AUTH' }).then((response) => {
           logger.log('[DEBUG] START_AUTH response:', response);
           if (!response) {
@@ -901,6 +906,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       } else {
+        if (isMobile) {
+          showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
+        }
         getGoogleTokenForFirefox(btn, originalText, direction);
       }
       return;
@@ -909,8 +917,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (method === 'oneDrive' && !data.onedrive_token) {
       updateSyncProgressUI(btnId, 'authorizing', true);
 
-      const isFirefoxAndroid = /Firefox/.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
-      if (isFirefoxAndroid) {
+      if (isMobile) {
         showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
       }
 

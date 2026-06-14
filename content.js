@@ -4394,36 +4394,36 @@ function initSelectionTranslate() {
     resizeObserver.observe(popupEl);
 
     shadow.addEventListener("touchstart", (e) => {
-        const dragZone = e.target.closest("#drag-zone");
-        if (!dragZone) return;
-        console.log('[touchstart] drag-zone 触发');
-        
-        const point = e.touches[0];
-        startX = point.clientX;
-        startY = point.clientY;
-        const r = popupEl.getBoundingClientRect();
-        initialX = r.left;
-        initialY = r.top;
-        e.preventDefault();
+      const dragZone = e.target.closest("#drag-zone");
+      if (!dragZone) return;
+      console.log('[touchstart] drag-zone 触发');
 
-        const onTouchMove = (ev) => {
-            const touch = ev.touches[0];
-            isDragging = true;
-            popupEl.style.left = initialX + (touch.clientX - startX) + "px";
-            popupEl.style.top = initialY + (touch.clientY - startY) + "px";
-            if (typeof clampPopupToViewport === "function")
-                clampPopupToViewport(popupEl);
-            ev.preventDefault();
-        };
+      const point = e.touches[0];
+      startX = point.clientX;
+      startY = point.clientY;
+      const r = popupEl.getBoundingClientRect();
+      initialX = r.left;
+      initialY = r.top;
+      e.preventDefault();
 
-        const onTouchEnd = () => {
-            isDragging = false;
-            shadow.removeEventListener("touchmove", onTouchMove);
-            shadow.removeEventListener("touchend", onTouchEnd);
-        };
+      const onTouchMove = (ev) => {
+        const touch = ev.touches[0];
+        isDragging = true;
+        popupEl.style.left = initialX + (touch.clientX - startX) + "px";
+        popupEl.style.top = initialY + (touch.clientY - startY) + "px";
+        if (typeof clampPopupToViewport === "function")
+          clampPopupToViewport(popupEl);
+        ev.preventDefault();
+      };
 
-        shadow.addEventListener("touchmove", onTouchMove, { passive: false });
-        shadow.addEventListener("touchend", onTouchEnd);
+      const onTouchEnd = () => {
+        isDragging = false;
+        shadow.removeEventListener("touchmove", onTouchMove);
+        shadow.removeEventListener("touchend", onTouchEnd);
+      };
+
+      shadow.addEventListener("touchmove", onTouchMove, { passive: false });
+      shadow.addEventListener("touchend", onTouchEnd);
     }, { passive: false });
   }
 
@@ -6449,43 +6449,43 @@ function initSelectionTranslate() {
     };
 
     // 拖拽
-const startDrag = (e) => {
-  logger.log('[startDrag] 触发', e.type, e.touches?.length);
-    if (e.target.closest(".icon-btn")) return;
-    
-    const point = e.touches ? e.touches[0] : e;
-    startX = point.clientX;
-    startY = point.clientY;
-    const r = popupEl.getBoundingClientRect();
-    initialX = r.left;
-    initialY = r.top;
-    e.preventDefault();
+    const startDrag = (e) => {
+      logger.log('[startDrag] 触发', e.type, e.touches?.length);
+      if (e.target.closest(".icon-btn")) return;
 
-    if (e.touches) {
+      const point = e.touches ? e.touches[0] : e;
+      startX = point.clientX;
+      startY = point.clientY;
+      const r = popupEl.getBoundingClientRect();
+      initialX = r.left;
+      initialY = r.top;
+      e.preventDefault();
+
+      if (e.touches) {
         // 移动端,动态绑定，用完移除
         const onTouchMove = (ev) => {
-            const touch = ev.touches[0];
-            isDragging = true;
-            popupEl.style.left = initialX + (touch.clientX - startX) + "px";
-            popupEl.style.top = initialY + (touch.clientY - startY) + "px";
-            if (typeof clampPopupToViewport === "function")
-                clampPopupToViewport(popupEl);
-            ev.preventDefault();
+          const touch = ev.touches[0];
+          isDragging = true;
+          popupEl.style.left = initialX + (touch.clientX - startX) + "px";
+          popupEl.style.top = initialY + (touch.clientY - startY) + "px";
+          if (typeof clampPopupToViewport === "function")
+            clampPopupToViewport(popupEl);
+          ev.preventDefault();
         };
 
         const onTouchEnd = () => {
-            isDragging = false;
-            window.removeEventListener("touchmove", onTouchMove);
-            window.removeEventListener("touchend", onTouchEnd);
+          isDragging = false;
+          window.removeEventListener("touchmove", onTouchMove);
+          window.removeEventListener("touchend", onTouchEnd);
         };
 
         window.addEventListener("touchmove", onTouchMove, { passive: false });
         window.addEventListener("touchend", onTouchEnd);
-    } else {
+      } else {
         // 桌面端
         isDragging = true;
-    }
-};
+      }
+    };
     shadow.getElementById("drag-zone").onmousedown = startDrag;
     shadow.getElementById("p-header").onmousedown = startDrag;
     shadow.getElementById("drag-zone").addEventListener("touchstart", startDrag, { passive: false });
@@ -7364,6 +7364,20 @@ const startDrag = (e) => {
     });
     return text;
   };
+  let liveText = "";
+  let liveRange = null;
+
+  // 监听选区变化，实时更新快照
+  document.addEventListener("selectionchange", () => {
+    const sel = getSmartSelection();
+    const t = sel?.toString().trim();
+    if (t && t.length > 0 && t.length <= 1000) {
+      liveText = t;
+      try {
+        if (sel.rangeCount > 0) liveRange = sel.getRangeAt(0).cloneRange();
+      } catch (_) { }
+    }
+  });
   // mouseup（桌面）+ touchend（移动端）统一处理选词翻译
   async function handleSelectionEnd(e) {
     if (e.button === 2) return;
@@ -7379,6 +7393,7 @@ const startDrag = (e) => {
     const mouseY = touch ? touch.clientY : e.clientY;
 
     if (!isTouchEvent && typeof isDragging !== "undefined") isDragging = false;
+
 
     // 移动端选词结果有时在 touchend 后才稳定，保留 150ms 延迟
     setTimeout(async () => {
@@ -7494,8 +7509,11 @@ const startDrag = (e) => {
       clearTimeout(window.logoAutoTimer);
       window.logoAutoTimer = setTimeout(forceHideLogo, 3000);
 
-      // 桌面 hover / 移动端 tap 共用的翻译逻辑
       async function triggerTranslation() {
+        // 用 selectionchange 持续更新的快照
+        const activeText = (liveText && liveText.length > 0) ? liveText : text;
+        const activeRange = liveRange || savedRange;
+
         try {
           if (!chrome.runtime?.id) { showUpdateNotice(); return; }
         } catch (_) { showUpdateNotice(); return; }
@@ -7503,25 +7521,24 @@ const startDrag = (e) => {
         try {
           const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
           const currentSource = storage?.lpLangA || "auto";
-          let finalQuery = text;
+          let finalQuery = activeText;
 
-          // 汉英混排且英文占多数时，去掉汉字再查
-          const hasHan = /[\u4e00-\u9fa5]/.test(text);
-          const hasEn = /[a-zA-Z]/.test(text);
-          const hasJa = LANGUAGE_PATTERNS["ja"]?.test(text);
+          const hasHan = /[\u4e00-\u9fa5]/.test(activeText);
+          const hasEn = /[a-zA-Z]/.test(activeText);
+          const hasJa = LANGUAGE_PATTERNS["ja"]?.test(activeText);
           if (hasHan && hasEn && !hasJa) {
-            const zhChars = text.match(/[\u4e00-\u9fa5]/g) || [];
-            const enChars = text.match(/[a-zA-Z]/g) || [];
+            const zhChars = activeText.match(/[\u4e00-\u9fa5]/g) || [];
+            const enChars = activeText.match(/[a-zA-Z]/g) || [];
             if (enChars.length > zhChars.length) {
-              finalQuery = text.replace(/[\u4e00-\u9fa5]/g, "").trim();
+              finalQuery = activeText.replace(/[\u4e00-\u9fa5]/g, "").trim();
             }
           }
 
           let ctxForDetect = _capturedContext || "";
           if (ctxForDetect.length < 20) {
             try {
-              if (savedRange) {
-                let block = savedRange.commonAncestorContainer;
+              if (activeRange) {
+                let block = activeRange.commonAncestorContainer;
                 if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
                 let tries = 0;
                 while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
@@ -7539,7 +7556,6 @@ const startDrag = (e) => {
           if (currentSource !== "auto") {
             detectedSourceLang = currentSource;
           } else if (textLang && ctxLang && textLang !== ctxLang) {
-            // 日语上下文里的纯汉字按日语处理
             detectedSourceLang = (ctxLang === "ja" && /^[\u4e00-\u9fa5]+$/.test(finalQuery))
               ? "ja" : textLang;
           } else {
@@ -7548,8 +7564,8 @@ const startDrag = (e) => {
 
           if (!shadowHost) initShadowDOM();
           try {
-            if (savedRange) {
-              const container = savedRange.commonAncestorContainer;
+            if (activeRange) {
+              const container = activeRange.commonAncestorContainer;
               const paragraph = container.nodeType === Node.TEXT_NODE
                 ? container.parentElement : container;
               let block = paragraph.closest("[data-translated]") || paragraph;
@@ -7608,7 +7624,6 @@ const startDrag = (e) => {
             return;
           }
           logger.error("[trigger] 显示翻译窗口失败:", e.message, e.stack);
-          // 出错时保留 logo 供用户重试
         }
       }
 
@@ -7618,7 +7633,7 @@ const startDrag = (e) => {
           tapEvt.stopPropagation();
           tapEvt.preventDefault();
           clearTimeout(window.logoAutoTimer);
-          window.getSelection()?.removeAllRanges();
+          //window.getSelection()?.removeAllRanges();
           await triggerTranslation();
         };
         // 兼容混合设备的 click 兜底
