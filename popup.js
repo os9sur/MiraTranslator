@@ -210,7 +210,7 @@ async function initUpdateNotify() {
     const vocabulary = await idb.vocabulary.getAll();
     activeVocab = vocabulary.filter(item => !item.deleted);
   } catch (e) {
-    console.error("Failed to fetch vocabulary", e);
+    logger.error("Failed to fetch vocabulary", e);
   }
 
   const guideEl = document.getElementById('welcome-guide');
@@ -2378,14 +2378,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     searchPanel.style.display = 'flex';
     input.focus();
   };
-  // document.getElementById('closeSearchPanel').onclick = () => {
-  //   mainContainer.style.display = 'block';
-  //   searchPanel.style.display = 'none';
-  //   input.value = '';
-  //   input.style.height = '36px';
-  //   resultArea.style.display = 'none';
-  //   notebookBtn.style.display = 'none';
-  // };
+  document.getElementById('closeSearchPanel').onclick = () => {
+    mainContainer.style.display = 'block';
+    searchPanel.style.display = 'none';
+    input.value = '';
+    input.style.height = '36px';
+    resultArea.style.display = 'none';
+    notebookBtn.style.display = 'none';
+  };
 
   // ── 原文发音
   document.getElementById('ttsBtn').onclick = function () {
@@ -2664,7 +2664,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const domainLabel = document.getElementById('domainIndicatorWrapper');
       const inspectBtn = document.getElementById('inspectElement');
       const inspectLabelBtn = document.getElementById('inspectElementLabel');
+      //仅手机端, 禁用pick功能
+      const isPhone = /Android.*Mobile|iPhone|iPod/i.test(navigator.userAgent);
 
+      if (isPhone) {
+        if (inspectBtn) inspectBtn.style.display = 'none';
+      }
       if (checkRTL(uiLangSelect.value)) {
         // inspectElementLabel 右对齐
         const label = document.getElementById('inspectElementLabel');
@@ -2722,7 +2727,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       if (inspectBtn && inspectLabelBtn) {
-        if (currentMode === 'global') {
+        if (isPhone) {
+          hideFade(inspectBtn); // 手机端始终隐藏
+        } else if (currentMode === 'global') {
           hideFade(inspectBtn);
           if (domainLabel) hideFade(domainLabel);
         } else {

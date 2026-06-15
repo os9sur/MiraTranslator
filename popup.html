@@ -177,6 +177,73 @@
       border-radius: 28px;
     }
 
+    .lp-select {
+      flex: 1;
+      min-width: 0;
+      font-size: 11px;
+      color: #f0f6fc;
+      background: rgba(15, 23, 42, 0.9);
+      border: 0.5px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 4px 6px;
+      outline: none;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #lpDoneBtn {
+      font-size: 13px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1.5px solid rgba(56, 189, 248, 0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #lpDoneBtn:hover {
+      border-color: #38f898;
+    }
+
+    .lpBadge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1.5px solid rgba(56, 189, 248, 0.25);
+      border-radius: 4px;
+      padding: 5px 6px;
+    }
+
+    .lpBadge:hover {
+      border-color: #73e2f0;
+    }
+
+    .pencil {
+      font-size: 16px;
+      color: #627186;
+    }
+
+    .pencil:hover {
+      color: #73e2f0;
+    }
+
+    .swapBtn {
+      flex: 0 0 auto;
+      font-size: 13px;
+      color: #94a3b8;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+
+    .swapBtn:hover {
+      color: #73e2f0;
+    }
+
     /* @media (max-width: 600px) {
       body {
         width: 100vw !important;
@@ -229,40 +296,34 @@
     style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 110; display: none; padding: 8px; box-sizing: border-box; flex-direction: column; border-radius: 10px;">
     <div
       style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-shrink: 0;">
+      <span id="closeSearchPanel" class="close-btn-common"
+        style="cursor: pointer; font-size: 16px; font-weight: bold; color: #94a3b8; line-height: 1;">➥</span>
       <div style="display: flex; align-items: center; gap: 6px;">
         <div style="width: 6px; height: 6px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 6px #38bdf8;">
         </div>
         <span style="font-weight: 800; font-size: 11px; letter-spacing: 1px; color: #38bdf8;">QUICK LOOKUP</span>
       </div>
-      <!-- <span id="closeSearchPanel" class="close-btn-common"
-        style="cursor: pointer; font-size: 16px;font-weight:bold; color: #94a3b8; line-height: 1;">✕</span> -->
     </div>
 
     <!-- 语言对选择：折叠态 -->
     <div id="langPairTag" style="display:flex; align-items:center; gap:6px; margin-bottom:8px; min-height:24px;">
       <span id="langPairToggle"
         style="display:flex; align-items:center; gap:5px; font-size:11px; color:#64748b; cursor:pointer; user-select:none;">
-        <span id="lpBadgeA"
-          style="font-size:11px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:1px 6px;">EN</span>
-        <span id="lpArrow" style="color: #627186;font-size:12px;">→</span>
-        <span id="lpBadgeB"
-          style="font-size:11px; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:1px 6px;">JA</span>
-        <span style="font-size:11px; color:#627186;">✎</span>
+        <span id="lpBadgeA" class="lpBadge">EN</span>
+        <span id="lpArrow" class="swapBtn">→</span>
+        <span id="lpBadgeB" class="lpBadge">JA</span>
+        <span class="pencil">✎</span>
       </span>
     </div>
 
     <!-- 语言对选择：展开态 -->
     <div id="langPairEdit" style="display:none; align-items:center; gap:6px; margin-bottom:8px;">
-      <select id="lpSelA"
-        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;"></select>
+      <select id="lpSelA" class="lp-select"></select>
 
-      <button id="lpSwapBtn"
-        style="flex:0 0 auto; font-size:13px; color:#94a3b8; background:none; border:none; cursor:pointer; padding:0 2px;">⇄</button>
+      <button id="lpSwapBtn" class="swapBtn">⇄</button>
 
-      <select id="lpSelB"
-        style="flex:1; min-width:0; font-size:11px; color:#f0f6fc; background:rgba(15,23,42,0.9); border:0.5px solid #1e3a5f; border-radius:6px; padding:4px 6px; outline:none;"></select>
-      <button id="lpDoneBtn"
-        style="font-size:12px; color:#38bdf8; background:rgba(56,189,248,0.08); border:0.5px solid rgba(56,189,248,0.25); border-radius:4px; padding:2px 7px; cursor:pointer; white-space:nowrap;">OK</button>
+      <select id="lpSelB" class="lp-select"></select>
+      <button id="lpDoneBtn">OK</button>
     </div>
 
     <div style="position: relative; margin-bottom:8px;">
@@ -513,10 +574,10 @@
       </div>
     </div>
     <div id="domainIndicatorWrapper">
-    <div id="domainIndicator" class="domain-tag">
+      <div id="domainIndicator" class="domain-tag">
         🌐 <span id="currentDomain">loading...</span>
+      </div>
     </div>
-</div>
     <div id="restrictedHint"
       style="display: none; flex-direction: column; align-items: center; justify-content: center; padding: 11px 20px; text-align: center;">
       <svg viewBox="0 0 24 24" fill="none" stroke="#8b949e" stroke-width="2" stroke-linecap="round"
@@ -669,82 +730,6 @@
         <span data-i18n="wordBook">生词本</span>
       </button>
     </div>
-  </div>
-  <!-- 设置 -->
-  <div id="settingsPanel"
-    style="width: 100%; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 100; display: none; padding: 20px; box-sizing: border-box; flex-direction: column;">
-    <div class="row" style="margin-bottom: 11px;">
-      <h3 data-i18n="translationEngineConfig" style="margin: 0; color: #38bdf8; font-size: 16px; letter-spacing: 1px;">
-        ENGINE CONFIG</h3>
-      <span id="closeSettings" class="close-btn-common">✕</span>
-    </div>
-    <div style="margin-bottom: 0px;">
-      <label data-i18n="selectTranslationEngine"
-        style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 6px; letter-spacing: 0.5px;">SELECT
-        TRANSLATOR</label>
-      <div class="custom-combobox" id="engineCombobox">
-        <input type="text" id="engineSelect" class="api-input-field" readonly value="Google Translate"
-          style="cursor: pointer;">
-        <div class="combobox-toggle">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 9l6 6 6-6"></path>
-          </svg>
-        </div>
-        <div class="combobox-dropdown">
-          <div class="dropdown-group-label">General Translation</div>
-          <div class="dropdown-item" data-value="google">Google Translate</div>
-          <div class="dropdown-item" data-value="bing">Microsoft Bing</div>
-          <div class="dropdown-item" data-value="deepl">DeepL API</div>
-          <div class="dropdown-item" data-value="baidu">Baidu Translation</div>
-          <div class="dropdown-group-label">AI Models (LLM)</div>
-          <div class="dropdown-item" data-value="openai">OpenAI (ChatGPT)</div>
-          <div class="dropdown-item" data-value="claude">Anthropic (Claude)</div>
-          <div class="dropdown-item" data-value="gemini">Google (Gemini)</div>
-          <div class="dropdown-item" data-value="deepseek">DeepSeek</div>
-          <div class="dropdown-item" data-value="grok">xAI (Grok)</div>
-          <div class="dropdown-group-label">Cloud Infrastructure</div>
-          <div class="dropdown-item" data-value="google_v3">Google Cloud (v3)</div>
-          <div class="dropdown-item" data-value="microsoft">Microsoft Azure</div>
-          <div class="dropdown-item" data-value="volc">ByteDance Volcengine</div>
-          <div class="dropdown-item" data-value="tencent">Tencent Cloud</div>
-          <div class="dropdown-group-label">Advanced & Custom</div>
-          <div class="dropdown-item" data-value="siliconflow">SiliconFlow (Aggregator)</div>
-          <div class="dropdown-item" data-value="custom_ai">Custom API (OpenAI-Compatible)</div>
-        </div>
-      </div>
-    </div>
-    <div id="apiInputs" style="margin-top: 0px;">
-    </div>
-    <!-- 清理缓存 -->
-    <div id="cacheManager"
-      style="margin: 14px 0 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px dashed rgba(148, 163, 184, 0.2); padding-bottom: 12px;margin-bottom: 10px;">
-      <div style="font-size: 10px; color: #94a3b8; display: flex; flex-direction: column; gap: 2px;">
-        <div data-i18n="cacheTitle" style="letter-spacing: 0.5px;">STORAGE USED</div>
-        <div id="cacheSizeText" style="color: #38bdf8; font-weight: bold;">0.0 KB</div>
-      </div>
-      <button id="clearAllCache" data-i18n="clearAllCache"
-        style="background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: #f87171; font-size: 10px; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;">
-        CLEAR ALL CACHE
-      </button>
-    </div>
-    <div class="allow-select">
-      <p id="tips" style="margin: 0; font-size: 10px; color: #ffc048; line-height: 1.4;">
-        💡 <strong data-i18n="whatIsAPIKey">什么是密钥 (API Key)?</strong><br>
-        <span data-i18n="apiKeyDescription"> 这是引擎服务商提供的身份凭证。没有它，备选引擎无法工作。</span>
-        <a href="#engineSelect" data-i18n="viewTutorial" style="color: #38bdf8; text-decoration: none;">查看获取教程
-          →</a>
-      </p>
-    </div>
-    <!-- 测试连接 -->
-    <button id="testApiConfig" class="cool-test-btn">
-      <span id="testBtnIcon">⚡</span>
-      <span id="testBtnText" data-i18n="testConnection">TEST CONNECTION</span>
-    </button>
-    <!-- 保存 -->
-    <button id="saveApiConfig" data-i18n="save" class="cool-btn">
-      APPLY CHANGES
-    </button>
   </div>
 
   <!-- 充值界面开始 -->

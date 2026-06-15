@@ -1296,7 +1296,10 @@ async function refreshBingToken(host) {
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 10000);
                 const preRes = await fetch(`https://${host}/translator`, {
-                    signal: controller.signal
+                    signal: controller.signal,
+                    headers: {
+                        'User-Agent': navigator.userAgent
+                    }
                 });
                 clearTimeout(timer);
                 const html = await preRes.text();
@@ -1324,7 +1327,7 @@ async function refreshBingToken(host) {
     return bingCache[host];
 }
 
-// ── Bing Host 探测 ───────────────────────────────────────────────────────────
+// ── Bing Host 探测 ─────
 // probe 只检查 token，不再发额外翻译请求
 async function probeBingHost() {
     if (_bingHostCache && (Date.now() - _bingHostCacheTs < DICT_ENGINE_TTL)) {
@@ -2201,7 +2204,7 @@ const Translators = {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                        'User-Agent': navigator.userAgent
                     },
                     body: new URLSearchParams({
                         fromLang: bingFrom,
@@ -2260,7 +2263,7 @@ const Translators = {
             const url = `https://cn.bing.com/dict/search?q=${encodeURIComponent(query)}&cc=cn`;
             const res = await fetch(url, {
                 headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'User-Agent': navigator.userAgent,
                     'Referer': 'https://cn.bing.com/dict/',
                 }
             });
@@ -4174,8 +4177,7 @@ async function handleMicrosoftLogin(sendResponse) {
         const fragment = new URL(redirected).hash.slice(1);
         const msToken = new URLSearchParams(fragment).get('access_token');
         if (!msToken) throw new Error('Failed to retrieve Microsoft access_token');
-
-        // 4. 拿用户信息（微软官方API，不改）
+ 
         const graphResp = await fetch('https://graph.microsoft.com/v1.0/me', {
             headers: { Authorization: `Bearer ${msToken}` }
         });
@@ -4881,12 +4883,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     if (request.type === 'AUTH_ONEDRIVE') {
-    getOneDriveTokenSilent()
-        .then(token => safeSetStorage({ onedrive_token: token }))
-        .then(() => safeSendResponse({ success: true }))
-        .catch(err => safeSendResponse({ success: false, error: err.message }));
-    return true;
-}
+        getOneDriveTokenSilent()
+            .then(token => safeSetStorage({ onedrive_token: token }))
+            .then(() => safeSendResponse({ success: true }))
+            .catch(err => safeSendResponse({ success: false, error: err.message }));
+        return true;
+    }
     if (request.type === 'START_ONEDRIVE_AUTH') {
         handleOneDriveAuthFlow(safeSendResponse);
         return true;

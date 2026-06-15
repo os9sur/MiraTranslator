@@ -1144,9 +1144,9 @@ let googleTTSFailCount = 0;
 const MAX_FAIL_COUNT = 3;
 
 function speakText(text, speakBtn, forcedLang) {
-  console.log('[TTS] speakText called, text:', text, 'forcedLang:', forcedLang);
+  logger.log('[TTS] speakText called, text:', text, 'forcedLang:', forcedLang);
   if (!text) {
-    console.log('[TTS] text 为空，直接 return');
+    logger.log('[TTS] text 为空，直接 return');
     return;
   }
 

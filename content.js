@@ -4396,7 +4396,7 @@ function initSelectionTranslate() {
     shadow.addEventListener("touchstart", (e) => {
       const dragZone = e.target.closest("#drag-zone");
       if (!dragZone) return;
-      console.log('[touchstart] drag-zone 触发');
+      logger.log('[touchstart] drag-zone 触发');
 
       const point = e.touches[0];
       startX = point.clientX;
@@ -4845,7 +4845,7 @@ function initSelectionTranslate() {
       
 @keyframes tts-loading-spin {
   to {
-    transform: rotate(360deg);
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 
@@ -5036,7 +5036,24 @@ function initSelectionTranslate() {
     opacity: 0.6;
     display: inline-block;
   }
+.mira-example-speak.tts-loading::before {
+  display: none;
+}
 
+.mira-example-speak.tts-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid rgba(56, 189, 248, 0.2);
+  border-top-color: #38bdf8;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: tts-loading-spin 0.7s linear infinite;
+}
   .mira-example-speak:hover {
     opacity: 1;
     transform: scale(1.2);
@@ -7507,7 +7524,7 @@ function initSelectionTranslate() {
       logoCenter = { x: l + 16, y: t + 16 };
       logoBtn.classList.add("show");
       clearTimeout(window.logoAutoTimer);
-      window.logoAutoTimer = setTimeout(forceHideLogo, 3000);
+      window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
 
       async function triggerTranslation() {
         // 用 selectionchange 持续更新的快照
@@ -7724,7 +7741,7 @@ function initSelectionTranslate() {
           background: linear-gradient(120deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.25) 100%);
           color: #38bdf8;
           border-bottom: 1px solid rgba(56,189,248,0.5);
-          border-radius: 2px;
+          border-radius: 5px;
           cursor: pointer;
           padding: 0 1px;
           transition: background 0.2s;
@@ -8019,6 +8036,12 @@ function initSelectionTranslate() {
   })();
 
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.type === "VOCAB_REMOVE_HIGHLIGHT" && window.__vocabRemoveHighlight) {
+      window.__vocabRemoveHighlight(msg.word);
+    }
+    if (msg.type === "VOCAB_ADD_HIGHLIGHT" && window.__vocabHighlightWord) {
+      window.__vocabHighlightWord(msg.word);
+    }
     if (msg.action === "TRANSLATE_DETAIL_UPDATE") {
       const currentWord = shadowHost?.getAttribute("data-current-word");
       if (msg.originalText !== currentWord) {

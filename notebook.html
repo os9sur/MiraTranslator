@@ -81,6 +81,9 @@
       font-size: 14px;
       outline: none;
       box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .search-bar-input:focus {
@@ -240,7 +243,7 @@
 
     .vocab-head {
       display: grid;
-      grid-template-columns: 220px 1fr 130px 160px 110px 105px;
+      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px 90px 90px;
       background: rgba(30, 41, 59, 0.8);
       border-bottom: 1px solid rgba(56, 189, 248, 0.2);
       padding: 0 8px;
@@ -256,7 +259,7 @@
 
     .vocab-row {
       display: grid;
-      grid-template-columns: 220px 1fr 130px 160px 110px 105px;
+      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px 90px 90px;
       border-bottom: 1px solid #1e293b;
       padding: 0 8px;
       transition: background-color 0.2s;
@@ -350,7 +353,7 @@
     .word-text {
       font-weight: 600;
       color: #38bdf8;
-      font-size: 15px;
+      font-size: 18px;
       margin-right: 6px;
     }
 
@@ -402,7 +405,7 @@
 
     @keyframes tts-loading-spin {
       to {
-        transform: rotate(360deg);
+        transform: translate(-50%, -50%) rotate(360deg);
       }
     }
 
@@ -413,11 +416,10 @@
     .tts-loading::before {
       content: "";
       position: absolute;
-      top: 0;
-      left: -3px;
-      right: 0;
-      bottom: 0;
-      margin: auto;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: 0;
       width: 14px;
       height: 14px;
       border: 1.5px solid rgba(56, 189, 248, 0.2);
@@ -431,12 +433,24 @@
       opacity: 0.3;
     }
 
+    /* 小喇叭 loading 圆环 */
+    .speaker-btn-sm.tts-loading::before {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 大喇叭 loading 圆环 */
+    .speaker-btn-lg.tts-loading::before {
+      width: 25px;
+      height: 25px;
+    }
+
     .speaker-btn:hover {
       color: #38bdf8 !important;
       transform: scale(1.1);
     }
 
-    .speaker-btn.speaking {
+    .speaker-btn.is-speaking {
       color: #38bdf8 !important;
       animation: pulse-ring 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
@@ -458,7 +472,7 @@
       }
     }
 
-    .speaker-btn.speaking svg path {
+    .speaker-btn.is-speaking svg path {
       stroke-dasharray: 10;
       animation: wave-offset 0.5s linear infinite;
     }
@@ -538,37 +552,50 @@
       transition: opacity 0.3s, max-height 0.3s, margin-bottom 0.3s;
     }
 
+    .word-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
     /* ── 移动端 ── */
     @media (max-width: 768px) {
       body {
         padding: 12px 12px 20px 12px;
       }
 
+      .word-row {
+        padding-right: 55px;
+        flex-wrap: wrap;
+      }
+
       #syncStatus {
         align-self: flex-start;
       }
-    #btnGroup {
+
+      #btnGroup {
         display: flex !important;
         flex-wrap: wrap;
         gap: 6px;
         width: 100%;
         justify-content: flex-start;
-    }
+      }
 
-    #btnGroup #nbSyncPush,
-    #btnGroup #nbSyncPull {
+      #btnGroup #nbSyncPush,
+      #btnGroup #nbSyncPull {
         flex: 1;
         min-width: 0;
-    }
+      }
 
-    #btnGroup #toggleAddBox {
+      #btnGroup #toggleAddBox {
         order: 3;
-    }
+      }
 
-    #btnGroup #exportBtn {
+      #btnGroup #exportBtn {
         flex: 1;
         order: 4;
-    }
+      }
+
       .header {
         flex-direction: column;
         align-items: flex-start;
@@ -838,7 +865,7 @@
       <h1 style="
     font-size: 22px; 
     margin: 0;
-    font-weight: 300;
+    font-weight: 500;
     white-space: nowrap;
     background: linear-gradient(135deg, #38bdf8 0%, #ffffff 50%, #7c3aed 100%);
     -webkit-background-clip: text;
@@ -848,24 +875,25 @@
     filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
 " data-i18n="myWordBook">📓 我的生词本</h1>
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 100%;">
-    <div id="btnGroup" style="display: flex; gap: 6px; align-items: center; width: 100%; justify-content: flex-end;">
-        <button id="nbSyncPush" class="btn nb-sync-btn"
+        <div id="btnGroup"
+          style="display: flex; gap: 6px; align-items: center; width: 100%; justify-content: flex-end;">
+          <button id="nbSyncPush" class="btn nb-sync-btn"
             style="background:#127538; color:white; position:relative; overflow:hidden; padding:6px 10px; font-size:12px;">
             <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
             <div class="sync-log-scroller"></div>
-        </button>
-        <button id="nbSyncPull" class="btn nb-sync-btn"
+          </button>
+          <button id="nbSyncPull" class="btn nb-sync-btn"
             style="background:rgba(16,185,129,0.1); border:1.5px solid #10b981; color:#10b981; position:relative; overflow:hidden; padding:5px 10px; font-size:12px;">
             <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
             <div class="sync-log-scroller"></div>
-        </button>
-        <button id="toggleAddBox" class="btn"
+          </button>
+          <button id="toggleAddBox" class="btn"
             style="background:#334155; color:white; padding:6px 10px; font-size:12px;" title="">＋</button>
-        <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
+          <button id="exportBtn" class="btn btn-export" style="padding:6px 18px; font-size:12px;"
             data-i18n="exportCSV">导出 CSV</button>
-    </div>
-    <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
-</div>
+        </div>
+        <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
+      </div>
     </div>
     <div dir="auto" id="syncHint"></div>
 

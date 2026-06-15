@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   <div class="v-detail-line" dir="ltr" style="margin-top: 2px; display: flex; gap: 6px;
     ${isRTLText(meanings) ? 'flex-direction: row-reverse; text-align: right;' : ''}">
     <span class="v-pos" style="color: #38bdf8; font-style: italic; font-size: 11px; min-width: 30px;">${pos}</span>
-    <span class="v-def" style="color: #94a3b8;font-size: 12px;">${query ? highlight(meanings, query) : meanings}</span>
+    <span class="v-def" style="color: #94a3b8;font-size: 14px;">${query ? highlight(meanings, query) : meanings}</span>
   </div>
 `;
     }).join('');
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     return `
   <div class="v-examples-box" style="border-top: 1px solid #3f5374; padding-top: 6px; margin-top: 6px;">
-    <div style="font-size: 10px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;
+    <div style="font-size: 11px; color: #475569; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold;
       ${isRTLText(examples.map(s => typeof s === 'object' ? (s.cn || '') : '').join('')) ? 'text-align: right;' : ''}">
       EXAMPLES
     </div>
@@ -189,10 +189,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       return `
         <div style="margin-bottom: 8px; border-inline-start: 2px solid #25cbf6ab; border-radius:1.5px; padding-inline-start: 8px;">
           <div dir="ltr" style="display:flex; align-items:center; gap:6px;">
-            <div style="font-size: 12px; font-style: italic; color: #94a3b8; line-height: 1.4; flex: 1;">
+            <div style="font-size: 13px; font-style: italic; color: #94a3b8; line-height: 1.4; flex: 1;">
               ${query ? highlight(en, query) : highlightWord(en, word)}
             </div>
-            <span class="example-speaker-btn" data-sentence="${safeEn}"
+            <span class="example-speaker-btn speaker-btn-sm" data-sentence="${safeEn}"
               style="cursor:pointer; color:#637793; flex-shrink:0; display:flex; transition:color 0.2s; position:relative; overflow:visible;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               </svg>
             </span>
           </div>
-          ${cn ? `<div dir="auto" style="font-size: 11px; color: #637793; margin-top: 2px;
+          ${cn ? `<div dir="auto" style="font-size: 13px; color: #637793; margin-top: 2px;
             ${isRTLText(cn) ? 'text-align: right;' : ''}
           ">${query ? highlight(cn, query) : cn}</div>` : ""}
         </div>`;
@@ -392,18 +392,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     <div class="vocab-row">
 
       <div class="vocab-cell">
-        <div style="display:flex;align-items:center;gap:8px;
-  ${isRTLUI ? 'flex-direction:row-reverse;justify-content:flex-end;' : 'padding-right:55px;'}">
-          <span class="word-text" dir="auto">${displayWordHL}</span>
-          <span class="speaker-btn" data-word="${safeWordForSpeech}" data-lang="${langCode}"
-            style="cursor:pointer;color:#909fb3;display:flex;transition:color 0.2s;position:relative;overflow:visible;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            </svg>
-          </span>
-        </div>
+        <div class="word-row" style="display:flex; align-items:flex-start; gap:8px;
+  ${isRTLUI ? 'flex-direction:row-reverse;justify-content:flex-end;' : ''}">
+  <span class="word-text" dir="auto">${displayWordHL}</span>
+  <span class="speaker-btn speaker-btn-lg" data-word="${safeWordForSpeech}" data-lang="${langCode}"
+    style="cursor:pointer; color:#909fb3; display:flex; transition:color 0.2s; position:relative; overflow:visible; flex-shrink:0; margin-top:2px;">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+    </svg>
+  </span>
+</div>
         ${phonetic ? `<div style="color:#909fb3;font-size:12px;margin-top:4px;font-family:Consolas,Monaco,'Andale Mono','Ubuntu Mono',monospace;">[${phonetic.replace(/[\[\]]/g, '')}]</div>` : ''}
         ${phonetic ? `<div id="kana-${item.id}" style="display:none;font-size:12px;color:#7dd3fc;margin-top:2px;"></div>` : ''}
         ${context ? `
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div style="flex:1;${isRTLText(context) ? 'text-align:right;' : ''}" dir="auto">
               ${searchQuery ? highlight(context, searchQuery) : highlightContext(context, contextWord)}
             </div>
-            <span class="context-speaker-btn"
+            <span class="context-speaker-btn speaker-btn-sm"
               data-sentence="${context.replace(/'/g, '&apos;').replace(/"/g, '&quot;')}"
               data-lang="${langCode}"
               style="cursor:pointer;color:#64748b;flex-shrink:0;display:flex;margin-top:1px;transition:color 0.2s;position:relative;overflow:visible;">
@@ -626,6 +626,11 @@ document.addEventListener('DOMContentLoaded', async () => {
           cell.innerHTML = originalContent;
           const btn = cell.querySelector('.btn-danger');
           if (btn) btn.onclick = () => deleteWord(id, word);
+          // 恢复高亮
+          const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+          if (tab?.id) {
+            chrome.tabs.sendMessage(tab.id, { type: "VOCAB_ADD_HIGHLIGHT", word });
+          }
         };
       };
 
@@ -637,6 +642,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       }, 1000);
 
       undoTimers[id] = setTimeout(async () => {
+        // 通知 content script 移除高亮
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab?.id) {
+          chrome.tabs.sendMessage(tab.id, { type: "VOCAB_REMOVE_HIGHLIGHT", word });
+        }
         // ── tr → .vocab-row ──
         const row = cell.closest('.vocab-row');
         if (row) {

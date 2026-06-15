@@ -1206,7 +1206,7 @@ select:hover {
   background-color: rgba(30, 41, 59, 0.4);
   backdrop-filter: blur(20px);
   border: 1px solid #2b3b4f;
-  padding: 10px;
+  padding: 7px 10px;
   border-radius: 11px;
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: flex;
