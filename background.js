@@ -43,7 +43,7 @@ if (typeof browser !== 'undefined' && typeof browser.identity === 'undefined') {
 
 const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
 const brands = navigator.userAgentData?.brands?.map(b => b.brand) || [];
-const isEdge = brands.includes('Microsoft Edge');
+const isEdge = brands.includes('Microsoft Edge') || /Edg\/|EdgA\/|EdgiOS\//i.test(navigator.userAgent);
 const identityAPI = isFirefox ? (browser.identity ?? null) : (chrome.identity ?? null);
 const SYNC_FILE_NAME = 'mira_sync.json';
 const VOCAB_CLEANUP_DAYS = 60;
@@ -303,6 +303,53 @@ async function handleAuthFlow(sendResponse) {
     }
 
     if (isEdge) {
+        const isMobileEdge = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+        if (isMobileEdge) {
+            logger.log("[Mira-LOG] 检测到移动端 Edge，使用 tab 授权流程...");
+            const REDIRECT = 'https://os9sur.github.io/mira-trans/oauth_callback.html';
+            const clientId = "{{EDGE_MOBILE_CLIENT_ID}}"; // Mira for Edge Web 客户端 的 ID
+            const scope = [
+                "https://www.googleapis.com/auth/drive.appdata",
+                "https://www.googleapis.com/auth/userinfo.email",
+                "https://www.googleapis.com/auth/userinfo.profile"
+            ].join(" ");
+
+            const authUrl = "https://accounts.google.com/o/oauth2/auth" +
+                `?client_id=${clientId}` +
+                `&response_type=token` +
+                `&redirect_uri=${encodeURIComponent(REDIRECT)}` +
+                `&scope=${encodeURIComponent(scope)}`;
+
+            return new Promise((resolve) => {
+                let authTabId = null;
+                const listener = (tabId, changeInfo) => {
+                    if (tabId !== authTabId) return;
+                    const url = changeInfo.url || '';
+                    if (!url.startsWith(REDIRECT)) return;
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    chrome.tabs.remove(tabId).catch(() => { });
+                    const hash = new URL(url).hash;
+                    const params = new URLSearchParams(hash.slice(1));
+                    const token = params.get('access_token');
+                    if (token) {
+                        safeSetStorage({ google_drive_token: token });
+                        sendResponse({ success: true });
+                    } else {
+                        sendResponse({ success: false, error: '未能获取 access_token' });
+                    }
+                    resolve();
+                };
+                chrome.tabs.onUpdated.addListener(listener);
+                chrome.tabs.create({ url: authUrl }).then(tab => {
+                    authTabId = tab.id;
+                }).catch(err => {
+                    chrome.tabs.onUpdated.removeListener(listener);
+                    sendResponse({ success: false, error: err.message });
+                    resolve();
+                });
+            });
+        }
         logger.log("[Mira-LOG] 检测到 Edge 环境，使用 launchWebAuthFlow...");
         const clientId = "{{MY_ID}}";
         const redirectUri = chrome.identity?.getRedirectURL?.() ?? '';
@@ -399,17 +446,22 @@ async function handleSyncFlow(message, sendResponse) {
             try {
                 let token = data.onedrive_token;
                 if (!token) throw new Error('Unauthorized');
-                await syncWithOneDrive(token, 'push');
-                notifySyncSuccess('onedrive');
+                const oneDriveResult = await syncWithOneDrive(token, direction);
+                if (chrome.runtime?.id) {
+                    sendResponse({ success: true, mergedData: oneDriveResult });
+                }
             } catch (e) {
                 if (e.message.includes('401') || e.message.includes('Unauthorized')) {
                     try {
                         const newToken = await getOneDriveTokenSilent();
                         await safeSetStorage({ onedrive_token: newToken });
-                        await syncWithOneDrive(newToken, 'push');
-                        notifySyncSuccess('onedrive');
+                        const oneDriveResult = await syncWithOneDrive(newToken, direction);
+                        if (chrome.runtime?.id) {
+                            sendResponse({ success: true, mergedData: oneDriveResult });
+                        }
                     } catch (silentErr) {
                         logger.warn("❌ [Mira-Sync] OneDrive 静默刷新失败，需要重新登录");
+                        try { sendResponse({ success: false, error: 'onedrive_reauth_required' }); } catch (e) { }
                     }
                 } else {
                     throw e;
@@ -4177,7 +4229,7 @@ async function handleMicrosoftLogin(sendResponse) {
         const fragment = new URL(redirected).hash.slice(1);
         const msToken = new URLSearchParams(fragment).get('access_token');
         if (!msToken) throw new Error('Failed to retrieve Microsoft access_token');
- 
+
         const graphResp = await fetch('https://graph.microsoft.com/v1.0/me', {
             headers: { Authorization: `Bearer ${msToken}` }
         });
@@ -4868,13 +4920,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return true;
     }
     //用户账号结束
-
     if (request.type === 'RECHECK_ENGINE') {
         detectAndCacheDefaultEngine(true);
         safeSendResponse({ ok: true });
         return false;
     }
-    if (request.type === 'START_AUTH' || request.action === 'AUTH_FIREFOX') {
+    if (request.type === 'START_AUTH' || request.action === 'AUTH_FIREFOX' || request.action === 'AUTH_TAB_FLOW') {
         handleAuthFlow(safeSendResponse);
         return true;
     }

@@ -783,26 +783,59 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     };
     updatePopupHeight();
+
     const isFirefox = typeof InstallTrigger !== 'undefined' || /Firefox/.test(navigator.userAgent);
+    const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+
     if (selectedMethod === 'googleDrive') {
       logger.log("🔍 正在验证 Google Drive 授权...");
+      const data = await safeGetStorage('google_drive_token');
+      if (!data) return;
+
       if (isFirefox) {
-        const data = await safeGetStorage('google_drive_token');
-        if (!data) return;
+        // Firefox 桌面 + Android
         if (!data.google_drive_token) {
           logger.log("🔑 Firefox 需要手动拉起授权...");
-          getGoogleTokenForFirefox(e.target, e.target.value, 'pull');
+          showToast(t('notice.auth') || 'Please complete the authorization in the new tab and return here to retry.', 'info');
+          safeSendMessage({ action: 'AUTH_FIREFOX' }).then((response) => {
+            if (response?.success) {
+              logger.log("✅ Firefox 授权成功");
+              saveSyncConfig();
+            } else {
+              showToast(t('firefoxAuthIncomplete'), 'error');
+            }
+          });
         } else {
-          logger.log("✅ Firefox 缓存 Token 存在 (是否有效需在同步时验证)");
+          logger.log("✅ Firefox 缓存 Token 存在");
           saveSyncConfig();
         }
+
+      } else if (isMobile) {
+        // 移动端 Edge：直接走 tab 授权，不碰 chrome.identity
+        if (!data.google_drive_token) {
+          logger.log("🔑 移动端 Edge 需要手动拉起授权...");
+          showToast(t('notice.auth') || 'Please complete the authorization in the new tab and return here to retry.', 'info');
+          safeSendMessage({ action: 'AUTH_TAB_FLOW' }).then((response) => {
+            if (response?.success) {
+              logger.log("✅ Google Drive 授权成功");
+              saveSyncConfig();
+            } else {
+              logger.error("❌ 授权失败或取消");
+            }
+          });
+        } else {
+          logger.log("✅ 移动端 Edge 缓存 Token 存在");
+          saveSyncConfig();
+        }
+
       } else {
+        // 桌面端 Chrome / Edge
         chrome.identity.getAuthToken({ interactive: false }, (token) => {
           if (chrome.runtime.lastError || !token) {
-            logger.log("🔑 Chrome 需要用户手动授权...");
+            logger.log("🔑 需要用户手动授权...");
             showToast(t('notice.auth') || 'Please complete the authorization in the new tab and return here to retry.', 'info');
-            handleAuthFlow((response) => {
-              if (response.success) {
+            safeSendMessage({ type: 'START_AUTH' }).then((response) => {
+              if (response?.success) {
                 logger.log("✅ Google Drive 授权成功");
                 saveSyncConfig();
               } else {
@@ -815,8 +848,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         });
       }
+
     } else if (selectedMethod === 'oneDrive') {
-      //  OneDrive 授权分支
+      // OneDrive 授权分支
       logger.log("🔍 正在验证 OneDrive 授权...");
       const data = await safeGetStorage('onedrive_token');
       if (!data?.onedrive_token) {
@@ -834,6 +868,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         logger.log("✅ OneDrive 缓存 Token 存在");
         saveSyncConfig();
       }
+
     } else {
       saveSyncConfig();
     }
@@ -889,10 +924,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       updateSyncProgressUI(btnId, 'authorizing', true);
       const isFirefox = typeof browser !== 'undefined' && /Firefox/.test(navigator.userAgent);
 
-      if (!isFirefox) {
-        if (isMobile) {
-          showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
-        }
+      if (isMobile) {
+        showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
+      }
+
+      if (isFirefox) {
+        // Firefox 桌面 + Android：走 AUTH_FIREFOX
+        getGoogleTokenForFirefox(btn, originalText, direction);
+      } else if (isMobile) {
+        // 移动端 Edge（非 Firefox）：走 AUTH_TAB_FLOW
+        performTabAuthFlow(btn, originalText, direction);
+      } else {
+        // 桌面端 Chrome / Edge：走 START_AUTH
         safeSendMessage({ type: 'START_AUTH' }).then((response) => {
           logger.log('[DEBUG] START_AUTH response:', response);
           if (!response) {
@@ -905,11 +948,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateSyncProgressUI(btnId, '', false);
           }
         });
-      } else {
-        if (isMobile) {
-          showToast(t('notice.auth', window.uiLanguage) || 'Please complete the authorization in the new tab and return here to retry', 'info', 6000);
-        }
-        getGoogleTokenForFirefox(btn, originalText, direction);
       }
       return;
     }
@@ -1069,7 +1107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const response = await safeSendMessage({ action: "AUTH_FIREFOX" });
     if (!response) {
       if (btn) btn.innerText = originalText;
-      updateSyncProgressUI(btn.id, '', false);
+      if (btn) updateSyncProgressUI(btn.id, '', false);
       return;
     }
     if (response.success) {
@@ -1078,10 +1116,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       showToast(t('firefoxAuthIncomplete'), 'error');
       if (btn) btn.innerText = originalText;
-      updateSyncProgressUI(btn.id, '', false);
+      if (btn) updateSyncProgressUI(btn.id, '', false);
     }
   }
-
+  async function performTabAuthFlow(btn, originalText, direction) {
+    const response = await safeSendMessage({ action: 'AUTH_TAB_FLOW' });
+    if (!response) {
+      if (btn) btn.innerText = originalText;
+      if (btn) updateSyncProgressUI(btn.id, '', false);
+      return;
+    }
+    if (response.success) {
+      logger.log("[Mira-LOG] 移动端 tab 授权成功");
+      executeSyncDataAction(btn, originalText, direction);
+    } else {
+      showToast(t('authFailed', window.uiLanguage) || 'Authorization failed', 'error');
+      if (btn) btn.innerText = originalText;
+      if (btn) updateSyncProgressUI(btn.id, '', false);
+    }
+  }
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local' && changes.lastSyncTime) {
       updateSyncStatusUI(changes.lastSyncTime.newValue);
