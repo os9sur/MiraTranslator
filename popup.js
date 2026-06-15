@@ -1390,6 +1390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.isRestricted = isRestricted;
     window.isYouTube = isYouTube;
     const hintEl = document.getElementById('restrictedHint');
+    const divideLine = document.getElementById('sharpDivideLine');
     const seperateLine = document.getElementById('seperateLine');
     //  受限页面：严格互斥，只做隐藏和显示提示
     if (isRestricted) {
@@ -1407,6 +1408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (hintEl) hintEl.style.display = 'flex';
+      if (divideLine) divideLine.style.display = 'none';
       seperateLine.style.display = 'none';
 
       const domainEl = document.getElementById('currentDomain');
@@ -1415,6 +1417,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // YouTube 页面
     else if (isYouTube) {
       if (hintEl) hintEl.style.display = 'none';
+      if (divideLine) divideLine.style.display = 'none';
 
       if (ytRow) {
         ytRow.classList.remove('disabled');
@@ -1432,6 +1435,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     //  普通页面
     else {
       if (hintEl) hintEl.style.display = 'none';
+      if (divideLine) divideLine.style.display = 'flex';
       seperateLine.style.display = '';
       if (ytRow) {
         ytRow.classList.add('disabled');

@@ -5326,18 +5326,9 @@ function initSelectionTranslate() {
     }
   }
 
-  function createEngineDropdown(
-    anchorEl,
-    shadow,
-    shadowHost,
-    userConfigs,
-    currentId,
-    currentModel,
-    onSelect,
-  ) {
+  function createEngineDropdown(anchorEl, shadow, shadowHost, userConfigs, currentId, currentModel, onSelect) {
     const shadowRoot = shadowHost.shadowRoot;
 
-    // 已存在则关闭
     const existing = shadowRoot.getElementById("p-engine-dropdown");
     if (existing) {
       existing.remove();
@@ -5373,58 +5364,74 @@ function initSelectionTranslate() {
     const dropdown = document.createElement("div");
     dropdown.id = "p-engine-dropdown";
     dropdown.style.cssText = `
-          position:fixed; z-index:2147483647;
-          background:${colors.bg}; border:1px solid ${colors.border};
-          border-radius:10px; box-shadow:${colors.shadow};
-          max-height:360px; overflow-y:auto; min-width:200px;
-          padding:4px; font-size:12px; color:${colors.text};
-          pointer-events:auto;
-          backdrop-filter:blur(20px) saturate(180%);
-          -webkit-backdrop-filter:blur(20px) saturate(180%);
-      `;
-
-    dropdown.addEventListener(
-      "wheel",
-      (ev) => {
-        ev.stopPropagation();
-        dropdown.scrollTop += ev.deltaY;
-      },
-      { passive: false },
-    );
-
-    // 定位
-    const btnRect = anchorEl.getBoundingClientRect();
-    const gap = 6;
-    const dropW = 200;
-    const dropH = 360;
-    let left = btnRect.left;
-    let top = btnRect.bottom + gap;
-    if (left + dropW > window.innerWidth)
-      left = window.innerWidth - dropW - gap;
-    if (left < gap) left = gap;
-    if (top + dropH > window.innerHeight) top = btnRect.top - dropH - gap;
-    dropdown.style.top = `${top}px`;
-    dropdown.style.left = `${left}px`;
-
-    // 滚动条样式
-    const scrollStyle = document.createElement("style");
-    scrollStyle.textContent = `
-        #p-engine-dropdown::-webkit-scrollbar { width: 4px; }
-        #p-engine-dropdown::-webkit-scrollbar-track { background: transparent; }
-        #p-engine-dropdown::-webkit-scrollbar-thumb {
-            background: ${colors.textMuted}; border-radius: 4px;
-        }
+      position:fixed; z-index:2147483647;
+      background:${colors.bg}; border:1px solid ${colors.border};
+      border-radius:10px; box-shadow:${colors.shadow};
+      overflow-y:auto; min-width:200px;
+      padding:4px; font-size:12px; color:${colors.text};
+      pointer-events:auto;
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
     `;
+    // max-height  由 repositionDropdown 动态设置
+
+    dropdown.addEventListener("wheel", (ev) => {
+      ev.stopPropagation();
+      dropdown.scrollTop += ev.deltaY;
+    }, { passive: false });
+ 
+    const repositionDropdown = () => {
+      const btnRect = anchorEl.getBoundingClientRect();
+      const gap = 6;
+      const safeMargin = 8;
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      const vh = document.documentElement.clientHeight || window.innerHeight;
+      const maxDropH = 360;
+      const dropW = Math.min(200, vw - safeMargin * 2);
+
+      // 水平
+      let left = btnRect.left;
+      if (left + dropW > vw - safeMargin) left = vw - dropW - safeMargin;
+      if (left < safeMargin) left = safeMargin;
+
+      // 垂直：按上下可用空间决定展开方向
+      const spaceBelow = vh - btnRect.bottom - gap - safeMargin;
+      const spaceAbove = btnRect.top - gap - safeMargin;
+
+      let top, maxHeight;
+      if (spaceBelow >= Math.min(maxDropH, 120)) {
+        top = btnRect.bottom + gap;
+        maxHeight = Math.min(maxDropH, spaceBelow);
+      } else if (spaceAbove > spaceBelow) {
+        maxHeight = Math.min(maxDropH, spaceAbove);
+        top = btnRect.top - gap - maxHeight;
+      } else {
+        top = btnRect.bottom + gap;
+        maxHeight = Math.min(maxDropH, spaceBelow);
+      }
+
+      // 兜底 clamp
+      top = Math.max(safeMargin, Math.min(top, vh - maxHeight - safeMargin));
+
+      dropdown.style.top = `${top}px`;
+      dropdown.style.left = `${left}px`;
+      dropdown.style.width = `${dropW}px`;
+      dropdown.style.maxHeight = `${maxHeight}px`;
+    };
+    // ────────────────────────────────────────────────────
+
+    // 滚动条样式 
+    const scrollStyle = document.createElement("style");
+    scrollStyle.textContent = `...`;
     dropdown.appendChild(scrollStyle);
 
-    // 覆写 remove
     const origRemove = dropdown.remove.bind(dropdown);
     dropdown.remove = () => {
       origRemove();
       anchorEl.classList.remove("is-open");
       shadowHost.style.pointerEvents = "none";
     };
-    //const miraModels = await getMiraModels();
+
     // 构建列表项
     userConfigs.forEach((cfg) => {
       const isMira = cfg.engine === "mira_pro";
@@ -5489,6 +5496,7 @@ function initSelectionTranslate() {
           getMiraModels().then((models) => {
             if (!shadowRoot.getElementById("p-engine-dropdown")) return;
             buildMiraItems(models);
+            repositionDropdown();
           });
         }
       } else {
@@ -5525,11 +5533,12 @@ function initSelectionTranslate() {
       }
     });
 
-    // 挂载到 shadowRoot
+    // 先挂载，再定位 
     shadowRoot.appendChild(dropdown);
     shadowHost.style.pointerEvents = "auto";
+    repositionDropdown(); //  挂载后首次定位
 
-    // 点击外部关闭
+    // 点击外部关闭 
     const closeDropdown = (ev) => {
       const path = ev.composedPath();
       if (!path.includes(dropdown) && !path.includes(anchorEl)) {
@@ -6192,7 +6201,7 @@ function initSelectionTranslate() {
       await window.__vocabOnSave?.(wordText, isActive);
     };
 
-    // ─── 公共函数 ────────────────────────────────────────────────────────────────
+    // 公共函数  
 
     function getLangDropdownColors() {
       const isDark =
@@ -6225,7 +6234,6 @@ function initSelectionTranslate() {
     function createLangDropdown(anchorEl) {
       const shadowRoot = shadowHost.shadowRoot;
 
-      // 已存在则关闭
       const existing = shadowRoot.getElementById("p-lang-dropdown");
       if (existing) {
         existing.remove();
@@ -6238,63 +6246,81 @@ function initSelectionTranslate() {
       const dropdown = document.createElement("div");
       dropdown.id = "p-lang-dropdown";
       dropdown.style.cssText = `
-        position:fixed; z-index:2147483647;
-        background:${colors.bg}; border:1px solid ${colors.border};
-        border-radius:8px; box-shadow:${colors.shadow};
-        max-height:380px; overflow-y:auto; min-width:220px;
-        padding:4px 0; font-size:12px; color:${colors.text};
-        pointer-events:auto;
-        backdrop-filter:blur(20px) saturate(180%);
-        -webkit-backdrop-filter:blur(20px) saturate(180%);
-      `;
+    position:fixed; z-index:2147483647;
+    background:${colors.bg}; border:1px solid ${colors.border};
+    border-radius:8px; box-shadow:${colors.shadow};
+    overflow-y:auto; min-width:220px;
+    padding:4px 0; font-size:12px; color:${colors.text};
+    pointer-events:auto;
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+  `;
+      //  max-height 和 width 移到定位计算之后动态设置
 
-      dropdown.addEventListener(
-        "wheel",
-        (ev) => {
-          ev.stopPropagation();
-          dropdown.scrollTop += ev.deltaY;
-        },
-        { passive: false },
-      );
+      dropdown.addEventListener("wheel", (ev) => {
+        ev.stopPropagation();
+        dropdown.scrollTop += ev.deltaY;
+      }, { passive: false });
 
-      // 定位
+      // 定位计算
       const btnRect = anchorEl.getBoundingClientRect();
       const gap = 4;
-      const dropW = 380;
-      const dropH = 380;
+      const safeMargin = 8; // 距屏幕边缘最小安全距离
+
+      // 视口尺寸（用 documentElement  避免移动端软键盘/地址栏干扰）
+      const vw = document.documentElement.clientWidth || window.innerWidth;
+      const vh = document.documentElement.clientHeight || window.innerHeight;
+
+      const dropW = Math.min(380, vw - safeMargin * 2);
+
+      // 水平定位：优先左对齐按钮，超出右边界则右对齐，最终 clamp 到安全区
       let left = btnRect.left;
-      let top = btnRect.bottom + gap;
-      if (left + dropW > window.innerWidth)
-        left = window.innerWidth - dropW - gap;
-      if (left < gap) left = gap;
-      if (top + dropH > window.innerHeight) top = btnRect.top - dropH - gap;
+      if (left + dropW > vw - safeMargin) left = vw - dropW - safeMargin;
+      if (left < safeMargin) left = safeMargin;
+
+      // 垂直方向：计算上方和下方可用空间
+      const spaceBelow = vh - btnRect.bottom - gap - safeMargin;
+      const spaceAbove = btnRect.top - gap - safeMargin;
+      const maxDropH = 380;
+
+      let top, maxHeight;
+      if (spaceBelow >= Math.min(maxDropH, 120)) {
+        // 优先向下展开
+        top = btnRect.bottom + gap;
+        maxHeight = Math.min(maxDropH, spaceBelow);
+      } else if (spaceAbove > spaceBelow) {
+        // 上方空间更大，向上展开
+        maxHeight = Math.min(maxDropH, spaceAbove);
+        top = btnRect.top - gap - maxHeight;
+      } else {
+        // 两侧都不够，取较大一侧向下
+        top = btnRect.bottom + gap;
+        maxHeight = Math.min(maxDropH, spaceBelow);
+      }
+
+      // 最终 clamp，防止任何情况下超出屏幕
+      top = Math.max(safeMargin, Math.min(top, vh - maxHeight - safeMargin));
+
       dropdown.style.top = `${top}px`;
       dropdown.style.left = `${left}px`;
+      dropdown.style.maxWidth = `${dropW}px`;
+      dropdown.style.maxHeight = `${maxHeight}px`;
 
-      // 挂载
+      // scrollbar 样式
       const scrollStyle = document.createElement("style");
       scrollStyle.textContent = `
-        #p-lang-dropdown::-webkit-scrollbar {
-          width: 6px;
-        }
-        #p-lang-dropdown::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        #p-lang-dropdown::-webkit-scrollbar-thumb {
-          background: ${colors.textMuted};
-          border-radius: 10px;
-          transition: background 0.2s;
-        }
-        #p-lang-dropdown::-webkit-scrollbar-thumb:hover {
-          background: ${colors.accent};
-        }
-      `;
+    #p-lang-dropdown::-webkit-scrollbar { width: 6px; }
+    #p-lang-dropdown::-webkit-scrollbar-track { background: transparent; }
+    #p-lang-dropdown::-webkit-scrollbar-thumb {
+      background: ${colors.textMuted}; border-radius: 10px; transition: background 0.2s;
+    }
+    #p-lang-dropdown::-webkit-scrollbar-thumb:hover { background: ${colors.accent}; }
+  `;
       dropdown.appendChild(scrollStyle);
 
       shadowRoot.appendChild(dropdown);
       shadowHost.style.pointerEvents = "auto";
 
-      // 覆写 remove，恢复 pointerEvents
       const origRemove = dropdown.remove.bind(dropdown);
       dropdown.remove = () => {
         origRemove();
@@ -6302,7 +6328,6 @@ function initSelectionTranslate() {
         shadowHost.style.pointerEvents = "none";
       };
 
-      // 点击外部关闭
       const closeDropdown = (ev) => {
         const path = ev.composedPath();
         if (!path.includes(dropdown) && !path.includes(anchorEl)) {
