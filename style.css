@@ -90,7 +90,7 @@
 }
 
 .row-text:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.049);
 }
 
 .row-text label {
@@ -1204,21 +1204,23 @@ select:hover {
 #inspectHeader {
   position: relative;
   background-color: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(20px);
-  border: 1px solid #2b3b4f;
-  padding: 7px 10px;
+  backdrop-filter: blur(20px); 
+  padding: 7px 1px;
   border-radius: 11px;
-  transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 #inspectHeader:hover {
-  background-color: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(56, 189, 248, 0.5);
-  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.2);
-  transform: translateY(-2px);
+  background-color: rgba(30, 41, 59, 0.7); 
+   
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.7), 
+              0 0 40px rgba(56, 189, 248, 0.4),
+              inset 0 0 8px rgba(56, 189, 248, 0.3); 
+              
+  transform: translateY(-3px); 
 }
 
 #inspectArrow {
