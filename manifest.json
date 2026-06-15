@@ -23,7 +23,8 @@
     "storage",
     "activeTab",
     "alarms",
-    "identity"
+    "identity",
+    "tabs"
   ],
   "oauth2": {
     "client_id": "{{MY_ID}}",
