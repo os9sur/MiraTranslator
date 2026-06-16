@@ -866,29 +866,28 @@ function detectIsAlreadyTarget(text, targetLang) {
   if (!text) return true;
 
   if (/^\s*[\d.,\s\-+%$€¥£#@!?]+\s*$/.test(text)) return true;
-  const textWithoutUrls = text
-    .replace(/https?:\/\/[^\s]+/g, '');
+  const textWithoutUrls = text.replace(/https?:\/\/[^\s]+/g, '');
   const hasCJK = /[\u4e00-\u9fa5\u3040-\u309F\u30A0-\u30FF\uAC00-\uD7AF]/.test(textWithoutUrls);
   if (textWithoutUrls.length > 12 && /[\d*]/.test(textWithoutUrls) && !/\s/.test(textWithoutUrls) && !hasCJK) return true;
+
   const cleanChars = Array.from(textWithoutUrls).filter(char =>
     /\p{L}/u.test(char) &&
     !/[\s\n\r\t\u00A0\u2000-\u200a\u2028\u2029\u3000\ufeff]/u.test(char) &&
     !/\p{P}|\p{S}/u.test(char)
   );
   if (cleanChars.length === 0) return true;
+
   const cleanText = cleanChars.join('');
   const prefix = (targetLang || 'en').toLowerCase().slice(0, 2);
+
   if (prefix === 'en') {
-    // 含非英文拉丁字符，肯定不是英文
     const hasNonEnglishLatin = cleanChars.some(char =>
       /[äöüßÄÖÜàâæçéèêëîïôœùûüÿáéíóúñãõîêôû]/i.test(char)
     );
     if (hasNonEnglishLatin) return false;
-
-    // 纯 a-z 的词：结合 hintSourceLang 或上下文判断
-    // 无法区分 "aus" 是德语还是英语缩写，直接放行让翻译引擎处理
-    return false; // 宁可多翻译，不neng漏掉
+    return false;
   }
+
   if (prefix === 'ja') {
     const hasKana = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(cleanText);
     if (!hasKana) return false;
@@ -898,28 +897,47 @@ function detectIsAlreadyTarget(text, targetLang) {
     ).length;
     return jaCount / cleanChars.length >= 0.7;
   }
+
   if (prefix === 'zh') {
     const hasKana = cleanChars.some(c => /\p{Script=Hiragana}|\p{Script=Katakana}/u.test(c));
     if (hasKana) return false;
+
     const hanCount = cleanChars.filter(c => /\p{Script=Han}/u.test(c)).length;
+    const latinCount = cleanChars.filter(c => /[a-zA-Z]/.test(c)).length;
     const totalCount = cleanChars.length;
-    const ratio = hanCount / totalCount;
-    if (totalCount <= 4) {
-      return hanCount === totalCount;
-    }
+
+    if (hanCount === 0) return false;
+
     if (totalCount <= 15) {
-      return ratio >= 0.7;
+      // 短文本：汉字数量 >= 拉丁字母数量，认为主体是中文
+      return hanCount >= latinCount;
     }
-    return ratio >= 0.8;
+    // 长文本：汉字绝对数量足够且占优
+    if (hanCount >= 10 && hanCount >= latinCount * 0.6) return true;
+    return hanCount / totalCount >= 0.8;
   }
+
   if (LANGUAGE_PATTERNS[prefix] && !LATIN_BASED_LANGS.has(prefix)) {
     const scriptPattern = LANGUAGE_PATTERNS[prefix];
-    const scriptCount = cleanChars.filter(char => scriptPattern.test(char)).length;
-    return scriptCount / cleanChars.length >= 0.7;
+    const scriptCount = cleanChars.filter(c => scriptPattern.test(c)).length;
+    const latinCount = cleanChars.filter(c => /[a-zA-Z]/.test(c)).length;
+    const totalCount = cleanChars.length;
+
+    if (scriptCount === 0) return false;
+
+    if (totalCount <= 15) {
+      // 短文本：目标文字数量 >= 拉丁字母数量
+      return scriptCount >= latinCount;
+    }
+    // 长文本：目标文字数量足够且占优
+    if (scriptCount >= 8 && scriptCount >= latinCount * 0.6) return true;
+    return scriptCount / totalCount >= 0.7;
   }
+
   if (LATIN_BASED_LANGS.has(prefix)) {
     return detectLatinLanguage(cleanText, cleanChars, prefix);
   }
+
   return false;
 }
 const POS_MAP = {
@@ -1596,7 +1614,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
         isSame = true;
       } else if (targetBase === 'zh' && hasHan && !hasJa && !hasKo) {
         const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
-        isSame = !targetIsTraditional;
+        isSame = !targetIsTraditional;  //不翻译简繁
       } else if (targetBase === 'ja' && hasJa) {
         isSame = true;
       } else if (targetBase === 'ko' && hasKo) {

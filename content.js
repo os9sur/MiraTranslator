@@ -1414,6 +1414,30 @@ const TranslationBatcher = {
         this.finishProcessing();
         return;
       }
+      //简繁不转
+      const targetBase = lang.split('-')[0];
+      if (targetBase === 'zh') {
+        const targetIsTraditional = lang.includes('tw') || lang.includes('hk');
+        if (!targetIsTraditional) {
+          needTranslate = needTranslate.filter(item => {
+            const t = item.textForTranslation || item.text;
+            const hasHan = /\p{Script=Han}/u.test(t);
+            const hasJa = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(t);
+            const hasKo = /\p{Script=Hangul}/u.test(t);
+            if (hasHan && !hasJa && !hasKo) {
+              item.el.dataset.translated = 'true';
+              this.unlock(item.el);
+              if (item.container?.parentNode) item.container.remove();
+              return false;
+            }
+            return true;
+          });
+          if (needTranslate.length === 0) {
+            this.finishProcessing();
+            return;
+          }
+        }
+      }
       needTranslate.forEach((item, i) => {
         const token = `mira_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`;
         item.el.dataset.miraToken = token;
@@ -4462,7 +4486,7 @@ function initSelectionTranslate() {
         --p-text-query:       #2d3748;
         --p-text-muted:       #718096;
         --p-text-detail:      #4f5a6a;
-        --p-accent:           #465359;
+        --p-accent:           #151517;
         --arrowColor:         #2ecb3c;
         --p-border:           rgba(0,0,0,0.1);
         --p-shadow:           rgba(0,0,0,0.1);
@@ -4527,15 +4551,28 @@ function initSelectionTranslate() {
         0%,100% { box-shadow: 0 0 8px 2px rgba(245,158,11,0.3), 0 0 20px 4px rgba(251,191,36,0.25), 0 0 35px 6px rgba(253,230,138,0.2), 0 10px 30px var(--p-shadow); }
         50%     { box-shadow: 0 0 15px 4px rgba(245,158,11,0.6), 0 0 30px 8px rgba(251,191,36,0.4), 0 0 50px 12px rgba(253,230,138,0.25), 0 0 80px 20px rgba(254,243,199,0.15), 0 10px 30px var(--p-shadow); }
       }
-      /* 备用光晕（紫色/绿色，按需启用）*/
+      /* 备用光晕 */
       @keyframes eclipseHaloLight {
         0%,100% { box-shadow: 0 0 8px 2px rgba(168,85,247,0.25), 0 0 20px 4px rgba(192,132,252,0.2), 0 10px 30px var(--p-shadow); }
         50%     { box-shadow: 0 0 15px 4px rgba(168,85,247,0.5), 0 0 30px 8px rgba(192,132,252,0.4), 0 10px 30px var(--p-shadow); }
       }
       @keyframes eclipseHaloLightAlt {
-        0%,100% { box-shadow: 0 0 8px 2px rgba(74,222,128,0.3), 0 0 20px 4px rgba(134,239,172,0.2), 0 10px 30px var(--p-shadow); }
-        50%     { box-shadow: 0 0 15px 4px rgba(74,222,128,0.6), 0 0 30px 8px rgba(134,239,172,0.4), 0 10px 30px var(--p-shadow); }
-      }
+  0%, 100% { 
+    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.1), 
+                0 0 20px 4px rgba(0, 0, 0, 0.5), 
+                0 10px 30px var(--p-shadow); 
+  }
+  25%, 75% {
+    box-shadow: 0 0 11px 3px rgba(255, 255, 255, 0.14), 
+                0 0 25px 6px rgba(0, 0, 0, 0.65), 
+                0 10px 30px var(--p-shadow);
+  }
+  50% { 
+    box-shadow: 0 0 14px 4px rgba(255, 255, 255, 0.18), 
+                0 0 30px 7px rgba(0, 0, 0, 0.75), 
+                0 10px 30px var(--p-shadow); 
+  }
+}
 
 @keyframes panelFloatLight {
   0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
@@ -4570,7 +4607,7 @@ function initSelectionTranslate() {
         overflow-wrap:    break-word;
         word-break:       break-word;
         transition:       opacity .2s cubic-bezier(.4,0,.2,1), transform .2s cubic-bezier(.34,1.56,.64,1);
-        animation:        var(--p-panel-anim, eclipseHalo) 6s ease-in-out infinite;
+        animation:        var(--p-panel-anim, eclipseHalo) 6s cubic-bezier(0.33, 1, 0.68, 1) infinite;
       }
       :host([theme="light"]) .panel { animation-name: eclipseHaloLightWarm; animation-duration: 8s; }
       .panel:hover                  { animation-duration: 3s !important; }
@@ -4984,33 +5021,34 @@ function initSelectionTranslate() {
     }
 
     .lang-tag-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 10px;
-  cursor: pointer;
-  border-radius: 6px;
-  border: none !important;
-  outline: none;
-  background: transparent !important;
-  box-shadow: none; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: unset;
-  width: auto;
-  height: auto;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-}
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px 10px;
+      cursor: pointer;
+      border-radius: 6px;
+      border: none !important;
+      outline: none;
+      background: transparent !important;
+      box-shadow: none; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      min-width: unset;
+      width: auto;
+      height: auto;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    }
 
-.lang-tag-btn:hover { 
-  background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--p-accent) 50%, transparent);
-  transform: none;
-}
+    .lang-tag-btn:hover { 
+      background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
+      box-shadow: 0 0 16px color-mix(in srgb, var(--p-accent) 30%, transparent);
+      transform: none;
+      border-radius: 20px;
+    }
 
-.lang-tag-btn:active { 
-  background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
-  box-shadow: 0 0 4px color-mix(in srgb, var(--p-accent) 50%, transparent);
-}
+    .lang-tag-btn:active { 
+      background: color-mix(in srgb, var(--p-accent) 28%, transparent) !important;
+      box-shadow: 0 0 4px color-mix(in srgb, var(--p-accent) 50%, transparent);
+    }
 
       #p-engine-wrap:hover,
       .p-eng-item:hover,
@@ -5379,7 +5417,7 @@ function initSelectionTranslate() {
       ev.stopPropagation();
       dropdown.scrollTop += ev.deltaY;
     }, { passive: false });
- 
+
     const repositionDropdown = () => {
       const btnRect = anchorEl.getBoundingClientRect();
       const gap = 6;
@@ -7377,7 +7415,9 @@ function initSelectionTranslate() {
       active = active.shadowRoot.activeElement;
     }
     if (active && active.shadowRoot) {
-      const shadowSel = active.shadowRoot.getSelection();
+      const shadowSel = typeof active.shadowRoot.getSelection === 'function'
+        ? active.shadowRoot.getSelection()
+        : null;
       if (shadowSel && shadowSel.toString().trim()) {
         return shadowSel;
       }
