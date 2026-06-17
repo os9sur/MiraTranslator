@@ -1201,26 +1201,60 @@ select:hover {
   letter-spacing: 0.3px;
 }
 
+
+
 #inspectHeader {
   position: relative;
-  background-color: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(20px); 
-  padding: 7px 1px;
-  border-radius: 11px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: transparent;
+  padding: 8px 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  overflow: hidden;
+   
+  background-image: radial-gradient(
+    circle at center,
+    rgba(34, 197, 94, 0.28) 0%, 
+    rgba(34, 197, 94, 0.12) 20%, 
+    rgba(56, 189, 248, 0.04) 50%,  
+    rgba(0, 0, 0, 0) 75%  
+  );
+  background-size: 35% 100%;  
+  background-repeat: no-repeat;
+   
+  animation: scanPendulum 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  
+  transition: background-color 0.3s ease, background-size 0.3s ease;
+}
+ 
+#inspectHeader:hover {
+  animation-play-state: paused;
+  background-color: rgba(30, 41, 59, 0.45);
+   
+  background-size: 100% 100%;
+  background-image: linear-gradient(
+    90deg,
+    rgba(34, 197, 94, 0.15) 0%,
+    rgba(30, 41, 59, 0.6) 60%,
+    rgba(15, 23, 42, 0) 100%
+  );
 }
 
-#inspectHeader:hover {
-  background-color: rgba(30, 41, 59, 0.7); 
-   
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.7), 
-              0 0 40px rgba(56, 189, 248, 0.4),
-              inset 0 0 8px rgba(56, 189, 248, 0.3); 
-              
-  transform: translateY(-3px); 
+/* 钟摆扫描动画位置控制 */
+@keyframes scanPendulum {
+  0% {
+    background-position: -10% 0;  
+  }
+  50% {
+    background-position: 110% 0; 
+  }
+  100% {
+    background-position: -10% 0; 
+  }
 }
 
 #inspectArrow {

@@ -84,11 +84,21 @@ body {
     box-shadow: var(--glow-blue);
 }
 
+.credit-text {
+    flex-shrink: 0;
+    margin-top: auto;   
+    padding: 8px 0 4px;
+    font-size: 11px;
+    color: rgb(84 98 120);
+    text-align: center;
+}
 .app-container {
     display: flex;
     width: 1150px;
     max-width: 1150px;
-    height: 88%;
+    height: auto; 
+    max-height: 90vh; 
+    min-height: 500px;
     background: rgba(15, 23, 42, 0.9) !important;
     backdrop-filter: blur(25px) saturate(150%);
     -webkit-backdrop-filter: blur(25px) saturate(150%);
@@ -333,7 +343,7 @@ body {
     flex: 0 1 auto;
     min-height: 0;
     padding-right: 16px;
-    padding-bottom: 16px;
+    padding-bottom: 9px;
     overflow-y: auto;
     margin-bottom: 0;
 }

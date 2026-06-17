@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const thumb = document.getElementById('highlightThumb');
 
   const updateToggleUI = (enabled) => {
-    toggle.style.background = enabled ? '#48f838' : '#334155';
+    toggle.style.background = enabled ? '#48f838c9' : '#334155';
     thumb.style.left = enabled ? '18px' : '2px';
   };
 
