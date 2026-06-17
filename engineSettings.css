@@ -97,7 +97,7 @@ body {
     width: 1150px;
     max-width: 1150px;
     height: auto; 
-    max-height: 90vh; 
+    max-height: 90vh; /*自适应*/
     min-height: 500px;
     background: rgba(15, 23, 42, 0.9) !important;
     backdrop-filter: blur(25px) saturate(150%);
@@ -1586,6 +1586,7 @@ body {
         max-width: 100vw;
         height: auto;
         min-height: 100vh;
+        max-height: none;
         border-radius: 0;
         flex-direction: column;
     }
