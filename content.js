@@ -268,20 +268,24 @@ async function applyUserStyles(
         transEl.classList.contains("kt-paragraph-translation") &&
         transEl.dataset.forceInline !== "false";
       let defaultCss = `
-        display: ${useInline ? "inline" : "block"} !important;
-        width: auto !important;
-        clear: ${useInline ? "none" : clearStyle} !important;
-        margin: ${useInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
-        padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
-        text-align: ${isRTL ? "right" : sourceAlign} !important;
-        color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
-        font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;
-        text-decoration: none !important;
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        animation: fadeIn 0.6s ease-out !important;
-        ${finalFontSize ? `font-size: ${finalFontSize} !important;` : ""}
+    display: ${useInline ? "inline" : "block"} !important;
+    width: auto !important;
+    clear: ${useInline ? "none" : clearStyle} !important;
+    margin: ${useInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
+    padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
+    text-align: ${isRTL ? "right" : sourceAlign} !important;
+    color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
+    font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;
+    text-decoration: ${transEl.dataset.translated === "true" ? "underline" : "none"} !important;
+    text-decoration-style: dashed !important;
+    text-decoration-color: #38bdf8 !important;
+    text-decoration-thickness: 0.5px !important;
+    text-underline-offset: 5px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    animation: fadeIn 0.6s ease-out !important;
+    ${finalFontSize ? `font-size: ${finalFontSize} !important;` : ""}
 `;
       transEl.style.cssText = defaultCss;
       const oldWrapper = transEl.querySelector(".mira-default-wrapper");
@@ -1995,7 +1999,11 @@ function startGenericTranslation() {
     font.style.setProperty('color', 'gray', 'important');
     font.style.setProperty('font-style', 'italic', 'important');
     font.innerText = t('loading');
-    el.appendChild(font);
+    if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
+      el.insertAdjacentElement('afterend', font);
+    } else {
+      el.appendChild(font);
+    }
 
     coveredNodes.add(el);
     el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
@@ -4556,22 +4564,14 @@ function initSelectionTranslate() {
         0%,100% { box-shadow: 0 0 8px 2px rgba(168,85,247,0.25), 0 0 20px 4px rgba(192,132,252,0.2), 0 10px 30px var(--p-shadow); }
         50%     { box-shadow: 0 0 15px 4px rgba(168,85,247,0.5), 0 0 30px 8px rgba(192,132,252,0.4), 0 10px 30px var(--p-shadow); }
       }
+        /*light模式阴影不呼吸*/
       @keyframes eclipseHaloLightAlt {
-  0%, 100% { 
-    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.1), 
-                0 0 20px 4px rgba(0, 0, 0, 0.5), 
-                0 10px 30px var(--p-shadow); 
-  }
-  25%, 75% {
-    box-shadow: 0 0 11px 3px rgba(255, 255, 255, 0.14), 
-                0 0 25px 6px rgba(0, 0, 0, 0.65), 
-                0 10px 30px var(--p-shadow);
-  }
-  50% { 
-    box-shadow: 0 0 14px 4px rgba(255, 255, 255, 0.18), 
-                0 0 30px 7px rgba(0, 0, 0, 0.75), 
-                0 10px 30px var(--p-shadow); 
-  }
+        0%, 25%, 50%, 75%, 100% { 
+          box-shadow: 0 0 14px 4px rgba(255, 255, 255, 0.18), 
+                      0 0 30px 7px rgba(0, 0, 0, 0.75), 
+                      0 10px 30px var(--p-shadow);
+        }
+      }
 }
 
 @keyframes panelFloatLight {

@@ -257,7 +257,7 @@ const SiteRules = {
             `h1:not(button *)${ignoreMenu}`,
             `h2:not(button *)${ignoreMenu}`,
             `h3:not(button *)${ignoreMenu}`,
-            `p:not(button *)${ignoreMenu}`,
+            `p:not(button *)`,
             `span:not(button *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *):not([class*='code'] *):not([class*='highlight'] *):not([class*='token'] *):not(td *):not(th *)${ignoreMenu}`,
             `article li${ignoreMenu}`,
             `section li${ignoreMenu}`,
