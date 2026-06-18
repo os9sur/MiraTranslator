@@ -1756,7 +1756,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   const searchPanel = document.getElementById('searchPanel');
   const mainContainer = document.getElementById('mainContainer');
-  const input = document.getElementById('searchTextInput');
   const resultArea = document.getElementById('searchResultArea');
   const resSource = document.getElementById('resSourceText')?.innerText.trim();
   const resPhonetic = document.getElementById('resPhonetic');
@@ -1765,25 +1764,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resVoiceHeader = document.getElementById('resVoiceHeader');
   const resSaveBtn = document.getElementById('resSaveBtn');
   const resRefreshBtn = document.getElementById('resRefreshBtn');
-  input.addEventListener('input', function () {
-    this.style.height = 'auto';
-    input.style.overflow = input.scrollHeight > input.clientHeight ? 'auto' : 'hidden';
-    const newHeight = Math.min(this.scrollHeight, 80);
-    this.style.height = newHeight + 'px';
-    this.style.overflowY = this.scrollHeight > 80 ? 'auto' : 'hidden';
-    if (!this.value.trim()) {
-      resultArea.style.display = 'none';
-      const actionArea = document.getElementById('actionArea');
-      if (actionArea) actionArea.style.display = 'none';
-      this.style.height = '35px';
-    }
-  });
-  input.onkeydown = function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+const input = document.getElementById('searchTextInput');
+
+input.addEventListener('input', function () {
+  this.style.height = 'auto';
+  
+  let newHeight = this.scrollHeight;
+  if (newHeight > 80) {
+    newHeight = 80;
+    this.style.overflowY = 'auto';
+  } else {
+    this.style.overflowY = 'hidden';
+  }
+  
+  this.style.height = newHeight + 'px';
+  
+  if (!this.value.trim()) {
+    const resultArea = document.getElementById('resultArea');
+    if (resultArea) resultArea.style.display = 'none';
+    const actionArea = document.getElementById('actionArea');
+    if (actionArea) actionArea.style.display = 'none';
+    
+    this.style.height = '35px';
+    this.style.overflowY = 'hidden';
+  }
+});
+
+input.onkeydown = function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (typeof triggerSearch === 'function') {
       triggerSearch(this.value.trim());
     }
-  };
+  }
+};
 
   document.getElementById('searchSubmitBtn').onclick = () => {
     triggerSearch(input.value.trim());

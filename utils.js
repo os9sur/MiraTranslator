@@ -1153,7 +1153,6 @@ function getPhoneticLabel(langCode) {
 }
 
 
-// speak 全局变量
 let currentAudio = null;
 let currentTimeoutId = null;
 let currentSpeakId = 0;
@@ -1168,10 +1167,8 @@ function speakText(text, speakBtn, forcedLang) {
     return;
   }
 
-  // 每次调用生成新的 speakId，过期任务自动失效
   const speakId = ++currentSpeakId;
 
-  // 清理上一次的音频和定时器
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.src = "";
@@ -1181,16 +1178,16 @@ function speakText(text, speakBtn, forcedLang) {
     clearTimeout(currentTimeoutId);
     currentTimeoutId = null;
   }
-  window.speechSynthesis?.cancel();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
 
-  // 清理上一个按钮的 UI 状态
   if (window._currentSpeakBtn && window._currentSpeakBtn !== speakBtn) {
     window._currentSpeakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
     window._currentSpeakBtn.querySelector?.('svg')?.classList.remove('icon-active');
   }
   window._currentSpeakBtn = speakBtn;
 
-  // --- 1. 语言检测与文本清理 ---
   const base = (forcedLang || '').split('-')[0].toLowerCase();
 
   const cleanCommon = (str) => str
@@ -1212,7 +1209,6 @@ function speakText(text, speakBtn, forcedLang) {
   text = cleanCommon(text);
   if (!text) return;
 
-  // --- 2. 确定目标语言代码 ---
   const langMap = {
     'ja': 'ja-JP', 'zh': 'zh-CN', 'en': 'en-US', 'ko': 'ko-KR',
     'fr': 'fr-FR', 'de': 'de-DE', 'es': 'es-ES', 'ru': 'ru-RU',
@@ -1237,16 +1233,21 @@ function speakText(text, speakBtn, forcedLang) {
     else targetLang = 'en-US';
   }
   if (forcedLang === 'null') forcedLang = null;
-  // --- 3. UI 初始状态 ---
+
   if (speakBtn) {
     speakBtn.classList.remove('is-speaking', 'speaking-wave');
     speakBtn.classList.add('is-loading', 'tts-loading');
   }
-  window.speechSynthesis.cancel();
-  const forceReset = new SpeechSynthesisUtterance("");
-  window.speechSynthesis.speak(forceReset);
+  
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    if (window.speechSynthesis.resume) window.speechSynthesis.resume();
+    const forceReset = new SpeechSynthesisUtterance(" ");
+    forceReset.volume = 0;
+    forceReset.rate = 10;
+    window.speechSynthesis.speak(forceReset);
+  }
 
-  // --- 4. 兜底函数 ---
   let isFallbackTriggered = false;
 
   const triggerFallback = (markUnavailable = false) => {
@@ -1268,92 +1269,56 @@ function speakText(text, speakBtn, forcedLang) {
       currentAudio = null;
     }
 
-    if (!window.speechSynthesis) {
+    const stopUI = () => {
       if (speakBtn) {
         speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
         speakBtn.querySelector?.('svg')?.classList.remove('icon-active');
       }
+      window._currentSpeakBtn = null;
+    };
+
+    if (!window.speechSynthesis) {
+      stopUI();
       return;
     }
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.volume = 1.0;
-    utterance.lang = targetLang;
+    window.speechSynthesis.cancel();
 
-    if (targetLang.startsWith('ja')) utterance.rate = 0.6;
-    else if (targetLang.startsWith('zh')) utterance.rate = 0.85;
-    else utterance.rate = 0.7;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.volume = 1.0;
+    utt.lang = targetLang;
+    
+    if (targetLang.startsWith('ja')) utt.rate = 0.6;
+    else if (targetLang.startsWith('zh')) utt.rate = 0.85;
+    else utt.rate = 0.7;
 
-    if (speakBtn) {
-      utterance.onstart = () => {
-        if (speakId !== currentSpeakId) return;
+    utt.onstart = () => {
+      if (speakId !== currentSpeakId) return;
+      if (speakBtn) {
         speakBtn.classList.remove('is-loading', 'tts-loading');
         speakBtn.classList.add('is-speaking', 'speaking-wave');
         speakBtn.querySelector('svg')?.classList.add('icon-active');
-      };
-      const stopUI = () => {
-        speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
-        speakBtn.querySelector('svg')?.classList.remove('icon-active');
-        window._currentSpeakBtn = null;
-      };
-      utterance.onend = stopUI;
-      utterance.onerror = stopUI;
-    }
+      }
+    };
+    
+    utt.onend = stopUI;
+    utt.onerror = (e) => {
+      logger.log('[TTS] 系统TTS onerror:', e.error);
+      stopUI();
+    };
 
-    setTimeout(() => {
-      if (speakId !== currentSpeakId) return;
-
-      window.speechSynthesis.cancel();
-
-      const utt = new SpeechSynthesisUtterance(text);
-      utt.volume = 1.0;
-      utt.lang = targetLang;
-      if (targetLang.startsWith('ja')) utt.rate = 0.6;
-      else if (targetLang.startsWith('zh')) utt.rate = 0.85;
-      else utt.rate = 0.7;
-
-      utt.onstart = () => {
-        if (speakId !== currentSpeakId) return;
-        if (speakBtn) {
-          speakBtn.classList.remove('is-loading', 'tts-loading');
-          speakBtn.classList.add('is-speaking', 'speaking-wave');
-          speakBtn.querySelector('svg')?.classList.add('icon-active');
-        }
-      };
-      const stopUI = () => {
-        if (speakBtn) {
-          speakBtn.classList.remove('is-speaking', 'is-loading', 'speaking-wave', 'tts-loading');
-          speakBtn.querySelector('svg')?.classList.remove('icon-active');
-        }
-        window._currentSpeakBtn = null;
-      };
-      utt.onend = stopUI;
-      utt.onerror = (e) => {
-        logger.log('[TTS] 系统TTS onerror:', e.error);
-        stopUI();
-      };
-
-      // 先 speak 空 utterance 热身，再 speak 真正内容
-      const forceReset = new SpeechSynthesisUtterance("");
-      window.speechSynthesis.speak(forceReset);
-      setTimeout(() => {
-        if (speakId !== currentSpeakId) return;
-        window.speechSynthesis.speak(utt);
-      }, 50);
-    }, 50);
+    window.speechSynthesis.speak(utt);
   };
 
-  // --- 5. Google TTS 已知不可用，直接降级 ---
   if (googleTTSAvailable === false) {
     logger.log('[TTS] Google TTS 已标记不可用，直接使用 speechSynthesis');
     triggerFallback(false);
     return;
   }
-  // --- 6. 尝试 Google TTS ---
+
   const safeText = encodeURIComponent(text.slice(0, 200));
   const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${targetLang}&q=${safeText}`;
 
-  // 超时兜底
   currentTimeoutId = setTimeout(() => {
     if (speakId !== currentSpeakId) return;
     logger.log('[TTS] Google TTS 超时，降级到 speechSynthesis');
@@ -1393,7 +1358,6 @@ function speakText(text, speakBtn, forcedLang) {
           });
       };
 
-      //  先 resume AudioContext 解除自动播放限制
       try {
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         audioCtx.resume().then(() => {
@@ -1423,18 +1387,15 @@ function speakText(text, speakBtn, forcedLang) {
     };
   };
 
-  // 判断是否在 content script / popup 环境，需要通过 background 中转
   const isExtensionPage = typeof location !== 'undefined' && (
-    location.href.startsWith('chrome-extension://') ||  // Chrome
-    location.href.startsWith('moz-extension://') ||     // Firefox
-    location.href.startsWith('extension://')            // Edge
+    location.href.startsWith('chrome-extension://') || 
+    location.href.startsWith('moz-extension://') ||  
+    location.href.startsWith('extension://')         
   );
 
   if (isExtensionPage) {
-    // 生词本等扩展页面：直接使用 URL
     setupAudio(googleUrl);
   } else {
-    // content script / popup：通过 background 中转获取 base64 
     const fetchTimeout = setTimeout(() => {
       if (speakId !== currentSpeakId) return;
       logger.log('[TTS] fetch 请求超时，直接 fallback');
