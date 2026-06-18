@@ -731,32 +731,31 @@ select:hover {
 }
 
 .mira-font-family {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "PingFang SC", "Microsoft YaHei",
+    "Hiragino Sans", "Meiryo",
+    sans-serif !important;
 }
 
 .mira-input-terminal {
-  display: block !important;
-  width: 100% !important;
+  display: block;
+  width: 100%;
   box-sizing: border-box;
   background: #020617;
   border: 1px solid #334155;
   color: #f1f5f9;
   padding: 8px;
   border-radius: 8px;
-  resize: vertical;
   outline: none;
-  text-align: start;
-  height: 36px;
-  max-height: 80px;
-  overflow-y: auto;
   line-height: 1.4;
-  resize: vertical;
-  max-height: 400px;
-  white-space: nowrap;
-  overflow-x: auto;
-  overflow-y: auto;
-  word-break: normal;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: pre-wrap;
+  word-break: break-word;
+  height: 35px;
+  max-height: 80px;
+  resize: none;
+  overflow-y: hidden;
+  transition: border-color 0.2s;
 }
 
 .mira-input-terminal:focus {
@@ -1215,45 +1214,43 @@ select:hover {
   border: none;
   outline: none;
   overflow: hidden;
-   
-  background-image: radial-gradient(
-    circle at center,
-    rgba(34, 197, 94, 0.28) 0%, 
-    rgba(34, 197, 94, 0.12) 20%, 
-    rgba(56, 189, 248, 0.04) 50%,  
-    rgba(0, 0, 0, 0) 75%  
-  );
-  background-size: 35% 100%;  
+
+  background-image: radial-gradient(circle at center,
+      rgba(34, 197, 94, 0.28) 0%,
+      rgba(34, 197, 94, 0.12) 20%,
+      rgba(56, 189, 248, 0.04) 50%,
+      rgba(0, 0, 0, 0) 75%);
+  background-size: 35% 100%;
   background-repeat: no-repeat;
-   
+
   animation: scanPendulum 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-  
+
   transition: background-color 0.3s ease, background-size 0.3s ease;
 }
- 
+
 #inspectHeader:hover {
   animation-play-state: paused;
   background-color: rgba(30, 41, 59, 0.45);
-   
+
   background-size: 100% 100%;
-  background-image: linear-gradient(
-    90deg,
-    rgba(34, 197, 94, 0.15) 0%,
-    rgba(30, 41, 59, 0.6) 60%,
-    rgba(15, 23, 42, 0) 100%
-  );
+  background-image: linear-gradient(90deg,
+      rgba(34, 197, 94, 0.15) 0%,
+      rgba(30, 41, 59, 0.6) 60%,
+      rgba(15, 23, 42, 0) 100%);
 }
 
 /* 钟摆扫描动画位置控制 */
 @keyframes scanPendulum {
   0% {
-    background-position: -10% 0;  
+    background-position: -10% 0;
   }
+
   50% {
-    background-position: 110% 0; 
+    background-position: 110% 0;
   }
+
   100% {
-    background-position: -10% 0; 
+    background-position: -10% 0;
   }
 }
 

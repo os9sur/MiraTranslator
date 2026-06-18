@@ -267,7 +267,7 @@ async function applyUserStyles(
         (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
         transEl.classList.contains("kt-paragraph-translation") &&
         transEl.dataset.forceInline !== "false";
-      let defaultCss = `
+     let defaultCss = `
     display: ${useInline ? "inline" : "block"} !important;
     width: auto !important;
     clear: ${useInline ? "none" : clearStyle} !important;
@@ -275,8 +275,8 @@ async function applyUserStyles(
     padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
     text-align: ${isRTL ? "right" : sourceAlign} !important;
     color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
-    font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;
-    text-decoration: ${transEl.dataset.translated === "true" ? "underline" : "none"} !important;
+    -webkit-text-fill-color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important; 
+    font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;text-decoration: ${transEl.dataset.translated === "true" ? "underline" : "none"} !important;
     text-decoration-style: dashed !important;
     text-decoration-color: #38bdf8 !important;
     text-decoration-thickness: 0.5px !important;
@@ -342,6 +342,7 @@ async function applyUserStyles(
         writing-mode: horizontal-tb !important;
         overflow: ${finalOverflow} !important;
         color: ${color} !important;
+        -webkit-text-fill-color: ${color} !important;  
         background: transparent !important;
         font-style: normal !important;
         font-weight: normal !important;
@@ -440,12 +441,9 @@ async function applyUserStyles(
       transEl.onmouseleave = () =>
         transEl.style.setProperty("filter", "blur(5px)", "important");
     }
-    if (transEl.dataset.translated !== "true") {
-      css = css.replace(/color:[^;]+!important;/, "color: gray !important;");
-      css = css.replace(
-        /font-style:[^;]+!important;/,
-        "font-style: italic !important;",
-      );
+    if (transEl.dataset.translated !== "true") { 
+      css = css.replace(/color:[^;]+!important;/, "color: gray !important; -webkit-text-fill-color: gray !important;");
+      css = css.replace(/font-style:[^;]+!important;/, "font-style: italic !important;");
     }
     transEl.style.cssText = css;
     const parentLI =
@@ -540,6 +538,7 @@ async function applyUserStyles(
       }
     }
     transEl.style.setProperty("writing-mode", "horizontal-tb", "important");
+
     const isSteam = location.hostname.includes("steamcommunity.com");
     if (isSteam && transEl.parentElement?.classList.contains("forum_topic_name")) {
       transEl.style.setProperty("display", "inline", "important");
@@ -4042,6 +4041,7 @@ async function scanContent(forcedSelectors = null) {
         el.id === "content-text";
       const isSpecialSite = isAmazonReview || isYTComment || isX || isAmazon;
       let targetEl = el;
+      
       if (isAmazonReview) {
         const deepSpan =
           el.querySelector(".review-text-content span") ||
@@ -6641,7 +6641,7 @@ function initSelectionTranslate() {
     let effectiveHintLang = null;
 
     if (hintSourceLang && hintSourceLang !== 'auto') {
-      effectiveHintLang = hintSourceLang; // 外部传入的直接用，不再覆盖
+      effectiveHintLang = hintSourceLang; 
     } else if (hasKana) {
       effectiveHintLang = 'ja';
     } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
@@ -7806,7 +7806,7 @@ function initSelectionTranslate() {
           background: linear-gradient(120deg, rgba(56,189,248,0.15) 0%, rgba(56,189,248,0.25) 100%);
           color: #38bdf8;
           border-bottom: 1px solid rgba(56,189,248,0.5);
-          border-radius: 5px;
+          border-radius: 2px;
           cursor: pointer;
           padding: 0 1px;
           transition: background 0.2s;
