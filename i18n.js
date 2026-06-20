@@ -524,82 +524,98 @@ self.i18nContent = {
   "zh-CN": {
     uncollect: "取消收藏",
     pronunciation: "发音",
-    retranslate: "重新翻译"
+    retranslate: "重新翻译",
+    ttsFailed: "语音加载超时，请确保您的网络环境可以访问海外服务"
   },
   "zh-TW": {
     uncollect: "取消收藏",
     pronunciation: "發音",
-    retranslate: "重新翻譯"
+    retranslate: "重新翻譯",
+    ttsFailed: "發音失敗，請檢查網路或裝置語音設定"
   },
   "en": {
     uncollect: "Remove",
     pronunciation: "Pronunciation",
-    retranslate: "Retranslate"
+    retranslate: "Retranslate",
+    ttsFailed: "Voice playback failed. Check your network or device voice settings"
   },
   "ja": {
     uncollect: "削除",
     pronunciation: "発音",
-    retranslate: "再翻訳"
+    retranslate: "再翻訳",
+    ttsFailed: "音声の再生に失敗しました。ネットワークまたは端末の音声設定をご確認ください"
   },
   "ko": {
     uncollect: "저장 취소",
     pronunciation: "발음",
-    retranslate: "다시 번역"
+    retranslate: "다시 번역",
+    ttsFailed: "음성 재생에 실패했습니다. 네트워크 또는 기기 음성 설정을 확인해주세요"
   },
   "es": {
     uncollect: "Eliminar guardado",
     pronunciation: "Pronunciación",
-    retranslate: "Retraducir"
+    retranslate: "Retraducir",
+    ttsFailed: "Error al reproducir la voz. Revisa tu red o la configuración de voz del dispositivo"
   },
   "fr": {
     uncollect: "Supprimer l'enregistrement",
     pronunciation: "Prononciation",
-    retranslate: "Retraduire"
+    retranslate: "Retraduire",
+    ttsFailed: "Échec de la lecture audio. Vérifiez votre réseau ou les paramètres vocaux de l'appareil"
   },
   "de": {
     uncollect: "Speicherung aufheben",
     pronunciation: "Aussprache",
-    retranslate: "Neu übersetzen"
+    retranslate: "Neu übersetzen",
+    ttsFailed: "Sprachausgabe fehlgeschlagen. Bitte Netzwerk oder Spracheinstellungen des Geräts prüfen"
   },
   "ru": {
     uncollect: "Удалить из сохраненного",
     pronunciation: "Произношение",
-    retranslate: "Перевести снова"
+    retranslate: "Перевести снова",
+    ttsFailed: "Не удалось воспроизвести озвучку. Проверьте сеть или настройки голоса устройства"
   },
   "pt": {
     uncollect: "Remover salvo",
     pronunciation: "Pronúncia",
-    retranslate: "Retraduzir"
+    retranslate: "Retraduzir",
+    ttsFailed: "Falha na reprodução de voz. Verifique sua rede ou as configurações de voz do dispositivo"
   },
   "it": {
     uncollect: "Rimuovi salvataggio",
     pronunciation: "Pronuncia",
-    retranslate: "Ritraduci"
+    retranslate: "Ritraduci",
+    ttsFailed: "Riproduzione vocale non riuscita. Controlla la rete o le impostazioni vocali del dispositivo"
   },
   "vi": {
     uncollect: "Bỏ lưu",
     pronunciation: "Phát âm",
-    retranslate: "Dịch lại"
+    retranslate: "Dịch lại",
+    ttsFailed: "Phát âm thất bại. Vui lòng kiểm tra mạng hoặc cài đặt giọng nói của thiết bị"
   },
   "th": {
     uncollect: "ยกเลิกการบันทึก",
     pronunciation: "การออกเสียง",
-    retranslate: "แปลใหม่"
+    retranslate: "แปลใหม่",
+    ttsFailed: "เล่นเสียงไม่สำเร็จ โปรดตรวจสอบเครือข่ายหรือการตั้งค่าเสียงของอุปกรณ์"
   },
   "ar": {
     uncollect: "إلغاء الحفظ",
     pronunciation: "النطق",
-    retranslate: "إعادة الترجمة"
+    retranslate: "إعادة الترجمة",
+    ttsFailed: "فشل تشغيل الصوت. يرجى التحقق من الشبكة أو إعدادات الصوت في الجهاز"
   },
   "fa": {
     uncollect: "لغو ذخیره",
     pronunciation: "تلفظ",
-    retranslate: "ترجمه مجدد"
+    retranslate: "ترجمه مجدد",
+    ttsFailed: "پخش صدا ناموفق بود. لطفاً شبکه یا تنظیمات صدای دستگاه را بررسی کنید"
   },
   "tr": {
     uncollect: "Kaydı kaldır",
     pronunciation: "Telaffuz",
-    retranslate: "Yeniden Çevir"
+    retranslate: "Yeniden Çevir",
+    ttsFailed: "Ses çalma başarısız oldu. Lütfen ağ veya cihaz ses ayarlarınızı kontrol edin"
   }
 };
 self.i18nEngineData = {
