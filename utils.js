@@ -641,8 +641,13 @@ function standardizeResult(raw, originalText) {
 }
 let toastTimer = null;
 function showToast(message, type = 'info') {
-  const toast = document.getElementById('toast');
+  let toast = null;
+  if (window.shadowHost?.shadowRoot) {
+    toast = window.shadowHost.shadowRoot.getElementById('toast');
+  }
+  if (!toast) toast = document.getElementById('toast');
   if (!toast) return;
+
   clearTimeout(toastTimer);
   if (type === 'error') toast.style.borderColor = '#f87171';
   else if (type === 'success') toast.style.borderColor = '#4ade80';
@@ -1238,7 +1243,7 @@ function speakText(text, speakBtn, forcedLang) {
     speakBtn.classList.remove('is-speaking', 'speaking-wave');
     speakBtn.classList.add('is-loading', 'tts-loading');
   }
-  
+
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel();
     if (window.speechSynthesis.resume) window.speechSynthesis.resume();
@@ -1282,32 +1287,54 @@ function speakText(text, speakBtn, forcedLang) {
       return;
     }
 
-    window.speechSynthesis.cancel();
+window.speechSynthesis.cancel();
 
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.volume = 1.0;
-    utt.lang = targetLang;
-    
-    if (targetLang.startsWith('ja')) utt.rate = 0.6;
-    else if (targetLang.startsWith('zh')) utt.rate = 0.85;
-    else utt.rate = 0.7;
+const utt = new SpeechSynthesisUtterance(text);
+utt.volume = 1.0;
+utt.lang = targetLang;
 
-    utt.onstart = () => {
-      if (speakId !== currentSpeakId) return;
-      if (speakBtn) {
-        speakBtn.classList.remove('is-loading', 'tts-loading');
-        speakBtn.classList.add('is-speaking', 'speaking-wave');
-        speakBtn.querySelector('svg')?.classList.add('icon-active');
-      }
-    };
-    
-    utt.onend = stopUI;
-    utt.onerror = (e) => {
-      logger.log('[TTS] 系统TTS onerror:', e.error);
-      stopUI();
-    };
+if (targetLang.startsWith('ja')) utt.rate = 0.6;
+else if (targetLang.startsWith('zh')) utt.rate = 0.85;
+else utt.rate = 0.7;
 
-    window.speechSynthesis.speak(utt);
+//  检测系统 TTS 是否真的启动，5秒内没有 onstart 就当作失败
+let sysStarted = false;
+const sysStartCheckTimer = setTimeout(() => {
+  if (speakId !== currentSpeakId) return;
+  if (!sysStarted) {
+    logger.log('[TTS] 系统 TTS 未能启动（可能设备无语音引擎或语音包未下载）');
+    stopUI();
+    if (typeof showToast === 'function') {
+      showToast(t('ttsFailed') || 'Voice playback unavailable on this device');
+    }
+  }
+}, 5000);
+
+utt.onstart = () => {
+  if (speakId !== currentSpeakId) return;
+  sysStarted = true;
+  clearTimeout(sysStartCheckTimer);
+  if (speakBtn) {
+    speakBtn.classList.remove('is-loading', 'tts-loading');
+    speakBtn.classList.add('is-speaking', 'speaking-wave');
+    speakBtn.querySelector('svg')?.classList.add('icon-active');
+  }
+};
+
+utt.onend = () => {
+  clearTimeout(sysStartCheckTimer);
+  stopUI();
+};
+utt.onerror = (e) => {
+  logger.log('[TTS] 系统TTS onerror:', e.error);
+  clearTimeout(sysStartCheckTimer);
+  stopUI();
+  if (typeof showToast === 'function') {
+    showToast(t('ttsFailed') || 'Voice playback failed.');
+  }
+};
+
+window.speechSynthesis.speak(utt);
   };
 
   if (googleTTSAvailable === false) {
@@ -1388,9 +1415,9 @@ function speakText(text, speakBtn, forcedLang) {
   };
 
   const isExtensionPage = typeof location !== 'undefined' && (
-    location.href.startsWith('chrome-extension://') || 
-    location.href.startsWith('moz-extension://') ||  
-    location.href.startsWith('extension://')         
+    location.href.startsWith('chrome-extension://') ||
+    location.href.startsWith('moz-extension://') ||
+    location.href.startsWith('extension://')
   );
 
   if (isExtensionPage) {
@@ -1679,11 +1706,11 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     }
     //透传 
     const data = response.currentTranslationResponse || response.result || response;
-// // 临时加
-// if (response.__debugError) {
-//     console.error('[DEBUG]', response.__debugError);
-//     // 或者直接 return { basic: response.__debugError, isError: true };
-// }
+    // // 临时加
+    // if (response.__debugError) {
+    //     console.error('[DEBUG]', response.__debugError);
+    //     // 或者直接 return { basic: response.__debugError, isError: true };
+    // }
     let result = {
       basic: "",
       phonetic: "",
@@ -1929,8 +1956,21 @@ function detectSourceLang(text) {
 
   // 此时 text 含有汉字或特殊脚本
   if (/\p{Script=Han}/u.test(text)) {
-    //  如果 text 中含有拉丁字母，且不是日语假名，
-    // 且要么在上下文检测中看到了 'ja'，要么返回 null 让 API 去 auto
+    const hanChars = (text.match(/\p{Script=Han}/gu) || []).length;
+    const latinChars = (text.match(/[a-zA-Z]/g) || []).length;
+    const latinWords = (text.match(/[a-zA-Z]+/g) || []).length;
+
+    if (latinChars > 0) {
+      // 短文本：用绝对计数判断，比例在小样本下不可靠
+      if (hanChars + latinChars < 20) {
+        if (latinWords >= 2 && latinChars >= hanChars) return 'en';
+      } else {
+        // 长文本：用比例判断，避免个别专有名词放大权重
+        const ratio = hanChars / (hanChars + latinChars);
+        if (ratio < 0.3) return 'en';
+      }
+    }
+
     return 'zh';
   }
 
@@ -1945,7 +1985,7 @@ const LANGS = [
   // --- 东亚 East Asia ---
   { type: 'sep', label: '—— East Asia ——' },
   { value: 'zh-CN', label: 'Chinese Simplified (简体中文)', en: 'Chinese Simplified' },
-  { value: 'zh-HK', label: 'Hong Kong (繁體中文)', en: 'Traditional Chinese (Hong Kong)'},
+  { value: 'zh-HK', label: 'Hong Kong (繁體中文)', en: 'Traditional Chinese (Hong Kong)' },
   { value: 'ja', label: 'Japanese (日本語)', en: 'Japanese' },
   { value: 'ko', label: 'Korean (한국어)', en: 'Korean' },
   { value: 'mn', label: 'Mongolian (Монгол хэл)', en: 'Mongolian' },

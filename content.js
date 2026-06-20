@@ -267,26 +267,26 @@ async function applyUserStyles(
         (transEl.tagName === "SPAN" || transEl.tagName === "FONT") &&
         transEl.classList.contains("kt-paragraph-translation") &&
         transEl.dataset.forceInline !== "false";
-     let defaultCss = `
-    display: ${useInline ? "inline" : "block"} !important;
-    width: auto !important;
-    clear: ${useInline ? "none" : clearStyle} !important;
-    margin: ${useInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
-    padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
-    text-align: ${isRTL ? "right" : sourceAlign} !important;
-    color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
-    -webkit-text-fill-color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important; 
-    font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;text-decoration: ${transEl.dataset.translated === "true" ? "underline" : "none"} !important;
-    text-decoration-style: dashed !important;
-    text-decoration-color: #38bdf8 !important;
-    text-decoration-thickness: 0.5px !important;
-    text-underline-offset: 5px !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    animation: fadeIn 0.6s ease-out !important;
-    ${finalFontSize ? `font-size: ${finalFontSize} !important;` : ""}
-`;
+      let defaultCss = `
+        display: ${useInline ? "inline" : "block"} !important;
+        width: auto !important;
+        clear: ${useInline ? "none" : clearStyle} !important;
+        margin: ${useInline ? "0 0 0 4px" : `${verticalMargin} ${sourceMarginLeft} ${bottomMargin} ${sourceMarginLeft}`} !important;
+        padding-left: ${useInline ? "0" : sourcePaddingLeft} !important;
+        text-align: ${isRTL ? "right" : sourceAlign} !important;
+        color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important;
+        -webkit-text-fill-color: ${transEl.dataset.translated === "true" ? "#60a5fa" : "gray"} !important; 
+        font-style: ${transEl.dataset.translated === "true" ? "normal" : "italic"} !important;text-decoration: ${transEl.dataset.translated === "true" ? "underline" : "none"} !important;
+        text-decoration-style: dashed !important;
+        text-decoration-color: #38bdf8 !important;
+        text-decoration-thickness: 0.5px !important;
+        text-underline-offset: 5px !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        animation: fadeIn 0.6s ease-out !important;
+        ${finalFontSize ? `font-size: ${finalFontSize} !important;` : ""}
+    `;
       transEl.style.cssText = defaultCss;
       const oldWrapper = transEl.querySelector(".mira-default-wrapper");
       if (oldWrapper) {
@@ -441,8 +441,9 @@ async function applyUserStyles(
       transEl.onmouseleave = () =>
         transEl.style.setProperty("filter", "blur(5px)", "important");
     }
-    if (transEl.dataset.translated !== "true") { 
-      css = css.replace(/color:[^;]+!important;/, "color: gray !important; -webkit-text-fill-color: gray !important;");
+    if (transEl.dataset.translated !== "true") {
+      css = css.replace(/color:\s*[^;]+!important;/g, "color: gray !important;")
+        .replace(/-webkit-text-fill-color:\s*[^;]+!important;/g, "-webkit-text-fill-color: gray !important;");
       css = css.replace(/font-style:[^;]+!important;/, "font-style: italic !important;");
     }
     transEl.style.cssText = css;
@@ -1427,11 +1428,20 @@ const TranslationBatcher = {
             const hasHan = /\p{Script=Han}/u.test(t);
             const hasJa = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(t);
             const hasKo = /\p{Script=Hangul}/u.test(t);
+
             if (hasHan && !hasJa && !hasKo) {
-              item.el.dataset.translated = 'true';
-              this.unlock(item.el);
-              if (item.container?.parentNode) item.container.remove();
-              return false;
+              // 只有汉字占主导（去除空格/标点后）才视为简繁转换场景
+              const cleanChars = Array.from(t).filter(c => /\p{L}/u.test(c));
+              const hanCount = cleanChars.filter(c => /\p{Script=Han}/u.test(c)).length;
+              const totalCount = cleanChars.length;
+              const isMainlyHan = totalCount > 0 && hanCount / totalCount >= 0.8;
+
+              if (isMainlyHan) {
+                item.el.dataset.translated = 'true';
+                this.unlock(item.el);
+                if (item.container?.parentNode) item.container.remove();
+                return false;
+              }
             }
             return true;
           });
@@ -2546,6 +2556,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
   );
   const textWithPlaceholders = textHolder.text;
   const originalText = textWithPlaceholders.replace(/[ \t]+/g, " ").trim();
+
   const rule = SiteRules.getRule(location.hostname);
   const minLen = rule?.minLen !== undefined ? rule?.minLen : 2;
   if (originalText.length < minLen) {
@@ -4041,7 +4052,7 @@ async function scanContent(forcedSelectors = null) {
         el.id === "content-text";
       const isSpecialSite = isAmazonReview || isYTComment || isX || isAmazon;
       let targetEl = el;
-      
+
       if (isAmazonReview) {
         const deepSpan =
           el.querySelector(".review-text-content span") ||
@@ -4365,6 +4376,7 @@ function initSelectionTranslate() {
     if (shadowHost) return;
 
     shadowHost = document.createElement("div");
+    window.shadowHost = shadowHost; 
     shadowHost.id = "eclipse-translator-host";
     shadowHost.setAttribute("data-pinned", "false");
     shadowHost.style.cssText =
@@ -5162,6 +5174,10 @@ function initSelectionTranslate() {
         background: color-mix(in srgb, var(--p-accent) 25%, transparent);
         box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 50%, transparent);
     }
+        .toast-hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
       `;
 
     return style;
@@ -5169,41 +5185,60 @@ function initSelectionTranslate() {
 
   // ─── 面板 HTML 模板 ──────────────────────────────────────────────────────────
 
-  function buildPanelHTML() {
-    return `
-    <div id="drag-zone"></div>
-    <div id="p-main-container">
-      <div class="header-controls">
-        <div id="p-theme-toggle" class="icon-btn theme" title="">
-          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2.8"
-              stroke-linecap="round" stroke-linejoin="round"></svg>
-        </div>
-        <div id="p-pin" class="icon-btn" title="${t("pinUnpin")}">
-          <svg id="pin-icon" width="16" height="16" viewBox="0 0 24 28"
-              fill="none" stroke="currentColor" stroke-width="2.8"
-              stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path>
-            <path d="M7 10v4a2 2 0 0 1-2 2 2 2 0 0 0 0 4h14a2 2 0 0 0 0-4 2 2 0 0 1-2-2v-4"></path>
-            <line x1="12" y1="22" x2="12" y2="28"></line>
-          </svg>
-        </div>
-        <div id="close-p" class="close-btn" title="${t("closeWindow")}">✕</div>
+function buildPanelHTML() {
+  return `
+  <div id="drag-zone"></div>
+  <div id="p-main-container">
+    <div class="header-controls">
+      <div id="p-theme-toggle" class="icon-btn theme" title="">
+        <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2.8"
+            stroke-linecap="round" stroke-linejoin="round"></svg>
       </div>
-      <div id="p-header-wrapper" style="pointer-events:auto;"></div>
-      <div id="p-content-container" style="pointer-events:auto;"></div>
+      <div id="p-pin" class="icon-btn" title="${t("pinUnpin")}">
+        <svg id="pin-icon" width="16" height="16" viewBox="0 0 24 28"
+            fill="none" stroke="currentColor" stroke-width="2.8"
+            stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 10V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v2"></path>
+          <path d="M7 10v4a2 2 0 0 1-2 2 2 2 0 0 0 0 4h14a2 2 0 0 0 0-4 2 2 0 0 1-2-2v-4"></path>
+          <line x1="12" y1="22" x2="12" y2="28"></line>
+        </svg>
+      </div>
+      <div id="close-p" class="close-btn" title="${t("closeWindow")}">✕</div>
     </div>
+    <div id="p-header-wrapper" style="pointer-events:auto;"></div>
+    <div id="p-content-container" style="pointer-events:auto;"></div>
+  </div>
 
-    <!-- Resize 手柄 -->
-    <div class="resizer" data-dir="t"  style="top:-5px;  left:10px;  right:10px; height:10px; cursor:ns-resize;"></div>
-    <div class="resizer" data-dir="b"  style="bottom:-5px;left:10px; right:10px; height:10px; cursor:ns-resize;"></div>
-    <div class="resizer" data-dir="l"  style="left:-5px; top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
-    <div class="resizer" data-dir="r"  style="right:-7px;top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
-    <div class="resizer" data-dir="tl" style="top:-8px;  left:-8px; width:16px; height:16px; cursor:nwse-resize;"></div>
-    <div class="resizer" data-dir="tr" style="top:-8px;  right:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
-    <div class="resizer" data-dir="bl" style="bottom:-8px;left:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
-    <div class="resizer" data-dir="br" style="bottom:-8px;right:-8px;width:16px;height:16px; cursor:nwse-resize;"></div>`;
-  }
+  <div id="toast" class="toast-hidden mira-font-family" style="
+    position:absolute;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    max-width:90%;
+    padding:8px 14px;
+    border-radius:8px;
+    background:rgba(20,20,20,0.92);
+    border:1px solid #475569;
+    color:#fff;
+    font-size:12px;
+    text-align:center;
+    z-index:2147483647;
+    transition:opacity 0.25s ease;
+    pointer-events:none;
+    word-break:break-word;
+  "></div>
+
+  <!-- Resize 手柄 -->
+  <div class="resizer" data-dir="t"  style="top:-5px;  left:10px;  right:10px; height:10px; cursor:ns-resize;"></div>
+  <div class="resizer" data-dir="b"  style="bottom:-5px;left:10px; right:10px; height:10px; cursor:ns-resize;"></div>
+  <div class="resizer" data-dir="l"  style="left:-5px; top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
+  <div class="resizer" data-dir="r"  style="right:-7px;top:10px;  bottom:10px;width:10px;  cursor:ew-resize;"></div>
+  <div class="resizer" data-dir="tl" style="top:-8px;  left:-8px; width:16px; height:16px; cursor:nwse-resize;"></div>
+  <div class="resizer" data-dir="tr" style="top:-8px;  right:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
+  <div class="resizer" data-dir="bl" style="bottom:-8px;left:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
+  <div class="resizer" data-dir="br" style="bottom:-8px;right:-8px;width:16px;height:16px; cursor:nwse-resize;"></div>`;
+}
 
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
 
@@ -6641,7 +6676,7 @@ function initSelectionTranslate() {
     let effectiveHintLang = null;
 
     if (hintSourceLang && hintSourceLang !== 'auto') {
-      effectiveHintLang = hintSourceLang; 
+      effectiveHintLang = hintSourceLang;
     } else if (hasKana) {
       effectiveHintLang = 'ja';
     } else if (textIsAmbiguousCJK && fromCtx === 'ja') {
@@ -6842,11 +6877,11 @@ function initSelectionTranslate() {
     </span>
    </div>
 
-  <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-bottom: 6px; padding-top: 6px; border-bottom: 1px dashed rgb(51, 65, 85);">
-    <div id="p-hiragana" style="color:#22afb7; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px; margin-bottom: 4px;"></div>
-    <div id="p-katakana" style="color:#8c8c8c; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px;"></div>
+    <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-bottom: 6px; padding-top: 6px; border-bottom: 1px dashed rgb(51, 65, 85);">
+      <div id="p-hiragana" style="color:#22afb7; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px; margin-bottom: 4px;"></div>
+      <div id="p-katakana" style="color:#8c8c8c; font-size:14px;  line-height:1.2; word-break:break-word; letter-spacing:0.5px;"></div>
+    </div>
   </div>
-</div>
 
       <div id="p-result-container" style="display:flex; flex-direction:column; gap:6px;">
        <div id="p-basic" class="basic" style="font-size:18px;font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important; color:var(--p-accent); font-weight:500;">Loading...</div>
