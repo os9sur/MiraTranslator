@@ -41,13 +41,24 @@
 
 ---
 
+## ⚠️ Project Scope & Free Alternatives
+
+If you are simply looking for a completely free, zero-setup AI translation tool, your current browser likely already provides excellent built-in options:
+* **Chrome Users:** The **Gemini** side panel offers powerful, out-of-the-box webpage reading and content analysis capabilities.
+* **Edge Users:** The built-in **Copilot** can easily analyze webpage content and generate video subtitle summaries.
+
+**So why develop Mira?**
+Actually, Mira Translator started purely because I couldn't find a translation tool that was truly "handy" for my needs, so I decided to build one myself in my spare time. As built-in browser AIs become more common, the value of tools like this is shifting from "mass utility" to "niche personalization." Through this project, I wanted to create a dedicated tool that perfectly aligns with my own workflow.
+
+Because of this, Mira's features and design carry a strong personal touch, and it is not intended to be a comprehensive commercial product. I primarily maintain it at my own pace. If this little tool happens to meet your needs too, you are more than welcome to use it! However, please understand that due to limited personal time, I cannot guarantee compatibility with all websites or provide immediate bug fixes.
+
+---
+
 ## Technical Overview
 
-**Mira Translate** is a browser extension designed for translation tasks using user-provided API keys. It functions as an interface between the browser and translation services, allowing users to manage their own API configurations.
+**Mira Translate** is a browser extension designed for translation tasks using user-provided API keys. It functions as an interface between the browser and translation services, allowing users to manage their own API configurations seamlessly.
 
-This tool was created to fill the need for a functional, open-source bilingual translation utility that prioritizes simplicity and efficiency. It was developed in spare time for personal use, featuring a streamlined interface designed around specific, subjective workflows. As it is a personal project, it does not aim to cater to every preference or provide the polish of commercial software.
-
-> **Note:** This tool serves strictly as an assistant for AI-powered translation. Due to limited maintenance time, bug fixes may not be immediate, and universal compatibility with all websites is not guaranteed.
+This tool was created to fill the need for a functional, open-source bilingual translation utility that prioritizes simplicity and efficiency. It features a streamlined interface designed around specific workflows without the bloat of corporate software.
 
 ### Features
 
