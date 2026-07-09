@@ -308,7 +308,7 @@ async function handleAuthFlow(sendResponse) {
         if (isMobileEdge) {
             logger.log("[Mira-LOG] 检测到移动端 Edge，使用 tab 授权流程...");
             const REDIRECT = 'https://os9sur.github.io/mira-trans/oauth_callback.html';
-            const clientId = "{{EDGE_MOBILE_CLIENT_ID}}"; // Mira for Edge Web 客户端 的 ID
+            const clientId = "{{CLIENT_ID_EDGE}}"; // Mira for Edge Web 客户端 的 ID
             const scope = [
                 "https://www.googleapis.com/auth/drive.appdata",
                 "https://www.googleapis.com/auth/userinfo.email",

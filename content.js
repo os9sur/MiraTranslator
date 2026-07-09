@@ -4376,7 +4376,7 @@ function initSelectionTranslate() {
     if (shadowHost) return;
 
     shadowHost = document.createElement("div");
-    window.shadowHost = shadowHost; 
+    window.shadowHost = shadowHost;
     shadowHost.id = "eclipse-translator-host";
     shadowHost.setAttribute("data-pinned", "false");
     shadowHost.style.cssText =
@@ -5185,8 +5185,8 @@ function initSelectionTranslate() {
 
   // ─── 面板 HTML 模板 ──────────────────────────────────────────────────────────
 
-function buildPanelHTML() {
-  return `
+  function buildPanelHTML() {
+    return `
   <div id="drag-zone"></div>
   <div id="p-main-container">
     <div class="header-controls">
@@ -5238,7 +5238,7 @@ function buildPanelHTML() {
   <div class="resizer" data-dir="tr" style="top:-8px;  right:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
   <div class="resizer" data-dir="bl" style="bottom:-8px;left:-8px;width:16px; height:16px; cursor:nesw-resize;"></div>
   <div class="resizer" data-dir="br" style="bottom:-8px;right:-8px;width:16px;height:16px; cursor:nwse-resize;"></div>`;
-}
+  }
 
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
 
@@ -7795,8 +7795,7 @@ function buildPanelHTML() {
     }
   });
   document.addEventListener("contextmenu", (e) => {
-    const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && e.pointerType === '');
-    if (isTouch) return;
+    if (e.pointerType === 'touch' || e.button === -1) return;
     forceHideLogo();
   }, true);
   window.addEventListener(
