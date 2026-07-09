@@ -787,9 +787,12 @@ async function findOneDriveFile(token) {
 // ============================================================
 async function getOneDriveToken() {
     const isFirefoxAndroid = isFirefox && /Android/.test(navigator.userAgent);
+    const isEdgeAndroid = isEdge && /Android/.test(navigator.userAgent);
+    const isMobileTabFlow = isFirefoxAndroid || isEdgeAndroid;
+
     const FIREFOX_ANDROID_REDIRECT = 'https://os9sur.github.io/mira-trans/oauth_callback.html';
 
-    const redirectUri = isFirefoxAndroid
+    const redirectUri = isMobileTabFlow
         ? FIREFOX_ANDROID_REDIRECT
         : identityAPI.getRedirectURL();
 
@@ -803,7 +806,7 @@ async function getOneDriveToken() {
 
     logger.log("[OneDrive Auth] authUrl:", authUrl);
 
-    if (isFirefoxAndroid) {
+    if (isMobileTabFlow) {
         return new Promise((resolve, reject) => {
             let authTabId = null;
 
@@ -837,7 +840,6 @@ async function getOneDriveToken() {
         });
     }
 
-    // 桌面逻辑
     return new Promise((resolve, reject) => {
         identityAPI.launchWebAuthFlow(
             { url: authUrl, interactive: true },
