@@ -618,11 +618,16 @@
     }
 
     .toggle-add-btn.is-open {
+      --rotate-deg: 45deg;
       transform: rotate(45deg);
     }
 
+    .toggle-add-btn.is-open:hover {
+      transform: scale(1.15) rotate(45deg);
+    }
+
     .toggle-add-btn:hover {
-      transform: scale(1.15);
+      transform: scale(1.15) rotate(var(--rotate-deg, 0deg));
       box-shadow: 0 0 8px rgba(56, 189, 248, 0.9), 0 0 16px rgba(124, 58, 237, 0.4);
     }
 
