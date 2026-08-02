@@ -4859,6 +4859,16 @@ function initSelectionTranslate() {
       .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
       .eclipse-logo-btn img  { width: 18px; height: 18px; border-radius: 4px; filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }
 
+      /* 触摸端加大按钮 */
+      .eclipse-logo-btn.touch {
+        width: 34px;
+        height: 34px;
+      }
+      .eclipse-logo-btn.touch img {
+        width: 28px;
+        height: 28px;
+      }
+
       .glowing-icon {
         display:      inline-block;
         width:        21px;
@@ -7489,6 +7499,9 @@ function initSelectionTranslate() {
   };
   let liveText = "";
   let liveRange = null;
+  const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  let selectionStableTimer = null;
+  let lastShownText = "";
 
   // 监听选区变化，实时更新快照
   document.addEventListener("selectionchange", () => {
@@ -7499,8 +7512,39 @@ function initSelectionTranslate() {
       try {
         if (sel.rangeCount > 0) liveRange = sel.getRangeAt(0).cloneRange();
       } catch (_) { }
+
+      //  移动端用防抖后的 selectionchange 作为触发信号,
+      // 因为 Edge/Chrome Android 在选词结束时不会派发 touchend(实测是 touchcancel)
+      if (isTouchDevice) {
+        if (typeof isSelectEnabled !== "undefined" && !isSelectEnabled) return;
+        clearTimeout(selectionStableTimer);
+        selectionStableTimer = setTimeout(() => {
+          const stillSel = getSmartSelection();
+          const stillText = stillSel?.toString().trim();
+          if (!stillText || stillText !== liveText || stillText === lastShownText) return;
+          lastShownText = stillText;
+
+          let approxX = window.innerWidth / 2;
+          let approxY = window.innerHeight / 2;
+          try {
+            if (stillSel.rangeCount > 0) {
+              const rect = stillSel.getRangeAt(0).getBoundingClientRect();
+              if (rect?.width > 0) {
+                approxX = rect.left + rect.width / 2;
+                approxY = rect.bottom;
+              }
+            }
+          } catch (_) { }
+
+          processSelectionEnd(approxX, approxY, true);
+        }, 300);
+      }
+    } else if (isTouchDevice) {
+      clearTimeout(selectionStableTimer);
+      lastShownText = "";
     }
   });
+
   // mouseup（桌面）+ touchend（移动端）统一处理选词翻译
   async function handleSelectionEnd(e) {
     if (e.button === 2) return;
@@ -7510,269 +7554,272 @@ function initSelectionTranslate() {
     if (typeof isSelectEnabled !== "undefined" && !isSelectEnabled) return;
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
 
-    // touchend 的坐标在 changedTouches 里，touches 此时已清空
     const touch = isTouchEvent ? e.changedTouches?.[0] : null;
     const mouseX = touch ? touch.clientX : e.clientX;
     const mouseY = touch ? touch.clientY : e.clientY;
 
-    if (!isTouchEvent && typeof isDragging !== "undefined") isDragging = false;
+    setTimeout(() => processSelectionEnd(mouseX, mouseY, isTouchEvent), isTouchEvent ? 300 : 150);
+  }
+  async function processSelectionEnd(mouseX, mouseY, isTouchEvent) {
+    const selection = getSmartSelection();
+    if (!selection) return;
+    const text = selection.toString().trim();
+    if (!text || text.length > 1000) return;
 
-
-    // 移动端选词结果有时在 touchend 后才稳定，保留 150ms 延迟
-    setTimeout(async () => {
-      const selection = getSmartSelection();
-      if (!selection) return;
-      const text = selection.toString().trim();
-      if (!text || text.length > 1000) return;
-
-      // 立即克隆 Range，此时 selection 还有效
-      let savedRange = null;
-      try {
-        if (selection.rangeCount > 0) {
-          savedRange = selection.getRangeAt(0).cloneRange();
-        }
-      } catch (_) { }
-
-      if (!window.__LANG_READY__) {
-        await window.__LANG_PROMISE__;
+    // 立即克隆 Range，此时 selection 还有效
+    let savedRange = null;
+    try {
+      if (selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange();
       }
-      const targetLang = window.currentTargetL || getBrowserLang() || "en";
-      const storage = await safeGetStorage(["targetLanguage", "lpLangA"]);
-      const sourceLang = storage?.lpLangA || "auto";
-      const targetPrefix = targetLang.toLowerCase().slice(0, 2);
+    } catch (_) { }
 
-      let isAlreadyTarget = false;
-      if (sourceLang !== "auto") {
-        isAlreadyTarget = sourceLang.toLowerCase() === targetLang.toLowerCase();
-      } else {
-        let ctxLang = null;
-        if (savedRange) {
-          try {
-            let block = savedRange.commonAncestorContainer;
-            if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
-            let tries = 0;
-            while (block.textContent.trim().length < 30 && block.parentElement && tries < 3) {
-              block = block.parentElement;
-              tries++;
-            }
-            const ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
-            if (ctxText.length >= 15) ctxLang = detectSourceLang(ctxText);
-          } catch (_) { }
-        }
+    if (!window.__LANG_READY__) {
+      await window.__LANG_PROMISE__;
+    }
+    const targetLang = window.currentTargetL || getBrowserLang() || "en";
+    const storage = await safeGetStorage(["targetLanguage", "lpLangA"]);
+    const sourceLang = storage?.lpLangA || "auto";
+    const targetPrefix = targetLang.toLowerCase().slice(0, 2);
 
-        if (ctxLang !== null && !LATIN_BASED_LANGS.has(ctxLang)) {
-          const textLang = detectSourceLang(text);
-          if (textLang && textLang !== ctxLang) {
-            const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(text);
-            if (ctxLang === "ja" && isPureCJK && targetPrefix === "ja") {
-              isAlreadyTarget = true;
-            } else if (ctxLang === "ja" && isPureCJK) {
-              isAlreadyTarget = false;
-            } else {
-              isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
-            }
+    let isAlreadyTarget = false;
+    if (sourceLang !== "auto") {
+      isAlreadyTarget = sourceLang.toLowerCase() === targetLang.toLowerCase();
+    } else {
+      let ctxLang = null;
+      if (savedRange) {
+        try {
+          let block = savedRange.commonAncestorContainer;
+          if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
+          let tries = 0;
+          while (block.textContent.trim().length < 30 && block.parentElement && tries < 3) {
+            block = block.parentElement;
+            tries++;
+          }
+          const ctxText = getOriginalText(block).replace(/\s+/g, " ").trim();
+          if (ctxText.length >= 15) ctxLang = detectSourceLang(ctxText);
+        } catch (_) { }
+      }
+
+      if (ctxLang !== null && !LATIN_BASED_LANGS.has(ctxLang)) {
+        const textLang = detectSourceLang(text);
+        if (textLang && textLang !== ctxLang) {
+          const isPureCJK = /^[\u4e00-\u9fa5]+$/.test(text);
+          if (ctxLang === "ja" && isPureCJK && targetPrefix === "ja") {
+            isAlreadyTarget = true;
+          } else if (ctxLang === "ja" && isPureCJK) {
+            isAlreadyTarget = false;
           } else {
-            isAlreadyTarget = ctxLang === targetPrefix;
+            isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
           }
         } else {
-          isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+          isAlreadyTarget = ctxLang === targetPrefix;
+        }
+      } else {
+        isAlreadyTarget = detectIsAlreadyTarget(text, targetLang);
+      }
+    }
+
+    if (isAlreadyTarget) {
+      forceHideLogo();
+      return;
+    }
+
+    if (!shadowHost) initShadowDOM();
+    if (!logoBtn) return;
+
+    let l = mouseX + 2;
+    let t = mouseY + 2;
+    try {
+      if (selection.rangeCount > 0) {
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        if (rect?.width > 0) {
+          const inside = mouseX >= rect.left && mouseX <= rect.right &&
+            mouseY >= rect.top && mouseY <= rect.bottom;
+          if (inside) { l = mouseX + 10; t = mouseY - 32; }
         }
       }
+    } catch (_) { }
+ 
+    // 触摸端按钮加大，且给按钮加/去 touch 类（class 决定实际 CSS 尺寸）
+    const btnSize = isTouchEvent ? 34 : 22; //  与 CSS 中 .eclipse-logo-btn / .touch 的尺寸一致
+    if (isTouchEvent) {
+      logoBtn.classList.add("touch");
+    } else {
+      logoBtn.classList.remove("touch");
+    }
 
-      if (isAlreadyTarget) {
-        forceHideLogo();
-        return;
-      }
-
-      if (!shadowHost) initShadowDOM();
-      if (!logoBtn) return;
-
-      let l = mouseX + 2;
-      let t = mouseY + 2;
+    // 移动端按钮显示在手指上方，避免被遮挡
+    if (isTouchEvent) {
       try {
-        if (selection.rangeCount > 0) {
-          const rect = selection.getRangeAt(0).getBoundingClientRect();
-          if (rect?.width > 0) {
-            const inside = mouseX >= rect.left && mouseX <= rect.right &&
-              mouseY >= rect.top && mouseY <= rect.bottom;
-            if (inside) { l = mouseX + 10; t = mouseY - 32; }
-          }
-        }
-      } catch (_) { }
-
-      // 移动端按钮显示在手指上方，避免被遮挡
-      if (isTouchEvent) {
-        try {
-          const rect = selection.getRangeAt(0).getBoundingClientRect();
-          l = rect.left + (rect.width / 2) - 16; // 居中，16 是按钮半径
-          t = rect.bottom + 8;
-        } catch (_) {
-          l = mouseX - 16;
-          t = mouseY + 24;
-        }
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        l = rect.left + (rect.width / 2) - (btnSize / 2); // 居中，用 btnSize 算半径
+        t = rect.bottom + 8;
+      } catch (_) {
+        l = mouseX - (btnSize / 2);
+        t = mouseY + 24;
       }
+    }
 
-      const btnSize = 32;
-      l = Math.max(10, Math.min(l, window.innerWidth - btnSize - 10));
-      t = Math.max(10, Math.min(t, window.innerHeight - btnSize - 10));
+    l = Math.max(10, Math.min(l, window.innerWidth - btnSize - 10));
+    t = Math.max(10, Math.min(t, window.innerHeight - btnSize - 10));
 
-      logoBtn.style.left = l + "px";
-      logoBtn.style.top = t + "px";
-      logoBtn.style.setProperty("display", "flex", "important");
-      setImportantStyle(logoBtn, {
-        transition: "transform 0.1s ease-out, opacity 0.1s ease",
-        transform: "scale(1)",
-        opacity: "1",
-        "pointer-events": "auto",
-        position: "fixed",
-        "z-index": "2147483647",
-      });
-      logoCenter = { x: l + 16, y: t + 16 };
-      logoBtn.classList.add("show");
-      clearTimeout(window.logoAutoTimer);
-      window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
+    logoBtn.style.left = l + "px";
+    logoBtn.style.top = t + "px";
+    logoBtn.style.setProperty("display", "flex", "important");
+    setImportantStyle(logoBtn, {
+      transition: "transform 0.1s ease-out, opacity 0.1s ease",
+      transform: "scale(1)",
+      opacity: "1",
+      "pointer-events": "auto",
+      position: "fixed",
+      "z-index": "2147483647",
+    });
+    logoCenter = { x: l + 16, y: t + 16 };
+    logoBtn.classList.add("show");
+    clearTimeout(window.logoAutoTimer);
+    window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
 
-      async function triggerTranslation() {
-        // 用 selectionchange 持续更新的快照
-        const activeText = (liveText && liveText.length > 0) ? liveText : text;
-        const activeRange = liveRange || savedRange;
+    async function triggerTranslation() {
+      // 用 selectionchange 持续更新的快照
+      const activeText = (liveText && liveText.length > 0) ? liveText : text;
+      const activeRange = liveRange || savedRange;
 
-        try {
-          if (!chrome.runtime?.id) { showUpdateNotice(); return; }
-        } catch (_) { showUpdateNotice(); return; }
+      try {
+        if (!chrome.runtime?.id) { showUpdateNotice(); return; }
+      } catch (_) { showUpdateNotice(); return; }
 
-        try {
-          const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
-          const currentSource = storage?.lpLangA || "auto";
-          let finalQuery = activeText;
+      try {
+        const currentTarget = storage?.targetLanguage || getBrowserLang() || "en";
+        const currentSource = storage?.lpLangA || "auto";
+        let finalQuery = activeText;
 
-          const hasHan = /[\u4e00-\u9fa5]/.test(activeText);
-          const hasEn = /[a-zA-Z]/.test(activeText);
-          const hasJa = LANGUAGE_PATTERNS["ja"]?.test(activeText);
-          if (hasHan && hasEn && !hasJa) {
-            const zhChars = activeText.match(/[\u4e00-\u9fa5]/g) || [];
-            const enChars = activeText.match(/[a-zA-Z]/g) || [];
-            if (enChars.length > zhChars.length) {
-              finalQuery = activeText.replace(/[\u4e00-\u9fa5]/g, "").trim();
-            }
+        const hasHan = /[\u4e00-\u9fa5]/.test(activeText);
+        const hasEn = /[a-zA-Z]/.test(activeText);
+        const hasJa = LANGUAGE_PATTERNS["ja"]?.test(activeText);
+        if (hasHan && hasEn && !hasJa) {
+          const zhChars = activeText.match(/[\u4e00-\u9fa5]/g) || [];
+          const enChars = activeText.match(/[a-zA-Z]/g) || [];
+          if (enChars.length > zhChars.length) {
+            finalQuery = activeText.replace(/[\u4e00-\u9fa5]/g, "").trim();
           }
+        }
 
-          let ctxForDetect = _capturedContext || "";
-          if (ctxForDetect.length < 20) {
-            try {
-              if (activeRange) {
-                let block = activeRange.commonAncestorContainer;
-                if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
-                let tries = 0;
-                while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
-                  block = block.parentElement;
-                  tries++;
-                }
-                ctxForDetect = getOriginalText(block).replace(/\s+/g, " ").trim();
-              }
-            } catch (_) { }
-          }
-
-          const textLang = detectSourceLang(finalQuery);
-          const ctxLang = detectSourceLang(ctxForDetect || "");
-          let detectedSourceLang;
-          if (currentSource !== "auto") {
-            detectedSourceLang = currentSource;
-          } else if (textLang && ctxLang && textLang !== ctxLang) {
-            detectedSourceLang = (ctxLang === "ja" && /^[\u4e00-\u9fa5]+$/.test(finalQuery))
-              ? "ja" : textLang;
-          } else {
-            detectedSourceLang = ctxLang || textLang || "auto";
-          }
-
-          if (!shadowHost) initShadowDOM();
+        let ctxForDetect = _capturedContext || "";
+        if (ctxForDetect.length < 20) {
           try {
             if (activeRange) {
-              const container = activeRange.commonAncestorContainer;
-              const paragraph = container.nodeType === Node.TEXT_NODE
-                ? container.parentElement : container;
-              let block = paragraph.closest("[data-translated]") || paragraph;
+              let block = activeRange.commonAncestorContainer;
+              if (block.nodeType === Node.TEXT_NODE) block = block.parentElement;
               let tries = 0;
               while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
                 block = block.parentElement;
                 tries++;
               }
-
-              const fullText = getOriginalText(block).replace(/\s+/g, " ").trim();
-              const selectedText = finalQuery.replace(/\s+/g, " ").trim();
-              let idx = fullText.indexOf(selectedText);
-              if (idx === -1) idx = fullText.toLowerCase().indexOf(selectedText.toLowerCase());
-
-              if (idx !== -1) {
-                const start = Math.max(0, idx - 80);
-                const end = Math.min(fullText.length, idx + selectedText.length + 80);
-                logger.log("[context] fullText slice:", fullText?.slice(0, 100));
-                logger.log("[context] selectedText:", selectedText);
-                logger.log("[context] idx:", idx);
-                let context = fullText.slice(start, end).trim();
-                if (start > 0) context = "..." + context;
-                if (end < fullText.length) context = context + "...";
-                _capturedContext = context;
-                _capturedContextTranslation = "";
-              } else {
-                _capturedContext = fullText.slice(0, 160) || "";
-              }
-
-              const translationEl =
-                block.querySelector(".kt-paragraph-translation") ||
-                (block.nextElementSibling?.classList.contains("kt-paragraph-translation")
-                  ? block.nextElementSibling : null) ||
-                (block.parentElement?.nextElementSibling?.classList.contains("kt-paragraph-translation")
-                  ? block.parentElement.nextElementSibling : null);
-              _capturedContextTranslation = translationEl ? translationEl.textContent.trim() : "";
+              ctxForDetect = getOriginalText(block).replace(/\s+/g, " ").trim();
             }
-          } catch (e) {
-            logger.warn("[context-capture] 上下文捕获失败:", e);
-            _capturedContext = "";
-            _capturedContextTranslation = "";
-          }
-
-          await renderAndShowPopup(
-            finalQuery,
-            { clientX: mouseX, clientY: mouseY },
-            shadowHost.shadowRoot,
-            currentTarget,
-            detectedSourceLang
-          );
-          forceHideLogo();
-        } catch (e) {
-          if (e.message?.includes("context invalidated")) {
-            logger.warn("[trigger] Context invalidated, 扩展已更新");
-            showUpdateNotice();
-            return;
-          }
-          logger.error("[trigger] 显示翻译窗口失败:", e.message, e.stack);
+          } catch (_) { }
         }
-      }
 
-      if (isTouchEvent) {
-        // 移动端：点击 logo 触发翻译（每次重新绑定以捕获最新闭包）
-        logoBtn.ontouchend = async (tapEvt) => {
-          tapEvt.stopPropagation();
-          tapEvt.preventDefault();
-          clearTimeout(window.logoAutoTimer);
-          //window.getSelection()?.removeAllRanges();
-          await triggerTranslation();
-        };
-        // 兼容混合设备的 click 兜底
-        logoBtn.onclick = async (clickEvt) => {
-          clickEvt.stopPropagation();
-          clearTimeout(window.logoAutoTimer);
-          await triggerTranslation();
-        };
-      } else {
-        // 桌面：hover 触发
-        logoBtn.onmouseenter = async () => {
-          clearTimeout(window.logoAutoTimer);
-          await triggerTranslation();
-        };
+        const textLang = detectSourceLang(finalQuery);
+        const ctxLang = detectSourceLang(ctxForDetect || "");
+        let detectedSourceLang;
+        if (currentSource !== "auto") {
+          detectedSourceLang = currentSource;
+        } else if (textLang && ctxLang && textLang !== ctxLang) {
+          detectedSourceLang = (ctxLang === "ja" && /^[\u4e00-\u9fa5]+$/.test(finalQuery))
+            ? "ja" : textLang;
+        } else {
+          detectedSourceLang = ctxLang || textLang || "auto";
+        }
+
+        if (!shadowHost) initShadowDOM();
+        try {
+          if (activeRange) {
+            const container = activeRange.commonAncestorContainer;
+            const paragraph = container.nodeType === Node.TEXT_NODE
+              ? container.parentElement : container;
+            let block = paragraph.closest("[data-translated]") || paragraph;
+            let tries = 0;
+            while (block.textContent.trim().length < 50 && block.parentElement && tries < 5) {
+              block = block.parentElement;
+              tries++;
+            }
+
+            const fullText = getOriginalText(block).replace(/\s+/g, " ").trim();
+            const selectedText = finalQuery.replace(/\s+/g, " ").trim();
+            let idx = fullText.indexOf(selectedText);
+            if (idx === -1) idx = fullText.toLowerCase().indexOf(selectedText.toLowerCase());
+
+            if (idx !== -1) {
+              const start = Math.max(0, idx - 80);
+              const end = Math.min(fullText.length, idx + selectedText.length + 80);
+              logger.log("[context] fullText slice:", fullText?.slice(0, 100));
+              logger.log("[context] selectedText:", selectedText);
+              logger.log("[context] idx:", idx);
+              let context = fullText.slice(start, end).trim();
+              if (start > 0) context = "..." + context;
+              if (end < fullText.length) context = context + "...";
+              _capturedContext = context;
+              _capturedContextTranslation = "";
+            } else {
+              _capturedContext = fullText.slice(0, 160) || "";
+            }
+
+            const translationEl =
+              block.querySelector(".kt-paragraph-translation") ||
+              (block.nextElementSibling?.classList.contains("kt-paragraph-translation")
+                ? block.nextElementSibling : null) ||
+              (block.parentElement?.nextElementSibling?.classList.contains("kt-paragraph-translation")
+                ? block.parentElement.nextElementSibling : null);
+            _capturedContextTranslation = translationEl ? translationEl.textContent.trim() : "";
+          }
+        } catch (e) {
+          logger.warn("[context-capture] 上下文捕获失败:", e);
+          _capturedContext = "";
+          _capturedContextTranslation = "";
+        }
+
+        await renderAndShowPopup(
+          finalQuery,
+          { clientX: mouseX, clientY: mouseY },
+          shadowHost.shadowRoot,
+          currentTarget,
+          detectedSourceLang
+        );
+        forceHideLogo();
+      } catch (e) {
+        if (e.message?.includes("context invalidated")) {
+          logger.warn("[trigger] Context invalidated, 扩展已更新");
+          showUpdateNotice();
+          return;
+        }
+        logger.error("[trigger] 显示翻译窗口失败:", e.message, e.stack);
       }
-    }, isTouchEvent ? 300 : 150);
+    }
+
+    if (isTouchEvent) {
+      // 移动端：点击 logo 触发翻译（每次重新绑定以捕获最新闭包）
+      logoBtn.ontouchend = async (tapEvt) => {
+        tapEvt.stopPropagation();
+        tapEvt.preventDefault();
+        clearTimeout(window.logoAutoTimer);
+        //window.getSelection()?.removeAllRanges();
+        await triggerTranslation();
+      };
+      // 兼容混合设备的 click 兜底
+      logoBtn.onclick = async (clickEvt) => {
+        clickEvt.stopPropagation();
+        clearTimeout(window.logoAutoTimer);
+        await triggerTranslation();
+      };
+    } else {
+      // 桌面：hover 触发
+      logoBtn.onmouseenter = async () => {
+        clearTimeout(window.logoAutoTimer);
+        await triggerTranslation();
+      };
+    }
   }
 
   window.addEventListener("mouseup", handleSelectionEnd);
