@@ -49,30 +49,30 @@
       box-shadow: 0 0 8px rgba(56, 189, 248, 0.6), 0 0 20px rgba(56, 189, 248, 0.3);
     }
 
-.highlight-label {
-  border: 1.2px solid rgba(16, 185, 129, 0.4);
-  border-radius: 999px;
-  padding: 8px 25px;
-  gap: 12px;
-  background: #111827;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
-  transition: all 0.3s ease;
-}
+    .highlight-label {
+      border: 1.2px solid rgba(16, 185, 129, 0.4);
+      border-radius: 999px;
+      padding: 8px 25px;
+      gap: 12px;
+      background: #111827;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+      transition: all 0.3s ease;
+    }
 
-.highlight-label:hover {
-  border-color: rgba(16, 185, 129, 0.6);
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
-}
+    .highlight-label:hover {
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
+    }
 
- 
-#highlightToggle {
-  background: #334155;
-}
 
- 
-#highlightToggle.active {
-  background: #059669;
-}
+    #highlightToggle {
+      background: #334155;
+    }
+
+
+    #highlightToggle.active {
+      background: #059669;
+    }
 
     .search-bar-icon {
       position: absolute;
@@ -251,11 +251,16 @@
 
     #vocabTable {
       width: 100%;
+
+    }
+
+    .vocab-head>div {
+      white-space: nowrap;
     }
 
     .vocab-head {
       display: grid;
-      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px 90px 90px;
+      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px minmax(100px, auto) minmax(80px, auto);
       background: rgba(30, 41, 59, 0.8);
       border-bottom: 1px solid rgba(56, 189, 248, 0.2);
       padding: 0 8px;
@@ -271,10 +276,15 @@
 
     .vocab-row {
       display: grid;
-      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px 90px 90px;
+      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px minmax(100px, auto) minmax(80px, auto);
       border-bottom: 1px solid #1e293b;
       padding: 0 8px;
       transition: background-color 0.2s;
+    }
+
+    .vocab-head,
+    .vocab-row {
+      grid-template-columns: 240px minmax(200px, 1fr) 125px 120px 130px 90px;
     }
 
     .vocab-row:nth-child(odd) {
@@ -570,6 +580,65 @@
       gap: 8px;
     }
 
+    .toggle-add-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: none;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 0;
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .toggle-add-btn::before,
+    .toggle-add-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: #0f172a;
+      transition: transform 0.3s ease;
+    }
+
+    /* 横线 */
+    .toggle-add-btn::before {
+      width: 13px;
+      height: 1.5px;
+      transform: translate(-50%, -50%);
+    }
+
+    /* 竖线，展开时旋转成横线，和 ::before 叠成 ✕ */
+    .toggle-add-btn::after {
+      width: 1.5px;
+      height: 13px;
+      transform: translate(-50%, -50%);
+    }
+
+    .toggle-add-btn.is-open {
+      transform: rotate(45deg);
+    }
+
+    .toggle-add-btn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.9), 0 0 16px rgba(124, 58, 237, 0.4);
+    }
+
+    .wordbook-title {
+      font-size: 22px;
+      margin: 0;
+      font-weight: 545;
+      white-space: nowrap;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #38bdf8 0%, #ffffff 50%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 4px #38bdf8) drop-shadow(0 0 10px #38bdf8) drop-shadow(0 0 16px #7c3aed);
+    }
+
     /* ── 移动端 ── */
     @media (max-width: 768px) {
       body {
@@ -618,6 +687,7 @@
         display: inline-block;
         white-space: nowrap;
         font-size: 20px;
+        font-weight: 545;
       }
 
       .header>div {
@@ -675,7 +745,7 @@
         display: block;
         position: relative;
         background: transparent !important;
-        padding: 12px;
+        padding: 12px 12px 18px 12px;
         margin: 0;
         border-bottom: none;
       }
@@ -686,10 +756,10 @@
         bottom: 0;
         left: 15px;
         right: 15px;
-        height: 1px;
-        background-image: linear-gradient(to right, rgb(39 255 98 / 36%) 50%, transparent 50%);
-        background-size: 6px 1px;
-        background-repeat: repeat-x;
+        height: 3px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'%3E%3Cpath d='M0,4 Q100,0 200,4 Q100,8 0,4 Z' fill='rgba(56,189,248,0.75)'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
       }
 
       /* 最后一个不显示 */
@@ -777,7 +847,24 @@
 
       /* 时间列：移动端隐藏 */
       .vocab-cell:nth-child(5) {
-        display: none;
+        display: block;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+        color: #637793;
+        font-size: 12px;
+        font-family: monospace;
+      }
+
+      .vocab-cell:nth-child(5)::before {
+        content: var(--label-time, "时间");
+        display: block;
+        font-size: 10px;
+        color: #5f718b;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+        /* 标签本身不用等宽字体，跟其他标签一致 */
       }
 
       /* 操作列：右上角绝对定位 */
@@ -874,62 +961,30 @@
 <body>
   <div class="container">
     <div dir="auto" class="header">
-    <div style="position: relative; display: inline-block;">
-    <h1 style="
-        font-size: 22px; 
-        margin: 0;
-        font-weight: 500;
-        white-space: nowrap;
-        letter-spacing: 1px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 1;
-        color: #38bdf8; 
-        text-shadow: 
-            0 0 4px #38bdf8, 
-            0 0 10px #38bdf8, 
-            0 0 20px #7c3aed, 
-            0 0 30px #7c3aed;
-        opacity: 0.75;
-    " aria-hidden="true" data-i18n="myWordBook">My Wordbook</h1>
-
-    <h1 style="
-        font-size: 22px; 
-        margin: 0;
-        font-weight: 500;
-        white-space: nowrap;
-        letter-spacing: 1px;
-        position: relative;
-        z-index: 2;
-        background: linear-gradient(135deg, #38bdf8 0%, #ffffff 50%, #7c3aed 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    " data-i18n="myWordBook">My Wordbook</h1>
-</div>
+      <div style="position: relative; display: inline-block;">
+        <h1 class="wordbook-title" data-i18n="myWordBook">My Wordbook</h1>
+      </div>
       <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; width: 100%;">
         <div id="btnGroup"
           style="display: flex; gap: 6px; align-items: center; width: 100%; justify-content: flex-end;">
-          
-        <button id="nbSyncPush" class="btn nb-sync-btn"
-          style="background: #0284c7; color: #ffffff; border: none; position: relative; overflow: hidden; padding: 6px 10px; font-size: 12px;">
-          <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
-          <div class="sync-log-scroller"></div>
-        </button>
 
-        <button id="nbSyncPull" class="btn nb-sync-btn"
-          style="background: #059669; color: #ffffff; border: none; position: relative; overflow: hidden; padding: 6px 10px; font-size: 12px;">
-          <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
-          <div class="sync-log-scroller"></div>
-        </button>
+          <button id="nbSyncPush" class="btn nb-sync-btn"
+            style="background: #0284c7; color: #ffffff; border: none; position: relative; overflow: hidden; padding: 6px 10px; font-size: 12px;">
+            <span class="btn-label" data-i18n="backupToCloud">备份至云端 ↑</span>
+            <div class="sync-log-scroller"></div>
+          </button>
 
-        <button id="toggleAddBox" class="btn"
-          style="background: #38bdf8; color: #0f172a; border: none; padding: 4px 9px; font-size: 15px; font-weight: bold;" title="">＋</button>
+          <button id="nbSyncPull" class="btn nb-sync-btn"
+            style="background: #059669; color: #ffffff; border: none; position: relative; overflow: hidden; padding: 6px 10px; font-size: 12px;">
+            <span class="btn-label" data-i18n="restoreFromCloud">从云端恢复 ↓</span>
+            <div class="sync-log-scroller"></div>
+          </button>
 
-        <button id="exportBtn" class="btn btn-export" 
-          style="background: #475569; color: #f8fafc; border: none; padding: 6px 18px; font-size: 12px;"
-          data-i18n="exportCSV">导出 CSV</button>
+          <button id="toggleAddBox" class="btn toggle-add-btn" title=""></button>
+
+          <button id="exportBtn" class="btn btn-export"
+            style="background: #475569; color: #f8fafc; border: none; padding: 6px 18px; font-size: 12px;"
+            data-i18n="exportCSV">导出 CSV</button>
 
         </div>
         <span id="syncStatus" style="font-size: 11px;margin-top: 6px; color: #475569;"></span>
@@ -952,12 +1007,16 @@
         <input type="text" id="searchInp" class="search-bar-input" data-i18n="searchVocabulary"
           data-i18n-type="placeholder" placeholder="Search vocabulary...">
       </div>
-      <label class="highlight-label" style="display:flex;align-items:center;gap:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;">
-  <span style="color:#cbd5e1; font-size:14px;" data-i18n="highlightVocab">在网页高亮生词</span>
-  <div id="highlightToggle" style="width:36px;height:20px;border-radius:999px;cursor:pointer;position:relative;transition:background 0.2s;">
-    <div id="highlightThumb" style="width:16px;height:16px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left 0.2s;"></div>
-  </div>
-</label>
+      <label class="highlight-label"
+        style="display:flex;align-items:center;gap:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+        <span style="color:#cbd5e1; font-size:14px;" data-i18n="highlightVocab">在网页高亮生词</span>
+        <div id="highlightToggle"
+          style="width:36px;height:20px;border-radius:999px;cursor:pointer;position:relative;transition:background 0.2s;">
+          <div id="highlightThumb"
+            style="width:16px;height:16px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left 0.2s;">
+          </div>
+        </div>
+      </label>
     </div>
 
     <div class="table-container">
