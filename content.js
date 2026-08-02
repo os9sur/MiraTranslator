@@ -1994,10 +1994,16 @@ function startGenericTranslation() {
 
 
   blockEls.forEach(el => {
+    if (coveredNodes.has(el)) return;
     if (shouldSkipTextNode({ parentElement: el })) return;
     const text = el.innerText?.trim();
     if (!text || text.length < 5) return;
-    if (el.querySelector('.kt-paragraph-translation')) return;
+    const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
+    const hasSiblingTranslation = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+    if (hasChildTranslation || hasSiblingTranslation) {
+      coveredNodes.add(el);
+      return;
+    }
     if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
 
     const font = document.createElement('font');
@@ -5902,11 +5908,11 @@ function initSelectionTranslate() {
     // 应用用户尺寸配置
     const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
     const vw = window.visualViewport?.width || window.innerWidth;
-    const savedWidth = parseInt(settings.width) || 360;
+    const savedWidth = parseInt(settings.width) || 420;
     const finalWidth = Math.min(savedWidth, vw - 20);
     popupEl.style.width = finalWidth + "px";
     popupEl.style.maxWidth = finalWidth + "px";
-    popupEl.style.maxHeight = settings.height || "50vh";
+    popupEl.style.maxHeight = settings.height || "60vh";
 
     // 调整查询词字号
     const pQuery = shadow.getElementById("p-query");

@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           box.style.margin = '0';
         });
       });
-      btn.textContent = '＋';
+      btn.classList.remove('is-open');
     } else {
       // 展开
       box.style.maxHeight = '200px';
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         box.style.overflow = 'visible';
         box.style.transition = 'none';
       }, 300);
-      btn.textContent = '✕';
+      btn.classList.add('is-open');
 
       requestAnimationFrame(() => {
         const h = wordInp.offsetHeight;
@@ -143,6 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.documentElement.style.setProperty('--label-meaning', `"${_t('meaning')}"`);
   document.documentElement.style.setProperty('--label-note', `"${_t('note')}"`);
   document.documentElement.style.setProperty('--label-source', `"${_t('source')}"`);
+document.documentElement.style.setProperty('--label-time', `"${_t('addTime')}"`); 
 
   function formatDetail(dictData, query = "") {
     if (!Array.isArray(dictData) || dictData.length === 0) return "";
@@ -547,7 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cell = el.closest('.vocab-cell');
         if (!cell) return;
         cell.innerHTML = `
-        <textarea class="note-inp" maxlength="300" dir="auto"
+        <textarea class="note-inp" maxlength="500" dir="auto"
           placeholder="${_t('notePlaceholder')}"
           style="background:#020617;border:none;color:white;padding:4px 8px;border-radius:6px;
           width:100%;font-size:12px;box-sizing:border-box;resize:vertical;min-height:32px;
