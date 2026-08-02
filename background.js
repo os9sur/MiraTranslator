@@ -2353,13 +2353,29 @@ const Translators = {
             }
 
             // 补充/降级：ul > li 里的释义（含 "網路" 条目）
-            const liRegex = /<span class="pos(?:\s+web)?">([^<]+)<\/span><span class="def b_regtxt"><span>([^<]+)<\/span>/g;
+            // 抓取整个 def 区块（内部可能是 <a>...</a> 或 <span>【</span> 混合） 
+            const liRegex = /<span class="pos(?:\s+web)?">([^<]+)<\/span><span class="def b_regtxt">([\s\S]*?)<\/span>\s*<\/li>/g;
             let liMatch;
             while ((liMatch = liRegex.exec(html)) !== null) {
                 const pos = liMatch[1].trim();
-                const meaning = liMatch[2].trim();
+                const rawBlock = liMatch[2];
+
+                // 去掉所有内部标签（<a>、<span> 等），保留纯文本和分隔符（；，【】等）
+                const plainText = rawBlock
+                    .replace(/<[^>]+>/g, '')
+                    .replace(/&nbsp;/g, ' ')
+                    .trim();
+
+                if (!plainText) continue;
+
+                // 按中文顿号/分号切成多个释义
+                const meanings = plainText
+                    .split(/[；;]/)
+                    .map(s => s.trim())
+                    .filter(Boolean);
+
                 if (!posMap[pos]) {
-                    posMap[pos] = [meaning];
+                    posMap[pos] = meanings;
                 }
             }
 
