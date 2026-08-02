@@ -366,8 +366,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const activeDaysData = await safeGetStorage('active_days');
     const activeDaysCount = activeDaysData?.active_days?.length || 0;
 
-    const MIN_DAYS = 60;
-    const MIN_ACTIVE_DAYS = 50;
+    const MIN_DAYS = 180;
+    const MIN_ACTIVE_DAYS = 120;
 
     if (daysSinceInstall >= MIN_DAYS && activeDaysCount >= MIN_ACTIVE_DAYS) {
       await safeSetStorage({ review_page_shown_v1: true });
