@@ -212,7 +212,7 @@ const SiteRules = {
             minLen: 15
         },
         "reuters.com": {
-            selectors: "h1, h2, h3, p, span[data-testid='TitleHeading'], [class*='nav-dropdown'] li, article li",
+            selectors: "h1, h2, h3, p, span[data-testid='TitleHeading'], [class*='nav-dropdown'] li, article li, div[data-testid^='paragraph']",
             minLen: 10
         },
 
@@ -249,23 +249,48 @@ const SiteRules = {
         "store.steampowered.com": {
             selectors: "div._1zbKizfCRpoX2D_zOLQes0",
             minLen: 5
-        }
+        },
+        "apple.com": {
+            selectors: [
+                "h1, h2, h3, h4",
+                "p",
+                // Newsroom 正文段落 
+                ".pagebody-copy > p",
+                ".pagebody-copy > div",
+                // 如果 pagebody-copy 本身就是单段落 div（无子 p），才匹配它
+                ".pagebody-copy:not(:has(p)):not(:has(div))",
+                "[class*='pagebody'] > p",
+                "[class*='article-body'] > p",
+                "main p",
+                "article p",
+                "article li",
+                ".we-truncate",
+                ".we-item-description__title",
+            ].join(", "),
+            minLen: 5
+        },
     },
-
     generic: {
         selectors: [
             `h1:not(button *)${ignoreMenu}`,
             `h2:not(button *)${ignoreMenu}`,
             `h3:not(button *)${ignoreMenu}`,
-            `p:not(button *)`,
-            `span:not(button *):not(header *):not(footer *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *):not([class*='code'] *):not([class*='highlight'] *):not([class*='token'] *):not(td *):not(th *)${ignoreMenu}`,
+            `p:not(button *):not(footer *):not(header *):not(nav *)${ignoreMenu}`,
+            // 现代框架的 div 段落
+            `div[data-testid*='paragraph']:not(footer *):not(nav *)`,
+            `div[class*='article-body']:not(footer *):not(nav *)`,
+            `div[class*='story-body']:not(footer *):not(nav *)`,
+            `div[class*='post-body']:not(footer *):not(nav *)`,
+            // span 收窄语义范围
+            `article span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)`,
+            `main span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)`,
             `article li${ignoreMenu}`,
             `section li${ignoreMenu}`,
             `main li${ignoreMenu}`,
             `[role='main'] li${ignoreMenu}`,
             `.content li${ignoreMenu}`,
             `.post li${ignoreMenu}`,
-            `.entry li${ignoreMenu}` 
+            `.entry li${ignoreMenu}`
         ].join(", "),
         minLen: 5
     },

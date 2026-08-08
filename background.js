@@ -5095,9 +5095,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 //============= 监控
 // ============ GA4 配置 ============
 
-
-
-
 // ============ 安装时 ============
 chrome.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === "install") {
