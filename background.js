@@ -3359,13 +3359,13 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
 
             const systemPrompt = buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPrompt);
 
-            // ── 抽取请求函数 ──────────────────────────────────────
-            const doTranslate = async (modelId) => {
+            // ── 抽取请求函数 ────────────────────────────────────── 
+            const doTranslate = async (modelId, jwt = token) => {
                 const resp = await workerFetch('/api/translate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        google_token: token,
+                        google_token: jwt, // 用参数而非闭包捕获的 token
                         model: modelId,
                         text: req.text,
                         target_lang: req.targetLang,
@@ -3374,7 +3374,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }, 20000);
 
                 if (resp.status === 402) return { __error: 'insufficient_balance' };
-                if (resp.status === 401) return { __error: 'loginExpired' };
+                if (resp.status === 401) return { __error: 'loginExpired' }; // 只标记，外层处理
                 if (!resp.ok) {
                     const errData = await resp.json().catch(() => ({}));
                     throw new Error(errData.error || `Worker error ${resp.status}`);
@@ -3385,9 +3385,23 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             try {
                 let result = await doTranslate(selectedModel);
 
+                if (result?.__error === 'loginExpired') {
+                    logger.warn('[Mira Pro] jwt 过期，尝试静默重新登录...');
+                    // 从 storage 拿 uid
+                    const userData = await safeGetStorage(['mira_user']);
+                    const uid = userData?.mira_user?.uid;
+
+                    const newJwt = await silentReLogin(uid); // 内部会写回 storage
+                    if (!newJwt) {
+                        return { error: 'loginExpired' };
+                    }
+                    // 用新 jwt 重试
+                    result = await doTranslate(selectedModel, newJwt);
+                    if (result?.__error) return { error: result.__error };
+                }
                 // ── 失败时检查模型是否下架 ────────────────────────
                 if (result?.__error === undefined && !result) {
-                    throw new Error('Empty response');
+                    return { error: result.__error };
                 }
 
                 // doTranslate 抛出异常说明 !resp.ok，走 catch
@@ -4535,31 +4549,36 @@ async function silentReLogin(uid) {
         return null;
     }
 }
-// ── 拉取余额  ──
+
+// ── 获取余额 ──
 async function fetchUserBalance(uid, sendResponse) {
+    let responded = false;
+    const reply = (data) => {
+        if (responded) return;
+        responded = true;
+        sendResponse(data);
+    };
+
     try {
-        // 1. 本地缓存（1分钟有效期）
         const cached = await safeGetStorage(['mira_user_balance']);
         if (cached?.mira_user_balance?.uid === uid) {
             const { balance, expires_at, expired, updatedAt } = cached.mira_user_balance;
             if (Date.now() - updatedAt < 1 * 60 * 1000) {
-                sendResponse({ balance, expires_at, expired });
+                reply({ balance, expires_at, expired });
                 return;
             }
         }
 
-        // 2. 检查 jwt，没有就静默重新登录
         let { mira_jwt } = await safeGetStorage(['mira_jwt']);
         if (!mira_jwt) {
             logger.warn('[fetchBalance] jwt 为空，尝试静默重新登录...');
             mira_jwt = await silentReLogin(uid);
             if (!mira_jwt) {
-                sendResponse({ balance: null, error: 'token_expired' });
+                reply({ balance: null, error: 'token_expired' });
                 return;
             }
         }
 
-        // 3. 请求后端
         const resp = await workerFetch('/api/balance', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${mira_jwt}` }
@@ -4569,20 +4588,20 @@ async function fetchUserBalance(uid, sendResponse) {
             logger.warn('[fetchBalance] jwt 过期，尝试静默重新登录...');
             const newJwt = await silentReLogin(uid);
             if (!newJwt) {
-                sendResponse({ error: 'token_expired' });
+                reply({ error: 'token_expired' });
                 return;
             }
-            // 用新 jwt 重试一次
+            await safeSetStorage({ mira_jwt: newJwt });
             const retryResp = await workerFetch('/api/balance', {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${newJwt}` }
             });
             if (!retryResp.ok) {
-                sendResponse({ error: 'token_expired' });
+                reply({ error: 'token_expired' });
                 return;
             }
             const data = await retryResp.json();
-            sendResponse({ balance: data.balance, expires_at: data.expires_at, expired: data.expired });
+            reply({ balance: data.balance, expires_at: data.expires_at, expired: data.expired });
             return;
         }
 
@@ -4593,27 +4612,25 @@ async function fetchUserBalance(uid, sendResponse) {
 
         const { balance, expires_at, expired } = await resp.json();
 
-        // 4. 过期：清除缓存，返回0
         if (expired) {
             await safeSetStorage({ mira_user_balance: null });
-            sendResponse({ balance: 0, expires_at, expired: true });
+            reply({ balance: 0, expires_at, expired: true });
             return;
         }
 
-        // 5. 正常：缓存余额和过期时间
         await safeSetStorage({
             mira_user_balance: { uid, balance, expires_at, expired: false, updatedAt: Date.now() }
         });
-        sendResponse({ balance, expires_at, expired: false });
+        reply({ balance, expires_at, expired: false });
 
     } catch (err) {
         if (err.message.includes('timeout') || err.message.includes('Failed to fetch')) {
             await markCurrentUrlFailed();
         }
         logger.error('[Mira-Auth] 获取余额失败:', err);
-        sendResponse({ balance: null, error: err.message });
+        reply({ balance: null, error: err.message });
     } finally {
-        sendResponse({ balance: null, error: 'no_response' });
+        reply({ balance: null, error: 'no_response' }); // responded=true 时自动跳过
     }
 }
 
@@ -5077,9 +5094,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 //============= 监控
 // ============ GA4 配置 ============
-
-
-
 
 // ============ 安装时 ============
 chrome.runtime.onInstalled.addListener(async (details) => {
