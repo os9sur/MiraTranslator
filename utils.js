@@ -1103,41 +1103,84 @@ async function safeRemoveStorage(keys) {
     return null;
   }
 }
+
+//缓存策略
+const CACHE_POLICY = {
+    fallback: { expireMs: 60 * 60 * 1000 },              // 1小时
+    ai:       { quotaBytes: 12 * 1024 * 1024 },          // 12MB
+    free:     { quotaBytes: 3 * 1024 * 1024 },           // 3MB
+    orphanSafetyNetMs: 180 * 24 * 60 * 60 * 1000,        // 180天，僵尸数据兜底
+};
+const CLEAN_INTERVAL = 24 * 60 * 60 * 1000; // 每天检查一次是否需要清理
+
+
 async function lookupCache(text, engine, lang) {
-  const isAI = AI_LLM_WHITE_LIST.includes(engine);
-  const singleKey = getCacheKey(text, engine, lang);
-  const commonFingerprint = singleKey.substring(singleKey.indexOf('_', 3));
-  let cachedData = null;
-  let hitKey = null;
-  if (isAI) {
-    const store = await idb.get(singleKey);
-    hitKey = singleKey;
-    cachedData = store?.[singleKey] || null;
-  } else {
-    const aiKeys = AI_LLM_WHITE_LIST.map(ai => `tr_${ai}${commonFingerprint}`);
-    const keysToQuery = [...aiKeys, singleKey];
-    const store = await idb.get(keysToQuery);
-    hitKey = aiKeys.find(k => store?.[k]) || (store?.[singleKey] ? singleKey : null);
-    if (hitKey) cachedData = store[hitKey];
-  }
-  if (!cachedData) return null;
-  const actualResult = cachedData.response?.currentTranslationResponse
-    || cachedData.response
-    || cachedData;
-  const ageHours = (Date.now() - (cachedData.timestamp || actualResult.timestamp || 0)) / 3600000;
-  const expireLimit = (actualResult.isFallback) ? 1 : 168;
-  if (ageHours >= expireLimit) {
-    await idb.remove(hitKey);
-    return null;
-  }
-  if (!actualResult.isFallback) {
-    actualResult.timestamp = Date.now();
-    const updates = { [singleKey]: actualResult };
-    if (hitKey !== singleKey) updates[hitKey] = actualResult;
-    await idb.set(updates);
-  }
-  //logger.log('[lookupCache] 查询 key:', singleKey, 'cachedData:', !!cachedData);
-  return { result: actualResult, hitKey, singleKey };
+    const isAI = AI_LLM_WHITE_LIST.includes(engine);
+    const singleKey = getCacheKey(text, engine, lang);
+    const commonFingerprint = singleKey.substring(singleKey.indexOf('_', 3));
+
+    let cachedData = null;
+    let hitKey = null;
+    let isAlias = false;
+
+    if (isAI) {
+        const store = await idb.get(singleKey);
+        hitKey = singleKey;
+        cachedData = store?.[singleKey] || null;
+    } else {
+        const aiKeys = AI_LLM_WHITE_LIST.map(ai => `tr_${ai}${commonFingerprint}`);
+        const keysToQuery = [...aiKeys, singleKey];
+        const store = await idb.get(keysToQuery);
+
+        hitKey = aiKeys.find(k => store?.[k]) || null;
+        if (hitKey) {
+            cachedData = store[hitKey];
+            isAlias = true;
+        } else if (store?.[singleKey]) {
+            const own = store[singleKey];
+            if (own.alias) {
+                // 别名指针指向的AI原始数据已被清理，指针失效，当作未命中
+                await idb.remove(singleKey);
+                cachedData = null;
+            } else {
+                cachedData = own;
+                hitKey = singleKey;
+                isAlias = false;
+            }
+        }
+    }
+
+    if (!cachedData) return null;
+
+    const actualResult = cachedData.response?.currentTranslationResponse
+        || cachedData.response
+        || cachedData;
+
+    // 没有时间戳 → 视为"刚创建"，补写，不删除
+    if (!actualResult.timestamp && !cachedData.timestamp) {
+        actualResult.timestamp = Date.now();
+    }
+
+    const ts = cachedData.timestamp || actualResult.timestamp;
+    const ageMs = Date.now() - ts;
+
+    // 只有 fallback 结果按时间强制过期，正常结果交给后台LRU统一管理，. 不再168h强删
+    if (actualResult.isFallback && ageMs >= CACHE_POLICY.fallback.expireMs) {
+        await idb.remove(hitKey);
+        return null;
+    }
+
+    // 命中即续命(LRU touch)，fallback 不续命
+    if (!actualResult.isFallback) {
+        actualResult.timestamp = Date.now();
+        const updates = { [hitKey]: actualResult };
+        if (isAlias && !cachedData.alias) {
+            updates[singleKey] = { alias: hitKey, timestamp: Date.now() };
+        }
+        await idb.set(updates);
+    }
+
+    return { result: actualResult, hitKey, singleKey };
 }
 
 function getPhoneticLabel(langCode) {

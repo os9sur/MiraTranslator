@@ -6126,141 +6126,144 @@ function initSelectionTranslate() {
       }
     }
     // 刷新翻译
-    function triggerRefresh() {
-      const refreshBtn = shadow.getElementById("p-refresh");
-      if (refreshBtn?.classList.contains("spinning")) return;
+function triggerRefresh() {
+  const refreshBtn = shadow.getElementById("p-refresh");
+  if (refreshBtn?.classList.contains("spinning")) return;
 
-      if (refreshBtn) refreshBtn.classList.add("spinning");
+  if (refreshBtn) refreshBtn.classList.add("spinning");
 
-      if (shadowHost) {
-        clearTimeout(shadowHost._slowTimer);
-        clearTimeout(shadowHost._detailTimer);
-        shadowHost._slowTimer = null;
-        shadowHost._detailTimer = null;
-        shadowHost._detailFullyRendered = false;
-      }
+  if (shadowHost) {
+    clearTimeout(shadowHost._slowTimer);
+    clearTimeout(shadowHost._detailTimer);
+    shadowHost._slowTimer = null;
+    shadowHost._detailTimer = null;
+    shadowHost._detailFullyRendered = false;
+  }
 
-      const currentTargetLang = window.currentTargetL || state.targetLang;
-      const currentSourceLang = state.sourceLang === "auto"
-        ? (detectedHintLang || null)
-        : state.sourceLang;
+  const currentTargetLang = window.currentTargetL || state.targetLang;
+  const currentSourceLang = state.sourceLang === "auto"
+    ? (detectedHintLang || null)
+    : state.sourceLang;
 
-      // 判断是单词还是句子（单词：无空格且长度<=30）
-      const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
+  // 判断是单词还是句子（单词：无空格且长度<=30）
+  const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
 
-      const fingerprint =
-        typeof hash === "function"
-          ? hash(
-            text
-              .trim()
-              .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
-              .toLowerCase(),
-          )
-          : text.trim().substring(0, 50);
+  const fingerprint =
+    typeof hash === "function"
+      ? hash(
+        text
+          .trim()
+          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+          .toLowerCase(),
+      )
+      : text.trim().substring(0, 50);
 
-      idb
-        .getAll("tr_")
-        .then((allCache) => {
-          return Promise.all(
-            Object.keys(allCache)
-              .filter((k) => k.includes(fingerprint))
-              .map((k) => idb.remove(k)),
-          );
-        })
-        .then(() => {
-          const saveBtn = shadow.getElementById("p-save");
-          if (saveBtn) saveBtn._miraReady = false;
+  // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
+  const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
+  const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
+  const keysToRemove = ALL_ENGINES.map(
+    (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
+  );
 
-          const basicEl = shadow.getElementById("p-basic");
-          const phoneticEl = shadow.getElementById("p-phonetic");
+  // console.time('[埋点]删除旧缓存');
+
+  Promise.all(keysToRemove.map((k) => idb.remove(k)))
+    .then(() => {
+      // console.timeEnd('[埋点]删除旧缓存');
+
+      const saveBtn = shadow.getElementById("p-save");
+      if (saveBtn) saveBtn._miraReady = false;
+
+      const basicEl = shadow.getElementById("p-basic");
+      const phoneticEl = shadow.getElementById("p-phonetic");
+      const pDetail = shadow.getElementById("p-detail");
+      const pExamples = shadow.getElementById("p-examples");
+      if (!basicEl?.style) return;
+
+      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
+      if (phoneticEl) phoneticEl.innerText = "";
+      if (pExamples) pExamples.style.display = "none";
+
+      if (isWord) {
+        if (pDetail) {
+          pDetail.style.display = "block";
+          pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+        }
+        // 8秒超时显示刷新按钮
+        shadowHost._detailTimer = setTimeout(() => {
+          if (shadowHost?._detailFullyRendered) return;
           const pDetail = shadow.getElementById("p-detail");
-          const pExamples = shadow.getElementById("p-examples");
-          if (!basicEl?.style) return;
+          if (pDetail) {
+            pDetail.style.display = "block";
+            pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
+            shadow
+              .getElementById("p-detail-retry")
+              ?.addEventListener("click", () => {
+                shadow.getElementById("p-refresh")?.click();
+              });
+          }
+        }, 8000);
+      } else {
+        //  句子：直接隐藏 pDetail，不启动定时器
+        if (pDetail) pDetail.style.display = "none";
+      }
+      if (shadowHost?._engineDotEl)
+        shadowHost._engineDotEl.style.background = "#6b7280";
 
-          basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
-          if (phoneticEl) phoneticEl.innerText = "";
-          if (pExamples) pExamples.style.display = "none";
+      // console.time('[埋点]翻译请求');
 
-          if (isWord) {
+      getDetailedTranslation(
+        text,
+        true,
+        currentTargetLang,
+        {
+          hintInputLang: currentSourceLang,
+        },
+        currentSourceLang,
+      )
+        .then((result) => {
+          // console.timeEnd('[埋点]翻译请求');
+
+          if (basicEl) {
+            basicEl.style.color = "";
+            basicEl.style.fontStyle = "normal";
+          }
+          if (result?.isError) {
+            if (shadowHost?._engineDotEl)
+              shadowHost._engineDotEl.style.background = "#ef4444";
+            clearTimeout(shadowHost?._detailTimer);
+            const pDetail = shadow.getElementById("p-detail");
             if (pDetail) {
-              pDetail.style.display = "block";
-              pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+              pDetail.style.display = "none";
+              pDetail.innerHTML = "";
             }
-            // 8秒超时显示刷新按钮
-            shadowHost._detailTimer = setTimeout(() => {
-              if (shadowHost?._detailFullyRendered) return;
-              const pDetail = shadow.getElementById("p-detail");
-              if (pDetail) {
-                pDetail.style.display = "block";
-                pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
-                shadow
-                  .getElementById("p-detail-retry")
-                  ?.addEventListener("click", () => {
-                    shadow.getElementById("p-refresh")?.click();
-                  });
-              }
-            }, 8000);
-          } else {
-            //  句子：直接隐藏 pDetail，不启动定时器
-            if (pDetail) pDetail.style.display = "none";
+            setBasicError(basicEl, result.basic || "Translation failed");
+            return;
           }
           if (shadowHost?._engineDotEl)
-            shadowHost._engineDotEl.style.background = "#6b7280";
+            shadowHost._engineDotEl.style.background = "#22c55e";
 
-          getDetailedTranslation(
-            text,
-            true,
-            currentTargetLang,
-            {
-              hintInputLang: currentSourceLang,
-            },
-            currentSourceLang,
-          )
-            .then((result) => {
-              // logger.log('[refresh]', {
-              //   isWord: result?.isWord,
-              //   isPartial: result?.isPartial,
-              //   dictData: result?.dictData,
-              //   basic: result?.basic,
-              // });
-              if (basicEl) {
-                basicEl.style.color = "";
-                basicEl.style.fontStyle = "normal";
-              }
-              if (result?.isError) {
-                if (shadowHost?._engineDotEl)
-                  shadowHost._engineDotEl.style.background = "#ef4444";
-                clearTimeout(shadowHost?._detailTimer);
-                const pDetail = shadow.getElementById("p-detail");
-                if (pDetail) {
-                  pDetail.style.display = "none";
-                  pDetail.innerHTML = "";
-                }
-                setBasicError(basicEl, result.basic || "Translation failed");
-                return;
-              }
-              if (shadowHost?._engineDotEl)
-                shadowHost._engineDotEl.style.background = "#22c55e";
+          if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+          handleTranslationResult(result, text, shadow);
+        })
+        .catch((err) => {
+          // console.timeEnd('[埋点]翻译请求');
 
-              if (result?.isPartial && shadowHost?._detailFullyRendered) return;
-              handleTranslationResult(result, text, shadow);
-            })
-            .catch((err) => {
-              if (shadowHost?._engineDotEl)
-                shadowHost._engineDotEl.style.background = "#ef4444";
-              clearTimeout(shadowHost?._detailTimer);
-              const pDetail = shadow.getElementById("p-detail");
-              if (pDetail) {
-                pDetail.style.display = "none";
-                pDetail.innerHTML = "";
-              }
-              setBasicError(basicEl, err.message || "Network Error");
-            })
-            .finally(() => {
-              setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
-            });
+          if (shadowHost?._engineDotEl)
+            shadowHost._engineDotEl.style.background = "#ef4444";
+          clearTimeout(shadowHost?._detailTimer);
+          const pDetail = shadow.getElementById("p-detail");
+          if (pDetail) {
+            pDetail.style.display = "none";
+            pDetail.innerHTML = "";
+          }
+          setBasicError(basicEl, err.message || "Network Error");
+        })
+        .finally(() => {
+          setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
         });
-    }
+    });
+}
 
     //  p-refresh 按钮绑定
     shadow.getElementById("p-refresh").onclick = async (e) => {
