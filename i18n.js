@@ -3717,7 +3717,7 @@ self.i18nAttach10 = {
     cpHint: "⚠ Solo indicaciones de estilo, p. ej., formal / conciso / términos médicos",
     cpSave: "Guardar",
     cpClear: "Borrar",
-    footerReview: "⭐ Calificar en la Tienda",
+    footerReview: "⭐ Calificar",
     footerFeedback: "✉️ Comentarios",
     restoreRules: "Restaurar reglas por defecto",
     builtInNoticeBody: `⬆ Esta función utiliza peticiones de red públicas y es solo para uso personal y no comercial; no requiere configuración de clave.
@@ -3740,7 +3740,7 @@ self.i18nAttach10 = {
     cpHint: "⚠ Indications de style uniquement, ex. formel / concis / termes médicaux",
     cpSave: "Enregistrer",
     cpClear: "Effacer",
-    footerReview: "⭐ Évaluer sur le Store",
+    footerReview: "⭐ Noter",
     footerFeedback: "✉️ Commentaires",
     restoreRules: "Restaurer les règles par défaut",
     builtInNoticeBody: `⬆ Cette fonctionnalité utilise des requêtes réseau publiques et est réservée à un usage personnel et non commercial ; aucune clé n'est requise.
@@ -3763,7 +3763,7 @@ self.i18nAttach10 = {
     cpHint: "⚠ Nur Stil-Hinweise, z. B. formal / prägnant / medizinische Fachbegriffe",
     cpSave: "Speichern",
     cpClear: "Leeren",
-    footerReview: "⭐ Im Store bewerten",
+    footerReview: "⭐ Bewerten",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Standardregeln wiederherstellen",
     builtInNoticeBody: `⬆ Diese Funktion verwendet öffentliche Netzwerkanfragen und ist nur für den persönlichen, nicht-kommerziellen Gebrauch bestimmt; kein Schlüssel erforderlich.
@@ -3786,8 +3786,8 @@ self.i18nAttach10 = {
     cpHint: "⚠ Только указания по стилю, например: официальный тон / кратко / медицинские термины",
     cpSave: "Сохранить",
     cpClear: "Очистить",
-    footerReview: "⭐ Оценить в магазине",
-    footerFeedback: "✉️ Обратная связь",
+    footerReview: "⭐ Оценить",
+    footerFeedback: "✉️ Отзыв",
     restoreRules: "Восстановить настройки по умолчанию",
     builtInNoticeBody: `⬆ Эта функция работает через публичные запросы и предназначена только для личного некоммерческого использования; ключ не требуется.
 ---
@@ -3809,7 +3809,7 @@ self.i18nAttach10 = {
     cpHint: "⚠ Chỉ hỗ trợ mô tả phong cách, ví dụ: giọng điệu trang trọng / ngắn gọn / thuật ngữ y học",
     cpSave: "Lưu",
     cpClear: "Xóa",
-    footerReview: "⭐ Đánh giá trên Store",
+    footerReview: "⭐ Đánh giá",
     footerFeedback: "✉️ Phản hồi",
     restoreRules: "Khôi phục quy tắc mặc định",
     builtInNoticeBody: `⬆ Tính năng này sử dụng yêu cầu mạng công cộng, chỉ dành cho mục đích học tập/phi thương mại; không cần khóa API.

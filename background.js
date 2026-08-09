@@ -4047,43 +4047,69 @@ function drawText(ctx, text, x, y, color) {
 
 //自动清理缓存
 async function cleanExpiredCache() {
-    const EXPIRE_MS = 60 * 24 * 60 * 60 * 1000;
-    const MAX_COUNT = 50000;
-    const CLEAN_INTERVAL = 24 * 60 * 60 * 1000;
-    //const CLEAN_INTERVAL=0; //测试
-
     logger.log('[Cache] cleanExpiredCache 开始执行');
 
     const lastClean = await handleIdbGet(['_cacheCleanTs']);
     const lastTs = lastClean?.['_cacheCleanTs'] || 0;
-    logger.log('[Cache] 上次清理时间:', lastTs, '距今:', Date.now() - lastTs, 'ms');
-    if (Date.now() - lastTs < CLEAN_INTERVAL) {
-        logger.log('[Cache] 未到清理间隔，跳过');
-        return;
-    }
+    if (Date.now() - lastTs < CLEAN_INTERVAL) return;
 
     const all = await handleIdbGetAll('tr_');
     const now = Date.now();
-    const entries = Object.entries(all || {});
-    logger.log('[Cache] 读取到 tr_ 条数:', entries.length);
+    let entries = Object.entries(all || {});
 
-    const getTs = (v) => v?.ts || v?.timestamp || 0;  //  兼容两个字段名
+    // 0. 缺时间戳的条目先补写为当前时间，避免被误判为"最旧"而优先淘汰
+    const patch = {};
+    entries = entries.map(([k, v]) => {
+        const ts = v?.ts || v?.timestamp || 0;
+        if (!ts) {
+            const patched = { ...v, ts: now };
+            patch[k] = patched;
+            return [k, patched];
+        }
+        return [k, v];
+    });
+    if (Object.keys(patch).length > 0) {
+        await handleIdbSet(patch);
+        logger.log('[Cache] 补写时间戳条数:', Object.keys(patch).length);
+    }
 
-    const expired = entries
-        .filter(([, v]) => getTs(v) && (now - getTs(v)) > EXPIRE_MS)
+    // 1. 清理真正的僵尸数据：远超180天且从未再被访问过的
+    const orphaned = entries
+        .filter(([, v]) => {
+            const ts = v?.ts || v?.timestamp || 0;
+            return ts && (now - ts) > CACHE_POLICY.orphanSafetyNetMs;
+        })
         .map(([k]) => k);
-    logger.log('[Cache] 过期条数:', expired.length);
-    for (const k of expired) await handleIdbRemove(k);
+    for (const k of orphaned) await handleIdbRemove(k);
+    logger.log('[Cache] 兜底过期清理条数:', orphaned.length);
 
-    const remaining = entries
-        .filter(([k, v]) => !expired.includes(k) && getTs(v))
-        .sort(([, a], [, b]) => getTs(a) - getTs(b));
-    logger.log('[Cache] 剩余条数:', remaining.length, '上限:', MAX_COUNT);
+    // 2. 按 AI / 免费引擎 分桶（别名指针体积如实统计 ）
+    const remaining = entries.filter(([k]) => !orphaned.includes(k));
+    const aiKeys = new Set(AI_LLM_WHITE_LIST);
+    const buckets = { ai: [], free: [] };
 
-    if (remaining.length > MAX_COUNT) {
-        const toDelete = remaining.slice(0, remaining.length - MAX_COUNT);
-        logger.log('[Cache] 超出上限，额外删除:', toDelete.length);
-        for (const [k] of toDelete) await handleIdbRemove(k);
+    for (const [k, v] of remaining) {
+        const engine = k.split('_')[1];
+        const bucket = aiKeys.has(engine) ? 'ai' : 'free';
+        buckets[bucket].push({
+            key: k,
+            ts: v?.ts || v?.timestamp || 0,
+            size: JSON.stringify(v).length,
+        });
+    }
+
+    // 3. 分别按各自配额做 LRU 淘汰
+    for (const bucket of ['ai', 'free']) {
+        const list = buckets[bucket].sort((a, b) => a.ts - b.ts);
+        let total = list.reduce((s, r) => s + r.size, 0);
+        const quota = CACHE_POLICY[bucket].quotaBytes;
+        let i = 0;
+        while (total > quota && i < list.length) {
+            await handleIdbRemove(list[i].key);
+            total -= list[i].size;
+            i++;
+        }
+        logger.log(`[Cache] ${bucket} 桶因超配额淘汰条数:`, i);
     }
 
     await handleIdbSet({ '_cacheCleanTs': Date.now() });
@@ -4121,11 +4147,31 @@ async function cleanupDeletedVocab() {
         logger.warn('[Vocab] 清理假删除失败:', err);
     }
 }
-// 启动时检测默认翻译引擎并缓存结果，减少后续请求延迟
+// 定时检测默认翻译引擎并缓存结果，减少后续请求延迟
+async function ensureAlarm(name, periodInMinutes) {
+    const existing = await chrome.alarms.get(name);
+    if (!existing) {
+        chrome.alarms.create(name, { periodInMinutes });
+    }
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+    ensureAlarm('cleanCache', 60 * 24);
+    ensureAlarm('cleanVocab', 60 * 24 * 3);
+});
+
 chrome.runtime.onStartup.addListener(() => {
     detectAndCacheDefaultEngine(false);
-    setTimeout(() => cleanExpiredCache(), 5000);
-    setTimeout(() => cleanupDeletedVocab(), 10000);
+    ensureAlarm('cleanCache', 60 * 24);
+    ensureAlarm('cleanVocab', 60 * 24 * 3);
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'cleanCache') {
+        cleanExpiredCache();
+    } else if (alarm.name === 'cleanVocab') {
+        cleanupDeletedVocab();
+    }
 });
 
 async function detectAndCacheDefaultEngine(force = false) {

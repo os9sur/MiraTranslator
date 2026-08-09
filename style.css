@@ -90,7 +90,7 @@
 }
 
 .row-text:hover {
-  background: rgba(255, 255, 255, 0.049);
+  background: rgba(255, 255, 255, 0.099);
 }
 
 .row-text label {
@@ -1206,7 +1206,7 @@ select:hover {
   position: relative;
   background-color: transparent;
   padding: 8px 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1229,14 +1229,14 @@ select:hover {
 }
 
 #inspectHeader:hover {
-  animation-play-state: paused;
-  background-color: rgba(30, 41, 59, 0.45);
+  animation-play-state: paused; 
+  background-color: rgba(30, 41, 59, 0.55);
 
   background-size: 100% 100%;
-  background-image: linear-gradient(90deg,
-      rgba(34, 197, 94, 0.15) 0%,
-      rgba(30, 41, 59, 0.6) 60%,
-      rgba(15, 23, 42, 0) 100%);
+  background-image: linear-gradient(90deg, 
+    rgba(34, 197, 94, 0.35) 0%, 
+    rgba(30, 41, 59, 0.8) 60%,
+    rgba(15, 23, 42, 0) 100%);
 }
 
 /* 钟摆扫描动画位置控制 */

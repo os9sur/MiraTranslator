@@ -1764,40 +1764,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resVoiceHeader = document.getElementById('resVoiceHeader');
   const resSaveBtn = document.getElementById('resSaveBtn');
   const resRefreshBtn = document.getElementById('resRefreshBtn');
-const input = document.getElementById('searchTextInput');
+  const input = document.getElementById('searchTextInput');
 
-input.addEventListener('input', function () {
-  this.style.height = 'auto';
-  
-  let newHeight = this.scrollHeight;
-  if (newHeight > 80) {
-    newHeight = 80;
-    this.style.overflowY = 'auto';
-  } else {
-    this.style.overflowY = 'hidden';
-  }
-  
-  this.style.height = newHeight + 'px';
-  
-  if (!this.value.trim()) {
-    const resultArea = document.getElementById('resultArea');
-    if (resultArea) resultArea.style.display = 'none';
-    const actionArea = document.getElementById('actionArea');
-    if (actionArea) actionArea.style.display = 'none';
-    
-    this.style.height = '35px';
-    this.style.overflowY = 'hidden';
-  }
-});
+  input.addEventListener('input', function () {
+    this.style.height = 'auto';
 
-input.onkeydown = function (e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    if (typeof triggerSearch === 'function') {
-      triggerSearch(this.value.trim());
+    let newHeight = this.scrollHeight;
+    if (newHeight > 80) {
+      newHeight = 80;
+      this.style.overflowY = 'auto';
+    } else {
+      this.style.overflowY = 'hidden';
     }
-  }
-};
+
+    this.style.height = newHeight + 'px';
+
+    if (!this.value.trim()) {
+      const resultArea = document.getElementById('resultArea');
+      if (resultArea) resultArea.style.display = 'none';
+      const actionArea = document.getElementById('actionArea');
+      if (actionArea) actionArea.style.display = 'none';
+
+      this.style.height = '35px';
+      this.style.overflowY = 'hidden';
+    }
+  });
+
+  input.onkeydown = function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (typeof triggerSearch === 'function') {
+        triggerSearch(this.value.trim());
+      }
+    }
+  };
 
   document.getElementById('searchSubmitBtn').onclick = () => {
     triggerSearch(input.value.trim());
@@ -2498,32 +2498,136 @@ input.onkeydown = function (e) {
     speakText(text, this, finalLang);
   };
 
-  async function triggerRefresh(btnElement, actionName) {
-    btnElement.classList.add('loading');
-    try {
-      if (typeof chrome === 'undefined' || !chrome.runtime?.id) {
-        showUpdateNotification();
-        btnElement.classList.remove('loading');
-        return;
-      }
-      const tab = await getActiveTab();
-      if (tab?.id) {
-        await safeSendToTab(tab.id, {
-          action: actionName,
-          config: { forceAll: true }
-        }).catch(err => {
-          logger.warn(`[Popup] 消息下发失败 (页面可能未就绪):`, err.message);
-        });
-        logger.log(`[Popup] ${actionName} 流程尝试结束`);
-      }
-    } catch (error) {
-      logger.warn("[Popup] 无法连接到目标页面脚本:", error.message);
-    } finally {
-      setTimeout(() => {
-        btnElement.classList.remove('loading');
-      }, 800);
-    }
+// 刷新翻译
+function triggerRefresh() {
+  const refreshBtn = shadow.getElementById("p-refresh");
+  if (refreshBtn?.classList.contains("spinning")) return;
+
+  if (refreshBtn) refreshBtn.classList.add("spinning");
+
+  if (shadowHost) {
+    clearTimeout(shadowHost._slowTimer);
+    clearTimeout(shadowHost._detailTimer);
+    shadowHost._slowTimer = null;
+    shadowHost._detailTimer = null;
+    shadowHost._detailFullyRendered = false;
   }
+
+  const currentTargetLang = window.currentTargetL || state.targetLang;
+  const currentSourceLang = state.sourceLang === "auto"
+    ? (detectedHintLang || null)
+    : state.sourceLang;
+
+  // 判断是单词还是句子（单词：无空格且长度<=30）
+  const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
+
+  const fingerprint =
+    typeof hash === "function"
+      ? hash(
+        text
+          .trim()
+          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+          .toLowerCase(),
+      )
+      : text.trim().substring(0, 50);
+
+  // 用已知的引擎全集直接拼出精确key去删，耗时恒定，不随缓存总量变慢 
+  const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
+  const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
+  const keysToRemove = ALL_ENGINES.map(
+    (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
+  );
+
+  Promise.all(keysToRemove.map((k) => idb.remove(k)))
+   
+    .then(() => {
+      const saveBtn = shadow.getElementById("p-save");
+      if (saveBtn) saveBtn._miraReady = false;
+
+      const basicEl = shadow.getElementById("p-basic");
+      const phoneticEl = shadow.getElementById("p-phonetic");
+      const pDetail = shadow.getElementById("p-detail");
+      const pExamples = shadow.getElementById("p-examples");
+      if (!basicEl?.style) return;
+
+      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
+      if (phoneticEl) phoneticEl.innerText = "";
+      if (pExamples) pExamples.style.display = "none";
+
+      if (isWord) {
+        if (pDetail) {
+          pDetail.style.display = "block";
+          pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+        }
+        // 8秒超时显示刷新按钮
+        shadowHost._detailTimer = setTimeout(() => {
+          if (shadowHost?._detailFullyRendered) return;
+          const pDetail = shadow.getElementById("p-detail");
+          if (pDetail) {
+            pDetail.style.display = "block";
+            pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
+            shadow
+              .getElementById("p-detail-retry")
+              ?.addEventListener("click", () => {
+                shadow.getElementById("p-refresh")?.click();
+              });
+          }
+        }, 8000);
+      } else {
+        //  句子：直接隐藏 pDetail，不启动定时器
+        if (pDetail) pDetail.style.display = "none";
+      }
+      if (shadowHost?._engineDotEl)
+        shadowHost._engineDotEl.style.background = "#6b7280";
+
+      getDetailedTranslation(
+        text,
+        true,
+        currentTargetLang,
+        {
+          hintInputLang: currentSourceLang,
+        },
+        currentSourceLang,
+      )
+        .then((result) => {
+          if (basicEl) {
+            basicEl.style.color = "";
+            basicEl.style.fontStyle = "normal";
+          }
+          if (result?.isError) {
+            if (shadowHost?._engineDotEl)
+              shadowHost._engineDotEl.style.background = "#ef4444";
+            clearTimeout(shadowHost?._detailTimer);
+            const pDetail = shadow.getElementById("p-detail");
+            if (pDetail) {
+              pDetail.style.display = "none";
+              pDetail.innerHTML = "";
+            }
+            setBasicError(basicEl, result.basic || "Translation failed");
+            return;
+          }
+          if (shadowHost?._engineDotEl)
+            shadowHost._engineDotEl.style.background = "#22c55e";
+
+          if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+          handleTranslationResult(result, text, shadow);
+        })
+        .catch((err) => {
+          if (shadowHost?._engineDotEl)
+            shadowHost._engineDotEl.style.background = "#ef4444";
+          clearTimeout(shadowHost?._detailTimer);
+          const pDetail = shadow.getElementById("p-detail");
+          if (pDetail) {
+            pDetail.style.display = "none";
+            pDetail.innerHTML = "";
+          }
+          setBasicError(basicEl, err.message || "Network Error");
+        })
+        .finally(() => {
+          setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
+        });
+    });
+}
   document.getElementById('btnRefreshPage').onclick = function (e) {
     e.stopPropagation();
     triggerRefresh(this, "RE_SCAN_PAGE");
@@ -2539,21 +2643,25 @@ input.onkeydown = function (e) {
       const arrow = document.getElementById('inspectArrow');
       if (!content || !arrow) return;
 
-      const savedState = localStorage.getItem('inspectContainerState') || 'collapsed';
-      if (savedState === 'expanded') {
-        content.style.transition = 'none';
-        content.style.maxHeight = '600px';
-        content.style.opacity = '1';
-        content.style.overflow = 'visible';
-        content.style.marginTop = '8px';
-        arrow.classList.add('arrow-expanded');
-      } else {
+      const savedState = localStorage.getItem('inspectContainerState');
+
+      if (savedState === 'collapsed') {
+        // 用户明确收起过，直接折叠
         content.style.transition = 'none';
         content.style.maxHeight = '0px';
         content.style.opacity = '0';
         content.style.overflow = 'hidden';
         content.style.marginTop = '0px';
         arrow.classList.remove('arrow-expanded');
+
+      } else {
+        // 已展开过，或首次使用：直接展开，不再自动收起
+        content.style.transition = 'none';
+        content.style.maxHeight = '600px';
+        content.style.opacity = '1';
+        content.style.overflow = 'visible';
+        content.style.marginTop = '8px';
+        arrow.classList.add('arrow-expanded');
       }
     };
 
@@ -2597,7 +2705,7 @@ input.onkeydown = function (e) {
         localStorage.setItem('inspectContainerState', 'collapsed');
       }
     });
-  }
+}
 
   const refreshUI = async () => {
     try {
@@ -2644,23 +2752,30 @@ input.onkeydown = function (e) {
 
       // 控制显隐youtube操作提示
       if (ytSwitch && btnYT) {
-        const ytRow = ytSwitch.closest('.row');
-        // 获取当前实时状态
-        const isYTDisabled = ytRow && (ytRow.classList.contains('disabled') || ytRow.style.display === 'none');
-        const isYTOn = !!conf.yt;
+        const ytContainer = document.getElementById('youtube-option-container');
 
-        ytSwitch.classList.toggle('on', isYTOn);
-        btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
-
-        if (ytHint) {
-          // 只有 开启状态 + 非禁用 + YouTube页面 + 非受限页面 才准显示
-          const finalShouldShow = isYTOn && !isYTDisabled && isYouTube && !window.isRestricted;
-
-          if (finalShouldShow) {
-            showYtHintWithFade(storage.ui_language);
-          } else {
+        if (currentMode === 'global' || !isYouTube) {
+          // 全局模式 或 非 YouTube 页面，直接隐藏
+          if (ytContainer) ytContainer.style.display = 'none';
+          if (ytHint) {
             ytHint.classList.remove('show');
             ytHint.style.display = 'none';
+          }
+        } else {
+          // current 模式 + YouTube 页面才显示
+          if (ytContainer) ytContainer.style.display = '';
+          const isYTOn = !!conf.yt;
+          ytSwitch.classList.toggle('on', isYTOn);
+          btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
+
+          if (ytHint) {
+            const finalShouldShow = isYTOn && isYouTube && !window.isRestricted;
+            if (finalShouldShow) {
+              showYtHintWithFade(storage.ui_language);
+            } else {
+              ytHint.classList.remove('show');
+              ytHint.style.display = 'none';
+            }
           }
         }
       }

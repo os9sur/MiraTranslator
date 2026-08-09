@@ -4277,6 +4277,7 @@ function initSelectionTranslate() {
   let shadowHost = null,
     popupEl = null,
     logoBtn = null;
+  let closeTimer = null;
   function clampPopupToViewport(el) {
     const margin = 10;
     const rect = el.getBoundingClientRect();
@@ -4590,11 +4591,11 @@ function initSelectionTranslate() {
                       0 10px 30px var(--p-shadow);
         }
       }
-}
+    }
 
-@keyframes panelFloatLight {
-  0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
-}
+    @keyframes panelFloatLight {
+      0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
+    }
 
       /* ── 主面板 ── */
       .mira-kt-panel {
@@ -4631,10 +4632,13 @@ function initSelectionTranslate() {
       .panel:hover                  { animation-duration: 3s !important; }
       :host([theme="light"]) .panel:hover { animation-duration: 4s !important; }
 
+      
+
       .is-hidden {
-        opacity:          0 !important;
-        pointer-events:   none !important;
-        transform:        scale(0.8) translateY(8px) !important;
+          opacity: 0 !important;
+          transform: scale(0.05) !important;
+          pointer-events: none !important;
+          transition: transform 0.35s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease !important;
       }
 
       /* ── 拖拽区 ── */
@@ -4781,6 +4785,7 @@ function initSelectionTranslate() {
       .icon-btn.theme:active           { transform: scale(0.92) !important; }
 
       /* 发音按钮 */
+      #p-speak svg { width: 20px !important; height: 20px !important; }
       #p-speak:hover     { background: rgba(56,189,248,0.2) !important; box-shadow: 0 0 8px rgba(56,189,248,0.4); }
       #p-speak:hover svg { stroke: #38bdf8 !important; }
 
@@ -4908,36 +4913,36 @@ function initSelectionTranslate() {
       }
 
       
-@keyframes tts-loading-spin {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
+      @keyframes tts-loading-spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
 
-.tts-loading {
-  position: relative;
-}
+      .tts-loading {
+        position: relative;
+      }
 
-.tts-loading::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -3px;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid rgba(56, 189, 248, 0.2);
-  border-top-color: #38bdf8;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: tts-loading-spin 0.7s linear infinite;
-}
+      .tts-loading::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -3px;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid rgba(56, 189, 248, 0.2);
+        border-top-color: #38bdf8;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: tts-loading-spin 0.7s linear infinite;
+      }
 
-.tts-loading svg {
-  opacity: 0.3;
-}
+      .tts-loading svg {
+        opacity: 0.3;
+      }
       .mira-font-family{
           font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important;
       }
@@ -5102,28 +5107,28 @@ function initSelectionTranslate() {
     opacity: 0.6;
     display: inline-block;
   }
-.mira-example-speak.tts-loading::before {
-  display: none;
-}
+    .mira-example-speak.tts-loading::before {
+      display: none;
+    }
 
-.mira-example-speak.tts-loading::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid rgba(56, 189, 248, 0.2);
-  border-top-color: #38bdf8;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: tts-loading-spin 0.7s linear infinite;
-}
-  .mira-example-speak:hover {
-    opacity: 1;
-    transform: scale(1.2);
-  }
+    .mira-example-speak.tts-loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: tts-loading-spin 0.7s linear infinite;
+    }
+    .mira-example-speak:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
     .mira-example-speak.is-speaking {
       opacity: 1;
       color: #38bdf8 !important;
@@ -5194,6 +5199,60 @@ function initSelectionTranslate() {
       opacity: 0;
       visibility: hidden;
     }
+
+    .p-header-brand { display: flex; align-items: center; gap: 5px; user-select: none; }
+    .p-header-logo { width: 23px; height: 23px; border-radius: 2px; }
+    .p-header-title { opacity: 0.6; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--p-text-main); font-style: italic; }
+    .p-header-actions { display: flex; gap: 4px; align-items: center; height: 40px; position: relative; z-index: 30; right: -15px; }
+
+    @media (pointer: coarse) {
+      #p-header-wrapper { padding: 6px 16px 0; }
+      #p-header { height: 30px; margin-bottom: 2px; } /*移动端header高度*/
+      #p-header img { width: 22px; height: 22px; }
+
+      .p-header-actions { height: 28px; }
+
+      .header-controls {
+        height: 35px;
+        gap: 8px;
+        right: 12px;
+      }
+
+      .icon-btn { width: 28px; height: 28px; }
+      .icon-btn svg { width: 16px; height: 16px; }
+      #p-pin svg {
+        width: 19px !important;
+        height: 19px !important;
+        stroke-width: 2.8 !important;
+      }
+      .icon-btn.theme svg#theme-icon {
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      #p-refresh svg {
+        width: 14px !important;
+        height: 14px !important;
+        stroke-width: 2.5 !important;
+      }
+        #p-save svg {
+        width: 18px !important;
+        height: 18px !important;
+        stroke-width: 2.0 !important;
+      }
+        #p-speak svg {
+        width: 19px !important;
+        height: 19px !important;
+      }
+        #p-speak.icon-btn {
+        width: 30px !important;
+        height: 30px !important;
+      }
+
+      .close-btn { padding: 7px 10px 10px 10px; font-size: 19px; }
+    }
+
+    
       `;
 
     return style;
@@ -5257,7 +5316,25 @@ function initSelectionTranslate() {
   }
 
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
+  // 提取出的公共关闭函数
+  function closePopup() {
+    if (!popupEl) return;
+    const rect = popupEl.getBoundingClientRect();
+    const originX = lastSelectionPos.clientX - rect.left;
+    const originY = lastSelectionPos.clientY - rect.top;
+    popupEl.style.transformOrigin = `${originX}px ${originY}px`;
+    popupEl.classList.add('is-hidden');
 
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!popupEl.classList.contains('is-hidden')) return;
+      popupEl.style.display = 'none';
+      popupEl.style.transformOrigin = '';
+      popupEl.style.transition = '';
+      popupEl.style.animation = '';
+      popupEl.classList.remove('is-hidden');
+    }, 480);
+  }
   function setPanelGlowColor(panel) {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
     const rgb = window
@@ -5833,6 +5910,7 @@ function initSelectionTranslate() {
     if (ctx.length < 20) return null;
     return detectSourceLang(ctx) || null;
   })();
+  let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
   async function renderAndShowPopup(
     text,
     pos,
@@ -5860,18 +5938,18 @@ function initSelectionTranslate() {
     // 头部 HTML
     popupEl.querySelector("#p-header-wrapper").innerHTML = `
     <div id="p-header">
-      <div style="display:flex;align-items:center;gap:5px;user-select:none;">
-        <img src="${logoBase64}" style="width:23px;height:23px;border-radius:2px;filter:drop-shadow(0 0 4px var(--p-accent));">
-        <span class="mira-font-family" style="opacity:0.6;font-size:11px;font-weight:bold;letter-spacing:2px;color:var(--p-text-main);font-style:italic;">${t("appName", window.uiLanguage) || APP_NAME}</span>
-      </div>
-      <div style="display:flex;gap:4px;align-items:center;height:40px;position:relative;z-index:30;right:-15px;">
-        <div id="p-theme-toggle" class="icon-btn theme" title="">
-          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round"></svg>
-        </div>
-      </div>
-    </div>`;
+  <div class="p-header-brand">
+    <img src="${logoBase64}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
+    <span class="mira-font-family p-header-title">${t("appName", window.uiLanguage) || APP_NAME}</span>
+  </div>
+  <div class="p-header-actions">
+    <div id="p-theme-toggle" class="icon-btn theme" title="">
+      <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"></svg>
+    </div>
+  </div>
+</div>`;
 
     // 内容区
     const contentContainer = popupEl.querySelector("#p-content-container");
@@ -5897,6 +5975,7 @@ function initSelectionTranslate() {
     });
 
     initEngineSelector(shadow);
+    clearTimeout(closeTimer);
     // 面板可见
     popupEl.classList.remove("is-hidden");
     Object.assign(popupEl.style, {
@@ -5970,18 +6049,11 @@ function initSelectionTranslate() {
     // 关闭
     shadow.getElementById("close-p").onclick = (e) => {
       e.stopPropagation();
-
-      const existingDropdown =
-        shadowHost.shadowRoot.getElementById("p-lang-dropdown");
+      const existingDropdown = shadowHost.shadowRoot.getElementById("p-lang-dropdown");
       if (existingDropdown) existingDropdown.remove();
-
       shadowHost.setAttribute("data-pinned", "false");
-      popupEl.classList.add("is-hidden");
-      setTimeout(() => {
-        if (shadowHost.getAttribute("data-pinned") !== "true")
-          popupEl.style.display = "none";
-      }, 200);
       stopSpeech();
+      closePopup();
     };
 
     // 固定
@@ -6054,140 +6126,144 @@ function initSelectionTranslate() {
       }
     }
     // 刷新翻译
-    function triggerRefresh() {
-      const refreshBtn = shadow.getElementById("p-refresh");
-      if (refreshBtn?.classList.contains("spinning")) return;
+function triggerRefresh() {
+  const refreshBtn = shadow.getElementById("p-refresh");
+  if (refreshBtn?.classList.contains("spinning")) return;
 
-      if (shadowHost) {
-        clearTimeout(shadowHost._slowTimer);
-        clearTimeout(shadowHost._detailTimer);
-        shadowHost._slowTimer = null;
-        shadowHost._detailTimer = null;
-        shadowHost._detailFullyRendered = false;
-      }
+  if (refreshBtn) refreshBtn.classList.add("spinning");
 
-      const currentTargetLang = window.currentTargetL || state.targetLang;
-      const currentSourceLang = state.sourceLang === "auto"
-        ? (detectedHintLang || null)
-        : state.sourceLang;
+  if (shadowHost) {
+    clearTimeout(shadowHost._slowTimer);
+    clearTimeout(shadowHost._detailTimer);
+    shadowHost._slowTimer = null;
+    shadowHost._detailTimer = null;
+    shadowHost._detailFullyRendered = false;
+  }
 
-      // 判断是单词还是句子（单词：无空格且长度<=30）
-      const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
+  const currentTargetLang = window.currentTargetL || state.targetLang;
+  const currentSourceLang = state.sourceLang === "auto"
+    ? (detectedHintLang || null)
+    : state.sourceLang;
 
-      const fingerprint =
-        typeof hash === "function"
-          ? hash(
-            text
-              .trim()
-              .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
-              .toLowerCase(),
-          )
-          : text.trim().substring(0, 50);
+  // 判断是单词还是句子（单词：无空格且长度<=30）
+  const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
 
-      idb
-        .getAll("tr_")
-        .then((allCache) => {
-          return Promise.all(
-            Object.keys(allCache)
-              .filter((k) => k.includes(fingerprint))
-              .map((k) => idb.remove(k)),
-          );
-        })
-        .then(() => {
-          const saveBtn = shadow.getElementById("p-save");
-          if (saveBtn) saveBtn._miraReady = false;
+  const fingerprint =
+    typeof hash === "function"
+      ? hash(
+        text
+          .trim()
+          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+          .toLowerCase(),
+      )
+      : text.trim().substring(0, 50);
 
-          const basicEl = shadow.getElementById("p-basic");
-          const phoneticEl = shadow.getElementById("p-phonetic");
+  // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
+  const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
+  const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
+  const keysToRemove = ALL_ENGINES.map(
+    (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
+  );
+
+  // console.time('[埋点]删除旧缓存');
+
+  Promise.all(keysToRemove.map((k) => idb.remove(k)))
+    .then(() => {
+      // console.timeEnd('[埋点]删除旧缓存');
+
+      const saveBtn = shadow.getElementById("p-save");
+      if (saveBtn) saveBtn._miraReady = false;
+
+      const basicEl = shadow.getElementById("p-basic");
+      const phoneticEl = shadow.getElementById("p-phonetic");
+      const pDetail = shadow.getElementById("p-detail");
+      const pExamples = shadow.getElementById("p-examples");
+      if (!basicEl?.style) return;
+
+      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
+      if (phoneticEl) phoneticEl.innerText = "";
+      if (pExamples) pExamples.style.display = "none";
+
+      if (isWord) {
+        if (pDetail) {
+          pDetail.style.display = "block";
+          pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+        }
+        // 8秒超时显示刷新按钮
+        shadowHost._detailTimer = setTimeout(() => {
+          if (shadowHost?._detailFullyRendered) return;
           const pDetail = shadow.getElementById("p-detail");
-          const pExamples = shadow.getElementById("p-examples");
-          if (!basicEl?.style) return;
+          if (pDetail) {
+            pDetail.style.display = "block";
+            pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
+            shadow
+              .getElementById("p-detail-retry")
+              ?.addEventListener("click", () => {
+                shadow.getElementById("p-refresh")?.click();
+              });
+          }
+        }, 8000);
+      } else {
+        //  句子：直接隐藏 pDetail，不启动定时器
+        if (pDetail) pDetail.style.display = "none";
+      }
+      if (shadowHost?._engineDotEl)
+        shadowHost._engineDotEl.style.background = "#6b7280";
 
-          if (refreshBtn) refreshBtn.classList.add("spinning");
-          basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
-          if (phoneticEl) phoneticEl.innerText = "";
-          if (pExamples) pExamples.style.display = "none";
+      // console.time('[埋点]翻译请求');
 
-          if (isWord) {
+      getDetailedTranslation(
+        text,
+        true,
+        currentTargetLang,
+        {
+          hintInputLang: currentSourceLang,
+        },
+        currentSourceLang,
+      )
+        .then((result) => {
+          // console.timeEnd('[埋点]翻译请求');
+
+          if (basicEl) {
+            basicEl.style.color = "";
+            basicEl.style.fontStyle = "normal";
+          }
+          if (result?.isError) {
+            if (shadowHost?._engineDotEl)
+              shadowHost._engineDotEl.style.background = "#ef4444";
+            clearTimeout(shadowHost?._detailTimer);
+            const pDetail = shadow.getElementById("p-detail");
             if (pDetail) {
-              pDetail.style.display = "block";
-              pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+              pDetail.style.display = "none";
+              pDetail.innerHTML = "";
             }
-            // 8秒超时显示刷新按钮
-            shadowHost._detailTimer = setTimeout(() => {
-              if (shadowHost?._detailFullyRendered) return;
-              const pDetail = shadow.getElementById("p-detail");
-              if (pDetail) {
-                pDetail.style.display = "block";
-                pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
-                shadow
-                  .getElementById("p-detail-retry")
-                  ?.addEventListener("click", () => {
-                    shadow.getElementById("p-refresh")?.click();
-                  });
-              }
-            }, 8000);
-          } else {
-            //  句子：直接隐藏 pDetail，不启动定时器
-            if (pDetail) pDetail.style.display = "none";
+            setBasicError(basicEl, result.basic || "Translation failed");
+            return;
           }
           if (shadowHost?._engineDotEl)
-            shadowHost._engineDotEl.style.background = "#6b7280";
+            shadowHost._engineDotEl.style.background = "#22c55e";
 
-          getDetailedTranslation(
-            text,
-            true,
-            currentTargetLang,
-            {
-              hintInputLang: currentSourceLang,
-            },
-            currentSourceLang,
-          )
-            .then((result) => {
-              // logger.log('[refresh]', {
-              //   isWord: result?.isWord,
-              //   isPartial: result?.isPartial,
-              //   dictData: result?.dictData,
-              //   basic: result?.basic,
-              // });
-              if (basicEl) {
-                basicEl.style.color = "";
-                basicEl.style.fontStyle = "normal";
-              }
-              if (result?.isError) {
-                if (shadowHost?._engineDotEl)
-                  shadowHost._engineDotEl.style.background = "#ef4444";
-                clearTimeout(shadowHost?._detailTimer);
-                const pDetail = shadow.getElementById("p-detail");
-                if (pDetail) {
-                  pDetail.style.display = "none";
-                  pDetail.innerHTML = "";
-                }
-                setBasicError(basicEl, result.basic || "Translation failed");
-                return;
-              }
-              if (shadowHost?._engineDotEl)
-                shadowHost._engineDotEl.style.background = "#22c55e";
+          if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+          handleTranslationResult(result, text, shadow);
+        })
+        .catch((err) => {
+          // console.timeEnd('[埋点]翻译请求');
 
-              if (result?.isPartial && shadowHost?._detailFullyRendered) return;
-              handleTranslationResult(result, text, shadow);
-            })
-            .catch((err) => {
-              if (shadowHost?._engineDotEl)
-                shadowHost._engineDotEl.style.background = "#ef4444";
-              clearTimeout(shadowHost?._detailTimer);
-              const pDetail = shadow.getElementById("p-detail");
-              if (pDetail) {
-                pDetail.style.display = "none";
-                pDetail.innerHTML = "";
-              }
-              setBasicError(basicEl, err.message || "Network Error");
-            })
-            .finally(() => {
-              setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
-            });
+          if (shadowHost?._engineDotEl)
+            shadowHost._engineDotEl.style.background = "#ef4444";
+          clearTimeout(shadowHost?._detailTimer);
+          const pDetail = shadow.getElementById("p-detail");
+          if (pDetail) {
+            pDetail.style.display = "none";
+            pDetail.innerHTML = "";
+          }
+          setBasicError(basicEl, err.message || "Network Error");
+        })
+        .finally(() => {
+          setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
         });
-    }
+    });
+}
 
     //  p-refresh 按钮绑定
     shadow.getElementById("p-refresh").onclick = async (e) => {
@@ -6871,12 +6947,12 @@ function initSelectionTranslate() {
             </svg>
           </div>
 
-          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:1px 0 0 0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-            </svg>
-          </div>
+          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+          </svg>
+        </div>
         </div>
       </div>
 
@@ -7640,7 +7716,7 @@ function initSelectionTranslate() {
         }
       }
     } catch (_) { }
- 
+
     // 触摸端按钮加大，且给按钮加/去 touch 类（class 决定实际 CSS 尺寸）
     const btnSize = isTouchEvent ? 34 : 22; //  与 CSS 中 .eclipse-logo-btn / .touch 的尺寸一致
     if (isTouchEvent) {
@@ -7679,6 +7755,7 @@ function initSelectionTranslate() {
     logoBtn.classList.add("show");
     clearTimeout(window.logoAutoTimer);
     window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
+
 
     async function triggerTranslation() {
       // 用 selectionchange 持续更新的快照
@@ -7787,6 +7864,7 @@ function initSelectionTranslate() {
           currentTarget,
           detectedSourceLang
         );
+        lastSelectionPos = { clientX: mouseX, clientY: mouseY };
         forceHideLogo();
       } catch (e) {
         if (e.message?.includes("context invalidated")) {
@@ -7824,47 +7902,36 @@ function initSelectionTranslate() {
 
   window.addEventListener("mouseup", handleSelectionEnd);
   window.addEventListener("touchend", handleSelectionEnd);
-
-  document.addEventListener("mousedown", (e) => {
+  document.addEventListener("pointerdown", (e) => {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
 
-    const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && e.pointerType === '');
-    if (isTouch) return;
-
-    const existingDropdown =
-      shadowHost?.shadowRoot?.getElementById("p-lang-dropdown");
+    const existingDropdown = shadowHost?.shadowRoot?.getElementById("p-lang-dropdown");
     if (existingDropdown) existingDropdown.remove();
     forceHideLogo();
+
     if (
       shadowHost &&
       shadowHost.getAttribute("data-pinned") !== "true" &&
-      typeof popupEl !== "undefined"
+      typeof popupEl !== "undefined" &&
+      popupEl?.style?.display !== "none"
     ) {
       stopSpeech();
-      if (popupEl) popupEl.classList.add("is-hidden");
-      setTimeout(() => {
-        popupEl.style.display = "none";
-      }, 200);
+      closePopup();
+      window.getSelection()?.removeAllRanges();
     }
-  });
+  }, { passive: true });
+
   document.addEventListener("contextmenu", (e) => {
     if (e.pointerType === 'touch' || e.button === -1) return;
     forceHideLogo();
   }, true);
-  window.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key === "Escape" && popupEl?.style.display !== "none") {
-        stopSpeech();
-        if (popupEl) popupEl.classList.add("is-hidden");
-        setTimeout(() => {
-          if (popupEl) popupEl.style.display = "none";
-        }, 200);
-        window.getSelection()?.removeAllRanges();
-      }
-    },
-    true,
-  );
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && popupEl?.style.display !== "none") {
+      stopSpeech();
+      closePopup();
+      window.getSelection()?.removeAllRanges();
+    }
+  }, true);
   //小按钮相关逻辑结束----------
 
   (async () => {
@@ -7956,6 +8023,7 @@ function initSelectionTranslate() {
               window.currentTargetL || "en",
               effectiveHintLang,
             );
+            lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
           });
         }
         return span;
@@ -8901,6 +8969,7 @@ window.addEventListener("KT_DATA_READY", (e) => {
     if (oEl) oEl.innerHTML = "";
     if (tEl) tEl.innerText = "";
     if (tEl) tEl.classList.remove("kt-loading");
+    document.getElementById("kt-loading-hint")?.remove();
     removeDownloadButton();
   });
 })();
@@ -9291,6 +9360,7 @@ function syncSubtitleDisplay() {
   const shouldShow = enabled && ccOn;
   if (!shouldShow) {
     if (box) box.style.display = "none";
+    document.getElementById("kt-loading-hint")?.remove();
     const tooltip = document.getElementById("kt-word-tooltip");
     if (tooltip && tooltip.style.display !== "none") {
       tooltip.style.display = "none";
@@ -9386,23 +9456,20 @@ function syncSubtitleDisplay() {
       }
       //源语言 === 目标语言时，隐藏翻译行
       const sourceLang = getVideoSourceLang();
-      if (oEl) renderWords(group.text, oEl, sourceLang);
-      if (tEl) {
-        // logger.log(
-        //   `[Subtitle Display] Source Lang: ${sourceLang}, Target Lang: ${currentTargetL}`,
-        // );
-        const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
-        const isSameLang =
-          sourceLang && targetLang && sourceLang === targetLang;
+      const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
+      const isSameLang = sourceLang && targetLang && sourceLang === targetLang;
 
+      if (oEl) renderWords(group.text, oEl, sourceLang, isSameLang);
+
+      if (tEl) {
+        const isBatchEngineLocal = isBatchEngine;
         if (isSameLang) {
           tEl.style.display = "none";
           tEl.innerText = "";
           tEl.classList.remove("kt-loading");
         } else {
-          tEl.style.display = ""; // 恢复显示
+          tEl.style.display = "";
         }
-
         if (cached && cached.basic) {
           tEl.innerText = cached.basic;
           tEl.classList.remove("kt-loading");
@@ -9690,24 +9757,22 @@ function initSettingsAvoidance() {
 setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 //卡片
-function renderWords(text, container, sourceLang = null) {
+function renderWords(text, container, sourceLang = null, disableInteraction = false) {
   if (!container) return;
   container.innerHTML = "";
 
   let words = [];
   let currentLang = sourceLang;
 
-  // 1. 自动判定语种（仅用于传给分词器）
   if (!currentLang) {
     if (/[\u3040-\u30ff]/.test(text)) currentLang = 'ja';
     else if (/[\u4e00-\u9fff]/.test(text)) currentLang = 'zh';
     else if (/[\u0E00-\u0E7F]/.test(text)) currentLang = 'th';
     else if (/[\u1000-\u109F]/.test(text)) currentLang = 'my';
     else if (/[\u1780-\u17FF]/.test(text)) currentLang = 'km';
-    else currentLang = 'en'; // 英文、德语、法语等西方语言统一默认 en
+    else currentLang = 'en';
   }
 
-  // 2. 全语种统一使用 Intl.Segmenter 分词 
   if (typeof Intl !== 'undefined' && Intl.Segmenter) {
     try {
       const segmenter = new Intl.Segmenter(currentLang, { granularity: 'word' });
@@ -9719,29 +9784,28 @@ function renderWords(text, container, sourceLang = null) {
     }
   }
 
-  // 3. 统一的高质量正则兜底（老旧浏览器）
   if (!words || words.length === 0) {
     words = text.match(
       /[\u4e00-\u9fa5]+|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[a-zA-Z0-9']+|[^\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff\s]+|\s+/g
     ) || [];
   }
 
-  // 判断是否属于紧凑布局语种，仅用于控制 span 的 margin 样式
   const isCompactStyle = ['ja', 'zh', 'th', 'my', 'km'].some(l => currentLang?.startsWith(l));
 
-  // 4. 统一渲染逻辑
   words.forEach((word) => {
     const trimmed = word.trim();
-
-    // 过滤掉所有标点符号，拿到纯净的查词文本
     const cleanWord = trimmed.replace(
       /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」【】『』""''\s]/g,
       ""
     );
 
-    //  如果 trimmed 为空（说明是空格）或者 cleanWord 为空（说明整个词全是标点符号）
     if (trimmed.length === 0 || cleanWord.length === 0) {
-      // 统统作为纯文本节点渲染，不绑定任何交互事件，完美保留排版，同时防止标点符号被点击
+      container.appendChild(document.createTextNode(word));
+      return;
+    }
+
+    // 同语言场景：只渲染纯文本，不绑定任何 hover/click 交互
+    if (disableInteraction) {
       container.appendChild(document.createTextNode(word));
       return;
     }
@@ -9749,7 +9813,6 @@ function renderWords(text, container, sourceLang = null) {
     const span = document.createElement("span");
     span.className = "kt-word";
     span.innerText = word;
-
     span.style.display = "inline-block";
     span.style.margin = isCompactStyle ? "0 0.5px" : "0 1px";
 
@@ -9758,7 +9821,6 @@ function renderWords(text, container, sourceLang = null) {
       span.style.borderBottom = "1px solid rgba(250, 204, 21, 0.6)";
     }
 
-    // 鼠标悬停事件（防抖）
     span.onmouseenter = (e) => {
       const el = e.target;
       el._hoverTimer = setTimeout(() => {
@@ -9777,7 +9839,6 @@ function renderWords(text, container, sourceLang = null) {
         handleWordDblClick(e, cleanWord);
     };
 
-    // 单击发音与闪烁（桌面）
     span.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
