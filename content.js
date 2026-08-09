@@ -7640,7 +7640,7 @@ function initSelectionTranslate() {
         }
       }
     } catch (_) { }
- 
+
     // 触摸端按钮加大，且给按钮加/去 touch 类（class 决定实际 CSS 尺寸）
     const btnSize = isTouchEvent ? 34 : 22; //  与 CSS 中 .eclipse-logo-btn / .touch 的尺寸一致
     if (isTouchEvent) {
@@ -8901,6 +8901,7 @@ window.addEventListener("KT_DATA_READY", (e) => {
     if (oEl) oEl.innerHTML = "";
     if (tEl) tEl.innerText = "";
     if (tEl) tEl.classList.remove("kt-loading");
+    document.getElementById("kt-loading-hint")?.remove();
     removeDownloadButton();
   });
 })();
@@ -9291,6 +9292,7 @@ function syncSubtitleDisplay() {
   const shouldShow = enabled && ccOn;
   if (!shouldShow) {
     if (box) box.style.display = "none";
+    document.getElementById("kt-loading-hint")?.remove();
     const tooltip = document.getElementById("kt-word-tooltip");
     if (tooltip && tooltip.style.display !== "none") {
       tooltip.style.display = "none";
@@ -9386,23 +9388,20 @@ function syncSubtitleDisplay() {
       }
       //源语言 === 目标语言时，隐藏翻译行
       const sourceLang = getVideoSourceLang();
-      if (oEl) renderWords(group.text, oEl, sourceLang);
-      if (tEl) {
-        // logger.log(
-        //   `[Subtitle Display] Source Lang: ${sourceLang}, Target Lang: ${currentTargetL}`,
-        // );
-        const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
-        const isSameLang =
-          sourceLang && targetLang && sourceLang === targetLang;
+      const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
+      const isSameLang = sourceLang && targetLang && sourceLang === targetLang;
 
+      if (oEl) renderWords(group.text, oEl, sourceLang, isSameLang);
+
+      if (tEl) {
+        const isBatchEngineLocal = isBatchEngine;
         if (isSameLang) {
           tEl.style.display = "none";
           tEl.innerText = "";
           tEl.classList.remove("kt-loading");
         } else {
-          tEl.style.display = ""; // 恢复显示
+          tEl.style.display = "";
         }
-
         if (cached && cached.basic) {
           tEl.innerText = cached.basic;
           tEl.classList.remove("kt-loading");
@@ -9690,24 +9689,22 @@ function initSettingsAvoidance() {
 setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 //卡片
-function renderWords(text, container, sourceLang = null) {
+function renderWords(text, container, sourceLang = null, disableInteraction = false) {
   if (!container) return;
   container.innerHTML = "";
 
   let words = [];
   let currentLang = sourceLang;
 
-  // 1. 自动判定语种（仅用于传给分词器）
   if (!currentLang) {
     if (/[\u3040-\u30ff]/.test(text)) currentLang = 'ja';
     else if (/[\u4e00-\u9fff]/.test(text)) currentLang = 'zh';
     else if (/[\u0E00-\u0E7F]/.test(text)) currentLang = 'th';
     else if (/[\u1000-\u109F]/.test(text)) currentLang = 'my';
     else if (/[\u1780-\u17FF]/.test(text)) currentLang = 'km';
-    else currentLang = 'en'; // 英文、德语、法语等西方语言统一默认 en
+    else currentLang = 'en';
   }
 
-  // 2. 全语种统一使用 Intl.Segmenter 分词 
   if (typeof Intl !== 'undefined' && Intl.Segmenter) {
     try {
       const segmenter = new Intl.Segmenter(currentLang, { granularity: 'word' });
@@ -9719,29 +9716,28 @@ function renderWords(text, container, sourceLang = null) {
     }
   }
 
-  // 3. 统一的高质量正则兜底（老旧浏览器）
   if (!words || words.length === 0) {
     words = text.match(
       /[\u4e00-\u9fa5]+|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[a-zA-Z0-9']+|[^\u4e00-\u9fa5\u3040-\u309f\u30a0-\u30ff\s]+|\s+/g
     ) || [];
   }
 
-  // 判断是否属于紧凑布局语种，仅用于控制 span 的 margin 样式
   const isCompactStyle = ['ja', 'zh', 'th', 'my', 'km'].some(l => currentLang?.startsWith(l));
 
-  // 4. 统一渲染逻辑
   words.forEach((word) => {
     const trimmed = word.trim();
-
-    // 过滤掉所有标点符号，拿到纯净的查词文本
     const cleanWord = trimmed.replace(
       /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」【】『』""''\s]/g,
       ""
     );
 
-    //  如果 trimmed 为空（说明是空格）或者 cleanWord 为空（说明整个词全是标点符号）
     if (trimmed.length === 0 || cleanWord.length === 0) {
-      // 统统作为纯文本节点渲染，不绑定任何交互事件，完美保留排版，同时防止标点符号被点击
+      container.appendChild(document.createTextNode(word));
+      return;
+    }
+
+    // 同语言场景：只渲染纯文本，不绑定任何 hover/click 交互
+    if (disableInteraction) {
       container.appendChild(document.createTextNode(word));
       return;
     }
@@ -9749,7 +9745,6 @@ function renderWords(text, container, sourceLang = null) {
     const span = document.createElement("span");
     span.className = "kt-word";
     span.innerText = word;
-
     span.style.display = "inline-block";
     span.style.margin = isCompactStyle ? "0 0.5px" : "0 1px";
 
@@ -9758,7 +9753,6 @@ function renderWords(text, container, sourceLang = null) {
       span.style.borderBottom = "1px solid rgba(250, 204, 21, 0.6)";
     }
 
-    // 鼠标悬停事件（防抖）
     span.onmouseenter = (e) => {
       const el = e.target;
       el._hoverTimer = setTimeout(() => {
@@ -9777,7 +9771,6 @@ function renderWords(text, container, sourceLang = null) {
         handleWordDblClick(e, cleanWord);
     };
 
-    // 单击发音与闪烁（桌面）
     span.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
