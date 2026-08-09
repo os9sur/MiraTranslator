@@ -4277,6 +4277,7 @@ function initSelectionTranslate() {
   let shadowHost = null,
     popupEl = null,
     logoBtn = null;
+  let closeTimer = null;
   function clampPopupToViewport(el) {
     const margin = 10;
     const rect = el.getBoundingClientRect();
@@ -4590,11 +4591,11 @@ function initSelectionTranslate() {
                       0 10px 30px var(--p-shadow);
         }
       }
-}
+    }
 
-@keyframes panelFloatLight {
-  0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
-}
+    @keyframes panelFloatLight {
+      0%,100% { box-shadow: 0 8px 24px rgba(0,0,0,0.16), 0 20px 48px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06); }
+    }
 
       /* ── 主面板 ── */
       .mira-kt-panel {
@@ -4631,10 +4632,13 @@ function initSelectionTranslate() {
       .panel:hover                  { animation-duration: 3s !important; }
       :host([theme="light"]) .panel:hover { animation-duration: 4s !important; }
 
+      
+
       .is-hidden {
-        opacity:          0 !important;
-        pointer-events:   none !important;
-        transform:        scale(0.8) translateY(8px) !important;
+          opacity: 0 !important;
+          transform: scale(0.05) !important;
+          pointer-events: none !important;
+          transition: transform 0.35s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease !important;
       }
 
       /* ── 拖拽区 ── */
@@ -4781,6 +4785,7 @@ function initSelectionTranslate() {
       .icon-btn.theme:active           { transform: scale(0.92) !important; }
 
       /* 发音按钮 */
+      #p-speak svg { width: 20px !important; height: 20px !important; }
       #p-speak:hover     { background: rgba(56,189,248,0.2) !important; box-shadow: 0 0 8px rgba(56,189,248,0.4); }
       #p-speak:hover svg { stroke: #38bdf8 !important; }
 
@@ -4908,36 +4913,36 @@ function initSelectionTranslate() {
       }
 
       
-@keyframes tts-loading-spin {
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
+      @keyframes tts-loading-spin {
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
 
-.tts-loading {
-  position: relative;
-}
+      .tts-loading {
+        position: relative;
+      }
 
-.tts-loading::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -3px;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-  width: 14px;
-  height: 14px;
-  border: 1.5px solid rgba(56, 189, 248, 0.2);
-  border-top-color: #38bdf8;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: tts-loading-spin 0.7s linear infinite;
-}
+      .tts-loading::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -3px;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid rgba(56, 189, 248, 0.2);
+        border-top-color: #38bdf8;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: tts-loading-spin 0.7s linear infinite;
+      }
 
-.tts-loading svg {
-  opacity: 0.3;
-}
+      .tts-loading svg {
+        opacity: 0.3;
+      }
       .mira-font-family{
           font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important;
       }
@@ -5102,28 +5107,28 @@ function initSelectionTranslate() {
     opacity: 0.6;
     display: inline-block;
   }
-.mira-example-speak.tts-loading::before {
-  display: none;
-}
+    .mira-example-speak.tts-loading::before {
+      display: none;
+    }
 
-.mira-example-speak.tts-loading::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border: 1.5px solid rgba(56, 189, 248, 0.2);
-  border-top-color: #38bdf8;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: tts-loading-spin 0.7s linear infinite;
-}
-  .mira-example-speak:hover {
-    opacity: 1;
-    transform: scale(1.2);
-  }
+    .mira-example-speak.tts-loading::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: tts-loading-spin 0.7s linear infinite;
+    }
+    .mira-example-speak:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
     .mira-example-speak.is-speaking {
       opacity: 1;
       color: #38bdf8 !important;
@@ -5194,6 +5199,60 @@ function initSelectionTranslate() {
       opacity: 0;
       visibility: hidden;
     }
+
+    .p-header-brand { display: flex; align-items: center; gap: 5px; user-select: none; }
+    .p-header-logo { width: 23px; height: 23px; border-radius: 2px; }
+    .p-header-title { opacity: 0.6; font-size: 11px; font-weight: bold; letter-spacing: 2px; color: var(--p-text-main); font-style: italic; }
+    .p-header-actions { display: flex; gap: 4px; align-items: center; height: 40px; position: relative; z-index: 30; right: -15px; }
+
+    @media (pointer: coarse) {
+      #p-header-wrapper { padding: 6px 16px 0; }
+      #p-header { height: 30px; margin-bottom: 2px; } /*移动端header高度*/
+      #p-header img { width: 22px; height: 22px; }
+
+      .p-header-actions { height: 28px; }
+
+      .header-controls {
+        height: 35px;
+        gap: 8px;
+        right: 12px;
+      }
+
+      .icon-btn { width: 28px; height: 28px; }
+      .icon-btn svg { width: 16px; height: 16px; }
+      #p-pin svg {
+        width: 19px !important;
+        height: 19px !important;
+        stroke-width: 2.8 !important;
+      }
+      .icon-btn.theme svg#theme-icon {
+        width: 16px !important;
+        height: 16px !important;
+      }
+
+      #p-refresh svg {
+        width: 14px !important;
+        height: 14px !important;
+        stroke-width: 2.5 !important;
+      }
+        #p-save svg {
+        width: 18px !important;
+        height: 18px !important;
+        stroke-width: 2.0 !important;
+      }
+        #p-speak svg {
+        width: 19px !important;
+        height: 19px !important;
+      }
+        #p-speak.icon-btn {
+        width: 30px !important;
+        height: 30px !important;
+      }
+
+      .close-btn { padding: 7px 10px 10px 10px; font-size: 19px; }
+    }
+
+    
       `;
 
     return style;
@@ -5257,7 +5316,25 @@ function initSelectionTranslate() {
   }
 
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
+  // 提取出的公共关闭函数
+  function closePopup() {
+    if (!popupEl) return;
+    const rect = popupEl.getBoundingClientRect();
+    const originX = lastSelectionPos.clientX - rect.left;
+    const originY = lastSelectionPos.clientY - rect.top;
+    popupEl.style.transformOrigin = `${originX}px ${originY}px`;
+    popupEl.classList.add('is-hidden');
 
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!popupEl.classList.contains('is-hidden')) return;
+      popupEl.style.display = 'none';
+      popupEl.style.transformOrigin = '';
+      popupEl.style.transition = '';
+      popupEl.style.animation = '';
+      popupEl.classList.remove('is-hidden');
+    }, 480);
+  }
   function setPanelGlowColor(panel) {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
     const rgb = window
@@ -5833,6 +5910,7 @@ function initSelectionTranslate() {
     if (ctx.length < 20) return null;
     return detectSourceLang(ctx) || null;
   })();
+  let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
   async function renderAndShowPopup(
     text,
     pos,
@@ -5860,18 +5938,18 @@ function initSelectionTranslate() {
     // 头部 HTML
     popupEl.querySelector("#p-header-wrapper").innerHTML = `
     <div id="p-header">
-      <div style="display:flex;align-items:center;gap:5px;user-select:none;">
-        <img src="${logoBase64}" style="width:23px;height:23px;border-radius:2px;filter:drop-shadow(0 0 4px var(--p-accent));">
-        <span class="mira-font-family" style="opacity:0.6;font-size:11px;font-weight:bold;letter-spacing:2px;color:var(--p-text-main);font-style:italic;">${t("appName", window.uiLanguage) || APP_NAME}</span>
-      </div>
-      <div style="display:flex;gap:4px;align-items:center;height:40px;position:relative;z-index:30;right:-15px;">
-        <div id="p-theme-toggle" class="icon-btn theme" title="">
-          <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round"></svg>
-        </div>
-      </div>
-    </div>`;
+  <div class="p-header-brand">
+    <img src="${logoBase64}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
+    <span class="mira-font-family p-header-title">${t("appName", window.uiLanguage) || APP_NAME}</span>
+  </div>
+  <div class="p-header-actions">
+    <div id="p-theme-toggle" class="icon-btn theme" title="">
+      <svg id="theme-icon" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round"></svg>
+    </div>
+  </div>
+</div>`;
 
     // 内容区
     const contentContainer = popupEl.querySelector("#p-content-container");
@@ -5897,6 +5975,7 @@ function initSelectionTranslate() {
     });
 
     initEngineSelector(shadow);
+    clearTimeout(closeTimer);
     // 面板可见
     popupEl.classList.remove("is-hidden");
     Object.assign(popupEl.style, {
@@ -5970,18 +6049,11 @@ function initSelectionTranslate() {
     // 关闭
     shadow.getElementById("close-p").onclick = (e) => {
       e.stopPropagation();
-
-      const existingDropdown =
-        shadowHost.shadowRoot.getElementById("p-lang-dropdown");
+      const existingDropdown = shadowHost.shadowRoot.getElementById("p-lang-dropdown");
       if (existingDropdown) existingDropdown.remove();
-
       shadowHost.setAttribute("data-pinned", "false");
-      popupEl.classList.add("is-hidden");
-      setTimeout(() => {
-        if (shadowHost.getAttribute("data-pinned") !== "true")
-          popupEl.style.display = "none";
-      }, 200);
       stopSpeech();
+      closePopup();
     };
 
     // 固定
@@ -6058,6 +6130,8 @@ function initSelectionTranslate() {
       const refreshBtn = shadow.getElementById("p-refresh");
       if (refreshBtn?.classList.contains("spinning")) return;
 
+      if (refreshBtn) refreshBtn.classList.add("spinning");
+
       if (shadowHost) {
         clearTimeout(shadowHost._slowTimer);
         clearTimeout(shadowHost._detailTimer);
@@ -6103,7 +6177,6 @@ function initSelectionTranslate() {
           const pExamples = shadow.getElementById("p-examples");
           if (!basicEl?.style) return;
 
-          if (refreshBtn) refreshBtn.classList.add("spinning");
           basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
           if (phoneticEl) phoneticEl.innerText = "";
           if (pExamples) pExamples.style.display = "none";
@@ -6871,12 +6944,12 @@ function initSelectionTranslate() {
             </svg>
           </div>
 
-          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}" style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; margin:0; padding:1px 0 0 0;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
-              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
-            </svg>
-          </div>
+          <div id="p-refresh" class="icon-btn refresh-btn" title="${t("retranslate")}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+          </svg>
+        </div>
         </div>
       </div>
 
@@ -7680,6 +7753,7 @@ function initSelectionTranslate() {
     clearTimeout(window.logoAutoTimer);
     window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
 
+
     async function triggerTranslation() {
       // 用 selectionchange 持续更新的快照
       const activeText = (liveText && liveText.length > 0) ? liveText : text;
@@ -7787,6 +7861,7 @@ function initSelectionTranslate() {
           currentTarget,
           detectedSourceLang
         );
+        lastSelectionPos = { clientX: mouseX, clientY: mouseY };
         forceHideLogo();
       } catch (e) {
         if (e.message?.includes("context invalidated")) {
@@ -7824,47 +7899,36 @@ function initSelectionTranslate() {
 
   window.addEventListener("mouseup", handleSelectionEnd);
   window.addEventListener("touchend", handleSelectionEnd);
-
-  document.addEventListener("mousedown", (e) => {
+  document.addEventListener("pointerdown", (e) => {
     if (shadowHost && e.composedPath().includes(shadowHost)) return;
 
-    const isTouch = e.pointerType === 'touch' || ('ontouchstart' in window && e.pointerType === '');
-    if (isTouch) return;
-
-    const existingDropdown =
-      shadowHost?.shadowRoot?.getElementById("p-lang-dropdown");
+    const existingDropdown = shadowHost?.shadowRoot?.getElementById("p-lang-dropdown");
     if (existingDropdown) existingDropdown.remove();
     forceHideLogo();
+
     if (
       shadowHost &&
       shadowHost.getAttribute("data-pinned") !== "true" &&
-      typeof popupEl !== "undefined"
+      typeof popupEl !== "undefined" &&
+      popupEl?.style?.display !== "none"
     ) {
       stopSpeech();
-      if (popupEl) popupEl.classList.add("is-hidden");
-      setTimeout(() => {
-        popupEl.style.display = "none";
-      }, 200);
+      closePopup();
+      window.getSelection()?.removeAllRanges();
     }
-  });
+  }, { passive: true });
+
   document.addEventListener("contextmenu", (e) => {
     if (e.pointerType === 'touch' || e.button === -1) return;
     forceHideLogo();
   }, true);
-  window.addEventListener(
-    "keydown",
-    (e) => {
-      if (e.key === "Escape" && popupEl?.style.display !== "none") {
-        stopSpeech();
-        if (popupEl) popupEl.classList.add("is-hidden");
-        setTimeout(() => {
-          if (popupEl) popupEl.style.display = "none";
-        }, 200);
-        window.getSelection()?.removeAllRanges();
-      }
-    },
-    true,
-  );
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && popupEl?.style.display !== "none") {
+      stopSpeech();
+      closePopup();
+      window.getSelection()?.removeAllRanges();
+    }
+  }, true);
   //小按钮相关逻辑结束----------
 
   (async () => {
@@ -7956,6 +8020,7 @@ function initSelectionTranslate() {
               window.currentTargetL || "en",
               effectiveHintLang,
             );
+            lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
           });
         }
         return span;

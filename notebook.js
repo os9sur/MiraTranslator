@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.documentElement.style.setProperty('--label-meaning', `"${_t('meaning')}"`);
   document.documentElement.style.setProperty('--label-note', `"${_t('note')}"`);
   document.documentElement.style.setProperty('--label-source', `"${_t('source')}"`);
-document.documentElement.style.setProperty('--label-time', `"${_t('addTime')}"`); 
+  document.documentElement.style.setProperty('--label-time', `"${_t('addTime')}"`);
 
   function formatDetail(dictData, query = "") {
     if (!Array.isArray(dictData) || dictData.length === 0) return "";
@@ -883,37 +883,39 @@ document.documentElement.style.setProperty('--label-time', `"${_t('addTime')}"`)
   }
 
   //鼠标手势
-  let gestureDidMove = false;
+  if (!isEdgeBrowser()) {
+    let gestureDidMove = false;
 
-  document.addEventListener('mousedown', (e) => {
-    if (e.button !== 2) return;
-    gestureDidMove = false;  // 重置
-    mouseGesture.active = true;
-    mouseGesture.startX = e.clientX;
-    mouseGesture.startY = e.clientY;
-    gesturePoints = [];
-    createGestureOverlay();
-    updateGestureUI(e.clientX, e.clientY);
-  });
+    document.addEventListener('mousedown', (e) => {
+      if (e.button !== 2) return;
+      gestureDidMove = false;  // 重置
+      mouseGesture.active = true;
+      mouseGesture.startX = e.clientX;
+      mouseGesture.startY = e.clientY;
+      gesturePoints = [];
+      createGestureOverlay();
+      updateGestureUI(e.clientX, e.clientY);
+    });
 
-  document.addEventListener('mousemove', (e) => {
-    if (!mouseGesture.active) return;
-    const dy = e.clientY - mouseGesture.startY;
-    const dx = e.clientX - mouseGesture.startX;
-    if (Math.abs(dy) >= 10 || Math.abs(dx) >= 10) gestureDidMove = true;  // 标记移动过
-    updateGestureUI(e.clientX, e.clientY);
-  });
+    document.addEventListener('mousemove', (e) => {
+      if (!mouseGesture.active) return;
+      const dy = e.clientY - mouseGesture.startY;
+      const dx = e.clientX - mouseGesture.startX;
+      if (Math.abs(dy) >= 10 || Math.abs(dx) >= 10) gestureDidMove = true;
+      updateGestureUI(e.clientX, e.clientY);
+    });
 
-  document.addEventListener('mouseup', (e) => {
-    if (!mouseGesture.active || e.button !== 2) return;
-    const dy = e.clientY - mouseGesture.startY;
-    const dx = e.clientX - mouseGesture.startX;
-    mouseGesture.active = false;
-    removeGestureOverlay();
-    if (Math.abs(dy) < 60 || Math.abs(dx) > Math.abs(dy)) return;
-    if (dy < 0) window.scrollTo({ top: 0, behavior: 'smooth' });
-    else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  });
+    document.addEventListener('mouseup', (e) => {
+      if (!mouseGesture.active || e.button !== 2) return;
+      const dy = e.clientY - mouseGesture.startY;
+      const dx = e.clientX - mouseGesture.startX;
+      mouseGesture.active = false;
+      removeGestureOverlay();
+      if (Math.abs(dy) < 60 || Math.abs(dx) > Math.abs(dy)) return;
+      if (dy < 0) window.scrollTo({ top: 0, behavior: 'smooth' });
+      else window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+  }
 
   document.addEventListener('contextmenu', (e) => {
     if (gestureDidMove) {

@@ -2535,59 +2535,33 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 个性化扫描配置面板
   {
     const initInspectState = () => {
-  const content = document.getElementById('inspectContent');
-  const arrow = document.getElementById('inspectArrow');
-  if (!content || !arrow) return;
+      const content = document.getElementById('inspectContent');
+      const arrow = document.getElementById('inspectArrow');
+      if (!content || !arrow) return;
 
-  const savedState = localStorage.getItem('inspectContainerState');
+      const savedState = localStorage.getItem('inspectContainerState');
 
-  if (savedState === 'expanded') {
-    // 用户明确展开过，直接展开不自动收起
-    content.style.transition = 'none';
-    content.style.maxHeight = '600px';
-    content.style.opacity = '1';
-    content.style.overflow = 'visible';
-    content.style.marginTop = '8px';
-    arrow.classList.add('arrow-expanded');
+      if (savedState === 'collapsed') {
+        // 用户明确收起过，直接折叠
+        content.style.transition = 'none';
+        content.style.maxHeight = '0px';
+        content.style.opacity = '0';
+        content.style.overflow = 'hidden';
+        content.style.marginTop = '0px';
+        arrow.classList.remove('arrow-expanded');
 
-  } else if (savedState === 'collapsed') {
-    // 用户明确收起过，直接折叠
-    content.style.transition = 'none';
-    content.style.maxHeight = '0px';
-    content.style.opacity = '0';
-    content.style.overflow = 'hidden';
-    content.style.marginTop = '0px';
-    arrow.classList.remove('arrow-expanded');
+      } else {
+        // 已展开过，或首次使用：直接展开，不再自动收起
+        content.style.transition = 'none';
+        content.style.maxHeight = '600px';
+        content.style.opacity = '1';
+        content.style.overflow = 'visible';
+        content.style.marginTop = '8px';
+        arrow.classList.add('arrow-expanded');
+      }
+    };
 
-  } else {
-    // 首次使用，没有记录：展开后 5 秒丝滑收起
-    content.style.transition = 'none';
-    content.style.maxHeight = '600px';
-    content.style.opacity = '1';
-    content.style.overflow = 'visible';
-    content.style.marginTop = '8px';
-    arrow.classList.add('arrow-expanded');
-
-    setTimeout(() => {
-    content.style.overflow = 'hidden';
-    requestAnimationFrame(() => {
-        content.style.transition = 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease';
-        requestAnimationFrame(() => {
-            content.style.maxHeight = '0px';
-            content.style.opacity = '0';
-            content.style.marginTop = '0px';
-            arrow.classList.remove('arrow-expanded');
-        });
-    });
-    // 动画结束后写入，下次不再触发引导
-    setTimeout(() => {
-        localStorage.setItem('inspectContainerState', 'collapsed');
-    }, 400); // 和 transition 时长对齐
-}, 5000);
-  }
-};
-
-setTimeout(initInspectState, 0);
+    setTimeout(initInspectState, 0);
 
     document.addEventListener('click', function (e) {
       const header = e.target.closest('#inspectHeader');
@@ -2627,7 +2601,7 @@ setTimeout(initInspectState, 0);
         localStorage.setItem('inspectContainerState', 'collapsed');
       }
     });
-  }
+}
 
   const refreshUI = async () => {
     try {
@@ -2674,33 +2648,33 @@ setTimeout(initInspectState, 0);
 
       // 控制显隐youtube操作提示
       if (ytSwitch && btnYT) {
-    const ytContainer = document.getElementById('youtube-option-container');
-    
-    if (currentMode === 'global' || !isYouTube) {
-        // 全局模式 或 非 YouTube 页面，直接隐藏
-        if (ytContainer) ytContainer.style.display = 'none';
-        if (ytHint) {
+        const ytContainer = document.getElementById('youtube-option-container');
+
+        if (currentMode === 'global' || !isYouTube) {
+          // 全局模式 或 非 YouTube 页面，直接隐藏
+          if (ytContainer) ytContainer.style.display = 'none';
+          if (ytHint) {
             ytHint.classList.remove('show');
             ytHint.style.display = 'none';
-        }
-    } else {
-        // current 模式 + YouTube 页面才显示
-        if (ytContainer) ytContainer.style.display = '';
-        const isYTOn = !!conf.yt;
-        ytSwitch.classList.toggle('on', isYTOn);
-        btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
+          }
+        } else {
+          // current 模式 + YouTube 页面才显示
+          if (ytContainer) ytContainer.style.display = '';
+          const isYTOn = !!conf.yt;
+          ytSwitch.classList.toggle('on', isYTOn);
+          btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
 
-        if (ytHint) {
+          if (ytHint) {
             const finalShouldShow = isYTOn && isYouTube && !window.isRestricted;
             if (finalShouldShow) {
-                showYtHintWithFade(storage.ui_language);
+              showYtHintWithFade(storage.ui_language);
             } else {
-                ytHint.classList.remove('show');
-                ytHint.style.display = 'none';
+              ytHint.classList.remove('show');
+              ytHint.style.display = 'none';
             }
+          }
         }
-    }
-}
+      }
 
       const autoSyncEl = document.getElementById('autoSyncToggle');
       if (autoSyncEl) {

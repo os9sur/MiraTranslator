@@ -1854,6 +1854,17 @@ async function refreshIcon() {
   });
 }
 
+//判断是否是edge 浏览器
+function isEdgeBrowser() { 
+    if (navigator.userAgentData?.brands) {
+        return navigator.userAgentData.brands.some(
+            (b) => b.brand === 'Microsoft Edge'
+        );
+    }
+    //  传统 UA 字符串匹配（Edge 新版 UA 里是 "Edg/"，不是 "Edge/"）
+    return /Edg\//.test(navigator.userAgent);
+}
+
 const MiraUtils = {
   /**
    * 判断当前 URL 是否为受限页面
