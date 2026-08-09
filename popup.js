@@ -1764,40 +1764,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   const resVoiceHeader = document.getElementById('resVoiceHeader');
   const resSaveBtn = document.getElementById('resSaveBtn');
   const resRefreshBtn = document.getElementById('resRefreshBtn');
-const input = document.getElementById('searchTextInput');
+  const input = document.getElementById('searchTextInput');
 
-input.addEventListener('input', function () {
-  this.style.height = 'auto';
-  
-  let newHeight = this.scrollHeight;
-  if (newHeight > 80) {
-    newHeight = 80;
-    this.style.overflowY = 'auto';
-  } else {
-    this.style.overflowY = 'hidden';
-  }
-  
-  this.style.height = newHeight + 'px';
-  
-  if (!this.value.trim()) {
-    const resultArea = document.getElementById('resultArea');
-    if (resultArea) resultArea.style.display = 'none';
-    const actionArea = document.getElementById('actionArea');
-    if (actionArea) actionArea.style.display = 'none';
-    
-    this.style.height = '35px';
-    this.style.overflowY = 'hidden';
-  }
-});
+  input.addEventListener('input', function () {
+    this.style.height = 'auto';
 
-input.onkeydown = function (e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    if (typeof triggerSearch === 'function') {
-      triggerSearch(this.value.trim());
+    let newHeight = this.scrollHeight;
+    if (newHeight > 80) {
+      newHeight = 80;
+      this.style.overflowY = 'auto';
+    } else {
+      this.style.overflowY = 'hidden';
     }
-  }
-};
+
+    this.style.height = newHeight + 'px';
+
+    if (!this.value.trim()) {
+      const resultArea = document.getElementById('resultArea');
+      if (resultArea) resultArea.style.display = 'none';
+      const actionArea = document.getElementById('actionArea');
+      if (actionArea) actionArea.style.display = 'none';
+
+      this.style.height = '35px';
+      this.style.overflowY = 'hidden';
+    }
+  });
+
+  input.onkeydown = function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (typeof triggerSearch === 'function') {
+        triggerSearch(this.value.trim());
+      }
+    }
+  };
 
   document.getElementById('searchSubmitBtn').onclick = () => {
     triggerSearch(input.value.trim());
@@ -2535,29 +2535,59 @@ input.onkeydown = function (e) {
   // 个性化扫描配置面板
   {
     const initInspectState = () => {
-      const content = document.getElementById('inspectContent');
-      const arrow = document.getElementById('inspectArrow');
-      if (!content || !arrow) return;
+  const content = document.getElementById('inspectContent');
+  const arrow = document.getElementById('inspectArrow');
+  if (!content || !arrow) return;
 
-      const savedState = localStorage.getItem('inspectContainerState') || 'collapsed';
-      if (savedState === 'expanded') {
-        content.style.transition = 'none';
-        content.style.maxHeight = '600px';
-        content.style.opacity = '1';
-        content.style.overflow = 'visible';
-        content.style.marginTop = '8px';
-        arrow.classList.add('arrow-expanded');
-      } else {
-        content.style.transition = 'none';
-        content.style.maxHeight = '0px';
-        content.style.opacity = '0';
-        content.style.overflow = 'hidden';
-        content.style.marginTop = '0px';
-        arrow.classList.remove('arrow-expanded');
-      }
-    };
+  const savedState = localStorage.getItem('inspectContainerState');
 
-    setTimeout(initInspectState, 0);
+  if (savedState === 'expanded') {
+    // 用户明确展开过，直接展开不自动收起
+    content.style.transition = 'none';
+    content.style.maxHeight = '600px';
+    content.style.opacity = '1';
+    content.style.overflow = 'visible';
+    content.style.marginTop = '8px';
+    arrow.classList.add('arrow-expanded');
+
+  } else if (savedState === 'collapsed') {
+    // 用户明确收起过，直接折叠
+    content.style.transition = 'none';
+    content.style.maxHeight = '0px';
+    content.style.opacity = '0';
+    content.style.overflow = 'hidden';
+    content.style.marginTop = '0px';
+    arrow.classList.remove('arrow-expanded');
+
+  } else {
+    // 首次使用，没有记录：展开后 5 秒丝滑收起
+    content.style.transition = 'none';
+    content.style.maxHeight = '600px';
+    content.style.opacity = '1';
+    content.style.overflow = 'visible';
+    content.style.marginTop = '8px';
+    arrow.classList.add('arrow-expanded');
+
+    setTimeout(() => {
+    content.style.overflow = 'hidden';
+    requestAnimationFrame(() => {
+        content.style.transition = 'max-height 0.4s ease, opacity 0.3s ease, margin-top 0.4s ease';
+        requestAnimationFrame(() => {
+            content.style.maxHeight = '0px';
+            content.style.opacity = '0';
+            content.style.marginTop = '0px';
+            arrow.classList.remove('arrow-expanded');
+        });
+    });
+    // 动画结束后写入，下次不再触发引导
+    setTimeout(() => {
+        localStorage.setItem('inspectContainerState', 'collapsed');
+    }, 400); // 和 transition 时长对齐
+}, 5000);
+  }
+};
+
+setTimeout(initInspectState, 0);
 
     document.addEventListener('click', function (e) {
       const header = e.target.closest('#inspectHeader');
@@ -2644,26 +2674,33 @@ input.onkeydown = function (e) {
 
       // 控制显隐youtube操作提示
       if (ytSwitch && btnYT) {
-        const ytRow = ytSwitch.closest('.row');
-        // 获取当前实时状态
-        const isYTDisabled = ytRow && (ytRow.classList.contains('disabled') || ytRow.style.display === 'none');
+    const ytContainer = document.getElementById('youtube-option-container');
+    
+    if (currentMode === 'global' || !isYouTube) {
+        // 全局模式 或 非 YouTube 页面，直接隐藏
+        if (ytContainer) ytContainer.style.display = 'none';
+        if (ytHint) {
+            ytHint.classList.remove('show');
+            ytHint.style.display = 'none';
+        }
+    } else {
+        // current 模式 + YouTube 页面才显示
+        if (ytContainer) ytContainer.style.display = '';
         const isYTOn = !!conf.yt;
-
         ytSwitch.classList.toggle('on', isYTOn);
         btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
 
         if (ytHint) {
-          // 只有 开启状态 + 非禁用 + YouTube页面 + 非受限页面 才准显示
-          const finalShouldShow = isYTOn && !isYTDisabled && isYouTube && !window.isRestricted;
-
-          if (finalShouldShow) {
-            showYtHintWithFade(storage.ui_language);
-          } else {
-            ytHint.classList.remove('show');
-            ytHint.style.display = 'none';
-          }
+            const finalShouldShow = isYTOn && isYouTube && !window.isRestricted;
+            if (finalShouldShow) {
+                showYtHintWithFade(storage.ui_language);
+            } else {
+                ytHint.classList.remove('show');
+                ytHint.style.display = 'none';
+            }
         }
-      }
+    }
+}
 
       const autoSyncEl = document.getElementById('autoSyncToggle');
       if (autoSyncEl) {
