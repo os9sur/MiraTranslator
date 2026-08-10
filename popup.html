@@ -486,27 +486,32 @@
         </div>
       </div>
 
-      <div
-        style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 9px;">
-        <div id="openSettings" class="engine-pulse-active"
-          style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.3); cursor: pointer; color: rgb(56, 189, 248); padding: 0 8px; min-width: 0;">
-          <span id="currentEngineName"
-            style="color: #38bdf8; font-weight: 600; white-space: nowrap;  text-overflow: ellipsis;">Bing
-            Translate</span>
-          <div id="keyWarningDot" class="warning-dot-anim"
-            style="width: 10px; height: 10px; margin-left: 6px; background: rgb(239, 68, 68); border-radius: 50%; display: none;">
-            !</div>
-        </div>
-        <div id="quickSearchBtn"
-          style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; padding: 0 8px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
-            style="margin-right: 6px;">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <span data-i18n="instantTranslation" style="font-weight: 800; white-space: nowrap;">SEARCH</span>
-        </div>
-      </div>
+<div
+  style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 9px;">
+
+  <div id="openSettings" class="engine-pulse-strong"
+    style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; 
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.85)); 
+    border: 1.05px solid rgba(56, 189, 248, 0.5); 
+    cursor: pointer; color: rgb(56, 189, 248); padding: 0 8px; min-width: 0; overflow: hidden;">
+    <span id="currentEngineName"
+      style="color: #38bdf8; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; max-width: 100%; display: inline-block; line-height: 1.4; padding-bottom: 1px;">Bing
+      Translate</span>
+    <div id="keyWarningDot" class="warning-dot-anim"
+      style="width: 10px; height: 10px; margin-left: 6px; background: rgb(239, 68, 68); border-radius: 50%; display: none; flex-shrink: 0;">
+      !</div>
+  </div>
+
+  <div id="quickSearchBtn"
+    style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; padding: 0 8px;">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+      style="margin-right: 6px;">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <span data-i18n="instantTranslation" style="font-weight: 800; white-space: nowrap;">SEARCH</span>
+  </div>
+</div>
 
       <div id="noticeBar" style="
           display: none;

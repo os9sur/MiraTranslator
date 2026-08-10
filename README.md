@@ -12,7 +12,7 @@
 
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-3.5.7.81-blue" alt="Version">
+  <img src="https://img.shields.io/badge/Version-3.5.7.82-blue" alt="Version">
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;
@@ -66,10 +66,11 @@ This tool was created to fill the need for a functional, open-source bilingual t
 * **Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied to the webpage.
 * **YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, and a feature to download subtitles.
 * **Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
-* **Multi-Engine Support:** Compatible with OpenAI, Claude, Gemini, DeepL, and SiliconFlow. Users can also configure custom API endpoints.
+* **Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models (like Ollama), and more. Users can also configure custom API endpoints.
 * **Element Selection:** Allows users to select or exclude specific areas of a webpage for translation.
 * **Data Synchronization:** Supports syncing configurations and saved vocabulary via Google Drive or WebDAV.
 * **Vocabulary Learning:** Enables users to save words or phrases directly from translated text into a local list, allowing for future review, editing, and cross-device synchronization.
+* **Mobile Support:** Compatible with mobile browsers (such as Microsoft Edge and Firefox on Android), allowing for seamless translation on the go.
 
 ---
 

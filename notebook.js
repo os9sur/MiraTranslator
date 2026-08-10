@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const highlightStorage = await safeGetStorage('vocabHighlight');
-  let highlightEnabled = highlightStorage?.vocabHighlight || false;
+  let highlightEnabled = highlightStorage?.vocabHighlight ?? true;
 
   const syncRes = await safeGetStorage('lastSyncTime');
   if (syncRes?.lastSyncTime) {
@@ -291,7 +291,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (goInputEl) goInputEl.placeholder = _t('goPlaceholder');
 
     if (total === 0) {
-      vocabBody.innerHTML = `<div style="padding:24px;text-align:center;color:#475569;">${_t('noCollection')}</div>`;
+      vocabBody.innerHTML = `
+  <div style="padding: 32px; text-align: center; color: #475569;"> 
+    <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #94a3b8;">
+      ${_t('noCollection')}
+    </div> 
+    <div style="display: inline-block; text-align: left; font-size: 13px; line-height: 1.8; color: #64748b; white-space: pre-line;">
+      ${_t('noCollectionTip')}
+    </div>
+  </div>
+`;
       return;
     }
     const isRTLUI = document.documentElement.lang === 'ar' || document.documentElement.lang === 'fa';
@@ -883,9 +892,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   //鼠标手势
-  if (!isEdgeBrowser()) {
-    let gestureDidMove = false;
+  let gestureDidMove = false;
 
+  if (!isEdgeBrowser()) {
     document.addEventListener('mousedown', (e) => {
       if (e.button !== 2) return;
       gestureDidMove = false;  // 重置

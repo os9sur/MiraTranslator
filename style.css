@@ -743,7 +743,7 @@ select:hover {
   width: 100%;
   box-sizing: border-box;
   background: #020617;
-  border: 1px solid #334155;
+  border: 1.2px solid #334155;
   color: #f1f5f9;
   padding: 8px;
   border-radius: 8px;
@@ -1200,11 +1200,9 @@ select:hover {
   letter-spacing: 0.3px;
 }
 
-
-
 #inspectHeader {
   position: relative;
-  background-color: transparent;
+  background-color: rgba(15, 23, 42, 0.6);
   padding: 8px 12px;
   border-radius: 8px;
   display: flex;
@@ -1213,45 +1211,54 @@ select:hover {
   cursor: pointer;
   border: none;
   outline: none;
-  overflow: hidden;
-
-  background-image: radial-gradient(circle at center,
-      rgba(34, 197, 94, 0.28) 0%,
-      rgba(34, 197, 94, 0.12) 20%,
-      rgba(56, 189, 248, 0.04) 50%,
-      rgba(0, 0, 0, 0) 75%);
-  background-size: 35% 100%;
-  background-repeat: no-repeat;
-
-  animation: scanPendulum 3.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-
-  transition: background-color 0.3s ease, background-size 0.3s ease;
+  isolation: isolate; 
 }
 
-#inspectHeader:hover {
-  animation-play-state: paused; 
-  background-color: rgba(30, 41, 59, 0.55);
-
-  background-size: 100% 100%;
-  background-image: linear-gradient(90deg, 
-    rgba(34, 197, 94, 0.35) 0%, 
-    rgba(30, 41, 59, 0.8) 60%,
-    rgba(15, 23, 42, 0) 100%);
+/* 旋转光圈 */
+#inspectHeader::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(8px + 1px);  
+  padding: 0.8px;
+  background: conic-gradient(
+    from var(--angle, 0deg),
+    rgba(56, 189, 248, 0) 0%,
+    rgba(56, 189, 248, 0.9) 15%,
+    rgba(56, 189, 248, 0) 30%,
+    rgba(56, 189, 248, 0) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: rotateBorder 3s linear infinite;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* 钟摆扫描动画位置控制 */
-@keyframes scanPendulum {
-  0% {
-    background-position: -10% 0;
-  }
+#inspectHeader > * {
+  position: relative;
+  z-index: 1; 
+}
 
-  50% {
-    background-position: 110% 0;
-  }
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
 
-  100% {
-    background-position: -10% 0;
-  }
+@keyframes rotateBorder {
+  to { --angle: 360deg; }
+}
+
+#inspectHeader:hover::before {
+  background: conic-gradient(
+    from 0deg,
+    rgba(56, 189, 248, 0.9) 0%,
+    rgba(56, 189, 248, 0.9) 100%
+  );
 }
 
 #inspectArrow {
@@ -1261,7 +1268,6 @@ select:hover {
   transition: transform 0.2s ease;
   display: inline-block;
 }
-
 
 .arrow-expanded {
   transform: rotate(90deg) !important;
@@ -1395,8 +1401,44 @@ select:hover {
   }
 }
 
-.engine-pulse-active {
-  animation: engine-pulse 2.5s infinite ease-in-out;
+/* 强发光：用户从未点过  */
+.engine-pulse-strong {
+  animation: enginePulseStrong 1.8s ease-in-out infinite;
+}
+
+@keyframes enginePulseStrong {
+  0%, 100% {
+    box-shadow:
+      0 0 6px 1px rgba(56, 189, 248, 0.5),
+      0 0 16px 4px rgba(56, 189, 248, 0.25);
+    border-color: rgba(56, 189, 248, 0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 12px 3px rgba(56, 189, 248, 0.95),
+      0 0 28px 8px rgba(56, 189, 248, 0.5);
+    border-color: rgba(125, 220, 255, 1);
+  }
+}
+
+/* 弱发光：用户已经点过，降级为不打扰的常态提示 */
+.engine-pulse-soft {
+  animation: enginePulseSoft 4s ease-in-out infinite;
+}
+
+@keyframes enginePulseSoft {
+  0%, 100% {
+    box-shadow:
+      0 0 3px 0 rgba(56, 189, 248, 0.25),
+      0 0 8px 1px rgba(56, 189, 248, 0.1);
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 0 5px 1px rgba(56, 189, 248, 0.4),
+      0 0 12px 2px rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.55);
+  }
 }
 
 @keyframes warning-blink {
@@ -1432,6 +1474,11 @@ select:hover {
 #openSettings:hover {
   background: rgba(56, 189, 248, 0.15) !important;
   border-color: rgba(56, 189, 248, 0.8) !important;
+  transform: scale(1.02);
+}
+ 
+#openSettings:hover #currentEngineName {
+  color: #fff !important;
 }
 
 #quickSearchBtn:active,
