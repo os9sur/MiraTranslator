@@ -3136,39 +3136,39 @@ document.addEventListener('DOMContentLoaded', async () => {
       langSelect.disabled = false;
     }
   };
-const openNotebook = async () => {
-  await safeCreateTab('notebook.html');
-  window.close();
-};
-document.getElementById('openNotebook').onclick = openNotebook;
-document.getElementById('openNotebookSecondary').onclick = openNotebook;
+  const openNotebook = async () => {
+    await safeCreateTab('notebook.html');
+    window.close();
+  };
+  document.getElementById('openNotebook').onclick = openNotebook;
+  document.getElementById('openNotebookSecondary').onclick = openNotebook;
 
-const openSettings = async () => {
-  // 首次点击  降级发光状态，避免每次点击都读写 storage
-  const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
-  if (!hasVisitedSettings) {
-    await safeSetStorage({ hasVisitedSettings: true });
+  const openSettings = async () => {
+    // 首次点击  降级发光状态，避免每次点击都读写 storage
+    const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
+    if (!hasVisitedSettings) {
+      await safeSetStorage({ hasVisitedSettings: true });
+      const btn = document.getElementById('openSettings');
+      btn.classList.remove('engine-pulse-strong');
+      btn.classList.add('engine-pulse-soft');
+    }
+    await safeCreateTab("engineSettings.html");
+    window.close();
+  };
+  document.getElementById('openSettings').onclick = openSettings;
+  document.getElementById('btnGoEngine').onclick = openSettings;
+
+  // 初始化发光状态：根据是否点过来决定强/弱
+  const initEngineButtonState = async () => {
     const btn = document.getElementById('openSettings');
-    btn.classList.remove('engine-pulse-strong');
-    btn.classList.add('engine-pulse-soft');
-  }
-  await safeCreateTab("engineSettings.html");
-  window.close();
-};
-document.getElementById('openSettings').onclick = openSettings;
-document.getElementById('btnGoEngine').onclick = openSettings;
+    const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
+    btn.classList.remove('engine-pulse-strong', 'engine-pulse-soft');
+    btn.classList.add(hasVisitedSettings ? 'engine-pulse-soft' : 'engine-pulse-strong');
+  };
 
-// 初始化发光状态：根据是否点过来决定强/弱
-const initEngineButtonState = async () => {
-  const btn = document.getElementById('openSettings');
-  const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
-  btn.classList.remove('engine-pulse-strong', 'engine-pulse-soft');
-  btn.classList.add(hasVisitedSettings ? 'engine-pulse-soft' : 'engine-pulse-strong');
-};
-
-initUILanguage();
-refreshUI();
-initEngineButtonState();
+  initUILanguage();
+  refreshUI();
+  initEngineButtonState();
 
   // 检测当前引擎是否可用
   async function checkEngineStatus() {
@@ -3224,29 +3224,28 @@ initEngineButtonState();
   function showEngineWarning(settingsBtn) {
     if (settingsBtn.querySelector('.engine-warning')) return;
 
-    settingsBtn.style.position = 'relative';
     settingsBtn.title = 'Engine may not be working, click to check settings';
 
     const warning = document.createElement('span');
     warning.className = 'engine-warning';
     warning.style.cssText = `
-          position: absolute;
-          top: -4px;
-          right: -4px;
-          width: 14px;
-          height: 14px;
-          background: #ef4444;
-          border-radius: 50%;
-          color: white;
-          font-size: 10px;
-          font-weight: bold;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10;
-          line-height: 1;
-          cursor: pointer;
-      `;
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        width: 14px;
+        height: 14px;
+        background: #ef4444;
+        border-radius: 50%;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        line-height: 1;
+        cursor: pointer;
+    `;
     warning.textContent = '!';
     settingsBtn.appendChild(warning);
   }
