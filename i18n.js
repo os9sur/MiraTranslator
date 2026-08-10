@@ -18,6 +18,7 @@ self.i18nData = {
     addTime: "添加时间",
     operation: "操作",
     noCollection: "暂无收藏单词",
+    noCollectionTip: "· 可以通过划词翻译点击收藏按钮 ⭐ 收藏单词\n· 可以通过youtube 视频字幕收藏\n· 可以点击本页右上角'+'按钮手动添加",
     completeContent: "请填写完整内容",
     noExportWords: "没有可导出的数据",
     currentSite: "当前网站",
@@ -51,7 +52,8 @@ self.i18nData = {
     meaning: "釋義",
     addTime: "添加時間",
     operation: "操作",
-    noCollection: "暫無收藏單詞",
+    noCollection: "目前尚無收藏的單字",
+    noCollectionTip: "· 可透過劃詞翻譯點擊收藏按鈕 ⭐ 收藏單字\n· 可透過 YouTube 影片字幕收藏\n· 也可點擊本頁右上角「+」按鈕手動新增",
     completeContent: "請填寫完整內容",
     noExportWords: "沒有可導出的數據",
     currentSite: "當前網站",
@@ -84,7 +86,8 @@ self.i18nData = {
     meaning: "Meaning",
     addTime: "Added Time",
     operation: "Action",
-    noCollection: "No words saved yet",
+    noCollection: "No saved words yet",
+    noCollectionTip: "· Hover over text to translate and click the ⭐ button to save words\n· Save words directly from YouTube video subtitles\n· Click the \"+\" button in the top right corner to add words manually",
     completeContent: "Please fill in all fields",
     noExportWords: "No data to export",
     currentSite: "Current Site",
@@ -118,6 +121,7 @@ self.i18nData = {
     addTime: "追加日時",
     operation: "操作",
     noCollection: "保存された単語はありません",
+    noCollectionTip: "· 画面上のワードをハイライトして翻訳し、⭐ボタンをクリックして保存\n· YouTubeの動画字幕から直接単語を保存\n· 右上の「＋」ボタンをクリックして手動で追加",
     completeContent: "すべての項目を入力してください",
     noExportWords: "出力するデータがありません",
     currentSite: "現在のサイト",
@@ -150,7 +154,8 @@ self.i18nData = {
     meaning: "뜻",
     addTime: "추가 일시",
     operation: "작업",
-    noCollection: "저장된 단어가 없습니다",
+    noCollection: "저장된 단어가 없습니다.",
+    noCollectionTip: "· 단어를 드래그하여 번역하고 ⭐ 버튼을 눌러 저장하세요.\n· YouTube 동영상 자막을 통해 단어를 저장할 수 있습니다.\n· 우측 상단의 '+' 버튼을 눌러 직접 단어를 추가하세요.",
     completeContent: "모든 내용을 입력해주세요",
     noExportWords: "내보낼 데이터가 없습니다",
     currentSite: "현재 사이트",
@@ -183,7 +188,8 @@ self.i18nData = {
     meaning: "Significado",
     addTime: "Añadido en",
     operation: "Acción",
-    noCollection: "Sin palabras guardadas",
+    noCollection: "Aún no hay palabras guardadas",
+    noCollectionTip: "· Selecciona texto para traducir y haz clic en el botón ⭐ para guardarlo\n· Guarda palabras directamente desde los subtítulos de YouTube\n· Haz clic en el botón \"+\" en la esquina superior derecha para añadir palabras manualmente",
     completeContent: "Complete todos los campos",
     noExportWords: "No hay datos para exportar",
     currentSite: "Sitio Actual",
@@ -215,7 +221,8 @@ self.i18nData = {
     meaning: "Signification",
     addTime: "Ajouté le",
     operation: "Action",
-    noCollection: "Aucun mot enregistré",
+    noCollection: "Aucun mot enregistré pour le moment",
+    noCollectionTip: "· Survolez ou sélectionnez du texte pour traduire et cliquez sur le bouton ⭐ pour l'enregistrer\n· Enregistrez des mots directement depuis les sous-titres YouTube\n· Cliquez sur le bouton « + » en haut à droite pour ajouter des mots manuellement",
     completeContent: "Veuillez remplir tout",
     noExportWords: "Aucune donnée à exporter",
     currentSite: "Site Actuel",
@@ -247,7 +254,8 @@ self.i18nData = {
     meaning: "Bedeutung",
     addTime: "Hinzugefügt",
     operation: "Aktion",
-    noCollection: "Keine Wörter gespeichert",
+    noCollection: "Noch keine gespeicherten Wörter",
+    noCollectionTip: "· Markieren Sie Text zum Übersetzen und klicken Sie auf das ⭐-Symbol zum Speichern\n· Speichern Sie Wörter direkt aus YouTube-Video-Untertiteln\n· Klicken Sie oben rechts auf die Schaltfläche „+“, um Wörter manuell hinzuzufügen",
     completeContent: "Bitte alles ausfüllen",
     noExportWords: "Keine Daten zum Exportieren",
     currentSite: "Aktuelle Seite",
@@ -279,7 +287,8 @@ self.i18nData = {
     meaning: "Значение",
     addTime: "Добавлено",
     operation: "Действие",
-    noCollection: "Нет сохраненных слов",
+    noCollection: "Сохраненных слов пока нет",
+    noCollectionTip: "· Выделите текст для перевода и нажмите кнопку ⭐, чтобы сохранить слово\n· Сохраняйте слова прямо из субтитров видео на YouTube\n· Нажмите кнопку «+» в правом верхнем углу, чтобы добавить слово вручную",
     completeContent: "Заполните все поля",
     noExportWords: "Нет данных для экспорта",
     currentSite: "Текущий сайт",
@@ -311,7 +320,8 @@ self.i18nData = {
     meaning: "Significado",
     addTime: "Adicionado",
     operation: "Ação",
-    noCollection: "Nenhuma palavra salva",
+    noCollection: "Nenhuma palavra salva ainda",
+    noCollectionTip: "· Selecione o texto para traduzir e clique no botão ⭐ para salvar a palavra\n· Salve palavras diretamente pelas legendas dos vídeos do YouTube\n· Clique no botão \"+\" no canto superior direito para adicionar palavras manualmente",
     completeContent: "Preencha tudo",
     noExportWords: "Sem dados para exportar",
     currentSite: "Site Atual",
@@ -344,6 +354,7 @@ self.i18nData = {
     addTime: "Aggiunto il",
     operation: "Azione",
     noCollection: "Nessuna parola salvata",
+    noCollectionTip: "· Seleziona il testo da tradurre e clicca sul pulsante ⭐ per salvare la parola\n· Salva le parole direttamente dai sottotitoli dei video di YouTube\n· Clicca sul pulsante \"+\" in alto a destra per aggiungere parole manualmente",
     completeContent: "Compila tutti i campi",
     noExportWords: "Nessun dato da esportare",
     currentSite: "Sito Attuale",
@@ -375,7 +386,8 @@ self.i18nData = {
     meaning: "Nghĩa",
     addTime: "Đã thêm",
     operation: "Thao tác",
-    noCollection: "Chưa có từ nào",
+    noCollection: "Chưa có từ nào được lưu",
+    noCollectionTip: "· Bôi đen văn bản để dịch và nhấp vào nút ⭐ để lưu từ\n· Lưu từ vựng trực tiếp từ phụ đề video YouTube\n· Nhấp vào nút \"+\" ở góc trên bên phải để thêm từ thủ công",
     completeContent: "Vui lòng điền đầy đủ",
     noExportWords: "Không có dữ liệu để xuất",
     currentSite: "Trang hiện tại",
@@ -407,7 +419,8 @@ self.i18nData = {
     meaning: "ความหมาย",
     addTime: "เวลาที่เพิ่ม",
     operation: "การดำเนินการ",
-    noCollection: "ยังไม่มีคำศัพท์ที่เก็บ",
+    noCollection: "ยังไม่มีคำศัพท์ที่บันทึกไว้",
+    noCollectionTip: "· ไฮไลท์ข้อความเพื่อแปลและคลิกปุ่ม ⭐ เพื่อบันทึกคำศัพท์\n· บันทึกคำศัพท์ได้โดยตรงจากคำบรรยายวิดีโอ YouTube\n· คลิกที่ปุ่ม \"+\" ที่มุมขวาบนเพื่อเพิ่มคำศัพท์ด้วยตนเอง",
     completeContent: "กรุณากรอกข้อมูลให้ครบ",
     noExportWords: "ไม่มีข้อมูลที่จะส่งออก",
     currentSite: "ไซต์ปัจจุบัน",
@@ -439,7 +452,8 @@ self.i18nData = {
     meaning: "معنى",
     addTime: "وقت الإضافة",
     operation: "إجراءات",
-    noCollection: "لا توجد كلمات محفوظة",
+    noCollection: "لا توجد كلمات محفوظة حتى الآن",
+    noCollectionTip: "· مرر فوق النص للترجمة وانقر على زر ⭐ لحفظ الكلمة\n· احفظ الكلمات مباشرة من ترجمات فيديوهات يوتيوب\n· انقر على زر \"+\" في الزاوية العليا لإضافة كلمات يدويًا",
     completeContent: "يرجى ملء كافة الحقول",
     noExportWords: "لا توجد بيانات للتصدير",
     currentSite: "الموقع الحالي",
@@ -471,7 +485,8 @@ self.i18nData = {
     meaning: "معنی",
     addTime: "زمان افزودن",
     operation: "عملیات",
-    noCollection: "کلمه‌ای ذخیره نشده است",
+    noCollection: "هنوز کلمه‌ای ذخیره نشده است",
+    noCollectionTip: "· متن را انتخاب کنید تا ترجمه شود و روی دکمه ⭐ کلیک کنید تا کلمه ذخیره شود\n· کلمات را مستقیماً از زیرنویس ویدیوهای یوتیوب ذخیره کنید\n· برای افزودن دستی کلمات، روی دکمه «+» در گوشه بالا سمت راست کلیک کنید",
     completeContent: "لطفاً همه موارد را پر کنید",
     noExportWords: "داده‌ای برای خروجی وجود ندارد",
     currentSite: "سایت فعلی",
@@ -503,7 +518,8 @@ self.i18nData = {
     meaning: "Anlam",
     addTime: "Eklendi",
     operation: "İşlem",
-    noCollection: "Kaydedilmiş kelime yok",
+    noCollection: "Henüz kaydedilen kelime yok",
+    noCollectionTip: "· Çeviri için metni seçin ve kelimeyi kaydetmek için ⭐ düğmesine tıklayın\n· YouTube video altyazılarından doğrudan kelime kaydedin\n· Kelimeleri manuel olarak eklemek için sağ üst köşedeki \"+\" düğmesine tıklayın",
     completeContent: "Lütfen tüm alanları doldurun",
     noExportWords: "Dışa aktarılacak veri yok",
     currentSite: "Mevcut Site",
@@ -3180,113 +3196,128 @@ self.i18nAttach7 = {
     "ytHint.middle": "，并在播放器 ",
     "ytHint.suffix": " 中选择原始视频语言",
     "common.youtube.settings": "[设定]",
-    "common.youtube.subtitles": "[字幕]"
+    "common.youtube.subtitles": "[字幕]",
+    "common.toggleVisibility": "显示/隐藏"
   },
   "zh-TW": {
     "ytHint.prefix": "💡 開啟影片右下角 ",
     "ytHint.middle": "，並在播放器 ",
     "ytHint.suffix": " 中選擇原始影片語言",
     "common.youtube.settings": "[設定]",
-    "common.youtube.subtitles": "[字幕]"
+    "common.youtube.subtitles": "[字幕]",
+    "common.toggleVisibility": "顯示/隱藏"
   },
   "en": {
     "ytHint.prefix": "💡 Turn on ",
     "ytHint.middle": " in the bottom right of the video, then go to ",
     "ytHint.suffix": " and select the original video language",
     "common.youtube.settings": "Settings",
-    "common.youtube.subtitles": "Subtitles"
+    "common.youtube.subtitles": "Subtitles",
+    "common.toggleVisibility": "Show/Hide"
   },
   "ja": {
     "ytHint.prefix": "💡 動画の右下にある ",
     "ytHint.middle": " をオンにし、プレイヤーの ",
     "ytHint.suffix": " で元の動画言語を選択してください",
     "common.youtube.settings": "設定",
-    "common.youtube.subtitles": "字幕"
+    "common.youtube.subtitles": "字幕",
+    "common.toggleVisibility": "表示/非表示"
   },
   "ko": {
     "ytHint.prefix": "💡 영상 오른쪽 아래의 ",
     "ytHint.middle": " 를 켜고, 플레이어의 ",
     "ytHint.suffix": " 에서 원본 자막 언어를 선택하세요",
     "common.youtube.settings": "설정",
-    "common.youtube.subtitles": "자막"
+    "common.youtube.subtitles": "자막",
+    "common.toggleVisibility": "표시/숨기기"
   },
   "es": {
     "ytHint.prefix": "💡 Activa el ",
     "ytHint.middle": " en la parte inferior derecha del video, luego ve a ",
     "ytHint.suffix": " y selecciona el idioma original del video",
     "common.youtube.settings": "Ajustes",
-    "common.youtube.subtitles": "Subtítulos"
+    "common.youtube.subtitles": "Subtítulos",
+    "common.toggleVisibility": "Mostrar/Ocultar"
   },
   "fr": {
     "ytHint.prefix": "💡 Activez le ",
     "ytHint.middle": " en bas à droite de la vidéo, puis allez dans ",
     "ytHint.suffix": " et sélectionnez la langue originale de la vidéo",
     "common.youtube.settings": "Paramètres",
-    "common.youtube.subtitles": "Sous-titres"
+    "common.youtube.subtitles": "Sous-titres",
+    "common.toggleVisibility": "Afficher/Masquer"
   },
   "de": {
     "ytHint.prefix": "💡 Schalten Sie das ",
     "ytHint.middle": " unten rechts im Video ein, dann gehen Sie zu ",
     "ytHint.suffix": " und wählen Sie die Originalsprache des Videos",
     "common.youtube.settings": "Einstellungen",
-    "common.youtube.subtitles": "Untertitel"
+    "common.youtube.subtitles": "Untertitel",
+    "common.toggleVisibility": "Anzeigen/Ausblenden"
   },
   "ru": {
     "ytHint.prefix": "💡 Включите ",
     "ytHint.middle": " в правом нижнем углу видео, затем перейдите в ",
     "ytHint.suffix": " и выберите оригинальный язык видео",
     "common.youtube.settings": "Настройки",
-    "common.youtube.subtitles": "Субтитры"
+    "common.youtube.subtitles": "Субтитры",
+    "common.toggleVisibility": "Показать/Скрыть"
   },
   "pt": {
     "ytHint.prefix": "💡 Ative o ",
     "ytHint.middle": " no canto inferior direito do vídeo, depois vá em ",
     "ytHint.suffix": " e selecione o idioma original do vídeo",
     "common.youtube.settings": "Configurações",
-    "common.youtube.subtitles": "Legendas"
+    "common.youtube.subtitles": "Legendas",
+    "common.toggleVisibility": "Mostrar/Ocultar"
   },
   "it": {
     "ytHint.prefix": "💡 Attiva il ",
     "ytHint.middle": " nell'angolo in basso a destra del video, poi vai su ",
     "ytHint.suffix": " e seleziona la lingua originale del video",
     "common.youtube.settings": "Impostazioni",
-    "common.youtube.subtitles": "Sottotitoli"
+    "common.youtube.subtitles": "Sottotitoli",
+    "common.toggleVisibility": "Mostra/Nascondi"
   },
   "vi": {
     "ytHint.prefix": "💡 Bật ",
     "ytHint.middle": " ở góc dưới bên phải video, sau đó vào ",
     "ytHint.suffix": " và chọn ngôn ngữ video gốc",
     "common.youtube.settings": "Cài đặt",
-    "common.youtube.subtitles": "Phụ đề"
+    "common.youtube.subtitles": "Phụ đề",
+    "common.toggleVisibility": "Hiện/Ẩn"
   },
   "th": {
     "ytHint.prefix": "💡 เปิด ",
     "ytHint.middle": " ที่มุมล่างขวาของวิดีโอ แล้วไปที่ ",
     "ytHint.suffix": " และเลือกภาษาวิดีโอต้นฉบับ",
     "common.youtube.settings": "การตั้งค่า",
-    "common.youtube.subtitles": "คำบรรยาย"
+    "common.youtube.subtitles": "คำบรรยาย",
+    "common.toggleVisibility": "แสดง/ซ่อน"
   },
   "tr": {
     "ytHint.prefix": "💡 Videonun sağ alt köşesindeki ",
     "ytHint.middle": " düğmesini açın, ardından oynatıcının ",
     "ytHint.suffix": " bölümünden orijinal video dilini seçin",
     "common.youtube.settings": "Ayarlar",
-    "common.youtube.subtitles": "Altyazılar"
+    "common.youtube.subtitles": "Altyazılar",
+    "common.toggleVisibility": "Göster/Gizle"
   },
   "ar": {
     "ytHint.prefix": "💡 شغّل ",
     "ytHint.middle": " في أسفل يمين الفيديو، ثم اذهب إلى ",
     "ytHint.suffix": " واختر لغة الفيديو الأصلية",
     "common.youtube.settings": "الإعدادات",
-    "common.youtube.subtitles": "الترجمة"
+    "common.youtube.subtitles": "الترجمة",
+    "common.toggleVisibility": "إظهار/إخفاء"
   },
-
   "fa": {
     "ytHint.prefix": "💡 دکمه ",
     "ytHint.middle": " را در پایین سمت راست ویدیو روشن کنید، سپس به بخش ",
     "ytHint.suffix": " بروید و زبان اصلی ویدیو را انتخاب کنید",
     "common.youtube.settings": "تنظیمات",
-    "common.youtube.subtitles": "زیرنویس"
+    "common.youtube.subtitles": "زیرنویس",
+    "common.toggleVisibility": "نمایش/پنهان"
   }
 };
 self.i18nAttach8 = {

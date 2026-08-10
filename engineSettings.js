@@ -907,7 +907,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (line === '---') {
                         //return `<hr style="border:0;border-top:1px solid #30363d;margin:32px 0;">`;
                         //return `<div class="bottom-bar" style="min-height:20px;" id="global-actions"></div>`;
-                       return `<div class="notice-divider"></div>`;
+                        return `<div class="notice-divider"></div>`;
                     }
 
                     const isRTL = checkRTL(uiLanguage);
@@ -1014,32 +1014,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             let val = saved[k] ?? (k === 'alias' ? (config.alias || '') : (d || ''));
             const isKeyField = k.toLowerCase().includes('key');
             const showGetKey = (isKeyField && tpl.url && tpl.url !== '#');
+            const isPasswordField = inputType === 'password';
             let inputHtml = '';
+            const placeholder = (k === 'alias') ? displayAlias : (p || '');
             if (opts && opts.length > 0) {
                 inputHtml = `
-                <div class="custom-combobox">
-                    <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
-                    <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
-                    <div class="combobox-dropdown">
-                        ${opts.map(opt =>
+        <div class="custom-combobox">
+            <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
+            <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
+            <div class="combobox-dropdown">
+                ${opts.map(opt =>
                     opt.startsWith('─')
                         ? `<div class="dropdown-divider" style="color:#666;font-size:10px;padding:4px 8px;cursor:default;pointer-events:none;">${opt}</div>`
                         : `<div class="dropdown-item" data-value="${opt}">${opt}</div>`
                 ).join('')}
-                    </div>
-                </div>`;
+            </div>
+        </div>`;
+            } else if (isPasswordField) {
+                inputHtml = `
+        <div class="api-input-wrapper">
+            <input type="password" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">
+            <button type="button" class="toggle-visibility-btn" tabindex="-1" title="${t('common.toggleVisibility', uiLanguage)}">
+                <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg class="icon-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.4 18.4 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                </svg>
+            </button>
+        </div>`;
             } else {
-                const placeholder = (k === 'alias') ? displayAlias : (p || '');
                 inputHtml = `<input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">`;
             }
             return `
-                <div class="form-group">
-                    <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
-                        <label style="margin:0">${l.toUpperCase()}</label>
-                        ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
-                    </div>
-                    ${inputHtml}
-                </div>`;
+        <div class="form-group">
+            <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
+                <label style="margin:0">${l.toUpperCase()}</label>
+                ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
+            </div>
+            ${inputHtml}
+        </div>`;
         };
         let html = `
                 <div class="main-header">
@@ -1172,6 +1188,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             grid.innerHTML = html;
             modal.classList.remove('hidden');
         };
+
+        document.getElementById('dynamic-form-container').addEventListener('click', (e) => {
+            const btn = e.target.closest('.toggle-visibility-btn');
+            if (!btn) return;
+
+            const input = btn.closest('.api-input-wrapper').querySelector('.api-input-field');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+
+            btn.querySelector('.icon-eye').style.display = isPassword ? 'none' : 'block';
+            btn.querySelector('.icon-eye-off').style.display = isPassword ? 'block' : 'none';
+        });
         document.getElementById('template-grid').onclick = async (e) => {
             const card = e.target.closest('.tpl-card');
             if (!card) return;
@@ -1195,8 +1223,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             closeBtn.onclick = () => modal.classList.add('hidden');
         }
         modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.add('hidden');
-});
+            if (e.target === modal) modal.classList.add('hidden');
+        });
     }
     async function deleteItem(id, event) {
         const icon = event.target;
@@ -1820,7 +1848,7 @@ function _buildAIPromptHTML(saved) {
     return `
         <div class="ai-prompt-header" id="ai-prompt-toggle" dir="auto">
             <div class="ai-prompt-header-left">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                      stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>

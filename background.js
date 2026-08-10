@@ -4155,9 +4155,13 @@ async function ensureAlarm(name, periodInMinutes) {
     }
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async (details) => {
     ensureAlarm('cleanCache', 60 * 24);
     ensureAlarm('cleanVocab', 60 * 24 * 3);
+
+    if (details.reason === 'install') {
+        await safeSetStorage({ vocabHighlight: true });
+    }
 });
 
 chrome.runtime.onStartup.addListener(() => {

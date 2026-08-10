@@ -743,7 +743,7 @@ select:hover {
   width: 100%;
   box-sizing: border-box;
   background: #020617;
-  border: 1px solid #334155;
+  border: 1.2px solid #334155;
   color: #f1f5f9;
   padding: 8px;
   border-radius: 8px;
