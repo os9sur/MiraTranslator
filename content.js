@@ -6165,11 +6165,8 @@ function triggerRefresh() {
     (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
   );
 
-  // console.time('[埋点]删除旧缓存');
-
   Promise.all(keysToRemove.map((k) => idb.remove(k)))
-    .then(() => {
-      // console.timeEnd('[埋点]删除旧缓存');
+    .then(() => { 
 
       const saveBtn = shadow.getElementById("p-save");
       if (saveBtn) saveBtn._miraReady = false;
@@ -6210,8 +6207,6 @@ function triggerRefresh() {
       if (shadowHost?._engineDotEl)
         shadowHost._engineDotEl.style.background = "#6b7280";
 
-      // console.time('[埋点]翻译请求');
-
       getDetailedTranslation(
         text,
         true,
@@ -6222,7 +6217,6 @@ function triggerRefresh() {
         currentSourceLang,
       )
         .then((result) => {
-          // console.timeEnd('[埋点]翻译请求');
 
           if (basicEl) {
             basicEl.style.color = "";
@@ -6247,8 +6241,6 @@ function triggerRefresh() {
           handleTranslationResult(result, text, shadow);
         })
         .catch((err) => {
-          // console.timeEnd('[埋点]翻译请求');
-
           if (shadowHost?._engineDotEl)
             shadowHost._engineDotEl.style.background = "#ef4444";
           clearTimeout(shadowHost?._detailTimer);
