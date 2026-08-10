@@ -48,23 +48,30 @@
     .search-bar-wrapper:focus-within {
       box-shadow: 0 0 8px rgba(56, 189, 248, 0.6), 0 0 20px rgba(56, 189, 248, 0.3);
     }
+.highlight-label {
+  border-radius: 999px;
+  padding: 8px 25px;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(45, 212, 191, 0.3);
+  box-shadow: 
+    0 0 20px rgba(45, 212, 191, 0.3), 
+    0 0 6px rgba(45, 212, 191, 0.4), 
+    inset 0 0 10px rgba(45, 212, 191, 0.3), 
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  color: #5eead4;
+  transition: all 0.3s ease;
+}
 
-    .highlight-label {
-      border-radius: 999px;
-      padding: 8px 25px;
-      gap: 12px;
-      background: rgba(15, 23, 42, 0.8);
-      border: 1px solid rgba(45, 212, 191, 0.3);
-      box-shadow: 0 0 20px rgba(45, 212, 191, 0.3), 0 0 6px rgba(45, 212, 191, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.1);
-      color: #5eead4;
-      transition: all 0.3s ease;
-    }
-
-    .highlight-label:hover {
-      border-color: rgba(45, 212, 191, 0.7);
-      background: rgba(20, 30, 50, 0.9);
-      box-shadow: 0 0 28px rgba(45, 212, 191, 0.45), 0 0 10px rgba(45, 212, 191, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.2);
-    }
+.highlight-label:hover {
+  border-color: rgba(45, 212, 191, 0.7);
+  background: rgba(20, 30, 50, 0.9);
+  box-shadow: 
+    0 0 28px rgba(45, 212, 191, 0.45), 
+    0 0 10px rgba(45, 212, 191, 0.6), 
+    inset 0 0 15px rgba(45, 212, 191, 0.5), 
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+}
 
     #highlightToggle {
       background: #334155;
@@ -85,31 +92,42 @@
     }
 
     .search-bar-input {
-      width: 100%;
-      background: rgba(23, 40, 81, 0.5);
-      border: 1.2px solid rgba(56, 189, 248, 0.1);
+  width: 100%;
+  background: rgba(23, 40, 81, 0.4);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  box-shadow: 
+    0 0 12px rgba(56, 189, 248, 0.2), 
+    inset 0 0 10px rgba(56, 189, 248, 0.25), 
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  color: white;
+  padding: 10px 16px 10px 42px;
+  border-radius: 999px;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.5), inset 0 1px 4px rgba(0, 0, 0, 0.3);
+.search-bar-input:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 
+    0 0 25px rgba(56, 189, 248, 0.45), 
+    inset 0 0 14px rgba(56, 189, 248, 0.4), 
+    inset 0 1px 3px rgba(0, 0, 0, 0.4);
+}
 
-      color: white;
-      padding: 10px 16px 10px 42px;
-      border-radius: 999px;
-      font-size: 14px;
-      outline: none;
-      box-sizing: border-box;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      transition: box-shadow 0.3s ease, background-color 0.3s ease;
-    }
-
-    .search-bar-input:focus {
-      border-color: #38bdf8;
-      background: #020617;
-      box-shadow: 0 0 45px rgba(56, 189, 248, 0.7), inset 0 1px 4px rgba(0, 0, 0, 0.5);
-      outline: none;
-      outline-offset: 0px;
-    }
+.search-bar-input:focus {
+  border-color: #38bdf8;
+  background: rgba(2, 6, 23, 0.9);
+  box-shadow: 
+    0 0 40px rgba(56, 189, 248, 0.7), 
+    inset 0 0 18px rgba(56, 189, 248, 0.6), 
+    inset 0 1px 4px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
 
     .context-speaker-btn,
     .example-speaker-btn {

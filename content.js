@@ -4768,8 +4768,10 @@ function initSelectionTranslate() {
         fill:           none;
         z-index:        1;
       }
-      .icon-btn:hover       { transform: scale(1.1); }
-      .icon-btn:hover svg   { transform: scale(1.1); }
+      @media (hover: hover) and (pointer: fine) {
+        .icon-btn:hover       { transform: scale(1.1); }
+        .icon-btn:hover svg   { transform: scale(1.1); }
+      }
 
       .save-btn:hover svg {stroke: #ffaa00a7 !important;}
 
@@ -4780,25 +4782,33 @@ function initSelectionTranslate() {
         fill:       none !important;
         transition: stroke .3s ease, filter .3s ease, transform .3s ease !important;
       }
-      .icon-btn.theme:hover            { transform: scale(1.1) !important; }
-      .icon-btn.theme:hover svg        { stroke: #ffaa00a7 !important; filter: drop-shadow(0 0 3px #ff7b00af) !important; }
+      @media (hover: hover) and (pointer: fine) {
+        .icon-btn.theme:hover            { transform: scale(1.1) !important; }
+        .icon-btn.theme:hover svg        { stroke: #ffaa00a7 !important; filter: drop-shadow(0 0 3px #ff7b00af) !important; }
+      }
       .icon-btn.theme:active           { transform: scale(0.92) !important; }
 
       /* 发音按钮 */
       #p-speak svg { width: 20px !important; height: 20px !important; }
-      #p-speak:hover     { background: rgba(56,189,248,0.2) !important; box-shadow: 0 0 8px rgba(56,189,248,0.4); }
-      #p-speak:hover svg { stroke: #38bdf8 !important; }
+      @media (hover: hover) and (pointer: fine) {
+        #p-speak:hover     { background: rgba(56,189,248,0.2) !important; box-shadow: 0 0 8px rgba(56,189,248,0.4); }
+        #p-speak:hover svg { stroke: #38bdf8 !important; }
+      }
 
       /* 收藏按钮 */
-      #p-save:hover     { background: rgba(250,204,21,0.2) !important; box-shadow: 0 0 8px rgba(250,204,21,0.4); }
-      #p-save:hover svg { filter: drop-shadow(0 0 5px rgba(250,204,21,0.4)); }
+      @media (hover: hover) and (pointer: fine) {
+        #p-save:hover     { background: rgba(250,204,21,0.2) !important; box-shadow: 0 0 8px rgba(250,204,21,0.4); }
+        #p-save:hover svg { filter: drop-shadow(0 0 5px rgba(250,204,21,0.4)); }
+      }
       #star-icon        { transition: all .2s ease !important; transform-origin: center; }
       .is-saved         { color: #facc15 !important; }
       .is-saved svg     { fill: #facc15 !important; stroke: #facc15 !important; }
 
       /* 刷新按钮 */
-      #p-refresh:hover     { background: rgba(34,197,94,0.2) !important; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
-      #p-refresh:hover svg { stroke: #4ade80 !important; }
+      @media (hover: hover) and (pointer: fine) {
+        #p-refresh:hover     { background: rgba(34,197,94,0.2) !important; box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+        #p-refresh:hover svg { stroke: #4ade80 !important; }
+      }
       @keyframes res-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       .spinning svg        { animation: res-rotate .6s linear infinite; stroke: #4ade80 !important;}
 
@@ -4817,7 +4827,9 @@ function initSelectionTranslate() {
         transform:  rotate(-45deg);
         transition: transform .4s cubic-bezier(.4,0,.2,1), stroke .4s ease !important;
       }
-      #p-pin:hover #pin-icon          { stroke: #38bdf8 !important; opacity: 1 !important; transform: scale(1.1) !important; }
+     @media (hover: hover) and (pointer: fine) {
+        #p-pin:hover #pin-icon        { stroke: #38bdf8 !important; opacity: 1 !important; transform: scale(1.1) !important; }
+      }
       #p-pin.is-pinned #pin-icon      { stroke: #38bdf8 !important; fill: #38bdf8 !important; transform: rotate(0deg) scale(1.05) !important; opacity: 1 !important; }
 
       /* 关闭按钮 */
@@ -4833,7 +4845,9 @@ function initSelectionTranslate() {
         -moz-user-select: none;
         user-select: none;         /* 标准语法 */
       }
-      .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
+      @media (hover: hover) and (pointer: fine) {
+        .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
+      }
       .close-btn:active { transform: scale(0.9); }
 
       /* ── Resize 手柄 ── */
@@ -4860,6 +4874,9 @@ function initSelectionTranslate() {
         opacity:      0;
         transform:    scale(0.5);
         pointer-events: auto;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
       }
       .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
       .eclipse-logo-btn img  { width: 18px; height: 18px; border-radius: 4px; filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }
@@ -4872,6 +4889,11 @@ function initSelectionTranslate() {
       .eclipse-logo-btn.touch img {
         width: 28px;
         height: 28px;
+      }
+      .eclipse-logo-btn::after {
+        content: "";
+        position: absolute;
+        inset: -10px;  /* 视觉之外再扩 10px 的可点区域 */
       }
 
       .glowing-icon {
@@ -5207,13 +5229,13 @@ function initSelectionTranslate() {
 
     @media (pointer: coarse) {
       #p-header-wrapper { padding: 6px 16px 0; }
-      #p-header { height: 30px; margin-bottom: 2px; } /*移动端header高度*/
+      #p-header { height: 33px; margin-bottom: 2px; } /*移动端header高度*/
       #p-header img { width: 22px; height: 22px; }
 
       .p-header-actions { height: 28px; }
 
       .header-controls {
-        height: 35px;
+        height: 36px;
         gap: 8px;
         right: 12px;
       }
@@ -5223,11 +5245,12 @@ function initSelectionTranslate() {
       #p-pin svg {
         width: 19px !important;
         height: 19px !important;
-        stroke-width: 2.8 !important;
+        stroke-width: 2.5 !important;
       }
       .icon-btn.theme svg#theme-icon {
-        width: 16px !important;
-        height: 16px !important;
+        width: 19px !important;
+        height: 19px !important;
+        stroke-width: 2.5 !important;
       }
 
       #p-refresh svg {
@@ -5250,6 +5273,10 @@ function initSelectionTranslate() {
       }
 
       .close-btn { padding: 7px 10px 10px 10px; font-size: 19px; }
+      .resizer {
+        display: none !important;
+        pointer-events: none !important;
+      }
     }
 
     
@@ -5318,23 +5345,29 @@ function initSelectionTranslate() {
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
   // 提取出的公共关闭函数
   function closePopup() {
-    if (!popupEl) return;
-    const rect = popupEl.getBoundingClientRect();
-    const originX = lastSelectionPos.clientX - rect.left;
-    const originY = lastSelectionPos.clientY - rect.top;
-    popupEl.style.transformOrigin = `${originX}px ${originY}px`;
-    popupEl.classList.add('is-hidden');
+  if (!popupEl) return;
+  const rect = popupEl.getBoundingClientRect();
+  const originX = lastSelectionPos.clientX - rect.left;
+  const originY = lastSelectionPos.clientY - rect.top;
+  popupEl.style.transformOrigin = `${originX}px ${originY}px`;
+  popupEl.classList.add('is-hidden');
 
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(() => {
-      if (!popupEl.classList.contains('is-hidden')) return;
-      popupEl.style.display = 'none';
-      popupEl.style.transformOrigin = '';
-      popupEl.style.transition = '';
-      popupEl.style.animation = '';
-      popupEl.classList.remove('is-hidden');
-    }, 480);
-  }
+  // 清除原生选区，避免移动端下一次长按选词失效
+  window.getSelection()?.removeAllRanges();
+  liveText = "";
+  lastShownText = "";
+  liveRange = null;
+
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => {
+    if (!popupEl.classList.contains('is-hidden')) return;
+    popupEl.style.display = 'none';
+    popupEl.style.transformOrigin = '';
+    popupEl.style.transition = '';
+    popupEl.style.animation = '';
+    popupEl.classList.remove('is-hidden');
+  }, 480);
+}
   function setPanelGlowColor(panel) {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
     const rgb = window
@@ -6126,136 +6159,136 @@ function initSelectionTranslate() {
       }
     }
     // 刷新翻译
-function triggerRefresh() {
-  const refreshBtn = shadow.getElementById("p-refresh");
-  if (refreshBtn?.classList.contains("spinning")) return;
+    function triggerRefresh() {
+      const refreshBtn = shadow.getElementById("p-refresh");
+      if (refreshBtn?.classList.contains("spinning")) return;
 
-  if (refreshBtn) refreshBtn.classList.add("spinning");
+      if (refreshBtn) refreshBtn.classList.add("spinning");
 
-  if (shadowHost) {
-    clearTimeout(shadowHost._slowTimer);
-    clearTimeout(shadowHost._detailTimer);
-    shadowHost._slowTimer = null;
-    shadowHost._detailTimer = null;
-    shadowHost._detailFullyRendered = false;
-  }
-
-  const currentTargetLang = window.currentTargetL || state.targetLang;
-  const currentSourceLang = state.sourceLang === "auto"
-    ? (detectedHintLang || null)
-    : state.sourceLang;
-
-  // 判断是单词还是句子（单词：无空格且长度<=30）
-  const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
-
-  const fingerprint =
-    typeof hash === "function"
-      ? hash(
-        text
-          .trim()
-          .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
-          .toLowerCase(),
-      )
-      : text.trim().substring(0, 50);
-
-  // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
-  const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
-  const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
-  const keysToRemove = ALL_ENGINES.map(
-    (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
-  );
-
-  Promise.all(keysToRemove.map((k) => idb.remove(k)))
-    .then(() => { 
-
-      const saveBtn = shadow.getElementById("p-save");
-      if (saveBtn) saveBtn._miraReady = false;
-
-      const basicEl = shadow.getElementById("p-basic");
-      const phoneticEl = shadow.getElementById("p-phonetic");
-      const pDetail = shadow.getElementById("p-detail");
-      const pExamples = shadow.getElementById("p-examples");
-      if (!basicEl?.style) return;
-
-      basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
-      if (phoneticEl) phoneticEl.innerText = "";
-      if (pExamples) pExamples.style.display = "none";
-
-      if (isWord) {
-        if (pDetail) {
-          pDetail.style.display = "block";
-          pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
-        }
-        // 8秒超时显示刷新按钮
-        shadowHost._detailTimer = setTimeout(() => {
-          if (shadowHost?._detailFullyRendered) return;
-          const pDetail = shadow.getElementById("p-detail");
-          if (pDetail) {
-            pDetail.style.display = "block";
-            pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
-            shadow
-              .getElementById("p-detail-retry")
-              ?.addEventListener("click", () => {
-                shadow.getElementById("p-refresh")?.click();
-              });
-          }
-        }, 8000);
-      } else {
-        //  句子：直接隐藏 pDetail，不启动定时器
-        if (pDetail) pDetail.style.display = "none";
+      if (shadowHost) {
+        clearTimeout(shadowHost._slowTimer);
+        clearTimeout(shadowHost._detailTimer);
+        shadowHost._slowTimer = null;
+        shadowHost._detailTimer = null;
+        shadowHost._detailFullyRendered = false;
       }
-      if (shadowHost?._engineDotEl)
-        shadowHost._engineDotEl.style.background = "#6b7280";
 
-      getDetailedTranslation(
-        text,
-        true,
-        currentTargetLang,
-        {
-          hintInputLang: currentSourceLang,
-        },
-        currentSourceLang,
-      )
-        .then((result) => {
+      const currentTargetLang = window.currentTargetL || state.targetLang;
+      const currentSourceLang = state.sourceLang === "auto"
+        ? (detectedHintLang || null)
+        : state.sourceLang;
 
-          if (basicEl) {
-            basicEl.style.color = "";
-            basicEl.style.fontStyle = "normal";
-          }
-          if (result?.isError) {
-            if (shadowHost?._engineDotEl)
-              shadowHost._engineDotEl.style.background = "#ef4444";
-            clearTimeout(shadowHost?._detailTimer);
-            const pDetail = shadow.getElementById("p-detail");
-            if (pDetail) {
-              pDetail.style.display = "none";
-              pDetail.innerHTML = "";
-            }
-            setBasicError(basicEl, result.basic || "Translation failed");
-            return;
-          }
-          if (shadowHost?._engineDotEl)
-            shadowHost._engineDotEl.style.background = "#22c55e";
+      // 判断是单词还是句子（单词：无空格且长度<=30）
+      const isWord = !text.trim().includes(" ") && text.trim().length <= 30;
 
-          if (result?.isPartial && shadowHost?._detailFullyRendered) return;
-          handleTranslationResult(result, text, shadow);
-        })
-        .catch((err) => {
-          if (shadowHost?._engineDotEl)
-            shadowHost._engineDotEl.style.background = "#ef4444";
-          clearTimeout(shadowHost?._detailTimer);
+      const fingerprint =
+        typeof hash === "function"
+          ? hash(
+            text
+              .trim()
+              .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
+              .toLowerCase(),
+          )
+          : text.trim().substring(0, 50);
+
+      // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
+      const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
+      const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
+      const keysToRemove = ALL_ENGINES.map(
+        (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
+      );
+
+      Promise.all(keysToRemove.map((k) => idb.remove(k)))
+        .then(() => {
+
+          const saveBtn = shadow.getElementById("p-save");
+          if (saveBtn) saveBtn._miraReady = false;
+
+          const basicEl = shadow.getElementById("p-basic");
+          const phoneticEl = shadow.getElementById("p-phonetic");
           const pDetail = shadow.getElementById("p-detail");
-          if (pDetail) {
-            pDetail.style.display = "none";
-            pDetail.innerHTML = "";
+          const pExamples = shadow.getElementById("p-examples");
+          if (!basicEl?.style) return;
+
+          basicEl.innerHTML = `<span style="opacity:0.6;font-size:13px;font-style:italic;">${t("retranslate")}...</span>`;
+          if (phoneticEl) phoneticEl.innerText = "";
+          if (pExamples) pExamples.style.display = "none";
+
+          if (isWord) {
+            if (pDetail) {
+              pDetail.style.display = "block";
+              pDetail.innerHTML = `<span class="mira-font-family" style="opacity:0.5;font-size:12px;font-style:italic;">${t("loadingMore", window.uiLanguage)}</span>`;
+            }
+            // 8秒超时显示刷新按钮
+            shadowHost._detailTimer = setTimeout(() => {
+              if (shadowHost?._detailFullyRendered) return;
+              const pDetail = shadow.getElementById("p-detail");
+              if (pDetail) {
+                pDetail.style.display = "block";
+                pDetail.innerHTML = `<span class="mira-font-family" id="p-detail-retry" style="opacity:0.5;font-size:12px;font-style:italic;cursor:pointer;text-decoration:underline;">↻ ${t("retry", window.uiLanguage) || "retry"}</span>`;
+                shadow
+                  .getElementById("p-detail-retry")
+                  ?.addEventListener("click", () => {
+                    shadow.getElementById("p-refresh")?.click();
+                  });
+              }
+            }, 8000);
+          } else {
+            //  句子：直接隐藏 pDetail，不启动定时器
+            if (pDetail) pDetail.style.display = "none";
           }
-          setBasicError(basicEl, err.message || "Network Error");
-        })
-        .finally(() => {
-          setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
+          if (shadowHost?._engineDotEl)
+            shadowHost._engineDotEl.style.background = "#6b7280";
+
+          getDetailedTranslation(
+            text,
+            true,
+            currentTargetLang,
+            {
+              hintInputLang: currentSourceLang,
+            },
+            currentSourceLang,
+          )
+            .then((result) => {
+
+              if (basicEl) {
+                basicEl.style.color = "";
+                basicEl.style.fontStyle = "normal";
+              }
+              if (result?.isError) {
+                if (shadowHost?._engineDotEl)
+                  shadowHost._engineDotEl.style.background = "#ef4444";
+                clearTimeout(shadowHost?._detailTimer);
+                const pDetail = shadow.getElementById("p-detail");
+                if (pDetail) {
+                  pDetail.style.display = "none";
+                  pDetail.innerHTML = "";
+                }
+                setBasicError(basicEl, result.basic || "Translation failed");
+                return;
+              }
+              if (shadowHost?._engineDotEl)
+                shadowHost._engineDotEl.style.background = "#22c55e";
+
+              if (result?.isPartial && shadowHost?._detailFullyRendered) return;
+              handleTranslationResult(result, text, shadow);
+            })
+            .catch((err) => {
+              if (shadowHost?._engineDotEl)
+                shadowHost._engineDotEl.style.background = "#ef4444";
+              clearTimeout(shadowHost?._detailTimer);
+              const pDetail = shadow.getElementById("p-detail");
+              if (pDetail) {
+                pDetail.style.display = "none";
+                pDetail.innerHTML = "";
+              }
+              setBasicError(basicEl, err.message || "Network Error");
+            })
+            .finally(() => {
+              setTimeout(() => refreshBtn?.classList.remove("spinning"), 600);
+            });
         });
-    });
-}
+    }
 
     //  p-refresh 按钮绑定
     shadow.getElementById("p-refresh").onclick = async (e) => {
@@ -7870,6 +7903,10 @@ function triggerRefresh() {
 
     if (isTouchEvent) {
       // 移动端：点击 logo 触发翻译（每次重新绑定以捕获最新闭包）
+      logoBtn.ontouchstart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
       logoBtn.ontouchend = async (tapEvt) => {
         tapEvt.stopPropagation();
         tapEvt.preventDefault();

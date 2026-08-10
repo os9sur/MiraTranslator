@@ -1211,54 +1211,59 @@ select:hover {
   cursor: pointer;
   border: none;
   outline: none;
-  isolation: isolate; 
+  isolation: isolate;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* 旋转光圈 */
 #inspectHeader::before {
   content: '';
   position: absolute;
-  inset: -1px;
-  border-radius: calc(8px + 1px);  
-  padding: 0.8px;
-  background: conic-gradient(
-    from var(--angle, 0deg),
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background: linear-gradient(
+    90deg,
     rgba(56, 189, 248, 0) 0%,
-    rgba(56, 189, 248, 0.9) 15%,
-    rgba(56, 189, 248, 0) 30%,
+    rgba(56, 189, 248, 0.9) 50%,
     rgba(56, 189, 248, 0) 100%
   );
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: rotateBorder 3s linear infinite;
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: scanBottom 2s linear infinite;
+  filter: drop-shadow(0 0 1.5px rgba(56, 189, 248, 0.8));
   pointer-events: none;
   z-index: 0;
+  transition: opacity 0.3s ease;
 }
 
 #inspectHeader > * {
   position: relative;
-  z-index: 1; 
+  z-index: 1;
 }
 
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes rotateBorder {
-  to { --angle: 360deg; }
+@keyframes scanBottom {
+  0% {
+    background-position: -40% 0;
+  }
+  100% {
+    background-position: 140% 0;
+  }
 }
 
 #inspectHeader:hover::before {
-  background: conic-gradient(
-    from 0deg,
-    rgba(56, 189, 248, 0.9) 0%,
-    rgba(56, 189, 248, 0.9) 100%
-  );
+  opacity: 0;
+}
+
+#inspectHeader:hover {
+  background-color: rgba(14, 116, 144, 0.25);
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 
+    0 0 10px rgba(56, 189, 248, 0.5),
+    0 0 25px rgba(56, 189, 248, 0.25),
+    inset 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 #inspectArrow {
@@ -1361,8 +1366,11 @@ select:hover {
 .icon-active {
   animation: icon-bounce 0.5s infinite;
 }
-
 #quickSearchBtn {
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 
+    0 0 8px rgba(56, 189, 248, 0.15), 
+    inset 0 0 6px rgba(56, 189, 248, 0.2);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1370,14 +1378,18 @@ select:hover {
   padding: 0 22px !important;
   background: rgba(56, 189, 248, 0.3) !important;
   color: #fff !important;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
   border-color: rgba(56, 189, 248, 0.8) !important;
+  box-shadow: 
+    0 0 20px rgba(56, 189, 248, 0.6),
+    inset 0 0 12px rgba(56, 189, 248, 0.5);
   transform: translateY(-1px);
 }
 
 #quickSearchBtn:active {
   transform: scale(0.92);
-  box-shadow: 0 0 5px rgba(56, 189, 248, 0.2);
+  box-shadow: 
+    0 0 5px rgba(56, 189, 248, 0.2),
+    inset 0 0 4px rgba(56, 189, 248, 0.3);
 }
 
 @keyframes engine-pulse {
@@ -1458,7 +1470,6 @@ select:hover {
 .warning-dot-anim {
   animation: warning-blink 1.5s infinite;
 }
-
 #quickSearchBtn,
 #openSettings {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1466,17 +1477,22 @@ select:hover {
 
 #quickSearchBtn:hover {
   background: rgba(56, 189, 248, 0.3) !important;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+  box-shadow: 
+    0 0 15px rgba(56, 189, 248, 0.5),
+    inset 0 0 10px rgba(56, 189, 248, 0.4);
   border-color: rgba(56, 189, 248, 0.8) !important;
   transform: scale(1.02);
 }
 
 #openSettings:hover {
   background: rgba(56, 189, 248, 0.15) !important;
+  box-shadow: 
+    0 0 12px rgba(56, 189, 248, 0.3),
+    inset 0 0 8px rgba(56, 189, 248, 0.3);
   border-color: rgba(56, 189, 248, 0.8) !important;
   transform: scale(1.02);
 }
- 
+
 #openSettings:hover #currentEngineName {
   color: #fff !important;
 }
