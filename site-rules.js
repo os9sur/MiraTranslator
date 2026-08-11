@@ -282,8 +282,8 @@ const SiteRules = {
             `div[class*='story-body']:not(footer *):not(nav *)`,
             `div[class*='post-body']:not(footer *):not(nav *)`,
             // span 收窄语义范围
-            `article span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)`,
-            `main span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)`,
+            `article span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)${ignoreMenu}`,
+            `main span:not(button *):not(.kt-paragraph-translation):not([class*='icon']):not([class*='badge']):not([class*='tag']):not(pre *):not(code *)${ignoreMenu}`,
             `article li${ignoreMenu}`,
             `section li${ignoreMenu}`,
             `main li${ignoreMenu}`,

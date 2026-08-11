@@ -73,7 +73,6 @@
         "<all_urls>"
       ],
       "js": [
-        "constants.js",
         "i18n.js",
         "site-rules.js",
         "utils.js",
@@ -97,5 +96,15 @@
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "icons/icon-128.png"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
 }

@@ -1970,8 +1970,8 @@ function shouldSkipTextNode(node) {
   if (el.offsetParent === null && el.tagName !== 'BODY') return true;
   // 跳过脚本/样式
   if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'].includes(el.tagName)) return true;
-  // 跳过代码块
-  if (el.closest('pre, code, [class*="highlight"], [class*="hljs"]')) return true;
+  // 跳过代码块 
+  if (isInCodeHighlightContext(el)) return true;
   // 跳过已翻译
   if (el.closest('[data-translated="true"]')) return true;
   // 跳过译文容器本身
@@ -1994,36 +1994,100 @@ function startGenericTranslation() {
 
 
   blockEls.forEach(el => {
-    if (coveredNodes.has(el)) return;
-    if (shouldSkipTextNode({ parentElement: el })) return;
-    const text = el.innerText?.trim();
-    if (!text || text.length < 5) return;
-    const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
-    const hasSiblingTranslation = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
-    if (hasChildTranslation || hasSiblingTranslation) {
+    try {
+      if (coveredNodes.has(el)) {
+        const stillHasTranslation =
+          el.querySelector('.kt-paragraph-translation') ||
+          el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+        if (stillHasTranslation) return;
+        coveredNodes.delete(el);
+        el.removeAttribute('data-translated');
+        delete el.dataset.translated;
+      }
+      if (shouldSkipTextNode({ parentElement: el })) return;
+
+      const text = el.innerText?.trim();
+      if (!text || text.length < 5) return;
+      const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
+      const hasSiblingTranslation = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+      if (hasChildTranslation || hasSiblingTranslation) {
+        coveredNodes.add(el);
+        return;
+      }
+      if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
+
+      // 处理 <br><br> 分隔的多个小段落：拆成独立分段，每段各自插入自己的译文
+      const directBrCount = el.tagName === 'P' ? el.querySelectorAll(':scope > br').length : 0;
+      if (directBrCount >= 2) {
+        const segments = [];
+        let current = document.createElement('span');
+        current.style.cssText = 'display:block;';
+        let consecutiveBr = 0;
+        Array.from(el.childNodes).forEach(node => {
+          if (node.nodeName === 'BR') {
+            consecutiveBr++;
+            if (consecutiveBr >= 2) {
+              segments.push(current);
+              current = document.createElement('span');
+              current.style.cssText = 'display:block;';
+              consecutiveBr = 0;
+            }
+            return;
+          }
+          consecutiveBr = 0;
+          current.appendChild(node.cloneNode(true));
+        });
+        segments.push(current);
+        el.innerHTML = '';
+        segments.forEach(seg => el.appendChild(seg));
+
+        segments.forEach(seg => {
+          const segText = seg.innerText?.trim();
+          if (!segText || segText.length < 5) return;
+          if (detectIsAlreadyTarget(segText, window.currentTargetL || getBrowserLang())) return;
+
+          const segFont = document.createElement('font');
+          segFont.className = 'kt-paragraph-translation';
+          segFont.dataset.forceInline = "false";
+          segFont.style.setProperty('display', 'block', 'important');
+          segFont.style.setProperty('margin-top', '4px', 'important');
+          segFont.style.setProperty('margin-bottom', '12px', 'important');
+          segFont.style.setProperty('color', 'gray', 'important');
+          segFont.style.setProperty('font-style', 'italic', 'important');
+          segFont.innerText = t('loading');
+          seg.appendChild(segFont);
+
+          coveredNodes.add(seg);
+          seg.querySelectorAll('*').forEach(child => coveredNodes.add(child));
+
+          TranslationBatcher.add({ el: seg, text: segText, container: segFont, linkMap: [] });
+        });
+
+        coveredNodes.add(el);
+        return;
+      }
+
+      const font = document.createElement('font');
+      font.className = 'kt-paragraph-translation';
+      font.dataset.forceInline = "false";
+      font.style.setProperty('display', 'block', 'important');
+      font.style.setProperty('margin-top', '4px', 'important');
+      font.style.setProperty('color', 'gray', 'important');
+      font.style.setProperty('font-style', 'italic', 'important');
+      font.innerText = t('loading');
+      if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
+        el.insertAdjacentElement('afterend', font);
+      } else {
+        el.appendChild(font);
+      }
+
       coveredNodes.add(el);
-      return;
+      el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
+
+      TranslationBatcher.add({ el, text, container: font, linkMap: [] });
+    } catch (e) {
+      logger.error('[Mira] blockEls.forEach 单元素处理出错，已跳过:', el, e);
     }
-    if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
-
-    const font = document.createElement('font');
-    font.className = 'kt-paragraph-translation';
-    font.dataset.forceInline = "false";
-    font.style.setProperty('display', 'block', 'important');
-    font.style.setProperty('margin-top', '4px', 'important');
-    font.style.setProperty('color', 'gray', 'important');
-    font.style.setProperty('font-style', 'italic', 'important');
-    font.innerText = t('loading');
-    if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
-      el.insertAdjacentElement('afterend', font);
-    } else {
-      el.appendChild(font);
-    }
-
-    coveredNodes.add(el);
-    el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
-
-    TranslationBatcher.add({ el, text, container: font, linkMap: [] });
   });
 
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -2065,6 +2129,15 @@ function startGenericTranslation() {
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
   });
+  if (!window.__mira_selfHealObserver) {
+    window.__mira_selfHealObserver = new MutationObserver(() => {
+      if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
+      window.__mira_selfHealTimer = setTimeout(() => {
+        if (typeof startGenericTranslation === 'function') startGenericTranslation();
+      }, 500);
+    });
+    window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
+  }
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
@@ -2167,11 +2240,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
   // wikipedia 维基百科的法语版本不会翻译的问题
   const isWikipedia = location.hostname.includes("wikipedia.org");
 
-  const isCodeBlock = el.closest('pre, code, [class*="highlight"], [class*="hljs"]');
-  const isClassCode = !isWikipedia && el.closest('[class*="code"]');
-
-  if (isCodeBlock || isClassCode) {
+  if (isInCodeHighlightContext(el)) {
     if (isWikipedia && !el.closest('pre, code')) {
+      // wikipedia 特殊放行逻辑保留
     } else {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
@@ -4258,7 +4329,7 @@ let _capturedContext = "";
 let _capturedContextTranslation = "";
 
 function initSelectionTranslate() {
-  const logoBase64 = ASSETS.logoBase64;
+  const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
 
   window.addEventListener(
     "scroll",
@@ -4396,10 +4467,8 @@ function initSelectionTranslate() {
     // Logo 按钮
     logoBtn = document.createElement("div");
     logoBtn.className = "eclipse-logo-btn";
-    logoBtn.innerHTML = `
-    <div class="glowing-icon">
-      <img src="${logoBase64}">
-    </div>`;
+    const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
+    logoBtn.innerHTML = `<img src="${logoUrl}">`;
     shadow.appendChild(logoBtn);
 
     window.addEventListener(
@@ -4650,7 +4719,7 @@ function initSelectionTranslate() {
         height:     46px;
         width:      calc(100% - 110px);
         cursor:     grab;
-        z-index:    1000000000;
+        z-index:    10000;
       }
 
       /* ── 头部 ── */
@@ -4776,6 +4845,14 @@ function initSelectionTranslate() {
       .save-btn:hover svg {stroke: #ffaa00a7 !important;}
 
       /* 主题切换 */
+      .icon-btn.theme {
+        position: relative; 
+      }
+      .icon-btn.theme::after {
+        content: "";
+        position: absolute;
+        inset: -6px; 
+      }
       .icon-btn.theme svg#theme-icon {
         width:      15px !important;
         height:     15px !important;
@@ -4859,64 +4936,53 @@ function initSelectionTranslate() {
       }
       .resizer:hover { background: rgba(56,189,248,0.05); }
 
-      /* ── Logo 浮动按钮 ── */
-      .eclipse-logo-btn {
-        position:     fixed;
-        width:        22px;
-        height:       22px;
-        background:   transparent !important;
-        display:      none;
-        align-items:  center;
-        justify-content: center;
-        cursor:       pointer;
-        z-index:      2147483647;
-        transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
-        opacity:      0;
-        transform:    scale(0.5);
-        pointer-events: auto;
-        touch-action: none;
-        -webkit-touch-callout: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
-      .eclipse-logo-btn img  { width: 18px; height: 18px; border-radius: 4px; filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }
+      /* ── Logo 浮动按钮 ── */ 
+.eclipse-logo-btn {
+  position:     fixed;
+  width:        22px;
+  height:       22px;
+  background:   transparent !important;
+  display:      none;
+  align-items:  center;
+  justify-content: center;
+  cursor:       pointer;
+  z-index:      2147483647;
+  transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
+  opacity:      0;
+  transform:    scale(0.5);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 12px;
+  animation: icon-glow 2s ease-in-out infinite;  
+}
+.eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
 
-      /* 触摸端加大按钮 */
-      .eclipse-logo-btn.touch {
-        width: 34px;
-        height: 34px;
-      }
-      .eclipse-logo-btn.touch img {
-        width: 28px;
-        height: 28px;
-      }
-      .eclipse-logo-btn::after {
-        content: "";
-        position: absolute;
-        inset: -10px;  /* 视觉之外再扩 10px 的可点区域 */
-      }
+.eclipse-logo-btn img {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+  filter: brightness(1.15); 
+}
 
-      .glowing-icon {
-        display:      inline-block;
-        width:        21px;
-        height:       21px;
-        border-radius: 4px;
-        position:     relative;
-        background:   rgba(100,180,255,0.1);
-        animation:    icon-glow 2s ease-in-out infinite;
-      }
-      .glowing-icon img {
-        width:      100%;
-        height:     100%;
-        border-radius: 2px;
-        position:   relative;
-        z-index:    2;
-        filter:     brightness(1.2);
-      }
-      @keyframes icon-glow {
-        0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
-        50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
-      }
+/* 触摸端：视觉尺寸和可点击热区都放大  */
+.eclipse-logo-btn.touch {
+  width: 44px;
+  height: 44px;
+}
+
+.eclipse-logo-btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px; 
+}
+
+@keyframes icon-glow {
+  0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
+  50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
+}
 
       /* ── 发音动画 ── */
       @keyframes speak-jump-fancy {
@@ -5251,8 +5317,15 @@ function initSelectionTranslate() {
         width: 19px !important;
         height: 19px !important;
         stroke-width: 2.5 !important;
+      } 
+      .icon-btn.theme {
+        width: 34px !important;
+        height: 34px !important;
       }
-
+      .icon-btn.theme:active {
+        background: rgba(255,170,0,0.15) !important;
+        transform: scale(0.92) !important;
+      }
       #p-refresh svg {
         width: 14px !important;
         height: 14px !important;
@@ -5272,7 +5345,7 @@ function initSelectionTranslate() {
         height: 30px !important;
       }
 
-      .close-btn { padding: 7px 10px 10px 10px; font-size: 19px; }
+      .close-btn { padding: 12px 10px 10px 10px; font-size: 19px; }
       .resizer {
         display: none !important;
         pointer-events: none !important;
@@ -5345,29 +5418,29 @@ function initSelectionTranslate() {
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
   // 提取出的公共关闭函数
   function closePopup() {
-  if (!popupEl) return;
-  const rect = popupEl.getBoundingClientRect();
-  const originX = lastSelectionPos.clientX - rect.left;
-  const originY = lastSelectionPos.clientY - rect.top;
-  popupEl.style.transformOrigin = `${originX}px ${originY}px`;
-  popupEl.classList.add('is-hidden');
+    if (!popupEl) return;
+    const rect = popupEl.getBoundingClientRect();
+    const originX = lastSelectionPos.clientX - rect.left;
+    const originY = lastSelectionPos.clientY - rect.top;
+    popupEl.style.transformOrigin = `${originX}px ${originY}px`;
+    popupEl.classList.add('is-hidden');
 
-  // 清除原生选区，避免移动端下一次长按选词失效
-  window.getSelection()?.removeAllRanges();
-  liveText = "";
-  lastShownText = "";
-  liveRange = null;
+    // 清除原生选区，避免移动端下一次长按选词失效
+    window.getSelection()?.removeAllRanges();
+    liveText = "";
+    lastShownText = "";
+    liveRange = null;
 
-  clearTimeout(closeTimer);
-  closeTimer = setTimeout(() => {
-    if (!popupEl.classList.contains('is-hidden')) return;
-    popupEl.style.display = 'none';
-    popupEl.style.transformOrigin = '';
-    popupEl.style.transition = '';
-    popupEl.style.animation = '';
-    popupEl.classList.remove('is-hidden');
-  }, 480);
-}
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!popupEl.classList.contains('is-hidden')) return;
+      popupEl.style.display = 'none';
+      popupEl.style.transformOrigin = '';
+      popupEl.style.transition = '';
+      popupEl.style.animation = '';
+      popupEl.classList.remove('is-hidden');
+    }, 480);
+  }
   function setPanelGlowColor(panel) {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
     const rgb = window
@@ -5972,7 +6045,7 @@ function initSelectionTranslate() {
     popupEl.querySelector("#p-header-wrapper").innerHTML = `
     <div id="p-header">
   <div class="p-header-brand">
-    <img src="${logoBase64}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
+    <img src="${logoUrl}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
     <span class="mira-font-family p-header-title">${t("appName", window.uiLanguage) || APP_NAME}</span>
   </div>
   <div class="p-header-actions">
@@ -6030,11 +6103,23 @@ function initSelectionTranslate() {
     // 应用用户尺寸配置
     const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
     const vw = window.visualViewport?.width || window.innerWidth;
-    const savedWidth = parseInt(settings.width) || 420;
-    const finalWidth = Math.min(savedWidth, vw - 20);
-    popupEl.style.width = finalWidth + "px";
-    popupEl.style.maxWidth = finalWidth + "px";
-    popupEl.style.maxHeight = settings.height || "60vh";
+    const vh = window.visualViewport?.height || window.innerHeight;
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+    if (isTouchDevice) {
+      // 移动端：不读取桌面端保存的固定尺寸，直接按屏幕比例算，给更充分的高度
+      popupEl.style.width = Math.min(vw - 20, 420) + "px";
+      popupEl.style.maxWidth = (vw - 20) + "px";
+      popupEl.style.maxHeight = Math.floor(vh * 0.85) + "px"; // 用 85%，而不是 60%
+    } else {
+      // 桌面端：保留原有的读取 uiConfig 逻辑
+      const savedWidth = parseInt(settings.width) || 420;
+      const finalWidth = Math.min(savedWidth, vw - 20);
+      popupEl.style.width = finalWidth + "px";
+      popupEl.style.maxWidth = finalWidth + "px";
+      popupEl.style.maxHeight = settings.height || "60vh";
+    }
 
     // 调整查询词字号
     const pQuery = shadow.getElementById("p-query");
@@ -8518,6 +8603,7 @@ async function fillMissingTranslations(
 }
 // 自定义confirm弹窗
 function showMiraConfirm(msg) {
+  const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
   return new Promise((resolve) => {
     // 防止重复
     document.getElementById("mira-confirm-modal")?.remove();
@@ -8538,7 +8624,7 @@ function showMiraConfirm(msg) {
     font-family: system-ui, sans-serif; color: white;
   ">
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-      <img src="${ASSETS.logoBase64}" style="width:20px; height:20px; border-radius:4px;" />
+      <img src="${logoUrl}" style="width:20px; height:20px; border-radius:4px;" />
       <span style="font-weight:700; font-size:15px; color:#38bdf8;">Mira Translator</span>
     </div>
     <div style="font-size:14px; line-height:1.7; color:#cbd5e1; white-space:pre-line;">${msg}</div>

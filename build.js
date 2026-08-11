@@ -202,7 +202,6 @@ async function build() {
                 const filePath = path.join(browserDistDir, file);
 
                 if (fs.statSync(filePath).isFile() && path.extname(file) === '.js') {
-                    if (file === 'constants.js') continue;
 
                     const originalCode = fs.readFileSync(filePath, 'utf8');
                     const terserOptions = {

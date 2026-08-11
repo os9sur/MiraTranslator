@@ -1106,81 +1106,81 @@ async function safeRemoveStorage(keys) {
 
 //缓存策略
 const CACHE_POLICY = {
-    fallback: { expireMs: 60 * 60 * 1000 },              // 1小时
-    ai:       { quotaBytes: 12 * 1024 * 1024 },          // 12MB
-    free:     { quotaBytes: 3 * 1024 * 1024 },           // 3MB
-    orphanSafetyNetMs: 180 * 24 * 60 * 60 * 1000,        // 180天，僵尸数据兜底
+  fallback: { expireMs: 60 * 60 * 1000 },              // 1小时
+  ai: { quotaBytes: 12 * 1024 * 1024 },          // 12MB
+  free: { quotaBytes: 3 * 1024 * 1024 },           // 3MB
+  orphanSafetyNetMs: 180 * 24 * 60 * 60 * 1000,        // 180天，僵尸数据兜底
 };
 const CLEAN_INTERVAL = 24 * 60 * 60 * 1000; // 每天检查一次是否需要清理
 
 
 async function lookupCache(text, engine, lang) {
-    const isAI = AI_LLM_WHITE_LIST.includes(engine);
-    const singleKey = getCacheKey(text, engine, lang);
-    const commonFingerprint = singleKey.substring(singleKey.indexOf('_', 3));
+  const isAI = AI_LLM_WHITE_LIST.includes(engine);
+  const singleKey = getCacheKey(text, engine, lang);
+  const commonFingerprint = singleKey.substring(singleKey.indexOf('_', 3));
 
-    let cachedData = null;
-    let hitKey = null;
-    let isAlias = false;
+  let cachedData = null;
+  let hitKey = null;
+  let isAlias = false;
 
-    if (isAI) {
-        const store = await idb.get(singleKey);
+  if (isAI) {
+    const store = await idb.get(singleKey);
+    hitKey = singleKey;
+    cachedData = store?.[singleKey] || null;
+  } else {
+    const aiKeys = AI_LLM_WHITE_LIST.map(ai => `tr_${ai}${commonFingerprint}`);
+    const keysToQuery = [...aiKeys, singleKey];
+    const store = await idb.get(keysToQuery);
+
+    hitKey = aiKeys.find(k => store?.[k]) || null;
+    if (hitKey) {
+      cachedData = store[hitKey];
+      isAlias = true;
+    } else if (store?.[singleKey]) {
+      const own = store[singleKey];
+      if (own.alias) {
+        // 别名指针指向的AI原始数据已被清理，指针失效，当作未命中
+        await idb.remove(singleKey);
+        cachedData = null;
+      } else {
+        cachedData = own;
         hitKey = singleKey;
-        cachedData = store?.[singleKey] || null;
-    } else {
-        const aiKeys = AI_LLM_WHITE_LIST.map(ai => `tr_${ai}${commonFingerprint}`);
-        const keysToQuery = [...aiKeys, singleKey];
-        const store = await idb.get(keysToQuery);
-
-        hitKey = aiKeys.find(k => store?.[k]) || null;
-        if (hitKey) {
-            cachedData = store[hitKey];
-            isAlias = true;
-        } else if (store?.[singleKey]) {
-            const own = store[singleKey];
-            if (own.alias) {
-                // 别名指针指向的AI原始数据已被清理，指针失效，当作未命中
-                await idb.remove(singleKey);
-                cachedData = null;
-            } else {
-                cachedData = own;
-                hitKey = singleKey;
-                isAlias = false;
-            }
-        }
+        isAlias = false;
+      }
     }
+  }
 
-    if (!cachedData) return null;
+  if (!cachedData) return null;
 
-    const actualResult = cachedData.response?.currentTranslationResponse
-        || cachedData.response
-        || cachedData;
+  const actualResult = cachedData.response?.currentTranslationResponse
+    || cachedData.response
+    || cachedData;
 
-    // 没有时间戳 → 视为"刚创建"，补写，不删除
-    if (!actualResult.timestamp && !cachedData.timestamp) {
-        actualResult.timestamp = Date.now();
+  // 没有时间戳 → 视为"刚创建"，补写，不删除
+  if (!actualResult.timestamp && !cachedData.timestamp) {
+    actualResult.timestamp = Date.now();
+  }
+
+  const ts = cachedData.timestamp || actualResult.timestamp;
+  const ageMs = Date.now() - ts;
+
+  // 只有 fallback 结果按时间强制过期，正常结果交给后台LRU统一管理，. 不再168h强删
+  if (actualResult.isFallback && ageMs >= CACHE_POLICY.fallback.expireMs) {
+    await idb.remove(hitKey);
+    return null;
+  }
+
+  // 命中即续命(LRU touch)，fallback 不续命
+  if (!actualResult.isFallback) {
+    actualResult.timestamp = Date.now();
+    const updates = { [hitKey]: actualResult };
+    if (isAlias && !cachedData.alias) {
+      updates[singleKey] = { alias: hitKey, timestamp: Date.now() };
     }
+    await idb.set(updates);
+  }
 
-    const ts = cachedData.timestamp || actualResult.timestamp;
-    const ageMs = Date.now() - ts;
-
-    // 只有 fallback 结果按时间强制过期，正常结果交给后台LRU统一管理，. 不再168h强删
-    if (actualResult.isFallback && ageMs >= CACHE_POLICY.fallback.expireMs) {
-        await idb.remove(hitKey);
-        return null;
-    }
-
-    // 命中即续命(LRU touch)，fallback 不续命
-    if (!actualResult.isFallback) {
-        actualResult.timestamp = Date.now();
-        const updates = { [hitKey]: actualResult };
-        if (isAlias && !cachedData.alias) {
-            updates[singleKey] = { alias: hitKey, timestamp: Date.now() };
-        }
-        await idb.set(updates);
-    }
-
-    return { result: actualResult, hitKey, singleKey };
+  return { result: actualResult, hitKey, singleKey };
 }
 
 function getPhoneticLabel(langCode) {
@@ -1330,54 +1330,54 @@ function speakText(text, speakBtn, forcedLang) {
       return;
     }
 
-window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
 
-const utt = new SpeechSynthesisUtterance(text);
-utt.volume = 1.0;
-utt.lang = targetLang;
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.volume = 1.0;
+    utt.lang = targetLang;
 
-if (targetLang.startsWith('ja')) utt.rate = 0.6;
-else if (targetLang.startsWith('zh')) utt.rate = 0.85;
-else utt.rate = 0.7;
+    if (targetLang.startsWith('ja')) utt.rate = 0.6;
+    else if (targetLang.startsWith('zh')) utt.rate = 0.85;
+    else utt.rate = 0.7;
 
-//  检测系统 TTS 是否真的启动，5秒内没有 onstart 就当作失败
-let sysStarted = false;
-const sysStartCheckTimer = setTimeout(() => {
-  if (speakId !== currentSpeakId) return;
-  if (!sysStarted) {
-    logger.log('[TTS] 系统 TTS 未能启动（可能设备无语音引擎或语音包未下载）');
-    stopUI();
-    if (typeof showToast === 'function') {
-      showToast(t('ttsFailed') || 'Voice playback unavailable on this device');
-    }
-  }
-}, 5000);
+    //  检测系统 TTS 是否真的启动，5秒内没有 onstart 就当作失败
+    let sysStarted = false;
+    const sysStartCheckTimer = setTimeout(() => {
+      if (speakId !== currentSpeakId) return;
+      if (!sysStarted) {
+        logger.log('[TTS] 系统 TTS 未能启动（可能设备无语音引擎或语音包未下载）');
+        stopUI();
+        if (typeof showToast === 'function') {
+          showToast(t('ttsFailed') || 'Voice playback unavailable on this device');
+        }
+      }
+    }, 5000);
 
-utt.onstart = () => {
-  if (speakId !== currentSpeakId) return;
-  sysStarted = true;
-  clearTimeout(sysStartCheckTimer);
-  if (speakBtn) {
-    speakBtn.classList.remove('is-loading', 'tts-loading');
-    speakBtn.classList.add('is-speaking', 'speaking-wave');
-    speakBtn.querySelector('svg')?.classList.add('icon-active');
-  }
-};
+    utt.onstart = () => {
+      if (speakId !== currentSpeakId) return;
+      sysStarted = true;
+      clearTimeout(sysStartCheckTimer);
+      if (speakBtn) {
+        speakBtn.classList.remove('is-loading', 'tts-loading');
+        speakBtn.classList.add('is-speaking', 'speaking-wave');
+        speakBtn.querySelector('svg')?.classList.add('icon-active');
+      }
+    };
 
-utt.onend = () => {
-  clearTimeout(sysStartCheckTimer);
-  stopUI();
-};
-utt.onerror = (e) => {
-  logger.log('[TTS] 系统TTS onerror:', e.error);
-  clearTimeout(sysStartCheckTimer);
-  stopUI();
-  if (typeof showToast === 'function') {
-    showToast(t('ttsFailed') || 'Voice playback failed.');
-  }
-};
+    utt.onend = () => {
+      clearTimeout(sysStartCheckTimer);
+      stopUI();
+    };
+    utt.onerror = (e) => {
+      logger.log('[TTS] 系统TTS onerror:', e.error);
+      clearTimeout(sysStartCheckTimer);
+      stopUI();
+      if (typeof showToast === 'function') {
+        showToast(t('ttsFailed') || 'Voice playback failed.');
+      }
+    };
 
-window.speechSynthesis.speak(utt);
+    window.speechSynthesis.speak(utt);
   };
 
   if (googleTTSAvailable === false) {
@@ -1898,14 +1898,14 @@ async function refreshIcon() {
 }
 
 //判断是否是edge 浏览器
-function isEdgeBrowser() { 
-    if (navigator.userAgentData?.brands) {
-        return navigator.userAgentData.brands.some(
-            (b) => b.brand === 'Microsoft Edge'
-        );
-    }
-    //  传统 UA 字符串匹配（Edge 新版 UA 里是 "Edg/"，不是 "Edge/"）
-    return /Edg\//.test(navigator.userAgent);
+function isEdgeBrowser() {
+  if (navigator.userAgentData?.brands) {
+    return navigator.userAgentData.brands.some(
+      (b) => b.brand === 'Microsoft Edge'
+    );
+  }
+  //  传统 UA 字符串匹配（Edge 新版 UA 里是 "Edg/"，不是 "Edge/"）
+  return /Edg\//.test(navigator.userAgent);
 }
 
 const MiraUtils = {
@@ -2296,5 +2296,23 @@ function isWordText(text) {
 
   // 默认：英文及其他拉丁字母，长度 <= 30
   return trimmed.length <= 30;
+}
+
+//避开源代码/语法高亮块
+function looksMonospace(el) {
+  const ff = getComputedStyle(el).fontFamily.toLowerCase();
+  return /mono|consolas|courier|menlo|monaco|source code|fira code|jetbrains/.test(ff);
+}
+
+function isInCodeHighlightContext(el) {
+  const isCodeBlock = el.closest(
+    'pre, code, [class~="hljs"], [class^="hljs-"], [class*=" hljs-"], [class^="language-"], [class*=" language-"]'
+  );
+  if (isCodeBlock) return true;
+
+  const classCodeEl = el.closest('[class~="code"], [class^="code-"], [class*=" code-"]');
+  if (classCodeEl && looksMonospace(classCodeEl)) return true;
+
+  return false;
 }
 
