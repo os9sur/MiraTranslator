@@ -1076,8 +1076,8 @@ select:hover {
 #advancedSettingsBtn.icon-action-btn:hover {
   animation: none;
   background: rgba(0, 229, 255, 0.15);
-  border: 1px solid rgba(0, 229, 255, 0.6) !important;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5);
+  border: 1px solid rgba(0, 229, 255, 0.6) !important; 
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(0, 229, 255, 0.6);
 }
 
 #advancedSettingsBtn.icon-action-btn svg {

@@ -1970,8 +1970,8 @@ function shouldSkipTextNode(node) {
   if (el.offsetParent === null && el.tagName !== 'BODY') return true;
   // 跳过脚本/样式
   if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA', 'INPUT'].includes(el.tagName)) return true;
-  // 跳过代码块
-  if (el.closest('pre, code, [class*="highlight"], [class*="hljs"]')) return true;
+  // 跳过代码块 
+  if (isInCodeHighlightContext(el)) return true;
   // 跳过已翻译
   if (el.closest('[data-translated="true"]')) return true;
   // 跳过译文容器本身
@@ -1994,36 +1994,100 @@ function startGenericTranslation() {
 
 
   blockEls.forEach(el => {
-    if (coveredNodes.has(el)) return;
-    if (shouldSkipTextNode({ parentElement: el })) return;
-    const text = el.innerText?.trim();
-    if (!text || text.length < 5) return;
-    const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
-    const hasSiblingTranslation = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
-    if (hasChildTranslation || hasSiblingTranslation) {
+    try {
+      if (coveredNodes.has(el)) {
+        const stillHasTranslation =
+          el.querySelector('.kt-paragraph-translation') ||
+          el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+        if (stillHasTranslation) return;
+        coveredNodes.delete(el);
+        el.removeAttribute('data-translated');
+        delete el.dataset.translated;
+      }
+      if (shouldSkipTextNode({ parentElement: el })) return;
+
+      const text = el.innerText?.trim();
+      if (!text || text.length < 5) return;
+      const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
+      const hasSiblingTranslation = el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+      if (hasChildTranslation || hasSiblingTranslation) {
+        coveredNodes.add(el);
+        return;
+      }
+      if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
+
+      // 处理 <br><br> 分隔的多个小段落：拆成独立分段，每段各自插入自己的译文
+      const directBrCount = el.tagName === 'P' ? el.querySelectorAll(':scope > br').length : 0;
+      if (directBrCount >= 2) {
+        const segments = [];
+        let current = document.createElement('span');
+        current.style.cssText = 'display:block;';
+        let consecutiveBr = 0;
+        Array.from(el.childNodes).forEach(node => {
+          if (node.nodeName === 'BR') {
+            consecutiveBr++;
+            if (consecutiveBr >= 2) {
+              segments.push(current);
+              current = document.createElement('span');
+              current.style.cssText = 'display:block;';
+              consecutiveBr = 0;
+            }
+            return;
+          }
+          consecutiveBr = 0;
+          current.appendChild(node.cloneNode(true));
+        });
+        segments.push(current);
+        el.innerHTML = '';
+        segments.forEach(seg => el.appendChild(seg));
+
+        segments.forEach(seg => {
+          const segText = seg.innerText?.trim();
+          if (!segText || segText.length < 5) return;
+          if (detectIsAlreadyTarget(segText, window.currentTargetL || getBrowserLang())) return;
+
+          const segFont = document.createElement('font');
+          segFont.className = 'kt-paragraph-translation';
+          segFont.dataset.forceInline = "false";
+          segFont.style.setProperty('display', 'block', 'important');
+          segFont.style.setProperty('margin-top', '4px', 'important');
+          segFont.style.setProperty('margin-bottom', '12px', 'important');
+          segFont.style.setProperty('color', 'gray', 'important');
+          segFont.style.setProperty('font-style', 'italic', 'important');
+          segFont.innerText = t('loading');
+          seg.appendChild(segFont);
+
+          coveredNodes.add(seg);
+          seg.querySelectorAll('*').forEach(child => coveredNodes.add(child));
+
+          TranslationBatcher.add({ el: seg, text: segText, container: segFont, linkMap: [] });
+        });
+
+        coveredNodes.add(el);
+        return;
+      }
+
+      const font = document.createElement('font');
+      font.className = 'kt-paragraph-translation';
+      font.dataset.forceInline = "false";
+      font.style.setProperty('display', 'block', 'important');
+      font.style.setProperty('margin-top', '4px', 'important');
+      font.style.setProperty('color', 'gray', 'important');
+      font.style.setProperty('font-style', 'italic', 'important');
+      font.innerText = t('loading');
+      if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
+        el.insertAdjacentElement('afterend', font);
+      } else {
+        el.appendChild(font);
+      }
+
       coveredNodes.add(el);
-      return;
+      el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
+
+      TranslationBatcher.add({ el, text, container: font, linkMap: [] });
+    } catch (e) {
+      logger.error('[Mira] blockEls.forEach 单元素处理出错，已跳过:', el, e);
     }
-    if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
-
-    const font = document.createElement('font');
-    font.className = 'kt-paragraph-translation';
-    font.dataset.forceInline = "false";
-    font.style.setProperty('display', 'block', 'important');
-    font.style.setProperty('margin-top', '4px', 'important');
-    font.style.setProperty('color', 'gray', 'important');
-    font.style.setProperty('font-style', 'italic', 'important');
-    font.innerText = t('loading');
-    if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
-      el.insertAdjacentElement('afterend', font);
-    } else {
-      el.appendChild(font);
-    }
-
-    coveredNodes.add(el);
-    el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
-
-    TranslationBatcher.add({ el, text, container: font, linkMap: [] });
   });
 
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -2065,6 +2129,15 @@ function startGenericTranslation() {
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
   });
+  if (!window.__mira_selfHealObserver) {
+    window.__mira_selfHealObserver = new MutationObserver(() => {
+      if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
+      window.__mira_selfHealTimer = setTimeout(() => {
+        if (typeof startGenericTranslation === 'function') startGenericTranslation();
+      }, 500);
+    });
+    window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
+  }
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
@@ -2167,11 +2240,9 @@ async function handleTranslateElement(el, forceRefresh = false) {
   // wikipedia 维基百科的法语版本不会翻译的问题
   const isWikipedia = location.hostname.includes("wikipedia.org");
 
-  const isCodeBlock = el.closest('pre, code, [class*="highlight"], [class*="hljs"]');
-  const isClassCode = !isWikipedia && el.closest('[class*="code"]');
-
-  if (isCodeBlock || isClassCode) {
+  if (isInCodeHighlightContext(el)) {
     if (isWikipedia && !el.closest('pre, code')) {
+      // wikipedia 特殊放行逻辑保留
     } else {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
@@ -4257,7 +4328,7 @@ const getTextFragmentAnchor = (word) => {
 let _capturedContext = "";
 let _capturedContextTranslation = "";
 
-function initSelectionTranslate() { 
+function initSelectionTranslate() {
   const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
 
   window.addEventListener(
@@ -6030,25 +6101,25 @@ function initSelectionTranslate() {
     }
 
     // 应用用户尺寸配置
-const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
-const vw = window.visualViewport?.width || window.innerWidth;
-const vh = window.visualViewport?.height || window.innerHeight;
+    const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
+    const vw = window.visualViewport?.width || window.innerWidth;
+    const vh = window.visualViewport?.height || window.innerHeight;
 
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-if (isTouchDevice) {
-  // 移动端：不读取桌面端保存的固定尺寸，直接按屏幕比例算，给更充分的高度
-  popupEl.style.width = Math.min(vw - 20, 420) + "px";
-  popupEl.style.maxWidth = (vw - 20) + "px";
-  popupEl.style.maxHeight = Math.floor(vh * 0.85) + "px"; // 用 85%，而不是 60%
-} else {
-  // 桌面端：保留原有的读取 uiConfig 逻辑
-  const savedWidth = parseInt(settings.width) || 420;
-  const finalWidth = Math.min(savedWidth, vw - 20);
-  popupEl.style.width = finalWidth + "px";
-  popupEl.style.maxWidth = finalWidth + "px";
-  popupEl.style.maxHeight = settings.height || "60vh";
-}
+    if (isTouchDevice) {
+      // 移动端：不读取桌面端保存的固定尺寸，直接按屏幕比例算，给更充分的高度
+      popupEl.style.width = Math.min(vw - 20, 420) + "px";
+      popupEl.style.maxWidth = (vw - 20) + "px";
+      popupEl.style.maxHeight = Math.floor(vh * 0.85) + "px"; // 用 85%，而不是 60%
+    } else {
+      // 桌面端：保留原有的读取 uiConfig 逻辑
+      const savedWidth = parseInt(settings.width) || 420;
+      const finalWidth = Math.min(savedWidth, vw - 20);
+      popupEl.style.width = finalWidth + "px";
+      popupEl.style.maxWidth = finalWidth + "px";
+      popupEl.style.maxHeight = settings.height || "60vh";
+    }
 
     // 调整查询词字号
     const pQuery = shadow.getElementById("p-query");
