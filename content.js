@@ -4257,8 +4257,8 @@ const getTextFragmentAnchor = (word) => {
 let _capturedContext = "";
 let _capturedContextTranslation = "";
 
-function initSelectionTranslate() {
-  const logoBase64 = ASSETS.logoBase64;
+function initSelectionTranslate() { 
+  const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
 
   window.addEventListener(
     "scroll",
@@ -4396,10 +4396,8 @@ function initSelectionTranslate() {
     // Logo 按钮
     logoBtn = document.createElement("div");
     logoBtn.className = "eclipse-logo-btn";
-    logoBtn.innerHTML = `
-    <div class="glowing-icon">
-      <img src="${logoBase64}">
-    </div>`;
+    const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
+    logoBtn.innerHTML = `<img src="${logoUrl}">`;
     shadow.appendChild(logoBtn);
 
     window.addEventListener(
@@ -4650,7 +4648,7 @@ function initSelectionTranslate() {
         height:     46px;
         width:      calc(100% - 110px);
         cursor:     grab;
-        z-index:    1000000000;
+        z-index:    10000;
       }
 
       /* ── 头部 ── */
@@ -4776,6 +4774,14 @@ function initSelectionTranslate() {
       .save-btn:hover svg {stroke: #ffaa00a7 !important;}
 
       /* 主题切换 */
+      .icon-btn.theme {
+        position: relative; 
+      }
+      .icon-btn.theme::after {
+        content: "";
+        position: absolute;
+        inset: -6px; 
+      }
       .icon-btn.theme svg#theme-icon {
         width:      15px !important;
         height:     15px !important;
@@ -4859,64 +4865,53 @@ function initSelectionTranslate() {
       }
       .resizer:hover { background: rgba(56,189,248,0.05); }
 
-      /* ── Logo 浮动按钮 ── */
-      .eclipse-logo-btn {
-        position:     fixed;
-        width:        22px;
-        height:       22px;
-        background:   transparent !important;
-        display:      none;
-        align-items:  center;
-        justify-content: center;
-        cursor:       pointer;
-        z-index:      2147483647;
-        transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
-        opacity:      0;
-        transform:    scale(0.5);
-        pointer-events: auto;
-        touch-action: none;
-        -webkit-touch-callout: none;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
-      .eclipse-logo-btn img  { width: 18px; height: 18px; border-radius: 4px; filter: drop-shadow(0 0 3px rgba(0,0,0,0.3)); }
+      /* ── Logo 浮动按钮 ── */ 
+.eclipse-logo-btn {
+  position:     fixed;
+  width:        22px;
+  height:       22px;
+  background:   transparent !important;
+  display:      none;
+  align-items:  center;
+  justify-content: center;
+  cursor:       pointer;
+  z-index:      2147483647;
+  transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
+  opacity:      0;
+  transform:    scale(0.5);
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 12px;
+  animation: icon-glow 2s ease-in-out infinite;  
+}
+.eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
 
-      /* 触摸端加大按钮 */
-      .eclipse-logo-btn.touch {
-        width: 34px;
-        height: 34px;
-      }
-      .eclipse-logo-btn.touch img {
-        width: 28px;
-        height: 28px;
-      }
-      .eclipse-logo-btn::after {
-        content: "";
-        position: absolute;
-        inset: -10px;  /* 视觉之外再扩 10px 的可点区域 */
-      }
+.eclipse-logo-btn img {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  display: block;
+  filter: brightness(1.15); 
+}
 
-      .glowing-icon {
-        display:      inline-block;
-        width:        21px;
-        height:       21px;
-        border-radius: 4px;
-        position:     relative;
-        background:   rgba(100,180,255,0.1);
-        animation:    icon-glow 2s ease-in-out infinite;
-      }
-      .glowing-icon img {
-        width:      100%;
-        height:     100%;
-        border-radius: 2px;
-        position:   relative;
-        z-index:    2;
-        filter:     brightness(1.2);
-      }
-      @keyframes icon-glow {
-        0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
-        50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
-      }
+/* 触摸端：视觉尺寸和可点击热区都放大  */
+.eclipse-logo-btn.touch {
+  width: 44px;
+  height: 44px;
+}
+
+.eclipse-logo-btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px; 
+}
+
+@keyframes icon-glow {
+  0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
+  50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
+}
 
       /* ── 发音动画 ── */
       @keyframes speak-jump-fancy {
@@ -5251,8 +5246,15 @@ function initSelectionTranslate() {
         width: 19px !important;
         height: 19px !important;
         stroke-width: 2.5 !important;
+      } 
+      .icon-btn.theme {
+        width: 34px !important;
+        height: 34px !important;
       }
-
+      .icon-btn.theme:active {
+        background: rgba(255,170,0,0.15) !important;
+        transform: scale(0.92) !important;
+      }
       #p-refresh svg {
         width: 14px !important;
         height: 14px !important;
@@ -5272,7 +5274,7 @@ function initSelectionTranslate() {
         height: 30px !important;
       }
 
-      .close-btn { padding: 7px 10px 10px 10px; font-size: 19px; }
+      .close-btn { padding: 12px 10px 10px 10px; font-size: 19px; }
       .resizer {
         display: none !important;
         pointer-events: none !important;
@@ -5345,29 +5347,29 @@ function initSelectionTranslate() {
   // ─── 辅助函数 ────────────────────────────────────────────────────────────────
   // 提取出的公共关闭函数
   function closePopup() {
-  if (!popupEl) return;
-  const rect = popupEl.getBoundingClientRect();
-  const originX = lastSelectionPos.clientX - rect.left;
-  const originY = lastSelectionPos.clientY - rect.top;
-  popupEl.style.transformOrigin = `${originX}px ${originY}px`;
-  popupEl.classList.add('is-hidden');
+    if (!popupEl) return;
+    const rect = popupEl.getBoundingClientRect();
+    const originX = lastSelectionPos.clientX - rect.left;
+    const originY = lastSelectionPos.clientY - rect.top;
+    popupEl.style.transformOrigin = `${originX}px ${originY}px`;
+    popupEl.classList.add('is-hidden');
 
-  // 清除原生选区，避免移动端下一次长按选词失效
-  window.getSelection()?.removeAllRanges();
-  liveText = "";
-  lastShownText = "";
-  liveRange = null;
+    // 清除原生选区，避免移动端下一次长按选词失效
+    window.getSelection()?.removeAllRanges();
+    liveText = "";
+    lastShownText = "";
+    liveRange = null;
 
-  clearTimeout(closeTimer);
-  closeTimer = setTimeout(() => {
-    if (!popupEl.classList.contains('is-hidden')) return;
-    popupEl.style.display = 'none';
-    popupEl.style.transformOrigin = '';
-    popupEl.style.transition = '';
-    popupEl.style.animation = '';
-    popupEl.classList.remove('is-hidden');
-  }, 480);
-}
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!popupEl.classList.contains('is-hidden')) return;
+      popupEl.style.display = 'none';
+      popupEl.style.transformOrigin = '';
+      popupEl.style.transition = '';
+      popupEl.style.animation = '';
+      popupEl.classList.remove('is-hidden');
+    }, 480);
+  }
   function setPanelGlowColor(panel) {
     if (typeof chrome === "undefined" || !chrome.runtime?.id) return;
     const rgb = window
@@ -5972,7 +5974,7 @@ function initSelectionTranslate() {
     popupEl.querySelector("#p-header-wrapper").innerHTML = `
     <div id="p-header">
   <div class="p-header-brand">
-    <img src="${logoBase64}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
+    <img src="${logoUrl}" class="p-header-logo" style="filter:drop-shadow(0 0 4px var(--p-accent));">
     <span class="mira-font-family p-header-title">${t("appName", window.uiLanguage) || APP_NAME}</span>
   </div>
   <div class="p-header-actions">
@@ -6028,13 +6030,25 @@ function initSelectionTranslate() {
     }
 
     // 应用用户尺寸配置
-    const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
-    const vw = window.visualViewport?.width || window.innerWidth;
-    const savedWidth = parseInt(settings.width) || 420;
-    const finalWidth = Math.min(savedWidth, vw - 20);
-    popupEl.style.width = finalWidth + "px";
-    popupEl.style.maxWidth = finalWidth + "px";
-    popupEl.style.maxHeight = settings.height || "60vh";
+const settings = (await safeGetStorage("uiConfig"))?.uiConfig || {};
+const vw = window.visualViewport?.width || window.innerWidth;
+const vh = window.visualViewport?.height || window.innerHeight;
+
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+if (isTouchDevice) {
+  // 移动端：不读取桌面端保存的固定尺寸，直接按屏幕比例算，给更充分的高度
+  popupEl.style.width = Math.min(vw - 20, 420) + "px";
+  popupEl.style.maxWidth = (vw - 20) + "px";
+  popupEl.style.maxHeight = Math.floor(vh * 0.85) + "px"; // 用 85%，而不是 60%
+} else {
+  // 桌面端：保留原有的读取 uiConfig 逻辑
+  const savedWidth = parseInt(settings.width) || 420;
+  const finalWidth = Math.min(savedWidth, vw - 20);
+  popupEl.style.width = finalWidth + "px";
+  popupEl.style.maxWidth = finalWidth + "px";
+  popupEl.style.maxHeight = settings.height || "60vh";
+}
 
     // 调整查询词字号
     const pQuery = shadow.getElementById("p-query");
@@ -8518,6 +8532,7 @@ async function fillMissingTranslations(
 }
 // 自定义confirm弹窗
 function showMiraConfirm(msg) {
+  const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
   return new Promise((resolve) => {
     // 防止重复
     document.getElementById("mira-confirm-modal")?.remove();
@@ -8538,7 +8553,7 @@ function showMiraConfirm(msg) {
     font-family: system-ui, sans-serif; color: white;
   ">
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:16px;">
-      <img src="${ASSETS.logoBase64}" style="width:20px; height:20px; border-radius:4px;" />
+      <img src="${logoUrl}" style="width:20px; height:20px; border-radius:4px;" />
       <span style="font-weight:700; font-size:15px; color:#38bdf8;">Mira Translator</span>
     </div>
     <div style="font-size:14px; line-height:1.7; color:#cbd5e1; white-space:pre-line;">${msg}</div>
