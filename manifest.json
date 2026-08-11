@@ -73,7 +73,6 @@
         "<all_urls>"
       ],
       "js": [
-        "constants.js",
         "i18n.js",
         "site-rules.js",
         "utils.js",
