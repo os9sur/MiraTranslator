@@ -295,10 +295,23 @@ select:hover {
 
 .openNotebook:hover {
   background-position: 100% center;
-  border-color: rgba(56, 189, 248, 0.8);
-  box-shadow:
-    0 0 20px rgba(59, 130, 246, 0.6),
-    inset 0 0 12px rgba(255, 255, 255, 0.2);
+  border-color: rgba(56, 189, 248, 0.9);
+  animation: notebook-glow-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes notebook-glow-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 8px rgba(56, 189, 248, 0.6),
+      0 0 20px rgba(59, 130, 246, 0.4),
+      inset 0 0 12px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 14px rgba(56, 189, 248, 0.9),
+      0 0 36px rgba(59, 130, 246, 0.7),
+      inset 0 0 18px rgba(255, 255, 255, 0.3);
+  }
 }
 
 .openNotebook::before {
@@ -801,41 +814,11 @@ select:hover {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-
-.tip-blue {
-  font-size: 10px;
-  color: #38bdf8;
-  margin: 0 0 8px 0;
-  opacity: 0.8;
-}
-
 .tip-yellow {
   font-size: 10px;
   color: #fbbf24;
   margin: 0 0 8px 0;
   opacity: 0.8;
-}
-
-.google-free-tip {
-  text-align: center;
-  padding: 20px;
-  color: #94a3b8;
-  font-size: 12px;
-  border: 1px dashed #334155;
-  border-radius: 8px;
-  background: rgba(56, 189, 248, 0.02);
-}
-
-.api-input-container {
-  margin-bottom: 0px;
-}
-
-.api-input-container label {
-  font-size: 10px;
-  color: #64748b;
-  margin-bottom: 4px;
-  display: block;
-  letter-spacing: 0.05em;
 }
 
 #webdavUrl,
@@ -874,12 +857,6 @@ select:hover {
   font-weight: normal !important;
 }
 
-.custom-combobox {
-  position: relative;
-  display: flex;
-  width: 100%;
-}
-
 .guideLink {
   display: inline-block;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -902,132 +879,6 @@ select:hover {
   filter: brightness(0.8);
 }
 
-.combobox-dropdown {
-  position: fixed;
-  top: 38px;
-  left: 0;
-  width: 100%;
-  max-height: 230px !important;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background: #0f172a;
-  border: 1px solid #38bdf8;
-  border-radius: 6px;
-  display: none;
-  z-index: 9999;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-  padding: 5px 0;
-  scrollbar-width: thin;
-  scrollbar-color: #38bdf8 #1e293b;
-  padding-right: 0px;
-  display: block;
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(-8px) scale(0.98);
-  transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
-  pointer-events: none;
-}
-
-.combobox-dropdown.show {
-  visibility: visible;
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-}
-
-.combobox-dropdown::-webkit-scrollbar {
-  width: 8px !important;
-  display: block !important;
-}
-
-.combobox-dropdown::-webkit-scrollbar-track {
-  background: #020617 !important;
-  border-radius: 0 6px 6px 0;
-  margin: 2px 0;
-}
-
-.combobox-dropdown::-webkit-scrollbar-thumb {
-  background: #38bdf8 !important;
-  border-radius: 10px;
-  border: 2px solid #020617;
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
-}
-
-.combobox-dropdown::-webkit-scrollbar-thumb:hover {
-  background: #f1f5f9 !important;
-  box-shadow: 0 0 12px #38bdf8;
-}
-
-.dropdown-group-label {
-  padding: 8px 12px;
-  font-size: 9px;
-  color: #64748b;
-  background: rgba(255, 255, 255, 0.02);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  pointer-events: none;
-}
-
-.dropdown-item {
-  padding: 10px 30px 10px 15px !important;
-  color: #f1f5f9;
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-}
-
-.dropdown-item:hover {
-  background: var(--hover-bg);
-  color: var(--neon-blue);
-  border-left: 3px solid var(--neon-blue);
-  padding-left: 18px;
-  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
-}
-
-.combobox-dropdown::-webkit-scrollbar {
-  width: 5px;
-}
-
-.combobox-dropdown::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 10px;
-}
-
-.combobox-toggle {
-  position: absolute;
-  right: 0;
-  top: 5px;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #38bdf8;
-  z-index: 2;
-}
-
-.combobox-dropdown.show {
-  display: block;
-}
-
-.dropdown-item {
-  padding: 8px 12px;
-  color: #f1f5f9;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background: #1e293b;
-  color: #38bdf8;
-}
-
-.api-input-field {
-  height: 32px;
-  padding-right: 35px !important;
-}
 
 @keyframes ice-active-breath {
 

@@ -565,39 +565,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       this.style.borderColor = '#334155';
     });
   }
-  function initAllComboboxes() {
-    document.querySelectorAll('.custom-combobox').forEach(box => {
-      const input = box.querySelector('.api-input-field');
-      const dropdown = box.querySelector('.combobox-dropdown');
-      const toggle = box.querySelector('.combobox-toggle');
-      const toggleMenu = (e) => {
-        e.stopPropagation();
-        const isShow = dropdown.classList.contains('show');
-        document.querySelectorAll('.combobox-dropdown.show').forEach(d => d.classList.remove('show'));
-        if (!isShow) {
-          dropdown.classList.add('show');
-          const currentValue = input.value;
-          const activeItem = Array.from(dropdown.querySelectorAll('.dropdown-item'))
-            .find(item => item.getAttribute('data-value') === currentValue);
-          if (activeItem) {
-            activeItem.scrollIntoView({ block: 'nearest' });
-          }
-        }
-      };
-      input.onclick = toggleMenu;
-      if (toggle) toggle.onclick = toggleMenu;
-      box.querySelectorAll('.dropdown-item').forEach(item => {
-        item.onclick = (e) => {
-          e.stopPropagation();
-          const newValue = item.getAttribute('data-value');
-          const newText = item.textContent;
-          input.value = newValue;
-          dropdown.classList.remove('show');
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        };
-      });
-    });
-  }
   async function updateCacheSizeDisplay() {
     const allData = await safeGetStorage(null);
     if (!allData) return;
@@ -1155,13 +1122,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isWeb = type === 'web';
     document.querySelectorAll('.style-tab').forEach(tab => {
       tab.classList.remove('active');
-      tab.style.color = '#94a3b8';
-      tab.style.background = 'transparent';
     });
     const activeTab = document.getElementById(`tab-${type}`);
     activeTab.classList.add('active');
-    activeTab.style.color = '#020617';
-    activeTab.style.background = '#38bdf8';
     document.getElementById('webStyleControls').style.display = isWeb ? 'block' : 'none';
     document.getElementById('ytStyleControls').style.display = !isWeb ? 'block' : 'none';
     document.getElementById('preview-web-box').style.display = isWeb ? 'block' : 'none';
@@ -1291,56 +1254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('style-color').value = currentConfig.ytStyleSettings.color;
     }
   }
-  //const btnDonate = document.getElementById('btnDonate');
-  // const donateOverlay = document.getElementById('donateOverlay');
-  // const closeDonate = document.getElementById('closeDonate');
-  // const paypalUnit = document.getElementById('unit-paypal');
-  // btnDonate.onclick = (e) => {
-  //   e.stopPropagation();
-  //   const currentLang = document.getElementById('targetLang').value;
-  //   const donateContainer = document.getElementById('donateContainer');
-  //   // 1. 处理 Paypal 单元挂载
-  //   if (currentLang !== 'zh-CN') {
-  //     donateContainer.prepend(paypalUnit);
-  //   } else {
-  //     donateContainer.appendChild(paypalUnit);
-  //   }
-  //   // 2. 面板切换
-  //   document.getElementById('advancedMenu').style.display = 'none';
-  //   donateOverlay.style.display = 'flex';
-  //   // 3.  强制修改 body 尺寸 
-  //   document.body.style.width = '600px';
-  //   document.body.style.minHeight = 'auto';
-  //   // 延迟获取高度
-  //   setTimeout(() => {
-  //     const fullHeight = donateOverlay.scrollHeight;
-  //     document.body.style.height = fullHeight + 'px';
-  //     document.body.style.minHeight = fullHeight + 'px';
-  //     window.scrollTo(0, 0);
-  //   }, 50); 
-  // };
-  // function hideDonateAndRestore() {
-  //   donateOverlay.style.display = 'none';
-  //   document.body.style.width = '260px';
-  // }
-  // if (closeDonate) {
-  //   closeDonate.onclick = hideDonateAndRestore;
-  // }
-  // donateOverlay.onclick = (e) => {
-  //   if (e.target === donateOverlay) {
-  //     hideDonateAndRestore();
-  //   }
-  // };
-  // paypalUnit.onclick = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   const url = 'https://www.paypal.me/davidbai27'; 
-  //   if (typeof chrome !== 'undefined' && chrome.tabs) {
-  //     chrome.tabs.create({ url: url });
-  //   } else {
-  //     window.open(url, '_blank', 'noopener,noreferrer');
-  //   }
-  // };
+
   const tab = await getActiveTab();
   activeTab = tab;
   let domain = "unknown";
@@ -1472,8 +1386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     langEl.value = value;
     if (!langEl.value) langEl.value = 'en';
   }
-
-  initAllComboboxes();
+ 
   const gearBtn = document.getElementById('advancedSettingsBtn');
   const advMenu = document.getElementById('advancedMenu');
   const stylePanel = document.getElementById('styleSettingsPanel');
@@ -1487,7 +1400,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function updatePreview() {
     const isWeb = document.getElementById('tab-web').classList.contains('active');
-    const webPreview = document.getElementById('webPreviewText');
     const ytPreview = document.getElementById('ytPreviewText');
 
     if (isWeb) {
@@ -1608,10 +1520,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       ytPreview.style.textShadow = '1px 1px 2px #000, -1px -1px 2px #000';
     }
   }
+  //默认样式
   const DEFAULT_STYLE = {
     color: '#60a5fa',
-    fontSize: '16',
-    borderType: 'left',
+    fontSize: '23',
+    borderType: 'dashedUnderline',
     borderColor: '#38bdf8',
     isBlur: false
   };
@@ -3543,7 +3456,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   checkEngineStatus();
-
 
   document.querySelector("#reviewLink").href = getReviewUrl();
 
