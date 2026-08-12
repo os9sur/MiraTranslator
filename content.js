@@ -4695,7 +4695,8 @@ function initSelectionTranslate() {
         overflow-wrap:    break-word;
         word-break:       break-word;
         transition:       opacity .2s cubic-bezier(.4,0,.2,1), transform .2s cubic-bezier(.34,1.56,.64,1);
-        animation:        var(--p-panel-anim, eclipseHalo) 6s cubic-bezier(0.33, 1, 0.68, 1) infinite;
+        animation:        var(--p-panel-anim, eclipseHalo) 8s cubic-bezier(0.33, 1, 0.68, 1) infinite;
+        transform-origin: calc(100% - 20px) calc(100% - 20px);
       }
       :host([theme="light"]) .panel { animation-name: eclipseHaloLightWarm; animation-duration: 8s; }
       .panel:hover                  { animation-duration: 3s !important; }
@@ -4704,11 +4705,13 @@ function initSelectionTranslate() {
       
 
       .is-hidden {
-          opacity: 0 !important;
-          transform: scale(0.05) !important;
-          pointer-events: none !important;
-          transition: transform 0.35s cubic-bezier(0.4, 0, 1, 1), opacity 0.3s ease !important;
-      }
+        opacity: 0 !important;
+        transform: scale(0.06, 0.02) translateY(4px) !important;
+        pointer-events: none !important;
+        transition:
+            transform 0.35s cubic-bezier(0.55, 0, 1, 0.45),
+            opacity 0.28s ease-in 0.05s !important;
+     }
 
       /* ── 拖拽区 ── */
       #drag-zone {
@@ -4920,7 +4923,7 @@ function initSelectionTranslate() {
         pointer-events: auto !important;
         -webkit-user-select: none; /* Chrome, Safari, Opera */
         -moz-user-select: none;
-        user-select: none;         /* 标准语法 */
+        user-select: none;        
       }
       @media (hover: hover) and (pointer: fine) {
         .close-btn:hover  { color: #f87171 !important; filter: drop-shadow(0 0 5px rgba(239,68,68,0.3)); transform: rotate(90deg); transition: all .3s; }
@@ -4937,52 +4940,52 @@ function initSelectionTranslate() {
       .resizer:hover { background: rgba(56,189,248,0.05); }
 
       /* ── Logo 浮动按钮 ── */ 
-.eclipse-logo-btn {
-  position:     fixed;
-  width:        22px;
-  height:       22px;
-  background:   transparent !important;
-  display:      none;
-  align-items:  center;
-  justify-content: center;
-  cursor:       pointer;
-  z-index:      2147483647;
-  transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
-  opacity:      0;
-  transform:    scale(0.5);
-  pointer-events: auto;
-  touch-action: none;
-  -webkit-touch-callout: none;
-  -webkit-tap-highlight-color: transparent;
-  border-radius: 12px;
-  animation: icon-glow 2s ease-in-out infinite;  
-}
-.eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
+      .eclipse-logo-btn {
+        position:     fixed;
+        width:        22px;
+        height:       22px;
+        background:   transparent !important;
+        display:      none;
+        align-items:  center;
+        justify-content: center;
+        cursor:       pointer;
+        z-index:      2147483647;
+        transition:   transform .2s cubic-bezier(.175,.885,.32,1.2), opacity .2s;
+        opacity:      0;
+        transform:    scale(0.5);
+        pointer-events: auto;
+        touch-action: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        border-radius: 12px;
+        animation: icon-glow 2s ease-in-out infinite;  
+      }
+      .eclipse-logo-btn.show { display: flex !important; opacity: 1 !important; transform: scale(1) !important; }
 
-.eclipse-logo-btn img {
-  width: 100%;
-  height: 100%;
-  border-radius: 4px;
-  display: block;
-  filter: brightness(1.15); 
-}
+      .eclipse-logo-btn img {
+        width: 100%;
+        height: 100%;
+        border-radius: 4px;
+        display: block;
+        filter: brightness(1.15); 
+      }
 
-/* 触摸端：视觉尺寸和可点击热区都放大  */
-.eclipse-logo-btn.touch {
-  width: 44px;
-  height: 44px;
-}
+      /* 触摸端：视觉尺寸和可点击热区都放大  */
+      .eclipse-logo-btn.touch {
+        width: 44px;
+        height: 44px;
+      }
 
-.eclipse-logo-btn::after {
-  content: "";
-  position: absolute;
-  inset: -4px; 
-}
+      .eclipse-logo-btn::after {
+        content: "";
+        position: absolute;
+        inset: -1px; 
+      }
 
-@keyframes icon-glow {
-  0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
-  50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
-}
+      @keyframes icon-glow {
+        0%,100% { box-shadow: 0 0 6px rgba(100,180,255,0.7), 0 0 10px rgba(100,180,255,0.4); }
+        50%     { box-shadow: 0 0 10px rgba(120,220,255,0.9), 0 0 16px rgba(100,200,255,0.6); }
+      }
 
       /* ── 发音动画 ── */
       @keyframes speak-jump-fancy {
@@ -5189,15 +5192,15 @@ function initSelectionTranslate() {
       }
 
       /* 例句喇叭 */
-    .mira-example-speak {
-    position: relative;
-    transition: all 0.2s;
-    opacity: 0.6;
-    display: inline-block;
-  }
-    .mira-example-speak.tts-loading::before {
-      display: none;
-    }
+      .mira-example-speak {
+      position: relative;
+      transition: all 0.2s;
+      opacity: 0.6;
+      display: inline-block;
+      }
+      .mira-example-speak.tts-loading::before {
+        display: none;
+      }
 
     .mira-example-speak.tts-loading::after {
       content: "";
@@ -5345,14 +5348,12 @@ function initSelectionTranslate() {
         height: 30px !important;
       }
 
-      .close-btn { padding: 12px 10px 10px 10px; font-size: 19px; }
+      .close-btn { padding: 8px 10px 10px 10px; font-size: 19px; }
       .resizer {
         display: none !important;
         pointer-events: none !important;
       }
-    }
-
-    
+    }    
       `;
 
     return style;
@@ -7840,13 +7841,13 @@ function initSelectionTranslate() {
       try {
         const rect = selection.getRangeAt(0).getBoundingClientRect();
         l = rect.left + (rect.width / 2) - (btnSize / 2); // 居中，用 btnSize 算半径
-        t = rect.bottom + 8;
+        t = rect.bottom + 20;
       } catch (_) {
         l = mouseX - (btnSize / 2);
-        t = mouseY + 24;
+        t = mouseY + 36;
       }
     }
-
+    //钳制逻辑, 防止溢出屏幕外
     l = Math.max(10, Math.min(l, window.innerWidth - btnSize - 10));
     t = Math.max(10, Math.min(t, window.innerHeight - btnSize - 10));
 
@@ -7864,7 +7865,10 @@ function initSelectionTranslate() {
     logoCenter = { x: l + 16, y: t + 16 };
     logoBtn.classList.add("show");
     clearTimeout(window.logoAutoTimer);
-    window.logoAutoTimer = setTimeout(forceHideLogo, isTouchEvent ? 8000 : 3000);
+    // 触摸端不自动隐藏小按钮
+    if (!isTouchEvent) {
+      window.logoAutoTimer = setTimeout(forceHideLogo, 3000);
+    }
 
 
     async function triggerTranslation() {
@@ -7996,7 +8000,8 @@ function initSelectionTranslate() {
         tapEvt.stopPropagation();
         tapEvt.preventDefault();
         clearTimeout(window.logoAutoTimer);
-        //window.getSelection()?.removeAllRanges();
+        // 取消页面选中状态
+        window.getSelection()?.removeAllRanges();
         await triggerTranslation();
       };
       // 兼容混合设备的 click 兜底

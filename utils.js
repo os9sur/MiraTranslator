@@ -1041,7 +1041,7 @@ function localizePos(pos, targetLang) {
 //需要同步的存储键列表
 const STORAGE_KEYS = {
   core: ['userConfigs', 'activeConfig', 'lastActiveId'],
-  settings: ['siteSettings', 'customRules', 'uiConfig', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig', 'ai_prompt_settings', 'vocabHighlight'],
+  settings: ['siteSettings', 'customRules', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig', 'ai_prompt_settings', 'vocabHighlight'],
   sync: function () {
     return [...this.core, ...this.settings];
   },
