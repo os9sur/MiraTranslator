@@ -208,7 +208,7 @@ body {
     color: var(--neon-blue);
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     font-weight: 600;
-    transform: scale(1.04);
+    transform: scale(1.02);
 }
 
 
@@ -920,14 +920,6 @@ body {
     --accent-rgb: 0, 131, 115;
 }
 
-.custom-combobox {
-    position: relative !important;
-    display: flex !important;
-    align-items: center;
-    width: 100%;
-    border-radius: 8px;
-}
-
 .api-input-wrapper {
     position: relative;
     width: 100%;
@@ -965,99 +957,6 @@ body {
     color: #c9d1d9;
 }
 
-.custom-combobox {
-    position: relative;
-    width: 100%;
-}
-
-.custom-combobox {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.combobox-toggle {
-    position: absolute;
-    right: 2px;
-    top: 2px;
-    bottom: 1px;
-    height: 41px;
-    width: 41px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 5;
-    color: #8b949e;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 15px !important;
-}
-
-.combobox-toggle:hover {
-    background: rgba(88, 166, 255, 0.15) !important;
-    color: #58a6ff;
-}
-
-.combobox-toggle svg {
-    width: 24px;
-    height: 24px;
-    transition: transform 0.3s ease;
-}
-
-.custom-combobox.open .combobox-toggle svg {
-    transform: rotate(180deg);
-}
-
-.combobox-dropdown {
-    display: none;
-    position: absolute !important;
-    top: calc(100% + 5px);
-    left: 0;
-    right: 0;
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 8px;
-    z-index: 9999;
-}
-
-.combobox-dropdown.show {
-    display: block !important;
-}
-
-.dropdown-item {
-    padding: 10px 14px 10px 20px;
-    font-size: 13px;
-    color: #c9d1d9;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-.dropdown-item::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 0;
-    background-color: #58a6ff;
-    transition: height 0.2s ease, opacity 0.2s;
-    opacity: 0;
-    border-radius: 0 2px 2px 0;
-}
-
-.dropdown-item:hover {
-    background: #21262d;
-    color: #58a6ff;
-    padding-left: 24px;
-}
-
-.dropdown-item:hover::before {
-    height: 60%;
-    opacity: 1;
-}
 
 .status-dot {
     width: 10px;
@@ -1382,8 +1281,8 @@ body {
 }
 
 .ai-prompt-chevron {
-    width: 15px;
-    height: 15px;
+    width: 21px;
+    height: 21px;
     color: aquamarine;
     transition: transform 0.22s ease;
     flex-shrink: 0;
@@ -1586,15 +1485,18 @@ body {
 }
 
 .github-link {
-    color: inherit;
-    opacity: 0.7;
+    color: #39ff14;
+    opacity: 0.85;
     text-decoration: underline;
-    transition: opacity 0.2s;
+    font-weight: bold;
+    text-shadow: 0 0 4px rgba(57, 255, 20, 0.6), 0 0 8px rgba(57, 255, 20, 0.4);
+    transition: opacity 0.2s, color 0.2s, text-shadow 0.2s;
 }
 
 .github-link:hover {
     opacity: 1;
     color: #007bff;
+    text-shadow: 0 0 4px rgba(0, 123, 255, 0.7), 0 0 10px rgba(0, 123, 255, 0.5), 0 0 16px rgba(0, 123, 255, 0.3);
 }
 
 .mira-model-card:hover {

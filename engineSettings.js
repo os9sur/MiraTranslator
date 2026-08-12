@@ -20,11 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
-    const ui_lang = window.currentConfig.ui_language;
-
+    const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
     // RTL布局调整
 
-    if (checkRTL(ui_lang)) {
+    if (checkRTL(uiLanguage)) {
         const panel = document.querySelector('.cache-status-panel');
         if (panel) panel.style.flexDirection = 'row-reverse';
 
@@ -35,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             cacheLabel.style.marginLeft = 'auto';
         }
     }
-    const titleSuffix = t('engineListTitle', ui_lang);
+    const titleSuffix = t('engineListTitle', uiLanguage);
     document.title = `Mira - ${titleSuffix}`;
 
     const TEMPLATES = {
@@ -68,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             default_url: 'https://api.openai.com/v1',
             fields: [
                 { k: 'oaKey', l: 'API Key', t: 'password', p: 'sk-...' },
-                { k: 'oaModel', l: 'Model Name', t: 'text', d: 'gpt-4o-mini', opts: ['gpt-5.2', 'gpt-5.1', 'gpt-5', 'gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'gpt-3.5-turbo'] },
+                { k: 'oaModel', l: 'Model Name', t: 'text', d: 'gpt-4o-mini', placeholderOnly: true },
                 { k: 'oaApiHost', l: 'Proxy Address', t: 'text', d: 'https://api.openai.com/v1' }
             ]
         },
@@ -76,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             name: 'Anthropic (Claude)', url: 'https://console.anthropic.com/settings/keys', color: '#d97752', meta: 'CL.35',
             fields: [
                 { k: 'claudeKey', l: 'API Key', t: 'password', p: 'sk-ant-api03-...' },
-                { k: 'claudeModel', l: 'Model Name', t: 'text', d: 'claude-3-5-sonnet-latest', opts: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-opus-latest'] },
+                { k: 'claudeModel', l: 'Model Name', t: 'text', d: 'claude-3-5-sonnet-latest', placeholderOnly: true },
                 { k: 'claudeApiHost', l: 'Proxy Address', t: 'text', d: 'https://api.anthropic.com/v1' }
             ]
         },
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'geminiKey', l: 'API Key', t: 'password', p: 'AIza...' },
                 { k: 'geminiHost', l: 'Base URL', t: 'text', d: 'https://generativelanguage.googleapis.com/v1beta/openai' },
-                { k: 'geminiModel', l: 'Model Name', t: 'text', d: 'gemini-2.5-flash', opts: ['gemini-2.5-flash', 'gemini-2.0-flash'] }
+                { k: 'geminiModel', l: 'Model Name', t: 'text', d: 'gemini-2.5-flash', placeholderOnly: true }
             ]
         },
         'deepseek': {
@@ -94,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'dsKey', l: 'API Key', t: 'password', p: 'sk-...' },
                 { k: 'dsHost', l: 'Base URL', t: 'text', d: 'https://api.deepseek.com' },
-                { k: 'dsModel', l: 'Model Name', t: 'text', d: 'deepseek-chat', opts: ['deepseek-chat', 'deepseek-reasoner'] }
+                { k: 'dsModel', l: 'Model Name', t: 'text', d: 'deepseek-chat', placeholderOnly: true }
             ]
         },
         'grok': {
@@ -102,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'grokKey', l: 'API Key', t: 'password', p: 'xai-...' },
                 { k: 'grokHost', l: 'Base URL', t: 'text', d: 'https://api.x.ai/v1' },
-                { k: 'grokModel', l: 'Model Name', t: 'text', d: 'grok-beta', opts: ['grok-2-1212', 'grok-beta', 'grok-vision-beta'] }
+                { k: 'grokModel', l: 'Model Name', t: 'text', d: 'grok-beta', placeholderOnly: true }
             ]
         },
         'google_v3': {
@@ -128,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'groqKey', l: 'API Key', t: 'password' },
                 { k: 'groqHost', l: 'Base URL', t: 'text', d: 'https://api.groq.com/openai/v1' },
-                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'llama-3.3-70b-versatile', opts: ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'mixtral-8x7b-32768'] }
+                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'llama-3.3-70b-versatile', placeholderOnly: true }
             ]
         },
         'siliconflow': {
@@ -136,28 +135,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'siliconflowKey', l: 'API Key', t: 'password' },
                 { k: 'siliconflowHost', l: 'Base URL', t: 'text', d: 'https://api.siliconflow.cn/v1' },
-                { k: 'siliconflowModel', l: 'Model Name', t: 'text', d: 'deepseek-ai/DeepSeek-V3', opts: ['deepseek-ai/DeepSeek-V3', 'deepseek-ai/DeepSeek-R1'] }
+                { k: 'siliconflowModel', l: 'Model Name', t: 'text', d: 'deepseek-ai/DeepSeek-V3' }
             ]
         },
         'custom_ai': {
             name: 'Custom API', url: '#', default_url: 'https://api.openai.com/v1', color: '#a855f7', meta: 'ANY.API',
-            tip: t('customApiTip', ui_lang),
+            tip: t('customApiTip', uiLanguage),
             fields: [
                 { k: 'customKey', l: 'API Key', t: 'password' },
                 { k: 'customHost', l: 'Base URL', t: 'text', d: 'https://api.your-provider.com/v1' },
                 {
-                    k: 'customModel', l: 'Model Name', t: 'text', d: 'gpt-4o',
-                    opts: [
-                        // 代理/中转场景
-                        'gpt-4o', 'gpt-4o-mini', 'deepseek/deepseek-v3.2',
-                        '───── Local Models ─────',
-                        // 低配 
-                        'gemma3:1b', 'qwen2.5:1.5b', 'phi4-mini', 'llama3.2:3b',
-                        // 中配 
-                        'gemma3:4b', 'qwen2.5:7b', 'qwen3:8b', 'llama3.3:8b', 'mistral:7b',
-                        // 高配 
-                        'deepseek-r1:8b', 'llama4:8b',
-                    ]
+                    k: 'customModel', l: 'Model Name', t: 'text', d: 'gpt-4o-mini', placeholderOnly: true
                 }
             ]
         }
@@ -188,12 +176,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const oldApiKeys = data.apiKeys || {};
         const builtInEngines = enable_pro_features ? [
             { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
-            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
-            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
+            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", uiLanguage)})` },
+            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", uiLanguage)})` }
         ] : [
             // { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
-            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", ui_lang)})` },
-            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", ui_lang)})` }
+            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", uiLanguage)})` },
+            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", uiLanguage)})` }
         ];
         const customConfigs = storedConfigs.filter(c =>
             c.id !== 'google_builtin' &&
@@ -253,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const activeConfig = userConfigs.find(c => c.id === runningId);
         const statusValueEl = document.getElementById('active-engine-name');
         if (statusValueEl) {
-            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', ui_lang);
+            statusValueEl.innerText = activeConfig ? activeConfig.alias : t('notEnabled', uiLanguage);
         }
         list.innerHTML = userConfigs.map(c => {
             const isEditing = c.id === lastActiveId;
@@ -557,35 +545,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 Pro
                             </span>
                         </h2>
-                        <p style="margin:12px 0px 4px 4px;font-size:12px;color:#8b949e;">${t('byokNotice', ui_lang) || 'No API Key required. Out-of-the-box'}</p>
+                        <p style="margin:12px 0px 4px 4px;font-size:12px;color:#8b949e;">${t('byokNotice', uiLanguage) || 'No API Key required. Out-of-the-box'}</p>
                     </div>
                 </div>
             </div>
             <div class="form-container" style="padding-left:2px;">
                 <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
                     <div>
-                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', ui_lang) || 'Current Balance'}</div>
+                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', uiLanguage) || 'Current Balance'}</div>
                         <div id="miraBalance" style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
                         <div id="miraExpiryHint" style="font-size:11px;margin-top:4px;color:#8b949e;">
                      ${expired
-                    ? `<span style="color:#ef4444">${t('credits_expired', ui_lang)}</span>`
+                    ? `<span style="color:#ef4444">${t('credits_expired', uiLanguage)}</span>`
                     : expiresAt
                         ? (() => {
                             const daysLeft = Math.ceil((new Date(expiresAt) - Date.now()) / (1000 * 60 * 60 * 24));
                             if (daysLeft <= 30) {
-                                return `<span style="color:#f59e0b">${t('expires_in_days', ui_lang).replace('{days}', daysLeft)}</span>`;
+                                return `<span style="color:#f59e0b">${t('expires_in_days', uiLanguage).replace('{days}', daysLeft)}</span>`;
                             } else {
                                 const dateStr = new Date(expiresAt).toLocaleDateString();
-                                return `<span style="color:#8b949e">${t('valid_until', ui_lang).replace('{date}', dateStr)}</span>`;
+                                return `<span style="color:#8b949e">${t('valid_until', uiLanguage).replace('{date}', dateStr)}</span>`;
                             }
                         })()
                         : ''
                 }
                 </div>
                     </div>
-                    <button id="miraRechargeBtn"><span>+ ${t('recharge', ui_lang) || 'Recharge'}</span></button>
+                    <button id="miraRechargeBtn"><span>+ ${t('recharge', uiLanguage) || 'Recharge'}</span></button>
                 </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">${t('selectModel', ui_lang) || 'Select Translation Model'}</div>
+                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">${t('selectModel', uiLanguage) || 'Select Translation Model'}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;" id="miraModelGrid">
                         ${models.map(m => `
                 <div class="mira-model-card" data-model="${m.id}"
@@ -669,16 +657,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (expiryEl) {
                             const { expires_at, expired } = newUser;
                             if (expired) {
-                                expiryEl.textContent = t('credits_expired', ui_lang);
+                                expiryEl.textContent = t('credits_expired', uiLanguage);
                                 expiryEl.style.color = '#ef4444';
                             } else if (expires_at) {
                                 const daysLeft = Math.ceil((new Date(expires_at) - Date.now()) / (1000 * 60 * 60 * 24));
                                 if (daysLeft <= 30) {
-                                    expiryEl.textContent = t('expires_in_days', ui_lang).replace('{days}', daysLeft);
+                                    expiryEl.textContent = t('expires_in_days', uiLanguage).replace('{days}', daysLeft);
                                     expiryEl.style.color = '#f59e0b';
                                 } else {
                                     const dateStr = new Date(expires_at).toLocaleDateString();
-                                    expiryEl.textContent = t('valid_until', ui_lang).replace('{date}', dateStr);
+                                    expiryEl.textContent = t('valid_until', uiLanguage).replace('{date}', dateStr);
                                     expiryEl.style.color = '#8b949e';
                                 }
                             }
@@ -806,7 +794,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         style="animation:spin 1s linear infinite;">
                         <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
                     </svg>
-                    ${t('loggingIn', ui_lang) || 'Logging in...'}`;
+                    ${t('loggingIn', uiLanguage) || 'Logging in...'}`;
                 }
 
                 const res = await safeSendMessage({ action });
@@ -905,24 +893,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
                 .map(line => {
                     if (line === '---') {
-                        //return `<hr style="border:0;border-top:1px solid #30363d;margin:32px 0;">`;
-                        //return `<div class="bottom-bar" style="min-height:20px;" id="global-actions"></div>`;
                         return `<div class="notice-divider"></div>`;
                     }
 
                     const isRTL = checkRTL(uiLanguage);
 
-                    const emojiMatch = line.match(/^\p{Emoji}\uFE0F?/u);
+                    const emojiMatch = line.match(/^\p{Extended_Pictographic}\uFE0F?/u);
                     const emoji = emojiMatch ? emojiMatch[0] : '';
-                    const textWithoutEmoji = line.replace(/^\p{Emoji}\uFE0F?\s*/u, '');
+                    const textWithoutEmoji = line.replace(/^\p{Extended_Pictographic}\uFE0F?\s*/u, '');
                     const finalizedText = textWithoutEmoji.replace(/\*\*(.*?)\*\*/g, '<strong style="color: #f0f6fc; font-weight: 600;">$1</strong>');
 
+                    // 只针对 ⬆ 单独放大变色,其它 emoji 用默认样式
+                    const isUpArrow = emoji === '⬆️' || emoji === '⬆';
+                    const emojiStyle = isUpArrow
+                        ? 'margin-right:6px;color:#31d66e;font-size:larger;'
+                        : 'margin-right:6px;';
+
                     return `
-                        <p dir="${isRTL ? 'rtl' : 'ltr'}" 
-                            style="color:#b0bac6; font-size:14px; line-height:1.8; margin:0 0 10px 0;
-                            ${isRTL ? 'text-align:right;' : ''}">
-                            ${emoji ? `<span style="margin-right:6px;">${emoji}</span>` : ''}${finalizedText}
-                        </p>`;
+        <p dir="${isRTL ? 'rtl' : 'ltr'}" 
+            style="color:#b0bac6; font-size:14px; line-height:1.8; margin:0 0 10px 0;
+            ${isRTL ? 'text-align:right;' : ''}">
+            ${emoji ? `<span style="${emojiStyle}">${emoji}</span>` : ''}${finalizedText}
+        </p>`;
                 }).join('');
             const builtInTemplate = `
                 <div class="main-header">
@@ -1010,27 +1002,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         actions.classList.remove('hidden');
         const getRow = (field) => {
-            const { k, l, t: inputType, p, d, opts } = field;
-            let val = saved[k] ?? (k === 'alias' ? (config.alias || '') : (d || ''));
+            const { k, l, t: inputType, p, d, placeholderOnly, hint } = field;
+            let val = saved[k] ?? (k === 'alias' ? (config.alias || '') : (placeholderOnly ? '' : (d || '')));
             const isKeyField = k.toLowerCase().includes('key');
             const showGetKey = (isKeyField && tpl.url && tpl.url !== '#');
             const isPasswordField = inputType === 'password';
             let inputHtml = '';
             const placeholder = (k === 'alias') ? displayAlias : (p || '');
-            if (opts && opts.length > 0) {
-                inputHtml = `
-        <div class="custom-combobox">
-            <input type="${inputType || 'text'}" data-key="${k}" class="api-input-field" placeholder="${p || ''}" value="${val}" spellcheck="false">
-            <div class="combobox-toggle"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>
-            <div class="combobox-dropdown">
-                ${opts.map(opt =>
-                    opt.startsWith('─')
-                        ? `<div class="dropdown-divider" style="color:#666;font-size:10px;padding:4px 8px;cursor:default;pointer-events:none;">${opt}</div>`
-                        : `<div class="dropdown-item" data-value="${opt}">${opt}</div>`
-                ).join('')}
-            </div>
-        </div>`;
-            } else if (isPasswordField) {
+            if (isPasswordField) {
                 inputHtml = `
         <div class="api-input-wrapper">
             <input type="password" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">
@@ -1055,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
             </div>
             ${inputHtml}
+            ${placeholderOnly && (hint || d) ? `<div class="field-hint" style="font-size:11px;color:#6e7681;margin-top:6px;padding-left:20px;line-height:1.5;">${hint || `${uiLanguage.startsWith('zh') ? '例如: ' : 'e.g. '}${d}`}</div>` : ''}
         </div>`;
         };
         let html = `
@@ -1067,86 +1047,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${(tpl.fields || []).map(f => getRow(f)).join('')}
                 </div>`;
         container.innerHTML = html;
-        if (typeof initAllComboboxes === 'function') initAllComboboxes();
         await renderAIPromptSection();
-    }
-    function initAllComboboxes() {
-        document.querySelectorAll('.combobox-toggle').forEach(toggle => {
-            toggle.onclick = (e) => {
-                e.stopPropagation();
-                const container = toggle.parentElement;
-
-                const dropdown = container._dropdown || container.querySelector('.combobox-dropdown');
-                if (!dropdown) return;
-                container._dropdown = dropdown;
-
-                const isOpen = dropdown.classList.contains('show');
-
-                closeAllDropdowns();
-
-                if (!isOpen) {
-                    const rect = container.getBoundingClientRect();
-                    dropdown._originalParent = container;
-                    document.body.appendChild(dropdown);
-
-                    // fixed → absolute + 滚动偏移，规避移动端视口跳动
-                    dropdown.style.position = 'absolute';
-                    dropdown.style.top = (rect.bottom + window.scrollY + 2) + 'px';
-                    dropdown.style.left = (rect.left + window.scrollX) + 'px';
-                    dropdown.style.width = rect.width + 'px';
-                    dropdown.style.maxHeight = '180px';
-                    dropdown.style.overflowY = 'auto';
-                    dropdown.style.zIndex = '999999';
-                    dropdown.classList.add('show');
-                    container.classList.add('open');
-
-                    // 打开期间监听滚动/resize，直接关闭而不是重新定位
-                    const closeOnScroll = () => closeAllDropdowns();
-                    window.addEventListener('scroll', closeOnScroll, { capture: true, passive: true });
-                    window.addEventListener('resize', closeOnScroll, { passive: true });
-                    dropdown._cleanupScrollListener = () => {
-                        window.removeEventListener('scroll', closeOnScroll, true);
-                        window.removeEventListener('resize', closeOnScroll);
-                    };
-                }
-            };
-        });
-
-        document.querySelectorAll('.dropdown-item').forEach(item => {
-            item.onclick = (e) => {
-                e.stopPropagation();
-                const val = item.dataset.value;
-                const dropdown = item.closest('.combobox-dropdown');
-                const originalParent = dropdown._originalParent;
-                const input = originalParent?.querySelector('input');
-                if (input) {
-                    input.value = val;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                closeAllDropdowns();
-            };
-        });
-
-        document.addEventListener('click', () => {
-            closeAllDropdowns();
-        });
-
-        function closeAllDropdowns() {
-            document.querySelectorAll('.combobox-dropdown.show').forEach(d => {
-                d.classList.remove('show');
-                if (d._cleanupScrollListener) {
-                    d._cleanupScrollListener();
-                    d._cleanupScrollListener = null;
-                }
-                if (d._originalParent) {
-                    d._originalParent.classList.remove('open');
-                    d._originalParent._dropdown = null;
-                    d._originalParent.appendChild(d);
-                    d._originalParent = null;
-                }
-                d.style.cssText = '';
-            });
-        }
     }
     function bindEvents() {
 
@@ -1172,8 +1073,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const color = tpl.color || '#38bdf8';
                         const rgb = hexToRgb(color);
                         const meta = tpl.meta || key.toUpperCase().substring(0, 6);
-                        //const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : t('accessService', ui_lang).replace('{0}', tpl.name);
-                        const desc = tpl.url === '#' ? t('customAiInterface', ui_lang) : '';
+                        //const desc = tpl.url === '#' ? t('customAiInterface', uiLanguage) : t('accessService', uiLanguage).replace('{0}', tpl.name);
+                        const desc = tpl.url === '#' ? t('customAiInterface', uiLanguage) : '';
                         html += `
                     <div class="tpl-card" 
                          data-type="${key}" 
@@ -1209,7 +1110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userConfigs.push({
                 id: newId,
                 engine: engineKey,
-                alias: `${t('newBadge', ui_lang)} ${template.name}`
+                alias: `${t('newBadge', uiLanguage)} ${template.name}`
             });
 
             await safeSetStorage({ userConfigs });
@@ -1277,14 +1178,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         if (!btn) return;
         const i18n = {
-            testConnection: t('testConnection', ui_lang),
-            testing: t('testing', ui_lang),
-            success: t('success', ui_lang),
-            failed: t('failed', ui_lang),
-            error_no_response: t('error_no_response', ui_lang),
-            error_timeout: t('error_timeout', ui_lang),
-            error_same_as_original: t('error_same_as_original', ui_lang),
-            error_generic: t('error_generic', ui_lang),
+            testConnection: t('testConnection', uiLanguage),
+            testing: t('testing', uiLanguage),
+            success: t('success', uiLanguage),
+            failed: t('failed', uiLanguage),
+            error_no_response: t('error_no_response', uiLanguage),
+            error_timeout: t('error_timeout', uiLanguage),
+            error_same_as_original: t('error_same_as_original', uiLanguage),
+            error_generic: t('error_generic', uiLanguage),
         };
         btn.disabled = true;
         const originalHTML = `⚡ ${i18n.testConnection}`;
@@ -1492,7 +1393,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('saveApiConfig').onclick = async () => {
         const saveBtn = document.getElementById('saveApiConfig');
         if (!saveBtn) return;
-        const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
         const config = userConfigs.find(c => c.id === currentId);
         if (!config) {
             logger.error("[Mira] 找不到当前配置实例");
@@ -1670,7 +1570,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.dataset.originalText = btn.innerText;
             const rawCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
             const formattedCount = `\u2066${rawCount}\u2069`;
-            btn.innerText = t("confirm", ui_lang).replace('{0}', formattedCount);
+            btn.innerText = t("confirm", uiLanguage).replace('{0}', formattedCount);
             btn.style.setProperty('background', 'rgba(248, 113, 113, 0.2)', 'important');
             btn.style.setProperty('border-color', '#f87171', 'important');
             btn.style.setProperty('color', '#f87171', 'important');
@@ -1699,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
             setTimeout(() => {
-                btn.innerText = `${t('completed', ui_lang)} ✓`;
+                btn.innerText = `${t('completed', uiLanguage)} ✓`;
                 btn.style.setProperty('color', '#4ade80', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
@@ -1713,14 +1613,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, animationDuration + 100);
         } catch (err) {
             logger.log("[Mira] Clear Cache Error:", err);
-            if (typeof showToast === 'function') showToast(t('failed', ui_lang), "error");
+            if (typeof showToast === 'function') showToast(t('failed', uiLanguage), "error");
             resetClearBtn(btn);
         }
     });
     function resetClearBtn(btn) {
         btn.dataset.confirmed = "";
         btn.disabled = false;
-        btn.innerText = btn.dataset.originalText || t('clearBtn', ui_lang);
+        btn.innerText = btn.dataset.originalText || t('clearBtn', uiLanguage);
         btn.style.background = "";
         btn.style.borderColor = "";
         btn.style.color = "";
