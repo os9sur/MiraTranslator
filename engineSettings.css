@@ -86,18 +86,20 @@ body {
 
 .credit-text {
     flex-shrink: 0;
-    margin-top: auto;   
+    margin-top: auto;
     padding: 8px 0 4px;
     font-size: 11px;
     color: rgb(84 98 120);
     text-align: center;
 }
+
 .app-container {
     display: flex;
     width: 1150px;
     max-width: 1150px;
-    height: auto; 
-    max-height: 90vh; /*自适应*/
+    height: auto;
+    max-height: 90vh;
+    /*自适应*/
     min-height: 500px;
     background: rgba(15, 23, 42, 0.9) !important;
     backdrop-filter: blur(25px) saturate(150%);
@@ -382,6 +384,10 @@ body {
     border-color: var(--neon-blue) !important;
     background: rgba(56, 189, 248, 0.03) !important;
     box-shadow: 0 0 15px rgba(56, 189, 248, 0.15), inset 0 0 8px rgba(0, 0, 0, 0.5) !important;
+}
+
+.form-group .api-input-wrapper .api-input-field {
+    padding-right: 44px !important;
 }
 
 .bottom-bar {
@@ -921,10 +927,12 @@ body {
     width: 100%;
     border-radius: 8px;
 }
+
 .api-input-wrapper {
     position: relative;
     width: 100%;
 }
+
 .toggle-visibility-btn {
     position: absolute;
     right: 10px;
@@ -946,6 +954,7 @@ body {
 .toggle-visibility-btn:hover {
     color: #c9d1d9;
 }
+
 .api-input-field {
     width: 100% !important;
     padding-right: 44px !important;
@@ -961,22 +970,11 @@ body {
     width: 100%;
 }
 
-.api-input-field {
-    width: 100%;
-    box-sizing: border-box;
-}
-
 .custom-combobox {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
-}
-
-.api-input-field {
-    width: 100% !important;
-    padding-right: 44px !important;
-    box-sizing: border-box;
 }
 
 .combobox-toggle {
@@ -1434,7 +1432,7 @@ body {
     font-size: 12px;
     color: #8b949e;
     font-weight: 500;
-    gap:5px;
+    gap: 5px;
 }
 
 .ai-prompt-clear-btn {

@@ -1076,39 +1076,38 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.stopPropagation();
                 const container = toggle.parentElement;
 
-                // ↓ dropdown 可能已经在 body 里，用 _dropdown 引用追踪
                 const dropdown = container._dropdown || container.querySelector('.combobox-dropdown');
                 if (!dropdown) return;
-                container._dropdown = dropdown; // 缓存引用
+                container._dropdown = dropdown;
 
                 const isOpen = dropdown.classList.contains('show');
 
-                // 关闭所有
-                document.querySelectorAll('.combobox-dropdown.show').forEach(d => {
-                    d.classList.remove('show');
-                    if (d._originalParent) {
-                        d._originalParent.classList.remove('open');
-                        d._originalParent._dropdown = null;
-                        d._originalParent.appendChild(d);
-                        d._originalParent = null;
-                    }
-                    d.style.cssText = '';
-                });
+                closeAllDropdowns();
 
                 if (!isOpen) {
                     const rect = container.getBoundingClientRect();
                     dropdown._originalParent = container;
                     document.body.appendChild(dropdown);
 
-                    dropdown.style.position = 'fixed';
-                    dropdown.style.top = (rect.bottom + 2) + 'px';
-                    dropdown.style.left = rect.left + 'px';
+                    // fixed → absolute + 滚动偏移，规避移动端视口跳动
+                    dropdown.style.position = 'absolute';
+                    dropdown.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+                    dropdown.style.left = (rect.left + window.scrollX) + 'px';
                     dropdown.style.width = rect.width + 'px';
                     dropdown.style.maxHeight = '180px';
                     dropdown.style.overflowY = 'auto';
                     dropdown.style.zIndex = '999999';
                     dropdown.classList.add('show');
                     container.classList.add('open');
+
+                    // 打开期间监听滚动/resize，直接关闭而不是重新定位
+                    const closeOnScroll = () => closeAllDropdowns();
+                    window.addEventListener('scroll', closeOnScroll, { capture: true, passive: true });
+                    window.addEventListener('resize', closeOnScroll, { passive: true });
+                    dropdown._cleanupScrollListener = () => {
+                        window.removeEventListener('scroll', closeOnScroll, true);
+                        window.removeEventListener('resize', closeOnScroll);
+                    };
                 }
             };
         });
@@ -1124,20 +1123,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     input.value = val;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                 }
-                dropdown.classList.remove('show');
-                if (originalParent) {
-                    originalParent.classList.remove('open');
-                    originalParent._dropdown = null;
-                    originalParent.appendChild(dropdown);
-                    dropdown._originalParent = null;
-                }
-                dropdown.style.cssText = '';
+                closeAllDropdowns();
             };
         });
 
         document.addEventListener('click', () => {
+            closeAllDropdowns();
+        });
+
+        function closeAllDropdowns() {
             document.querySelectorAll('.combobox-dropdown.show').forEach(d => {
                 d.classList.remove('show');
+                if (d._cleanupScrollListener) {
+                    d._cleanupScrollListener();
+                    d._cleanupScrollListener = null;
+                }
                 if (d._originalParent) {
                     d._originalParent.classList.remove('open');
                     d._originalParent._dropdown = null;
@@ -1146,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 d.style.cssText = '';
             });
-        });
+        }
     }
     function bindEvents() {
 
