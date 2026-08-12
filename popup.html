@@ -233,33 +233,36 @@
       white-space: nowrap;
     }
 
-    #lpDoneBtn {
-      font-size: 13px;
+    #lpDoneBtn,
+    .lpBadge {
       color: #38bdf8;
       background: rgba(56, 189, 248, 0.08);
-      border: 1.5px solid rgba(56, 189, 248, 0.25);
+      border: none;
+      box-shadow: 0 0 0 1.5px rgba(56, 189, 248, 0.25);
       border-radius: 20px;
+      transition: box-shadow 0.25s ease, background 0.25s ease;
+    }
+
+    #lpDoneBtn:hover,
+    .lpBadge:hover {
+      background: rgba(56, 189, 248, 0.12);
+      box-shadow:
+        /* inset 0 0 8px 1px rgba(56, 189, 248, 0.35), */
+        0 0 10px 2px rgba(56, 189, 248, 0.35),
+        0 0 20px 6px rgba(56, 189, 248, 0.2);
+    }
+
+    #lpDoneBtn {
+      font-size: 13px;
       padding: 2px 7px;
       cursor: pointer;
       white-space: nowrap;
     }
 
-    #lpDoneBtn:hover {
-      border-color: #38f898;
-    }
-
     .lpBadge {
       font-size: 11px;
       font-weight: 700;
-      color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1.5px solid rgba(56, 189, 248, 0.25);
-      border-radius: 20px;
       padding: 4px 6px;
-    }
-
-    .lpBadge:hover {
-      border-color: #73e2f0;
     }
 
     .pencil {
