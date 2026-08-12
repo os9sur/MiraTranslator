@@ -480,7 +480,6 @@ body {
     line-height: 1.4;
     word-break: break-all;
 }
-
 .btn-test,
 .btn-save {
     width: auto !important;
@@ -517,7 +516,7 @@ body {
     height: 100%;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.15),
+            rgba(255, 255, 255, 0.25),
             transparent);
     transform: skewX(-25deg);
 }
@@ -526,12 +525,14 @@ body {
     background: rgba(255, 255, 255, 0.08) !important;
     border-color: #fff !important;
     color: #fff !important;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+        0 0 12px 2px rgba(255, 255, 255, 0.15),
+        0 0 24px 6px rgba(255, 255, 255, 0.08) !important;
 }
 
 .btn-test:hover::before {
     left: 150%;
-    transition: all 0.7s ease-in-out;
+    transition: left 0.7s ease-in-out;
 }
 
 .btn-save {
@@ -545,8 +546,9 @@ body {
 
 .btn-save:hover {
     filter: brightness(1.2);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.45) !important;
+    box-shadow:
+        0 0 12px 2px rgba(56, 189, 248, 0.5),
+        0 0 28px 8px rgba(56, 189, 248, 0.3) !important;
 }
 
 .btn-save:active,

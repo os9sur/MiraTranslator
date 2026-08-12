@@ -300,12 +300,15 @@ select:hover {
 }
 
 @keyframes notebook-glow-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       0 0 8px rgba(56, 189, 248, 0.6),
       0 0 20px rgba(59, 130, 246, 0.4),
       inset 0 0 12px rgba(255, 255, 255, 0.2);
   }
+
   50% {
     box-shadow:
       0 0 14px rgba(56, 189, 248, 0.9),
@@ -895,14 +898,14 @@ select:hover {
   }
 }
 
-/* .btn-login,
-#advancedSettingsBtn {
-  height: 29px;
-  border-radius: 20px;
-} */
 #advancedSettingsBtn.icon-action-btn {
   border: 1px solid rgba(0, 229, 255, 0.3) !important;
-  background: rgba(0, 229, 255, 0.05);
+  background:
+    radial-gradient(circle at 30% 25%,
+      rgba(0, 229, 255, 0.25),
+      rgba(0, 229, 255, 0.04) 60%,
+      rgba(0, 229, 255, 0.01) 100%),
+    rgba(10, 20, 25, 0.4);
   width: 30px;
   height: 30px;
   display: flex;
@@ -913,15 +916,48 @@ select:hover {
   outline: none;
   position: relative;
   animation: ice-active-breath 4s infinite ease-in-out;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 3px rgba(0, 0, 0, 0.3),
+    inset 0 0 6px 1px rgba(0, 229, 255, 0.12);
+}
+
+#advancedSettingsBtn.icon-action-btn::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 #advancedSettingsBtn.icon-action-btn:hover {
   animation: none;
-  background: rgba(0, 229, 255, 0.15);
-  border: 1px solid rgba(0, 229, 255, 0.6) !important;
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5), inset 0 0 10px rgba(0, 229, 255, 0.6);
+  background:
+    radial-gradient(circle at 30% 25%,
+      rgba(0, 229, 255, 0.4),
+      rgba(0, 229, 255, 0.1) 60%,
+      rgba(0, 229, 255, 0.02) 100%),
+    rgba(10, 20, 25, 0.5);
+  border: 1px solid rgba(0, 229, 255, 0.65) !important;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 3px rgba(0, 0, 0, 0.25),
+    0 0 10px 2px rgba(0, 229, 255, 0.5),
+    0 0 24px 8px rgba(0, 229, 255, 0.25);
+}
+
+#advancedSettingsBtn.icon-action-btn:hover::after {
+  opacity: 1;
+}
+
+#advancedSettingsBtn.icon-action-btn:active {
+  transform: translateY(0) scale(0.94);
+  transition: all 0.1s ease;
 }
 
 #advancedSettingsBtn.icon-action-btn svg {
@@ -1101,12 +1137,13 @@ select:hover {
 }
 
 #inspectHeader:hover {
-  background-color: rgba(14, 116, 144, 0.25);
-  border-color: rgba(56, 189, 248, 0.7);
+  background-color: rgba(0, 229, 255, 0.06);
+  border-color: rgba(0, 229, 255, 0.45);
   box-shadow:
-    0 0 10px rgba(56, 189, 248, 0.5),
-    0 0 25px rgba(56, 189, 248, 0.25),
-    inset 0 0 10px rgba(56, 189, 248, 0.2);
+    0 0 6px rgba(0, 229, 255, 0.25),
+    0 0 12px rgba(0, 229, 255, 0.12),
+    inset 0 0 6px rgba(0, 229, 255, 0.08);
+  transition: all 0.25s ease;
 }
 
 #inspectArrow {

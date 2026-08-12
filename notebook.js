@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #94a3b8;">
       ${_t('noCollection')}
     </div> 
-    <div style="display: inline-block; text-align: left; font-size: 13px; line-height: 1.8; color: #64748b; white-space: pre-line;">
+    <div style="display: inline-block; text-align: left; font-size: 15px; line-height: 1.8; color: #64748b; white-space: pre-line;">
       ${_t('noCollectionTip')}
     </div>
   </div>

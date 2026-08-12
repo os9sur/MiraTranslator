@@ -906,7 +906,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // 只针对 ⬆ 单独放大变色,其它 emoji 用默认样式
                     const isUpArrow = emoji === '⬆️' || emoji === '⬆';
                     const emojiStyle = isUpArrow
-                        ? 'margin-right:6px;color:#31d66e;font-size:larger;'
+                        ? 'margin-right:6px;color:#bdbdbd;font-size:larger;'
                         : 'margin-right:6px;';
 
                     return `
