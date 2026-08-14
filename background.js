@@ -3002,7 +3002,41 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
             if (hintInputLang === 'ru') return `  "sourcePhonetic": "<Russian Romanization, e.g. privet>"`;
             return `  "sourcePhonetic": "<Romanization of input>"`;
         })();
+        if (req.translateMode !== 'dictionary') {
+            const contextBlock = (req.capturedContext || '').trim();
+            const contextTransBlock = (req.capturedContextTranslation || '').trim();
 
+            const ctxJsonShape = [
+                `{`,
+                `  "phonetic": "IPA or empty",`,
+                (req.needPhonetic || hintInputLang === 'ja') ? sourcePhoneticDesc : '',
+                `  "basic": "<the word's actual meaning AS USED in the given context, one short phrase, in ${targetLanguageName}>",`,
+                `  "examples": ["<short collocation/phrase using this exact word> | <brief gloss in ${targetLanguageName}>"],`,
+                `  "wordForms": [],`,
+                `  "prototype": null`,
+                `}`,
+            ].filter(Boolean).join('\n');
+
+            systemPrompt = [
+                `You are a ${targetLanguageName} dictionary assistant explaining a word AS USED in a specific sentence. Output PURE JSON only — no markdown, no backticks, no explanation.`,
+                `TARGET: ${targetLanguageName}. "basic" and "examples" gloss MUST be written in ${targetLanguageName}.`,
+                hintInputLang ? `Source word language: ${sourceLangLabel}.` : '',
+                contextBlock
+                    ? `CONTEXT (the sentence/passage this word was selected from, in ${sourceLangLabel}): ${JSON.stringify(contextBlock)}`
+                    : `No surrounding context was captured — explain the word's most common/default meaning instead.`,
+                contextTransBlock ? `Existing translation of that context (reference only, do not just copy it): ${JSON.stringify(contextTransBlock)}` : '',
+                `TASK: Given the word ${JSON.stringify(req.text)} and the context above, determine what it actually means IN THIS SPECIFIC SENTENCE — not a generic list of all possible dictionary meanings.`,
+                `OUTPUT:\n${ctxJsonShape}`,
+                `RULES:`,
+                `- "basic": give ONLY the contextual meaning — one short phrase, not a list of alternatives. Do NOT prefix it with any label.`,
+                `- "examples": 2-3 short collocations or set phrases containing this exact word (in ${sourceLangLabel}), format "phrase | gloss" — gloss briefly in ${targetLanguageName}. Prefer variety in structure (e.g. mix noun-modifier phrases with verb+word or word+preposition patterns) rather than all the same pattern. Give actual short phrases (e.g. "artificial intelligence | 人工智能"), NOT full explanatory sentences and NOT a descriptive paragraph.`,
+                `- Tone: natural and conversational, like a knowledgeable friend explaining it — not a formal dictionary entry.`,
+                `- phonetic: accurate pronunciation of the word in ${sourceLangLabel}.`,
+                `- Start with '{', end with '}'.`,
+            ].filter(Boolean).join('\n');
+
+            return systemPrompt;
+        }
         // ── wordForms instruction ────────────── 
         const wordFormsInstruction = `  "wordForms": [{"name": "form name in ${targetLanguageName}, e.g. past/conjugation", "value": "the form"}],`;
 
@@ -3589,12 +3623,13 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                         let def = Array.isArray(item.definition)
                             ? item.definition.join(', ')
                             : (item.definition || '');
-                        // 去重并截断
-                        const defParts = def.split(',').map(s => s.trim()).filter(Boolean);
+                        // 优先按 | 分隔（语境模式格式），未检测到 | 时按逗号分隔（兼容普通词典模式）
+                        const rawParts = def.includes('|') ? def.split('|') : def.split(',');
+                        const defParts = rawParts.map(s => s.trim()).filter(Boolean);
                         const uniqueDefs = [...new Set(defParts)].slice(0, 5);
                         return {
                             pos: item.pos,
-                            meanings: [uniqueDefs.join(', ')]
+                            meanings: uniqueDefs
                         };
                     });
 
