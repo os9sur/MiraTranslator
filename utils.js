@@ -408,7 +408,6 @@ const TRADITIONAL_ENGINE_LIST = [
   'deeplx',
   'bing'
 ];
-
 let isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;
@@ -779,20 +778,22 @@ const idb = {
     }
   }
 };
-function getCacheKey(text, engine, lang) {
+
+function getCacheKey(text, engine, lang, mode = 'context') {
   if (!text) return '';
   const coreText = text
     .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
     .toLowerCase();
   const safeEngine = (engine || getRuntimeDefaultEngine()).toLowerCase();
   const safeLang = (lang || 'zh-cn').replace('_', '-').toLowerCase();
+  const modeSuffix = mode === 'dictionary' ? '_dict' : '';
   let contentPart;
   if (typeof hash === 'function') {
     contentPart = hash(coreText);
   } else {
     contentPart = coreText.substring(0, 50);
   }
-  return `tr_${safeEngine}_${contentPart}_${safeLang}`;
+  return `tr_${safeEngine}_${contentPart}_${safeLang}${modeSuffix}`;
 }
 
 /**
@@ -986,6 +987,26 @@ const POS_MAP = {
     'zh-cn': '数词', 'zh-tw': '數詞', 'ja': '数詞', 'ko': '수사',
     'en': 'num.', 'fr': 'num.', 'de': 'Num.'
   },
+  '助词': {
+    'zh-cn': '助词', 'zh-tw': '助詞', 'ja': '助詞', 'ko': '조사',
+    'en': 'part.', 'fr': 'part.', 'de': 'Part.'
+  },
+  '量词': {
+    'zh-cn': '量词', 'zh-tw': '量詞', 'ja': '助数詞', 'ko': '양사',
+    'en': 'classifier', 'fr': 'class.', 'de': 'Zählw.'
+  },
+  '助动词': {
+    'zh-cn': '助动词', 'zh-tw': '助動詞', 'ja': '助動詞', 'ko': '조동사',
+    'en': 'aux.', 'fr': 'aux.', 'de': 'Hilfsv.'
+  },
+  '限定词': {
+    'zh-cn': '限定词', 'zh-tw': '限定詞', 'ja': '限定詞', 'ko': '한정사',
+    'en': 'det.', 'fr': 'dét.', 'de': 'Det.'
+  },
+  '专有名词': {
+    'zh-cn': '专有名词', 'zh-tw': '專有名詞', 'ja': '固有名詞', 'ko': '고유명사',
+    'en': 'prop.n.', 'fr': 'n.pr.', 'de': 'Eigenname'
+  }
 };
 /**
  * 词性本地化转换函数
@@ -1002,19 +1023,37 @@ const POS_REVERSE_MAP = (() => {
     }
   }
   // 补充 AI 常见的缩写/变体
-  const extra = {
-    'n': '名词', 'noun': '名词',
-    'v': '动词', 'verb': '动词',
-    'adj': '形容词', 'adjective': '形容词',
-    'adv': '副词', 'adverb': '副词',
-    'prep': '介词', 'preposition': '介词',
-    'conj': '连词', 'conjunction': '连词',
-    'pron': '代词', 'pronoun': '代词',
-    'art': '冠词', 'article': '冠词',
-    'interj': '感叹词', 'interjection': '感叹词',
-    'num': '数词', 'numeral': '数词', '介系词': '介词',
-    '介系詞': '介词',
-  };
+const extra = {
+  // 基础映射
+  'n': '名词', 'noun': '名词',
+  'v': '动词', 'verb': '动词',
+  'adj': '形容词', 'adjective': '形容词',
+  'adv': '副词', 'adverb': '副词',
+  'prep': '介词', 'preposition': '介词',
+  'conj': '连词', 'conjunction': '连词',
+  'pron': '代词', 'pronoun': '代词',
+  'art': '冠词', 'article': '冠词',
+  'interj': '感叹词', 'interjection': '感叹词',
+  'num': '数词', 'numeral': '数词',
+
+  // 助动词
+  'aux': '助动词', 'auxv': '助动词', 'auxiliary': '助动词', 'modal': '助动词',
+
+  // 助词 / 量词 / 限定词 / 专有名词
+  'part': '助词', 'particle': '助词',
+  'classifier': '量词', 'measure': '量词', 'mw': '量词',
+  'det': '限定词', 'determiner': '限定词',
+  'prop.n': '专有名词', 'proper': '专有名词', 'pn': '专有名词', 'proper noun': '专有名词',
+
+  // 中文常见别名 / 繁体
+  '介系词': '介词', '介系詞': '介词',
+  '助詞': '助词',
+  '量詞': '量词',
+  '助動詞': '助动词',
+  '限定詞': '限定词',
+  '專有名詞': '专有名词',
+  '固有名詞': '专有名词'
+};
   return { ...map, ...extra };
 })();
 
@@ -1611,7 +1650,10 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     hintInputLang = null,
     hintLangA = null,
     hintLangB = null,
-    fromPopup = false
+    fromPopup = false,
+    translateMode = 'context',
+    capturedContext = '',
+    capturedContextTranslation = '',
   } = options;
   let engine = (
     storage.activeConfig?.engine ||
@@ -1690,7 +1732,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
 
   //缓存
-  const cacheKey = getCacheKey(query, engine, lang);
+  const cacheKey = getCacheKey(query, engine, lang, translateMode);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
     if (!forceRefresh && !isBatch) {
@@ -1726,6 +1768,9 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           cacheKey,
           isSubtitle: query.includes('⟦KT_') && isAI,
           fromPopup: fromPopup || false,
+          translateMode,
+          capturedContext,
+          capturedContextTranslation,
         }),
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
       ]);
@@ -2107,7 +2152,7 @@ const LANGS = [
   { value: 'zh-SG', label: 'Singapore (简体中文)', en: 'Simplified Chinese (Singapore)' },
 
   // --- 中东与南亚 Middle East & South Asia ---
-  { type: 'sep', label: '—— Middle East & South Asia ——' },
+  { type: 'sep', label: '- Middle East & South Asia -' },
   { value: 'ar', label: 'Arabic (العربية)', en: 'Arabic' },
   { value: 'ar-SA', label: 'Arabic Saudi Arabia (العربية)', en: 'Arabic (Saudi Arabia)' },
   { value: 'ar-AE', label: 'Arabic UAE (العربية)', en: 'Arabic (UAE)' },
@@ -2246,55 +2291,20 @@ function isWordText(text) {
   // 含有空格 → 不是单词
   if (trimmed.includes(' ')) return false;
 
-  // 检测是否为日语
-  const isJapanese = /[\p{Script=Hiragana}\p{Script=Katakana}]/u.test(trimmed);
-  if (isJapanese) {
-    return trimmed.length <= 10;
-  }
+  // 无空格分词的语言（中/日/韩/阿拉伯/泰语等）无法用长度可靠区分
+  // 单词与短语/句子，一律不显示词典模式，避免误判
+  const nonSpaceDelimited =
+    /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Arabic}\p{Script=Thai}\p{Script=Hebrew}\p{Script=Devanagari}]/u;
+  if (nonSpaceDelimited.test(trimmed)) return false;
 
-  // 检测是否为汉语（纯汉字）
-  const isChinese = /^\p{Script=Han}+$/u.test(trimmed);
-  if (isChinese) {
-    return trimmed.length <= 4;
-  }
-
-  // 检测是否为韩语
-  const isKorean = /\p{Script=Hangul}/u.test(trimmed);
-  if (isKorean) {
-    return trimmed.length <= 15;
-  }
-
-  // 检测是否为阿拉伯语
-  const isArabic = /\p{Script=Arabic}/u.test(trimmed);
-  if (isArabic) {
-    return trimmed.length <= 20;
-  }
-
-  // 检测是否为俄语（西里尔字母）
+  // 俄语（西里尔字母）虽有空格分词，但要求整体不含空格才走到这里，
+  // 说明本身就是单个词，沿用长度阈值
   const isRussian = /\p{Script=Cyrillic}/u.test(trimmed);
   if (isRussian) {
     return trimmed.length <= 25;
   }
 
-  // 检测是否为泰语
-  const isThai = /\p{Script=Thai}/u.test(trimmed);
-  if (isThai) {
-    return trimmed.length <= 20;
-  }
-
-  // 检测是否为希伯来语
-  const isHebrew = /\p{Script=Hebrew}/u.test(trimmed);
-  if (isHebrew) {
-    return trimmed.length <= 20;
-  }
-
-  // 检测是否为印地语（天城文）
-  const isDevanagari = /\p{Script=Devanagari}/u.test(trimmed);
-  if (isDevanagari) {
-    return trimmed.length <= 25;
-  }
-
-  // 默认：英文及其他拉丁字母，长度 <= 30
+  // 默认：英文及其他拉丁字母语言，长度 <= 30
   return trimmed.length <= 30;
 }
 

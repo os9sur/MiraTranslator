@@ -1129,9 +1129,6 @@ function isYoutubeCaptionOn() {
   if (mobileBtn) {
     return mobileBtn.getAttribute('aria-pressed') === 'true';
   }
-
-  // 都找不到按钮时，不要直接返回 false 把字幕功能锁死
-  // 可以根据实际情况选择默认值，比如默认 true（假设用户开了字幕）
   return true;
 }
 function toggleVisibility() {
@@ -4326,7 +4323,9 @@ const getTextFragmentAnchor = (word) => {
 };
 let _capturedContext = "";
 let _capturedContextTranslation = "";
-
+function isAIEngine(engineId) {
+  return AI_LLM_WHITE_LIST.includes(engineId);
+}
 function initSelectionTranslate() {
   const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
 
@@ -4553,58 +4552,61 @@ function initSelectionTranslate() {
     style.textContent = `
       /* ── CSS 变量（暗色默认）── */
       :host {
-        --p-bg:               rgba(18,18,18,0.95);
+        --p-bg:             rgba(18,18,18,0.95);
         --p-text-main:        #ffffffb7;
-        --p-text-query:       rgb(31 31 35 / 34%);
-        --p-text-muted:       rgba(255,255,255,0.6);
+        --p-text-query:      rgb(31 31 35 / 34%);
+        --p-text-muted:      rgba(255,255,255,0.6);
         --p-text-detail:      rgba(255,255,255,0.6);
         --p-accent:           #38bdf8;
-        --arrowColor:         rgb(34, 197, 94);
-        --p-border:           rgba(255,255,255,0.1);
-        --p-shadow:           rgba(0,0,0,0.5);
-        --p-content-bg:       rgba(39,39,50,0.39);
-        --p-header-bg:        rgba(31,31,35,0.34);
+        --p-highlight:        #38bdf8;
+        --arrowColor:        rgb(34, 197, 94);
+        --p-border:          rgba(255,255,255,0.1);
+        --p-shadow:          rgba(0,0,0,0.5);
+        --p-content-bg:      rgba(39,39,50,0.39);
+        --p-header-bg:       rgba(31,31,35,0.34);
         --p-header-shadow:    0 2px 8px rgba(235,215,215,0.09);
-        --p-phonetic:         #38bdf8;
-        --p-glow-opacity:     0.8;
-        --p-panel-anim:       eclipseHalo;
-        --p-link-hover-bg:    rgba(56, 189, 248, 0.15);
-        --p-link-kana-bg:     #064e3b;
-          --p-link-kana:     #dae2da; 
+        --p-phonetic:        #38bdf8;
+        --p-glow-opacity:    0.8;
+        --p-panel-anim:      eclipseHalo;
+        --p-link-hover-bg:   rgba(56, 189, 248, 0.15);
+        --p-link-kana-bg:    rgba(45, 212, 191, 0.22);
+        --p-link-kana:       #5eead4;
       }
 
       /* ── 亮色变量── */
       :host([theme="light"]),
       :host(:not([theme="dark"])) {
-        --p-bg:               #fffffff3;
-        --p-text-main:        #1a202c;
-        --p-text-query:       #2d3748;
-        --p-text-muted:       #718096;
-        --p-text-detail:      #4f5a6a;
-        --p-accent:           #151517;
-        --arrowColor:         #2ecb3c;
-        --p-border:           rgba(0,0,0,0.1);
-        --p-shadow:           rgba(0,0,0,0.1);
-        --p-content-bg:       rgba(245,249,249,0.79);
-        --p-header-bg:        rgba(177,178,191,0.23);
-        --p-header-shadow:    0 2px 8px rgba(0,0,0,0.3);
-        --p-phonetic:         #07a457;
-        --p-glow-opacity:     0.3;
-        --p-panel-anim:       eclipseHaloLightAlt;
-        --p-link-hover-bg:    rgba(2, 132, 199, 0.1);
-        --p-link-kana-bg:     #66f16f69;
-          --p-link-kana:     #030303; 
+        --p-bg:              #fffffff3;
+        --p-text-main:       #1a202c;
+        --p-text-query:      #2d3748;
+        --p-text-muted:      #718096;
+        --p-text-detail:     #4f5a6a;
+        --p-accent:          #151517;
+        --p-highlight:       #4b5563;
+        --arrowColor:        #2ecb3c;
+        --p-border:          rgba(0,0,0,0.1);
+        --p-shadow:          rgba(0,0,0,0.1);
+        --p-content-bg:      rgba(245,249,249,0.79);
+        --p-header-bg:       rgba(177,178,191,0.23);
+        --p-header-shadow:   0 2px 8px rgba(0,0,0,0.3);
+        --p-phonetic:        #07a457;
+        --p-glow-opacity:    0.3;
+        --p-panel-anim:      eclipseHaloLightAlt;
+        --p-link-hover-bg:   rgba(2, 132, 199, 0.1);
+        --p-link-kana-bg:    rgba(13, 148, 136, 0.14);
+        --p-link-kana:       #0f766e;
       }
 
       /* 仅在系统偏好亮色且未手动设置 dark 时生效 */
       @media (prefers-color-scheme: light) {
         :host(:not([theme="dark"])) {
-          --p-bg:            #fffffff3;
+          --p-bg:           #fffffff3;
           --p-text-main:     #1a202c;
           --p-text-query:    #2d3748;
           --p-text-muted:    #718096;
           --p-text-detail:   #4f5a6a;
           --p-accent:        #0284c7;
+          --p-highlight:     #4b5563;
           --arrowColor:      #2ecb3c;
           --p-border:        rgba(0,0,0,0.1);
           --p-shadow:        rgba(0,0,0,0.1);
@@ -4613,8 +4615,8 @@ function initSelectionTranslate() {
           --p-header-shadow: 0 2px 8px rgba(0,0,0,0.3);
           --p-phonetic:      #07a457;
           --p-panel-anim:    eclipseHaloLightWarm;
-          --p-link-kana-bg:  #66f16f69;
-          --p-link-kana:     #dae2da; 
+          --p-link-kana-bg:  rgba(13, 148, 136, 0.14);
+          --p-link-kana:     #0f766e; 
         }
       }
 
@@ -4627,14 +4629,15 @@ function initSelectionTranslate() {
         --p-border:        rgba(255,255,255,0.1);
         --p-shadow:        rgba(0,0,0,0.5);
         --p-accent:        #38bdf8;  
+        --p-highlight:     #38bdf8;
         --arrowColor:      rgb(34, 197, 94);
         --p-content-bg:    rgba(39,39,50,0.39);
         --p-header-bg:     rgba(31,31,35,0.34);
         --p-header-shadow: 0 2px 8px rgba(235,215,215,0.09);
         --p-phonetic:      #38bdf8;
         --p-panel-anim:    eclipseHalo;
-        --p-link-kana-bg: #064e3b;
-        --p-link-kana:     #dae2da; 
+        --p-link-kana-bg: rgba(45, 212, 191, 0.22);
+        --p-link-kana:    #5eead4;
       }
 
       /* ── 光晕动画 ── */
@@ -5163,7 +5166,11 @@ function initSelectionTranslate() {
 
     .lang-tag-btn:hover { 
       background: color-mix(in srgb, var(--p-accent) 18%, transparent) !important;
-      box-shadow: 0 0 16px color-mix(in srgb, var(--p-accent) 30%, transparent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--p-accent) 35%, transparent),
+                  0 0 45px color-mix(in srgb, var(--p-accent) 22%, transparent),
+                  0 0 70px color-mix(in srgb, var(--p-accent) 12%, transparent),
+                  inset 0 0 4px color-mix(in srgb, var(--p-accent) 25%, transparent),
+                  inset 0 0 10px color-mix(in srgb, var(--p-accent) 15%, transparent);
       transform: none;
       border-radius: 20px;
     }
@@ -5242,27 +5249,6 @@ function initSelectionTranslate() {
     .mira-example-speak.is-speaking::before { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite; }
     .mira-example-speak.is-speaking::after  { animation: wave-ripple 1s cubic-bezier(0,0,.2,1) infinite .5s; }
   
-    .mira-neon-btn {
-        display: none;
-        font-size: 11px;
-        color: var(--p-link-kana);
-        cursor: pointer;
-        user-select: none;
-        padding: 2px 6px; 
-        border-radius: 6px;
-        background: var(--p-link-kana-bg);  
-        margin-left: 8px;
-        white-space: nowrap;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-  
-    .mira-neon-btn:hover {
-        color: #ffffff; 
-        border-color: #34d399; 
-        background-color: #059669; 
-        box-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 
-                    0 0 20px rgba(52, 211, 153, 0.3);
-    }
 
     .neon-engine-btn {
         display: flex;
@@ -5282,12 +5268,63 @@ function initSelectionTranslate() {
     }
 
     .neon-engine-btn:hover {
-        background: color-mix(in srgb, var(--p-accent) 25%, transparent);
-        box-shadow: 0 0 10px color-mix(in srgb, var(--p-accent) 50%, transparent);
+      background: color-mix(in srgb, var(--p-accent) 25%, transparent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--p-accent) 35%, transparent),
+                  0 0 45px color-mix(in srgb, var(--p-accent) 22%, transparent),
+                  0 0 70px color-mix(in srgb, var(--p-accent) 12%, transparent),
+                  inset 0 0 4px color-mix(in srgb, var(--p-accent) 25%, transparent),
+                  inset 0 0 10px color-mix(in srgb, var(--p-accent) 15%, transparent);
     }
-        .toast-hidden {
+    .toast-hidden {
       opacity: 0;
       visibility: hidden;
+    }
+
+    /*  两个 toggle 按钮的通用外观 */
+    .mira-toggle-btn {
+      font-size: 11px;
+      font-weight: 550;
+      cursor: pointer;
+      user-select: none;
+
+      padding: 2px 6px;
+      border-radius: 20px;
+      white-space: nowrap;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* 假名切换按钮  */
+    .mira-toggle-btn--kana {
+      display: none;
+      color: var(--p-link-kana);
+      background: var(--p-link-kana-bg);
+      margin-left: 8px;
+    }
+    .mira-toggle-btn--kana:hover {
+      color: #ffffff;
+      background-color: #059669;
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.7),
+                  0 0 20px rgba(52, 211, 153, 0.5),
+                  0 0 40px rgba(52, 211, 153, 0.3);
+    }
+
+    /* 词典模式切换按钮 */
+    .mira-toggle-btn--dict {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-weight: 600;
+      padding: 3px 8px;
+      color: var(--p-accent);
+      background: color-mix(in srgb, var(--p-accent) 8%, transparent);
+    }
+.mira-toggle-btn--dict:hover {
+      background: color-mix(in srgb, var(--p-accent) 18%, transparent);
+      box-shadow: 0 0 20px color-mix(in srgb, var(--p-accent) 35%, transparent),
+                  0 0 45px color-mix(in srgb, var(--p-accent) 22%, transparent),
+                  0 0 70px color-mix(in srgb, var(--p-accent) 12%, transparent),
+                  inset 0 0 4px color-mix(in srgb, var(--p-accent) 25%, transparent),
+                  inset 0 0 10px color-mix(in srgb, var(--p-accent) 15%, transparent);
     }
 
     .p-header-brand { display: flex; align-items: center; gap: 5px; user-select: none; }
@@ -6032,6 +6069,14 @@ function initSelectionTranslate() {
     const isPinnedNow = shadowHost.getAttribute("data-pinned") === "true";
     const wordText = text.trim();
     shadowHost.setAttribute("data-current-word", wordText);
+    const engineInfo = await safeGetStorage(["activeConfig", "selectedEngine", "_defaultEngine"]);
+    const currentEngineId =
+      engineInfo?.activeConfig?.engine ||
+      engineInfo?.selectedEngine ||
+      engineInfo?._defaultEngine ||
+      "google";
+    let translateMode = "context"; // 每次新开弹窗都重置为默认上下文模式
+    const showDictToggle = isAIEngine(currentEngineId) && isWordText(wordText);
 
     const targetPrefix = (window.currentTargetL || "")
       .toLowerCase()
@@ -6065,7 +6110,7 @@ function initSelectionTranslate() {
     direction:${isRTL ? "rtl" : "ltr"};
     text-align:${isRTL ? "right" : "left"};`;
 
-    contentContainer.innerHTML = buildContentHTML(text, isSaved);
+    contentContainer.innerHTML = buildContentHTML(text, isSaved, showDictToggle);
     // 异步读取上次保存的源语言并更新显示
     safeGetStorage("lpLangA").then((res) => {
       const saved = res?.lpLangA;
@@ -6125,7 +6170,7 @@ function initSelectionTranslate() {
     const pQuery = shadow.getElementById("p-query");
     if (!pQuery?.style) {
       // DOM 不完整，重新构建内容区
-      contentContainer.innerHTML = buildContentHTML(text, isSaved);
+      contentContainer.innerHTML = buildContentHTML(text, isSaved, showDictToggle);
       // 重新获取
       const pQueryRetry = shadow.getElementById("p-query");
       if (!pQueryRetry?.style) return;
@@ -6204,6 +6249,20 @@ function initSelectionTranslate() {
       logger.log('[p-speak] 经过上下文辅助判断后的最终发音语言:', finalLang);
       speakText(text, shadow.getElementById("p-speak"), finalLang);
     };
+    const dictToggleBtn = shadow.getElementById("mira-toggle-dict");
+    if (dictToggleBtn) {
+      dictToggleBtn.onclick = (e) => {
+        e.stopPropagation();
+        translateMode = translateMode === "context" ? "dictionary" : "context";
+        dictToggleBtn.textContent =
+          translateMode === "dictionary"
+            ? `${t("contextMode") || "Context-Aware"} ⇄`
+            : `${t("dictMode") || "Dictionary Mode"} ⇄`;
+        dictToggleBtn.classList.toggle("is-active", translateMode === "dictionary");
+        triggerRefresh();
+      };
+    }
+
     function handleTranslationResult(result, text, shadow) {
       if (!result) return;
       const currentWord = shadowHost?.getAttribute("data-current-word");
@@ -6279,8 +6338,10 @@ function initSelectionTranslate() {
       // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
       const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
       const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
+      // 加 modeSuffix,避免上下文/词典两种模式互相读到对方的缓存
+      const modeSuffix = translateMode === "dictionary" ? "_dict" : "";
       const keysToRemove = ALL_ENGINES.map(
-        (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}`
+        (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}${modeSuffix}`
       );
 
       Promise.all(keysToRemove.map((k) => idb.remove(k)))
@@ -6326,11 +6387,12 @@ function initSelectionTranslate() {
             shadowHost._engineDotEl.style.background = "#6b7280";
 
           getDetailedTranslation(
-            text,
-            true,
-            currentTargetLang,
+            text, true, currentTargetLang,
             {
               hintInputLang: currentSourceLang,
+              translateMode,
+              capturedContext: _capturedContext,
+              capturedContextTranslation: _capturedContextTranslation,
             },
             currentSourceLang,
           )
@@ -6492,6 +6554,7 @@ function initSelectionTranslate() {
           textMuted: "rgba(255,255,255,0.50)",
           sepBorder: "rgba(255,255,255,0.08)",
           hoverBg: "rgba(56,189,248,0.15)",
+          activeBg: "rgba(56,189,248,0.22)",
           accent: "#38bdf8",
         }
         : {
@@ -6501,8 +6564,9 @@ function initSelectionTranslate() {
           text: "#1a202c",
           textMuted: "#718096",
           sepBorder: "rgba(0,0,0,0.06)",
-          hoverBg: "rgba(2,132,199,0.1)",
-          accent: "#0284c7",
+          hoverBg: "rgba(14,165,233,0.12)",
+          activeBg: "rgba(14,165,233,0.20)",
+          accent: "#0ea5e9",
         };
     }
 
@@ -6521,15 +6585,15 @@ function initSelectionTranslate() {
       const dropdown = document.createElement("div");
       dropdown.id = "p-lang-dropdown";
       dropdown.style.cssText = `
-    position:fixed; z-index:2147483647;
-    background:${colors.bg}; border:1px solid ${colors.border};
-    border-radius:8px; box-shadow:${colors.shadow};
-    overflow-y:auto; min-width:220px;
-    padding:4px 0; font-size:12px; color:${colors.text};
-    pointer-events:auto;
-    backdrop-filter:blur(20px) saturate(180%);
-    -webkit-backdrop-filter:blur(20px) saturate(180%);
-  `;
+      position:fixed; z-index:2147483647;
+      background:${colors.bg}; border:1px solid ${colors.border};
+      border-radius:8px; box-shadow:${colors.shadow};
+      overflow-y:auto; min-width:220px;
+      padding:4px 0; font-size:12px; color:${colors.text};
+      pointer-events:auto;
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
+    `;
       //  max-height 和 width 移到定位计算之后动态设置
 
       dropdown.addEventListener("wheel", (ev) => {
@@ -6900,10 +6964,13 @@ function initSelectionTranslate() {
     });
     // 发消息，不等结果，UI 完全由 TRANSLATE_DETAIL_UPDATE 驱动
     getDetailedTranslation(
-      text,
-      false,
-      manualLang,
-      { hintInputLang: effectiveHintLang },
+      text, false, manualLang,
+      {
+        hintInputLang: effectiveHintLang,
+        translateMode,
+        capturedContext: _capturedContext,
+        capturedContextTranslation: _capturedContextTranslation,
+      },
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
       .then((result) => {
@@ -6994,7 +7061,7 @@ function initSelectionTranslate() {
 
   // ─── 内容 HTML 模板 ──
 
-  function buildContentHTML(text, isSaved) {
+  function buildContentHTML(text, isSaved, showDictToggle = false) {
     const isMultiline = text.length > 40 || text.includes("\n");
     const targetLang = (
       window.currentTargetL ||
@@ -7073,10 +7140,11 @@ function initSelectionTranslate() {
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
         <div id="p-phonetic" style="color:var(--p-phonetic); font-size:13px; opacity:0.6; font-family:sans-serif;  word-break:break-word;"></div>
-        
-    <span id="mira-toggle-ja" class="mira-neon-btn">
-        Kana ▾
-    </span>
+
+        <div style="display:flex; align-items:center; gap:6px;">
+        ${showDictToggle ? `<span id="mira-toggle-dict" class="mira-toggle-btn mira-toggle-btn--dict">${t("dictMode") || "Dictionary Mode"} ⇄</span>` : ""}
+        <span id="mira-toggle-ja" class="mira-toggle-btn mira-toggle-btn--kana">Kana ▾</span>
+      </div>
    </div>
 
     <div id="p-ja-extension" style="display: none; margin-top: 6px; padding-bottom: 6px; padding-top: 6px; border-bottom: 1px dashed rgb(51, 65, 85);">
@@ -7240,22 +7308,31 @@ function initSelectionTranslate() {
           .map((item) => {
             const pos = esc(localizePos(item.pos, targetLang) || "");
 
-            const isJaContent = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(
-              (item.meanings || []).join('')
-            );
-            const meanings = (item.meanings || [])
+            const meaningsList = (item.meanings || [])
               .map(m => esc(cleanMarker(m))
                 .replace(/。(?!$)/g, '、')
                 .replace(/\s*、\s*/g, '、')
               )
-              .join(isJaContent ? '、' : ', ');
+              .filter(Boolean);
 
-            return `<div style="margin-bottom:4px;">
-                  <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
-                    <b class="mira-font-family" style="color:#319BCA;font-size:12px;font-weight:500;margin-right:4px;flex-shrink:0;">${pos}</b>
-                    <span class="mira-font-family">${meanings}</span>
-                  </div>
-                </div>`;
+            // 短词条 横排逗号连写；
+            // 长条目 竖排列表 
+            const isLongForm = meaningsList.length > 1 && meaningsList.some(m => m.length > 12 || m.includes('('));
+
+            const meaningsHtml = isLongForm
+              ? meaningsList
+                .map(m => `<div class="mira-font-family" style="position:relative;padding-left:12px;line-height:1.6;margin-top:2px;">
+              <span style="position:absolute;left:0;color:var(--p-text-muted);">·</span>${m}
+            </div>`)
+                .join("")
+              : `<span class="mira-font-family">${meaningsList.join(
+                /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(meaningsList.join('')) ? '、' : ', '
+              )}</span>`;
+
+            return `<div style="margin-bottom:6px;display:flex;align-items:baseline;flex-wrap:wrap;gap:2px;">
+          <b class="mira-font-family" style="color:#319BCA;font-size:12px;font-weight:500;margin-right:4px;flex-shrink:0;">${pos}</b>
+          <div style="flex:1;min-width:0;">${meaningsHtml}</div>
+        </div>`;
           })
           .join("");
 
@@ -7273,6 +7350,8 @@ function initSelectionTranslate() {
       </span>`;
         }
         (res.wordForms || []).forEach((wf) => {
+          const value = (wf.value || "").trim();
+          if (!value) return;
           const name = esc(
             isTraditional ? ZH_FORM_TW[wf.name] || wf.name : wf.name,
           );
@@ -7365,9 +7444,9 @@ function initSelectionTranslate() {
               return `<div class="mira-font-family" style="margin-bottom:10px;${borderStyle}${paddingStyle}
               border-radius:2px;word-break:break-word;direction:${dir};text-align:${isRTL ? "right" : "left"};">
               <div style="display:flex;align-items:center;gap:6px;flex-direction:${isRTL ? "row-reverse" : "row"};">
-                <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
-                  ${en.replace(regex, '<span style="color:#38BDF8;font-weight:600;">$1</span>')}
-                </div>
+            <div class="mira-font-family" style="font-size:13px;font-style:italic;color:var(--p-text-muted);line-height:1.4;flex:1;">
+      ${en.replace(regex, '<span style="color:var(--highlight-color, #38BDF8);font-weight:600;">$1</span>')}
+    </div>
                 <span class="mira-example-speak" data-sentence="${safeEn}" data-lang="${exampleLang || ''}" 
                   style="cursor:pointer;flex-shrink:0;color:var(--p-text-muted);display:flex;transition:color 0.2s;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -10073,13 +10152,55 @@ async function handleWordMouseEnter(e, word) {
   if (/^[a-zA-Z]$/.test(cleanWord)) return;
   if (/^[\p{P}\p{S}\s]+$/u.test(cleanWord)) return;
 
-  const [entry, storage] = await Promise.all([
+  const [entry, storage, engineInfo] = await Promise.all([
     idb.vocabulary.get(cleanWord),
     safeGetStorage(["targetLanguage"]),
+    safeGetStorage(["activeConfig", "selectedEngine", "_defaultEngine"]),   //  拿当前引擎
   ]);
   if (__currentHoverToken !== myToken) return;
   const currentLang = storage?.targetLanguage || getBrowserLang() || "en";
   const isCollected = !!(entry && entry.deleted === false);
+
+  //  判断是否 AI 引擎
+  const currentEngineId =
+    engineInfo?.activeConfig?.engine ||
+    engineInfo?.selectedEngine ||
+    engineInfo?._defaultEngine ||
+    "google";
+  const useContextMode = isAIEngine(currentEngineId);
+
+  //  AI 引擎时采集当前字幕行文本作为语境
+  let subtitleContext = "";
+  let subtitleContextTranslation = "";
+  if (useContextMode) {
+    try {
+      const ytO = document.getElementById("yt-o");
+      const ytT = document.getElementById("yt-t");
+
+      const cleanSubtitle = (text) => {
+        return text
+          .replace(/^[\s\-–—>>\|]+/g, "")
+          .replace(/[\-–—>>\|]+$/g, "")
+          .replace(/\s*\|\s*/g, ". ")
+          .replace(/\s+-\s+/g, " ")           // 只去掉前后有空格的 - （避免误删 couldn't）
+          .replace(/\[.*?\]/g, "")            // 去掉 [...]
+          .replace(/["""«»]/g, "")            // 去掉特殊引号
+          .replace(/\s+/g, " ")
+          .trim();
+      };
+
+      const originalText = ytO
+        ? Array.from(ytO.querySelectorAll(".kt-word"))
+          .map(el => el.textContent.trim())
+          .filter(Boolean)
+          .join(" ")
+        : "";
+      const translationText = ytT ? ytT.textContent.trim() : "";
+
+      subtitleContext = cleanSubtitle(originalText);
+      subtitleContextTranslation = cleanSubtitle(translationText);
+    } catch (_) { }
+  }
 
   let tooltip = document.getElementById("kt-word-tooltip");
   if (!tooltip) {
@@ -10121,12 +10242,21 @@ async function handleWordMouseEnter(e, word) {
   tooltip.style.visibility = "visible";
   repositionTooltip(tooltip, e.target);
 
-  // logger.log('[getVideoSourceLang] result:', getVideoSourceLang());
   try {
-    const res = await getDetailedTranslation(cleanWord, false, currentLang, {
-      lightweight: true,
-      hintInputLang: getVideoSourceLang(),
-    });
+    //  按引擎类型分流调用参数
+    const res = await getDetailedTranslation(cleanWord, false, currentLang,
+      useContextMode
+        ? {
+          translateMode: 'context',
+          hintInputLang: getVideoSourceLang(),
+          capturedContext: subtitleContext,
+          capturedContextTranslation: subtitleContextTranslation,
+        }
+        : {
+          lightweight: true,
+          hintInputLang: getVideoSourceLang(),
+        }
+    );
     if (__currentHoverToken !== myToken) {
       const t2 = document.getElementById("kt-word-tooltip");
       if (t2) t2.style.display = "none";
@@ -10138,8 +10268,30 @@ async function handleWordMouseEnter(e, word) {
         ? `<span style="font-size: 11px; color: #94a3b8; font-weight: normal; width: 100%;">[${res.phonetic}]</span>`
         : "";
 
+      const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const highlightWord = (text, word) => {
+        if (!text || !word) return text;
+        const re = new RegExp(escapeRegExp(word), "gi");
+        return text.replace(re, (match) =>
+          `<span style="color:#38bdf8;font-weight:700;font-style:normal;">${match}</span>`
+        );
+      };
+
       let dictHtml = "";
-      if (res.dictData && res.dictData.length > 0) {
+      if (useContextMode) {
+        if (res.examples?.length) {
+          dictHtml = res.examples.slice(0, 2).map(ex => {
+            const phrase = typeof ex === 'string' ? ex.split(' | ')[0] : (ex.en || '');
+            const gloss = typeof ex === 'string' ? (ex.split(' | ')[1] || '') : (ex.cn || '');
+            const highlightedPhrase = highlightWord(phrase, cleanWord);
+            return `<div style="margin-top:4px;font-size:12px;">
+              <span style="color:#94a3b8;font-style:italic;">${highlightedPhrase}</span>
+              <span style="color:#64748b;"> — ${gloss}</span>
+            </div>`;
+          }).join("");
+        }
+      } else if (res.dictData && res.dictData.length > 0) {
+        // 原有词典模式渲染逻辑不变
         dictHtml = res.dictData
           .map((i, index) => {
             const meaning =
@@ -10156,7 +10308,6 @@ async function handleWordMouseEnter(e, word) {
             if (!meaning) return "";
 
             const localizedPos = localizePos(i.pos, currentLang);
-            // 第一条显示3行，其余2行
             const maxH = index === 0 ? "4.2em" : "2.8em";
             return `
             <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">

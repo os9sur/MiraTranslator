@@ -1636,213 +1636,132 @@ self.i18nYTData = {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次双击取消",
     alreadyAddedFeedback: "⭐ 已在生词本，双击取消",
-    hintAddAction: "双击收藏到生词本"
+    hintAddAction: "双击收藏到生词本",
+    dictMode: "词典模式",
+    contextMode: "上下文感知"
   },
   "zh-TW": {
     removed: "已移除",
     addedFeedback: "⭐ 已收藏，再次雙擊取消",
     alreadyAddedFeedback: "⭐ 已在單字本，雙擊取消",
-    hintAddAction: "雙擊收藏到單字本"
+    hintAddAction: "雙擊收藏到單字本",
+    dictMode: "詞典模式",
+    contextMode: "上下文感知"
   },
   "en": {
     removed: "Removed",
     addedFeedback: "⭐ Added to collection, double-click to undo",
     alreadyAddedFeedback: "⭐ Already in vocabulary, double-click to undo",
-    hintAddAction: "Double-click to save to vocabulary"
+    hintAddAction: "Double-click to save to vocabulary",
+    dictMode: "Dictionary Mode",
+    contextMode: "Context-Aware"
   },
   "ja": {
     removed: "削除済み",
     addedFeedback: "⭐ コレクションに追加しました、ダブルクリックで取り消し",
     alreadyAddedFeedback: "⭐ 単語帳に既に存在します、ダブルクリックで取り消し",
-    hintAddAction: "ダブルクリックで単語帳に保存"
+    hintAddAction: "ダブルクリックで単語帳に保存",
+    dictMode: "辞書モード",
+    contextMode: "文脈認識"
   },
   "ko": {
     removed: "삭제됨",
     addedFeedback: "⭐ 콜렉션에 추가됨, 더블클릭하여 취소",
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
-    hintAddAction: "더블클릭하여 단어장에 저장"
+    hintAddAction: "더블클릭하여 단어장에 저장",
+    dictMode: "사전 모드",
+    contextMode: "문맥 인식"
   },
   "es": {
     removed: "Eliminado",
     addedFeedback: "⭐ Añadido a la colección, doble clic para deshacer",
     alreadyAddedFeedback: "⭐ Ya está en el vocabulario, doble clic para deshacer",
-    hintAddAction: "Doble clic para guardar en el vocabulario"
+    hintAddAction: "Doble clic para guardar en el vocabulario",
+    dictMode: "Modo Diccionario",
+    contextMode: "Consciente del contexto"
   },
   "fr": {
     removed: "Supprimé",
     addedFeedback: "⭐ Ajouté à la collection, double-clic pour annuler",
     alreadyAddedFeedback: "⭐ Déjà dans le lexique, double-clic pour annuler",
-    hintAddAction: "Double-clic pour sauvegarder dans le lexique"
+    hintAddAction: "Double-clic pour sauvegarder dans le lexique",
+    dictMode: "Mode Dictionnaire",
+    contextMode: "Sensible au contexte"
   },
   "de": {
     removed: "Entfernt",
     addedFeedback: "⭐ Zur Sammlung hinzugefügt, Doppelklick zum Rückgängig",
     alreadyAddedFeedback: "⭐ Bereits im Vokabelheft, Doppelklick zum Rückgängig",
-    hintAddAction: "Doppelklick zum Speichern im Vokabelheft"
+    hintAddAction: "Doppelklick zum Speichern im Vokabelheft",
+    dictMode: "Wörterbuchmodus",
+    contextMode: "Kontextsensitiv"
   },
   "ru": {
     removed: "Удалено",
     addedFeedback: "⭐ Добавлено в коллекцию, двойной щелчок для отмены",
     alreadyAddedFeedback: "⭐ Уже в словаре, двойной щелчок для отмены",
-    hintAddAction: "Двойной щелчок для сохранения в словарь"
+    hintAddAction: "Двойной щелчок для сохранения в словарь",
+    dictMode: "Режим словаря",
+    contextMode: "С учётом контекста"
   },
   "pt": {
     removed: "Removido",
     addedFeedback: "⭐ Adicionado à coleção, clique duplo para desfazer",
     alreadyAddedFeedback: "⭐ Já no vocabulário, clique duplo para desfazer",
-    hintAddAction: "Clique duplo para salvar no vocabulário"
+    hintAddAction: "Clique duplo para salvar no vocabulário",
+    dictMode: "Modo Dicionário",
+    contextMode: "Sensível ao contexto"
   },
   "it": {
     removed: "Rimosso",
     addedFeedback: "⭐ Aggiunto alla collezione, doppio clic per annullare",
     alreadyAddedFeedback: "⭐ Già nel vocabolario, doppio clic per annullare",
-    hintAddAction: "Doppio clic per salvare nel vocabolario"
+    hintAddAction: "Doppio clic per salvare nel vocabolario",
+    dictMode: "Modalità Dizionario",
+    contextMode: "Consapevole del contesto"
   },
   "vi": {
     removed: "Đã xóa",
     addedFeedback: "⭐ Đã thêm vào bộ sưu tập, nhấp đôi để hoàn tác",
     alreadyAddedFeedback: "⭐ Đã có trong sổ từ vựng, nhấp đôi để hoàn tác",
-    hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng"
+    hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng",
+    dictMode: "Chế độ Từ điển",
+    contextMode: "Nhận biết ngữ cảnh"
   },
   "th": {
     removed: "ลบแล้ว",
     addedFeedback: "⭐ เพิ่มไปยังคอลเลกชันแล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     alreadyAddedFeedback: "⭐ อยู่ในสมุดคำศัพท์แล้ว, ดับเบิลคลิกเพื่อยกเลิก",
-    hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์"
+    hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์",
+    dictMode: "โหมดพจนานุกรม",
+    contextMode: "รับรู้บริบท"
   },
   "ar": {
     removed: "تم الإزالة",
     addedFeedback: "⭐ تمت الإضافة إلى المجموعة، انقر نقرًا مزدوجًا للتراجع",
     alreadyAddedFeedback: "⭐ موجود بالفعل في مفكرة الكلمات، انقر نقرًا مزدوجًا للتراجع",
-    hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات"
+    hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات",
+    dictMode: "وضع القاموس",
+    contextMode: "إدراك السياق"
   },
   "fa": {
     removed: "حذف شد",
     addedFeedback: "⭐ به مجموعه اضافه شد، دوبار کلیک برای لغو",
     alreadyAddedFeedback: "⭐ قبلاً در دفتر لغات است، دوبار کلیک برای لغو",
-    hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات"
+    hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات",
+    dictMode: "حالت واژه‌نامه",
+    contextMode: "آگاه از بافت"
   },
   "tr": {
     removed: "Kaldırıldı",
     addedFeedback: "⭐ Koleksiyona eklendi, geri almak için çift tıklayın",
     alreadyAddedFeedback: "⭐ Zaten kelime defterinde, geri almak için çift tıklayın",
-    hintAddAction: "Kelime defterine kaydetmek için çift tıklayın"
+    hintAddAction: "Kelime defterine kaydetmek için çift tıklayın",
+    dictMode: "Sözlük Modu",
+    contextMode: "Bağlama Duyarlı"
   }
 };
-self.i18nDonateData = {
-  "zh-CN": {
-    buyMeACoffee: "请作者喝杯咖啡",
-    supportDeveloper: "支持作者持续更新",
-    devStory: "本插件由作者在业余时间独立开发并免费维护。每一个好评和支持都是我持续更新的动力。",
-    thankYou: "感谢你的支持！❤️",
-    scanOrClick: "扫描或点击跳转 ↗"
-  },
-  "zh-TW": {
-    buyMeACoffee: "請作者喝杯咖啡",
-    supportDeveloper: "支持作者持續更新",
-    devStory: "本插件由作者在業餘時間獨立開發並免費維護。每一個好評和支持都是我持續更新的動力。",
-    thankYou: "感謝你的支持！❤️",
-    scanOrClick: "掃描或點擊跳轉 ↗"
-  },
-  "en": {
-    buyMeACoffee: "Buy me a coffee",
-    supportDeveloper: "Support ongoing updates",
-    devStory: "Independently developed and maintained for free in my spare time. Every review and support fuels continuous updates. ",
-    thankYou: "Thanks for your support! ❤️",
-    scanOrClick: "Scan or Click ↗"
-  },
-  "ja": {
-    buyMeACoffee: "作者にコーヒーをおごる",
-    supportDeveloper: "継続的な開発を支援",
-    devStory: "このプラグインは作者が余暇に独立して開発し、無料で維持しています。皆様の応援が更新の励みになります。",
-    thankYou: "ご支援ありがとうございます！❤️",
-    scanOrClick: "スキャンまたはクリック ↗"
-  },
-  "ko": {
-    buyMeACoffee: "개발자에게 커피 한 잔 후원하기",
-    supportDeveloper: "지속적인 업데이트 응원하기",
-    devStory: "이 플러그인은 작가가 여가 시간에 독립적으로 개발하고 무료로 유지 관리합니다. 모든 응원이 업데이트의 원동력이 됩니다. ",
-    thankYou: "후원해주셔서 진심으로 감사합니다! ❤️",
-    scanOrClick: "스캔 또는 클릭하여 이동 ↗"
-  },
-  "es": {
-    buyMeACoffee: "Invítame un café",
-    supportDeveloper: "Apoya el desarrollo continuo",
-    devStory: "Desarrollado y mantenido de forma gratuita en mi tiempo libre. Cada reseña y apoyo impulsa nuevas actualizaciones. ",
-    thankYou: "¡Gracias por tu apoyo! ❤️",
-    scanOrClick: "Escanear o clic ↗"
-  },
-  "fr": {
-    buyMeACoffee: "Offrez-moi un café",
-    supportDeveloper: "Soutenez le développement",
-    devStory: "Développé et maintenu gratuitement pendant mon temps libre. Chaque avis et soutien motive les mises à jour. ",
-    thankYou: "Merci pour votre soutien ! ❤️",
-    scanOrClick: "Scanner ou cliquer ↗"
-  },
-  "de": {
-    buyMeACoffee: "Kauf mir einen Kaffee",
-    supportDeveloper: "Unterstütze die Entwicklung",
-    devStory: "In der Freizeit unabhängig entwickelt und kostenlos gepflegt. Jede Bewertung und Unterstützung motiviert mich. ",
-    thankYou: "Danke für deine Unterstützung! ❤️",
-    scanOrClick: "Scannen oder Klicken ↗"
-  },
-  "ru": {
-    buyMeACoffee: "Купите мне кофе",
-    supportDeveloper: "Поддержите разработку",
-    devStory: "Разработано и поддерживается бесплатно в свободное время. Каждый отзыв и поддержка дают силы для обновлений. ",
-    thankYou: "Спасибо за поддержку! ❤️",
-    scanOrClick: "Сканируйте или нажмите ↗"
-  },
-  "pt": {
-    buyMeACoffee: "Compre-me um café",
-    supportDeveloper: "Apoie o desenvolvimento",
-    devStory: "Desenvolvido e mantido gratuitamente no meu tempo livre. Cada avaliação e apoio motiva as atualizações. ",
-    thankYou: "Obrigado pelo seu apoio! ❤️",
-    scanOrClick: "Escanear ou clicar ↗"
-  },
-  "it": {
-    buyMeACoffee: "Offrimi un caffè",
-    supportDeveloper: "Supporta lo sviluppo",
-    devStory: "Sviluppato e mantenuto gratuitamente nel mio tempo libero. Ogni recensione e supporto motiva gli aggiornamenti. ",
-    thankYou: "Grazie per il tuo supporto! ❤️",
-    scanOrClick: "Scansiona o clicca ↗"
-  },
-  "vi": {
-    buyMeACoffee: "Mời tác giả một ly cà phê",
-    supportDeveloper: "Hỗ trợ phát triển",
-    devStory: "Được phát triển và duy trì miễn phí trong thời gian rảnh. Mỗi đánh giá và sự ủng hộ là động lực để cập nhật. ",
-    thankYou: "Cảm ơn sự hỗ trợ của bạn! ❤️",
-    scanOrClick: "Quét hoặc nhấp vào ↗"
-  },
-  "th": {
-    buyMeACoffee: "เลี้ยงกาแฟผู้เขียน",
-    supportDeveloper: "สนับสนุนการพัฒนา",
-    devStory: "พัฒนาและดูแลรักษาฟรีในเวลาว่าง ทุกรีวิวและการสนับสนุนเป็นแรงผลักดันให้พัฒนาต่อ ",
-    thankYou: "ขอบคุณที่สนับสนุน! ❤️",
-    scanOrClick: "สแกนหรือคลิก ↗"
-  },
-  "ar": {
-    buyMeACoffee: "اشترِ لي كوب قهوة",
-    supportDeveloper: "ادعم التطوير المستمر",
-    devStory: "تم تطويره وصيانته مجانًا في وقت الفراغ. كل تقييم ودعم يمثل دافعًا للتحديث المستمر. ",
-    thankYou: "شكراً لدعمك! ❤️",
-    scanOrClick: "امسح أو انقر ↗"
-  },
-  "fa": {
-    buyMeACoffee: "به نویسنده قهوه تعارف کنید",
-    supportDeveloper: "پشتیبانی از توسعه",
-    devStory: "این افزونه در زمان آزاد توسعه یافته و به رایگان نگهداری می‌شود. حمایت شما انگیزه من برای بروزرسانی است. ",
-    thankYou: "از حمایت شما متشکرم! ❤️",
-    scanOrClick: "اسکن یا کلیک ↗"
-  },
-  "tr": {
-    buyMeACoffee: "Bana bir kahve ısmarla",
-    supportDeveloper: "Gelişimi destekleyin",
-    devStory: "Boş zamanlarımda bağımsız olarak geliştirildi ve ücretsiz sunuldu. Her yorum ve destek beni motive ediyor. ",
-    thankYou: "Desteğiniz için teşekkürler! ❤️",
-    scanOrClick: "Tara veya Tıkla ↗"
-  }
-};
+
 self.i18nSyncData = {
   "zh-CN": {
     manualExportImport: "手动导出/导入 (JSON)",
