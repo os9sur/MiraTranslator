@@ -9476,6 +9476,12 @@ function getVideoSourceLang() {
 
 function applyAdaptiveFontSize(box, text) {
   if (!box || !text) return;
+
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768;
+  if (!isMobile) return; // 桌面端保持用户设置的固定字号，不做自动缩放
+
   const len = text.length;
 
   // 用户设定的字号作为上限；没设置过就退回默认值 25/21.25
