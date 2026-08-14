@@ -189,7 +189,6 @@ function applyAppConfig(newConfig) {
   if (!isSelectEnabled) {
     hidePopup();
   }
-  refreshIcon();
   if (location.hostname.includes("youtube.com")) {
     syncSubtitleDisplay();
     ensureYouTubeReadyWatcher();
@@ -9103,18 +9102,22 @@ function mergeToSemantic(data, isAI = false) {
     /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]/;
   const isCJK = cjkRegex.test(data[0]?.text || "");
   const isEnglish = !isCJK;
+  //移动端
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth <= 768;
   const LIMITS = isAI
     ? {
-      MAX_CHARS: 150,
-      MIN_CHARS_PAUSE: 80,
+      MAX_CHARS: isMobile ? 90 : 150,
+      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
       PAUSE_GAP: 1.5,
-      FORCE_CUT: 210,
+      FORCE_CUT: isMobile ? 120 : 210,
     }
     : {
-      MAX_CHARS: 120,
-      MIN_CHARS_PAUSE: 80,
+      MAX_CHARS: isMobile ? 75 : 120,
+      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
       PAUSE_GAP: 1.2,
-      FORCE_CUT: 180,
+      FORCE_CUT: isMobile ? 100 : 180,
     };
   data.forEach((item, index) => {
     const currentRawText = item.text.replace(/\n/g, " ").trim();
@@ -9342,12 +9345,13 @@ if (!document.getElementById("mira-global-style")) {
 
     @media (max-width: 768px), (max-height: 500px) {
         :root {
-            --kt-origin-size: 16px !important;
-            --kt-trans-size: 15px !important;
+            --kt-origin-size: 13px !important;
+            --kt-trans-size: 12px !important;
         }
         #kt-yt-box {
             padding: 6px 12px !important;
-            max-width: 95% !important;
+            max-width: 92% !important;
+            box-sizing: border-box;
             border-radius: 8px;
         }
         #yt-t {
@@ -9469,12 +9473,36 @@ function getVideoSourceLang() {
   const ctx = subtitleEl?.textContent || "";
   return ctx.length > 5 ? detectSourceLang(ctx) : null;
 }
+
+function applyAdaptiveFontSize(box, text) {
+  if (!box || !text) return;
+  const len = text.length;
+
+  // 用户设定的字号作为上限；没设置过就退回默认值 25/21.25
+  const userOriginMax = parseFloat(box.dataset.userOriginSize) || 21.25;
+  const userTransMax = parseFloat(box.dataset.userTransSize) || 25;
+
+  // 缩放比例：句子越长，比例越小（1 = 不缩放，0.6 = 缩到 60%）
+  let ratio;
+  if (len <= 20) ratio = 1;
+  else if (len <= 40) ratio = 0.9;
+  else if (len <= 70) ratio = 0.78;
+  else if (len <= 110) ratio = 0.65;
+  else ratio = 0.55;
+
+  // 缩放后设一个绝对下限，避免字号小到无法阅读
+  const originSize = Math.max(10, Math.round(userOriginMax * ratio));
+  const transSize = Math.max(11, Math.round(userTransMax * ratio));
+
+  box.style.setProperty("--kt-origin-size", `${originSize}px`);
+  box.style.setProperty("--kt-trans-size", `${transSize}px`);
+}
+
 function syncSubtitleDisplay() {
   const video = document.querySelector("video");
   const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   const box = document.getElementById("kt-yt-box");
   const enabled = typeof isYTEnabled === "undefined" ? true : isYTEnabled;
-  refreshIcon();
   const ccOn =
     typeof isYoutubeCaptionOn === "function" ? isYoutubeCaptionOn() : true;
   const shouldShow = enabled && ccOn;
@@ -9560,6 +9588,7 @@ function syncSubtitleDisplay() {
     if (currentIndex !== lastSubIndex) {
       if (typeof closeTooltipAndResume === "function") closeTooltipAndResume();
       lastSubIndex = currentIndex;
+      applyAdaptiveFontSize(box, group.text);
       let cached =
         typeof fastMemoryCache !== "undefined"
           ? fastMemoryCache.get(cacheKey)
@@ -9672,24 +9701,27 @@ async function createSubtitleBox(player) {
 `;
   player.appendChild(box);
 
-  const tempHint = document.createElement("div");
-  tempHint.id = "kt-loading-hint";
-  tempHint.style.cssText = `
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 60px;
-    z-index: 2147483647;
-    color: #cbd5e1;
-    font-size: 17px;
-    padding: 8px 16px;
-    background: rgba(0,0,0,0.6);
-    border-radius: 8px;
-    pointer-events: none;
-`;
-  tempHint.innerText =
-    t("loadingSubtitles", window.uiLanguage) || "Loading subtitles...";
-  player.appendChild(tempHint);
+  const video = document.querySelector("video");
+  if (!video || !video.paused) {
+    const tempHint = document.createElement("div");
+    tempHint.id = "kt-loading-hint";
+    tempHint.style.cssText = `
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 60px;
+      z-index: 2147483647;
+      color: #cbd5e1;
+      font-size: 17px;
+      padding: 8px 16px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 8px;
+      pointer-events: none;
+    `;
+    tempHint.innerText =
+      t("loadingSubtitles", window.uiLanguage) || "Loading subtitles...";
+    player.appendChild(tempHint);
+  }
   try {
     const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings"]);
     if (!data) return;
@@ -9989,6 +10021,9 @@ function applySubtitleSettings(settings) {
     textShadow: settings.textShadow ?? "2px 2px 4px black",
     ...settings,
   };
+
+  box.dataset.userTransSize = baseFontSize;
+  box.dataset.userOriginSize = baseFontSize * 0.85;
 
   box.style.setProperty("--kt-trans-size", `${baseFontSize}px`);
   box.style.setProperty("--kt-trans-color", config.color);

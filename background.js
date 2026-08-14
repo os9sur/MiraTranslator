@@ -3950,7 +3950,27 @@ async function handleIdbSet(items) {
 async function handleIdbRemove(key) {
     const db = await getDB();
     const tx = db.transaction(DB_CONFIG.store, 'readwrite');
-    tx.objectStore(DB_CONFIG.store).delete(key);
+    return new Promise((resolve, reject) => {
+        tx.objectStore(DB_CONFIG.store).delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e.target.error);
+        tx.onabort = (e) => reject(e.target.error);
+    });
+}
+
+async function handleIdbRemoveBatch(keys) {
+    if (!keys || keys.length === 0) return;
+    const db = await getDB();
+    const tx = db.transaction(DB_CONFIG.store, 'readwrite');
+    const store = tx.objectStore(DB_CONFIG.store);
+    return new Promise((resolve, reject) => {
+        for (const key of keys) {
+            store.delete(key);
+        }
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e.target.error);
+        tx.onabort = (e) => reject(e.target.error);
+    });
 }
 async function handleIdbGetAll(prefix) {
     const db = await getDB();
@@ -4047,73 +4067,79 @@ function drawText(ctx, text, x, y, color) {
 
 //自动清理缓存
 async function cleanExpiredCache() {
-    logger.log('[Cache] cleanExpiredCache 开始执行');
+    try {
+        logger.log('[Cache] cleanExpiredCache 开始执行');
 
-    const lastClean = await handleIdbGet(['_cacheCleanTs']);
-    const lastTs = lastClean?.['_cacheCleanTs'] || 0;
-    if (Date.now() - lastTs < CLEAN_INTERVAL) return;
+        const lastClean = await handleIdbGet(['_cacheCleanTs']);
+        const lastTs = lastClean?.['_cacheCleanTs'] || 0;
+        if (Date.now() - lastTs < CLEAN_INTERVAL) return;
 
-    const all = await handleIdbGetAll('tr_');
-    const now = Date.now();
-    let entries = Object.entries(all || {});
+        const all = await handleIdbGetAll('tr_');
+        const now = Date.now();
+        let entries = Object.entries(all || {});
 
-    // 0. 缺时间戳的条目先补写为当前时间，避免被误判为"最旧"而优先淘汰
-    const patch = {};
-    entries = entries.map(([k, v]) => {
-        const ts = v?.ts || v?.timestamp || 0;
-        if (!ts) {
-            const patched = { ...v, ts: now };
-            patch[k] = patched;
-            return [k, patched];
-        }
-        return [k, v];
-    });
-    if (Object.keys(patch).length > 0) {
-        await handleIdbSet(patch);
-        logger.log('[Cache] 补写时间戳条数:', Object.keys(patch).length);
-    }
-
-    // 1. 清理真正的僵尸数据：远超180天且从未再被访问过的
-    const orphaned = entries
-        .filter(([, v]) => {
+        // 0. 缺时间戳的条目先补写为当前时间，避免被误判为"最旧"而优先淘汰
+        const patch = {};
+        entries = entries.map(([k, v]) => {
             const ts = v?.ts || v?.timestamp || 0;
-            return ts && (now - ts) > CACHE_POLICY.orphanSafetyNetMs;
-        })
-        .map(([k]) => k);
-    for (const k of orphaned) await handleIdbRemove(k);
-    logger.log('[Cache] 兜底过期清理条数:', orphaned.length);
-
-    // 2. 按 AI / 免费引擎 分桶（别名指针体积如实统计 ）
-    const remaining = entries.filter(([k]) => !orphaned.includes(k));
-    const aiKeys = new Set(AI_LLM_WHITE_LIST);
-    const buckets = { ai: [], free: [] };
-
-    for (const [k, v] of remaining) {
-        const engine = k.split('_')[1];
-        const bucket = aiKeys.has(engine) ? 'ai' : 'free';
-        buckets[bucket].push({
-            key: k,
-            ts: v?.ts || v?.timestamp || 0,
-            size: JSON.stringify(v).length,
+            if (!ts) {
+                const patched = { ...v, ts: now };
+                patch[k] = patched;
+                return [k, patched];
+            }
+            return [k, v];
         });
-    }
-
-    // 3. 分别按各自配额做 LRU 淘汰
-    for (const bucket of ['ai', 'free']) {
-        const list = buckets[bucket].sort((a, b) => a.ts - b.ts);
-        let total = list.reduce((s, r) => s + r.size, 0);
-        const quota = CACHE_POLICY[bucket].quotaBytes;
-        let i = 0;
-        while (total > quota && i < list.length) {
-            await handleIdbRemove(list[i].key);
-            total -= list[i].size;
-            i++;
+        if (Object.keys(patch).length > 0) {
+            await handleIdbSet(patch);
+            logger.log('[Cache] 补写时间戳条数:', Object.keys(patch).length);
         }
-        logger.log(`[Cache] ${bucket} 桶因超配额淘汰条数:`, i);
-    }
 
-    await handleIdbSet({ '_cacheCleanTs': Date.now() });
-    logger.log('[Cache] 清理完成');
+        // 1. 清理真正的僵尸数据：远超180天且从未再被访问过的
+        const orphaned = entries
+            .filter(([, v]) => {
+                const ts = v?.ts || v?.timestamp || 0;
+                return ts && (now - ts) > CACHE_POLICY.orphanSafetyNetMs;
+            })
+            .map(([k]) => k);
+        await handleIdbRemoveBatch(orphaned);
+        logger.log('[Cache] 兜底过期清理条数:', orphaned.length);
+
+        // 2. 按 AI / 免费引擎 分桶（别名指针体积如实统计 ）
+        const remaining = entries.filter(([k]) => !orphaned.includes(k));
+        const aiKeys = new Set(AI_LLM_WHITE_LIST);
+        const buckets = { ai: [], free: [] };
+
+        for (const [k, v] of remaining) {
+            const engine = k.split('_')[1];
+            const bucket = aiKeys.has(engine) ? 'ai' : 'free';
+            buckets[bucket].push({
+                key: k,
+                ts: v?.ts || v?.timestamp || 0,
+                size: JSON.stringify(v).length,
+            });
+        }
+
+        // 3. 分别按各自配额做 LRU 淘汰
+        for (const bucket of ['ai', 'free']) {
+            const list = buckets[bucket].sort((a, b) => a.ts - b.ts);
+            let total = list.reduce((s, r) => s + r.size, 0);
+            const quota = CACHE_POLICY[bucket].quotaBytes;
+            const toRemove = [];
+            let i = 0;
+            while (total > quota && i < list.length) {
+                toRemove.push(list[i].key);
+                total -= list[i].size;
+                i++;
+            }
+            await handleIdbRemoveBatch(toRemove);
+            logger.log(`[Cache] ${bucket} 桶因超配额淘汰条数:`, toRemove.length);
+        }
+
+        await handleIdbSet({ '_cacheCleanTs': Date.now() });
+        logger.log('[Cache] 清理完成');
+    } catch (err) {
+        logger.warn('[Cache] 清理失败:', err);
+    }
 }
 //清理假删除数据
 async function cleanupDeletedVocab() {
@@ -4150,7 +4176,7 @@ async function cleanupDeletedVocab() {
 // 定时检测默认翻译引擎并缓存结果，减少后续请求延迟
 async function ensureAlarm(name, periodInMinutes) {
     const existing = await chrome.alarms.get(name);
-    if (!existing) {
+    if (!existing || existing.periodInMinutes !== periodInMinutes) {
         chrome.alarms.create(name, { periodInMinutes });
     }
 }
@@ -4164,17 +4190,17 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     }
 });
 
-chrome.runtime.onStartup.addListener(() => {
+chrome.runtime.onStartup.addListener(async () => {
     detectAndCacheDefaultEngine(false);
-    ensureAlarm('cleanCache', 60 * 24);
-    ensureAlarm('cleanVocab', 60 * 24 * 3);
+    await ensureAlarm('cleanCache', 60 * 24);
+    await ensureAlarm('cleanVocab', 60 * 24 * 3);
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'cleanCache') {
-        cleanExpiredCache();
+        cleanExpiredCache().catch(err => logger.warn('[Alarm] cleanCache 失败:', err));
     } else if (alarm.name === 'cleanVocab') {
-        cleanupDeletedVocab();
+        cleanupDeletedVocab().catch(err => logger.warn('[Alarm] cleanVocab 失败:', err));
     }
 });
 
