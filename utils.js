@@ -306,7 +306,7 @@ const showNotice = false;
 let globalDefault_Page = !showNotice;
 let globalDefault_Select = !showNotice;
 let globalDefault_YT = !showNotice;
-let enable_pro_features = false;
+let enable_pro_features = false; //是否显示pro模型列表
 
 let cachedSiteSettings = {};
 let cachedGlobalConfig = { page: globalDefault_Page, select: globalDefault_Select, yt: globalDefault_YT };

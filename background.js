@@ -3289,6 +3289,7 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
 let _runtimeEngine = null;
 let _runtimeEngineFallbackTs = 0;
 const FALLBACK_RESET_MS = 5 * 60 * 1000; // 5分钟后重置
+const ENGINE_FAIL_THRESHOLD = 3; // 连续失败次数超过阈值
 async function processTranslate(req, tabId = null, cacheKey = null) {
     try {
         let engine;
@@ -3498,7 +3499,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
             rawResult = workerRes.text || '';
         }
         // ── Mira Pro 结束 ──────────────────────────────────────────
-        let actualEngine = effectiveEngine; // ← 新增
+        let actualEngine = effectiveEngine;  
 
         if (effectiveEngine === 'bing') {
             try {
@@ -3507,17 +3508,21 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
+                    _bingFailStreak = 0;
                     safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Bing 失败，降级 Google:', e.message);
-                actualEngine = 'google'; // ← 新增
+                actualEngine = 'google';  
                 if (!req.isTest) {
                     _runtimeEngine = 'google';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
-                    safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
+                    _bingFailStreak++;
+                    if (_bingFailStreak >= ENGINE_FAIL_THRESHOLD) {
+                        safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
+                    }
                 } else {
                     throw e;
                 }
@@ -3531,21 +3536,25 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                     _runtimeEngine = null;
                     _dictEngineCache = 'google';
                     _dictEngineCacheTs = Date.now();
+                    _googleFailStreak = 0;
                     safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
                 }
             } catch (e) {
                 logger.warn('[主翻译] Google 失败，降级 Bing:', e.message);
-                actualEngine = 'bing'; // ← 新增
+                actualEngine = 'bing';  
                 if (!req.isTest) {
                     _runtimeEngine = 'bing';
                     _runtimeEngineFallbackTs = Date.now();
                     _dictEngineCache = 'bing';
                     _dictEngineCacheTs = Date.now();
-                    safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
+                    _googleFailStreak++;
+                    if (_googleFailStreak >= ENGINE_FAIL_THRESHOLD) {
+                        safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
+                    }
                 } else {
                     throw e;
                 }
-                rawResult = await Translators.bing(req.text, req.targetLang, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
+                rawResult = await Translators.google(req.text, req.targetLang, false, req.hintSourceLang, tabId, cacheKey, req.fromPopup).catch(() => null);
             }
         }
         else if (Translators[engine]) {
