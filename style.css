@@ -1318,7 +1318,9 @@ select:hover {
 }
 
 @keyframes advancedBtnPulseStrong {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       inset 0 -1px 3px rgba(0, 0, 0, 0.3),
@@ -1327,6 +1329,7 @@ select:hover {
       0 0 16px 4px rgba(56, 189, 248, 0.25);
     border-color: rgba(56, 189, 248, 0.6);
   }
+
   50% {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -1337,13 +1340,17 @@ select:hover {
     border-color: rgba(125, 220, 255, 1);
   }
 }
- @keyframes menuItemPulseStrong {
-  0%, 100% {
+
+@keyframes menuItemPulseStrong {
+
+  0%,
+  100% {
     box-shadow:
       inset 0 0 0 1px rgba(56, 189, 248, 0.35),
       0 0 6px 1px rgba(56, 189, 248, 0.3);
     background: rgba(56, 189, 248, 0.06);
   }
+
   50% {
     box-shadow:
       inset 0 0 0 1px rgba(56, 189, 248, 0.85),
@@ -1358,7 +1365,9 @@ select:hover {
 }
 
 @keyframes advancedBtnPulseSoft {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
       inset 0 -1px 3px rgba(0, 0, 0, 0.3),
@@ -1367,6 +1376,7 @@ select:hover {
       0 0 8px 1px rgba(56, 189, 248, 0.1);
     border-color: rgba(56, 189, 248, 0.4);
   }
+
   50% {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.1),
@@ -1377,7 +1387,7 @@ select:hover {
     border-color: rgba(56, 189, 248, 0.55);
   }
 }
- 
+
 #advancedSettingsBtn.icon-action-btn.engine-pulse-strong {
   animation: advancedBtnPulseStrong 1.8s ease-in-out infinite;
 }
@@ -1385,6 +1395,7 @@ select:hover {
 #advancedSettingsBtn.icon-action-btn.engine-pulse-soft {
   animation: advancedBtnPulseSoft 4s ease-in-out infinite;
 }
+
 /* 弱发光：用户已经点过，降级为不打扰的常态提示 */
 .engine-pulse-soft {
   animation: enginePulseSoft 4s ease-in-out infinite;
@@ -1539,10 +1550,13 @@ select:hover {
   color: #f1f5f9;
   padding: 8px 16px;
   border-radius: 12px;
-  border: 1px solid #475569;
+  border: 1.5px solid var(--toast-glow-color, #475569);
   font-size: 12px;
   z-index: 10000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 10px 2px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 45%, transparent),
+    0 0 22px 5px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 22%, transparent),
+    0 10px 25px rgba(0, 0, 0, 0.5);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   pointer-events: none;
   white-space: normal;

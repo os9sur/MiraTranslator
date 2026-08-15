@@ -3012,82 +3012,114 @@ self.i18nAttach5 = {
   "zh-CN": {
     dlOriginal: "下载原文字幕",
     dlBilingual: "下载双语字幕（含翻译）",
-    bilingual: "双语"
+    bilingual: "双语",
+    shortcutCopied: "已复制 about:addons，请粘贴到地址栏打开，右上角齿轮图标里可设置快捷键",
+    shortcutManual: "请在地址栏输入 about:addons 打开，右上角齿轮图标里可设置快捷键"
   },
   "zh-TW": {
     dlOriginal: "下載原文字幕",
     dlBilingual: "下載雙語字幕（含翻譯）",
-    bilingual: "雙語"
+    bilingual: "雙語",
+    shortcutCopied: "已複製 about:addons，請貼到網址列開啟，右上角齒輪圖示可設定快捷鍵",
+    shortcutManual: "請在網址列輸入 about:addons 開啟，右上角齒輪圖示可設定快捷鍵"
   },
   "en": {
     dlOriginal: "Download Original Subtitles",
     dlBilingual: "Download Bilingual (with Translation)",
-    bilingual: "Bilingual"
+    bilingual: "Bilingual",
+    shortcutCopied: "Copied \"about:addons\" — paste it into the address bar, then set your shortcut via the gear icon in the top right",
+    shortcutManual: "Type \"about:addons\" into the address bar, then set your shortcut via the gear icon in the top right"
   },
   "ja": {
     dlOriginal: "原文字幕をダウンロード",
     dlBilingual: "2ヶ国語字幕をダウンロード（翻訳あり）",
-    bilingual: "2ヶ国語"
+    bilingual: "2ヶ国語",
+    shortcutCopied: "「about:addons」をコピーしました。アドレスバーに貼り付けて開き、右上の歯車アイコンからショートカットを設定してください",
+    shortcutManual: "アドレスバーに「about:addons」と入力して開き、右上の歯車アイコンからショートカットを設定してください"
   },
   "ko": {
     dlOriginal: "원본 자막 다운로드",
     dlBilingual: "이중 언어 자막 다운로드 (번역 포함)",
-    bilingual: "이중 언어"
+    bilingual: "이중 언어",
+    shortcutCopied: "\"about:addons\"가 복사되었습니다. 주소창에 붙여넣어 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
+    shortcutManual: "주소창에 \"about:addons\"를 입력하여 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요"
   },
   "es": {
     dlOriginal: "Descargar subtítulos originales",
     dlBilingual: "Descargar bilingües (con traducción)",
-    bilingual: "Bilingüe"
+    bilingual: "Bilingüe",
+    shortcutCopied: "Se copió \"about:addons\": pégalo en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
+    shortcutManual: "Escribe \"about:addons\" en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha"
   },
   "fr": {
     dlOriginal: "Télécharger les sous-titres originaux",
     dlBilingual: "Télécharger bilingue (avec traduction)",
-    bilingual: "Bilingue"
+    bilingual: "Bilingue",
+    shortcutCopied: "« about:addons » copié : collez-le dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
+    shortcutManual: "Saisissez « about:addons » dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite"
   },
   "de": {
     dlOriginal: "Original-Untertitel herunterladen",
     dlBilingual: "Bilingual herunterladen (mit Übersetzung)",
-    bilingual: "Bilingual"
+    bilingual: "Bilingual",
+    shortcutCopied: "„about:addons“ kopiert – in die Adressleiste einfügen und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
+    shortcutManual: "„about:addons“ in die Adressleiste eingeben und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen"
   },
   "ru": {
     dlOriginal: "Скачать оригинальные субтитры",
     dlBilingual: "Скачать двуязычные (с переводом)",
-    bilingual: "Двуязычный"
+    bilingual: "Двуязычный",
+    shortcutCopied: "Скопировано «about:addons» — вставьте в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
+    shortcutManual: "Введите «about:addons» в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу"
   },
   "pt": {
     dlOriginal: "Baixar legendas originais",
     dlBilingual: "Baixar bilíngue (com tradução)",
-    bilingual: "Bilíngue"
+    bilingual: "Bilíngue",
+    shortcutCopied: "\"about:addons\" copiado: cole na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
+    shortcutManual: "Digite \"about:addons\" na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito"
   },
   "it": {
     dlOriginal: "Scarica sottotitoli originali",
     dlBilingual: "Scarica bilingue (con traduzione)",
-    bilingual: "Bilingue"
+    bilingual: "Bilingue",
+    shortcutCopied: "\"about:addons\" copiato: incollalo nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
+    shortcutManual: "Digita \"about:addons\" nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra"
   },
   "vi": {
     dlOriginal: "Tải phụ đề gốc",
     dlBilingual: "Tải phụ đề song ngữ (có bản dịch)",
-    bilingual: "Song ngữ"
+    bilingual: "Song ngữ",
+    shortcutCopied: "Đã sao chép \"about:addons\", hãy dán vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
+    shortcutManual: "Nhập \"about:addons\" vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải"
   },
   "th": {
     dlOriginal: "ดาวน์โหลดคำบรรยายต้นฉบับ",
     dlBilingual: "ดาวน์โหลดสองภาษา (พร้อมคำแปล)",
-    bilingual: "สองภาษา"
+    bilingual: "สองภาษา",
+    shortcutCopied: "คัดลอก \"about:addons\" แล้ว วางในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
+    shortcutManual: "พิมพ์ \"about:addons\" ในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน"
   },
   "ar": {
     dlOriginal: "تحميل الترجمة الأصلية",
     dlBilingual: "تحميل ثنائية اللغة (مع الترجمة)",
-    bilingual: "ثنائية اللغة"
+    bilingual: "ثنائية اللغة",
+    shortcutCopied: "تم نسخ \"about:addons\"، الصق الرابط في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
+    shortcutManual: "اكتب \"about:addons\" في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة"
   },
   "fa": {
     dlOriginal: "دانلود زیرنویس اصلی",
     dlBilingual: "دانلود دو زبانه (همراه با ترجمه)",
-    bilingual: "دو زبانه"
+    bilingual: "دو زبانه",
+    shortcutCopied: "«about:addons» کپی شد؛ آن را در نوار آدرس جای‌گذاری و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
+    shortcutManual: "«about:addons» را در نوار آدرس تایپ و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید"
   },
   "tr": {
     dlOriginal: "Orijinal altyazıları indir",
     dlBilingual: "İki dilli indir (çeviri dahil)",
-    bilingual: "İki dilli"
+    bilingual: "İki dilli",
+    shortcutCopied: "\"about:addons\" kopyalandı; adres çubuğuna yapıştırıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
+    shortcutManual: "Adres çubuğuna \"about:addons\" yazıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın"
   }
 };
 

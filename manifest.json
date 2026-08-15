@@ -101,8 +101,8 @@
     },
     "translate-hover-word": {
       "suggested_key": {
-        "default": "Alt+S",
-        "mac": "Alt+S"
+        "default": "Alt+Q",
+        "mac": "Alt+Q"
       },
       "description": "__MSG_SHORT_CUT_TRANSLATE_WORD__"
     }

@@ -639,7 +639,7 @@ function standardizeResult(raw, originalText) {
   return schema;
 }
 let toastTimer = null;
-function showToast(message, type = 'info') {
+function showToast(message, type = 'info', duration = 5000) {
   let toast = null;
   if (window.shadowHost?.shadowRoot) {
     toast = window.shadowHost.shadowRoot.getElementById('toast');
@@ -655,7 +655,7 @@ function showToast(message, type = 'info') {
   toast.classList.remove('toast-hidden');
   toastTimer = setTimeout(() => {
     toast.classList.add('toast-hidden');
-  }, 3000);
+  }, duration);
 }
 function simpleHash(str) {
   let hash = 0;
