@@ -488,8 +488,8 @@
             <span id="avatarInitial"></span>
           </button>
 
-          <div id="advancedSettingsBtn" class="icon-action-btn" style="border-width: 1.3px !important;"
-            data-i18n="moreSettings" data-i18n-title title="Advanced settings">
+          <div id="advancedSettingsBtn" class="icon-action-btn engine-pulse-strong" style="border-width: 1.3px !important;"
+  data-i18n="moreSettings" data-i18n-title title="Advanced settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -505,13 +505,18 @@
       <div
         style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 9px;">
 
-        <div id="openSettings" class="engine-pulse-strong" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; 
+        <div id="openSettings" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.85)); 
   border: 1.05px solid rgba(56, 189, 248, 0.5); 
   cursor: pointer; color: rgb(56, 189, 248); padding: 0 8px; min-width: 0; position: relative;">
           <span id="currentEngineName"
-            style="color: #38bdf8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; line-height: 1.4; padding-bottom: 1px;">Bing
+            style="color: #38bdf8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; line-height: 1.4; padding-bottom: 1px;">Google
             Translate</span>
+          <svg id="p-engine-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width="3"
+  style="opacity: 0.75; flex-shrink: 0; margin-left: 5px; pointer-events: none; vertical-align: middle;">
+  <path d="M6 9l6 6 6-6" />
+</svg>
           <!-- 实际红点由 showEngineWarning() 动态插入的 .engine-warning 负责 -->
         </div>
 

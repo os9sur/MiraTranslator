@@ -1386,7 +1386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     langEl.value = value;
     if (!langEl.value) langEl.value = 'en';
   }
- 
+
   const gearBtn = document.getElementById('advancedSettingsBtn');
   const advMenu = document.getElementById('advancedMenu');
   const stylePanel = document.getElementById('styleSettingsPanel');
@@ -1578,12 +1578,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
-  gearBtn.addEventListener('click', (e) => {
+
+  gearBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
     loginModal.style.display = 'none';
     profilePanel.style.display = 'none';
+    document.getElementById('p-engine-dropdown-popup')?.remove();
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
+
+    const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
+    const isFirstTime = !hasVisitedSettings;
+
+    if (isFirstTime) {
+      await safeSetStorage({ hasVisitedSettings: true });
+      gearBtn.classList.remove('engine-pulse-strong');
+      gearBtn.classList.add('engine-pulse-soft');
+    }
+
+    const engineMenuItem = document.getElementById('btnGoEngine');
+    if (!isVisible && isFirstTime) {
+      engineMenuItem.classList.add('menu-item-pulse-strong');
+    }
   });
   // 切换UI语言
   const uiSelect = document.getElementById('uiLangSelect');
@@ -3057,31 +3073,355 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('openNotebookSecondary').onclick = openNotebook;
 
   const openSettings = async () => {
-    // 首次点击  降级发光状态，避免每次点击都读写 storage
-    const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
-    if (!hasVisitedSettings) {
-      await safeSetStorage({ hasVisitedSettings: true });
-      const btn = document.getElementById('openSettings');
-      btn.classList.remove('engine-pulse-strong');
-      btn.classList.add('engine-pulse-soft');
-    }
+    document.getElementById('btnGoEngine').classList.remove('menu-item-pulse-strong');
     await safeCreateTab("engineSettings.html");
     window.close();
   };
-  document.getElementById('openSettings').onclick = openSettings;
   document.getElementById('btnGoEngine').onclick = openSettings;
 
-  // 初始化发光状态：根据是否点过来决定强/弱
+  document.getElementById('openSettings').onclick = async (e) => {
+    e.stopPropagation();
+    advMenu.style.display = 'none';
+    togglePopupEngineDropdown();
+  };
+
   const initEngineButtonState = async () => {
-    const btn = document.getElementById('openSettings');
+    const btn = document.getElementById('advancedSettingsBtn');
     const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
     btn.classList.remove('engine-pulse-strong', 'engine-pulse-soft');
     btn.classList.add(hasVisitedSettings ? 'engine-pulse-soft' : 'engine-pulse-strong');
   };
 
+  // 初始化弹窗的引擎选择器
+  async function initPopupEngineSelector() {
+    const data = await safeGetStorage([
+      "userConfigs",
+      "activeConfig",
+      "data_mira_pro",
+      "selectedEngine",
+      "_defaultEngine",
+    ]);
+    if (!data) return;
+
+    const builtInEngines = [
+      { id: "mira_pro", engine: "mira_pro", alias: "✦ Mira AI Translator" },
+      { id: "google_builtin", engine: "google", alias: "Google" },
+      { id: "bing_builtin", engine: "bing", alias: "Bing" },
+    ];
+    const storedConfigs = data.userConfigs || [];
+    const customConfigs = storedConfigs.filter(
+      (c) => !["mira_pro", "google_builtin", "bing_builtin"].includes(c.id)
+    );
+    window._popupUserConfigs = [...builtInEngines, ...customConfigs];
+
+    let currentId =
+      data.activeConfig?.id ||
+      window._popupUserConfigs.find((c) => c.engine === data.selectedEngine)?.id ||
+      window._popupUserConfigs.find((c) => c.engine === data._defaultEngine)?.id ||
+      "google_builtin";
+    const currentModel = data.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
+
+    // Pro 功能未开放时，若历史数据残留 mira_pro，兜底为 google
+    if (currentId === "mira_pro" && !enable_pro_features) {
+      currentId = "google_builtin";
+    }
+
+    window._popupCurrentEngineId = currentId;
+    window._popupCurrentModel = currentModel;
+
+    updatePopupEngineLabel();
+  }
+
+  function getShortAliasPopup(cfg, modelId) {
+    if (cfg.engine === "mira_pro") {
+      const m = MIRA_FALLBACK_MODELS.find((m) => m.id === modelId);
+      return m ? m.label : "Mira";
+    }
+    return (cfg.alias || cfg.engine).slice(0, 10);
+  }
+
+  function updatePopupEngineLabel() {
+    const labelEl = document.getElementById('currentEngineName');
+    const cfg = (window._popupUserConfigs || []).find(
+      (c) => c.id === window._popupCurrentEngineId
+    ) || window._popupUserConfigs?.[0];
+    if (labelEl && cfg) {
+      labelEl.textContent = getShortAliasPopup(cfg, window._popupCurrentModel);
+    }
+  }
+
+  function togglePopupEngineDropdown() {
+    const existing = document.getElementById('p-engine-dropdown-popup');
+    if (existing) {
+      existing.remove();
+      return;
+    }
+    createPopupEngineDropdown();
+  }
+
+  function createPopupEngineDropdown() {
+    const anchorEl = document.getElementById('openSettings');
+    const userConfigs = window._popupUserConfigs || [];
+    const currentId = window._popupCurrentEngineId;
+    const currentModel = window._popupCurrentModel;
+
+    const colors = {
+      bg: "rgba(18,18,18,0.85)",
+      border: "rgba(255,255,255,0.27)",
+      shadow: "0 8px 24px rgba(0,0,0,0.6)",
+      text: "#ffffffb7",
+      textMuted: "rgba(255,255,255,0.50)",
+      hoverBg: "rgba(56,189,248,0.15)",
+      accent: "#38bdf8",
+      activeBg: "rgba(56,189,248,0.15)",
+    };
+
+    const dropdown = document.createElement('div');
+    const anchorMinWidth = anchorEl.offsetWidth;
+    const maxAllowedWidth = 260;
+
+    dropdown.id = 'p-engine-dropdown-popup';
+    //  先不定位、不限宽，只做隐身测量容器，让内容自然撑开
+    dropdown.style.cssText = `
+    position:fixed; z-index:9999; visibility:hidden;
+    background:${colors.bg}; border:1px solid ${colors.border};
+    border-radius:10px; box-shadow:${colors.shadow};
+    padding:4px; font-size:12px; line-height:1.5; color:${colors.text};
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    top:0; left:0;
+    width:max-content;
+    max-width:${maxAllowedWidth}px;
+  `;
+
+    let activeItemEl = null; // 用于记录当前选中项，稍后滚动定位到它
+
+    userConfigs.forEach((cfg) => {
+      const isMira = cfg.engine === 'mira_pro';
+      const isEngineActive = cfg.id === currentId;
+
+      if (isMira) {
+        if (!enable_pro_features) return; // Pro 功能未启用，整个 Mira 分组不渲染
+
+        const header = document.createElement('div');
+        header.style.cssText = `
+        display:flex; align-items:center; gap:6px;
+        padding:6px 10px; font-size:12px; font-weight:600;
+        color:${colors.textMuted}; user-select:none;
+      `;
+        header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator`;
+        dropdown.appendChild(header);
+
+        MIRA_FALLBACK_MODELS.forEach((m) => {
+          const isActive = isEngineActive && currentModel === m.id;
+          const item = document.createElement('div');
+          item.style.cssText = `
+          display:flex; align-items:center; gap:8px;
+          padding:5px 10px 5px 24px; border-radius:7px; cursor:pointer;
+          color:${isActive ? colors.accent : colors.text};
+          background:${isActive ? colors.activeBg : 'transparent'};
+          transition:background 0.15s;
+        `;
+          item.innerHTML = `
+          <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.label}</span>
+          <span style="font-size:9px; padding:1px 5px; border-radius:8px; flex-shrink:0;
+            background:${m.tagColor}22; color:${m.tagColor};">${m.tag}</span>
+        `;
+          item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
+          item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
+          item.onclick = (ev) => {
+            ev.stopPropagation();
+            dropdown.remove();
+            switchPopupEngine(cfg, m.id);
+          };
+          dropdown.appendChild(item);
+        });
+      } else {
+        const isActive = isEngineActive;
+        const item = document.createElement('div');
+        item.style.cssText = `
+        display:flex; align-items:center; gap:8px;
+        padding:6px 10px; border-radius:7px; cursor:pointer;
+        color:${isActive ? colors.accent : colors.text};
+        background:${isActive ? colors.activeBg : 'transparent'};
+        font-weight:${isActive ? '600' : '400'};
+        transition:background 0.15s;
+      `;
+        item.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cfg.alias}</span>`;
+        item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
+        item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
+        item.onclick = (ev) => {
+          ev.stopPropagation();
+          dropdown.remove();
+          switchPopupEngine(cfg, null);
+        };
+        if (isActive) activeItemEl = item;
+        dropdown.appendChild(item);
+      }
+    });
+
+    // 分隔线
+    const divider = document.createElement('div');
+    divider.style.cssText = `
+      height:1px; background:${colors.border}; margin:4px 6px;
+    `;
+    dropdown.appendChild(divider);
+
+    // 特殊选项：跳转到完整引擎设置页
+    const manageItem = document.createElement('div');
+    manageItem.style.cssText = `
+      display:flex; align-items:center; gap:8px;
+      padding:6px 10px; border-radius:7px; cursor:pointer;
+      color:${colors.accent}; font-weight:600;
+      transition:background 0.15s;
+    `;
+    manageItem.innerHTML = `
+      <span style="
+        flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        width:20px; height:16px; border-radius:5px;
+        background: linear-gradient(135deg, rgba(56,189,248,0.35), rgba(56,189,248,0.12));
+        border: 1px solid rgba(56,189,248,0.6);
+        font-size:9px; font-weight:800; letter-spacing:0.3px;
+        color:#7dd3fc;
+        box-shadow: 0 0 6px 1px rgba(56,189,248,0.6);
+        filter: drop-shadow(0 0 3px rgba(56,189,248,0.6));
+      ">AI</span>
+      <span data-i18n="engineSettingsShort" style="
+      flex:1;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:2;
+      white-space:normal;
+      line-height:16px;
+    ">${t('translationEngine', globalUiLang)}</span>
+        `;
+
+    manageItem.onmouseenter = () => { manageItem.style.background = colors.hoverBg; };
+    manageItem.onmouseleave = () => { manageItem.style.background = 'transparent'; };
+    manageItem.onclick = (ev) => {
+      ev.stopPropagation();
+      dropdown.remove();
+      openSettings();
+    };
+    dropdown.appendChild(manageItem);
+
+    document.body.appendChild(dropdown);
+
+    // 彻底绕开 -webkit-box/line-clamp 的测量干扰：
+    // 用一个完全独立的、脱离文档流的临时元素来测文字真实单行宽度，
+    // 不依赖 manageSpan 当前的 display/whiteSpace 状态如何切换
+    const manageSpan = manageItem.querySelector('span[data-i18n="engineSettingsShort"]');
+    const measureEl = document.createElement('span');
+    measureEl.style.cssText = `
+  position:absolute; visibility:hidden; white-space:nowrap;
+  font-size:12px; line-height:16px; font-weight:600;
+`;
+    measureEl.textContent = manageSpan.textContent;
+    document.body.appendChild(measureEl);
+    const manageTextWidth = measureEl.scrollWidth;
+    measureEl.remove();
+
+    const iconWidth = 20 + 8; // AI 图标宽度 + gap
+    const managePadding = 20; // manageItem 左右 padding (10px * 2)
+    const safetyBuffer = 16; // 测量与实际渲染的误差余量，避免临界换行
+    const manageItemNeededWidth = manageTextWidth + iconWidth + managePadding + safetyBuffer;
+
+    const naturalWidth = Math.max(dropdown.scrollWidth, manageItemNeededWidth);
+    const dropW = Math.min(Math.max(naturalWidth, anchorMinWidth), maxAllowedWidth);
+    //alert(`manageTextWidth: ${manageTextWidth}\ndropdown.scrollWidth: ${dropdown.scrollWidth}\nmanageItemNeededWidth: ${manageItemNeededWidth}\nanchorMinWidth: ${anchorMinWidth}\nnaturalWidth: ${naturalWidth}\ndropW: ${dropW}`);
+    //  拿到最终宽度后，再计算屏幕定位
+    const btnRect = anchorEl.getBoundingClientRect();
+    const gap = 6;
+    const safeMargin = 8;
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+    const maxDropH = 280;
+
+    let left = btnRect.left;
+    if (left + dropW > vw - safeMargin) left = vw - dropW - safeMargin;
+    if (left < safeMargin) left = safeMargin;
+
+    const spaceBelow = vh - btnRect.bottom - gap - safeMargin;
+    const spaceAbove = btnRect.top - gap - safeMargin;
+    let top, maxHeight;
+    if (spaceBelow >= Math.min(maxDropH, 120)) {
+      top = btnRect.bottom + gap;
+      maxHeight = Math.min(maxDropH, spaceBelow);
+    } else if (spaceAbove > spaceBelow) {
+      maxHeight = Math.min(maxDropH, spaceAbove);
+      top = btnRect.top - gap - maxHeight;
+    } else {
+      top = btnRect.bottom + gap;
+      maxHeight = Math.min(maxDropH, spaceBelow);
+    }
+    top = Math.max(safeMargin, Math.min(top, vh - maxHeight - safeMargin));
+
+    //  应用最终宽度、位置，并取消隐身
+    dropdown.style.width = `${dropW}px`;
+    dropdown.style.maxWidth = '';
+    dropdown.style.maxHeight = `${maxHeight}px`;
+    dropdown.style.overflowY = 'auto';
+    dropdown.style.top = `${top}px`;
+    dropdown.style.left = `${left}px`;
+    dropdown.style.visibility = 'visible';
+
+    // 挂载后滚动到当前选中项，让用户一打开就能看到已选的引擎
+    if (activeItemEl) {
+      const itemTop = activeItemEl.offsetTop;
+      const itemHeight = activeItemEl.offsetHeight;
+      const dropdownHeight = dropdown.clientHeight;
+      // 让选中项尽量居中显示
+      const targetScroll = itemTop - dropdownHeight / 2 + itemHeight / 2;
+      dropdown.scrollTop = Math.max(0, targetScroll);
+    }
+
+    const closeDropdown = (ev) => {
+      if (!dropdown.contains(ev.target) && !anchorEl.contains(ev.target)) {
+        dropdown.remove();
+        document.removeEventListener('click', closeDropdown, true);
+      }
+    };
+    setTimeout(() => {
+      document.addEventListener('click', closeDropdown, true);
+    }, 0);
+  }
+
+  async function switchPopupEngine(cfg, model) {
+    const instanceData =
+      (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
+
+    let finalInstanceData = instanceData;
+    if (cfg.engine === 'mira_pro' && model) {
+      finalInstanceData = { ...instanceData, model };
+    }
+
+    const activeConfig = {
+      id: cfg.id,
+      engine: cfg.engine,
+      data: finalInstanceData,
+    };
+
+    await safeSetStorage({
+      activeConfig,
+      lastActiveId: cfg.id,
+      selectedEngine: cfg.engine,
+      ...(cfg.engine === 'mira_pro' && model
+        ? { data_mira_pro: finalInstanceData }
+        : {}),
+    });
+
+    window._popupCurrentEngineId = cfg.id;
+    if (model) window._popupCurrentModel = model;
+    updatePopupEngineLabel();
+
+  }
   initUILanguage();
   refreshUI();
   initEngineButtonState();
+  initPopupEngineSelector();//  加载引擎列表并显示当前引擎名
 
   // 检测当前引擎是否可用
   async function checkEngineStatus() {
@@ -3137,7 +3477,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showEngineWarning(settingsBtn) {
     if (settingsBtn.querySelector('.engine-warning')) return;
 
-    settingsBtn.title = 'Engine may not be working, click to check settings';
+    settingsBtn.title = 'Engine may not be working';
 
     const warning = document.createElement('span');
     warning.className = 'engine-warning';
@@ -3159,7 +3499,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         line-height: 1;
         cursor: pointer;
     `;
+    warning.title = 'Click to open engine settings';
     warning.textContent = '!';
+    warning.onclick = async (e) => {
+      e.stopPropagation(); // 防止触发 openSettings 上的下拉框逻辑
+      await safeCreateTab("engineSettings.html");
+      window.close();
+    };
     settingsBtn.appendChild(warning);
   }
 

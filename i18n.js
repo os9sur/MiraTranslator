@@ -1638,7 +1638,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ 已在生词本，双击取消",
     hintAddAction: "双击收藏到生词本",
     dictMode: "词典模式",
-    contextMode: "上下文感知"
+    contextMode: "上下文感知",
+    translationEngine: "管理翻译引擎"
   },
   "zh-TW": {
     removed: "已移除",
@@ -1646,7 +1647,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ 已在單字本，雙擊取消",
     hintAddAction: "雙擊收藏到單字本",
     dictMode: "詞典模式",
-    contextMode: "上下文感知"
+    contextMode: "上下文感知",
+    translationEngine: "管理翻譯引擎"
   },
   "en": {
     removed: "Removed",
@@ -1654,7 +1656,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Already in vocabulary, double-click to undo",
     hintAddAction: "Double-click to save to vocabulary",
     dictMode: "Dictionary Mode",
-    contextMode: "Context-Aware"
+    contextMode: "Context-Aware",
+    translationEngine: "Manage Translation Engine"
   },
   "ja": {
     removed: "削除済み",
@@ -1662,7 +1665,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ 単語帳に既に存在します、ダブルクリックで取り消し",
     hintAddAction: "ダブルクリックで単語帳に保存",
     dictMode: "辞書モード",
-    contextMode: "文脈認識"
+    contextMode: "文脈認識",
+    translationEngine: "翻訳エンジンの管理"
   },
   "ko": {
     removed: "삭제됨",
@@ -1670,7 +1674,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
     hintAddAction: "더블클릭하여 단어장에 저장",
     dictMode: "사전 모드",
-    contextMode: "문맥 인식"
+    contextMode: "문맥 인식",
+    translationEngine: "번역 엔진 관리"
   },
   "es": {
     removed: "Eliminado",
@@ -1678,7 +1683,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Ya está en el vocabulario, doble clic para deshacer",
     hintAddAction: "Doble clic para guardar en el vocabulario",
     dictMode: "Modo Diccionario",
-    contextMode: "Consciente del contexto"
+    contextMode: "Consciente del contexto",
+    translationEngine: "Administrar motor de traducción"
   },
   "fr": {
     removed: "Supprimé",
@@ -1686,7 +1692,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Déjà dans le lexique, double-clic pour annuler",
     hintAddAction: "Double-clic pour sauvegarder dans le lexique",
     dictMode: "Mode Dictionnaire",
-    contextMode: "Sensible au contexte"
+    contextMode: "Sensible au contexte",
+    translationEngine: "Gérer le moteur de traduction"
   },
   "de": {
     removed: "Entfernt",
@@ -1694,7 +1701,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Bereits im Vokabelheft, Doppelklick zum Rückgängig",
     hintAddAction: "Doppelklick zum Speichern im Vokabelheft",
     dictMode: "Wörterbuchmodus",
-    contextMode: "Kontextsensitiv"
+    contextMode: "Kontextsensitiv",
+    translationEngine: "Übersetzungs-Engine verwalten"
   },
   "ru": {
     removed: "Удалено",
@@ -1702,7 +1710,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Уже в словаре, двойной щелчок для отмены",
     hintAddAction: "Двойной щелчок для сохранения в словарь",
     dictMode: "Режим словаря",
-    contextMode: "С учётом контекста"
+    contextMode: "С учётом контекста",
+    translationEngine: "Управление движком перевода"
   },
   "pt": {
     removed: "Removido",
@@ -1710,7 +1719,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Já no vocabulário, clique duplo para desfazer",
     hintAddAction: "Clique duplo para salvar no vocabulário",
     dictMode: "Modo Dicionário",
-    contextMode: "Sensível ao contexto"
+    contextMode: "Sensível ao contexto",
+    translationEngine: "Gerenciar motor de tradução"
   },
   "it": {
     removed: "Rimosso",
@@ -1718,7 +1728,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Già nel vocabolario, doppio clic per annullare",
     hintAddAction: "Doppio clic per salvare nel vocabolario",
     dictMode: "Modalità Dizionario",
-    contextMode: "Consapevole del contesto"
+    contextMode: "Consapevole del contesto",
+    translationEngine: "Gestisci motore di traduzione"
   },
   "vi": {
     removed: "Đã xóa",
@@ -1726,7 +1737,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Đã có trong sổ từ vựng, nhấp đôi để hoàn tác",
     hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng",
     dictMode: "Chế độ Từ điển",
-    contextMode: "Nhận biết ngữ cảnh"
+    contextMode: "Nhận biết ngữ cảnh",
+    translationEngine: "Quản lý công cụ dịch"
   },
   "th": {
     removed: "ลบแล้ว",
@@ -1734,7 +1746,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ อยู่ในสมุดคำศัพท์แล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์",
     dictMode: "โหมดพจนานุกรม",
-    contextMode: "รับรู้บริบท"
+    contextMode: "รับรู้บริบท",
+    translationEngine: "จัดการเครื่องมือแปลภาษา"
   },
   "ar": {
     removed: "تم الإزالة",
@@ -1742,7 +1755,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ موجود بالفعل في مفكرة الكلمات، انقر نقرًا مزدوجًا للتراجع",
     hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات",
     dictMode: "وضع القاموس",
-    contextMode: "إدراك السياق"
+    contextMode: "إدراك السياق",
+    translationEngine: "إدارة محرك الترجمة"
   },
   "fa": {
     removed: "حذف شد",
@@ -1750,7 +1764,8 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ قبلاً در دفتر لغات است، دوبار کلیک برای لغو",
     hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات",
     dictMode: "حالت واژه‌نامه",
-    contextMode: "آگاه از بافت"
+    contextMode: "آگاه از بافت",
+    translationEngine: "مدیریت موتور ترجمه"
   },
   "tr": {
     removed: "Kaldırıldı",
@@ -1758,9 +1773,10 @@ self.i18nYTData = {
     alreadyAddedFeedback: "⭐ Zaten kelime defterinde, geri almak için çift tıklayın",
     hintAddAction: "Kelime defterine kaydetmek için çift tıklayın",
     dictMode: "Sözlük Modu",
-    contextMode: "Bağlama Duyarlı"
+    contextMode: "Bağlama Duyarlı",
+    translationEngine: "Çeviri Motorunu Yönet"
   }
-};
+};  
 
 self.i18nSyncData = {
   "zh-CN": {
