@@ -3289,6 +3289,8 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
 let _runtimeEngine = null;
 let _runtimeEngineFallbackTs = 0;
 const FALLBACK_RESET_MS = 5 * 60 * 1000; // 5分钟后重置
+let _bingFailStreak = 0;
+let _googleFailStreak = 0;
 const ENGINE_FAIL_THRESHOLD = 3; // 连续失败次数超过阈值
 async function processTranslate(req, tabId = null, cacheKey = null) {
     try {
@@ -5313,3 +5315,20 @@ async function updateUninstallURL(count = null) {
 // 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 
 chrome.runtime.onStartup.addListener(updateUninstallURL);
 chrome.runtime.onInstalled.addListener(updateUninstallURL);
+
+chrome.commands.onCommand.addListener((command) => {
+  const actionMap = {
+    "translate-hover-target": "TRANSLATE_HOVER_TARGET",
+    "translate-hover-word": "TRANSLATE_HOVER_WORD",
+  };
+  const action = actionMap[command];
+  if (!action) return;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tabId = tabs[0]?.id;
+    if (!tabId) return;
+    chrome.tabs.sendMessage(tabId, { action }, () => {
+      void chrome.runtime.lastError;
+    });
+  });
+});

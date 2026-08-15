@@ -91,6 +91,22 @@
       "128": "icons/icon-128.png"
     }
   },
+  "commands": {
+    "translate-hover-target": {
+      "suggested_key": {
+        "default": "Alt+A",
+        "mac": "Alt+A"
+      },
+      "description": "__MSG_SHORT_CUT_TRANSLATE_HOVER__"
+    },
+    "translate-hover-word": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "__MSG_SHORT_CUT_TRANSLATE_WORD__"
+    }
+  },
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",

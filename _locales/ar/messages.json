@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "يرجى تسجيل الدخول لاستخدام Mira Translator."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "ترجمة الفقرة الموجودة تحت المؤشر"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "ترجمة الكلمة الموجودة تحت المؤشر"
   }
 }

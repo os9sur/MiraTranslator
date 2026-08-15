@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "Bitte anmelden, um Mira Translator zu verwenden."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "Absatz unter dem Cursor übersetzen"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "Wort unter dem Cursor übersetzen"
   }
 }

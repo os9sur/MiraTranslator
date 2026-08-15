@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "برای استفاده از Mira Translator وارد شوید."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "ترجمه پاراگراف زیر نشانگر"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "ترجمه کلمه زیر نشانگر"
   }
 }
