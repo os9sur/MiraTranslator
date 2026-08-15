@@ -3289,6 +3289,8 @@ function buildSystemPrompt(req, isWord, isSubtitle, isSingleQuery, userCustomPro
 let _runtimeEngine = null;
 let _runtimeEngineFallbackTs = 0;
 const FALLBACK_RESET_MS = 5 * 60 * 1000; // 5分钟后重置
+let _bingFailStreak = 0;
+let _googleFailStreak = 0;
 const ENGINE_FAIL_THRESHOLD = 3; // 连续失败次数超过阈值
 async function processTranslate(req, tabId = null, cacheKey = null) {
     try {
