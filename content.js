@@ -5552,7 +5552,7 @@ function initSelectionTranslate() {
     <div id="p-content-container" style="pointer-events:auto;"></div>
   </div>
 
-  <div id="toast" class="toast-hidden mira-font-family" style="
+<div id="toast" class="toast-hidden mira-font-family" style="
     position:absolute;
     bottom:10px;
     left:50%;
@@ -5561,14 +5561,18 @@ function initSelectionTranslate() {
     padding:8px 14px;
     border-radius:8px;
     background:rgba(20,20,20,0.92);
-    border:1px solid #475569;
+    border:1.5px solid var(--toast-glow-color, #475569);
     color:#fff;
     font-size:12px;
     text-align:center;
     z-index:2147483647;
-    transition:opacity 0.25s ease;
+    transition:opacity 0.25s ease, box-shadow 0.25s ease;
     pointer-events:none;
     word-break:break-word;
+    box-shadow:
+      0 0 10px 2px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 45%, transparent),
+      0 0 22px 5px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 22%, transparent),
+      0 8px 20px rgba(0,0,0,0.5);
   "></div>
 
   <!-- Resize 手柄 -->
@@ -6183,6 +6187,21 @@ function initSelectionTranslate() {
     if (ctx.length < 20) return null;
     return detectSourceLang(ctx) || null;
   })();
+
+
+  async function maybeShowShortcutHint() {
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
+
+    const storage = await safeGetStorage(['hasShownShortcutHint']);
+    if (storage?.hasShownShortcutHint) return;
+    await safeSetStorage({ hasShownShortcutHint: true });
+
+    setTimeout(() => {
+      showToast(t('firstTimeShortcutHint'), 'info', 5000);
+    }, 1000);
+  }
+
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
   async function renderAndShowPopup(
     text,
@@ -7169,6 +7188,8 @@ function initSelectionTranslate() {
             null,
             shadowHost._effectiveHintLang || result?.langInfo?.code || null,
           );
+          //  首次划词翻译完成后，提示快捷键设置
+          maybeShowShortcutHint();
         }
       })
       .catch((err) => {
