@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "Mira 번역을 사용하려면 로그인하세요."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "마우스 포인터가 있는 문단 번역"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "마우스 포인터가 있는 단어 번역"
   }
 }

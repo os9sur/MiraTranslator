@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "请登录后使用 Mira 翻译。"
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "翻译鼠标所在段落"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "翻译鼠标所在单词"
   }
 }

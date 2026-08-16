@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "Mira 翻訳を使用するにはサインインしてください。"
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "マウスポインターのある段落を翻訳"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "マウスポインターのある単語を翻訳"
   }
 }

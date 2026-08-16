@@ -3864,6 +3864,136 @@ function sortElementsByPriority(elements, selectors) {
     return (isLiTarget(a) ? 1 : 0) - (isLiTarget(b) ? 1 : 0);
   });
 }
+// 快捷键翻译相关：鼠标位置追踪 
+
+function getCurrentBlockSelector() {
+  try {
+    return resolveActiveSelectors(
+      typeof currentActiveSelectors !== "undefined" ? currentActiveSelectors : null
+    );
+  } catch (e) {
+    return "p, li, h1, h2, h3, h4, td, th, blockquote";
+  }
+}
+
+let __miraHoverTarget = null;
+let __miraLastMouseX = 0;
+let __miraLastMouseY = 0;
+
+document.addEventListener(
+  "mousemove",
+  (e) => {
+    __miraLastMouseX = e.clientX;
+    __miraLastMouseY = e.clientY;
+  },
+  true,
+);
+
+document.addEventListener(
+  "mouseover",
+  (e) => {
+    const raw = e.composedPath ? e.composedPath()[0] : e.target;
+    const sel = getCurrentBlockSelector();
+    let matched = null;
+    try {
+      matched = raw.closest(sel);
+    } catch (err) {
+      matched = null;
+    }
+    __miraHoverTarget = matched || null;
+  },
+  true,
+);
+
+function forceTranslateElement(el) {
+  if (!el || el.nodeType !== 1) return;
+
+  // 清理旧状态，保证这次一定重新发起翻译
+  const oldChildFont = el.querySelector(":scope > .kt-paragraph-translation");
+  if (oldChildFont) oldChildFont.remove();
+  if (el.nextElementSibling?.classList?.contains("kt-paragraph-translation")) {
+    el.nextElementSibling.remove();
+  }
+  el.removeAttribute("data-translated");
+  el.removeAttribute("data-translating");
+  el.removeAttribute("data-mira-processing");
+  delete el.dataset.translated;
+  delete el._miraSkippedHash;
+  _miraProcessingSet.delete(el);
+  window.__mira_generic_covered?.delete(el);
+
+  // 复用现有的链接感知文本提取，保证链接不会被翻译坏
+  const linkMap = [];
+  const textHolder = { text: "" };
+  el.childNodes.forEach((node) => extractTextWithLinks(node, el, linkMap, textHolder));
+  let text = textHolder.text.replace(/[ \t]+/g, " ").trim();
+  if (!text) text = (el.innerText || el.textContent || "").trim();
+  if (!text) return;
+
+  // 根据元素类型判断：独立成块的内容显示在下面，嵌在句子里的行内内容跟在后面
+  const BLOCK_LIKE_TAGS = ["P", "LI", "H1", "H2", "H3", "H4", "BLOCKQUOTE", "TD", "TH"];
+  const isBlockLike = BLOCK_LIKE_TAGS.includes(el.tagName);
+
+  const font = document.createElement("font");
+  font.className = "kt-paragraph-translation";
+  font.dataset.forceInline = isBlockLike ? "false" : "true";
+  font.style.setProperty("display", isBlockLike ? "block" : "inline", "important");
+  if (isBlockLike) {
+    font.style.setProperty("margin-top", "4px", "important");
+  } else {
+    font.style.setProperty("margin-left", "4px", "important");
+  }
+  font.style.setProperty("color", "gray", "important");
+  font.style.setProperty("font-style", "italic", "important");
+  font.innerText = t("loading");
+
+  if (isBlockLike) {
+    el.appendChild(font);
+  } else {
+    el.insertAdjacentElement("afterend", font);
+  }
+
+  el.dataset.translating = "true";
+  TranslationBatcher.add({ el, text, container: font, linkMap }, true);
+}
+// 快捷键翻译相关：翻译鼠标所在单词 
+
+function getWordAtPoint(x, y) {
+  let node, offset;
+  if (document.caretPositionFromPoint) {
+    const pos = document.caretPositionFromPoint(x, y);
+    if (!pos) return null;
+    node = pos.offsetNode;
+    offset = pos.offset;
+  } else if (document.caretRangeFromPoint) {
+    const r = document.caretRangeFromPoint(x, y);
+    if (!r) return null;
+    node = r.startContainer;
+    offset = r.startOffset;
+  } else {
+    return null;
+  }
+  if (node.nodeType !== Node.TEXT_NODE) return null;
+
+  const text = node.textContent;
+  const isWordChar = (ch) => /[^\s\u3000-\u303F]/.test(ch) && !/\p{P}/u.test(ch);
+
+  let start = offset, end = offset;
+  while (start > 0 && isWordChar(text[start - 1])) start--;
+  while (end < text.length && isWordChar(text[end])) end++;
+
+  const word = text.slice(start, end).trim();
+  if (!word) return null;
+
+  // 只处理含空格分词的语言：单词里混有 CJK 字符说明扫描失控，放弃
+  if (/[\u4e00-\u9fff\u3040-\u30ff]/.test(word)) return null;
+
+  const range = document.createRange();
+  range.setStart(node, start);
+  range.setEnd(node, end);
+  return range;
+}
+
 
 async function executeReScan(config) {
   if (!isPageScanEnabled) return;
@@ -5422,7 +5552,7 @@ function initSelectionTranslate() {
     <div id="p-content-container" style="pointer-events:auto;"></div>
   </div>
 
-  <div id="toast" class="toast-hidden mira-font-family" style="
+<div id="toast" class="toast-hidden mira-font-family" style="
     position:absolute;
     bottom:10px;
     left:50%;
@@ -5431,14 +5561,18 @@ function initSelectionTranslate() {
     padding:8px 14px;
     border-radius:8px;
     background:rgba(20,20,20,0.92);
-    border:1px solid #475569;
+    border:1.5px solid var(--toast-glow-color, #475569);
     color:#fff;
     font-size:12px;
     text-align:center;
     z-index:2147483647;
-    transition:opacity 0.25s ease;
+    transition:opacity 0.25s ease, box-shadow 0.25s ease;
     pointer-events:none;
     word-break:break-word;
+    box-shadow:
+      0 0 10px 2px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 45%, transparent),
+      0 0 22px 5px color-mix(in srgb, var(--toast-glow-color, #38bdf8) 22%, transparent),
+      0 8px 20px rgba(0,0,0,0.5);
   "></div>
 
   <!-- Resize 手柄 -->
@@ -6053,6 +6187,21 @@ function initSelectionTranslate() {
     if (ctx.length < 20) return null;
     return detectSourceLang(ctx) || null;
   })();
+
+
+  async function maybeShowShortcutHint() {
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return;
+
+    const storage = await safeGetStorage(['hasShownShortcutHint']);
+    if (storage?.hasShownShortcutHint) return;
+    await safeSetStorage({ hasShownShortcutHint: true });
+
+    setTimeout(() => {
+      showToast(t('firstTimeShortcutHint'), 'info', 5000);
+    }, 1000);
+  }
+
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
   async function renderAndShowPopup(
     text,
@@ -7039,6 +7188,8 @@ function initSelectionTranslate() {
             null,
             shadowHost._effectiveHintLang || result?.langInfo?.code || null,
           );
+          //  首次划词翻译完成后，提示快捷键设置
+          maybeShowShortcutHint();
         }
       })
       .catch((err) => {
@@ -7825,7 +7976,19 @@ function initSelectionTranslate() {
 
     setTimeout(() => processSelectionEnd(mouseX, mouseY, isTouchEvent), isTouchEvent ? 300 : 150);
   }
-  async function processSelectionEnd(mouseX, mouseY, isTouchEvent) {
+  function forceTranslateWordAtCursor(x, y) {
+    const range = getWordAtPoint(x, y);
+    if (!range) return;
+
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    if (typeof processSelectionEnd === "function") {
+      processSelectionEnd(x, y, false, true);
+    }
+  }
+  async function processSelectionEnd(mouseX, mouseY, isTouchEvent, autoTrigger = false) {
     const selection = getSmartSelection();
     if (!selection) return;
     const text = selection.toString().trim();
@@ -8078,16 +8241,18 @@ function initSelectionTranslate() {
         tapEvt.stopPropagation();
         tapEvt.preventDefault();
         clearTimeout(window.logoAutoTimer);
-        // 取消页面选中状态
         window.getSelection()?.removeAllRanges();
         await triggerTranslation();
       };
-      // 兼容混合设备的 click 兜底
       logoBtn.onclick = async (clickEvt) => {
         clickEvt.stopPropagation();
         clearTimeout(window.logoAutoTimer);
         await triggerTranslation();
       };
+    } else if (autoTrigger) {
+      // 快捷键触发：跳过等待鼠标 hover 图标，直接弹出翻译窗口
+      clearTimeout(window.logoAutoTimer);
+      await triggerTranslation();
     } else {
       // 桌面：hover 触发
       logoBtn.onmouseenter = async () => {
@@ -8556,6 +8721,21 @@ function initSelectionTranslate() {
         );
       }
 
+      sendResponse({ status: "ok" });
+
+    } else if (msg.action === "TRANSLATE_HOVER_TARGET") {
+      if (typeof __miraHoverTarget !== "undefined" && __miraHoverTarget) {
+        if (typeof forceTranslateElement === "function") {
+          forceTranslateElement(__miraHoverTarget);
+        }
+      }
+      sendResponse({ status: "ok" });
+    } else if (msg.action === "TRANSLATE_HOVER_WORD") {
+      if (typeof forceTranslateWordAtCursor === "function") {
+        forceTranslateWordAtCursor(__miraLastMouseX, __miraLastMouseY);
+      } else {
+        logger.warn('[Mira Debug] forceTranslateWordAtCursor 未定义');
+      }
       sendResponse({ status: "ok" });
     }
     return true;

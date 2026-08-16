@@ -5315,3 +5315,20 @@ async function updateUninstallURL(count = null) {
 // 仅在扩展安装、更新、或每次浏览器启动/SW唤醒时更新一次参数 
 chrome.runtime.onStartup.addListener(updateUninstallURL);
 chrome.runtime.onInstalled.addListener(updateUninstallURL);
+
+chrome.commands.onCommand.addListener((command) => {
+  const actionMap = {
+    "translate-hover-target": "TRANSLATE_HOVER_TARGET",
+    "translate-hover-word": "TRANSLATE_HOVER_WORD",
+  };
+  const action = actionMap[command];
+  if (!action) return;
+
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tabId = tabs[0]?.id;
+    if (!tabId) return;
+    chrome.tabs.sendMessage(tabId, { action }, () => {
+      void chrome.runtime.lastError;
+    });
+  });
+});

@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "Войдите, чтобы использовать Mira Translator."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "Перевести абзац под курсором"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "Перевести слово под курсором"
   }
 }

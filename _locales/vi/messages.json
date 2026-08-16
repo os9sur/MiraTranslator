@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "Vui lòng đăng nhập để sử dụng Mira Translator."
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "Dịch đoạn văn dưới con trỏ chuột"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "Dịch từ dưới con trỏ chuột"
   }
 }

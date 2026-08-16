@@ -37,5 +37,11 @@
   },
   "ERROR_NOT_SIGNED_IN": {
     "message": "กรุณาลงชื่อเข้าใช้เพื่อใช้งาน Mira Translator"
+  },
+  "SHORT_CUT_TRANSLATE_HOVER": {
+    "message": "แปลย่อหน้าที่เคอร์เซอร์ชี้อยู่"
+  },
+  "SHORT_CUT_TRANSLATE_WORD": {
+    "message": "แปลคำที่เคอร์เซอร์ชี้อยู่"
   }
 }

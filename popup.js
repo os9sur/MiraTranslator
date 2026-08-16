@@ -700,7 +700,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     showPanel('syncSettingsPanel');
     if (typeof refreshUI === 'function') refreshUI();
   };
+  //快捷键设置菜单
+  document.getElementById('openShortcutSettings').onclick = (e) => {
+    e.stopPropagation();
 
+    const isFirefox = typeof browser !== 'undefined' && navigator.userAgent.includes('Firefox');
+
+    if (isFirefox) {
+      navigator.clipboard.writeText('about:addons').then(() => {
+        showToast(t('shortcutCopied', globalUiLang), 'info', 8000);
+      }).catch(() => {
+        showToast(t('shortcutManual', globalUiLang), 'info', 8000);
+      });
+      return;
+    }
+
+    if (chrome.commands?.openShortcutSettings) {
+      chrome.commands.openShortcutSettings();
+      return;
+    }
+
+    const isEdge = navigator.userAgent.includes('Edg/');
+    const url = isEdge ? 'edge://extensions/shortcuts' : 'chrome://extensions/shortcuts';
+
+    chrome.tabs.create({ url }, () => {
+      if (chrome.runtime.lastError) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast(`Link copied (${url}), please paste it into the address bar`, 'info', 8000);
+        }).catch(() => {
+          showToast(url, 'info', 8000);
+        });
+      }
+    });
+  };
   document.getElementById('closeSyncPanel').onclick = () => {
     showMain();
   };
