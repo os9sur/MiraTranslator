@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'groqKey', l: 'API Key', t: 'password' },
                 { k: 'groqHost', l: 'Base URL', t: 'text', d: 'https://api.groq.com/openai/v1' },
-                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'llama-3.3-70b-versatile', placeholderOnly: true }
+                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'openai/gpt-oss-120b', placeholderOnly: true }
             ]
         },
         'siliconflow': {
