@@ -7,6 +7,7 @@
   <script src="i18n.js"></script>
   <title>Mira Translator</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="notice.css">
   <style>
     html {
       padding-right: 0px;
@@ -536,7 +537,6 @@
           position: relative;
           margin-bottom: 3px;
           border-radius: 20px;
-          overflow: hidden;
           padding: 1px 5px 1px 5px;
           cursor: pointer;
           border: 0.3px solid rgba(234, 179, 8, 0.4);
@@ -566,8 +566,17 @@
         </div>
         <div id="noticeExpandedBody" style="
           display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          z-index: 50;
+          margin-top: 4px;
+          background: rgba(15, 23, 42, 0.98);
+          border: 1px solid var(--notice-glow, rgba(234, 179, 8, 0.6));
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), 0 0 16px var(--notice-glow, rgba(234, 179, 8, 0.4));
+          border-radius: 0 0 16px 16px;
           padding: 8px 10px 10px;
-          border-top: 1px solid rgba(234, 179, 8, 0.15);
         ">
           <div id="noticeContentText" class="allow-select" style="
           font-size: 11.5px; cursor:text; color: #cbd5e1; line-height: 1.55;
@@ -1092,6 +1101,7 @@
   </div>
   <div dir="auto" id="toast" class="toast-hidden"></div>
   <script src="utils.js"></script>
+  <script src="notice.js"></script>
   <script src="site-rules.js"></script>
   <script src="popup.js"></script>
 

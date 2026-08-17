@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectedEngine: res.selectedEngine || _defaultEngine,
         apiKeys: res.apiKeys || {}
     };
+    initNoticeBar('settings');
     const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
     // RTL布局调整
 

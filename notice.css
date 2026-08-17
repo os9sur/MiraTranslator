@@ -1,0 +1,123 @@
+/* notice.css —— popup.html 与 engineSettings.html 共用 */
+
+#noticeBar {
+  border: 1px solid;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  position: relative;
+  transition: opacity 0.3s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+#noticeBar.mira-pulsing {
+  animation: miraBorderPulse 1.8s ease-in-out infinite;
+}
+
+#noticeBar:hover {
+  /* background: rgba(30, 41, 59, 0.98);  */
+  box-shadow: 0 0 8px var(--notice-glow);
+}
+
+#noticeCollapsedRow {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#noticeTitleClip {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+#noticeTitleClip.notice-title-expanded {
+  white-space: normal;
+}
+
+#noticeChevron {
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+  font-size: 12px;
+}
+#noticeExpandedBody {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin-top: 4px;
+  background: rgba(15, 23, 42, 0.98);
+  border: 1px solid var(--notice-glow);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), 0 0 16px var(--notice-glow);
+  padding: 0 12px 10px;
+  border-radius: 0 0 8px 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  flex-direction: column;
+}
+
+#noticeExpandedBody.is-expanded {
+  display: flex;
+}
+
+#noticeContentText {
+  margin: 8px 0;
+  max-height: 75px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+#noticeContentText::-webkit-scrollbar {
+  width: 4px;
+}
+
+#noticeContentText::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#noticeContentText::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 2px;
+}
+
+#noticeContentText::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+.notice-content-list {
+  margin: 8px 0;
+  padding-left: 18px;
+}
+
+.notice-content-list li {
+  margin-bottom: 4px;
+}
+
+#noticeGotItBtn {
+  align-self: flex-end;
+  margin-top: 6px;
+  border: 1px solid;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#noticeGotItBtn:hover {
+  background: rgba(56, 189, 248, 0.15); 
+  transform: scale(1.06);
+  box-shadow: 0 0 8px currentColor;
+}
+
+#noticeGotItBtn:active {
+  transform: scale(0.96);
+  filter: brightness(0.9);
+}

@@ -98,7 +98,7 @@ body {
     width: 1150px;
     max-width: 1150px;
     height: auto;
-    max-height: 90vh;
+    max-height: 95vh;
     /*自适应*/
     min-height: 500px;
     background: rgba(15, 23, 42, 0.9) !important;
