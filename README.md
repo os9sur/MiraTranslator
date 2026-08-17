@@ -40,9 +40,9 @@
 </p>
 
 <p align="center">
-  <img src="images/screenshot1.png" width="276" alt="Style Settings">
-  <img src="images/screenshot2.png" width="276" alt="Settings">
   <img src="images/screenshot3.png" width="276" alt="Settings">
+  <img src="images/screenshot2.png" width="276" alt="Settings">
+  <img src="images/screenshot1.png" width="276" alt="Style Settings">
 </p>
 
 ---
