@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <script src="i18n.js"></script>
     <title>Mira Translator</title>
+    <link rel="stylesheet" href="notice.css">
     <link rel="stylesheet" href="engineSettings.css">
 </head>
 
@@ -34,6 +35,27 @@
         </aside>
         <main class="main-content">
             <div id="close-engineSettingsWindow" class="close-btn" title=""></div>
+            <!-- 通知栏 -->
+            <div id="noticeBar" class="notice-bar" style="display:none;">
+                <!-- 折叠行：默认是手型 cursor: pointer -->
+                <div id="noticeCollapsedRow" class="notice-collapsed-row"
+                    style="cursor: pointer; display: flex; align-items: center;">
+                    <span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;"></span>
+                    <span id="noticeTitleClip" class="notice-title-clip"></span>
+                    <div id="noticeChevron" style="
+            flex-shrink: 0; color: rgb(70 235 179);
+            font-size: 10px; transition: transform 0.25s ease;
+            ">&#9660;</div>
+                </div>
+
+                <!-- 展开后的正文体  -->
+                <div id="noticeExpandedBody" class="notice-expanded-body">
+                    <div id="noticeContentText" class="notice-content-text"
+                        style="user-select: text; -webkit-user-select: text; cursor: text;"></div>
+                    <button id="noticeGotItBtn" class="notice-got-it-btn" style="cursor: pointer;"></button>
+                </div>
+            </div>
+
             <div id="dynamic-form-container"></div>
             <div class="bottom-bar hidden" id="global-actions">
                 <div id="tips" style="font-size: 12px; margin-bottom: 8px; min-height: 18px;"></div>
@@ -110,6 +132,7 @@
     </div>
 
     <script src="utils.js"></script>
+    <script src="notice.js"></script>
     <script src="engineSettings.js"></script>
 </body>
 

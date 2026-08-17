@@ -76,134 +76,6 @@ let currentTranslationResponse = null;
 //   }
 // }
 
-
-const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';
-
-async function initNoticeBar() {
-  const GITHUB_NOTICE_URL = IS_DEV ? 'https://os9sur.github.io/mira-trans/notice.json' :
-    'https://os9sur.github.io/MiraTranslator/assets/notice.json';
-
-  let noticeData = null;
-  let minDays = 0;    // 默认0，普通公告不受限制
-  let openReview = false; // 默认不跳转商店
-
-  try {
-    const resp = await fetch(`${GITHUB_NOTICE_URL}?t=${Date.now()}`, {
-      cache: 'no-cache'
-    });
-    if (!resp.ok) return;
-    const json = await resp.json();
-    if (!json.enabled) return;
-
-    const openReview = json.openReview || false;
-    if (openReview) return;
-    // 读取顶层配置
-    minDays = json.minDays ?? 0;
-    openReview = json.openReview || false;
-
-    const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
-    const langShort = uiLang.split('-')[0];
-
-    noticeData =
-      json[uiLang] ||
-      json[langShort] ||
-      json['en'] ||
-      null;
-  } catch (e) {
-    return;
-  }
-
-  // 安装时间判断
-  const installData = await safeGetStorage('install_time');
-  const installTime = installData?.install_time || Date.now();
-  const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-  if (daysSinceInstall < minDays) return;
-
-  if (noticeData.targetLangs?.length) {
-    const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
-    if (!noticeData.targetLangs.includes(currentTargetLang)) return;
-  }
-  if (!noticeData?.id || !noticeData?.title) return;
-
-  const dismissedKey = NOTICE_DISMISSED_KEY + noticeData.id;
-  const stored = await safeGetStorage(dismissedKey);
-  if (stored?.[dismissedKey]) return;
-
-  const bar = document.getElementById('noticeBar');
-  const titleEl = document.getElementById('noticeTitleClip');
-  const contentEl = document.getElementById('noticeContentText');
-  const gotItBtn = document.getElementById('noticeGotItBtn');
-  const expandBody = document.getElementById('noticeExpandedBody');
-  const chevron = document.getElementById('noticeChevron');
-  const dotEl = bar?.querySelector('[style*="border-radius: 50%"]');
-
-  if (!bar || !titleEl || !contentEl || !gotItBtn || !expandBody || !chevron) {
-    return;
-  }
-
-  // 应用主题配色
-  const theme = NOTICE_THEMES[noticeData.level] || NOTICE_THEMES.warning;
-  bar.style.borderColor = theme.border;
-  if (dotEl) dotEl.style.background = theme.dot;
-  titleEl.style.color = theme.title;
-  chevron.style.color = theme.chevron;
-  gotItBtn.style.color = theme.gotItColor;
-  gotItBtn.style.borderColor = theme.gotItBorder;
-  gotItBtn.style.background = theme.gotItBg;
-  expandBody.style.borderTopColor = theme.divider;
-  bar.style.setProperty('--notice-glow', theme.dot);
-
-  const styleId = 'mira-notice-pulse-style';
-  let styleEl = document.getElementById(styleId);
-  if (!styleEl) {
-    styleEl = document.createElement('style');
-    styleEl.id = styleId;
-    document.head.appendChild(styleEl);
-  }
-  styleEl.textContent = `
-    @keyframes miraBorderPulse {
-      0%,100% { border-color: ${theme.pulse[0]}; }
-      50%      { border-color: ${theme.pulse[1]}; }
-    }
-  `;
-
-  // 填入内容
-  titleEl.textContent = noticeData.title;
-  contentEl.textContent = noticeData.content || '';
-  gotItBtn.textContent = noticeData.gotIt || t('btnGotIt', getBrowserLang() || 'en');
-
-  bar.style.display = 'block';
-  bar.classList.add('mira-pulsing');
-
-  // 折叠行点击：展开 / 收起
-  document.getElementById('noticeCollapsedRow').addEventListener('click', () => {
-    const isExpanded = expandBody.style.display === 'block';
-    expandBody.style.display = isExpanded ? 'none' : 'block';
-    chevron.style.transform = isExpanded ? '' : 'rotate(180deg)';
-    titleEl.classList.toggle('notice-title-expanded', !isExpanded);
-    if (!isExpanded) bar.classList.remove('mira-pulsing');
-  });
-
-  // 知道了：持久化 + 按需跳转 + 淡出
-  gotItBtn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    await safeSetStorage({ [dismissedKey]: true });
-
-    // 普通公告：不跳转
-    // link字段：跳转指定链接
-    // openReview：跳转商店评价页
-    if (noticeData.link) {
-      chrome.tabs.create({ url: noticeData.link });
-    } else if (openReview) {
-      chrome.tabs.create({ url: getReviewUrl() });
-    }
-
-    bar.style.transition = 'opacity 0.3s ease';
-    bar.style.opacity = '0';
-    setTimeout(() => { bar.style.display = 'none'; }, 300);
-  });
-}
-
 async function initUpdateNotify() {
   let activeVocab = [];
   try {
@@ -385,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  initNoticeBar();
+  initNoticeBar('popup');
 
   //await initOnboarding();
   const btnLogin = document.getElementById('btnLogin');
