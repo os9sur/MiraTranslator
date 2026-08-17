@@ -1,33 +1,32 @@
 {
-    "enabled": false,
-    "minDays": 7,
+    "enabled": true,
+    "minDays": 0,
     "zh-CN": {
-        "id": "notice_20260422_v3450",
-        "title": "🎉 新版本 v3.4.5.0 已发布",
+        "id": "notice_20260817_free_ai",
+        "title": "💡 免费 AI 翻译渠道推荐",
         "level": "info",
-        "content": "支持更多语言,并进行了深度优化与功能新增。如需立即更新：打开 chrome://extensions/，开启「开发者模式」，点击「更新」。",
+        "content": "推荐大家使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快且完全免费！(提示：免费版通常有调用频率或额度限制，超限后稍等即可恢复)。欢迎在设置中配置体验。",
         "gotIt": "知道了"
     },
     "zh-TW": {
-        "id": "notice_20260422_v3450",
-        "title": "🎉 新版本 v3.4.5.0 已發布.",
+        "id": "notice_20260817_free_ai",
+        "title": "💡 免費 AI 翻譯管道推薦",
         "level": "info",
-        "content": "支援更多語言，並進行了深度優化與功能新增。如需立即更新：開啟 chrome://extensions/，開啟「開發人員模式」，點按「更新」。",
+        "content": "推薦大家使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快且完全免費！(提示：免費版通常有呼叫頻率或額度限制，超限後稍等即可恢復)。歡迎在設定中配置體驗。",
         "gotIt": "知道了"
     },
     "ja": {
-        "id": "notice_20260422_v3450",
-        "title": "🎉 新バージョン v3.4.5.0 リリース",
+        "id": "notice_20260817_free_ai",
+        "title": "💡 無料のAI翻訳ルートのご案内",
         "level": "info",
-        "content": "多言語対応の拡充、パフォーマンスの最適化、さらに多数の新機能を追加しました。今すぐ更新する場合は chrome://extensions/ を開き、「デベロッパーモード」をオンにして「更新」をクリックしてください。",
+        "content": "GroqまたはGeminiの無料APIキーを使用してAI翻訳を行うことをお勧めします（高速で無料ですが、無料版には利用回数の制限があります）。設定画面からぜひお試しください。",
         "gotIt": "了解"
     },
     "en": {
-        "id": "notice_20260422_v3450",
-        "targetLangs": ["ko", "ja"],
-        "title": "🎉 New Version v3.4.5.0 Available",
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Free AI Translation Options",
         "level": "info",
-        "content": "Expanded language support, performance optimizations, and a host of new features. To update now: open chrome://extensions/, enable Developer Mode, then click Update.",
+        "content": "We recommend using free Groq or Gemini API keys for AI translation—fast and free! (Note: Free tiers typically have rate limits; if exceeded, simply wait a moment for it to reset). Configure it in settings to try it out.",
         "gotIt": "Got it"
     }
 }
