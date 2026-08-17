@@ -925,15 +925,29 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (isPageScanEnabled) {
       if (typeof refreshIcon === "function") refreshIcon();
       if (typeof scanContent === "function") scanContent();
-    } else {
-      document
-        .querySelectorAll(".kt-paragraph-translation")
-        .forEach((el) => el.remove());
-      document.querySelectorAll("[data-translated]").forEach((el) => {
-        el.removeAttribute("data-translated");
-        el.removeAttribute("data-translating");
-      });
-      if (typeof observer !== "undefined") observer.disconnect();
+} else {
+  document.querySelectorAll(".kt-paragraph-translation").forEach((el) => el.remove());
+  document.querySelectorAll("[data-translated], [data-translating], [data-mira-processing]").forEach((el) => {
+    el.removeAttribute("data-translated");
+    el.removeAttribute("data-translating");
+    el.removeAttribute("data-mira-processing");
+  });
+
+  // 断开所有可能触发重新翻译的观察者
+  if (window.__mira_selfHealObserver) {
+    window.__mira_selfHealObserver.disconnect();
+    window.__mira_selfHealObserver = null;
+  }
+  if (window.__mira_selfHealTimer) {
+    clearTimeout(window.__mira_selfHealTimer);
+    window.__mira_selfHealTimer = null;
+  }
+  if (window.__mira_dynamic_observer) {
+    window.__mira_dynamic_observer.disconnect();
+    window.__mira_dynamic_observer = null;
+  }
+
+  if (typeof observer !== "undefined" && observer) observer.disconnect();
       try {
         const commentsRoot =
           document.querySelector("ytd-comments") ||
@@ -2125,15 +2139,28 @@ function startGenericTranslation() {
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
   });
-  if (!window.__mira_selfHealObserver) {
-    window.__mira_selfHealObserver = new MutationObserver(() => {
-      if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
-      window.__mira_selfHealTimer = setTimeout(() => {
-        if (typeof startGenericTranslation === 'function') startGenericTranslation();
-      }, 500);
-    });
-    window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
-  }
+if (!window.__mira_selfHealObserver) {
+  window.__mira_selfHealObserver = new MutationObserver((mutations) => {
+    //  检查开关 
+    if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
+
+    // 排除只是"译文容器自己"的增删（避免自己触发自己）
+    const hasRealChange = mutations.some((m) =>
+      Array.from(m.addedNodes).concat(Array.from(m.removedNodes)).some((n) => {
+        if (n.nodeType !== 1) return true; // 文本节点变化 
+        return !n.classList?.contains('kt-paragraph-translation');
+      })
+    );
+    if (!hasRealChange) return;
+
+    if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
+    window.__mira_selfHealTimer = setTimeout(() => {
+      if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
+      if (typeof startGenericTranslation === 'function') startGenericTranslation();
+    }, 500);
+  });
+  window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
+}
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
@@ -7293,7 +7320,7 @@ function initSelectionTranslate() {
         <div id="p-phonetic" style="color:var(--p-phonetic); font-size:13px; opacity:0.6; font-family:sans-serif;  word-break:break-word;"></div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-        ${showDictToggle ? `<span id="mira-toggle-dict" class="mira-toggle-btn mira-toggle-btn--dict">${t("dictMode") || "Dictionary Mode"} ⇄</span>` : ""}
+        ${showDictToggle ? `<span id="mira-toggle-dict" class="mira-toggle-btn mira-toggle-btn--dict mira-font-family">${t("dictMode") || "Dictionary Mode"} ⇄</span>` : ""}
         <span id="mira-toggle-ja" class="mira-toggle-btn mira-toggle-btn--kana">Kana ▾</span>
       </div>
    </div>
