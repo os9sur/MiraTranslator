@@ -5,7 +5,7 @@
         "id": "notice_20260817_free_ai",
         "title": "💡 免费 AI 翻译渠道推荐",
         "level": "info",
-        "content": "推荐大家使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快且完全免费！(提示：免费版通常有调用频率或额度限制，超限后稍等即可恢复)。欢迎在设置中配置体验。",
+        "content": "推荐使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快且完全免费！(提示：免费版通常有调用频率或额度限制，超限后稍等即可恢复)。欢迎在设置中配置体验。",
         "gotIt": "知道了",
         "scope": "both"
     },
@@ -13,15 +13,15 @@
         "id": "notice_20260817_free_ai",
         "title": "💡 免費 AI 翻譯管道推薦",
         "level": "info",
-        "content": "推薦大家使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快且完全免費！(提示：免費版通常有呼叫頻率或額度限制，超限後稍等即可恢復)。歡迎在設定中配置體驗。",
+        "content": "推薦使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快且完全免費！(提示：免費版通常有呼叫頻率或額度限制，超限後稍等即可恢復)。歡迎在設定中配置體驗。",
         "gotIt": "知道了",
         "scope": "both"
     },
     "ja": {
         "id": "notice_20260817_free_ai",
-        "title": "💡 無料のAI翻訳ルートのご案内",
+        "title": "💡 無料AI翻訳サービスのご案内",
         "level": "info",
-        "content": "GroqまたはGeminiの無料APIキーを使用してAI翻訳を行うことをお勧めします（高速で無料ですが、無料版には利用回数の制限があります）。設定画面からぜひお試しください。",
+        "content": "GroqまたはGeminiの無料APIキーを使ってAI翻訳を利用できます。高速かつ無料で利用できます！(注：無料プランには通常、利用回数やレート制限があります。制限に達した場合は、しばらく待つと再び利用できるようになります)。設定からぜひお試しください。",
         "gotIt": "了解",
         "scope": "both"
     },
@@ -29,8 +29,72 @@
         "id": "notice_20260817_free_ai",
         "title": "💡 Free AI Translation Options",
         "level": "info",
-        "content": "We recommend using free Groq or Gemini API keys for AI translation—fast and free! (Note: Free tiers typically have rate limits; if exceeded, simply wait a moment for it to reset). Configure it in settings to try it out.",
+        "content": "Try using a free Groq or Gemini API key for AI translation—fast and completely free! (Note: Free tiers typically have rate or usage limits. If you reach a limit, simply wait a while and access will be restored.) Configure it in Settings to give it a try.",
         "gotIt": "Got it",
+        "scope": "both"
+    },
+    "ru": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Бесплатные варианты AI-перевода",
+        "level": "info",
+        "content": "Для AI-перевода можно использовать бесплатный API-ключ Groq или Gemini — быстро и совершенно бесплатно! (Примечание: бесплатные тарифы обычно имеют ограничения по частоте запросов или объёму использования. При достижении лимита достаточно немного подождать.) Настройте сервис в разделе «Настройки» и попробуйте.",
+        "gotIt": "Понятно",
+        "scope": "both"
+    },
+    "pt-BR": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Opções gratuitas de tradução com IA",
+        "level": "info",
+        "content": "Use uma chave de API gratuita do Groq ou Gemini para tradução com IA — rápido e totalmente grátis! (Observação: os planos gratuitos geralmente têm limites de frequência ou de uso. Se o limite for atingido, basta aguardar um pouco para que o acesso seja restabelecido.) Configure em «Configurações» e experimente.",
+        "gotIt": "Entendi",
+        "scope": "both"
+    },
+    "fr": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Options de traduction IA gratuites",
+        "level": "info",
+        "content": "Utilisez une clé API gratuite de Groq ou Gemini pour la traduction avec l’IA : rapide et entièrement gratuite ! (Remarque : les offres gratuites sont généralement soumises à des limites de fréquence ou d’utilisation. En cas de dépassement, il suffit d’attendre un peu pour retrouver l’accès.) Configurez le service dans les paramètres et essayez-le.",
+        "gotIt": "Compris",
+        "scope": "both"
+    },
+    "de": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Kostenlose KI-Übersetzung",
+        "level": "info",
+        "content": "Für KI-Übersetzungen kann ein kostenloser API-Key von Groq oder Gemini verwendet werden – schnell und völlig kostenlos! (Hinweis: Kostenlose Tarife haben in der Regel Limits für die Anfragerate oder Nutzung. Wenn ein Limit erreicht ist, einfach kurz warten, bis der Zugriff wieder verfügbar ist.) In den Einstellungen konfigurieren und ausprobieren.",
+        "gotIt": "Verstanden",
+        "scope": "both"
+    },
+    "tr": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Ücretsiz Yapay Zekâ Çeviri Seçenekleri",
+        "level": "info",
+        "content": "Yapay zekâ ile çeviri için ücretsiz Groq veya Gemini API anahtarı kullanılabilir — hızlı ve tamamen ücretsiz! (Not: Ücretsiz planlarda genellikle istek sıklığı veya kullanım sınırları bulunur. Sınıra ulaşıldığında biraz bekleyerek tekrar kullanılabilir.) Ayarlar bölümünden yapılandırıp deneyebilirsiniz.",
+        "gotIt": "Anladım",
+        "scope": "both"
+    },
+    "es": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Opciones gratuitas de traducción con IA",
+        "level": "info",
+        "content": "Puedes usar una clave API gratuita de Groq o Gemini para traducir con IA: ¡rápido y totalmente gratis! (Nota: los planes gratuitos suelen tener límites de frecuencia o de uso. Si alcanzas el límite, solo tienes que esperar un poco para volver a utilizar el servicio.) Configúralo en Ajustes y pruébalo.",
+        "gotIt": "Entendido",
+        "scope": "both"
+    },
+    "ar": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 خيارات مجانية للترجمة بالذكاء الاصطناعي",
+        "level": "info",
+        "content": "يمكن استخدام مفتاح API مجاني من Groq أو Gemini للترجمة بالذكاء الاصطناعي — بسرعة ومجانًا بالكامل! (ملاحظة: عادةً ما تتضمن الخطط المجانية حدودًا على معدل الطلبات أو حجم الاستخدام. عند الوصول إلى الحد، يكفي الانتظار قليلًا حتى تتاح الخدمة مجددًا.) يمكن إعداد الخدمة وتجربتها من «الإعدادات».",
+        "gotIt": "فهمت",
+        "scope": "both"
+    },
+    "fa": {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 گزینه‌های رایگان ترجمه با هوش مصنوعی",
+        "level": "info",
+        "content": "برای ترجمه با هوش مصنوعی می‌توانید از کلید API رایگان Groq یا Gemini استفاده کنید؛ سریع و کاملاً رایگان! (توجه: طرح‌های رایگان معمولاً محدودیت‌هایی برای تعداد درخواست‌ها یا میزان استفاده دارند. در صورت رسیدن به سقف، کافی است کمی صبر کنید تا امکان استفاده دوباره فراهم شود.) از بخش «تنظیمات» سرویس را پیکربندی و امتحان کنید.",
+        "gotIt": "متوجه شدم",
         "scope": "both"
     }
 }
