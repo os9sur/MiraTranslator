@@ -80,21 +80,5 @@
         "content": "Puedes usar una clave API gratuita de Groq o Gemini para traducir con IA: ¡rápido y totalmente gratis! (Nota: los planes gratuitos suelen tener límites de frecuencia o de uso. Si alcanzas el límite, solo tienes que esperar un poco para volver a utilizar el servicio.) Configúralo en Ajustes y pruébalo.",
         "gotIt": "Entendido",
         "scope": "both"
-    },
-    "ar": {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 خيارات مجانية للترجمة بالذكاء الاصطناعي",
-        "level": "info",
-        "content": "يمكن استخدام مفتاح API مجاني من Groq أو Gemini للترجمة بالذكاء الاصطناعي — بسرعة ومجانًا بالكامل! (ملاحظة: عادةً ما تتضمن الخطط المجانية حدودًا على معدل الطلبات أو حجم الاستخدام. عند الوصول إلى الحد، يكفي الانتظار قليلًا حتى تتاح الخدمة مجددًا.) يمكن إعداد الخدمة وتجربتها من «الإعدادات».",
-        "gotIt": "فهمت",
-        "scope": "both"
-    },
-    "fa": {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 گزینه‌های رایگان ترجمه با هوش مصنوعی",
-        "level": "info",
-        "content": "برای ترجمه با هوش مصنوعی می‌توانید از کلید API رایگان Groq یا Gemini استفاده کنید؛ سریع و کاملاً رایگان! (توجه: طرح‌های رایگان معمولاً محدودیت‌هایی برای تعداد درخواست‌ها یا میزان استفاده دارند. در صورت رسیدن به سقف، کافی است کمی صبر کنید تا امکان استفاده دوباره فراهم شود.) از بخش «تنظیمات» سرویس را پیکربندی و امتحان کنید.",
-        "gotIt": "متوجه شدم",
-        "scope": "both"
     }
 }
