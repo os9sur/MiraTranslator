@@ -39,6 +39,12 @@
   <img src="images/settings_screenshot.png" width="415" alt="Settings">
 </p>
 
+<p align="center">
+  <img src="images/screenshot1.png" width="276" alt="Style Settings">
+  <img src="images/screenshot2.png" width="276" alt="Settings">
+  <img src="images/screenshot3.png" width="276" alt="Settings">
+</p>
+
 ---
 
 ## ⚠️ Project Scope & Free Alternatives
