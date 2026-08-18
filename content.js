@@ -220,6 +220,7 @@ async function applyUserStyles(
       inheritFontSize || transEl.dataset.inheritFontSize || null;
     const isWiki = location.hostname.includes("wikipedia.org");
     const isInstagram = location.hostname.includes("instagram.com");
+    const isLinkedIn = location.hostname.includes("linkedin.com");
     const clearStyle = isWiki ? "none" : "both";
     const targetPrefix = (window.currentTargetL || "")
       .toLowerCase()
@@ -328,14 +329,14 @@ async function applyUserStyles(
     let css = `
         display: ${useInline ? "inline" : isWikiUI ? "inline-block" : "block"} !important;
         clear: ${useInline ? "none" : clearStyle} !important;
-        width: ${useInline ? "auto" : "100%"} !important;
+        width: ${useInline ? "auto" : isLinkedIn ? "auto" : "100%"} !important;
         max-width: ${isWikiUI ? "calc(100% - 2px)" : "100%"} !important;
         margin: ${useInline ? "0 0 0 4px" : finalMargin} !important;
         direction: ${isRTL ? "rtl" : "ltr"} !important;
         text-align: ${isRTL ? "right" : sourceAlign} !important;
         unicode-bidi: ${isRTL ? "plaintext" : "normal"} !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
+        overflow-wrap: ${isLinkedIn ? "break-word" : "anywhere"} !important;
+        word-break: ${isLinkedIn ? "normal" : "break-word"} !important;
         white-space: ${isTwitter || isFBC || inheritedWhiteSpace === "pre-wrap" ? "pre-wrap" : "normal"} !important;
         line-height: 1.5 !important;
         writing-mode: horizontal-tb !important;
@@ -925,29 +926,29 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (isPageScanEnabled) {
       if (typeof refreshIcon === "function") refreshIcon();
       if (typeof scanContent === "function") scanContent();
-} else {
-  document.querySelectorAll(".kt-paragraph-translation").forEach((el) => el.remove());
-  document.querySelectorAll("[data-translated], [data-translating], [data-mira-processing]").forEach((el) => {
-    el.removeAttribute("data-translated");
-    el.removeAttribute("data-translating");
-    el.removeAttribute("data-mira-processing");
-  });
+    } else {
+      document.querySelectorAll(".kt-paragraph-translation").forEach((el) => el.remove());
+      document.querySelectorAll("[data-translated], [data-translating], [data-mira-processing]").forEach((el) => {
+        el.removeAttribute("data-translated");
+        el.removeAttribute("data-translating");
+        el.removeAttribute("data-mira-processing");
+      });
 
-  // 断开所有可能触发重新翻译的观察者
-  if (window.__mira_selfHealObserver) {
-    window.__mira_selfHealObserver.disconnect();
-    window.__mira_selfHealObserver = null;
-  }
-  if (window.__mira_selfHealTimer) {
-    clearTimeout(window.__mira_selfHealTimer);
-    window.__mira_selfHealTimer = null;
-  }
-  if (window.__mira_dynamic_observer) {
-    window.__mira_dynamic_observer.disconnect();
-    window.__mira_dynamic_observer = null;
-  }
+      // 断开所有可能触发重新翻译的观察者
+      if (window.__mira_selfHealObserver) {
+        window.__mira_selfHealObserver.disconnect();
+        window.__mira_selfHealObserver = null;
+      }
+      if (window.__mira_selfHealTimer) {
+        clearTimeout(window.__mira_selfHealTimer);
+        window.__mira_selfHealTimer = null;
+      }
+      if (window.__mira_dynamic_observer) {
+        window.__mira_dynamic_observer.disconnect();
+        window.__mira_dynamic_observer = null;
+      }
 
-  if (typeof observer !== "undefined" && observer) observer.disconnect();
+      if (typeof observer !== "undefined" && observer) observer.disconnect();
       try {
         const commentsRoot =
           document.querySelector("ytd-comments") ||
@@ -1976,6 +1977,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
 function shouldSkipTextNode(node) {
   let el = node.parentElement;
   if (!el) return true;
+  if (location.hostname.includes('linkedin.com') && el.closest('[componentkey^="ProfileVerificationTriggerRef-"]')) return true;
   // 跳过不可见元素
   if (el.offsetParent === null && el.tagName !== 'BODY') return true;
   // 跳过脚本/样式
@@ -2005,6 +2007,19 @@ function startGenericTranslation() {
 
   blockEls.forEach(el => {
     try {
+      //  检查是否有祖先仍在 coveredNodes 里且已产出翻译内容
+      let ancestor = el.parentElement;
+      let ancestorCovers = false;
+      while (ancestor && ancestor !== document.body) {
+        if (coveredNodes.has(ancestor)) {
+          const ancestorHasTranslation =
+            ancestor.querySelector('.kt-paragraph-translation') ||
+            ancestor.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+          if (ancestorHasTranslation) { ancestorCovers = true; break; }
+        }
+        ancestor = ancestor.parentElement;
+      }
+      if (ancestorCovers) return;  // 祖先已经整体翻译过，跳过这个子孙
       if (coveredNodes.has(el)) {
         const stillHasTranslation =
           el.querySelector('.kt-paragraph-translation') ||
@@ -2015,7 +2030,7 @@ function startGenericTranslation() {
         delete el.dataset.translated;
       }
       if (shouldSkipTextNode({ parentElement: el })) return;
-
+      if (el.tagName === 'A' && el.querySelectorAll('p, h1, h2, h3, li').length > 0) return;
       const text = el.innerText?.trim();
       if (!text || text.length < 5) return;
       const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
@@ -2139,28 +2154,28 @@ function startGenericTranslation() {
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
   });
-if (!window.__mira_selfHealObserver) {
-  window.__mira_selfHealObserver = new MutationObserver((mutations) => {
-    //  检查开关 
-    if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
-
-    // 排除只是"译文容器自己"的增删（避免自己触发自己）
-    const hasRealChange = mutations.some((m) =>
-      Array.from(m.addedNodes).concat(Array.from(m.removedNodes)).some((n) => {
-        if (n.nodeType !== 1) return true; // 文本节点变化 
-        return !n.classList?.contains('kt-paragraph-translation');
-      })
-    );
-    if (!hasRealChange) return;
-
-    if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
-    window.__mira_selfHealTimer = setTimeout(() => {
+  if (!window.__mira_selfHealObserver) {
+    window.__mira_selfHealObserver = new MutationObserver((mutations) => {
+      //  检查开关 
       if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
-      if (typeof startGenericTranslation === 'function') startGenericTranslation();
-    }, 500);
-  });
-  window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
-}
+
+      // 排除只是"译文容器自己"的增删（避免自己触发自己）
+      const hasRealChange = mutations.some((m) =>
+        Array.from(m.addedNodes).concat(Array.from(m.removedNodes)).some((n) => {
+          if (n.nodeType !== 1) return true; // 文本节点变化 
+          return !n.classList?.contains('kt-paragraph-translation');
+        })
+      );
+      if (!hasRealChange) return;
+
+      if (window.__mira_selfHealTimer) clearTimeout(window.__mira_selfHealTimer);
+      window.__mira_selfHealTimer = setTimeout(() => {
+        if (typeof isPageScanEnabled !== 'undefined' && !isPageScanEnabled) return;
+        if (typeof startGenericTranslation === 'function') startGenericTranslation();
+      }, 500);
+    });
+    window.__mira_selfHealObserver.observe(document.body, { childList: true, subtree: true });
+  }
 }
 const _miraProcessingSet = new WeakSet();
 async function handleTranslateElement(el, forceRefresh = false) {
@@ -2197,9 +2212,15 @@ async function handleTranslateElement(el, forceRefresh = false) {
     }
   }
   // LinkedIn profile 名字在 h2 里是纯文本节点，跳过
-  if (location.hostname.includes("linkedin.com") && el.tagName === "H2") {
-    const hasOnlyText = el.children.length === 0 && el.childNodes.length === 1 && el.childNodes[0].nodeType === 3;
-    if (hasOnlyText) {
+  if (location.hostname.includes("linkedin.com")) {
+    const isNameHeading =
+      ["H1", "H2", "H3"].includes(el.tagName) &&
+      Array.from(el.childNodes).every((n) => n.nodeType === 3) &&
+      el.textContent.trim().length > 0;
+    const isVerificationLink =
+      el.tagName === "A" &&
+      el.querySelector('[id="verified-medium"], [id^="verified-"]');
+    if (isNameHeading || isVerificationLink) {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
       _miraProcessingSet.delete(el);
@@ -2259,13 +2280,11 @@ async function handleTranslateElement(el, forceRefresh = false) {
     _miraProcessingSet.delete(el);
     return;
   }
-  // wikipedia 维基百科的代码块很多都是用 class 包裹的，而不是 pre/code 标签， 特殊处理 
-  // wikipedia 维基百科的法语版本不会翻译的问题
+
   const isWikipedia = location.hostname.includes("wikipedia.org");
 
   if (isInCodeHighlightContext(el)) {
     if (isWikipedia && !el.closest('pre, code')) {
-      // wikipedia 特殊放行逻辑保留
     } else {
       el.dataset.translated = "true";
       el.removeAttribute("data-mira-processing");
@@ -2282,7 +2301,6 @@ async function handleTranslateElement(el, forceRefresh = false) {
   const isIndependent = ["P", "LI"].includes(el.tagName);
   const parentH1 = isYoutube ? el.closest("h1") : null;
 
-  //youtube的 yt-lockup-metadata-view-model__title 改成 ytLockupMetadataViewModelTitle 或 ytLockupMetadataViewModelHeadingReset了，先兼容一下
   const youtubeListTitleLink = isYoutube
     ? el.closest(".yt-lockup-metadata-view-model__title") ||
     el.closest(".ytLockupMetadataViewModelTitle") ||

@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fields: [
                 { k: 'groqKey', l: 'API Key', t: 'password' },
                 { k: 'groqHost', l: 'Base URL', t: 'text', d: 'https://api.groq.com/openai/v1' },
-                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'llama-3.3-70b-versatile', placeholderOnly: true }
+                { k: 'groqModel', l: 'Model Name', t: 'text', d: 'openai/gpt-oss-120b', placeholderOnly: true }
             ]
         },
         'siliconflow': {
@@ -153,20 +153,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const ENGINE_GROUPS = [
         {
-            label: "Advanced & Custom",
-            engines: ['groq', 'siliconflow', 'custom_ai']
+            label: "Custom",
+            engines: ['custom_ai']
         },
         {
             label: "AI Models (LLM)",
-            engines: ['openai', 'claude', 'gemini', 'deepseek', 'grok']
+            engines: ['groq', 'gemini', 'claude', 'deepseek', 'openai', 'siliconflow', 'grok']
         },
         {
-            label: "Cloud Infrastructure",
-            engines: ['google_v3', 'microsoft', 'volc', 'tencent']
-        },
-        {
-            label: "General Translation",
-            engines: ['google', 'bing', 'deepl', 'baidu']
+            label: "Cloud Translation API",
+            engines: ['deepl', 'baidu', 'google', 'bing', 'google_v3', 'microsoft', 'volc', 'tencent']
         }
     ];
 
