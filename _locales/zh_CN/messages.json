@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻译"
+    "message": "Mira 翻译 - 网页翻译"
   },
   "appDesc": {
-    "message": "开源安全的网页对照翻译、YouTube 双语字幕"
+    "message": "开源网页翻译、YouTube 双语字幕、AI 翻译与生词本"
   },
   "ERROR_400": {
     "message": "接口提示：请求无效或账户余额不足。"

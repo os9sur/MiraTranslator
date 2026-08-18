@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - ترجمه وب"
   },
   "appDesc": {
-    "message": "ترجمه وب متن‌باز و امن، زیرنویس دو زبانه یوتیوب"
+    "message": "ترجمه وب متن‌باز، زیرنویس دوزبانه یوتیوب، ترجمه با هوش مصنوعی و واژه‌نامه"
   },
   "ERROR_400": {
     "message": "خطای API: درخواست نامعتبر."

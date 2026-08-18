@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Web Çeviri"
   },
   "appDesc": {
-    "message": "Açık kaynaklı ve güvenli web çevirisi, YouTube iki dilli altyazı"
+    "message": "Açık kaynaklı web çevirisi, YouTube iki dilli altyazılar, yapay zekâ çevirisi ve kelime defteri"
   },
   "ERROR_400": {
     "message": "API Hatası: Geçersiz istek."

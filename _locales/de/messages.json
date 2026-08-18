@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Webübersetzung"
   },
   "appDesc": {
-    "message": "Open-Source & sichere Webübersetzung, zweisprachige YouTube-Untertitel"
+    "message": "Open-Source-Webübersetzung, zweisprachige YouTube-Untertitel, KI-Übersetzung & Vokabeltrainer"
   },
   "ERROR_400": {
     "message": "API-Fehler: Ungültige Anfrage."

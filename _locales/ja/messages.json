@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻訳"
+    "message": "Mira 翻訳 - Web翻訳"
   },
   "appDesc": {
-    "message": "安全・オープンソースのウェブ翻訳、YouTubeバイリンガル字幕"
+    "message": "オープンソースのWeb翻訳、YouTube 2言語字幕、AI翻訳・単語帳"
   },
   "ERROR_400": {
     "message": "APIエラー：無効なリクエストまたは残高不足。"

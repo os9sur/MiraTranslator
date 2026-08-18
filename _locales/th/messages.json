@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - แปลเว็บ"
   },
   "appDesc": {
-    "message": "แปลเว็บโอเพนซอร์สและปลอดภัย, ซับไตเติ้ลสองภาษา YouTube"
+    "message": "แปลเว็บโอเพนซอร์ส, ซับไตเติลสองภาษา YouTube, แปลด้วย AI และสมุดคำศัพท์"
   },
   "ERROR_400": {
     "message": "ข้อผิดพลาด API: คำขอไม่ถูกต้องหรือยอดเงินไม่พอ"

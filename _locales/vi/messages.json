@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Dịch web"
   },
   "appDesc": {
-    "message": "Dịch web mã nguồn mở & bảo mật, phụ đề song ngữ YouTube"
+    "message": "Dịch web mã nguồn mở, phụ đề song ngữ YouTube, dịch AI & sổ từ vựng"
   },
   "ERROR_400": {
     "message": "Lỗi API: Yêu cầu không hợp lệ hoặc hết số dư."
