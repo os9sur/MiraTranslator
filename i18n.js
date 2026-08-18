@@ -3015,7 +3015,8 @@ self.i18nAttach5 = {
     bilingual: "双语",
     shortcutCopied: "已复制 about:addons，请粘贴到地址栏打开，右上角齿轮图标里可设置快捷键",
     shortcutManual: "请在地址栏输入 about:addons 打开，右上角齿轮图标里可设置快捷键",
-    firstTimeShortcutHint: "💡 小提示：点击浏览器工具栏上的 Mira 图标，可以设置划词翻译快捷键"
+    firstTimeShortcutHint: "💡 小提示：点击浏览器工具栏上的 Mira 图标，可以设置划词翻译快捷键",
+    shortcutSettings: "快捷键设置"
   },
   "zh-TW": {
     dlOriginal: "下載原文字幕",
@@ -3023,7 +3024,8 @@ self.i18nAttach5 = {
     bilingual: "雙語",
     shortcutCopied: "已複製 about:addons，請貼到網址列開啟，右上角齒輪圖示可設定快捷鍵",
     shortcutManual: "請在網址列輸入 about:addons 開啟，右上角齒輪圖示可設定快捷鍵",
-    firstTimeShortcutHint: "💡 小提示：點擊瀏覽器工具列上的 Mira 圖示，可以設定劃詞翻譯快捷鍵"
+    firstTimeShortcutHint: "💡 小提示：點擊瀏覽器工具列上的 Mira 圖示，可以設定劃詞翻譯快捷鍵",
+    shortcutSettings: "快捷鍵設定"
   },
   "en": {
     dlOriginal: "Download Original Subtitles",
@@ -3031,7 +3033,8 @@ self.i18nAttach5 = {
     bilingual: "Bilingual",
     shortcutCopied: "Copied \"about:addons\" — paste it into the address bar, then set your shortcut via the gear icon in the top right",
     shortcutManual: "Type \"about:addons\" into the address bar, then set your shortcut via the gear icon in the top right",
-    firstTimeShortcutHint: "💡 Tip: Click the Mira icon in your browser toolbar to set up a keyboard shortcut"
+    firstTimeShortcutHint: "💡 Tip: Click the Mira icon in your browser toolbar to set up a keyboard shortcut",
+    shortcutSettings: "Shortcut Settings"
   },
   "ja": {
     dlOriginal: "原文字幕をダウンロード",
@@ -3039,7 +3042,8 @@ self.i18nAttach5 = {
     bilingual: "2ヶ国語",
     shortcutCopied: "「about:addons」をコピーしました。アドレスバーに貼り付けて開き、右上の歯車アイコンからショートカットを設定してください",
     shortcutManual: "アドレスバーに「about:addons」と入力して開き、右上の歯車アイコンからショートカットを設定してください",
-    firstTimeShortcutHint: "💡 ヒント：ツールバーのMiraアイコンをクリックすると、ショートカットキーを設定できます"
+    firstTimeShortcutHint: "💡 ヒント：ツールバーのMiraアイコンをクリックすると、ショートカットキーを設定できます",
+    shortcutSettings: "ショートカット設定"
   },
   "ko": {
     dlOriginal: "원본 자막 다운로드",
@@ -3047,7 +3051,8 @@ self.i18nAttach5 = {
     bilingual: "이중 언어",
     shortcutCopied: "\"about:addons\"가 복사되었습니다. 주소창에 붙여넣어 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
     shortcutManual: "주소창에 \"about:addons\"를 입력하여 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
-    firstTimeShortcutHint: "💡 팁: 브라우저 툴바의 Mira 아이콘을 클릭하면 단축키를 설정할 수 있어요"
+    firstTimeShortcutHint: "💡 팁: 브라우저 툴바의 Mira 아이콘을 클릭하면 단축키를 설정할 수 있어요",
+    shortcutSettings: "단축키 설정"
   },
   "es": {
     dlOriginal: "Descargar subtítulos originales",
@@ -3055,7 +3060,8 @@ self.i18nAttach5 = {
     bilingual: "Bilingüe",
     shortcutCopied: "Se copió \"about:addons\": pégalo en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
     shortcutManual: "Escribe \"about:addons\" en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
-    firstTimeShortcutHint: "💡 Consejo: haz clic en el icono de Mira en la barra de herramientas para configurar un atajo de teclado"
+    firstTimeShortcutHint: "💡 Consejo: haz clic en el icono de Mira en la barra de herramientas para configurar un atajo de teclado",
+    shortcutSettings: "Configuración de atajos"
   },
   "fr": {
     dlOriginal: "Télécharger les sous-titres originaux",
@@ -3063,7 +3069,8 @@ self.i18nAttach5 = {
     bilingual: "Bilingue",
     shortcutCopied: "« about:addons » copié : collez-le dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
     shortcutManual: "Saisissez « about:addons » dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
-    firstTimeShortcutHint: "💡 Astuce : cliquez sur l'icône Mira dans la barre d'outils pour configurer un raccourci clavier"
+    firstTimeShortcutHint: "💡 Astuce : cliquez sur l'icône Mira dans la barre d'outils pour configurer un raccourci clavier",
+    shortcutSettings: "Paramètres des raccourcis"
   },
   "de": {
     dlOriginal: "Original-Untertitel herunterladen",
@@ -3071,7 +3078,8 @@ self.i18nAttach5 = {
     bilingual: "Bilingual",
     shortcutCopied: "„about:addons“ kopiert – in die Adressleiste einfügen und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
     shortcutManual: "„about:addons“ in die Adressleiste eingeben und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
-    firstTimeShortcutHint: "💡 Tipp: Klicke auf das Mira-Symbol in der Symbolleiste, um eine Tastenkombination festzulegen"
+    firstTimeShortcutHint: "💡 Tipp: Klicke auf das Mira-Symbol in der Symbolleiste, um eine Tastenkombination festzulegen",
+    shortcutSettings: "Tastenkombinationen-Einstellungen"
   },
   "ru": {
     dlOriginal: "Скачать оригинальные субтитры",
@@ -3079,7 +3087,8 @@ self.i18nAttach5 = {
     bilingual: "Двуязычный",
     shortcutCopied: "Скопировано «about:addons» — вставьте в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
     shortcutManual: "Введите «about:addons» в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
-    firstTimeShortcutHint: "💡 Совет: нажмите на значок Mira на панели инструментов браузера, чтобы настроить сочетание клавиш"
+    firstTimeShortcutHint: "💡 Совет: нажмите на значок Mira на панели инструментов браузера, чтобы настроить сочетание клавиш",
+    shortcutSettings: "Настройки сочетаний клавиш"
   },
   "pt": {
     dlOriginal: "Baixar legendas originais",
@@ -3087,7 +3096,8 @@ self.i18nAttach5 = {
     bilingual: "Bilíngue",
     shortcutCopied: "\"about:addons\" copiado: cole na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
     shortcutManual: "Digite \"about:addons\" na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
-    firstTimeShortcutHint: "💡 Dica: clique no ícone do Mira na barra de ferramentas do navegador para configurar um atalho de teclado"
+    firstTimeShortcutHint: "💡 Dica: clique no ícone do Mira na barra de ferramentas do navegador para configurar um atalho de teclado",
+    shortcutSettings: "Configurações de atalhos"
   },
   "it": {
     dlOriginal: "Scarica sottotitoli originali",
@@ -3095,7 +3105,8 @@ self.i18nAttach5 = {
     bilingual: "Bilingue",
     shortcutCopied: "\"about:addons\" copiato: incollalo nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
     shortcutManual: "Digita \"about:addons\" nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
-    firstTimeShortcutHint: "💡 Suggerimento: clicca sull'icona di Mira nella barra degli strumenti per impostare una scorciatoia da tastiera"
+    firstTimeShortcutHint: "💡 Suggerimento: clicca sull'icona di Mira nella barra degli strumenti per impostare una scorciatoia da tastiera",
+    shortcutSettings: "Impostazioni scorciatoie"
   },
   "vi": {
     dlOriginal: "Tải phụ đề gốc",
@@ -3103,7 +3114,8 @@ self.i18nAttach5 = {
     bilingual: "Song ngữ",
     shortcutCopied: "Đã sao chép \"about:addons\", hãy dán vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
     shortcutManual: "Nhập \"about:addons\" vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
-    firstTimeShortcutHint: "💡 Mẹo: nhấp vào biểu tượng Mira trên thanh công cụ trình duyệt để thiết lập phím tắt"
+    firstTimeShortcutHint: "💡 Mẹo: nhấp vào biểu tượng Mira trên thanh công cụ trình duyệt để thiết lập phím tắt",
+    shortcutSettings: "Cài đặt phím tắt"
   },
   "th": {
     dlOriginal: "ดาวน์โหลดคำบรรยายต้นฉบับ",
@@ -3111,7 +3123,8 @@ self.i18nAttach5 = {
     bilingual: "สองภาษา",
     shortcutCopied: "คัดลอก \"about:addons\" แล้ว วางในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
     shortcutManual: "พิมพ์ \"about:addons\" ในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
-    firstTimeShortcutHint: "💡 เคล็ดลับ: คลิกไอคอน Mira บนแถบเครื่องมือของเบราว์เซอร์เพื่อตั้งค่าคีย์ลัด"
+    firstTimeShortcutHint: "💡 เคล็ดลับ: คลิกไอคอน Mira บนแถบเครื่องมือของเบราว์เซอร์เพื่อตั้งค่าคีย์ลัด",
+    shortcutSettings: "ตั้งค่าคีย์ลัด"
   },
   "ar": {
     dlOriginal: "تحميل الترجمة الأصلية",
@@ -3119,7 +3132,8 @@ self.i18nAttach5 = {
     bilingual: "ثنائية اللغة",
     shortcutCopied: "تم نسخ \"about:addons\"، الصق الرابط في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
     shortcutManual: "اكتب \"about:addons\" في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
-    firstTimeShortcutHint: "💡 نصيحة: انقر على أيقونة Mira في شريط أدوات المتصفح لإعداد اختصار لوحة المفاتيح"
+    firstTimeShortcutHint: "💡 نصيحة: انقر على أيقونة Mira في شريط أدوات المتصفح لإعداد اختصار لوحة المفاتيح",
+    shortcutSettings: "إعدادات الاختصارات"
   },
   "fa": {
     dlOriginal: "دانلود زیرنویس اصلی",
@@ -3127,7 +3141,8 @@ self.i18nAttach5 = {
     bilingual: "دو زبانه",
     shortcutCopied: "«about:addons» کپی شد؛ آن را در نوار آدرس جای‌گذاری و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
     shortcutManual: "«about:addons» را در نوار آدرس تایپ و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
-    firstTimeShortcutHint: "💡 نکته: روی آیکون Mira در نوار ابزار مرورگر کلیک کنید تا میان‌بر صفحه‌کلید را تنظیم کنید"
+    firstTimeShortcutHint: "💡 نکته: روی آیکون Mira در نوار ابزار مرورگر کلیک کنید تا میان‌بر صفحه‌کلید را تنظیم کنید",
+    shortcutSettings: "تنظیمات میان‌برها"
   },
   "tr": {
     dlOriginal: "Orijinal altyazıları indir",
@@ -3135,7 +3150,8 @@ self.i18nAttach5 = {
     bilingual: "İki dilli",
     shortcutCopied: "\"about:addons\" kopyalandı; adres çubuğuna yapıştırıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
     shortcutManual: "Adres çubuğuna \"about:addons\" yazıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
-    firstTimeShortcutHint: "💡 İpucu: Klavye kısayolu ayarlamak için tarayıcı araç çubuğundaki Mira simgesine tıklayın"
+    firstTimeShortcutHint: "💡 İpucu: Klavye kısayolu ayarlamak için tarayıcı araç çubuğundaki Mira simgesine tıklayın",
+    shortcutSettings: "Kısayol Ayarları"
   }
 };
 
