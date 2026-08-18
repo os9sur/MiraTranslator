@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 翻譯"
+    "message": "Mira 翻譯 - 網頁翻譯"
   },
   "appDesc": {
-    "message": "開源安全的網頁對照翻譯、YouTube 雙語字幕"
+    "message": "開源網頁翻譯、YouTube 雙語字幕、AI 翻譯與生字本"
   },
   "ERROR_400": {
     "message": "介面提示：請求無效或帳戶餘額不足。"

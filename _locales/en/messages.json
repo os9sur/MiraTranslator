@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira Translator"
+    "message": "Mira Translator - Web Translation"
   },
   "appDesc": {
-    "message": "Open-source & secure webpage translation, YouTube bilingual subtitles"
+    "message": "Open-source web translation, YouTube bilingual subtitles, AI translation & vocabulary"
   },
   "ERROR_400": {
     "message": "API Error: Invalid request or low balance."

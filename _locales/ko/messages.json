@@ -1,9 +1,9 @@
 {
   "appName": {
-    "message": "Mira 번역"
+    "message": "Mira 번역 - 웹 번역"
   },
   "appDesc": {
-    "message": "안전하고 오픈소스인 웹 번역, YouTube 이중 자막"
+    "message": "오픈 소스 웹 번역, YouTube 이중 자막, AI 번역 및 단어장"
   },
   "ERROR_400": {
     "message": "API 오류: 잘못된 요청 또는 잔액 부족."
