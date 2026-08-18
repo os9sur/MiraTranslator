@@ -16,7 +16,7 @@
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;
-  <a href="https://os9sur.github.io/mira-translator/">
+  <a href="https://os9sur.github.io/mira-trans/">
     <img src="https://img.shields.io/badge/Official-Website-brightgreen" alt="Website">
   </a>
 </p>

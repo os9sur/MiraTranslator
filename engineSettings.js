@@ -153,20 +153,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     const ENGINE_GROUPS = [
         {
-            label: "Advanced & Custom",
-            engines: ['groq', 'siliconflow', 'custom_ai']
+            label: "Custom",
+            engines: ['custom_ai']
         },
         {
             label: "AI Models (LLM)",
-            engines: ['openai', 'claude', 'gemini', 'deepseek', 'grok']
+            engines: ['groq', 'gemini', 'claude', 'deepseek', 'openai', 'siliconflow', 'grok']
         },
         {
-            label: "Cloud Infrastructure",
-            engines: ['google_v3', 'microsoft', 'volc', 'tencent']
-        },
-        {
-            label: "General Translation",
-            engines: ['google', 'bing', 'deepl', 'baidu']
+            label: "Cloud Translation API",
+            engines: ['deepl', 'baidu', 'google', 'bing', 'google_v3', 'microsoft', 'volc', 'tencent']
         }
     ];
 

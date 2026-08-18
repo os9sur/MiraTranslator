@@ -680,6 +680,15 @@ body {
     box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);
 }
 
+@keyframes goldPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.2), 0 0 10px rgba(255, 215, 0, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.6), 0 0 25px rgba(255, 215, 0, 0.3);
+    }
+}
+
 .get-key-link {
     font-size: 14px;
     color: #ffd700 !important;
@@ -690,11 +699,14 @@ body {
     border: 1px solid rgba(255, 215, 0, 0.2);
     transition: 0.3s;
     animation: goldPulse 4s infinite;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
 }
 
 .get-key-link:hover {
     background: rgba(255, 215, 0, 0.15);
     border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 35px rgba(255, 215, 0, 0.4);
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
 }
 
 .hidden {
@@ -1482,7 +1494,7 @@ body {
 
 .ai-prompt-style-hint {
     font-size: 12px;
-    color: #d29922;
+    color: #d1b526;
     margin-top: 3px;
 }
 

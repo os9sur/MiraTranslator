@@ -36,9 +36,9 @@
         <main class="main-content">
             <div id="close-engineSettingsWindow" class="close-btn" title=""></div>
             <!-- 通知栏 -->
-            <div id="noticeBar" class="notice-bar" style="display:none;">
+            <div id="noticeBar" class="notice-bar" style="display:none;width:97%;">
                 <!-- 折叠行：默认是手型 cursor: pointer -->
-                <div id="noticeCollapsedRow" class="notice-collapsed-row"
+                <div id="noticeCollapsedRow" dir="auto" class="notice-collapsed-row"
                     style="cursor: pointer; display: flex; align-items: center;">
                     <span style="width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;"></span>
                     <span id="noticeTitleClip" class="notice-title-clip"></span>
@@ -49,7 +49,7 @@
                 </div>
 
                 <!-- 展开后的正文体  -->
-                <div id="noticeExpandedBody" class="notice-expanded-body">
+                <div id="noticeExpandedBody" dir="auto" class="notice-expanded-body">
                     <div id="noticeContentText" class="notice-content-text"
                         style="user-select: text; -webkit-user-select: text; cursor: text;"></div>
                     <button id="noticeGotItBtn" class="notice-got-it-btn" style="cursor: pointer;"></button>
