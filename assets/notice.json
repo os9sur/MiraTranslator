@@ -7,7 +7,7 @@
         "level": "info",
         "content": "推荐使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快。使用方法：点击右上角的「设置」图标，进入「配置翻译服务 → 添加自定义翻译服务」，选择 Groq 或 Gemini，点击“获取 API Key”，按照提示完成配置即可。",
         "gotIt": "知道了",
-        "scope": "both"
+        "scope": "popup"
     },
     "zh-TW": {
         "id": "notice_20260817_free_ai",
@@ -15,7 +15,7 @@
         "level": "info",
         "content": "推薦使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快。使用方法：點擊右上角的「設定」圖示，進入「設定翻譯服務 → 新增自訂翻譯服務」，選擇 Groq 或 Gemini，點擊「取得 API Key」，按照提示完成設定即可。",
         "gotIt": "知道了",
-        "scope": "both"
+        "scope": "popup"
     },
     "ja": {
         "id": "notice_20260817_free_ai",
@@ -23,7 +23,7 @@
         "level": "info",
         "content": "GroqまたはGeminiの無料APIキーを使ってAI翻訳を利用できます。高速で利用できます。使い方：右上の「設定」アイコンをクリックし、「翻訳サービスの設定 → カスタム翻訳サービスを追加」を開き、GroqまたはGeminiを選択して「APIキーを取得」をクリックし、案内に従って設定してください。",
         "gotIt": "了解",
-        "scope": "both"
+        "scope": "popup"
     },
     "en": {
         "id": "notice_20260817_free_ai",
@@ -31,7 +31,7 @@
         "level": "info",
         "content": "Try using a free Groq or Gemini API key for AI translation—fast and easy to use. To get started, click the Settings icon in the top-right corner, go to “Translation Service Settings → Add Custom Translation Service”, select Groq or Gemini, click “Get API Key”, and follow the instructions to complete the setup.",
         "gotIt": "Got it",
-        "scope": "both"
+        "scope": "popup"
     },
     "ru": {
         "id": "notice_20260817_free_ai",
@@ -39,7 +39,7 @@
         "level": "info",
         "content": "Для AI-перевода можно использовать бесплатный API-ключ Groq или Gemini — быстро и удобно. Чтобы начать, нажмите значок «Настройки» в правом верхнем углу, перейдите в «Настройки переводчика → Добавить собственный переводчик», выберите Groq или Gemini, нажмите «Получить API-ключ» и следуйте инструкциям для завершения настройки.",
         "gotIt": "Понятно",
-        "scope": "both"
+        "scope": "popup"
     },
     "pt-BR": {
         "id": "notice_20260817_free_ai",
@@ -47,7 +47,7 @@
         "level": "info",
         "content": "Use uma chave de API gratuita do Groq ou Gemini para tradução com IA — rápida e fácil de usar. Para começar, clique no ícone de configurações no canto superior direito, acesse «Configurações do serviço de tradução → Adicionar serviço de tradução personalizado», selecione Groq ou Gemini, clique em «Obter chave de API» e siga as instruções para concluir a configuração.",
         "gotIt": "Entendi",
-        "scope": "both"
+        "scope": "popup"
     },
     "fr": {
         "id": "notice_20260817_free_ai",
@@ -55,7 +55,7 @@
         "level": "info",
         "content": "Utilisez une clé API gratuite de Groq ou Gemini pour la traduction avec l’IA : rapide et facile à utiliser. Pour commencer, cliquez sur l’icône des paramètres en haut à droite, allez dans « Paramètres du service de traduction → Ajouter un service de traduction personnalisé », sélectionnez Groq ou Gemini, cliquez sur « Obtenir une clé API » et suivez les instructions pour terminer la configuration.",
         "gotIt": "Compris",
-        "scope": "both"
+        "scope": "popup"
     },
     "de": {
         "id": "notice_20260817_free_ai",
@@ -63,7 +63,7 @@
         "level": "info",
         "content": "Für KI-Übersetzungen kann ein kostenloser API-Key von Groq oder Gemini verwendet werden – schnell und einfach. Klicke zunächst oben rechts auf das Einstellungssymbol, gehe zu „Übersetzungsdienste konfigurieren → Benutzerdefinierten Übersetzungsdienst hinzufügen“, wähle Groq oder Gemini aus, klicke auf „API-Key abrufen“ und folge den Anweisungen zur Einrichtung.",
         "gotIt": "Verstanden",
-        "scope": "both"
+        "scope": "popup"
     },
     "tr": {
         "id": "notice_20260817_free_ai",
@@ -71,7 +71,7 @@
         "level": "info",
         "content": "Yapay zekâ ile çeviri için ücretsiz Groq veya Gemini API anahtarı kullanabilirsiniz — hızlı ve kullanımı kolay. Başlamak için sağ üst köşedeki ayarlar simgesine tıklayın, «Çeviri Hizmetlerini Yapılandır → Özel Çeviri Hizmeti Ekle» bölümüne gidin, Groq veya Gemini'yi seçin, «API Anahtarını Al» seçeneğine tıklayın ve kurulumu tamamlamak için talimatları izleyin.",
         "gotIt": "Anladım",
-        "scope": "both"
+        "scope": "popup"
     },
     "es": {
         "id": "notice_20260817_free_ai",
@@ -79,6 +79,6 @@
         "level": "info",
         "content": "Puedes usar una clave API gratuita de Groq o Gemini para traducir con IA: rápido y fácil de usar. Para empezar, haz clic en el icono de Ajustes situado en la esquina superior derecha, ve a «Configurar servicios de traducción → Añadir servicio de traducción personalizado», selecciona Groq o Gemini, haz clic en «Obtener clave API» y sigue las instrucciones para completar la configuración.",
         "gotIt": "Entendido",
-        "scope": "both"
+        "scope": "popup"
     }
 }
