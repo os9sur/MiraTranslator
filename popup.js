@@ -1155,7 +1155,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('ytFontSizeVal').innerText = currentConfig.ytStyleSettings.fontSize + 'px';
     document.getElementById('ytBgOpacityVal').innerText = currentConfig.ytStyleSettings.bgOpacity;
     if (currentConfig.ytStyleSettings.color) {
-      document.getElementById('style-color').value = currentConfig.ytStyleSettings.color;
+      const ytColorInput = document.getElementById('yt-style-color');
+      ytColorInput.value = currentConfig.ytStyleSettings.color;
+      ytColorInput.style.background = currentConfig.ytStyleSettings.color;
     }
   }
 
@@ -1437,9 +1439,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res) return;
     const config = res.userStyleConfig || DEFAULT_STYLE;
     colorInput.value = config.color;
+    colorInput.style.background = config.color;
     fontSizeInput.value = config.fontSize;
     borderTypeSelect.value = config.borderType;
     borderColorInput.value = config.borderColor;
+    borderColorInput.style.background = config.borderColor;
     document.getElementById('fontSizeVal').innerText = config.fontSize + 'px';
     isBlur = config.isBlur;
     if (isBlur) {
@@ -1455,6 +1459,132 @@ document.addEventListener('DOMContentLoaded', async () => {
   webPreview.addEventListener('mouseleave', () => {
     if (isBlur) webPreview.style.filter = 'blur(4px)';
   });
+
+  //手绘取色器
+  // 迷你取色器：全局只初始化一次，所有颜色输入框共用
+  (function setupMiniPicker() {
+    const picker = document.getElementById('mini-picker');
+    const svBox = document.getElementById('picker-sv');
+    const svCursor = document.getElementById('picker-sv-cursor');
+    const hueBar = document.getElementById('picker-hue');
+    const hueCursor = document.getElementById('picker-hue-cursor');
+    let hue = 217;
+    let currentInput = null;
+
+    function hsvToHex(h, s, v) {
+      s /= 100; v /= 100;
+      const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+      let [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x]
+        : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+      const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    // HEX 反推 HSV，用于面板初始化同步当前颜色
+    function hexToHsv(hex) {
+      let r = parseInt(hex.slice(1, 3), 16) / 255;
+      let g = parseInt(hex.slice(3, 5), 16) / 255;
+      let b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+      let h = 0;
+      if (d !== 0) {
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+      }
+      if (h < 0) h += 360;
+      const s = max === 0 ? 0 : d / max;
+      const v = max;
+      return { h, s: s * 100, v: v * 100 };
+    }
+
+    function applyColor(hex) {
+      if (!currentInput) return;
+      currentInput.value = hex;
+      currentInput.style.background = hex; // 拖动取色时同步按钮背景
+      currentInput.dispatchEvent(new Event('input'));
+    }
+
+    function updateFromSV(clientX, clientY) {
+      const rect = svBox.getBoundingClientRect();
+      const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+      svCursor.style.left = x + 'px';
+      svCursor.style.top = y + 'px';
+      applyColor(hsvToHex(hue, (x / rect.width) * 100, 100 - (y / rect.height) * 100));
+    }
+
+    function updateFromHue(clientX) {
+      const rect = hueBar.getBoundingClientRect();
+      const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      hueCursor.style.left = x + 'px';
+      hue = (x / rect.width) * 360;
+      svBox.style.background =
+        `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent), hsl(${hue},100%,50%)`;
+      const svRect = svBox.getBoundingClientRect();
+      updateFromSV(svRect.left + (parseFloat(svCursor.style.left) || 0),
+        svRect.top + (parseFloat(svCursor.style.top) || 0));
+    }
+
+    let draggingSV = false, draggingHue = false;
+    svBox.addEventListener('mousedown', e => { draggingSV = true; updateFromSV(e.clientX, e.clientY); });
+    hueBar.addEventListener('mousedown', e => { draggingHue = true; updateFromHue(e.clientX); });
+    document.addEventListener('mousemove', e => {
+      if (draggingSV) updateFromSV(e.clientX, e.clientY);
+      if (draggingHue) updateFromHue(e.clientX);
+    });
+    document.addEventListener('mouseup', () => { draggingSV = draggingHue = false; });
+
+    document.addEventListener('click', e => {
+      if (!picker.contains(e.target) && !e.target.classList.contains('mini-picker-trigger')) {
+        picker.style.display = 'none';
+      }
+    });
+
+    window.bindMiniPicker = function (input) {
+      input.type = 'text';
+      input.readOnly = true;
+      input.classList.add('mini-picker-trigger');
+      input.style.background = input.value; // 初始化按钮背景
+
+      input.addEventListener('click', e => {
+        e.preventDefault();
+        currentInput = input;
+
+        // 先定位面板并显示，确保后面 getBoundingClientRect() 能拿到真实宽高
+        const rect = input.getBoundingClientRect();
+        let top = rect.bottom + 4;
+        let left = rect.left;
+        if (left + 150 > window.innerWidth) left = window.innerWidth - 150;
+        if (top + 130 > window.innerHeight) top = rect.top - 134;
+        picker.style.left = left + 'px';
+        picker.style.top = top + 'px';
+        picker.style.display = 'block';
+
+        // 面板已经可见，现在计算游标位置才准确
+        const { h, s, v } = hexToHsv(input.value || '#60a5fa');
+        hue = h;
+        svBox.style.background =
+          `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent), hsl(${hue},100%,50%)`;
+        const svRect = svBox.getBoundingClientRect();
+        svCursor.style.left = (s / 100 * svRect.width) + 'px';
+        svCursor.style.top = ((100 - v) / 100 * svRect.height) + 'px';
+        const hueRect = hueBar.getBoundingClientRect();
+        hueCursor.style.left = (hue / 360 * hueRect.width) + 'px';
+      });
+    };
+  })();
+
+  document.querySelectorAll('input[type="color"]').forEach(input => {
+    window.bindMiniPicker(input);
+  });
+
+  //自动给所有原生颜色输入框绑定迷你取色器 
+  document.querySelectorAll('input[type="color"]').forEach(input => {
+    window.bindMiniPicker(input);
+    input.style.background = input.value;
+  });
+
   [
     colorInput, fontSizeInput, borderTypeSelect, borderColorInput,
     document.getElementById('yt-style-color'),
@@ -1469,9 +1599,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isYTPanel = this.closest('#ytStyleControls') !== null;
       if (isYTPanel) {
         const ytInput = document.getElementById('yt-style-color');
-        if (ytInput) ytInput.value = selectedColor;
+        if (ytInput) {
+          ytInput.value = selectedColor;
+          ytInput.style.background = selectedColor;
+        }
       } else {
         colorInput.value = selectedColor;
+        colorInput.style.background = selectedColor;
       }
       updatePreview();
     });
