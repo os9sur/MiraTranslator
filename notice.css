@@ -68,6 +68,7 @@
   margin: 8px 0;
   max-height: 75px;
   min-height: 0;
+  white-space: pre-line;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: rgba(148, 163, 184, 0.4) transparent;

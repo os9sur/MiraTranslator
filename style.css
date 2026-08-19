@@ -1618,7 +1618,7 @@ select:hover {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-size: 13px;
   color: #e2e8f0;
   cursor: pointer;
