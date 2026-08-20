@@ -9,53 +9,92 @@ async function initNoticeBar(pageScope) {
   const GITHUB_NOTICE_URL = IS_DEV ? 'https://os9sur.github.io/mira-trans/notice.json' :
     'https://os9sur.github.io/MiraTranslator/assets/notice.json';
 
-  let noticeData = null;
-  let minDays = 0;
-  let openReview = false;
-
+  let json = null;
   try {
     const resp = await fetch(`${GITHUB_NOTICE_URL}?t=${Date.now()}`, { cache: 'no-cache' });
     if (!resp.ok) return;
-    const json = await resp.json();
-    if (!json.enabled) return;
-
-    minDays = json.minDays ?? 0;
-
-    const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
-    const langShort = uiLang.split('-')[0];
-
-    noticeData = json[uiLang] || json[langShort] || json['en'] || null;
-    if (!noticeData) return;
-
-    // scope 未填默认 'both'，两个页面都显示
-    const scope = noticeData.scope || 'both';
-    if (scope !== 'both' && scope !== pageScope) return;
-
-    openReview = noticeData.openReview || false;
-    
-    if (openReview && pageScope !== 'popup') return;
+    json = await resp.json();
   } catch (e) {
     return;
   }
 
+  const uiLang = chrome.i18n.getUILanguage().replace('_', '-');
+  const langShort = uiLang.split('-')[0];
+
   const installData = await safeGetStorage('install_time');
   const installTime = installData?.install_time || Date.now();
   const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-  if (daysSinceInstall < minDays) return;
 
-  // targetLangs 跟当前翻译目标语言相关，只在 popup 场景下有意义
-  if (pageScope === 'popup' && noticeData.targetLangs?.length) {
-    const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
-    if (!noticeData.targetLangs.includes(currentTargetLang)) return;
+  // 从某个区块（guide 或 notices）里取出该区块的语言数组
+  // section 内部自带 enabled / minDays，不满足直接返回空数组
+  function getLangList(section) {
+    if (!section || section.enabled === false) return [];
+    const minDays = section.minDays ?? 0;
+    if (daysSinceInstall < minDays) return [];
+    return section[uiLang] || section[langShort] || section['en'] || [];
   }
 
-  if (!noticeData?.id || !noticeData?.title) return;
+  function isEligible(item) {
+    if (!item?.id || !item?.title) return false;
+    const scope = item.scope || 'both';
+    if (scope !== 'both' && scope !== pageScope) return false;
+    if (pageScope === 'popup' && item.targetLangs?.length) {
+      const currentTargetLang = (window.currentTargetL || '').split('-')[0].toLowerCase();
+      if (!item.targetLangs.includes(currentTargetLang)) return false;
+    }
+    if (item.openReview && pageScope !== 'popup') return false;
+    return true;
+  }
 
-  // dismissedKey 不带 pageScope 后缀：任一页面点了"知道了"，两边都不再弹
-  const dismissedKey = NOTICE_DISMISSED_KEY + noticeData.id;
-  const stored = await safeGetStorage(dismissedKey);
-  if (stored?.[dismissedKey]) return;
+function dismissedKeyOf(item) {
+  const scope = item.scope || 'both';
+  const suffix = scope === 'both' ? 'both' : scope;
+  return `${NOTICE_DISMISSED_KEY}${item.id}_${suffix}`;
+}
 
+// 兼容旧版本：scope 为 both 的通知曾经按 popup/settings 分别存 dismiss 状态，
+// 检查旧 key，命中则视为已 dismiss，并迁移到新的统一 key，避免老用户重复看到已关闭的通知
+async function isDismissed(item) {
+  const key = dismissedKeyOf(item);
+  const stored = await safeGetStorage(key);
+  if (stored?.[key]) return true;
+
+  const scope = item.scope || 'both';
+  if (scope === 'both') {
+    const legacyKey = `${NOTICE_DISMISSED_KEY}${item.id}_${pageScope}`;
+    const legacyStored = await safeGetStorage(legacyKey);
+    if (legacyStored?.[legacyKey]) {
+      // 迁移到新 key，下次两个页面都能直接命中新 key
+      await safeSetStorage({ [key]: true });
+      return true;
+    }
+  }
+
+  return false;
+}
+
+  async function findFirstShowable(list) {
+    for (const item of list) {
+      if (!isEligible(item)) continue;
+      if (await isDismissed(item)) continue;
+      return item;
+    }
+    return null;
+  }
+
+  const guideList = getLangList(json.guide);
+  const noticeList = getLangList(json.notices);
+
+  // 优先级：guide 优先于 notices
+  let noticeData = await findFirstShowable(guideList);
+  if (!noticeData) {
+    noticeData = await findFirstShowable(noticeList);
+  }
+  if (!noticeData) return;
+
+  const openReview = noticeData.openReview || false;
+
+  // ---- 渲染逻辑 ----
   const bar = document.getElementById('noticeBar');
   const titleEl = document.getElementById('noticeTitleClip');
   const contentEl = document.getElementById('noticeContentText');
@@ -66,7 +105,6 @@ async function initNoticeBar(pageScope) {
 
   if (!bar || !titleEl || !contentEl || !gotItBtn || !expandBody || !chevron) return;
 
-  // 应用主题配色
   const theme = NOTICE_THEMES[noticeData.level] || NOTICE_THEMES.warning;
   bar.style.borderColor = theme.border;
   if (dotEl) dotEl.style.background = theme.dot;
@@ -92,7 +130,6 @@ async function initNoticeBar(pageScope) {
     }
   `;
 
-  // 填入内容：优先渲染 contentList（列表形式），否则退回纯文本 content
   titleEl.textContent = noticeData.title;
   if (Array.isArray(noticeData.contentList) && noticeData.contentList.length) {
     contentEl.innerHTML = '';
@@ -112,20 +149,19 @@ async function initNoticeBar(pageScope) {
   bar.style.display = 'block';
   bar.classList.add('mira-pulsing');
 
-  // 折叠行点击：展开 / 收起
-document.getElementById('noticeCollapsedRow').addEventListener('click', () => {
+  document.getElementById('noticeCollapsedRow').addEventListener('click', () => {
     const isExpanded = expandBody.classList.contains('is-expanded');
     expandBody.classList.toggle('is-expanded', !isExpanded);
     expandBody.style.display = isExpanded ? 'none' : 'flex';
     chevron.style.transform = isExpanded ? '' : 'rotate(180deg)';
     titleEl.classList.toggle('notice-title-expanded', !isExpanded);
     if (!isExpanded) bar.classList.remove('mira-pulsing');
-});
+  });
 
-  // 知道了：持久化 + 按需跳转 + 淡出
   gotItBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    await safeSetStorage({ [dismissedKey]: true });
+    const key = dismissedKeyOf(noticeData);
+    await safeSetStorage({ [key]: true });
 
     if (noticeData.link) {
       chrome.tabs.create({ url: noticeData.link });

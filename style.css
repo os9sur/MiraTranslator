@@ -1618,7 +1618,7 @@ select:hover {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   font-size: 13px;
   color: #e2e8f0;
   cursor: pointer;
@@ -2658,4 +2658,27 @@ yt-attributed-string+.kt-paragraph-translation {
   background: rgba(255, 80, 80, 0.1);
   border-color: rgba(255, 80, 80, 0.6);
   color: rgb(255, 100, 100);
+}
+
+.mini-picker {
+  position: fixed; z-index: 9999; background:#0f172a; border:1px solid #334155;
+  border-radius:8px; padding:8px; box-shadow:0 4px 12px rgba(0,0,0,.4);
+}
+.picker-sv {
+  position:relative; width:140px; height:100px; border-radius:4px; cursor:crosshair;
+  background: linear-gradient(to top, #000, transparent),
+              linear-gradient(to right, #fff, transparent),
+              hsl(217,100%,50%);
+}
+.picker-cursor {
+  position:absolute; width:8px; height:8px; border:2px solid #fff; border-radius:50%;
+  box-shadow:0 0 2px rgba(0,0,0,.6); transform:translate(-50%,-50%); pointer-events:none;
+}
+.picker-hue {
+  position:relative; width:140px; height:12px; margin-top:8px; border-radius:4px; cursor:pointer;
+  background: linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red);
+}
+.picker-hue-cursor {
+  position:absolute; top:-2px; width:4px; height:16px; background:#fff;
+  border:1px solid #888; transform:translateX(-50%); pointer-events:none;
 }

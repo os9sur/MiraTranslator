@@ -76,144 +76,6 @@ let currentTranslationResponse = null;
 //   }
 // }
 
-async function initUpdateNotify() {
-  let activeVocab = [];
-  try {
-    const vocabulary = await idb.vocabulary.getAll();
-    activeVocab = vocabulary.filter(item => !item.deleted);
-  } catch (e) {
-    logger.error("Failed to fetch vocabulary", e);
-  }
-
-  const guideEl = document.getElementById('welcome-guide');
-  if (!guideEl) return;
-
-  const exportBtnHtml = activeVocab.length > 0 ? `
-  <button id="notice-export-btn" style="
-    background: #fcfcfc;
-    color: #555;
-    border: 1px solid #dcdcdc;
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 13px;
-    cursor: pointer;
-    margin-bottom: 12px;
-    width: 100%;
-    pointer-events: auto;
-    transition: all 0.2s;
-  ">${t('notice.export', null, activeVocab.length)}</button>
-` : '';
-
-
-  guideEl.innerHTML = `
-  <div style="
-    background: #fff;
-    border-radius: 20px;
-    padding: 36px 28px;
-    text-align: center;
-    max-width: 320px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.18);
-  ">
-    <div style="font-size: 40px; margin-bottom: 20px;">✨</div>
-    <h3 style="margin: 0 0 14px; font-size: 16px; font-weight: 600; color: #1a1a1a;">
-      ${t('notice.title')}
-    </h3>
-    <div style="font-size: 13px; color: #555; line-height: 1.8; margin: 0 0 24px; text-align: left;">
-      <p style="margin: 0 0 10px;"><strong> </strong></p>
-      <p style="margin: 0;">${t('notice.body')}</p>
-    </div>
-    ${exportBtnHtml}
-    <button id="notice-close-btn" style="
-      background: #1890ff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 28px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      pointer-events: auto;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(24,144,255,0.2);
-    ">${t('notice.close')}</button>
-  </div>
-`;
-
-  guideEl.style.display = 'flex';
-  guideEl.style.opacity = '1';
-  guideEl.style.zIndex = '9999';
-
-  if (activeVocab.length > 0) {
-    const exportBtn = document.getElementById('notice-export-btn');
-    exportBtn.addEventListener('click', async () => {
-      activeVocab.sort((a, b) => (b.date || 0) - (a.date || 0));
-      let csvContent = `\ufeff${_t('word')},${_t('meaning')},${_t('note')},Context,Source,URL,${_t('addTime')}\n`;
-
-      activeVocab.forEach(item => {
-        let transText = "";
-        if (typeof item.trans === 'object' && item.trans !== null) {
-          const basic = item.trans.basic || "";
-          let detail = "";
-          if (Array.isArray(item.trans.dictData)) {
-            detail = item.trans.dictData.map(d => {
-              const pos = d.pos ? `${d.pos} ` : "";
-              const meanings = Array.isArray(d.meanings)
-                ? d.meanings.join(' ')
-                : (d.meanings || d.definition || "");
-              return `${pos}${meanings}`;
-            }).join(' | ');
-          }
-          transText = basic + (detail ? ` [${detail}]` : "");
-
-          //  例句
-          if (Array.isArray(item.trans.examples) && item.trans.examples.length > 0) {
-            const exampleText = item.trans.examples.slice(0, 3).map(s => {
-              const en = typeof s === 'string' ? s : (s.en || s.sentence || "");
-              const cn = typeof s === 'object' ? (s.cn || s.translation || "") : "";
-              return cn ? `${en} (${cn})` : en;
-            }).join(' / ');
-            transText += ` | Examples: ${exampleText}`;
-          }
-
-        } else {
-          transText = item.trans || "";
-        }
-
-        //  上下文
-        const context = item.trans?.context || "";
-        const contextTranslation = item.trans?.contextTranslation || "";
-        const contextText = context
-          ? (contextTranslation ? `${context} (${contextTranslation})` : context)
-          : "";
-
-        const safeWord = (item.word || "").replace(/"/g, '""');
-        const safeTrans = transText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
-        const safeNote = (item.note || "").replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
-        const safeTitle = (item.title || "").replace(/"/g, '""');
-        const safeUrl = (item.src || "").replace(/"/g, '""');
-        const safeContext = contextText.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ');
-        const time = new Date(item.date).toLocaleString().replace(/,/g, ' ');
-        csvContent += `"${safeWord}","${safeTrans}","${safeNote}","${safeContext}","${safeTitle}","${safeUrl}","${time}"\n`;
-      });
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `Mira_Vocabulary_Backup_${new Date().toISOString().slice(0, 10)}.csv`;
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-
-    exportBtn.addEventListener('mouseenter', () => exportBtn.style.background = '#f0f0f0');
-    exportBtn.addEventListener('mouseleave', () => exportBtn.style.background = '#fcfcfc');
-  }
-
-  document.getElementById('notice-close-btn').onclick = () => {
-    window.close();
-  };
-}
 document.addEventListener('DOMContentLoaded', async () => {
   if (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
     document.body.style.width = '100vw';
@@ -222,11 +84,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.style.margin = '0';
     document.body.style.padding = '12px';
     document.body.style.borderRadius = '0';
-  }
-
-  if (showNotice) {
-    initUpdateNotify();
-    return;
   }
 
   const shown = await safeGetStorage('review_page_shown_v1');
@@ -1155,7 +1012,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('ytFontSizeVal').innerText = currentConfig.ytStyleSettings.fontSize + 'px';
     document.getElementById('ytBgOpacityVal').innerText = currentConfig.ytStyleSettings.bgOpacity;
     if (currentConfig.ytStyleSettings.color) {
-      document.getElementById('style-color').value = currentConfig.ytStyleSettings.color;
+      const ytColorInput = document.getElementById('yt-style-color');
+      ytColorInput.value = currentConfig.ytStyleSettings.color;
+      ytColorInput.style.background = currentConfig.ytStyleSettings.color;
     }
   }
 
@@ -1437,9 +1296,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!res) return;
     const config = res.userStyleConfig || DEFAULT_STYLE;
     colorInput.value = config.color;
+    colorInput.style.background = config.color;
     fontSizeInput.value = config.fontSize;
     borderTypeSelect.value = config.borderType;
     borderColorInput.value = config.borderColor;
+    borderColorInput.style.background = config.borderColor;
     document.getElementById('fontSizeVal').innerText = config.fontSize + 'px';
     isBlur = config.isBlur;
     if (isBlur) {
@@ -1455,6 +1316,132 @@ document.addEventListener('DOMContentLoaded', async () => {
   webPreview.addEventListener('mouseleave', () => {
     if (isBlur) webPreview.style.filter = 'blur(4px)';
   });
+
+  //手绘取色器
+  // 迷你取色器：全局只初始化一次，所有颜色输入框共用
+  (function setupMiniPicker() {
+    const picker = document.getElementById('mini-picker');
+    const svBox = document.getElementById('picker-sv');
+    const svCursor = document.getElementById('picker-sv-cursor');
+    const hueBar = document.getElementById('picker-hue');
+    const hueCursor = document.getElementById('picker-hue-cursor');
+    let hue = 217;
+    let currentInput = null;
+
+    function hsvToHex(h, s, v) {
+      s /= 100; v /= 100;
+      const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+      let [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x]
+        : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+      const toHex = n => Math.round((n + m) * 255).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    // HEX 反推 HSV，用于面板初始化同步当前颜色
+    function hexToHsv(hex) {
+      let r = parseInt(hex.slice(1, 3), 16) / 255;
+      let g = parseInt(hex.slice(3, 5), 16) / 255;
+      let b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+      let h = 0;
+      if (d !== 0) {
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+      }
+      if (h < 0) h += 360;
+      const s = max === 0 ? 0 : d / max;
+      const v = max;
+      return { h, s: s * 100, v: v * 100 };
+    }
+
+    function applyColor(hex) {
+      if (!currentInput) return;
+      currentInput.value = hex;
+      currentInput.style.background = hex; // 拖动取色时同步按钮背景
+      currentInput.dispatchEvent(new Event('input'));
+    }
+
+    function updateFromSV(clientX, clientY) {
+      const rect = svBox.getBoundingClientRect();
+      const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+      svCursor.style.left = x + 'px';
+      svCursor.style.top = y + 'px';
+      applyColor(hsvToHex(hue, (x / rect.width) * 100, 100 - (y / rect.height) * 100));
+    }
+
+    function updateFromHue(clientX) {
+      const rect = hueBar.getBoundingClientRect();
+      const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+      hueCursor.style.left = x + 'px';
+      hue = (x / rect.width) * 360;
+      svBox.style.background =
+        `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent), hsl(${hue},100%,50%)`;
+      const svRect = svBox.getBoundingClientRect();
+      updateFromSV(svRect.left + (parseFloat(svCursor.style.left) || 0),
+        svRect.top + (parseFloat(svCursor.style.top) || 0));
+    }
+
+    let draggingSV = false, draggingHue = false;
+    svBox.addEventListener('mousedown', e => { draggingSV = true; updateFromSV(e.clientX, e.clientY); });
+    hueBar.addEventListener('mousedown', e => { draggingHue = true; updateFromHue(e.clientX); });
+    document.addEventListener('mousemove', e => {
+      if (draggingSV) updateFromSV(e.clientX, e.clientY);
+      if (draggingHue) updateFromHue(e.clientX);
+    });
+    document.addEventListener('mouseup', () => { draggingSV = draggingHue = false; });
+
+    document.addEventListener('click', e => {
+      if (!picker.contains(e.target) && !e.target.classList.contains('mini-picker-trigger')) {
+        picker.style.display = 'none';
+      }
+    });
+
+    window.bindMiniPicker = function (input) {
+      input.type = 'text';
+      input.readOnly = true;
+      input.classList.add('mini-picker-trigger');
+      input.style.background = input.value; // 初始化按钮背景
+
+      input.addEventListener('click', e => {
+        e.preventDefault();
+        currentInput = input;
+
+        // 先定位面板并显示，确保后面 getBoundingClientRect() 能拿到真实宽高
+        const rect = input.getBoundingClientRect();
+        let top = rect.bottom + 4;
+        let left = rect.left;
+        if (left + 150 > window.innerWidth) left = window.innerWidth - 150;
+        if (top + 130 > window.innerHeight) top = rect.top - 134;
+        picker.style.left = left + 'px';
+        picker.style.top = top + 'px';
+        picker.style.display = 'block';
+
+        // 面板已经可见，现在计算游标位置才准确
+        const { h, s, v } = hexToHsv(input.value || '#60a5fa');
+        hue = h;
+        svBox.style.background =
+          `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, transparent), hsl(${hue},100%,50%)`;
+        const svRect = svBox.getBoundingClientRect();
+        svCursor.style.left = (s / 100 * svRect.width) + 'px';
+        svCursor.style.top = ((100 - v) / 100 * svRect.height) + 'px';
+        const hueRect = hueBar.getBoundingClientRect();
+        hueCursor.style.left = (hue / 360 * hueRect.width) + 'px';
+      });
+    };
+  })();
+
+  document.querySelectorAll('input[type="color"]').forEach(input => {
+    window.bindMiniPicker(input);
+  });
+
+  //自动给所有原生颜色输入框绑定迷你取色器 
+  document.querySelectorAll('input[type="color"]').forEach(input => {
+    window.bindMiniPicker(input);
+    input.style.background = input.value;
+  });
+
   [
     colorInput, fontSizeInput, borderTypeSelect, borderColorInput,
     document.getElementById('yt-style-color'),
@@ -1469,9 +1456,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       const isYTPanel = this.closest('#ytStyleControls') !== null;
       if (isYTPanel) {
         const ytInput = document.getElementById('yt-style-color');
-        if (ytInput) ytInput.value = selectedColor;
+        if (ytInput) {
+          ytInput.value = selectedColor;
+          ytInput.style.background = selectedColor;
+        }
       } else {
         colorInput.value = selectedColor;
+        colorInput.style.background = selectedColor;
       }
       updatePreview();
     });

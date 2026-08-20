@@ -212,15 +212,9 @@
       border: none;
       border-radius: 28px;
       overflow: hidden;
-    }
-
-    .rounded-color-input::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-
-    .rounded-color-input::-webkit-color-swatch {
-      border: none;
-      border-radius: 28px;
+      color: transparent;
+      caret-color: transparent;
+      font-size: 0;
     }
 
     .lp-select {
@@ -489,8 +483,8 @@
             <span id="avatarInitial"></span>
           </button>
 
-          <div id="advancedSettingsBtn" class="icon-action-btn engine-pulse-strong" style="border-width: 1.3px !important;"
-  data-i18n="moreSettings" data-i18n-title title="Advanced settings">
+          <div id="advancedSettingsBtn" class="icon-action-btn engine-pulse-strong"
+            style="border-width: 1.3px !important;" data-i18n="moreSettings" data-i18n-title title="Advanced settings">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <line x1="3" y1="6" x2="21" y2="6" />
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -514,10 +508,10 @@
             style="color: #38bdf8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; line-height: 1.4; padding-bottom: 1px;">Google
             Translate</span>
           <svg id="p-engine-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-  stroke-width="3"
-  style="opacity: 0.75; flex-shrink: 0; margin-left: 5px; pointer-events: none; vertical-align: middle;">
-  <path d="M6 9l6 6 6-6" />
-</svg>
+            stroke-width="3"
+            style="opacity: 0.75; flex-shrink: 0; margin-left: 5px; pointer-events: none; vertical-align: middle;">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
           <!-- 实际红点由 showEngineWarning() 动态插入的 .engine-warning 负责 -->
         </div>
 
@@ -862,8 +856,8 @@
       <span data-i18n="cloudSync">云同步</span>
     </div>
     <div class="menu-item" id="openShortcutSettings" dir="auto">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
         <rect x="2" y="6" width="20" height="12" rx="2"></rect>
         <line x1="6" y1="10" x2="6" y2="10"></line>
         <line x1="10" y1="10" x2="10" y2="10"></line>
@@ -1098,7 +1092,16 @@
     </div>
     <button id="saveStyleConfig" data-i18n="applyAndSync" class="cool-btn"
       style="margin-top: 30px; flex-shrink: 0;">应用并同步到网页</button>
+    <div id="mini-picker" class="mini-picker" style="display:none;">
+      <div id="picker-sv" class="picker-sv">
+        <div id="picker-sv-cursor" class="picker-cursor"></div>
+      </div>
+      <div id="picker-hue" class="picker-hue">
+        <div id="picker-hue-cursor" class="picker-hue-cursor"></div>
+      </div>
+    </div>
   </div>
+  <!-- 风格设置panel结束 -->
   <div dir="auto" id="toast" class="toast-hidden"></div>
   <script src="utils.js"></script>
   <script src="notice.js"></script>

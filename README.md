@@ -74,7 +74,7 @@ This tool was created to fill the need for a functional, open-source bilingual t
 * **Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
 * **Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models (like Ollama), and more. Users can also configure custom API endpoints.
 * **AI Context-Aware Translation:** Uses surrounding context to produce more accurate and natural translations, rather than translating isolated words or sentences.
-* **Element Selection:** Allows users to select or exclude specific areas of a webpage for translation.
+* **Element Selection:** Rather than translating the entire page by default, Mira focuses on main content areas out of the box — menus and other UI chrome are skipped to avoid layout breakage and visual clutter. Users can select additional areas to translate, or exclude specific ones, as needed.
 * **Data Synchronization:** Supports syncing configurations and saved vocabulary via Google Drive or WebDAV.
 * **Vocabulary Learning:** Enables users to save words or phrases directly from translated text into a local list, allowing for future review, editing, and cross-device synchronization.
 * **Mobile Support:** Compatible with mobile browsers (such as Microsoft Edge and Firefox on Android), allowing for seamless translation on the go.
