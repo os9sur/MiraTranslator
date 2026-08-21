@@ -286,12 +286,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
   const styledInput = document.getElementById('conf-minlen');
+  const btnSaveMinLen = document.getElementById('btnSaveMinLen');
   if (styledInput) {
     styledInput.addEventListener('focus', function () {
       this.style.borderColor = '#38bdf8';
+      this.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.5), inset 0 0 4px rgba(56, 189, 248, 0.2)';
     });
     styledInput.addEventListener('blur', function () {
       this.style.borderColor = '#334155';
+      this.style.boxShadow = 'none';
+    });
+  }
+  if (myInput && btnSaveMinLen) {
+    myInput.addEventListener('focus', function () {
+      btnSaveMinLen.style.display = 'inline-block';
+    });
+
+    btnSaveMinLen.addEventListener('click', () => {
+      saveScanConfig();
+      btnSaveMinLen.style.display = 'none';
     });
   }
   async function updateCacheSizeDisplay() {
@@ -2407,10 +2420,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setTimeout(initInspectState, 0);
 
+    const INSPECT_CLICK_LIMIT = 3;
+    let inspectHeaderClicks = parseInt(localStorage.getItem('inspectHeaderClicks') || '0', 10);
+
+    // 页面加载时,如果之前已经被禁用过,直接应用 class
+    (function applyScanDisabledIfNeeded() {
+      const header = document.getElementById('inspectHeader');
+      if (header && localStorage.getItem('inspectScanDisabled') === 'true') {
+        header.classList.add('scan-disabled');
+      }
+    })();
+
     document.addEventListener('click', function (e) {
       const header = e.target.closest('#inspectHeader');
       if (!header) return;
 
+      // 光效点击计数逻辑
+      if (localStorage.getItem('inspectScanDisabled') !== 'true') {
+        inspectHeaderClicks++;
+        localStorage.setItem('inspectHeaderClicks', inspectHeaderClicks);
+        if (inspectHeaderClicks > INSPECT_CLICK_LIMIT) {
+          header.classList.add('scan-disabled');
+          localStorage.setItem('inspectScanDisabled', 'true');
+        }
+      }
+
+      // 展开/折叠逻辑
       const content = document.getElementById('inspectContent');
       const arrow = document.getElementById('inspectArrow');
       if (!content || !arrow) return;
@@ -2430,7 +2465,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         arrow.classList.add('arrow-expanded');
         localStorage.setItem('inspectContainerState', 'expanded');
       } else {
-        // 折叠 确保 transition 先生效再改属性, 避免顿挫
         content.style.overflow = 'hidden';
         content.style.transition = 'none';
         requestAnimationFrame(() => {
@@ -2844,6 +2878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const normalizeSelectors = (str) =>
     str.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).join(', ');
   const selectorInput = document.getElementById('conf-selectors');
+  const btnSaveSelector = document.getElementById('btnSaveSelector');
   const userScanConfig = currentConfig.scanConfig?.custom?.[domain];
   const defaultScanRule = SiteRules.getRule(domain);
   const minLenInput = document.getElementById('conf-minlen');
@@ -2933,12 +2968,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   selectorInput.onfocus = () => {
     _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
     _originalMinLen = minLenInput.value;
+    btnSaveSelector.style.display = 'inline-block';
   };
   minLenInput.onfocus = () => {
     _originalSelectorValue = normalizeSelectors(selectorInput.value.trim());
     _originalMinLen = minLenInput.value;
   };
-  selectorInput.addEventListener('blur', saveScanConfig);
+
+  btnSaveSelector.addEventListener('click', () => {
+    saveScanConfig();
+    btnSaveSelector.style.display = 'none';
+  });
   minLenInput.addEventListener('blur', saveScanConfig);
   //切换网页翻译目标语言
   document.getElementById('targetLang').onchange = async (e) => {
@@ -3063,7 +3103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const colors = {
       bg: "rgba(18,18,18,0.85)",
       border: "rgba(255,255,255,0.27)",
-      shadow: "0 8px 24px rgba(0,0,0,0.6)",
+      shadow: "rgb(184 178 178 / 60%) 0px 8px 24px",
       text: "#ffffffb7",
       textMuted: "rgba(255,255,255,0.50)",
       hoverBg: "rgba(56,189,248,0.15)",

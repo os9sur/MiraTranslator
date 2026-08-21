@@ -400,6 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let switchVersion = 0;
 
     let currentModel = null;
+    let _loginTrigger = null;
     async function switchInstance(id) {
         await safeSetStorage({ lastActiveId: id });
         const myVersion = ++switchVersion;
@@ -834,6 +835,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     backdrop.style.display = 'none';
                                     backdrop.style.animation = '';
                                 }
+
+                                //  登录成功后自动续接被打断的操作 ----
+                                if (_loginTrigger === 'test') {
+                                    const testBtn = document.getElementById('testApiConfig');
+                                    if (testBtn) testBtn.click();
+                                } else if (_loginTrigger === 'save') {
+                                    const saveBtn = document.getElementById('saveApiConfig');
+                                    if (saveBtn) saveBtn.click();
+                                }
+                                _loginTrigger = null; // 消费完标记后重置，避免残留影响下一次登录流程 
+
                             }, 400);
 
                         }, 1500);
@@ -1848,6 +1860,7 @@ function _bindAIPromptEvents(section, initialSaved) {
 
     // ── dirty 标记 → 激活保存按钮
     function markDirty() {
+        clearTimeout(saveTimer);
         if (!isDirty) {
             isDirty = true;
             saveBtn.disabled = false;
@@ -1886,7 +1899,7 @@ function _bindAIPromptEvents(section, initialSaved) {
     saveBtn.addEventListener('click', async () => {
         if (!isDirty || saveBtn.disabled) return;
 
-        _setPromptBtnState(saveBtn, 'saving');
+        saveBtn.disabled = true;
 
         try {
             await safeSetStorage({
@@ -1899,7 +1912,6 @@ function _bindAIPromptEvents(section, initialSaved) {
             isDirty = false;
             _setPromptBtnState(saveBtn, 'saved');
 
-            // 2s 后恢复，但 disable（无变化不可再按）
             clearTimeout(saveTimer);
             saveTimer = setTimeout(() => {
                 _setPromptBtnState(saveBtn, 'idle');
@@ -1911,24 +1923,22 @@ function _bindAIPromptEvents(section, initialSaved) {
             clearTimeout(saveTimer);
             saveTimer = setTimeout(() => {
                 _setPromptBtnState(saveBtn, 'idle');
-                saveBtn.disabled = false; // 出错可重试
+                saveBtn.disabled = false;
             }, 2000);
         }
     });
 }
 
-// ── 按钮状态切换 ──── 
+// ── 按钮状态切换 ────  
 function _setPromptBtnState(btn, state) {
-    btn.classList.remove('state-saving', 'state-saved', 'state-error');
+    btn.classList.remove('state-saving', 'state-saved', 'state-error');  
     const icons = {
-        idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save`,
-        saving: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Saving...`,
-        saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved`,
-        error: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Failed`,
+        idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${t('cpSave')}`,
+        saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${t('success')}`,
+        error: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${t('failed')}`,
     };
     if (state !== 'idle') btn.classList.add(`state-${state}`);
     btn.innerHTML = icons[state] || icons.idle;
-    btn.disabled = (state === 'saving');
 }
 
 // ── HTML 转义（防止 saved prompt 里有 < > 破坏 innerHTML）──

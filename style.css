@@ -1145,6 +1145,9 @@ select:hover {
     inset 0 0 6px rgba(0, 229, 255, 0.08);
   transition: all 0.25s ease;
 }
+#inspectHeader.scan-disabled::before {
+  display: none;
+}
 
 #inspectArrow {
   font-size: 10px;
@@ -1582,8 +1585,7 @@ select:hover {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3),
-    0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  box-shadow: rgb(255 247 247 / 30%) 0px 10px 25px -5px, rgb(64 64 64 / 30%) 0px 8px 10px -6px;
   display: none;
   z-index: 130;
   padding: 6px;
@@ -2228,7 +2230,6 @@ yt-attributed-string+.kt-paragraph-translation {
 }
 
 @keyframes miraDotBlink {
-
   0%,
   100% {
     opacity: 1;
