@@ -1497,7 +1497,22 @@ body {
     color: #d1b526;
     margin-top: 3px;
 }
+@keyframes miraDotBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
 
+  50% {
+    opacity: 0.25;
+  }
+}
+.field-hint {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
 .github-link {
     color: #39ff14;
     opacity: 0.85;
