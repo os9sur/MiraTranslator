@@ -104,97 +104,97 @@
     ]
   },
   "notices": {
-    "enabled": true,
-    "minDays": 0,
-    "zh-CN": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 免费 AI 翻译渠道",
-        "level": "info",
-        "content": "可使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快。点击左下角「添加自定义翻译服务 (API Key)」按钮，选择 Groq 或 Gemini，点击\"获取 API Key\"，按照提示完成配置即可。提示：免费 API 通常有请求频率限制，翻译内容较多的长网页时可能触发限制；如遇到 429，请稍等片刻后再试，或关闭网页翻译，通过选定文本或快捷键翻译段落，可减少请求并降低触发限制的可能。",
-        "gotIt": "知道了",
-        "scope": "settings"
-      }
-    ],
-    "zh-TW": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 免費 AI 翻譯管道",
-        "level": "info",
-        "content": "可使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快。點擊左下角「新增自訂翻譯服務 (API Key)」按鈕，選擇 Groq 或 Gemini，點擊「取得 API Key」，按照提示完成設定即可。提示：免費 API 通常有請求頻率限制，翻譯內容較多的長網頁時可能觸發限制；如遇到 429，請稍等片刻後再試，或關閉網頁翻譯，透過選取文字或快捷鍵翻譯段落，可減少請求並降低觸發限制的可能。",
-        "gotIt": "知道了",
-        "scope": "settings"
-      }
-    ],
-    "en": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 Free AI Translation Tip",
-        "level": "info",
-        "content": "You can use a free Groq or Gemini API Key for AI translation — it's fast. To set it up: click the 'Add Custom Translation Service (API Key)' button in the bottom left, choose Groq or Gemini, click 'Get API Key', and follow the prompts to finish setup. Note: Free APIs typically have rate limits. Translating very long web pages may trigger these limits. If you encounter a 429 error, wait a moment and try again, or turn off full-page translation and translate selected text or use the shortcut key for paragraphs — this reduces requests and helps avoid hitting the limit.",
-        "gotIt": "Got it",
-        "scope": "settings"
-      }
-    ],
-    "ja": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 無料で使える AI 翻訳サービス",
-        "level": "info",
-        "content": "Groq または Gemini の無料 API Key を使って AI 翻訳ができます。高速で便利です。設定方法：左下の「カスタム翻訳サービスを追加 (API Key)」ボタンをクリックし、Groq または Gemini を選択して「API Key を取得」をクリックし、画面の指示に従って設定を完了してください。注意：無料 API には通常、リクエスト頻度の制限があります。長い Web ページの翻訳時に制限に引っかかることがあります。429 エラーが発生した場合は、しばらく待ってからもう一度お試しください。または、ページ全体の翻訳をオフにして、テキストを選択して翻訳するか、ショートカットキーで段落を翻訳することで、リクエスト数を減らし制限を回避できます。",
-        "gotIt": "わかりました",
-        "scope": "settings"
-      }
-    ],
-    "ko": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 무료 AI 번역 서비스",
-        "level": "info",
-        "content": "Groq 또는 Gemini의 무료 API Key를 사용하면 AI 번역을 이용할 수 있습니다. 속도가 빠르고 편리합니다. 설정 방법: 왼쪽 하단의 '사용자 지정 번역 서비스 추가 (API Key)' 버튼을 클릭하고 Groq 또는 Gemini를 선택한 후 'API Key 받기'를 클릭하여 화면 안내에 따라 설정을 완료하세요. 참고: 무료 API는 일반적으로 요청 빈도 제한이 있습니다. 긴 웹페이지를 번역할 때 제한이 걸릴 수 있습니다. 429 오류가 발생하면 잠시 기다렸다가 다시 시도하거나, 전체 페이지 번역을 끄고 텍스트를 선택하여 번역하거나 단축키로 문단을 번역하면 요청 수를 줄여 제한을 피할 수 있습니다.",
-        "gotIt": "알겠습니다",
-        "scope": "settings"
-      }
-    ],
-    "es": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 Traducción con IA gratuita",
-        "level": "info",
-        "content": "Puedes usar una API Key gratuita de Groq o Gemini para la traducción con IA. Es rápida y fácil de configurar. Para empezar, haz clic en el botón 'Agregar servicio de traducción personalizado (API Key)' en la parte inferior izquierda, selecciona Groq o Gemini, haz clic en 'Obtener API Key' y sigue las instrucciones para completar la configuración. Nota: Las API gratuitas suelen tener límites de frecuencia de solicitudes. Traducir páginas web muy largas puede activar estos límites. Si encuentras un error 429, espera un momento y vuelve a intentarlo, o desactiva la traducción de toda la página y traduce texto seleccionado o usa el atajo de teclado para párrafos; esto reduce las solicitudes y ayuda a evitar alcanzar el límite.",
-        "gotIt": "Entendido",
-        "scope": "settings"
-      }
-    ],
-    "pt-BR": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 Tradução com IA gratuita",
-        "level": "info",
-        "content": "Você pode usar uma API Key gratuita do Groq ou Gemini para tradução com IA. É rápido e fácil de configurar. Para começar, clique no botão 'Adicionar serviço de tradução personalizado (API Key)' no canto inferior esquerdo, selecione Groq ou Gemini, clique em 'Obter API Key' e siga as instruções para concluir a configuração. Observação: APIs gratuitas geralmente têm limites de frequência de requisições. Traduzir páginas web muito longas pode acionar esses limites. Se encontrar um erro 429, aguarde um momento e tente novamente, ou desative a tradução da página inteira e traduza o texto selecionado ou use o atalho do teclado para parágrafos; isso reduz as requisições e ajuda a evitar o limite.",
-        "gotIt": "Entendi",
-        "scope": "settings"
-      }
-    ],
-    "ru": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 Бесплатный ИИ-перевод",
-        "level": "info",
-        "content": "Для ИИ-перевода можно использовать бесплатный API Key от Groq или Gemini — это быстро и просто. Чтобы настроить перевод, нажмите кнопку «Добавить пользовательскую службу перевода (API Key)» в левом нижнем углу, выберите Groq или Gemini, нажмите «Получить API Key» и следуйте инструкциям. Примечание: бесплатные API обычно имеют ограничения по частоте запросов. При переводе очень длинных веб-страниц можно превысить лимит. Если вы столкнулись с ошибкой 429, подождите немного и попробуйте снова, или отключите полный перевод страницы и переводите выделенный текст или используйте горячие клавиши для перевода абзацев — это уменьшит количество запросов и поможет избежать ограничений.",
-        "gotIt": "Хорошо",
-        "scope": "settings"
-      }
-    ],
-    "tr": [
-      {
-        "id": "notice_20260817_free_ai",
-        "title": "💡 Ücretsiz AI çeviri",
-        "level": "info",
-        "content": "AI çevirisi için Groq veya Gemini'nin ücretsiz API Key'ini kullanabilirsiniz. Çevirisi hızlıdır ve kurulumu kolaydır. Ayarlamak için sol alt köşedeki 'Özel çeviri hizmeti ekle (API Key)' butonuna tıklayın, Groq veya Gemini'yi seçin, 'API Key al'a tıklayın ve talimatları izleyerek kurulumu tamamlayın. Not: Ücretsiz API'ler genellikle istek sıklığı sınırlamasına sahiptir. Çok uzun web sayfalarını çevirirken bu sınıra takılabilirsiniz. 429 hatası alırsanız, bir süre bekleyip tekrar deneyin veya sayfa çevirisini kapatıp seçili metni veya kısayol tuşuyla paragrafları çevirin; bu, istek sayısını azaltarak sınıra takılmanızı önlemeye yardımcı olur.",
-        "gotIt": "Anladım",
-        "scope": "settings"
-      }
-    ]
+  "enabled": true,
+  "minDays": 0,
+  "zh-CN": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 免费 AI 翻译渠道",
+      "level": "info",
+      "content": "可使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快。点击左下角「添加自定义翻译服务 (API Key)」按钮，选择 Groq 或 Gemini，点击\"获取 API Key\"，按照提示完成配置即可。\n 提示：免费 API 通常有请求频率限制，翻译内容较多的长网页时可能触发限制；如遇到 429，请稍等片刻后再试，或关闭网页翻译，通过选定文本或快捷键翻译段落，可减少请求并降低触发限制的可能。",
+      "gotIt": "知道了",
+      "scope": "settings"
+    }
+  ],
+  "zh-TW": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 免費 AI 翻譯管道",
+      "level": "info",
+      "content": "可使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快。點擊左下角「新增自訂翻譯服務 (API Key)」按鈕，選擇 Groq 或 Gemini，點擊「取得 API Key」，按照提示完成設定即可。\n 提示：免費 API 通常有請求頻率限制，翻譯內容較多的長網頁時可能觸發限制；如遇到 429，請稍等片刻後再試，或關閉網頁翻譯，透過選取文字或快捷鍵翻譯段落，可減少請求並降低觸發限制的可能。",
+      "gotIt": "知道了",
+      "scope": "settings"
+    }
+  ],
+  "en": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 Free AI Translation Tip",
+      "level": "info",
+      "content": "You can use a free Groq or Gemini API Key for AI translation — it's fast. To set it up: click the 'Add Custom Translation Service (API Key)' button in the bottom left, choose Groq or Gemini, click 'Get API Key', and follow the prompts to finish setup.\n Note: Free APIs typically have rate limits. Translating very long web pages may trigger these limits. If you encounter a 429 error, wait a moment and try again, or turn off full-page translation and translate selected text or use the shortcut key for paragraphs — this reduces requests and helps avoid hitting the limit.",
+      "gotIt": "Got it",
+      "scope": "settings"
+    }
+  ],
+  "ja": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 無料で使える AI 翻訳サービス",
+      "level": "info",
+      "content": "Groq または Gemini の無料 API Key を使って AI 翻訳ができます。高速で便利です。設定方法：左下の「カスタム翻訳サービスを追加 (API Key)」ボタンをクリックし、Groq または Gemini を選択して「API Key を取得」をクリックし、画面の指示に従って設定を完了してください。\n 注意：無料 API には通常、リクエスト頻度の制限があります。長い Web ページの翻訳時に制限に引っかかることがあります。429 エラーが発生した場合は、しばらく待ってからもう一度お試しください。または、ページ全体の翻訳をオフにして、テキストを選択して翻訳するか、ショートカットキーで段落を翻訳することで、リクエスト数を減らし制限を回避できます。",
+      "gotIt": "わかりました",
+      "scope": "settings"
+    }
+  ],
+  "ko": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 무료 AI 번역 서비스",
+      "level": "info",
+      "content": "Groq 또는 Gemini의 무료 API Key를 사용하면 AI 번역을 이용할 수 있습니다. 속도가 빠르고 편리합니다. 설정 방법: 왼쪽 하단의 '사용자 지정 번역 서비스 추가 (API Key)' 버튼을 클릭하고 Groq 또는 Gemini를 선택한 후 'API Key 받기'를 클릭하여 화면 안내에 따라 설정을 완료하세요.\n 참고: 무료 API는 일반적으로 요청 빈도 제한이 있습니다. 긴 웹페이지를 번역할 때 제한이 걸릴 수 있습니다. 429 오류가 발생하면 잠시 기다렸다가 다시 시도하거나, 전체 페이지 번역을 끄고 텍스트를 선택하여 번역하거나 단축키로 문단을 번역하면 요청 수를 줄여 제한을 피할 수 있습니다.",
+      "gotIt": "알겠습니다",
+      "scope": "settings"
+    }
+  ],
+  "es": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 Traducción con IA gratuita",
+      "level": "info",
+      "content": "Puedes usar una API Key gratuita de Groq o Gemini para la traducción con IA. Es rápida y fácil de configurar. Para empezar, haz clic en el botón 'Agregar servicio de traducción personalizado (API Key)' en la parte inferior izquierda, selecciona Groq o Gemini, haz clic en 'Obtener API Key' y sigue las instrucciones para completar la configuración.\n Nota: Las API gratuitas suelen tener límites de frecuencia de solicitudes. Traducir páginas web muy largas puede activar estos límites. Si encuentras un error 429, espera un momento y vuelve a intentarlo, o desactiva la traducción de toda la página y traduce texto seleccionado o usa el atajo de teclado para párrafos; esto reduce las solicitudes y ayuda a evitar alcanzar el límite.",
+      "gotIt": "Entendido",
+      "scope": "settings"
+    }
+  ],
+  "pt-BR": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 Tradução com IA gratuita",
+      "level": "info",
+      "content": "Você pode usar uma API Key gratuita do Groq ou Gemini para tradução com IA. É rápido e fácil de configurar. Para começar, clique no botão 'Adicionar serviço de tradução personalizado (API Key)' no canto inferior esquerdo, selecione Groq ou Gemini, clique em 'Obter API Key' e siga as instruções para concluir a configuração.\n Observação: APIs gratuitas geralmente têm limites de frequência de requisições. Traduzir páginas web muito longas pode acionar esses limites. Se encontrar um erro 429, aguarde um momento e tente novamente, ou desative a tradução da página inteira e traduza o texto selecionado ou use o atalho do teclado para parágrafos; isso reduz as requisições e ajuda a evitar o limite.",
+      "gotIt": "Entendi",
+      "scope": "settings"
+    }
+  ],
+  "ru": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 Бесплатный ИИ-перевод",
+      "level": "info",
+      "content": "Для ИИ-перевода можно использовать бесплатный API Key от Groq или Gemini — это быстро и просто. Чтобы настроить перевод, нажмите кнопку «Добавить пользовательскую службу перевода (API Key)» в левом нижнем углу, выберите Groq или Gemini, нажмите «Получить API Key» и следуйте инструкциям.\n Примечание: бесплатные API обычно имеют ограничения по частоте запросов. При переводе очень длинных веб-страниц можно превысить лимит. Если вы столкнулись с ошибкой 429, подождите немного и попробуйте снова, или отключите полный перевод страницы и переводите выделенный текст или используйте горячие клавиши для перевода абзацев — это уменьшит количество запросов и поможет избежать ограничений.",
+      "gotIt": "Хорошо",
+      "scope": "settings"
+    }
+  ],
+  "tr": [
+    {
+      "id": "notice_20260817_free_ai",
+      "title": "💡 Ücretsiz AI çeviri",
+      "level": "info",
+      "content": "AI çevirisi için Groq veya Gemini'nin ücretsiz API Key'ini kullanabilirsiniz. Çevirisi hızlıdır ve kurulumu kolaydır. Ayarlamak için sol alt köşedeki 'Özel çeviri hizmeti ekle (API Key)' butonuna tıklayın, Groq veya Gemini'yi seçin, 'API Key al'a tıklayın ve talimatları izleyerek kurulumu tamamlayın.\n Not: Ücretsiz API'ler genellikle istek sıklığı sınırlamasına sahiptir. Çok uzun web sayfalarını çevirirken bu sınıra takılabilirsiniz. 429 hatası alırsanız, bir süre bekleyip tekrar deneyin veya sayfa çevirisini kapatıp seçili metni veya kısayol tuşuyla paragrafları çevirin; bu, istek sayısını azaltarak sınıra takılmanızı önlemeye yardımcı olur.",
+      "gotIt": "Anladım",
+      "scope": "settings"
+    }
+  ]
   }
 }
