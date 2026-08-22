@@ -932,7 +932,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         el.removeAttribute("data-translated");
         el.removeAttribute("data-translating");
         el.removeAttribute("data-mira-processing");
+        // 清理挂在元素对象上的重试计数/跳过标记，防止快速开关翻译时
+        // 因为上一轮翻译还没完成就被再次 add()，导致重试计数虚高，
+        // 最终把该元素永久标记为"已跳过翻译"（只有刷新页面才能重置）
+        delete el._miraRetryCount;
+        delete el._miraSkippedHash;
+        delete el._miraLastText;
       });
+
+      // 同时清空批处理队列里还没发出的待翻译任务，避免它们在重新
+      // 打开翻译后才延迟触发，和新一轮扫描的结果冲突
+      if (typeof TranslationBatcher !== "undefined") {
+        TranslationBatcher.queue = [];
+        if (TranslationBatcher.timer) {
+          clearTimeout(TranslationBatcher.timer);
+          TranslationBatcher.timer = null;
+        }
+      }
+
+      // 给 generic 网站（走 startGenericTranslation 的路径）清空覆盖记录，
+      // 否则关闭时清除了 .kt-paragraph-translation，但 coveredNodes 里还
+      // 残留旧的引用，重新打开时可能误判"已处理过"
+      if (window.__mira_generic_covered) {
+        window.__mira_generic_covered.clear();
+      }
 
       // 断开所有可能触发重新翻译的观察者
       if (window.__mira_selfHealObserver) {

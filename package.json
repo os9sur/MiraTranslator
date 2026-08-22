@@ -1,6 +1,6 @@
 {
   "name": "mira_translator",
-  "version": "3.5.7.993",
+  "version": "3.5.7.997",
   "scripts": {
     "build:chrome": "node build.js --browser=chrome",
     "build:edge": "node build.js --browser=edge",

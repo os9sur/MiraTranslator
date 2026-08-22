@@ -1776,7 +1776,7 @@ self.i18nYTData = {
     contextMode: "Bağlama Duyarlı",
     translationEngine: "Çeviri Motorunu Yönet"
   }
-};  
+};
 
 self.i18nSyncData = {
   "zh-CN": {
@@ -2816,196 +2816,116 @@ self.i18nAttach3 = {
 };
 self.i18nAttach4 = {
   "zh-CN": {
-    welcomeTitle: "欢迎使用 Mira! 🪄",
     setLanguage: "你希望翻译成哪种语言？",
     targetLang: "翻译成什么语言？",
     uiLanguage: "界面语言",
-    restrictedNotice: "此页面受浏览器安全策略限制，Mira 无法在此运行",
-    translatePrefix: "Mira 将把网页内容与 YouTube 视频字幕翻译为",
-    translateHighlight: "你选择的语言",
-    translateSuffix: "",
-    btnGotIt: "开始使用",
-    changeSetting: "你可以随时在设置中修改目标语言"
+    restrictedNotice: "此页面受浏览器安全策略限制（如扩展商店、内置页面），与 Mira 无关",
+    btnGotIt: "知道了"
   },
   "zh-TW": {
-    welcomeTitle: "歡迎使用 Mira! 🪄",
-    setLanguage: "你希望翻譯成什麼語言？",
+    setLanguage: "你想翻譯成什麼語言？",
     targetLang: "翻譯成什麼語言？",
-    uiLanguage: "界面語言",
-    restrictedNotice: "此頁面受瀏覽器安全策略限制，Mira 無法在此運行",
-    translatePrefix: "Mira 將把網頁內容與 YouTube 視頻字幕翻譯為",
-    translateHighlight: "你選擇的語言",
-    translateSuffix: "",
-    btnGotIt: "開始使用",
-    changeSetting: "你可以隨時在設置中修改目標語言"
+    uiLanguage: "介面語言",
+    restrictedNotice: "此頁面受瀏覽器安全策略限制（如擴充功能商店、內建頁面），與 Mira 無關",
+    btnGotIt: "知道了"
   },
   "en": {
-    welcomeTitle: "Welcome to Mira! 🪄",
     setLanguage: "What language would you like to translate into?",
-    targetLang: "Translate to?",
+    targetLang: "Translate into what language?",
     uiLanguage: "App Language",
-    restrictedNotice: "This page is restricted by browser policy. Mira cannot run here.",
-    translatePrefix: "Mira will translate web pages and YouTube subtitles into",
-    translateHighlight: "the language you select.",
-    translateSuffix: "",
-    btnGotIt: "Get Started",
-    changeSetting: "You can change this anytime in settings."
+    restrictedNotice: "This page is restricted by browser security policy (e.g., extension store, built-in pages) — nothing to do with Mira",
+    btnGotIt: "Got it"
   },
   "ja": {
-    welcomeTitle: "Mira へようこそ! 🪄",
     setLanguage: "どの言語に翻訳しますか？",
     targetLang: "どの言語に翻訳しますか？",
     uiLanguage: "表示言語",
-    restrictedNotice: "このページはブラウザのポリシーで制限されています。Mira はここでは動作しません。",
-    translatePrefix: "Miraはウェブページと YouTube の字幕を",
-    translateHighlight: "選択した言語",
-    translateSuffix: "に翻訳します。",
-    btnGotIt: "使ってみる",
-    changeSetting: "設定からいつでも変更できます。"
+    restrictedNotice: "このページはブラウザのセキュリティポリシーにより制限されています（例：拡張機能ストア、内部ページ）— Mira とは関係ありません",
+    btnGotIt: "了解"
   },
   "ko": {
-    welcomeTitle: "Mira에 오신 것을 환영합니다! 🪄",
-    setLanguage: "어떤 언어로 번역하고 싶으신가요?",
+    setLanguage: "어떤 언어로 번역하시겠어요?",
     targetLang: "어떤 언어로 번역할까요?",
-    uiLanguage: "표시 언어",
-    restrictedNotice: "이 페이지는 브라우저 정책에 의해 제한되었습니다. Mira는 여기서 작동할 수 없습니다.",
-    translatePrefix: "Mira가 웹 페이지와 YouTube 자막을",
-    translateHighlight: "선택한 언어",
-    translateSuffix: "로 번역해 드립니다.",
-    btnGotIt: "시작하기",
-    changeSetting: "설정에서 언제든지 변경할 수 있습니다."
+    uiLanguage: "앱 언어",
+    restrictedNotice: "이 페이지는 브라우저 보안 정책에 의해 제한됩니다 (예: 확장 프로그램 스토어, 내장 페이지) — Mira와는 관련이 없습니다",
+    btnGotIt: "알겠어요"
   },
   "de": {
-    welcomeTitle: "Willkommen bei Mira! 🪄",
-    setLanguage: "In welche Sprache möchten Sie übersetzen?",
-    targetLang: "Übersetzen in?",
+    setLanguage: "In welche Sprache möchtest du übersetzen?",
+    targetLang: "In welche Sprache übersetzen?",
     uiLanguage: "Sprache",
-    restrictedNotice: "Diese Seite ist durch Browser-Richtlinien eingeschränkt. Mira kann hier nicht ausgeführt werden.",
-    translatePrefix: "Mira übersetzt Webseiten und YouTube-Untertitel in",
-    translateHighlight: "die gewählte Sprache.",
-    translateSuffix: "",
-    btnGotIt: "Loslegen",
-    changeSetting: "Jederzeit in den Einstellungen änderbar."
+    restrictedNotice: "Diese Seite ist durch die Browser-Sicherheitsrichtlinie eingeschränkt (z.B. Erweiterungsstore, interne Seiten) — hat nichts mit Mira zu tun",
+    btnGotIt: "Verstanden"
   },
   "ru": {
-    welcomeTitle: "Добро пожаловать в Mira! 🪄",
-    setLanguage: "На какой язык вы хотите перевести?",
-    targetLang: "Перевести на?",
+    setLanguage: "На какой язык переводить?",
+    targetLang: "На какой язык переводить?",
     uiLanguage: "Язык интерфейса",
-    restrictedNotice: "Эта страница ограничена политикой браузера. Mira не может здесь работать.",
-    translatePrefix: "Mira переведет веб-страницы и субтитры YouTube на",
-    translateHighlight: "выбранный язык.",
-    translateSuffix: "",
-    btnGotIt: "Начать",
-    changeSetting: "Можно изменить в любое время в настройках."
+    restrictedNotice: "Эта страница ограничена политикой безопасности браузера (например, магазин расширений, встроенные страницы) — Mira здесь ни при чём",
+    btnGotIt: "Понятно"
   },
   "es": {
-    welcomeTitle: "¡Bienvenido a Mira! 🪄",
-    setLanguage: "¿A qué idioma te gustaría traducir?",
-    targetLang: "¿Traducir al?",
+    setLanguage: "¿A qué idioma quieres traducir?",
+    targetLang: "¿Traducir a qué idioma?",
     uiLanguage: "Idioma",
-    restrictedNotice: "Esta página está restringida por la política del navegador. Mira no puede funcionar aquí.",
-    translatePrefix: "Mira traducirá páginas web y subtítulos de YouTube al",
-    translateHighlight: "idioma seleccionado.",
-    translateSuffix: "",
-    btnGotIt: "Empezar",
-    changeSetting: "Puedes cambiarlo en los ajustes en cualquier momento."
+    restrictedNotice: "Esta página está restringida por la política de seguridad del navegador (ej. tienda de extensiones, páginas internas) — no tiene nada que ver con Mira",
+    btnGotIt: "Entendido"
   },
   "fr": {
-    welcomeTitle: "Bienvenue sur Mira ! 🪄",
-    setLanguage: "Dans quelle langue souhaitez-vous traduire ?",
-    targetLang: "Traduire en ?",
+    setLanguage: "Vers quelle langue souhaites-tu traduire ?",
+    targetLang: "Traduire dans quelle langue ?",
     uiLanguage: "Langue",
-    restrictedNotice: "Cette page est limitée par la politique du navigateur. Mira ne peut pas s'exécuter ici.",
-    translatePrefix: "Mira traduira les pages et les sous-titres YouTube en",
-    translateHighlight: "la langue choisie.",
-    translateSuffix: "",
-    btnGotIt: "C'est parti !",
-    changeSetting: "Modifiable à tout moment dans les paramètres."
+    restrictedNotice: "Cette page est restreinte par la politique de sécurité du navigateur (ex. boutique d'extensions, pages internes) — ça n'a rien à voir avec Mira",
+    btnGotIt: "Compris"
   },
-  "pt": {
-    welcomeTitle: "Bem-vindo ao Mira! 🪄",
-    setLanguage: "Para qual idioma você gostaria de traduzir?",
-    targetLang: "Traduzir para?",
+  "pt-BR": {
+    setLanguage: "Para qual idioma você quer traduzir?",
+    targetLang: "Traduzir para qual idioma?",
     uiLanguage: "Idioma",
-    restrictedNotice: "Esta página é restrita pela política do navegador. O Mira não pode ser executado aqui.",
-    translatePrefix: "O Mira traduzirá páginas e legendas do YouTube para",
-    translateHighlight: "o idioma selecionado.",
-    translateSuffix: "",
-    btnGotIt: "Começar",
-    changeSetting: "Altere quando quiser nas configurações."
+    restrictedNotice: "Esta página é restrita pela política de segurança do navegador (ex. loja de extensões, páginas internas) — não tem nada a ver com o Mira",
+    btnGotIt: "Entendi"
   },
   "it": {
-    welcomeTitle: "Benvenuto su Mira! 🪄",
-    setLanguage: "In quale lingua vorresti tradurre?",
-    targetLang: "Traduci in?",
+    setLanguage: "In che lingua vuoi tradurre?",
+    targetLang: "Tradurre in quale lingua?",
     uiLanguage: "Lingua",
-    restrictedNotice: "Questa pagina è limitata dalle norme del browser. Mira non può essere eseguito qui.",
-    translatePrefix: "Mira tradurrà le pagine e i sottotitoli di YouTube nella",
-    translateHighlight: "lingua selezionata.",
-    translateSuffix: "",
-    btnGotIt: "Inizia",
-    changeSetting: "Puoi cambiarlo in qualsiasi momento nelle impostazioni."
+    restrictedNotice: "Questa pagina è limitata dalla politica di sicurezza del browser (es. store delle estensioni, pagine interne) — non ha niente a che fare con Mira",
+    btnGotIt: "Capito"
   },
   "tr": {
-    welcomeTitle: "Mira'ya Hoş Geldiniz! 🪄",
-    setLanguage: "Hangi dile çeviri yapmak istersiniz?",
-    targetLang: "Şuna çevir?",
+    setLanguage: "Hangi dile çevirmek istiyorsun?",
+    targetLang: "Hangi dile çevirelim?",
     uiLanguage: "Dil",
-    restrictedNotice: "Bu sayfa tarayıcı politikası tarafından kısıtlanmıştır. Mira burada çalışamaz.",
-    translatePrefix: "Mira web sayfalarını ve YouTube altyazılarını",
-    translateHighlight: "seçtiğiniz dile",
-    translateSuffix: "çevirecektir.",
-    btnGotIt: "Başla",
-    changeSetting: "Ayarlardan istediğiniz zaman değiştirilebilir."
+    restrictedNotice: "Bu sayfa tarayıcı güvenlik politikası nedeniyle kısıtlanmıştır (ör. eklenti mağazası, dahili sayfalar) — Mira ile ilgisi yok",
+    btnGotIt: "Anladım"
   },
   "vi": {
-    welcomeTitle: "Chào mừng đến với Mira! 🪄",
     setLanguage: "Bạn muốn dịch sang ngôn ngữ nào?",
-    targetLang: "Dịch sang?",
+    targetLang: "Dịch sang ngôn ngữ nào?",
     uiLanguage: "Ngôn ngữ",
-    restrictedNotice: "Trang này bị hạn chế bởi chính sách trình duyệt. Mira không thể chạy ở đây.",
-    translatePrefix: "Mira sẽ dịch trang web và phụ đề YouTube sang",
-    translateHighlight: "ngôn ngữ bạn chọn",
-    translateSuffix: ".",
-    btnGotIt: "Bắt đầu",
-    changeSetting: "Có thể thay đổi trong phần cài đặt."
+    restrictedNotice: "Trang này bị hạn chế bởi chính sách bảo mật của trình duyệt (vd. cửa hàng tiện ích, trang nội bộ) — không liên quan gì đến Mira",
+    btnGotIt: "Đã hiểu"
   },
   "th": {
-    welcomeTitle: "ยินดีต้อนรับสู่ Mira! 🪄",
-    setLanguage: "คุณต้องการแปลเป็นภาษาใด?",
-    targetLang: "แปลเป็นภาษา?",
+    setLanguage: "คุณต้องการแปลเป็นภาษาอะไร?",
+    targetLang: "แปลเป็นภาษาอะไร?",
     uiLanguage: "ภาษา",
-    restrictedNotice: "หน้านี้ถูกจำกัดโดยนโยบายของเบราว์เซอร์ Mira ไม่สามารถทำงานที่นี่ได้",
-    translatePrefix: "Mira จะแปลหน้าเว็บและคำบรรยาย YouTube เป็น",
-    translateHighlight: "ภาษาที่คุณเลือก",
-    translateSuffix: "",
-    btnGotIt: "เริ่มใช้งาน",
-    changeSetting: "เปลี่ยนได้ตลอดเวลาในการตั้งค่า"
+    restrictedNotice: "หน้านี้ถูกจำกัดโดยนโยบายความปลอดภัยของเบราว์เซอร์ (เช่น ร้านค้าส่วนขยาย หน้าเว็บภายใน) — ไม่เกี่ยวกับ Mira",
+    btnGotIt: "เข้าใจแล้ว"
   },
   "ar": {
-    welcomeTitle: "مرحباً بك في Mira! 🪄",
-    setLanguage: "ما هي اللغة التي ترغب في الترجمة إليها؟",
-    targetLang: "ترجمة إلى؟",
-    uiLanguage: "اللغة",
-    restrictedNotice: "هذه الصفحة مقيدة بسياسة المتصفح. لا يمكن لـ Mira العمل هنا.",
-    translatePrefix: "بترجمة الصفحات والترجمات إلى Mira ستعمل",
-    translateHighlight: "اللغة التي تختارها",
-    translateSuffix: "",
-    btnGotIt: "ابدأ الآن",
-    changeSetting: "يمكنك التغيير في الإعدادات."
+    setLanguage: "إلى أي لغة تريد الترجمة؟",
+    targetLang: "الترجمة إلى أي لغة؟",
+    uiLanguage: "لغة الواجهة",
+    restrictedNotice: "هذه الصفحة مقيدة بسياسة أمان المتصفح (مثل: متجر الإضافات، الصفحات الداخلية) — لا علاقة لها بـ Mira",
+    btnGotIt: "فهمت"
   },
   "fa": {
-    welcomeTitle: "به Mira خوش آمدید! 🪄",
-    setLanguage: "می‌خواهید به چه زبانی ترجمه شود؟",
-    targetLang: "ترجمه به؟",
-    uiLanguage: "زبان",
-    restrictedNotice: "این صفحه توسط سیاست‌های مرورگر محدود شده است. Mira نمی‌تواند در اینجا اجرا شود.",
-    translatePrefix: "محتوا و زیرنویس‌ها را به Mira",
-    translateHighlight: "زبان انتخابی شما",
-    translateSuffix: "ترجمه می‌کند.",
-    btnGotIt: "شروع کنید",
-    changeSetting: "قابل تغییر در تنظیمات."
+    setLanguage: "به چه زبانی ترجمه شود؟",
+    targetLang: "ترجمه به چه زبانی؟",
+    uiLanguage: "زبان برنامه",
+    restrictedNotice: "این صفحه توسط سیاست امنیتی مرورگر محدود شده است (مانند فروشگاه افزونه‌ها، صفحات داخلی) — ربطی به Mira ندارد",
+    btnGotIt: "متوجه شدم"
   }
 };
 self.i18nAttach5 = {
