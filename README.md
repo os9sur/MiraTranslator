@@ -47,7 +47,7 @@
 
 ---
 
-## ⚠️ Project Scope & Free Alternatives
+## 💡 Project Scope & Free Alternatives
 
 If you are simply looking for a completely free, zero-setup AI translation tool, your current browser likely already provides excellent built-in options:
 
