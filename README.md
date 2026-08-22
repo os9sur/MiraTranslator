@@ -83,6 +83,16 @@ This tool was created to fill the need for a functional, open-source bilingual t
 
 ---
 
+### **Design Philosophy**
+
+Mira aims to provide the essential features needed for a practical translation workflow without overwhelming users with configuration options. Most of the functionality is already built in, while many technical details are handled automatically in the background to keep things simple.
+
+Users can still customize the things that matter most, such as which areas to translate, the style of translated text, and keyboard shortcuts.
+
+For AI translation, Mira batches multiple pieces of text into a single request whenever possible, helping reduce unnecessary API calls and improve translation efficiency.
+
+
+
 ## Development & Build
 
 ### 1. Prerequisites
