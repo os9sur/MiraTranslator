@@ -17,6 +17,7 @@ window.browser = (function () {
 })();
 let activeTab = null;
 let currentMode = 'current';
+let refreshToken = 0;
 const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
@@ -2482,6 +2483,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const refreshUI = async () => {
+    const myToken = ++refreshToken;
     try {
       const tab = await getActiveTab();
       if (tab && tab.url) {
@@ -2489,6 +2491,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig', 'ui_language'];
       const storage = await safeGetStorage(keys);
+      if (myToken !== refreshToken) return; //  已经有更新的调用，本次作废
       if (!storage) {
         logger.error("[Mira-Trace] refreshUI 无法获取 storage");
         return;
@@ -2629,6 +2632,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (isPhone) {
         if (inspectBtn) inspectBtn.style.display = 'none';
+        const shortcutItem = document.getElementById('openShortcutSettings');
+        if (shortcutItem) shortcutItem.style.display = 'none';
       }
       if (checkRTL(uiLangSelect.value)) {
         // inspectElementLabel 右对齐
@@ -2670,14 +2675,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       function hideFade(el) {
         if (!el) return;
+        if (el._fadeTimer) {
+          clearTimeout(el._fadeTimer);   //  先清掉上一次残留的 timer
+          el._fadeTimer = null;
+        }
         el.classList.add('hidden-fade');
-        setTimeout(() => {
+        el._fadeTimer = setTimeout(() => {   // 保存这次的 timer 引用
           el.style.display = 'none';
+          el._fadeTimer = null;
         }, 350);
       }
 
       function showFade(el) {
         if (!el) return;
+        if (el._fadeTimer) {
+          clearTimeout(el._fadeTimer);   //  清掉可能残留的 hideFade 定时器
+          el._fadeTimer = null;
+        }
         el.style.display = 'block';
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -2688,7 +2702,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (inspectBtn && inspectLabelBtn) {
         if (isPhone) {
-          hideFade(inspectBtn); // 手机端始终隐藏
+          hideFade(inspectBtn); // 手机端 inspect 功能始终隐藏 
+          if (domainLabel) {
+            if (currentMode === 'global') {
+              hideFade(domainLabel);
+            } else {
+              showFade(domainLabel);
+            }
+          }
         } else if (currentMode === 'global') {
           hideFade(inspectBtn);
           if (domainLabel) hideFade(domainLabel);
@@ -2698,6 +2719,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
       const { activeConfig } = await safeGetStorage('activeConfig');
+      if (myToken !== refreshToken) return; //  过期结果，丢弃后续 DOM 更新
       const engineNameEl = document.getElementById('currentEngineName');
       if (engineNameEl) {
         const activeCfg = activeConfig || { engine: _defaultEngine, data: {} };
@@ -3738,6 +3760,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   checkEngineStatus();
 
-  document.querySelector("#reviewLink").href = getReviewUrl();
+  function openExternalLink(url) {
+    if (typeof browser !== 'undefined' && browser.tabs?.create) {
+      browser.tabs.create({ url }); // Firefox
+    } else if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
+      chrome.tabs.create({ url }); // Chrome / Edge
+    } else {
+      window.open(url, '_blank'); // 兜底
+    }
+  }
+
+  document.querySelector('#reviewLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    openExternalLink(getReviewUrl());
+  });
+
+  document.querySelector('#githubLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    openExternalLink('https://github.com/os9sur/MiraTranslator/issues');
+  });
 
 });

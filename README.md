@@ -12,7 +12,7 @@
 
 
 <p align="center">
-<img src="https://img.shields.io/badge/Version-3.5.7.993-blue" alt="Version">
+<img src="https://img.shields.io/badge/Version-3.5.7.997-blue" alt="Version">
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;
@@ -50,13 +50,15 @@
 ## ⚠️ Project Scope & Free Alternatives
 
 If you are simply looking for a completely free, zero-setup AI translation tool, your current browser likely already provides excellent built-in options:
-* **Chrome Users:** The **Gemini** side panel offers powerful, out-of-the-box webpage reading and content analysis capabilities.
-* **Edge Users:** The built-in **Copilot** can easily analyze webpage content and generate video subtitle summaries.
+
+- **Chrome Users:** The Gemini side panel offers powerful, out-of-the-box webpage reading and content analysis capabilities.
+- **Edge Users:** The built-in Copilot can easily analyze webpage content and generate video subtitle summaries.
 
 **So why develop Mira?**
-Actually, Mira Translator started purely because I couldn't find a translation tool that was truly "handy" for my needs, so I decided to build one myself in my spare time. As built-in browser AIs become more common, the value of tools like this is shifting from "mass utility" to "niche personalization." Through this project, I wanted to create a dedicated tool that perfectly aligns with my own workflow.
 
-Because of this, Mira's features and design carry a strong personal touch, and it is not intended to be a comprehensive commercial product. I primarily maintain it at my own pace. If this little tool happens to meet your needs too, you are more than welcome to use it! However, please understand that due to limited personal time, I cannot guarantee compatibility with all websites or provide immediate bug fixes.
+I couldn't find an open-source translation tool that was truly handy, respected my privacy, and didn't leave me wondering whether my browsing data was being collected in the background. So I decided to build one myself in my spare time.
+
+Mira is designed around my own needs and preferences. It's not a commercial product, and I maintain it at my own pace. If this little tool happens to meet your needs too, you're welcome to use it! But please understand that due to limited time, I can't guarantee compatibility with every website or provide immediate bug fixes.
 
 ---
 
