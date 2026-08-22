@@ -47,7 +47,7 @@
 
 ---
 
-## ⚠️ Project Scope & Free Alternatives
+## 💡 Project Scope & Free Alternatives
 
 If you are simply looking for a completely free, zero-setup AI translation tool, your current browser likely already provides excellent built-in options:
 
@@ -70,16 +70,25 @@ This tool was created to fill the need for a functional, open-source bilingual t
 
 ### Features
 
-* **Performance:** The extension is built using native JavaScript with a core size of approximately 300KB, aimed at minimizing browser resource usage.
-* **Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied to the webpage.
-* **YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, and a feature to download subtitles.
-* **Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
-* **Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models (like Ollama), and more. Users can also configure custom API endpoints.
-* **AI Context-Aware Translation:** Uses surrounding context to produce more accurate and natural translations, rather than translating isolated words or sentences.
-* **Element Selection:** Rather than translating the entire page by default, Mira focuses on main content areas out of the box — menus and other UI chrome are skipped to avoid layout breakage and visual clutter. Users can select additional areas to translate, or exclude specific ones, as needed.
-* **Data Synchronization:** Supports syncing configurations and saved vocabulary via Google Drive or WebDAV.
-* **Vocabulary Learning:** Enables users to save words or phrases directly from translated text into a local list, allowing for future review, editing, and cross-device synchronization.
-* **Mobile Support:** Compatible with mobile browsers (such as Microsoft Edge and Firefox on Android), allowing for seamless translation on the go.
+**Performance:** The extension is built using native JavaScript with a core size of approximately 300KB, aimed at minimizing browser resource usage.
+
+**Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied to the webpage.
+
+**YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, and a feature to download subtitles.
+
+**Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
+
+**Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models (like Ollama), and more. Users can also configure custom API endpoints.
+
+**AI Context-Aware Translation:** Uses surrounding context to produce more accurate and natural translations, rather than translating isolated words or sentences.
+
+**Element Selection:** Rather than translating the entire page by default, Mira focuses on main content areas out of the box — menus and other UI chrome are skipped to avoid layout breakage and visual clutter. Users can select additional areas to translate, or exclude specific ones, as needed.
+
+**Data Synchronization:** Syncs your settings and saved vocabulary across devices via Google Drive OneDrive or WebDAV.
+
+**Vocabulary Learning:** Save words or phrases from translated text to your vocabulary list for later review and editing.
+
+**Mobile Support:** Use Mira on mobile browsers such as Microsoft Edge and Firefox for Android. Save and review vocabulary on your phone, with your vocabulary synced between desktop and mobile.
 
 ---
 
