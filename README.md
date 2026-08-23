@@ -1,4 +1,8 @@
 <p align="center">
+  English · <a href="README_zh-CN.md">简体中文</a> · <a href="README_ja.md">日本語</a>
+</p>
+
+<p align="center">
   <a href="https://chromewebstore.google.com/detail/mira-translator/hmmllfdmkbmmfffjekhmmbhhfhhnocmn" target="_blank">
     <img src="images/logo.png" width="120px" height="auto" alt="Mira Logo">
   </a>
@@ -87,7 +91,7 @@ This tool was created to fill the need for a functional, open-source bilingual t
 
 Mira aims to provide the essential features needed for a practical translation workflow without overwhelming users with configuration options. Most of the functionality is already built in, while many technical details are handled automatically in the background to keep things simple.
 
-Users can still customize the things that matter most, such as which areas to translate, the style of translated text, and keyboard shortcuts.
+You're still in control of the essentials: AI tones/personas, global or site-specific default toggles, translation scopes, styling, and hotkeys.
 
 For AI translation, Mira batches multiple pieces of text into a single request whenever possible, helping reduce unnecessary API calls and improve translation efficiency.
 
