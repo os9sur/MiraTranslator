@@ -103,98 +103,108 @@
       }
     ]
   },
-  "notices": {
-  "enabled": true,
-  "minDays": 0,
-  "zh-CN": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 免费 AI 翻译渠道",
-      "level": "info",
-      "content": "可使用 Groq 或 Gemini 的免费 API Key 进行 AI 翻译，速度快。点击左下角「添加自定义翻译服务 (API Key)」按钮，选择 Groq 或 Gemini，点击\"获取 API Key\"，按照提示完成配置即可。\n 提示：免费 API 通常有请求频率限制，翻译内容较多的长网页时可能触发限制；如遇到 429，请稍等片刻后再试，或关闭网页翻译，通过选定文本或快捷键翻译段落，可减少请求并降低触发限制的可能。",
-      "gotIt": "知道了",
-      "scope": "settings"
-    }
-  ],
-  "zh-TW": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 免費 AI 翻譯管道",
-      "level": "info",
-      "content": "可使用 Groq 或 Gemini 的免費 API Key 進行 AI 翻譯，速度快。點擊左下角「新增自訂翻譯服務 (API Key)」按鈕，選擇 Groq 或 Gemini，點擊「取得 API Key」，按照提示完成設定即可。\n 提示：免費 API 通常有請求頻率限制，翻譯內容較多的長網頁時可能觸發限制；如遇到 429，請稍等片刻後再試，或關閉網頁翻譯，透過選取文字或快捷鍵翻譯段落，可減少請求並降低觸發限制的可能。",
-      "gotIt": "知道了",
-      "scope": "settings"
-    }
-  ],
-  "en": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Free AI Translation Tip",
-      "level": "info",
-      "content": "You can use a free Groq or Gemini API Key for AI translation — it's fast. To set it up: click the 'Add Custom Translation Service (API Key)' button in the bottom left, choose Groq or Gemini, click 'Get API Key', and follow the prompts to finish setup.\n Note: Free APIs typically have rate limits. Translating very long web pages may trigger these limits. If you encounter a 429 error, wait a moment and try again, or turn off full-page translation and translate selected text or use the shortcut key for paragraphs — this reduces requests and helps avoid hitting the limit.",
-      "gotIt": "Got it",
-      "scope": "settings"
-    }
-  ],
-  "ja": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 無料で使える AI 翻訳サービス",
-      "level": "info",
-      "content": "Groq または Gemini の無料 API Key を使って AI 翻訳ができます。高速で便利です。設定方法：左下の「カスタム翻訳サービスを追加 (API Key)」ボタンをクリックし、Groq または Gemini を選択して「API Key を取得」をクリックし、画面の指示に従って設定を完了してください。\n 注意：無料 API には通常、リクエスト頻度の制限があります。長い Web ページの翻訳時に制限に引っかかることがあります。429 エラーが発生した場合は、しばらく待ってからもう一度お試しください。または、ページ全体の翻訳をオフにして、テキストを選択して翻訳するか、ショートカットキーで段落を翻訳することで、リクエスト数を減らし制限を回避できます。",
-      "gotIt": "わかりました",
-      "scope": "settings"
-    }
-  ],
-  "ko": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 무료 AI 번역 서비스",
-      "level": "info",
-      "content": "Groq 또는 Gemini의 무료 API Key를 사용하면 AI 번역을 이용할 수 있습니다. 속도가 빠르고 편리합니다. 설정 방법: 왼쪽 하단의 '사용자 지정 번역 서비스 추가 (API Key)' 버튼을 클릭하고 Groq 또는 Gemini를 선택한 후 'API Key 받기'를 클릭하여 화면 안내에 따라 설정을 완료하세요.\n 참고: 무료 API는 일반적으로 요청 빈도 제한이 있습니다. 긴 웹페이지를 번역할 때 제한이 걸릴 수 있습니다. 429 오류가 발생하면 잠시 기다렸다가 다시 시도하거나, 전체 페이지 번역을 끄고 텍스트를 선택하여 번역하거나 단축키로 문단을 번역하면 요청 수를 줄여 제한을 피할 수 있습니다.",
-      "gotIt": "알겠습니다",
-      "scope": "settings"
-    }
-  ],
-  "es": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Traducción con IA gratuita",
-      "level": "info",
-      "content": "Puedes usar una API Key gratuita de Groq o Gemini para la traducción con IA. Es rápida y fácil de configurar. Para empezar, haz clic en el botón 'Agregar servicio de traducción personalizado (API Key)' en la parte inferior izquierda, selecciona Groq o Gemini, haz clic en 'Obtener API Key' y sigue las instrucciones para completar la configuración.\n Nota: Las API gratuitas suelen tener límites de frecuencia de solicitudes. Traducir páginas web muy largas puede activar estos límites. Si encuentras un error 429, espera un momento y vuelve a intentarlo, o desactiva la traducción de toda la página y traduce texto seleccionado o usa el atajo de teclado para párrafos; esto reduce las solicitudes y ayuda a evitar alcanzar el límite.",
-      "gotIt": "Entendido",
-      "scope": "settings"
-    }
-  ],
-  "pt-BR": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Tradução com IA gratuita",
-      "level": "info",
-      "content": "Você pode usar uma API Key gratuita do Groq ou Gemini para tradução com IA. É rápido e fácil de configurar. Para começar, clique no botão 'Adicionar serviço de tradução personalizado (API Key)' no canto inferior esquerdo, selecione Groq ou Gemini, clique em 'Obter API Key' e siga as instruções para concluir a configuração.\n Observação: APIs gratuitas geralmente têm limites de frequência de requisições. Traduzir páginas web muito longas pode acionar esses limites. Se encontrar um erro 429, aguarde um momento e tente novamente, ou desative a tradução da página inteira e traduza o texto selecionado ou use o atalho do teclado para parágrafos; isso reduz as requisições e ajuda a evitar o limite.",
-      "gotIt": "Entendi",
-      "scope": "settings"
-    }
-  ],
-  "ru": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Бесплатный ИИ-перевод",
-      "level": "info",
-      "content": "Для ИИ-перевода можно использовать бесплатный API Key от Groq или Gemini — это быстро и просто. Чтобы настроить перевод, нажмите кнопку «Добавить пользовательскую службу перевода (API Key)» в левом нижнем углу, выберите Groq или Gemini, нажмите «Получить API Key» и следуйте инструкциям.\n Примечание: бесплатные API обычно имеют ограничения по частоте запросов. При переводе очень длинных веб-страниц можно превысить лимит. Если вы столкнулись с ошибкой 429, подождите немного и попробуйте снова, или отключите полный перевод страницы и переводите выделенный текст или используйте горячие клавиши для перевода абзацев — это уменьшит количество запросов и поможет избежать ограничений.",
-      "gotIt": "Хорошо",
-      "scope": "settings"
-    }
-  ],
-  "tr": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Ücretsiz AI çeviri",
-      "level": "info",
-      "content": "AI çevirisi için Groq veya Gemini'nin ücretsiz API Key'ini kullanabilirsiniz. Çevirisi hızlıdır ve kurulumu kolaydır. Ayarlamak için sol alt köşedeki 'Özel çeviri hizmeti ekle (API Key)' butonuna tıklayın, Groq veya Gemini'yi seçin, 'API Key al'a tıklayın ve talimatları izleyerek kurulumu tamamlayın.\n Not: Ücretsiz API'ler genellikle istek sıklığı sınırlamasına sahiptir. Çok uzun web sayfalarını çevirirken bu sınıra takılabilirsiniz. 429 hatası alırsanız, bir süre bekleyip tekrar deneyin veya sayfa çevirisini kapatıp seçili metni veya kısayol tuşuyla paragrafları çevirin; bu, istek sayısını azaltarak sınıra takılmanızı önlemeye yardımcı olur.",
-      "gotIt": "Anladım",
-      "scope": "settings"
-    }
-  ]
+ "notices": {
+    "enabled": true,
+    "minDays": 0,
+    "zh-CN": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 如何免费/原价用上顶级 AI 翻译？",
+        "level": "info",
+        "content": "本扩展本身完全免费且开源（不收取任何软件费用）。由于 AI 翻译需要消耗算力，建议按需选择：\n• 长期免费：Groq, 谷歌 (Gemini) 长期免费，若触发 429 速率限制（Rate Limit），稍等即可自动恢复。\n• 聚合平台：嫌多平台注册繁琐，可选用 OpenRouter，单个 Key 即可调用海量模型。\n• 进阶付费：若需解除限频或调用高级模型，建议前往官网按量付费 (Pay-as-you-go)，无月费与中间溢价，数据直连更安全。\n👉 点击下方「添加自定义翻译服务 (API Key)」，选择模型后点击「获取 API Key」直达官网。",
+        "gotIt": "知道了",
+        "scope": "settings"
+      }
+    ],
+    "zh-TW": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 如何免費/原價用上頂級 AI 翻譯？",
+        "level": "info",
+        "content": "本擴充功能本身完全免費且開源（不收取任何軟體費用）。由於 AI 翻譯需要消耗算力，建議按需選擇：\n• 長期免費：Groq, Google (Gemini) 長期免費，若觸發 429 速率限制（Rate Limit），稍等即可自動恢復。\n• 聚合平台：嫌多平台註冊繁瑣，可選用 OpenRouter，單個 Key 即可調用海量模型。\n• 進階付費：若需解除限頻或調用進階模型，建議前往官網按量付費 (Pay-as-you-go)，無月費與中間溢價，資料直連更安全。\n👉 點擊下方「新增自訂翻譯服務 (API Key)」，選擇模型後點擊「取得 API Key」直達官網。",
+        "gotIt": "知道了",
+        "scope": "settings"
+      }
+    ],
+    "en": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 How to get top-tier AI translation for free or at cost?",
+        "level": "info",
+        "content": "This extension is 100% free and open-source (no software fees). Since AI translation consumes computing power, choose what fits best:\n• Permanently Free: Groq and Google (Gemini) offer permanent free tiers. If you hit a 429 rate limit, it will automatically recover shortly.\n• Aggregator: Avoid multi-platform registration by using OpenRouter to access massive models with a single API key.\n• Pay-as-You-Go: For zero rate limits or advanced models, purchase directly via official sites (Pay-as-you-go) with no monthly fees, no markup, and direct connection for better security.\n👉 Click 'Add Custom Service (API Key)' below, select a model, and click 'Get API Key'.",
+        "gotIt": "Got it",
+        "scope": "settings"
+      }
+    ],
+    "ja": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 最高峰の AI 翻訳を無料・原価で使うには？",
+        "level": "info",
+        "content": "本拡張機能は完全無料・オープンソースです（ソフト自体の費用は一切かかりません）。AI 翻訳にはリソースが必要なため、以下からお選びください：\n• 常時無料：Groq と Google (Gemini) は長期無料です。429 エラー（レートリミット）が発生した場合は、少し待つと自動で復旧します。\n• 集約プラットフォーム：複数サイトへの登録を避けるため、OpenRouter を使えば1つのキーで多様なモデルを利用可能です。\n• 従量課金：制限解除や高機能モデルが必要な場合は、公式サイトでの従量課金（Pay-as-you-go）をご利用ください（月額固定費・上乗せ料金なし、直接通信でより安全）。\n👉 下の「カスタム翻訳サービスを追加 (API Key)」からモデルを選択し、「API Key を取得」をクリックしてください。",
+        "gotIt": "了解",
+        "scope": "settings"
+      }
+    ],
+    "ko": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 최고급 AI 번역을 무료 또는 정가로 사용하는 방법",
+        "level": "info",
+        "content": "본 확장 프로그램은 완전 무료 및 오픈소스입니다 (소프트웨어 비용 없음). AI 번역에는 리소스가 소모되므로 다음 중 선택하세요:\n• 상시 무료: Groq, Google(Gemini) 영구 무료. 429 속도 제한(Rate Limit) 발생 시 잠시 후 자동으로 복구됩니다.\n• 통합 플랫폼: 다중 플랫폼 가입이 번거롭다면 OpenRouter를 통해 단일 키로 수많은 모델을 이용하세요.\n• 종량제 이용: 제한 해제나 고급 모델이 필요할 경우 공식 사이트에서 종량제(Pay-as-you-go)로 이용하세요 (월 구독료 및 마진 없음, 직접 연결되어 더 안전함).\n👉 아래 '사용자 지정 번역 서비스 추가 (API Key)'를 클릭하고 모델 선택 후 'API Key 받기'를 누르세요.",
+        "gotIt": "확인",
+        "scope": "settings"
+      }
+    ],
+    "es": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 ¿Cómo usar traducción IA de nivel superior gratis o al costo?",
+        "level": "info",
+        "content": "Esta extensión es 100% gratuita y de código abierto (sin tarifas de software). Como la traducción por IA requiere recursos, elige según tus necesidades:\n• Gratis permanente: Groq y Google (Gemini) son gratuitos a largo plazo. Si se alcanza el límite 429 (Rate Limit), se recuperará automáticamente en unos segundos.\n• Plataforma agregadora: Evita registros múltiples usando OpenRouter para acceder a modelos masivos con una sola clave.\n• Pago por uso: Para eliminar restricciones o usar modelos avanzados, cómpralo directamente en la web oficial (Pay-as-you-go, sin cuotas mensuales ni sobrecostes, y con conexión directa más segura).\n👉 Haz clic en 'Añadir servicio personalizado (API Key)' abajo, selecciona un modelo y pulsa 'Obtener API Key'.",
+        "gotIt": "Entendido",
+        "scope": "settings"
+      }
+    ],
+    "pt-BR": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Como usar tradução com IA de ponta de graça ou pelo preço de custo?",
+        "level": "info",
+        "content": "Esta extensão é de código aberto e 100% gratuita (sem taxas de software). Como a tradução por IA consome recursos, escolha a melhor opção:\n• Grátis permanente: Groq e Google (Gemini) são gratuitos a longo prazo. Caso ocorra o limite 429 (Rate Limit), o serviço é retomado automaticamente após alguns segundos.\n• Plataforma agregadora: Evite cadastros múltiplos usando o OpenRouter para acessar diversos modelos com uma única chave.\n• Pague pelo uso: Para remover limites ou usar modelos avançados, adquira diretamente no site oficial (Pay-as-you-go, sem mensalidades ou sobretaxas, com conexão direta mais segura).\n👉 Clique em 'Adicionar serviço personalizado (API Key)' abaixo, escolha o modelo e clique em 'Obter API Key'.",
+        "gotIt": "Entendi",
+        "scope": "settings"
+      }
+    ],
+    "ru": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Как использовать топовый ИИ-перевод бесплатно или по себестоимости?",
+        "level": "info",
+        "content": "Это расширение абсолютно бесплатно и с открытым исходным кодом (без платы за софт). Поскольку ИИ-перевод требует ресурсов, выберите подходящий вариант:\n• Постоянно бесплатно: Groq и Google (Gemini) бесплатны бессрочно. При превышении лимита 429 (Rate Limit) работа восстановится автоматически.\n• Платформа-агрегатор: Избегайте лишних регистраций — используйте OpenRouter для доступа к множеству моделей по одному ключу.\n• Оплата по факту: Для снятия ограничений или продвинутых моделей используйте официальную тарификацию Pay-as-you-go (без абонентской платы и наценок, с безопасным прямым подключением).\n👉 Нажмите «Добавить пользовательскую службу (API Key)» ниже, выберите модель и нажмите «Получить API Key».",
+        "gotIt": "Понятно",
+        "scope": "settings"
+      }
+    ],
+    "ar": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 كيف تستخدم ترجمة الذكاء الاصطناعي الممتازة مجانًا أو بسعر التكلفة؟",
+        "level": "info",
+        "content": "هذه الإضافة مجانية ومفتوحة المصدر بالكامل (بدون أي رسوم برمجية). ونظرًا لأن ترجمة الذكاء الاصطناعي تستهلك موارد، اختر ما يناسبك:\n• مجاني دائمًا: توفر Groq وGoogle (Gemini) حصصًا مجانية دائمة. إذا واجهت حد التقييد 429 (Rate Limit)، فستعود للعمل تلقائيًا.\n• منصة التجميع: لتجنب تعدد التسجيلات، استخدم OpenRouter للوصول إلى نماذج متعددة بمفتاح واحد.\n• الدفع حسب الاستخدام: لإزالة القيود أو استخدام نماذج متقدمة، يُفضل الشراء مباشرة عبر الموقع الرسمي بنظام (Pay-as-you-go) بدون رسوم شهرية أو زيادات، وباتصال مباشر أكثر أمانًا.\n👉 اضغط على «إضافة خدمة ترجمة مخصصة (API Key)» أدناه، اختر النموذج ثم اضغط «الحصول على API Key».",
+        "gotIt": "حسنًا",
+        "scope": "settings"
+      }
+    ],
+    "tr": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Üst düzey AI çevirisini ücretsiz veya maliyetine nasıl kullanırsınız?",
+        "level": "info",
+        "content": "Bu eklenti tamamen ücretsiz ve açık kaynaklıdır (yazılım ücreti yoktur). Yapay zeka çevirisi kaynak tüketimi gerektirdiğinden, size uygun olanı seçin:\n• Sürekli Ücretsiz: Groq ve Google (Gemini) kalıcı olarak ücretsizdir. 429 oran sınırı (Rate Limit) hatası alırsanız kısa sürede otomatik düzelir.\n• Toplayıcı Platform: Çoklu kayıt zahmetinden kaçınmak için OpenRouter kullanarak tek bir anahtarla modellere erişebilirsiniz.\n• Kullandığın Kadar Öde: Sınırları kaldırmak veya gelişmiş modelleri kullanmak için resmi site üzerinden (Pay-as-you-go, aylık ücret, ek kar payı ve aracı olmadan doğrudan bağlantıyla daha güvenli) ödeme yapabilirsiniz.\n👉 Aşağıdaki 'Özel çeviri hizmeti ekle (API Key)' butonuna tıklayın, modeli seçip 'API Key al' butonuna basın.",
+        "gotIt": "Anladım",
+        "scope": "settings"
+      }
+    ]
   }
 }
