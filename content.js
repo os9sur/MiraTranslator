@@ -1723,19 +1723,25 @@ const TranslationBatcher = {
           // 只对看起来像 URL 的内容截断，译文不截断
           const looksLikeUrl =
             /^[\w\-\.\/]+$/.test(display) && !display.includes(" ");
-          const LIMIT = 25;
-          if (looksLikeUrl && display.length > LIMIT) {
-            display = display.substring(0, LIMIT).replace(/\/$/, "") + "...";
+          const LIMIT = 30;
+          if (display.length > LIMIT && !display.includes(" ")) {
+            // 没有空格（单个长 token，通常是 URL/路径）才做字符串截断
+            // 有空格说明是正常译文句子，交给 CSS 换行，不能从中间砍断语义
+            display = display.substring(0, LIMIT).replace(/\/$/, "") + "…";
           }
 
-          link.textContent = display;
-          link.style.cssText = `
-      color: #1d9bf0 !important;
-      display: inline !important;
-      white-space: normal !important;
-      font-size: inherit !important;
-      letter-spacing: -0.2px !important;
-    `;
+          link.textContent = display; // 不做字符串级截断，保留完整文本和语义
+link.style.cssText = `
+  color: #1d9bf0 !important;
+  display: inline-block !important;
+  max-width: 100% !important;   
+  vertical-align: baseline !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: inherit !important;
+  letter-spacing: -0.2px !important;
+`;
         }
         link.removeAttribute("data-mira-link");
       });
