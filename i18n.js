@@ -657,8 +657,6 @@ self.i18nEngineData = {
     success: "成功",
     failed: "失败",
     freeInterfaceTipsInfo: "此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥",
-    wantBetterExperience: "想要更好的翻译体验？",
-    clickBottomTip: "请点击左侧 Mira AI Translator Pro"
   },
   "zh-TW": {
     engineListTitle: "引擎列表",
@@ -682,8 +680,6 @@ self.i18nEngineData = {
     success: "成功",
     failed: "失敗",
     freeInterfaceTipsInfo: "本介面基於公共網路請求驅動，僅供個人學習及非商業用途。無需配置金鑰",
-    wantBetterExperience: "想要更好的翻譯體驗？",
-    clickBottomTip: "請點擊左側 Mira AI Translator Pro"
   },
   "en": {
     engineListTitle: "Engine List",
@@ -707,8 +703,6 @@ self.i18nEngineData = {
     success: "Success",
     failed: "Failed",
     freeInterfaceTipsInfo: "Powered by public requests. For personal learning and non-commercial use only. No API key required.",
-    wantBetterExperience: "Want a better experience?",
-    clickBottomTip: "Click 'Mira AI Translator Pro' on the left"
   },
   "ja": {
     engineListTitle: "エンジンリスト",
@@ -732,8 +726,6 @@ self.i18nEngineData = {
     success: "成功",
     failed: "失敗",
     freeInterfaceTipsInfo: "パブリックリクエストに基づいています。個人の学習および非営利目的のみ。APIキーは不要です",
-    wantBetterExperience: "より良い体験をお求めですか？",
-    clickBottomTip: "左側の「Mira AI Translator Pro」をクリックしてください"
   },
   "ko": {
     engineListTitle: "엔진 목록",
@@ -757,8 +749,6 @@ self.i18nEngineData = {
     success: "성공",
     failed: "실패",
     freeInterfaceTipsInfo: "공용 네트워크 요청 기반입니다. 개인 학습 및 비상업적 용도로만 사용 가능. API 키 불필요",
-    wantBetterExperience: "더 나은 번역 경험을 원하십니까?",
-    clickBottomTip: "왼쪽의 'Mira AI Translator Pro'을 클릭하세요"
   },
   "es": {
     engineListTitle: "Lista de motores",
@@ -782,8 +772,6 @@ self.i18nEngineData = {
     success: "Éxito",
     failed: "Fallo",
     freeInterfaceTipsInfo: "Basado en red pública. Solo para uso personal y no comercial. No requiere clave API",
-    wantBetterExperience: "¿Desea una mejor experiencia?",
-    clickBottomTip: "Haz clic en 'Mira AI Translator Pro' a la izquierda"
   },
   "fr": {
     engineListTitle: "Liste des moteurs",
@@ -807,8 +795,6 @@ self.i18nEngineData = {
     success: "Succès",
     failed: "Échec",
     freeInterfaceTipsInfo: "Basé sur le réseau public. Usage personnel et non commercial uniquement. Aucune clé requise",
-    wantBetterExperience: "Vous voulez une meilleure expérience ?",
-    clickBottomTip: "Cliquez sur 'Mira AI Translator Pro' à gauche"
   },
   "de": {
     engineListTitle: "Engine-Liste",
@@ -832,8 +818,6 @@ self.i18nEngineData = {
     success: "Erfolg",
     failed: "Fehlgeschlagen",
     freeInterfaceTipsInfo: "Basiert auf öffentlichen Anfragen. Nur für persönlichen/nicht-kommerziellen Gebrauch. Kein Schlüssel nötig",
-    wantBetterExperience: "Möchten Sie ein besseres Erlebnis?",
-    clickBottomTip: "Klicken Sie links auf 'Mira AI Translator Pro'"
   },
   "ru": {
     engineListTitle: "Список движков",
@@ -857,8 +841,6 @@ self.i18nEngineData = {
     success: "Успешно",
     failed: "Ошибка",
     freeInterfaceTipsInfo: "На основе публичных запросов. Только для личного некоммерческого использования. Ключ не нужен",
-    wantBetterExperience: "Хотите переводить качественнее?",
-    clickBottomTip: "Нажмите «Mira AI Translator Pro» слева"
   },
   "pt": {
     engineListTitle: "Lista de motores",
@@ -882,8 +864,6 @@ self.i18nEngineData = {
     success: "Sucesso",
     failed: "Falha",
     freeInterfaceTipsInfo: "Baseado em rede pública. Apenas uso pessoal/não comercial. Nenhuma chave necessária",
-    wantBetterExperience: "Quer uma experiência melhor?",
-    clickBottomTip: "Clique em 'Mira AI Translator Pro' à esquerda"
   },
   "it": {
     engineListTitle: "Elenco motori",
@@ -907,8 +887,6 @@ self.i18nEngineData = {
     success: "Successo",
     failed: "Fallito",
     freeInterfaceTipsInfo: "Basado su richieste pubbliche. Solo uso personale/non commerciale. Nessuna chiave richiesta",
-    wantBetterExperience: "Vuoi un'esperienza migliore?",
-    clickBottomTip: "Clicca su 'Mira AI Translator Pro' a sinistra"
   },
   "vi": {
     engineListTitle: "Danh sách công cụ",
@@ -932,8 +910,6 @@ self.i18nEngineData = {
     success: "Thành công",
     failed: "Thất bại",
     freeInterfaceTipsInfo: "Dựa trên yêu cầu mạng công cộng. Chỉ dùng cho cá nhân/phi thương mại. Không cần khóa",
-    wantBetterExperience: "Bạn muốn trải nghiệm tốt hơn?",
-    clickBottomTip: "Vui lòng nhấp vào 'Mira AI Translator Pro' ở bên trái"
   },
   "th": {
     engineListTitle: "รายการเครื่องยนต์",
@@ -957,8 +933,6 @@ self.i18nEngineData = {
     success: "สำเร็จ",
     failed: "ล้มเหลว",
     freeInterfaceTipsInfo: "ใช้คำขอเครือข่ายสาธารณะ สำหรับการเรียนรู้ส่วนบุคคล/ไม่ใช่เชิงพาณิชย์ ไม่ต้องใช้คีย์",
-    wantBetterExperience: "ต้องการประสบการณ์ที่ดีกว่าเดิมไหม?",
-    clickBottomTip: "กรุณาคลิกที่ 'Mira AI Translator Pro' ทางด้านซ้าย"
   },
   "ar": {
     engineListTitle: "قائمة المحركات",
@@ -982,8 +956,6 @@ self.i18nEngineData = {
     success: "تم بنجاح",
     failed: "فشل",
     freeInterfaceTipsInfo: "مدعوم بطلبات الشبكة العامة. للاستخدام الشخصي وغير التجاري فقط. لا يتطلب مفتاح",
-    wantBetterExperience: "هل تريد تجربة أفضل؟",
-    clickBottomTip: "يرجى النقر على 'Mira AI Translator Pro' على اليسار"
   },
   "fa": {
     engineListTitle: "لیست موتورها",
@@ -1007,8 +979,6 @@ self.i18nEngineData = {
     success: "موفقیت",
     failed: "ناموفق",
     freeInterfaceTipsInfo: "مبتنی بر شبکه عمومی. فقط استفاده شخصی/غیرتجاری. بدون نیاز به کلید",
-    wantBetterExperience: "تجربه بهتری می‌خواهید؟",
-    clickBottomTip: "لطفاً روی «ترجمه پیشرفته Mira AI Translator Pro» در سمت چپ کلیک کنید"
   },
   "tr": {
     engineListTitle: "Motor Listesi",
@@ -1032,8 +1002,6 @@ self.i18nEngineData = {
     success: "Başarılı",
     failed: "Başarısız",
     freeInterfaceTipsInfo: "Genel ağ isteklerine dayalıdır. Yalnızca kişisel/ticari olmayan kullanım. Anahtar gerekmez",
-    wantBetterExperience: "Daha iyi bir deneyim ister misiniz?",
-    clickBottomTip: "Sol taraftaki 'Mira AI Translator Pro' seçeneğine tıklayın"
   }
 };
 self.i18nStyleData = {
@@ -3354,169 +3322,6 @@ self.i18nAttach8 = {
   }
 };
 
-self.i18nAttach9 = {
-  "zh_CN": {
-    refreshing: "刷新中...",
-    loggingIn: "登录中...",
-    login: "登录",
-    logout: "退出登录",
-    balance: "账户余额",
-    recharge: "充值",
-    loginExpired: "登录已过期，请重新登录",
-    loginAccount: "当前账号",
-    PAYG: "按量计费",
-    expired: "余额有效期一年",
-    byokNotice: "无需配置 API Key，按用量计费，开箱即用",
-    selectModel: "选择翻译模型",
-    loginFirst: "请先在插件中登录账号，再进行充值。",
-    openPluginToLogin: "请打开 Mira 插件并点击登录按钮。",
-    rechargeIssue: "充值问题",
-    selectPlan: "选择充值金额",
-    recommended: "推荐",
-    notArrived: "充值未到账？",
-    paymentNotice: "点击金额直接跳转 <b>Ko-fi</b> 结账。支持信用卡 / PayPal。<br>支付成功后，余额通常在 <b>5 分钟内</b>自动到账。",
-    deleteAccount: "注销账户",
-    deleteAccountConfirm: "确定要注销并删除账户吗？此操作不可撤销，账户余额将一并清空。",
-    deleteAccountSuccess: "✓ 账户已注销",
-    deleteAccountFail: "✗ 操作失败，请稍后重试",
-    credits_expired: "余额已过期，请重新充值",
-    insufficient_balance: "余额不足，请充值",
-    status_normal: "正常",
-    expires_in_days: "将在{days}天后过期",
-    valid_until: "有效期至{date}",
-    not_logged_in: "未登录",
-    status_check_failed: "状态检查失败",
-  },
-  "zh_TW": {
-    refreshing: "重新整理中...",
-    loggingIn: "登入中...",
-    login: "登入",
-    logout: "登出",
-    balance: "帳戶餘額",
-    recharge: "儲值",
-    loginExpired: "登入逾期，請重新登入",
-    loginAccount: "當前帳號",
-    PAYG: "隨用隨付",
-    expired: "儲值餘額一年內有效",
-    byokNotice: "無需配置 API Key，隨開即用，按用量計費",
-    selectModel: "選擇翻譯模型",
-    loginFirst: "請先在擴充功能中登入帳號，再進行儲值。",
-    openPluginToLogin: "請打開 Mira 擴充功能後點擊登入按鈕。",
-    rechargeIssue: "儲值遇到問題",
-    selectPlan: "選擇儲值金額",
-    recommended: "推薦",
-    notArrived: "儲值未到帳？",
-    paymentNotice: "點擊方案直接跳轉至 <b>Ko-fi</b> 結帳。支援信用卡 / PayPal。<br>支付成功後餘額通常在 <b>5 分鐘內</b>自動入帳。",
-    deleteAccount: "刪除帳號",
-    deleteAccountConfirm: "確定要刪除帳號嗎？此操作不可撤銷，餘額將會被清空。",
-    deleteAccountSuccess: "✓ 帳號已刪除",
-    deleteAccountFail: "✗ 刪除失敗，請稍後再試",
-    credits_expired: "餘額已過期，請重新儲值",
-    insufficient_balance: "餘額不足，請儲值",
-    status_normal: "正常",
-    expires_in_days: "將在{days}天後過期",
-    valid_until: "有效期至{date}",
-    not_logged_in: "未登入",
-    status_check_failed: "狀態檢查失敗",
-  },
-  "en": {
-    refreshing: "Refreshing...",
-    loggingIn: "Signing in...",
-    login: "Sign in",
-    logout: "Sign out",
-    balance: "Balance",
-    loginExpired: "Session expired. Please log in again.",
-    recharge: "Top up",
-    loginAccount: "Account",
-    PAYG: "Pay-as-you-go",
-    expired: "Credits valid for 1 year",
-    byokNotice: "No API Key required. Out-of-the-box, pay-as-you-go.",
-    selectModel: "Translation Model",
-    loginFirst: "Please sign in to the extension before topping up.",
-    openPluginToLogin: "Please open the Mira extension and click the sign-in button.",
-    rechargeIssue: "Top-up issues?",
-    selectPlan: "Select Amount",
-    recommended: "Best Value",
-    notArrived: "Didn't receive balance?",
-    paymentNotice: "Click a plan to pay via <b>Ko-fi</b> (Credit Card / PayPal).<br>Balance usually arrives within <b>5 minutes</b>.",
-    deleteAccount: "Delete account",
-    deleteAccountConfirm: "Are you sure? This action is irreversible and your balance will be lost forever.",
-    deleteAccountSuccess: "✓ Account deleted",
-    deleteAccountFail: "✗ Deletion failed, please try again later",
-    credits_expired: "Credits expired, please top up",
-    insufficient_balance: "Insufficient balance, please top up",
-    status_normal: "Active",
-    expires_in_days: "Expires in {days} days",
-    valid_until: "Valid until {date}",
-    not_logged_in: "Not signed in",
-    status_check_failed: "Status check failed",
-  },
-  "ja": {
-    refreshing: "更新中...",
-    loggingIn: "ログイン中...",
-    login: "ログイン",
-    logout: "ログアウト",
-    balance: "残高",
-    loginExpired: "セッションの有効期限が切れました。再度ログインしてください。",
-    recharge: "チャージ",
-    loginAccount: "アカウント",
-    PAYG: "従量課金制",
-    expired: "有効期限は1年間です",
-    byokNotice: "APIキーの設定は不要。使った分だけ支払う従量課金制。",
-    selectModel: "翻訳モデルを選択",
-    loginFirst: "チャージする前に、拡張機能でログインしてください。",
-    openPluginToLogin: "Mira拡張機能を開き、ログインボタンをクリックしてください。",
-    rechargeIssue: "チャージに関するヘルプ",
-    selectPlan: "チャージ金額を選択",
-    recommended: "おすすめ",
-    notArrived: "チャージが反映されない場合",
-    paymentNotice: "プランをクリックすると <b>Ko-fi</b> で決済します。カード / PayPal対応。<br>決済後、通常 <b>5分以内</b>に残高が反映されます。",
-    deleteAccount: "アカウントを削除",
-    deleteAccountConfirm: "本当に削除しますか？この操作は取り消せず、残高も失われます。",
-    deleteAccountSuccess: "✓ アカウントを削除しました",
-    deleteAccountFail: "✗ 削除に失敗しました。時間をおいて再度お試しください",
-    credits_expired: "残高の有効期限が切れました。チャージしてください",
-    insufficient_balance: "残高不足です。チャージしてください",
-    status_normal: "正常",
-    expires_in_days: "あと{days}日で期限切れ",
-    valid_until: "{date}まで有効",
-    not_logged_in: "ログインしていません",
-    status_check_failed: "ステータスの確認に失敗しました",
-  },
-  "ko": {
-    refreshing: "새로고침 중...",
-    loggingIn: "로그인 중...",
-    login: "로그인",
-    logout: "로그아웃",
-    balance: "잔액",
-    loginExpired: "로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
-    recharge: "충전",
-    loginAccount: "계정 정보",
-    PAYG: "종량제",
-    expired: "잔액 유효기간은 1년입니다",
-    byokNotice: "API 키 설정 필요 없음. 사용한 만큼만 결제하세요.",
-    selectModel: "번역 모델 선택",
-    loginFirst: "충전하려면 먼저 확장 프로그램에서 로그인해 주세요.",
-    openPluginToLogin: "Mira 확장 프로그램을 연 후 로그인 버튼을 클릭해 주세요.",
-    rechargeIssue: "충전 관련 문의",
-    selectPlan: "충전 금액 선택",
-    recommended: "추천",
-    notArrived: "충전 금액이 반영되지 않았나요?",
-    paymentNotice: "금액을 클릭하면 <b>Ko-fi</b> 결제 페이지로 이동합니다. 신용카드 / PayPal 지원.<br>결제 후 보통 <b>5분 이내</b>에 잔액이 자동 반영됩니다.",
-    deleteAccount: "계정 삭제",
-    deleteAccountConfirm: "정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며 잔액도 사라집니다.",
-    deleteAccountSuccess: "✓ 계정이 삭제되었습니다",
-    deleteAccountFail: "✗ 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요",
-    credits_expired: "잔액이 만료되었습니다. 충전해 주세요",
-    insufficient_balance: "잔액이 부족합니다. 충전해 주세요",
-    status_normal: "정상",
-    expires_in_days: "{days}일 후 만료",
-    valid_until: "{date}까지 유효",
-    not_logged_in: "로그인되지 않음",
-    status_check_failed: "상태 확인 실패",
-  }
-};
-
 self.i18nAttach10 = {
   "zh-CN": {
     cpTitle: "自定义提示词",
@@ -3537,7 +3342,6 @@ self.i18nAttach10 = {
     🔑 **关于设置：** 如需进阶 AI 翻译，可前往各大 AI 平台自行申请 API Key 并点击左下角按钮进行设置。若本地显卡性能较佳，亦可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度会比商业 AI 大模型明显较慢。
     💡 **AI 翻译性能说明：** AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，此为正常现象。
     💰 **提示：** AI 翻译并非模型越新越好。翻译任务并不需要复杂推理，主流模型已能完全胜任，最新模型的价格往往高出数倍。
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是为希望省去设置步骤、直接使用 AI 翻译的用户提供的付费升级选项。
     ❤️ **关于项目：**  {0} 这是一个追求极致轻量的开源翻译项目（仅约300kb），最初是为了满足我个人的翻译需求而独立开发，因此在交互设计上可能带有较强的个人习惯。
     ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。因个人维护精力有限，无法保证完美兼容全网所有特定网站，后续的更新维护亦无法做到即时响应。感谢理解。`,
   },
@@ -3560,7 +3364,6 @@ self.i18nAttach10 = {
     🔑 **關於設定：** 如需進階 AI 翻譯，可前往各大 AI 平台自行申請 API Key 並點擊左下角按鈕進行設定。若本地顯示卡效能較佳，亦可部署本地 AI 模型，無需連網、無限次免費使用，但翻譯速度會比商業 AI 大模型明顯較慢。
     💡 **AI 翻譯效能說明：** AI 翻譯效果更自然，但由於模型逐字生成的機制，速度比 Google、Bing 等傳統引擎慢，此為正常現象。
     💰 **提醒：** AI 翻譯並非模型越新越好。翻譯任務不需要複雜推理，主流模型已完全勝任，最新模型的價格往往高出數倍。
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> 是為希望省去設定步驟、直接使用 AI 翻譯的使用者提供的付費升級選項。
     ❤️ **關於專案：** {0} 是一個追求極致輕量的開源翻譯專案（僅約 300KB），最初是為了滿足我個人的翻譯需求而獨立開發，因此在互動設計上可能帶有較強的個人習慣。
     ⚠️ **注意：** 本工具預設內建基礎的免費翻譯引擎，**不額外提供免費的高級 AI 翻譯額度及服務**。因個人維護精力有限，無法保證完美相容全網所有特定網站，後續的更新維護亦無法做到即時回應。感謝理解。`,
   },
@@ -3583,7 +3386,6 @@ self.i18nAttach10 = {
     🔑 **Settings:** For advanced AI translation, you can obtain an API key from major AI platforms and configure it via the button in the bottom-left corner. If you have a capable GPU, you can deploy a local AI model for offline, unlimited free use, though it will be significantly slower than commercial AI models.
     💡 **Performance Note:** AI translations are more natural but, due to their token-by-token generation, are slower than traditional engines like Google or Bing. This is normal.
     💰 **Tip:** Newer isn't always better for AI models. Translation does not require complex reasoning, so mainstream models are fully sufficient, while newer models often cost several times more.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> is a paid upgrade for users who want to skip setup and start using AI translation immediately.
     ❤️ **About {0}:** This is an ultra-lightweight open-source project (~300KB). It was developed independently for my personal needs, so the UI/UX may reflect my personal preferences.
     ⚠️ **Note:** This tool includes built-in basic free translation engines by default but **does not provide additional free premium AI credits**. Due to limited maintenance capacity, I cannot guarantee perfect compatibility with all websites or provide instant support. Thanks for your understanding.`,
   },
@@ -3606,7 +3408,6 @@ self.i18nAttach10 = {
     🔑 **設定について：** 高度なAI翻訳が必要な場合は、各AIプラットフォームでAPI Keyを取得し、左下のボタンから設定してください。高性能なGPUをお持ちであれば、ローカルAIモデルを導入することで、オフラインかつ無制限に無料で利用可能です（ただし、商用AIモデルより翻訳速度は大幅に低下します）。
     💡 **AI翻訳の性能：** AI翻訳は自然な結果を出力しますが、逐次生成の仕組み上、GoogleやBingなどの従来型エンジンより低速です。これは仕様です。
     💰 **TIPS：** AIモデルは最新が常にベストとは限りません。翻訳タスクには高度な推論は不要であり、主流のモデルで十分です。最新モデルはコストが数倍になる傾向があります。
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> は、設定の手間を省き、すぐにAI翻訳を利用したい方向けの有料アップグレードです。
     ❤️ **プロジェクトについて：** {0} は軽量さを追求したオープンソースプロジェクト（約300KB）です。もともと自身の翻訳ニーズのために開発したため、操作設計に個人の好みが反映されている場合があります。
     ⚠️ **注意：** 本ツールは基本的な無料翻訳エンジンを内蔵していますが、**追加の無料AI翻訳枠やサービスは提供していません**。個人開発のため、全サイトでの完全な互換性や即時のメンテナンスは保証できかねます。ご理解いただけますと幸いです。`,
   },
@@ -3629,7 +3430,6 @@ self.i18nAttach10 = {
     🔑 **설정 안내:** 고급 AI 번역이 필요한 경우, 주요 AI 플랫폼에서 API Key를 발급받아 왼쪽 하단 버튼을 통해 설정할 수 있습니다. GPU 성능이 좋다면 로컬 AI 모델을 설치하여 오프라인으로 무제한 무료 번역이 가능하지만, 상업용 AI 모델보다는 속도가 훨씬 느립니다.
     💡 **성능 안내:** AI 번역은 결과물이 더 자연스럽지만, 토큰 단위 생성 방식 특성상 Google이나 Bing 같은 기존 번역 엔진보다 속도가 느릴 수 있습니다. 이는 정상적인 현상입니다.
     💰 **팁:** AI 모델은 최신 버전이 항상 좋은 것은 아닙니다. 번역 작업에는 복잡한 추론이 필요 없으므로 주류 모델로도 충분하며, 최신 모델은 비용이 수배 이상 높습니다.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span>는 설정 과정 없이 바로 AI 번역을 사용하고 싶은 사용자를 위한 유료 업그레이드 옵션입니다.
     ❤️ **프로젝트 정보:** {0}은 300KB 정도의 매우 가벼운 오픈소스 프로젝트입니다. 애초에 제 개인적인 번역 니즈를 해결하기 위해 개발했기 때문에, UI/UX 설계에 개인적인 취향이 다소 반영되어 있을 수 있습니다.
     ⚠️ **주의:** 본 도구는 기본 무료 번역 엔진을 내장하고 있으며, **무료 고급 AI 번역 서비스는 추가로 제공하지 않습니다**. 개인 개발 특성상 모든 웹사이트와의 완벽한 호환성이나 즉각적인 대응을 보장할 수 없음을 양해 부탁드립니다.`,
   },
@@ -3652,7 +3452,6 @@ self.i18nAttach10 = {
     🔑 **Configurações:** Para tradução avançada via IA, você pode obter uma chave de API nas principais plataformas e configurá-la no botão no canto inferior esquerdo. Se tiver uma GPU potente, pode usar modelos locais para tradução offline e ilimitada, embora a velocidade seja consideravelmente menor que a de modelos comerciais.
     💡 **Performance:** Traduções por IA são mais naturais, mas devido ao mecanismo de geração palavra por palavra, são mais lentas que motores tradicionais (Google/Bing). Isso é normal.
     💰 **Dica:** Modelos de IA mais novos não são necessariamente melhores. Tarefas de tradução não exigem raciocínio complexo; modelos populares são suficientes e custam muito menos.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> é uma atualização paga para usuários que desejam pular configurações e usar IA imediatamente.
     ❤️ **Sobre o {0}:** Este é um projeto open-source extremamente leve (~300KB). Desenvolvido por mim para uso próprio, por isso o design reflete minhas preferências pessoais.
     ⚠️ **Nota:** Esta ferramenta inclui motores gratuitos básicos, mas **não fornece créditos extras gratuitos de IA premium**. Devido à manutenção individual, não garanto compatibilidade perfeita com todos os sites nem suporte imediato. Obrigado pela compreensão.`,
   },
@@ -3675,7 +3474,6 @@ self.i18nAttach10 = {
     🔑 **Configuración:** Para una traducción por IA avanzada, obtenga una API Key en las plataformas principales y configúrela en el botón inferior izquierdo. Si tiene una GPU potente, puede usar modelos locales para uso offline ilimitado, aunque será notablemente más lento que los modelos comerciales.
     💡 **Nota de rendimiento:** Las traducciones por IA son más naturales, pero debido a su mecanismo de generación palabra por palabra, son más lentas que los motores tradicionales como Google o Bing. Esto es normal.
     💰 **Consejo:** Los modelos más nuevos no siempre son mejores para traducir. Las tareas de traducción no requieren razonamiento complejo; los modelos estándar son suficientes y los nuevos suelen costar mucho más.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> es una mejora de pago para usuarios que prefieren no configurar nada y usar IA directamente.
     ❤️ **Sobre el proyecto {0}:** Es un proyecto open-source ultraligero (~300KB). Lo desarrollé para mi uso personal, por lo que el diseño refleja mis preferencias personales.
     ⚠️ **Nota:** Esta herramienta incluye motores gratuitos básicos, pero **no ofrece créditos gratuitos de IA premium adicionales**. Debido a que es un desarrollo individual, no puedo garantizar compatibilidad total con todos los sitios ni soporte inmediato. Gracias por su comprensión.`,
   },
@@ -3698,7 +3496,6 @@ self.i18nAttach10 = {
     🔑 **Configuration :** Pour une traduction IA avancée, obtenez une clé API sur les plateformes principales et configurez-la via le bouton en bas à gauche. Si vous avez un bon GPU, vous pouvez utiliser des modèles locaux pour un usage illimité hors ligne, bien que ce soit plus lent que les modèles commerciaux.
     💡 **Performance :** La traduction IA est plus naturelle mais, en raison de sa génération mot à mot, elle est plus lente que les moteurs traditionnels (Google/Bing). C'est normal.
     💰 **Conseil :** Les nouveaux modèles ne sont pas toujours les meilleurs pour la traduction. Les modèles grand public suffisent amplement, tandis que les plus récents coûtent souvent beaucoup plus cher.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> est une mise à niveau payante pour ceux qui souhaitent utiliser l'IA immédiatement sans configuration.
     ❤️ **À propos de {0} :** C'est un projet open-source ultra-léger (~300KB). Développé pour mes besoins personnels, le design reflète mes préférences habituelles.
     ⚠️ **Note :** Cet outil inclut des moteurs gratuits par défaut mais **ne fournit pas de crédits IA premium gratuits supplémentaires**. En raison d'une maintenance individuelle, je ne peux garantir une compatibilité parfaite avec tous les sites ni un support immédiat. Merci de votre compréhension.`,
   },
@@ -3721,7 +3518,6 @@ self.i18nAttach10 = {
     🔑 **Einstellungen:** Für fortgeschrittene KI-Übersetzung können Sie einen API-Schlüssel bei KI-Plattformen erhalten und diesen über den Button unten links konfigurieren. Mit einer leistungsstarken GPU können Sie lokale KI-Modelle für unbegrenzte Offline-Nutzung verwenden, was jedoch langsamer als bei kommerziellen Modellen ist.
     💡 **Leistung:** KI-Übersetzungen sind natürlicher, aber aufgrund der wortweisen Generierung langsamer als Google oder Bing. Das ist normal.
     💰 **Tipp:** Neuere KI-Modelle sind nicht immer besser für Übersetzungen. Gängige Modelle reichen völlig aus, während neue oft ein Vielfaches kosten.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> ist ein kostenpflichtiges Upgrade für Nutzer, die keine Zeit mit Einstellungen verbringen möchten.
     ❤️ **Über {0}:** Ein extrem leichtes Open-Source-Projekt (~300KB). Da ich es für meine Bedürfnisse entwickelt habe, spiegelt das Design meine persönlichen Gewohnheiten wider.
     ⚠️ **Hinweis:** Dieses Tool bietet grundlegende kostenlose Engines, **keine zusätzlichen kostenlosen KI-Credits**. Aufgrund der individuellen Wartung kann ich keine perfekte Kompatibilität mit allen Seiten oder sofortigen Support garantieren. Danke für Ihr Verständnis.`,
   },
@@ -3744,7 +3540,6 @@ self.i18nAttach10 = {
     🔑 **Настройки:** Для продвинутого ИИ-перевода получите API Key на платформе ИИ и настройте его через кнопку в левом нижнем углу. Если у вас мощный GPU, можно использовать локальные модели для неограниченного оффлайн-перевода (хотя это медленнее коммерческих моделей).
     💡 **Производительность:** ИИ-перевод естественнее, но из-за пословной генерации он медленнее традиционных движков (Google/Bing). Это нормально.
     💰 **Совет:** Новые модели не всегда лучше для перевода. Стандартные модели отлично справляются, а новые часто стоят в разы дороже.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> — это платный апгрейд для тех, кто хочет использовать ИИ сразу, без настроек.
     ❤️ **О проекте {0}:** Это ультралегкий open-source проект (~300KB). Я разработал его для своих нужд, поэтому дизайн может отражать мои личные привычки.
     ⚠️ **Примечание:** Инструмент включает базовые бесплатные движки, но **не предоставляет бесплатные кредиты для премиум-ИИ**. Из-за индивидуальной разработки я не гарантирую полную совместимость со всеми сайтами и мгновенную поддержку. Спасибо за понимание.`,
   },
@@ -3767,7 +3562,6 @@ self.i18nAttach10 = {
     🔑 **Cài đặt:** Để dịch AI nâng cao, bạn có thể lấy API Key từ các nền tảng AI và cấu hình qua nút ở góc dưới bên trái. Nếu có GPU mạnh, bạn có thể cài đặt mô hình AI cục bộ để dùng offline miễn phí không giới hạn, dù tốc độ sẽ chậm hơn các mô hình thương mại.
     💡 **Hiệu suất:** Dịch AI tự nhiên hơn nhưng do cơ chế tạo từng từ, tốc độ sẽ chậm hơn Google/Bing. Đây là điều bình thường.
     💰 **Mẹo:** Mô hình AI mới không phải lúc nào cũng tốt hơn cho việc dịch. Các mô hình phổ biến là đủ dùng, trong khi mô hình mới thường đắt hơn nhiều.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> là tùy chọn trả phí dành cho người dùng muốn bỏ qua các bước cài đặt và dùng AI ngay lập tức.
     ❤️ **Về dự án {0}:** Đây là dự án mã nguồn mở siêu nhẹ (~300KB). Vì tôi tự phát triển cho nhu cầu cá nhân nên thiết kế có thể mang đậm thói quen sử dụng của tôi.
     ⚠️ **Lưu ý:** Công cụ này tích hợp sẵn các công cụ dịch miễn phí, **không cung cấp thêm hạn mức AI cao cấp miễn phí**. Do phát triển cá nhân, tôi không đảm bảo tương thích hoàn hảo với mọi trang web hay hỗ trợ tức thì. Cảm ơn bạn đã thông cảm.`,
   },
@@ -3790,120 +3584,48 @@ self.i18nAttach10 = {
     🔑 **حول الإعدادات:** للحصول على ترجمة AI متقدمة، يمكنك الحصول على مفتاح API من منصات الذكاء الاصطناعي وإعداده عبر الزر في الزاوية اليسرى السفلية. إذا كان أداء بطاقة الرسوميات (GPU) لديك جيداً، يمكنك أيضاً تشغيل نموذج محلي للترجمة بدون إنترنت وبلا حدود، لكن السرعة ستكون أبطأ مقارنة بالنماذج التجارية.
     💡 **ملاحظة حول الأداء:** نتائج ترجمة الذكاء الاصطناعي تبدو أكثر طبيعية، لكن نظراً لآلية التوليد كلمة بكلمة، فهي أبطأ من محركات الترجمة التقليدية مثل Google و Bing، وهذا أمر طبيعي.
     💰 **تنبيه:** ليس بالضرورة أن يكون النموذج الأحدث هو الأفضل للترجمة. النماذج الشائعة كافية تماماً، بينما تكون تكلفة النماذج الأحدث أعلى بعدة أضعاف.
-    🪄 <span style='color:#f2cc60;font-size: 16px;'>Mira AI Translator Pro</span> هو خيار ترقية مدفوع مخصص للمستخدمين الذين يرغبون في توفير عناء خطوات الإعداد واستخدام ترجمة AI مباشرة.
     ❤️ **حول المشروع {0}:** هو مشروع مفتوح المصدر يسعى لتحقيق أقصى درجات الخفة (حجمه حوالي 300 كيلوبايت فقط). قمت بتطويره في الأصل لتلبية احتياجاتي الشخصية، لذا قد تعكس طريقة تصميمه بعض تفضيلاتي الشخصية.
     ⚠️ **تنبيه:** هذه الأداة تتضمن محركات ترجمة مجانية أساسية افتراضياً، **ولا توفر رصيداً أو خدمات ترجمة AI متقدمة مجانية إضافية**. نظراً لمحدودية وقتي في الصيانة، لا يمكنني ضمان التوافق التام مع جميع المواقع أو تقديم دعم فوري. شكراً لتفهمك.`,
   },
 };
 
+
 self.i18nAttach11 = {
   "zh-CN": {
-    "notice.title": "服务通知",
-    "notice.bold": "Mira 翻译服务更新",
-    "notice.body": "请及时导出您的生词本数据。",
     "notice.auth": "请切换授权页完成操作，授权后返回重试。",
-    "notice.config": "请先在插件主界面配置同步方式。",
-    "notice.export": "导出数据 ({0})",
-    "notice.close": "确认"
   },
   "zh-TW": {
-    "notice.title": "服務通知",
-    "notice.bold": "Mira 翻譯服務更新",
-    "notice.body": "請及時匯出您的生詞本資料。",
     "notice.auth": "請切換授權頁完成操作，授權後返回重試。",
-    "notice.config": "請先在插件主介面設定同步方式。",
-    "notice.export": "匯出資料 ({0})",
-    "notice.close": "確認"
   },
   "en": {
-    "notice.title": "Service Notice",
-    "notice.bold": "Mira Update",
-    "notice.body": "Please export your vocabulary data.",
     "notice.auth": "Please complete the authorization in the new tab and return here to retry.",
-    "notice.config": "Please configure your sync method in the main interface first.",
-    "notice.export": "Export Data ({0})",
-    "notice.close": "Close"
   },
   "ja": {
-    "notice.title": "サービス通知",
-    "notice.bold": "Mira 翻訳の更新",
-    "notice.body": "単語帳のデータをエクスポートしてください。",
     "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。",
-    "notice.config": "メイン画面で同期方法を設定してください。",
-    "notice.export": "エクスポート ({0})",
-    "notice.close": "確認"
   },
   "ko": {
-    "notice.title": "서비스 안내",
-    "notice.bold": "Mira 번역기 업데이트",
-    "notice.body": "단어장 데이터를 내보내기 해주세요.",
     "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요.",
-    "notice.config": "먼저 메인 화면에서 동기화 방식을 설정해 주세요.",
-    "notice.export": "내보내기 ({0})",
-    "notice.close": "확인"
   },
   "pt-BR": {
-    "notice.title": "Aviso de Serviço",
-    "notice.bold": "Atualização do Mira",
-    "notice.body": "Por favor, exporte seus dados de vocabulário.",
     "notice.auth": "Conclua a autorização na nova aba e retorne para tentar novamente.",
-    "notice.config": "Por favor, configure o método de sincronização na interface principal primeiro.",
-    "notice.export": "Exportar Dados ({0})",
-    "notice.close": "Fechar"
   },
   "fr": {
-    "notice.title": "Avis de service",
-    "notice.bold": "Mise à jour de Mira",
-    "notice.body": "Veuillez exporter vos données de vocabulaire.",
     "notice.auth": "Veuillez terminer l'autorisation dans le nouvel onglet et revenir ici pour réessayer.",
-    "notice.config": "Veuillez d'abord configurer la méthode de synchronisation dans l'interface principale.",
-    "notice.export": "Exporter les données ({0})",
-    "notice.close": "Fermer"
   },
   "ru": {
-    "notice.title": "Сервисное уведомление",
-    "notice.bold": "Обновление Mira",
-    "notice.body": "Пожалуйста, экспортируйте данные вашего словаря.",
     "notice.auth": "Завершите авторизацию в новой вкладке и вернитесь, чтобы повторить попытку.",
-    "notice.config": "Пожалуйста, сначала настройте способ синхронизации в главном интерфейсе.",
-    "notice.export": "Экспорт данных ({0})",
-    "notice.close": "Закрыть"
   },
   "es": {
-    "notice.title": "Aviso de servicio",
-    "notice.bold": "Actualización de Mira",
-    "notice.body": "Por favor, exporte sus datos de vocabulario.",
     "notice.auth": "Complete la autorización en la nueva pestaña y regrese aquí para reintentar.",
-    "notice.config": "Por favor, configure el método de sincronización en la interfaz principal primero.",
-    "notice.export": "Exportar datos ({0})",
-    "notice.close": "Cerrar"
   },
   "ar": {
-    "notice.title": "إشعار الخدمة",
-    "notice.bold": "تحديث Mira",
-    "notice.body": "يرجى تصدير بيانات المفردات الخاصة بك.",
     "notice.auth": "يرجى إكمال التفويض في علامة التبويب الجديدة والعودة إلى هنا لإعادة المحاولة.",
-    "notice.config": "يرجى تكوين طريقة المزامنة في الواجهة الرئيسية أولاً.",
-    "notice.export": "تصدير البيانات ({0})",
-    "notice.close": "إغلاق"
   },
   "fa": {
-    "notice.title": "اطلاعیه خدمات",
-    "notice.bold": "به‌روزرسانی Mira",
-    "notice.body": "لطفاً داده‌های واژگان خود را صادر کنید.",
     "notice.auth": "لطفاً احراز هویت را در برگه جدید تکمیل کرده و برای تلاش مجدد به اینجا بازگردید.",
-    "notice.config": "لطفاً ابتدا روش همگام‌سازی را در رابط کاربری اصلی تنظیم کنید.",
-    "notice.export": "صدور داده‌ها ({0})",
-    "notice.close": "بستن"
   },
   "he": {
-    "notice.title": "הודעת שירות",
-    "notice.bold": "עדכון Mira",
-    "notice.body": "אנא ייצא את נתוני אוצר המילים שלך.",
     "notice.auth": "אנא השלם את ההרשאה בכרטיסייה החדשה וחזור לכאן כדי לנסות שוב.",
-    "notice.config": "אנא הגדר תחילה את שיטת הסנכרון בממשק הראשי.",
-    "notice.export": "ייצוא נתונים ({0})",
-    "notice.close": "סגור"
   }
 };
 

@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "Erro de API: Erro no servidor (500)."
   },
+  "ERROR_503": {
+    "message": "Erro de API: Serviço temporariamente indisponível. Tente novamente mais tarde."
+  },
   "ERROR_TIMEOUT": {
     "message": "Tempo esgotado: Verifique a conexão."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "Falha: Verifique a configuração da API."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Faça login para usar o Mira Translator."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "Traduzir o parágrafo sob o cursor"

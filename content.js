@@ -1603,29 +1603,47 @@ const TranslationBatcher = {
         this.unlock(item.el);
         if (item.container?.parentNode) {
           const errorText = err.message || "Translation failed";
-          const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
+          // 支持更多错误码
+          const match = errorText.match(/400|401|402|403|404|429|500|502|503|504|505/);
           let displayMessage = "";
+
           if (match) {
             let errorCode = match[0];
-            if (
-              errorCode === "400" &&
-              errorText.toLowerCase().includes("balance")
-            )
+            if (errorCode === "400" && errorText.toLowerCase().includes("balance")) {
               errorCode = "402";
+            }
+
+            // 先尝试获取友好消息
             const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
-            displayMessage = friendlyMsg
-              ? `${friendlyMsg} (Code: ${errorCode})`
-              : `API Error (Code: ${errorCode})`;
+
+            if (friendlyMsg) {
+              // ✅ 有翻译
+              displayMessage = `${friendlyMsg} (Code: ${errorCode})`;
+            } else {
+              // ❌ 没有翻译：尝试提取 API 详细错误
+              try {
+                const jsonMatch = errorText.match(/\{.*\}/);
+                if (jsonMatch) {
+                  const errorObj = JSON.parse(jsonMatch[0]);
+                  const apiMessage = errorObj.error?.message || errorObj.message;
+                  if (apiMessage) {
+                    displayMessage = `HTTP ${errorCode}: ${apiMessage}`;
+                  } else {
+                    displayMessage = `API Error (Code: ${errorCode})`;
+                  }
+                } else {
+                  displayMessage = `API Error (Code: ${errorCode})`;
+                }
+              } catch {
+                displayMessage = `API Error (Code: ${errorCode})`;
+              }
+            }
           } else if (errorText.toLowerCase().includes("timeout")) {
-            displayMessage =
-              getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
-          } else if (errorText.includes("ERROR_NOT_SIGNED_IN")) {
-            displayMessage =
-              getSafeMessage("ERROR_NOT_SIGNED_IN") || "Please sign in";
+            displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
           } else {
-            displayMessage =
-              errorText.length < 100 ? errorText : "Translation failed";
+            displayMessage = errorText.length < 100 ? errorText : "Translation failed";
           }
+
           item.container.innerText = `⚠ ${displayMessage}`;
           item.container.style.color = "#f87171";
           item.container.style.fontStyle = "italic";
@@ -1731,7 +1749,7 @@ const TranslationBatcher = {
           }
 
           link.textContent = display; // 不做字符串级截断，保留完整文本和语义
-link.style.cssText = `
+          link.style.cssText = `
   color: #1d9bf0 !important;
   display: inline-block !important;
   max-width: 100% !important;   
@@ -4889,8 +4907,8 @@ function initSelectionTranslate() {
         box-sizing:       border-box;
         min-height:       150px;
         max-height:       85vh;
-        max-width:        min(450px, calc(100vw - 20px)) !important;
-        min-width:        min(280px, calc(100vw - 20px)) !important;
+        max-width:        min(650px, calc(100vw - 20px)) !important; /*最大宽度*/
+        min-width:        min(300px, calc(100vw - 20px)) !important;
         width:            fit-content;
         display:          flex;
         flex-direction:   column;
@@ -5808,42 +5826,7 @@ function initSelectionTranslate() {
     }
   };
 
-  async function getMiraModels() {
-    // 先读缓存
-    const cached = await safeGetStorage("mira_models_cache");
-    const cache = cached?.mira_models_cache;
-    const ONE_HOUR = 60 * 60 * 1000;
-
-    // 缓存存在且未过期（1小时内）
-    if (cache?.models?.length && Date.now() - cache.timestamp < ONE_HOUR) {
-      return cache.models;
-    }
-
-    // 缓存过期或不存在，重新 fetch
-    try {
-      const resp = await fetch(MODELS_URL);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const notice = await resp.json();
-      const models = (notice.models || []).map((m) => ({
-        id: m.id,
-        label: m.label,
-        tag: m.tag || "",
-        tagColor: m.tagColor || "#7c3aed",
-      }));
-      // 存入缓存
-      await safeSetStorage({
-        mira_models_cache: { models, timestamp: Date.now() },
-      });
-      return models;
-    } catch (e) {
-      // fetch 失败，用旧缓存（即使过期）
-      if (cache?.models?.length) return cache.models;
-      // 实在没有，用内置备用
-      return MIRA_FALLBACK_MODELS;
-    }
-  }
-
-  function createEngineDropdown(anchorEl, shadow, shadowHost, userConfigs, currentId, currentModel, onSelect) {
+  function createEngineDropdown(anchorEl, shadow, shadowHost, userConfigs, currentId, onSelect) {
     const shadowRoot = shadowHost.shadowRoot;
 
     const existing = shadowRoot.getElementById("p-engine-dropdown");
@@ -5951,78 +5934,14 @@ function initSelectionTranslate() {
 
     // 构建列表项
     userConfigs.forEach((cfg) => {
-      const isMira = cfg.engine === "mira_pro";
       const isEngineActive = cfg.id === currentId;
 
-      if (isMira) {
-        const header = document.createElement("div");
-        header.classList.add("mira-font-family");
-        header.style.cssText = `
-        display:flex; align-items:center; gap:6px;
-        padding:6px 10px; font-size:12px; font-weight:600;
-        color:${colors.textMuted}; user-select:none;
-    `;
-        if (enable_pro_features) {
-          header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator
-        <span style="margin-left:auto; background: linear-gradient(135deg, rgb(245, 158, 11), rgb(217, 119, 6)) !important; color:#fff;
-            font-size:9px; padding:1px 5px; border-radius:8px;">Pro</span>`;
-          dropdown.appendChild(header);
-        }
+      // 普通引擎
+      const isActive = isEngineActive;
+      const item = document.createElement("div");
 
-        //  创建子项容器
-        const miraContainer = document.createElement("div");
-        miraContainer.id = "p-mira-models-list";
-        dropdown.appendChild(miraContainer);
-        miraContainer.classList.add("mira-font-family");
-        //  渲染函数
-        const buildMiraItems = (models) => {
-          miraContainer.innerHTML = "";
-          models.forEach((m) => {
-            const isActive = isEngineActive && currentModel === m.id;
-            const item = document.createElement("div");
-            item.style.cssText = `
-                display:flex; align-items:center; gap:8px;
-                padding:5px 10px 5px 24px; border-radius:7px; cursor:pointer;
-                color:${isActive ? colors.accent : colors.text};
-                background:${isActive ? colors.activeBg : "transparent"};
-                transition:background 0.15s;
-            `;
-            item.innerHTML = `
-                <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.label}</span>
-                <span style="font-size:9px; padding:1px 5px; border-radius:8px; flex-shrink:0;
-                    background:${m.tagColor}22; color:${m.tagColor};">${m.tag}</span>
-            `;
-            item.onmouseenter = () => {
-              if (!isActive) item.style.background = colors.hoverBg;
-            };
-            item.onmouseleave = () => {
-              if (!isActive) item.style.background = "transparent";
-            };
-            item.onclick = (ev) => {
-              ev.stopPropagation();
-              dropdown.remove();
-              onSelect(cfg, m.id);
-            };
-            miraContainer.appendChild(item);
-          });
-        };
-
-        if (enable_pro_features) {
-          buildMiraItems(MIRA_FALLBACK_MODELS);
-
-          getMiraModels().then((models) => {
-            if (!shadowRoot.getElementById("p-engine-dropdown")) return;
-            buildMiraItems(models);
-            repositionDropdown();
-          });
-        }
-      } else {
-        // 普通引擎
-        const isActive = isEngineActive;
-        const item = document.createElement("div");
-
-        item.classList.add("mira-font-family");
-        item.style.cssText = `
+      item.classList.add("mira-font-family");
+      item.style.cssText = `
                 display:flex; align-items:center; gap:8px;
                 padding:6px 10px; border-radius:7px; cursor:pointer;
                 color:${isActive ? colors.accent : colors.text};
@@ -6030,24 +5949,24 @@ function initSelectionTranslate() {
                 font-weight:${isActive ? "600" : "400"};
                 transition:background 0.15s;
             `;
-        item.innerHTML = `
+      item.innerHTML = `
                 <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                     ${cfg.alias}
                 </span>
             `;
-        item.onmouseenter = () => {
-          if (!isActive) item.style.background = colors.hoverBg;
-        };
-        item.onmouseleave = () => {
-          if (!isActive) item.style.background = "transparent";
-        };
-        item.onclick = (ev) => {
-          ev.stopPropagation();
-          dropdown.remove();
-          onSelect(cfg, null);
-        };
-        dropdown.appendChild(item);
-      }
+      item.onmouseenter = () => {
+        if (!isActive) item.style.background = colors.hoverBg;
+      };
+      item.onmouseleave = () => {
+        if (!isActive) item.style.background = "transparent";
+      };
+      item.onclick = (ev) => {
+        ev.stopPropagation();
+        dropdown.remove();
+        onSelect(cfg);
+      };
+      dropdown.appendChild(item);
+
     });
 
     // 先挂载，再定位 
@@ -6071,7 +5990,6 @@ function initSelectionTranslate() {
   }
   async function switchEngineInPopup(
     cfg,
-    model,
     userConfigs,
     shadow,
     dotEl,
@@ -6080,15 +5998,10 @@ function initSelectionTranslate() {
     const instanceData =
       (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
 
-    let finalInstanceData = instanceData;
-    if (cfg.engine === "mira_pro" && model) {
-      finalInstanceData = { ...instanceData, model };
-    }
-
     const activeConfig = {
       id: cfg.id,
       engine: cfg.engine,
-      data: finalInstanceData,
+      data: instanceData,
     };
 
     // 存储操作不 await，fire-and-forget
@@ -6096,20 +6009,11 @@ function initSelectionTranslate() {
       activeConfig,
       lastActiveId: cfg.id,
       selectedEngine: cfg.engine,
-      ...(cfg.engine === "mira_pro" && model
-        ? { data_mira_pro: finalInstanceData }
-        : {}),
     });
 
     // 立即更新 UI
     if (labelEl) {
-      const m = MIRA_FALLBACK_MODELS.find((m) => m.id === model);
-      labelEl.textContent =
-        cfg.engine === "mira_pro"
-          ? m
-            ? m.label
-            : "Mira"
-          : (cfg.alias || cfg.engine).slice(0, 10);
+      labelEl.textContent = (cfg.alias || cfg.engine).slice(0, 10);
     }
     if (dotEl) dotEl.style.background = "#6b7280";
 
@@ -6124,19 +6028,17 @@ function initSelectionTranslate() {
     const data = await safeGetStorage([
       "userConfigs",
       "activeConfig",
-      "data_mira_pro",
     ]);
     if (!data) return;
 
     const builtInEngines = [
-      { id: "mira_pro", engine: "mira_pro", alias: "✦ Mira AI Translator" },
       { id: "google_builtin", engine: "google", alias: "Google" },
       { id: "bing_builtin", engine: "bing", alias: "Bing" },
     ];
 
     const storedConfigs = data.userConfigs || [];
     const customConfigs = storedConfigs.filter(
-      (c) => !["mira_pro", "google_builtin", "bing_builtin"].includes(c.id),
+      (c) => !["google_builtin", "bing_builtin"].includes(c.id),
     );
     const userConfigs = [...builtInEngines, ...customConfigs];
 
@@ -6147,21 +6049,14 @@ function initSelectionTranslate() {
         "google_builtin"
       );
     };
-
     const currentId =
       activeConfig?.id ||
       userConfigs.find((c) => c.engine === data.selectedEngine)?.id ||
       userConfigs.find((c) => c.engine === _defaultEngine)?.id ||
       getDefaultEngineId(userConfigs);
-    const miraSaved = data.data_mira_pro || {};
-    const currentModel = miraSaved.model || MIRA_FALLBACK_MODELS[0].id;
 
     // 2. 更新按钮标签
-    function getShortAlias(cfg, modelId) {
-      if (cfg.engine === "mira_pro") {
-        const m = MIRA_FALLBACK_MODELS.find((m) => m.id === modelId);
-        return m ? m.label : "Mira";
-      }
+    function getShortAlias(cfg) {
       // 自定义引擎取前8字
       return (cfg.alias || cfg.engine).slice(0, 10);
     }
@@ -6171,16 +6066,11 @@ function initSelectionTranslate() {
     if (labelEl) {
       const curCfg =
         userConfigs.find((c) => c.id === currentId) || userConfigs[0];
-      labelEl.textContent = getShortAlias(curCfg, currentModel);
+      labelEl.textContent = getShortAlias(curCfg);
     }
-    shadow.host._engineDotEl = dotEl;
-    // safeGetStorage('_engineAvailable').then(res => {
-    //   if (!dotEl) return;
-    //   if (res?._engineAvailable === true) dotEl.style.background = '#22c55e';
-    //   else if (res?._engineAvailable === false) dotEl.style.background = '#ef4444';
-    //   else dotEl.style.background = '#6b7280'; // 从未检测过，灰色
-    // });
 
+
+    shadow.host._engineDotEl = dotEl;
     // 4. 按钮点击
     const btn = shadow.getElementById("p-engine-btn");
     btn.onclick = async (e) => {
@@ -6188,7 +6078,6 @@ function initSelectionTranslate() {
       try {
         const latestData = await safeGetStorage([
           "activeConfig",
-          "data_mira_pro",
           "selectedEngine",
           "_defaultEngine",
         ]);
@@ -6202,8 +6091,6 @@ function initSelectionTranslate() {
           (latestData?._defaultEngine &&
             userConfigs.find((c) => c.engine === latestData._defaultEngine)?.id) ||
           "google_builtin";
-        const latestModel =
-          latestData?.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
 
         createEngineDropdown(
           btn,
@@ -6211,14 +6098,12 @@ function initSelectionTranslate() {
           shadow.host,
           userConfigs,
           latestId,
-          latestModel,
-          async (cfg, model) => {
-            await switchEngineInPopup(cfg, model, userConfigs, shadow, dotEl, labelEl);
+          async (cfg) => {
+            await switchEngineInPopup(cfg, userConfigs, shadow, dotEl, labelEl);
           },
         );
       } catch (err) {
         logger.warn('[engine-btn] 下拉框加载失败:', err.message);
-        // 不做任何处理，下次点击依然可以重试
       }
     };
 
@@ -7197,6 +7082,7 @@ function initSelectionTranslate() {
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
       .then((result) => {
+        if (shadowHost?._detailFullyRendered) return;
         // 翻译完成，恢复发音按钮
         setActionBtns(shadow, true);
         if (basicEl) {
@@ -7245,6 +7131,7 @@ function initSelectionTranslate() {
           if (shadowHost?._engineDotEl)
             shadowHost._engineDotEl.style.background = "#22c55e";
         } else {
+          if (shadowHost?._detailFullyRendered) return;   // 防止final消息被处理两次
           // logger.log("result.isPartial 为 false", result);
           if (shadowHost) {
             clearTimeout(shadowHost._slowTimer);

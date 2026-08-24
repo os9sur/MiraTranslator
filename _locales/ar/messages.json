@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "خطأ في API: خطأ في الخادم (500)."
   },
+  "ERROR_503": {
+    "message": "خطأ في API: الخدمة غير متاحة مؤقتًا. يرجى المحاولة لاحقًا."
+  },
   "ERROR_TIMEOUT": {
     "message": "انتهت المهلة: تحقق من الشبكة."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "فشلت الترجمة: تحقق من الإعدادات."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "يرجى تسجيل الدخول لاستخدام Mira Translator."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "ترجمة الفقرة الموجودة تحت المؤشر"

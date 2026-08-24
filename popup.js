@@ -22,61 +22,6 @@ const CACHE_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_CACHE_SIZE = 200;
 let currentTranslationResponse = null;
 
-// //新用户蒙层
-// async function initOnboarding() {
-//   const tab = await getActiveTab();
-//   const url = tab?.url || "";
-
-//   // 受限页面，直接退出，不显示蒙层
-//   if (MiraUtils.isRestrictedUrl(url)) {
-//     return;
-//   }
-//   const guideEl = document.getElementById('welcome-guide');
-//   const targetBox = document.getElementById('targetLangCombox');
-//   const labelEl = document.getElementById('targetLangLabelText');
-//   const selectEl = document.getElementById('targetLang');
-//   const storageKey = 'mira_onboarding_v1';
-
-//   const completeOnboarding = () => {
-//     if (!guideEl || guideEl.style.display === 'none') return;
-//     if (labelEl) labelEl.style.display = 'block';
-//     localStorage.setItem(storageKey, 'true');
-//     guideEl.style.transition = 'opacity 0.4s ease';
-//     guideEl.style.opacity = '0';
-
-//     setTimeout(() => {
-//       guideEl.style.display = 'none';
-//       targetBox.classList.remove('first-time-highlight');
-//       //  蒙层消失时，恢复原生高度，不再占用多余空间
-//       // document.body.style.minHeight = '';
-//     }, 400);
-//   };
-
-//   if (!localStorage.getItem(storageKey)) {
-//     if (labelEl) labelEl.style.display = 'none';
-//     //  强制撑开 popup 窗口，保证蒙层内容完全展示
-//     //document.body.style.minHeight = '0';
-
-//     guideEl.style.display = 'flex';
-//     targetBox.classList.add('first-time-highlight');
-//     document.getElementById('close-guide-btn').onclick = completeOnboarding;
-
-//     if (selectEl) {
-//       selectEl.addEventListener('mousedown', () => {
-//         // 500ms 后自动关掉蒙层 
-//         setTimeout(completeOnboarding, 500);
-//       });
-//     }
-//     // 点击蒙层背景关闭 
-//     guideEl.addEventListener('click', (e) => {
-//       if (e.target === guideEl) completeOnboarding();
-//     });
-//   } else {
-//     // 非第一次加载，Label 显示
-//     if (labelEl) labelEl.style.display = 'block';
-//   }
-// }
-
 document.addEventListener('DOMContentLoaded', async () => {
   if (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent)) {
     document.body.style.width = '100vw';
@@ -86,42 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.style.padding = '12px';
     document.body.style.borderRadius = '0';
   }
-
-  const shown = await safeGetStorage('review_page_shown_v1');
-  if (!shown?.review_page_shown_v1) {
-    const installData = await safeGetStorage('install_time');
-    const installTime = installData?.install_time || Date.now();
-    const daysSinceInstall = (Date.now() - installTime) / (1000 * 60 * 60 * 24);
-    const usageData = await safeGetStorage('usage_count');
-    const activeDaysData = await safeGetStorage('active_days');
-    const activeDaysCount = activeDaysData?.active_days?.length || 0;
-
-    const MIN_DAYS = 180;
-    const MIN_ACTIVE_DAYS = 120;
-
-    if (daysSinceInstall >= MIN_DAYS && activeDaysCount >= MIN_ACTIVE_DAYS) {
-      await safeSetStorage({ review_page_shown_v1: true });
-      const { browser, timezone } = getDeviceInfo();
-      trackEvent('review_page_shown', {
-        browser_lang: navigator.language,
-        timezone,
-        browser,
-        days_since_install: Math.floor(daysSinceInstall),
-        active_days: activeDaysCount,
-        usage_count: usageData?.usage_count || 0,
-        trigger: 'popup',
-      });
-      chrome.tabs.create({ url: chrome.runtime.getURL("review.html") });
-    }
-  }
-
-  initNoticeBar('popup');
-
-  //await initOnboarding();
-  const btnLogin = document.getElementById('btnLogin');
-  const btnAvatar = document.getElementById('btnAvatar');
-  if (btnLogin) btnLogin.style.display = 'none';
-  if (btnAvatar) btnAvatar.style.display = 'none';
 
   function showPanel(panelId) {
     const allPanels = [
@@ -175,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.body.style.maxHeight = '';
     window.scrollTo(0, 0);
   }
-
+  initNoticeBar('popup');
   const res_uiLanguage = await safeGetStorage('ui_language');
   if (res_uiLanguage) {
     window.currentConfig = {
@@ -1490,8 +1399,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   gearBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
-    loginModal.style.display = 'none';
-    profilePanel.style.display = 'none';
     document.getElementById('p-engine-dropdown-popup')?.remove();
     const isVisible = advMenu.style.display === 'block';
     advMenu.style.display = isVisible ? 'none' : 'block';
@@ -3054,46 +2961,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await safeGetStorage([
       "userConfigs",
       "activeConfig",
-      "data_mira_pro",
       "selectedEngine",
       "_defaultEngine",
     ]);
     if (!data) return;
 
     const builtInEngines = [
-      { id: "mira_pro", engine: "mira_pro", alias: "✦ Mira AI Translator" },
       { id: "google_builtin", engine: "google", alias: "Google" },
       { id: "bing_builtin", engine: "bing", alias: "Bing" },
     ];
     const storedConfigs = data.userConfigs || [];
     const customConfigs = storedConfigs.filter(
-      (c) => !["mira_pro", "google_builtin", "bing_builtin"].includes(c.id)
+      (c) => !["google_builtin", "bing_builtin"].includes(c.id)
     );
     window._popupUserConfigs = [...builtInEngines, ...customConfigs];
 
-    let currentId =
+    const currentId =
       data.activeConfig?.id ||
       window._popupUserConfigs.find((c) => c.engine === data.selectedEngine)?.id ||
       window._popupUserConfigs.find((c) => c.engine === data._defaultEngine)?.id ||
       "google_builtin";
-    const currentModel = data.data_mira_pro?.model || MIRA_FALLBACK_MODELS[0].id;
-
-    // Pro 功能未开放时，若历史数据残留 mira_pro，兜底为 google
-    if (currentId === "mira_pro" && !enable_pro_features) {
-      currentId = "google_builtin";
-    }
 
     window._popupCurrentEngineId = currentId;
-    window._popupCurrentModel = currentModel;
 
     updatePopupEngineLabel();
   }
 
-  function getShortAliasPopup(cfg, modelId) {
-    if (cfg.engine === "mira_pro") {
-      const m = MIRA_FALLBACK_MODELS.find((m) => m.id === modelId);
-      return m ? m.label : "Mira";
-    }
+  function getShortAliasPopup(cfg) {
     return (cfg.alias || cfg.engine).slice(0, 10);
   }
 
@@ -3154,49 +3048,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let activeItemEl = null; // 用于记录当前选中项，稍后滚动定位到它
 
     userConfigs.forEach((cfg) => {
-      const isMira = cfg.engine === 'mira_pro';
       const isEngineActive = cfg.id === currentId;
-
-      if (isMira) {
-        if (!enable_pro_features) return; // Pro 功能未启用，整个 Mira 分组不渲染
-
-        const header = document.createElement('div');
-        header.style.cssText = `
-        display:flex; align-items:center; gap:6px;
-        padding:6px 10px; font-size:12px; font-weight:600;
-        color:${colors.textMuted}; user-select:none;
-      `;
-        header.innerHTML = `<span style="color:#fbbf24;">✦</span> Mira AI Translator`;
-        dropdown.appendChild(header);
-
-        MIRA_FALLBACK_MODELS.forEach((m) => {
-          const isActive = isEngineActive && currentModel === m.id;
-          const item = document.createElement('div');
-          item.style.cssText = `
-          display:flex; align-items:center; gap:8px;
-          padding:5px 10px 5px 24px; border-radius:7px; cursor:pointer;
-          color:${isActive ? colors.accent : colors.text};
-          background:${isActive ? colors.activeBg : 'transparent'};
-          transition:background 0.15s;
-        `;
-          item.innerHTML = `
-          <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.label}</span>
-          <span style="font-size:9px; padding:1px 5px; border-radius:8px; flex-shrink:0;
-            background:${m.tagColor}22; color:${m.tagColor};">${m.tag}</span>
-        `;
-          item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
-          item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
-          item.onclick = (ev) => {
-            ev.stopPropagation();
-            dropdown.remove();
-            switchPopupEngine(cfg, m.id);
-          };
-          dropdown.appendChild(item);
-        });
-      } else {
-        const isActive = isEngineActive;
-        const item = document.createElement('div');
-        item.style.cssText = `
+      const isActive = isEngineActive;
+      const item = document.createElement('div');
+      item.style.cssText = `
         display:flex; align-items:center; gap:8px;
         padding:6px 10px; border-radius:7px; cursor:pointer;
         color:${isActive ? colors.accent : colors.text};
@@ -3204,17 +3059,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         font-weight:${isActive ? '600' : '400'};
         transition:background 0.15s;
       `;
-        item.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cfg.alias}</span>`;
-        item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
-        item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
-        item.onclick = (ev) => {
-          ev.stopPropagation();
-          dropdown.remove();
-          switchPopupEngine(cfg, null);
-        };
-        if (isActive) activeItemEl = item;
-        dropdown.appendChild(item);
-      }
+      item.innerHTML = `<span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${cfg.alias}</span>`;
+      item.onmouseenter = () => { if (!isActive) item.style.background = colors.hoverBg; };
+      item.onmouseleave = () => { if (!isActive) item.style.background = 'transparent'; };
+      item.onclick = (ev) => {
+        ev.stopPropagation();
+        dropdown.remove();
+        switchPopupEngine(cfg, null);
+      };
+      if (isActive) activeItemEl = item;
+      dropdown.appendChild(item);
+
     });
 
     // 分隔线
@@ -3346,34 +3201,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 0);
   }
 
-  async function switchPopupEngine(cfg, model) {
+  async function switchPopupEngine(cfg) {
     const instanceData =
       (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
-
-    let finalInstanceData = instanceData;
-    if (cfg.engine === 'mira_pro' && model) {
-      finalInstanceData = { ...instanceData, model };
-    }
 
     const activeConfig = {
       id: cfg.id,
       engine: cfg.engine,
-      data: finalInstanceData,
+      data: instanceData,
     };
 
     await safeSetStorage({
       activeConfig,
       lastActiveId: cfg.id,
       selectedEngine: cfg.engine,
-      ...(cfg.engine === 'mira_pro' && model
-        ? { data_mira_pro: finalInstanceData }
-        : {}),
     });
 
     window._popupCurrentEngineId = cfg.id;
-    if (model) window._popupCurrentModel = model;
     updatePopupEngineLabel();
-
   }
   initUILanguage();
   refreshUI();
@@ -3466,298 +3311,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsBtn.appendChild(warning);
   }
 
-  // 登录认证相关
-  // ── Auth UI 状态管理 ──────────────────────────────
-  let userData = null;
-  function updateAuthUI(user) {
-    if (!enable_pro_features) return;
-    userData = user;
-    const btnLogin = document.getElementById('btnLogin');
-    const btnAvatar = document.getElementById('btnAvatar');
-    const authLoading = document.getElementById('authLoading');
-
-    // 隐藏占位
-    if (authLoading) authLoading.style.display = 'none';
-
-    if (user) {
-      btnLogin.style.display = 'none';
-      btnAvatar.style.display = 'flex';
-      setAvatarDisplay(user);
-    } else {
-      btnLogin.style.display = 'flex';
-      btnAvatar.style.display = 'none';
-    }
-  }
-
-  function setAvatarDisplay(user) {
-    // 小头像（header 按钮）
-    const img = document.getElementById('avatarImg');
-    const initial = document.getElementById('avatarInitial');
-    // 大头像（panel 内）
-    const pImg = document.getElementById('panelAvatarImg');
-    const pInitial = document.getElementById('panelAvatarInitial');
-
-    if (user.photoURL) {
-      img.src = user.photoURL;
-      img.style.display = 'block';
-      initial.style.display = 'none';
-      pImg.src = user.photoURL;
-      pImg.style.display = 'block';
-      pInitial.style.display = 'none';
-    } else {
-      const letter = (user.displayName || user.email || '?')[0].toUpperCase();
-      initial.textContent = letter;
-      pInitial.textContent = letter;
-      img.style.display = 'none';
-      pImg.style.display = 'none';
-    }
-
-    document.getElementById('panelName').textContent = user.displayName || '—';
-    document.getElementById('panelEmail').textContent = user.email || '—';
-  }
-
-  function updateBalance(amount) {
-    document.getElementById('panelBalance').textContent =
-      '$ ' + Number(amount).toFixed(2);
-  }
-
-  // ── Profile Panel 开关 ────────────────────────────
-  const profilePanel = document.getElementById('profilePanel');
-
-  document.getElementById('btnAvatar').addEventListener('click', (e) => {
-    e.stopPropagation();
-
-    const isOpening = profilePanel.style.display !== 'block';
-    profilePanel.style.display = isOpening ? 'block' : 'none';
-    advMenu.style.display = 'none';
-
-    if (isOpening) {
-      const balanceEl = document.getElementById('panelBalance');
-      if (balanceEl) {
-        balanceEl.innerText = t('refreshing') || 'fetching balance...';
-        balanceEl.style.opacity = '0.7';
-      }
-
-      setTimeout(() => {
-        if (userData?.uid) {
-          logger.log('--- 延迟后发起真实的获取请求 ---');
-          fetchBalance(userData.uid);
-        }
-      }, 150);
-    }
-  });
-
-  // 点击 panel 外部关闭
-  document.addEventListener('click', (e) => {
-    if (!profilePanel.contains(e.target) && e.target !== document.getElementById('btnAvatar')) {
-      profilePanel.style.display = 'none';
-    }
-  });
-
-  // ── 按钮事件 ─────────────────────────────────────
-
-  // ── 登录弹窗开关 ──────────────────────────────────
-  const loginModal = document.getElementById('loginModal');
-
-  document.getElementById('btnLogin').addEventListener('click', (e) => {
-    e.stopPropagation();
-    advMenu.style.display = 'none';
-    profilePanel.style.display = 'none';
-    loginModal.style.display = loginModal.style.display === 'none' ? 'block' : 'none';
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!loginModal.contains(e.target) &&
-      e.target !== document.getElementById('btnLogin')) {
-      loginModal.style.display = 'none';
-    }
-  });
-
-  async function doLogin(provider) {
-    loginModal.style.display = 'none';
-
-    const btnLogin = document.getElementById('btnLogin');
-    btnLogin.disabled = true;
-    btnLogin.innerHTML = '<div class="mini-spinner"></div>';
-
-    const action = provider === 'google' ? 'googleLogin' : 'microsoftLogin';
-
-    const res = await safeSendMessage({ action });
-
-    btnLogin.disabled = false;
-    btnLogin.innerText = t('login') || 'Log in';
-
-    if (res?.user) {
-      await safeSendMessage({ action: 'clearBalanceCache' });
-      updateAuthUI(res.user);
-      fetchBalance(res.user.uid);
-    } else if (res?.error && res.error !== 'USER_CANCELED') {
-      logger.error('Login error:', res.error);
-    }
-  }
-
-  if (enable_pro_features) {
-    document.getElementById('btnGoogleLogin').addEventListener('click', () => doLogin('google'));
-    document.getElementById('btnMicrosoftLogin').addEventListener('click', () => doLogin('microsoft'));
-  }
-
-  document.getElementById('btnLogout').addEventListener('click', async () => {
-    await safeSendMessage({ action: 'logout' });
-    profilePanel.style.display = 'none';
-    updateAuthUI(null);
-  });
-  document.getElementById('btnDeleteAccount').addEventListener('click', async () => {
-    const confirmed = confirm(t('deleteAccountConfirm') || 'Are you sure you want to delete your account? This action cannot be undone.');
-    if (!confirmed) return;
-
-    const btn = document.getElementById('btnDeleteAccount');
-    const originalText = btn.innerText;
-
-    // 删除中状态
-    btn.disabled = true;
-    btn.innerHTML = '<div class="mini-spinner"></div>';
-
-    const response = await safeSendMessage({ action: 'deleteAccount' });
-
-    if (response.ok) {
-      btn.innerText = t('deleteAccountSuccess') || 'Account deleted successfully';
-      setTimeout(() => {
-        document.getElementById('btnLogout').click();
-      }, 800);
-    } else {
-      btn.innerText = t('deleteAccountFail') || '✗ Deletion failed, please try again later';
-      setTimeout(() => {
-        btn.disabled = false;
-        btn.innerText = originalText;
-      }, 2000); // 2秒后恢复 
-    }
-  });
-  //充值按钮
-  document.getElementById('btnRecharge').addEventListener('click', (e) => {
-    const btn = e.currentTarget;
-    btn.style.transform = 'scale(0.96)';
-    btn.style.opacity = '0.8';
-    setTimeout(() => {
-      btn.style.transform = '';
-      btn.style.opacity = '';
-      profilePanel.style.display = 'none';
-      safeSendMessage({ action: 'openRecharge' });
-    }, 150);
-  });
-
-
-  function updateExpiryHint(expiresAt, expired) {
-    const hintEl = document.getElementById('balanceExpiryHint');
-    if (!hintEl) return;
-
-    hintEl.className = 'balance-expiry';
-
-    if (expired) {
-      hintEl.textContent = t('credits_expired');
-      hintEl.classList.add('danger');
-      return;
-    }
-
-    if (!expiresAt) {
-      hintEl.textContent = '';
-      return;
-    }
-
-    const daysLeft = Math.ceil((new Date(expiresAt) - Date.now()) / (1000 * 60 * 60 * 24));
-
-    if (daysLeft <= 30) {
-      hintEl.textContent = t('expires_in_days').replace('{days}', daysLeft);
-      hintEl.classList.add('warning');
-    } else {
-      const dateStr = new Date(expiresAt).toLocaleDateString();
-      hintEl.textContent = t('valid_until').replace('{date}', dateStr);
-    }
-  }
-  // ── 初始化：读取登录状态 ───────────────────────────
-
-  async function fetchBalance(uid) {
-    if (!uid) return;
-    logger.log('[fetchBalance] 开始请求, uid:', uid);
-
-    const res = await safeSendMessage({ action: 'getBalance', uid });
-    logger.log('[fetchBalance] 返回结果:', res);
-
-    if (!res) {
-      logger.warn('[fetchBalance] res 为 null，请求失败');
-      return;
-    }
-    if (res?.error === 'token_expired') {
-      logger.warn('[fetchBalance] token 已过期，需要重新登录');
-      await safeSendMessage({ action: 'logout' });  // 清除后端存储
-      profilePanel.style.display = 'none';
-      updateAuthUI(null);  // 切回登录 UI
-      return;
-    }
-    const balanceEl = document.getElementById('panelBalance');
-    if (balanceEl) balanceEl.style.opacity = '1';
-
-    if (res?.balance != null) {
-      logger.log('[fetchBalance] 获取到余额:', res.balance);
-      updateBalance(res.balance);
-
-      // 同步存储余额 + 过期时间
-      const data = await safeGetStorage(['mira_user']);
-      const existingUser = data?.mira_user || {};
-      if (existingUser.uid) {
-        await safeSetStorage({
-          'mira_user': {
-            ...existingUser,
-            balance: res.balance,
-            expires_at: res.expires_at || null,
-            expired: res.expired || false,
-          }
-        });
-      }
-
-      // 显示过期提示
-      updateExpiryHint(res.expires_at, res.expired);
-
-    } else {
-      logger.warn('[fetchBalance] balance 为空, 使用本地缓存');
-      if (userData && userData.balance != null) {
-        updateBalance(userData.balance);
-        // 本地缓存也有过期时间，一并显示
-        updateExpiryHint(userData.expires_at, userData.expired);
-      }
-    }
-  }
-
-  // ── 初始化：读取登录状态 ──
-  const resUser = await safeSendMessage({ action: 'getUser' });
-  if (resUser?.user) {
-    updateAuthUI(resUser.user);
-    safeGetStorage(['mira_jwt'], (data) => {
-      if (data.mira_jwt) {
-        fetchBalance(resUser.user.uid);
-      } else {
-        logger.log('通行证尚未就绪，暂不拉取余额');
-      }
-    });
-  } else {
-    updateAuthUI(null);
-  }
-
-  //  监听 storage 变化自动刷新 UI
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.mira_user) {
-      const user = changes.mira_user.newValue;
-      if (user) {
-        // 如果是其他地方（比如后台翻译完）更新了 storage，这里的监听会自动同步头像和面板里的显示。
-        userData = user; // 同步内存变量
-        if (user.balance !== undefined) {
-          updateBalance(user.balance);
-        }
-      } else {
-        updateAuthUI(null);
-      }
-    }
-  });
-
   checkEngineStatus();
 
   function openExternalLink(url) {
@@ -3766,7 +3319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
       chrome.tabs.create({ url }); // Chrome / Edge
     } else {
-      window.open(url, '_blank'); // 兜底
+      window.open(url, '_blank');
     }
   }
 

@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "接口提示：服务器暂时不可用（500 错误）。"
   },
+  "ERROR_503": {
+    "message": "接口提示：服务暂时繁忙，请稍后重试。"
+  },
   "ERROR_TIMEOUT": {
     "message": "请求超时：请检查网络或代理设置。"
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "翻译失败：请检查网络连接或 API 配置。"
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "请登录后使用 Mira 翻译。"
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "翻译鼠标所在段落"

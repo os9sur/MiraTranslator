@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "Ошибка API: Ошибка сервера (500)."
   },
+  "ERROR_503": {
+    "message": "Ошибка API: Сервис временно недоступен. Пожалуйста, попробуйте позже."
+  },
   "ERROR_TIMEOUT": {
     "message": "Время ожидания истекло: Проверьте сеть."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "Ошибка: Проверьте настройки API."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Войдите, чтобы использовать Mira Translator."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "Перевести абзац под курсором"

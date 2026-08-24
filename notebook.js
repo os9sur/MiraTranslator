@@ -63,11 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const highlightStorage = await safeGetStorage('vocabHighlight');
   let highlightEnabled = highlightStorage?.vocabHighlight ?? true;
 
-  const syncRes = await safeGetStorage('lastSyncTime');
-  if (syncRes?.lastSyncTime) {
-    const el = document.getElementById('syncStatus');
-    if (el) el.textContent = `${t('lastSync')} ${new Date(syncRes.lastSyncTime).toLocaleString()}`;
-  }
+
 
   const toggle = document.getElementById('highlightToggle');
   const thumb = document.getElementById('highlightThumb');
@@ -93,7 +89,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const _t = (key) => (typeof t === 'function') ? t(key, targetLanguage) : key;
   const toggleAddBoxBtn = document.getElementById('toggleAddBox');
   toggleAddBoxBtn.title = _t('manualAdd');
-
+  const syncRes = await safeGetStorage('lastSyncTime');
+  if (syncRes?.lastSyncTime) {
+    const el = document.getElementById('syncStatus');
+    if (el) el.textContent = `${_t('lastSync')} ${new Date(syncRes.lastSyncTime).toLocaleString()}`;
+  }
   toggleAddBoxBtn.onclick = () => {
     const box = document.getElementById('addBox');
     const btn = document.getElementById('toggleAddBox');
@@ -832,7 +832,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (area === 'local' && changes.lastSyncTime) {
       renderTable();
       const el = document.getElementById('syncStatus');
-      if (el) el.textContent = `${t('lastSync') || 'Last Sync'} ${new Date(changes.lastSyncTime.newValue).toLocaleString()}`;
+      if (el) el.textContent = `${_t('lastSync') || 'Last Sync'} ${new Date(changes.lastSyncTime.newValue).toLocaleString()}`;
     }
   });
 

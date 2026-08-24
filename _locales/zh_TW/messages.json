@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "介面提示：伺服器暫時不可用（500 錯誤）。"
   },
+  "ERROR_503": {
+    "message": "介面提示：服務暫時繁忙，請稍後再試。"
+  },
   "ERROR_TIMEOUT": {
     "message": "請求超時：請檢查網路或代理設定。"
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "翻譯失敗：請檢查網路連線或 API 設定。"
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "請登入後使用 Mira 翻譯。"
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "翻譯滑鼠所在段落"

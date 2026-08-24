@@ -39,13 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.title = `Mira - ${titleSuffix}`;
 
     const TEMPLATES = {
-        'mira_pro': {
-            name: 'Mira Pro',
-            isBuiltIn: true,
-            isPro: true,
-            color: '#7c3aed',
-            meta: 'MIRA.PRO',
-        },
         'google': {
             name: 'Google Translate', isBuiltIn: true, color: '#4285F4', meta: 'G.FREE'
         },
@@ -171,19 +164,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!data) return;
         let storedConfigs = data.userConfigs || [];
         const oldApiKeys = data.apiKeys || {};
-        const builtInEngines = enable_pro_features ? [
-            { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
-            { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", uiLanguage)})` },
-            { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", uiLanguage)})` }
-        ] : [
-            // { id: 'mira_pro', engine: 'mira_pro', alias: '✦ Mira AI Translator' },
+        const builtInEngines = [
             { id: 'google_builtin', engine: 'google', alias: `Google (${window.t("builtin", uiLanguage)})` },
             { id: 'bing_builtin', engine: 'bing', alias: `Bing (${window.t("builtin", uiLanguage)})` }
         ];
         const customConfigs = storedConfigs.filter(c =>
             c.id !== 'google_builtin' &&
-            c.id !== 'bing_builtin' &&
-            c.id !== 'mira_pro'
+            c.id !== 'bing_builtin'
         );
         if (customConfigs.length === 0 && Object.keys(oldApiKeys).length > 0) {
             for (const engineKey of Object.keys(TEMPLATES)) {
@@ -243,20 +230,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         list.innerHTML = userConfigs.map(c => {
             const isEditing = c.id === lastActiveId;
             const isRunning = c.id === runningId;
-
-            //  判断是否为 mira_pro
-            const isMiraPro = c.id === 'mira_pro';
-
             const tpl = TEMPLATES[c.engine] || {};
             const proTag = tpl.isPro ? `<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">Pro</span>` : '';
 
             return `
-    <div dir="auto" class="engine-item ${isEditing ? 'active' : ''} ${isMiraPro ? 'item-gold-pro' : ''}" data-id="${c.id}">
+    <div dir="auto" class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
         <div class="engine-info">
             ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
             <span class="engine-name">${c.alias}</span>${proTag}
         </div>
-        ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin' && c.id !== 'mira_pro') ?
+        ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
                     `<span class="del-icon" data-id="${c.id}">×</span>` : ''}
     </div>`;
         }).join('');
@@ -283,54 +266,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const targetLang = storage?.ui_language || 'en';
         const isTargetEn = targetLang.toLowerCase().startsWith('en');
         const testText = isTargetEn ? '早上好' : 'Good morning';
-
-        // Mira Pro 特殊处理：只检查登录和余额，不做翻译测试（避免扣费）
-        if (config.engine === 'mira_pro') {
-            try {
-                const userData = await safeGetStorage(['mira_user']);
-                const user = userData?.mira_user;
-                if (!user) {
-                    dot.classList.remove('checking');
-                    dot.classList.add('error');
-                    dot.title = `Mira Pro · ${t('not_logged_in', targetLang)}`;
-                    return;
-                }
-
-                const res = await safeSendMessage({ action: 'getBalance', uid: user.uid });
-                const failed = !res?.balance || res.balance <= 0;
-                dot.classList.remove('checking');
-                dot.classList.add(failed ? 'error' : 'success');
-
-                if (failed) {
-                    dot.title = res?.expired
-                        ? t('credits_expired', targetLang)
-                        : t('insufficient_balance', targetLang);
-                } else {
-                    const expiresAt = res?.expires_at ? new Date(res.expires_at) : null;
-                    const daysLeft = expiresAt
-                        ? Math.ceil((expiresAt - Date.now()) / (1000 * 60 * 60 * 24))
-                        : null;
-
-                    const statusNormal = `Mira Pro ${t('status_normal', targetLang)} · $${res.balance.toFixed(2)}`;
-
-                    if (daysLeft !== null && daysLeft <= 30) {
-                        const expireStr = t('expires_in_days', targetLang).replace('{days}', daysLeft);
-                        dot.title = `${statusNormal} · ${expireStr}`;
-                    } else if (daysLeft !== null) {
-                        const dateStr = expiresAt.toLocaleDateString();
-                        const validStr = t('valid_until', targetLang).replace('{date}', dateStr);
-                        dot.title = `${statusNormal} · ${validStr}`;
-                    } else {
-                        dot.title = statusNormal;
-                    }
-                }
-            } catch (e) {
-                dot.classList.remove('checking');
-                dot.classList.add('error');
-                dot.title = `Mira Pro · ${t('status_check_failed', targetLang)}`;
-            }
-            return;
-        }
 
         // google / bing / 其他AI引擎：做翻译测试
         try {
@@ -398,9 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     let switchVersion = 0;
-
-    let currentModel = null;
-    let _loginTrigger = null;
+ 
     async function switchInstance(id) {
         await safeSetStorage({ lastActiveId: id });
         const myVersion = ++switchVersion;
@@ -435,455 +368,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveBtn.innerHTML = `${t('save', uiLanguage)}`;
             saveBtn.style.backgroundColor = "";
             saveBtn.disabled = false;
-        }
-        // ---- Mira Pro 专属页面 ----
-        if (config.engine === 'mira_pro') {
-            actions.classList.remove('hidden');
-            const miraSaved = (await safeGetStorage(`data_mira_pro`)) || {};
-            const selectedModel = miraSaved[`data_mira_pro`]?.model || MIRA_DEFAULT_MODEL;
-
-            // 从 background.js 获取真实余额数据
-            let balance = 0;
-            let expiresAt = null;
-            let expired = false;
-            let usedTokens = 0;
-            let usedCost = '0.00';
-            try {
-                const userData = await safeGetStorage(['mira_user', 'mira_user_balance']);
-                const balanceData = userData?.mira_user_balance;
-                if (balanceData?.balance !== undefined) {
-                    balance = balanceData.balance;
-                    expiresAt = balanceData.expires_at || null;
-                    expired = balanceData.expired || false;
-                }
-                if (miraSaved[`data_mira_pro`]?.usedTokens !== undefined) {
-                    usedTokens = miraSaved[`data_mira_pro`].usedTokens;
-                    usedCost = (usedTokens / 1000000 * 1.8).toFixed(2);
-                }
-            } catch (e) {
-                logger.warn('获取 Mira 余额数据失败:', e);
-                balance = 0;
-            }
-
-            // ── 语言工具函数 ──────────────────────────────────────────
-
-            const getDesc = (descObj, lang) => {
-                if (!descObj) return '';
-                // 1. 完整匹配 zh-CN
-                if (descObj[lang]) return descObj[lang];
-                // 2. 下划线格式兼容 zh_CN
-                const underscored = lang.replace('-', '_');
-                if (descObj[underscored]) return descObj[underscored];
-                // 3. 繁体兜底：zh-TW / zh-HK / zh-MO → zh_TW
-                if (lang.startsWith('zh-') && lang !== 'zh-CN') {
-                    if (descObj['zh-TW']) return descObj['zh-TW'];
-                    if (descObj['zh_TW']) return descObj['zh_TW'];
-                }
-                // 4. 主语言码兜底 zh-CN → zh
-                const primary = lang.split('-')[0];
-                return descObj[primary] || descObj['en'] || '';
-            };
-
-            // ── 动态加载模型列表 ──────────────────────────────────────
-            let models = [];
-            const browserLang = getBrowserLang();
-            // 先显示 loading
-            container.innerHTML = `
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px;color:#8b949e;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"
-                    style="animation:spin 1s linear infinite;">
-                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                </svg>
-                <span style="font-size:13px;">Loading models...</span>
-            </div>
-            <style>@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>`;
-
-            try {
-                const resp = await fetch(MODELS_URL);
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const notice = await resp.json();
-                models = (notice.models || []).map(m => ({
-                    id: m.id,
-                    label: m.label,
-                    tag: m.tag || '',
-                    tagColor: m.tagColor || '#7c3aed',
-                    desc: getDesc(m.desc, browserLang),
-                }));
-            } catch (e) {
-                logger.warn('加载模型列表失败，使用内置备用列表:', e);
-                // 备用列表（与 JSON 保持一致）
-                models = MIRA_FALLBACK_MODELS
-            }
-
-            // ── 渲染页面 ──────────────────────────────────────────────
-            container.innerHTML = `
-            <div class="main-header" style="display:flex;margin-bottom:10px; justify-content:space-between;align-items:center;">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div>
-                        <h2 style="margin:0; display:flex; align-items:center; gap:8px; 
-                            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); 
-                            -webkit-background-clip: text; 
-                            background-clip: text;
-                            -webkit-text-fill-color: transparent; 
-                            font-weight: 800; 
-                            letter-spacing: -0.2px;">
-                            
-                            <span style="-webkit-text-fill-color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);">✦</span> 
-                            Mira AI Translator
-                            
-                            <span style="background: linear-gradient(135deg, #f59e0b, #d97706); 
-                                        -webkit-text-fill-color: #fff; 
-                                        color: #fff; 
-                                        font-size: 11px; 
-                                        padding: 2px 8px; 
-                                        border-radius: 10px; 
-                                        font-weight: 600; 
-                                        margin-left: 2px;
-                                        box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);">
-                                Pro
-                            </span>
-                        </h2>
-                        <p style="margin:12px 0px 4px 4px;font-size:12px;color:#8b949e;">${t('byokNotice', uiLanguage) || 'No API Key required. Out-of-the-box'}</p>
-                    </div>
-                </div>
-            </div>
-            <div class="form-container" style="padding-left:2px;">
-                <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-                    <div>
-                        <div style="font-size:12px;color:#8b949e;margin-bottom:4px;">${t('balance', uiLanguage) || 'Current Balance'}</div>
-                        <div id="miraBalance" style="font-size:28px;font-weight:600;">$${balance.toFixed(2)}</div>
-                        <div id="miraExpiryHint" style="font-size:11px;margin-top:4px;color:#8b949e;">
-                     ${expired
-                    ? `<span style="color:#ef4444">${t('credits_expired', uiLanguage)}</span>`
-                    : expiresAt
-                        ? (() => {
-                            const daysLeft = Math.ceil((new Date(expiresAt) - Date.now()) / (1000 * 60 * 60 * 24));
-                            if (daysLeft <= 30) {
-                                return `<span style="color:#f59e0b">${t('expires_in_days', uiLanguage).replace('{days}', daysLeft)}</span>`;
-                            } else {
-                                const dateStr = new Date(expiresAt).toLocaleDateString();
-                                return `<span style="color:#8b949e">${t('valid_until', uiLanguage).replace('{date}', dateStr)}</span>`;
-                            }
-                        })()
-                        : ''
-                }
-                </div>
-                    </div>
-                    <button id="miraRechargeBtn"><span>+ ${t('recharge', uiLanguage) || 'Recharge'}</span></button>
-                </div>
-                <div style="font-size:13px;color:#8b949e;margin-bottom:12px;">${t('selectModel', uiLanguage) || 'Select Translation Model'}</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;" id="miraModelGrid">
-                        ${models.map(m => `
-                <div class="mira-model-card" data-model="${m.id}"
-                    style="border:1.5px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
-                            border-radius:10px;padding:14px;cursor:pointer;
-                        background:${m.id === selectedModel ? '#1a1230' : 'transparent'};">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                    <div style="width:16px;height:16px;border-radius:50%;
-                                border:2px solid ${m.id === selectedModel ? '#7c3aed' : '#30363d'};
-                                background:${m.id === selectedModel ? '#7c3aed' : 'transparent'};
-                                display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        ${m.id === selectedModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
-                                </div>
-                                <span style="font-size:14px;font-weight:500;">${m.label}</span>
-                                <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
-                            </div>
-                            <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
-                        </div>`).join('')}
-                    </div>
-                </div>`;
-            // ── 模型切换：只更新存储+重绘卡片，不重新渲染整页 ──
-            const renderCards = (activeModel) => {
-                document.getElementById('miraModelGrid').innerHTML = models.map(m => `
-                <div class="mira-model-card" data-model="${m.id}"
-                    style="border:1.5px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
-                            border-radius:10px;padding:14px;cursor:pointer;
-                            background:${m.id === activeModel ? '#1a1230' : 'transparent'};">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                        <div style="width:16px;height:16px;border-radius:50%;
-                                    border:2px solid ${m.id === activeModel ? '#7c3aed' : '#30363d'};
-                                    background:${m.id === activeModel ? '#7c3aed' : 'transparent'};
-                                    display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            ${m.id === activeModel ? '<div style="width:6px;height:6px;border-radius:50%;background:#fff;"></div>' : ''}
-                        </div>
-                        <span style="font-size:14px;font-weight:500;">${m.label}</span>
-                        <span style="margin-left:auto;background:${m.tagColor};color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;">${m.tag}</span>
-                    </div>
-                    <div class='model-desc' style="font-size:12px;color:#8b949e;padding-left:24px;">${m.desc}</div>
-                </div>`).join('');
-                // 绑定模型切换
-                document.getElementById('miraModelGrid').querySelectorAll('.mira-model-card').forEach(card => {
-                    card.onclick = async () => {
-                        currentModel = card.dataset.model;
-                        // const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
-                        // await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: modelId } });
-                        renderCards(currentModel);
-                    };
-                });
-            };
-
-            renderCards(selectedModel);
-
-            //  防止重复注册
-            if (window._miraStorageListener) {
-                chrome.storage.onChanged.removeListener(window._miraStorageListener);
-            }
-
-            window._miraStorageListener = (changes, area) => {
-                if (area !== 'local') return;
-
-                if (changes.mira_user) {
-                    const newUser = changes.mira_user.newValue;
-                    if (!newUser) {
-                        const balanceEl = document.getElementById('miraBalance');
-                        if (balanceEl) balanceEl.textContent = '$0.00';
-
-                        // 过期提示也清空
-                        const expiryEl = document.getElementById('miraExpiryHint');
-                        if (expiryEl) expiryEl.textContent = '';
-
-                        const wrap = document.getElementById('miraUserAvatar');
-                        if (wrap) wrap.style.display = 'none';
-
-                        updateModalUserInfo(null);
-                    } else {
-                        showMiraAvatar(newUser);
-                        updateModalUserInfo(newUser);
-
-                        //  更新过期提示
-                        const expiryEl = document.getElementById('miraExpiryHint');
-                        if (expiryEl) {
-                            const { expires_at, expired } = newUser;
-                            if (expired) {
-                                expiryEl.textContent = t('credits_expired', uiLanguage);
-                                expiryEl.style.color = '#ef4444';
-                            } else if (expires_at) {
-                                const daysLeft = Math.ceil((new Date(expires_at) - Date.now()) / (1000 * 60 * 60 * 24));
-                                if (daysLeft <= 30) {
-                                    expiryEl.textContent = t('expires_in_days', uiLanguage).replace('{days}', daysLeft);
-                                    expiryEl.style.color = '#f59e0b';
-                                } else {
-                                    const dateStr = new Date(expires_at).toLocaleDateString();
-                                    expiryEl.textContent = t('valid_until', uiLanguage).replace('{date}', dateStr);
-                                    expiryEl.style.color = '#8b949e';
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            chrome.storage.onChanged.addListener(window._miraStorageListener);
-            const res = await safeSendMessage({ action: 'getUser' });
-            if (res?.user) {
-                showMiraAvatar(res.user);
-                // 已登录，确保登录弹窗关闭
-                const modal = document.getElementById('loginModal');
-                const backdrop = document.getElementById('loginModalBackdrop');
-                if (modal) modal.style.display = 'none';
-                if (backdrop) backdrop.style.display = 'none';
-            } else {
-                // 未登录，隐藏头像
-                const wrap = document.getElementById('miraUserAvatar');
-                if (wrap) wrap.style.display = 'none';
-            }
-
-            function showMiraAvatar(user) {
-                const wrap = document.getElementById('miraUserAvatar');
-                const img = document.getElementById('miraAvatarImg');
-                const initial = document.getElementById('miraAvatarInitial');
-                const name = document.getElementById('miraUserName');
-                if (!wrap) return;
-
-                wrap.style.display = 'flex';
-                if (user.photoURL) {
-                    img.src = user.photoURL;
-                    img.style.display = 'block';
-                    initial.style.display = 'none';
-                } else {
-                    initial.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
-                    initial.style.display = 'block';
-                    img.style.display = 'none';
-                }
-                if (name) name.textContent = user.displayName || user.email || '';
-            }
-            // 绑定充值按钮
-            document.getElementById('miraRechargeBtn').onclick = async () => {
-                const userData = await safeGetStorage(['mira_user']);
-                const user = userData?.mira_user;
-
-                if (!user) {
-                    _loginTrigger = 'recharge';
-
-                    // 未登录，重置弹窗为未登录状态
-                    updateModalUserInfo(null);
-
-                    const modal = document.getElementById('loginModal');
-                    const backdrop = document.getElementById('loginModalBackdrop');
-                    if (modal) {
-                        const isOpen = modal.style.display === 'block';
-                        modal.style.display = isOpen ? 'none' : 'block';
-                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
-                    }
-                    return;
-                }
-
-                // 已登录，打开充值页
-                const btn = document.getElementById('miraRechargeBtn');
-                btn.disabled = true;
-                btn.innerHTML = `
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        style="animation:spin 1s linear infinite;">
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                    </svg>
-                    <span>Redirecting...</span>
-                `;
-                safeSendMessage({ action: 'openRecharge' }).then(() => {
-                    chrome.tabs.getCurrent((tab) => {
-                        if (tab?.id) {
-                            chrome.tabs.remove(tab.id);
-                        } else {
-                            window.close();
-                        }
-                    });
-                });
-            };
-
-            // 更新弹窗内用户信息
-            function updateModalUserInfo(user) {
-                const userInfo = document.getElementById('modalUserInfo');
-                const loginPrompt = document.getElementById('modalLoginPrompt');
-                const avatarImg = document.getElementById('modalAvatarImg');
-                const avatarInitial = document.getElementById('modalAvatarInitial');
-                const userName = document.getElementById('modalUserName');
-                const userEmail = document.getElementById('modalUserEmail');
-
-                if (user) {
-                    if (userInfo) userInfo.style.display = 'block';
-                    if (loginPrompt) loginPrompt.style.display = 'none';
-                    if (user.photoURL && avatarImg) {
-                        avatarImg.src = user.photoURL;
-                        avatarImg.style.display = 'block';
-                        if (avatarInitial) avatarInitial.style.display = 'none';
-                    } else if (avatarInitial) {
-                        avatarInitial.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
-                        avatarInitial.style.display = 'block';
-                        if (avatarImg) avatarImg.style.display = 'none';
-                    }
-                    if (userName) userName.textContent = user.displayName || '';
-                    if (userEmail) userEmail.textContent = user.email || '';
-                } else {
-                    if (userInfo) userInfo.style.display = 'none';
-                    if (loginPrompt) loginPrompt.style.display = 'block';
-                }
-            }
-
-            // 登录按钮处理
-            async function doLogin(provider) {
-                const action = provider === 'google' ? 'googleLogin' : 'microsoftLogin';
-                const btn = document.getElementById(provider === 'google' ? 'btnGoogleLogin' : 'btnMicrosoftLogin');
-
-                // 显示loading状态
-                if (btn) {
-                    btn.disabled = true;
-                    btn.style.opacity = '0.6';
-                    btn.innerHTML = `
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                        style="animation:spin 1s linear infinite;">
-                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                    </svg>
-                    ${t('loggingIn', uiLanguage) || 'Logging in...'}`;
-                }
-
-                const res = await safeSendMessage({ action });
-
-                if (btn) {
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                    btn.innerHTML = provider === 'google'
-                        ? `<svg width="14" height="14" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908C16.658 14.095 17.64 11.787 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Google `
-                        : `<svg width="14" height="14" viewBox="0 0 21 21"><rect x="1" y="1" width="9" height="9" fill="#F25022"/><rect x="11" y="1" width="9" height="9" fill="#7FBA00"/><rect x="11" y="11" width="9" height="9" fill="#FFB900"/><rect x="1" y="11" width="9" height="9" fill="#00A4EF"/></svg> Microsoft`;
-                }
-
-                if (res?.user) {
-                    showMiraAvatar(res.user);
-                    updateModalUserInfo(res.user);
-                    switchInstance(currentId);
-
-                    //  登录成功，显示用户信息后自动关闭
-                    if (_loginTrigger !== 'recharge') {
-                        // 先显示登录成功的用户头像信息，等1.5秒后动画关闭
-                        setTimeout(() => {
-                            const modal = document.getElementById('loginModal');
-                            const backdrop = document.getElementById('loginModalBackdrop');
-
-                            // 同时播放淡出动画
-                            if (modal) {
-                                modal.style.animation = 'fadeOutScale 0.4s ease forwards';
-                            }
-                            if (backdrop) {
-                                backdrop.style.animation = 'fadeOut 0.4s ease forwards';
-                            }
-
-                            // 动画结束后隐藏元素
-                            setTimeout(() => {
-                                if (modal) {
-                                    modal.style.display = 'none';
-                                    modal.style.animation = '';
-                                }
-                                if (backdrop) {
-                                    backdrop.style.display = 'none';
-                                    backdrop.style.animation = '';
-                                }
-
-                                //  登录成功后自动续接被打断的操作 ----
-                                if (_loginTrigger === 'test') {
-                                    const testBtn = document.getElementById('testApiConfig');
-                                    if (testBtn) testBtn.click();
-                                } else if (_loginTrigger === 'save') {
-                                    const saveBtn = document.getElementById('saveApiConfig');
-                                    if (saveBtn) saveBtn.click();
-                                }
-                                _loginTrigger = null; // 消费完标记后重置，避免残留影响下一次登录流程 
-
-                            }, 400);
-
-                        }, 1500);
-                    }
-
-                    if (_loginTrigger === 'recharge') {
-                        setTimeout(() => {
-                            chrome.runtime.sendMessage({ action: 'openRecharge' }, () => {
-                                chrome.tabs.getCurrent((tab) => {
-                                    if (tab?.id) {
-                                        chrome.tabs.remove(tab.id);
-                                    } else {
-                                        window.close();
-                                    }
-                                });
-                            });
-                        }, 300);
-                    }
-                } else if (res?.error && res.error !== 'USER_CANCELED') {
-                    logger.error('Login error:', res.error);
-                }
-
-            }
-
-            document.getElementById('btnGoogleLogin')?.addEventListener('click', () => doLogin('google'));
-            document.getElementById('btnMicrosoftLogin')?.addEventListener('click', () => doLogin('microsoft'));
-
-            // 点击遮罩关闭弹窗
-            document.getElementById('loginModalBackdrop')?.addEventListener('click', () => {
-                document.getElementById('loginModal').style.display = 'none';
-                document.getElementById('loginModalBackdrop').style.display = 'none';
-            });
-
-            // 页面初始化时检查登录状态，更新弹窗头像
-            const resUser = await safeSendMessage({ action: 'getUser' });
-            if (resUser?.user) updateModalUserInfo(resUser.user);
-            await renderAIPromptSection();
-            return;
         }
 
         // ----  isBuiltIn 逻辑（google / bing）----
@@ -1213,170 +697,104 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let testResult = false;
         try {
-            // Mira Pro 特殊处理 - 实际测试翻译功能
-            if (userConfig.engine === 'mira_pro') {
-                const userData = await safeGetStorage(['mira_user', 'mira_user_balance']);
-                const user = userData?.mira_user;
-                const balanceData = userData?.mira_user_balance;
+            // 其他引擎的处理逻辑
+            const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
+            const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
+            const tempKeys = {};
+            document.querySelectorAll('.api-input-field').forEach(input => {
+                const key = input.getAttribute('data-key');
+                if (key) tempKeys[key] = input.value.trim();
+            });
 
+            const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
+            const testText = isTargetEn ? '早上好' : 'Good morning';
+            logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
 
-                if (!user) {
-                    _loginTrigger = 'test';
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-
-                    const modal = document.getElementById('loginModal');
-                    const backdrop = document.getElementById('loginModalBackdrop');
-
-                    if (modal) {
-                        const modalUserInfo = document.getElementById('modalUserInfo');
-                        const modalLoginPrompt = document.getElementById('modalLoginPrompt');
-                        const btnGoogle = document.getElementById('btnGoogleLogin');
-                        const btnMicrosoft = document.getElementById('btnMicrosoftLogin');
-
-                        if (modalUserInfo) modalUserInfo.style.display = 'none';
-                        if (modalLoginPrompt) modalLoginPrompt.style.display = 'block';
-                        if (btnGoogle) btnGoogle.style.display = 'flex';
-                        if (btnMicrosoft) btnMicrosoft.style.display = 'flex';
-
-                        const isOpen = modal.style.display === 'block';
-                        modal.style.display = isOpen ? 'none' : 'block';
-                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
-                    }
-                    return;
-                }
-
-                let hasBalance = false;
-                if (balanceData?.balance !== undefined && balanceData.balance > 0) {
-                    hasBalance = true;
-                } else if (!balanceData) {
-                    // 尝试从后端获取余额
-                    const response = await new Promise((resolve) => {
-                        safeSendMessage({ action: 'getBalance', uid: user.uid }, resolve);
-                    });
-                    hasBalance = response?.balance && response.balance > 0;
-                }
-
-                if (!hasBalance) {
-                    throw new Error(t('insufficient_balance') || "Insufficient balance");
-                }
-
-                // 第二步：实际测试翻译功能
-                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
-                const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
-                const testText = isTargetEn ? '早上好' : 'Good morning';
-
-                logger.log("Testing Mira Pro: ", "text:", testText, "targetLang: ", testTargetLang);
-
-                const res = await safeSendMessage({
-                    type: 'TRANSLATE',
-                    text: testText,
-                    targetLang: testTargetLang,
-                    isTest: true,
-                    engine: 'mira_pro'
-                });
-
-                if (!res) throw new Error('No response from Mira Pro');
-                if (res.error) throw new Error(res.error);
-
-                const data = res.currentTranslationResponse;
-                if (!data) throw new Error('Invalid response structure');
-                if (data.error) throw new Error(data.error);
-
-                const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
-                const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
-                const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
-
-                if (hasValidStructure && isNotOriginal) {
-                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
-                    btn.style.setProperty('border-color', '#10a37f', 'important');
-                    testResult = true;
-                } else {
-                    throw new Error(translatedText.length === 0 ? "Empty Content from Mira Pro" : "Mira Pro returned original text");
-                }
+            const res = await safeSendMessage({
+                type: 'TRANSLATE',
+                text: testText,
+                targetLang: testTargetLang,
+                isTest: true,
+                engine: userConfig.engine,
+                tempKeys
+            });
+            if (!res) throw new Error(i18n.error_no_response || 'No response from background');
+            if (res.error) throw new Error(res.error);
+            const data = res.currentTranslationResponse;
+            if (!data) throw new Error('Invalid response structure');
+            if (data.error) throw new Error(data.error);
+            const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
+            const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
+            const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
+            if (hasValidStructure && isNotOriginal) {
+                btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                btn.style.setProperty('border-color', '#10a37f', 'important');
+                testResult = true;
             } else {
-                // 其他引擎的处理逻辑
-                const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                const testTargetLang = storage?.ui_language || window.currentConfig?.ui_language || getBrowserLang() || 'en';
-                const tempKeys = {};
-                document.querySelectorAll('.api-input-field').forEach(input => {
-                    const key = input.getAttribute('data-key');
-                    if (key) tempKeys[key] = input.value.trim();
-                });
+                throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
+            }
+        }
+        catch (e) {
+    logger.error("[Test] Failed:", e);
+    btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
+    btn.style.setProperty('border-color', '#f87171', 'important');
+    btn.style.userSelect = 'text';
+    testResult = false;
 
-                const isTargetEn = testTargetLang.toLowerCase().startsWith('en');
-                const testText = isTargetEn ? '早上好' : 'Good morning';
-                logger.log("Testing info: ", "text:", testText, "targetLang: ", testTargetLang, "engine", userConfig.engine);
-
-                const res = await safeSendMessage({
-                    type: 'TRANSLATE',
-                    text: testText,
-                    targetLang: testTargetLang,
-                    isTest: true,
-                    engine: userConfig.engine,
-                    tempKeys
-                });
-                if (!res) throw new Error(i18n.error_no_response || 'No response from background');
-                if (res.error) throw new Error(res.error);
-                const data = res.currentTranslationResponse;
-                if (!data) throw new Error('Invalid response structure');
-                if (data.error) throw new Error(data.error);
-                const translatedText = (typeof data === 'string' ? data : (data.translatedText || data.basic)) || "";
-                const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
-                const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
-                if (hasValidStructure && isNotOriginal) {
-                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
-                    btn.style.setProperty('border-color', '#10a37f', 'important');
-                    testResult = true;
+    if (tipsDesc) {
+        tipsDesc.style.color = "#f87171";
+        tipsDesc.style.userSelect = 'text';
+        tipsDesc.style.cursor = 'text';
+        
+        const errorText = e.message || String(e);
+        const match = errorText.match(/400|401|402|403|404|429|500|502|503|504|505/);
+        let displayMessage = "";
+        
+        if (match) {
+            let errorCode = match[0];
+            if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
+            
+            // 第一步：尝试获取友好消息
+            const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
+            
+            if (friendlyMsg) {
+                // ✅ 有翻译：显示友好消息
+                displayMessage = `${friendlyMsg} (Code: ${errorCode})`;
+            } else {
+                // ❌ 没有翻译：尝试提取 API 的详细错误信息
+                const jsonMatch = errorText.match(/\{.*\}/);
+                if (jsonMatch) {
+                    try {
+                        const errorObj = JSON.parse(jsonMatch[0]);
+                        const apiMessage = errorObj.error?.message || errorObj.message;
+                        if (apiMessage) {
+                            // ✅ 显示 API 返回的详细错误
+                            displayMessage = `HTTP ${errorCode}: ${apiMessage}`;
+                        } else {
+                            displayMessage = `HTTP Error ${errorCode}`;
+                        }
+                    } catch {
+                        displayMessage = `HTTP Error ${errorCode}`;
+                    }
                 } else {
-                    throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
+                    displayMessage = `HTTP Error ${errorCode}`;
                 }
             }
-        } catch (e) {
-            // Mira Pro 的特殊错误处理
-            if (userConfig && userConfig.engine === 'mira_pro' && e.message.includes('connection check passed')) {
-                // 这是成功的情况，不需要显示错误
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-                btn.style.removeProperty('border-color');
-                return;
-            }
-
-            logger.error("[Test] Failed:", e);
-            btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
-            btn.style.setProperty('border-color', '#f87171', 'important');
-            btn.style.userSelect = 'text';
-            testResult = false;
-
-            if (tipsDesc) {
-                tipsDesc.style.color = "#f87171";
-                tipsDesc.style.userSelect = 'text';
-                tipsDesc.style.cursor = 'text';
-                const errorText = e.message || String(e);
-                const match = errorText.match(/400|401|402|403|404|429|500|502|503/);
-                let displayMessage = "";
-                if (match) {
-                    let errorCode = match[0];
-                    if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
-                    const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
-                    displayMessage = friendlyMsg ? `${friendlyMsg} (Code: ${errorCode})` : `API Error: ${errorCode}`;
-                } else if (errorText.toLowerCase().includes("timeout")) {
-                    const isLocalModel = (((userConfig && userConfig.engine !== 'mira_pro') ? (document.querySelector('[data-key="baseUrl"]')?.value || '') : '').includes('localhost') ||
-                        (document.querySelector('[data-key="baseUrl"]')?.value || '').includes('127.0.0.1'));
-                    displayMessage = isLocalModel
-                        ? t('timeoutLocalModel')
-                        : (i18n.error_timeout || "Timeout ⌛");
-                } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {
-                    displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
-                } else if (errorText === "Same as Original") {
-                    displayMessage = i18n.error_same_as_original || "API returned original text";
-                } else {
-                    displayMessage = (errorText.length > 2 && errorText.length < 80) ? errorText : (i18n.error_generic || "Config Error");
-                }
-                tipsDesc.innerText = displayMessage;
-            }
-        } finally {
+        } else if (errorText.toLowerCase().includes("timeout")) {
+            const baseUrl = document.querySelector('[data-key="baseUrl"]')?.value || '';
+            const isLocalModel = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+            displayMessage = isLocalModel
+                ? t('timeoutLocalModel')
+                : (i18n.error_timeout || "Timeout ⌛");
+        } else if (errorText === "Same as Original") {
+            displayMessage = i18n.error_same_as_original || "API returned original text";
+        } else {
+            displayMessage = (errorText.length > 2 && errorText.length < 80) ? errorText : (i18n.error_generic || "Config Error");
+        }
+        
+        tipsDesc.innerText = displayMessage;
+    }
+} finally {
             setTimeout(() => {
                 if (btn) {
                     btn.disabled = false;
@@ -1412,55 +830,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const originalText = saveBtn.innerText;
         const originalBg = saveBtn.style.backgroundColor;
         try {
-            // Mira Pro 特殊处理 - 保存后触发测试
-            if (config.engine === 'mira_pro') {
-                const userData = await safeGetStorage(['mira_user']);
-                const user = userData?.mira_user;
-
-                if (!user) {
-                    _loginTrigger = 'save';
-                    saveBtn.disabled = false;
-                    // 未登录，显示登录弹窗
-                    const modal = document.getElementById('loginModal');
-                    const backdrop = document.getElementById('loginModalBackdrop');
-                    if (modal) {
-                        const isOpen = modal.style.display === 'block';
-                        modal.style.display = isOpen ? 'none' : 'block';
-                        if (backdrop) backdrop.style.display = isOpen ? 'none' : 'block';
-                    }
-                    return;
-                }
-
-                await safeSetStorage({ lastActiveId: currentId });
-                const existing = (await safeGetStorage(`data_mira_pro`))?.[`data_mira_pro`] || {};
-                await safeSetStorage({ [`data_mira_pro`]: { ...existing, model: currentModel } });
-
-                if (typeof syncGlobalConfig === 'function') {
-                    await syncGlobalConfig(currentId, config.engine, {});
-                }
-
-                logger.log("Mira Pro 配置已保存，准备测试: ", uiLanguage);
-
-                // 显示保存成功提示（固定时间，只显示消息）
-                saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
-                saveBtn.style.setProperty('background-color', '#22c55e', 'important');
-
-                // 延迟后触发测试，这样用户能看到保存成功的提示
-                setTimeout(() => {
-                    if (saveBtn) {
-                        saveBtn.innerText = originalText;
-                        saveBtn.style.removeProperty('background-color');
-                        saveBtn.style.backgroundColor = originalBg;
-                        saveBtn.disabled = false;
-                    }
-                    // 触发测试连接
-                    const testBtn = document.getElementById('testApiConfig');
-                    if (testBtn) {
-                        testBtn.click();
-                    }
-                }, 1500);
-                return;
-            }
 
             // 其他自定义引擎的处理逻辑 - 先保存配置
             const inputs = document.querySelectorAll('#dynamic-form-container input');
@@ -1931,7 +1300,7 @@ function _bindAIPromptEvents(section, initialSaved) {
 
 // ── 按钮状态切换 ────  
 function _setPromptBtnState(btn, state) {
-    btn.classList.remove('state-saving', 'state-saved', 'state-error');  
+    btn.classList.remove('state-saving', 'state-saved', 'state-error');
     const icons = {
         idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${t('cpSave')}`,
         saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${t('success')}`,
