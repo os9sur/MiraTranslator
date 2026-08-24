@@ -376,23 +376,8 @@ async function safeSendMessage(message) {
 
 //自定义prompt
 const AI_PROMPT_KEY = 'ai_prompt_settings';
-// ── Mira Pro 模型配置 ──
-const MIRA_DEFAULT_MODEL = 'google/gemini-2.5-flash-lite';
-
-const MIRA_FALLBACK_MODELS = [
-  { id: 'google/gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite', tag: 'Fastest', tagColor: '#0ea5e9', desc: 'Ultra-fast and lightweight, best for quick translation' },
-  { id: 'deepseek/deepseek-v3.2', label: 'DeepSeek V3.2', tag: 'Popular', tagColor: '#7c3aed', desc: 'Smart balancing with exceptional cost-performance' },
-  { id: 'openai/gpt-4o-mini', label: 'GPT-4o Mini', tag: 'Stable', tagColor: '#b45309', desc: 'Highly stable with balanced overall performance' },
-  { id: 'anthropic/claude-3-5-haiku', label: 'Claude 3.5 Haiku', tag: 'Natural', tagColor: '#d946ef', desc: 'Excellent at natural context and nuance' },
-  { id: 'qwen/qwen-plus', label: 'Qwen Plus', tag: 'Enhanced', tagColor: '#059669', desc: 'Enhanced Qwen model with stronger logic' },
-  { id: 'meta-llama/llama-3.3-70b-instruct', label: 'Llama 3.3 70B', tag: 'Open', tagColor: '#4b5563', desc: 'Meta\'s open-source flagship, fast and high quality' },
-  { id: 'mistralai/mistral-small-3.2-24b-instruct', label: 'Mistral Small 3.2', tag: 'Europe', tagColor: '#0284c7', desc: 'European-built model, outstanding multilingual performance' }
-];
-
-const MODELS_URL = `https://os9sur.github.io/MiraTranslator/assets/models.json?t=${Date.now()}`;
 
 const AI_LLM_WHITE_LIST = [
-  'mira_pro',
   'openai',
   'deepseek',
   'claude',
@@ -1023,37 +1008,37 @@ const POS_REVERSE_MAP = (() => {
     }
   }
   // 补充 AI 常见的缩写/变体
-const extra = {
-  // 基础映射
-  'n': '名词', 'noun': '名词',
-  'v': '动词', 'verb': '动词',
-  'adj': '形容词', 'adjective': '形容词',
-  'adv': '副词', 'adverb': '副词',
-  'prep': '介词', 'preposition': '介词',
-  'conj': '连词', 'conjunction': '连词',
-  'pron': '代词', 'pronoun': '代词',
-  'art': '冠词', 'article': '冠词',
-  'interj': '感叹词', 'interjection': '感叹词',
-  'num': '数词', 'numeral': '数词',
+  const extra = {
+    // 基础映射
+    'n': '名词', 'noun': '名词',
+    'v': '动词', 'verb': '动词',
+    'adj': '形容词', 'adjective': '形容词',
+    'adv': '副词', 'adverb': '副词',
+    'prep': '介词', 'preposition': '介词',
+    'conj': '连词', 'conjunction': '连词',
+    'pron': '代词', 'pronoun': '代词',
+    'art': '冠词', 'article': '冠词',
+    'interj': '感叹词', 'interjection': '感叹词',
+    'num': '数词', 'numeral': '数词',
 
-  // 助动词
-  'aux': '助动词', 'auxv': '助动词', 'auxiliary': '助动词', 'modal': '助动词',
+    // 助动词
+    'aux': '助动词', 'auxv': '助动词', 'auxiliary': '助动词', 'modal': '助动词',
 
-  // 助词 / 量词 / 限定词 / 专有名词
-  'part': '助词', 'particle': '助词',
-  'classifier': '量词', 'measure': '量词', 'mw': '量词',
-  'det': '限定词', 'determiner': '限定词',
-  'prop.n': '专有名词', 'proper': '专有名词', 'pn': '专有名词', 'proper noun': '专有名词',
+    // 助词 / 量词 / 限定词 / 专有名词
+    'part': '助词', 'particle': '助词',
+    'classifier': '量词', 'measure': '量词', 'mw': '量词',
+    'det': '限定词', 'determiner': '限定词',
+    'prop.n': '专有名词', 'proper': '专有名词', 'pn': '专有名词', 'proper noun': '专有名词',
 
-  // 中文常见别名 / 繁体
-  '介系词': '介词', '介系詞': '介词',
-  '助詞': '助词',
-  '量詞': '量词',
-  '助動詞': '助动词',
-  '限定詞': '限定词',
-  '專有名詞': '专有名词',
-  '固有名詞': '专有名词'
-};
+    // 中文常见别名 / 繁体
+    '介系词': '介词', '介系詞': '介词',
+    '助詞': '助词',
+    '量詞': '量词',
+    '助動詞': '助动词',
+    '限定詞': '限定词',
+    '專有名詞': '专有名词',
+    '固有名詞': '专有名词'
+  };
   return { ...map, ...extra };
 })();
 
@@ -1910,22 +1895,45 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     lastTranslationResult = null;
     logger.error("Detailed Translation Error:", e);
     const errorText = e.message || e.toString() || "";
-    const match = errorText.match(/400|401|402|404|429|500/);
+    // 支持更多错误码
+    const match = errorText.match(/400|401|402|403|404|429|500|502|503|504|505/);
     let displayMessage;
+
     if (match) {
-      let errorCode = match[0];
+      let errorCode = match[0]; 
       if (errorCode === "400" && errorText.toLowerCase().includes("balance")) {
         errorCode = "402";
       }
+
+      // 先尝试获取友好消息
       const i18nMsg = getSafeMessage(`ERROR_${errorCode}`);
-      displayMessage = `${i18nMsg || 'API Error'} (Code: ${match[0]})`;
+
+      if (i18nMsg) { 
+        displayMessage = `${i18nMsg} (Code: ${errorCode})`;
+      } else { 
+        try {
+          const jsonMatch = errorText.match(/\{.*\}/);
+          if (jsonMatch) {
+            const errorObj = JSON.parse(jsonMatch[0]);
+            const apiMessage = errorObj.error?.message || errorObj.message;
+            if (apiMessage) {
+              displayMessage = `HTTP ${errorCode}: ${apiMessage}`;
+            } else {
+              displayMessage = `HTTP Error ${errorCode}`;
+            }
+          } else {
+            displayMessage = `HTTP Error ${errorCode}`;
+          }
+        } catch {
+          displayMessage = `HTTP Error ${errorCode}`;
+        }
+      }
     } else if (errorText.toLowerCase().includes("timeout")) {
       displayMessage = getSafeMessage("ERROR_TIMEOUT") || "Request Timeout";
-    } else if (errorText.includes('ERROR_NOT_SIGNED_IN')) {
-      displayMessage = getSafeMessage('ERROR_NOT_SIGNED_IN') || 'Please sign in';
     } else {
       displayMessage = errorText || getSafeMessage("ERROR_GENERIC") || "Translation failed";
     }
+
     return { basic: displayMessage, isError: true };
   } finally {
     pendingRequests.delete(cacheKey);

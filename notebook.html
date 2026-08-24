@@ -259,19 +259,32 @@
       outline: none;
     }
 
-    /* ── 桌面端 grid 表格 ── */
-    .table-container {
-      background: #1e293b;
-      border-radius: 12px;
-      box-shadow:
-        0 25px 50px -12px rgba(0, 0, 0, 0.7),
+/* ── 桌面端 grid 表格 ── */
+.table-container {
+    background: rgba(15, 30, 50, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
         0 0 40px rgba(56, 189, 248, 0.3),
         0 0 80px rgba(56, 189, 248, 0.1),
-        inset 0 0 15px rgba(56, 189, 248, 0.15);
-      overflow: hidden;
-      margin-top: 20px;
-      margin-bottom: 50px;
-    }
+        inset 0 0 30px rgba(56, 189, 248, 0.06);
+    overflow: hidden;
+    margin-top: 20px;
+    margin-bottom: 50px;
+    transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.table-container:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.8),
+        0 0 60px rgba(56, 189, 248, 0.4),
+        0 0 120px rgba(56, 189, 248, 0.15),
+        inset 0 0 30px rgba(56, 189, 248, 0.1);
+}
 
     #vocabTable {
       width: 100%;

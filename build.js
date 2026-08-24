@@ -69,7 +69,6 @@ async function build() {
             content = content.replace(/{{GA_API_SECRET}}/g, config.GA_API_SECRET || '');
             content = content.replace(/{{MY_KEY}}/g, config.MANIFEST_KEY || '');
             content = content.replace(/{{ONEDRIVE_CLIENT_ID}}/g, config.ONEDRIVE_CLIENT_ID || '');
-            content = content.replace(/{{MIRA_WORKER_URLS}}/g, config.MIRA_WORKER_URLS.join(','));
             content = content.replace(/IS_DEV\s*=\s*(true|false)/g, `IS_DEV = ${IS_DEV_MODE}`);
             content = content.replace(/enable_pro_features\s*=\s*(true|false)/g, `enable_pro_features = ${IS_DEV_MODE}`);
 
@@ -147,36 +146,6 @@ async function build() {
         // 4. Firefox 专属 HTML/locales 后处理（在 targetFiles 循环之后，独立执行一次）
         if (targetBrowser === 'firefox') {
             logger.log(' 🦊 Firefox: 处理 HTML 和 locales...');
-
-            // 处理所有 HTML 文件里的 btnGoogleLogin
-            const htmlFiles = ['popup.html', 'engineSettings.html'];
-            htmlFiles.forEach(htmlFile => {
-                const htmlPath = path.join(browserDistDir, htmlFile);
-                if (!fs.existsSync(htmlPath)) return;
-
-                let html = fs.readFileSync(htmlPath, 'utf8');
-
-                // 1. 清理之前可能误加的多余 style="display:none"
-                html = html.replace(/(<button[^>]*id="btnGoogleLogin"[^>]*?)(\s+style="display:none")+/g, '$1');
-
-                // 2. 替换原始 style 里的 display:flex 为 display:none
-                html = html.replace(
-                    /(<button[^>]*id="btnGoogleLogin"[^>]*style="[^"]*?)display\s*:\s*flex([^"]*")/g,
-                    '$1display:none$2'
-                );
-
-                // 3. 如果按钮没有 style 属性，追加一个（兜底）
-                html = html.replace(
-                    /(<button[^>]*id="btnGoogleLogin")(?![^>]*style=)([^>]*>)/g,
-                    '$1 style="display:none"$2'
-                );
-
-                // 4. 移除 Google Drive option
-                //html = html.replace(/<option[^>]*value="googleDrive"[^>]*>.*?<\/option>/g, '');
-
-                fs.writeFileSync(htmlPath, html);
-                logger.log(`  └─ 已处理: ${htmlFile}`);
-            });
 
             // 处理 _locales：Google Drive → OneDrive
             const localesDir = path.join(browserDistDir, '_locales');

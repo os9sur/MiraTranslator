@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "APIエラー：サーバーエラー（500）。"
   },
+  "ERROR_503": {
+    "message": "APIエラー：サービスが一時的に混雑しています。しばらく経ってからもう一度お試しください。"
+  },
   "ERROR_TIMEOUT": {
     "message": "タイムアウト：ネットワーク設定を確認してください。"
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "翻訳失敗：API設定を確認してください。"
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Mira 翻訳を使用するにはサインインしてください。"
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "マウスポインターのある段落を翻訳"

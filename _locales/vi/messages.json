@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "Lỗi API: Lỗi máy chủ (500)."
   },
+  "ERROR_503": {
+    "message": "Lỗi API: Dịch vụ tạm thời quá tải. Vui lòng thử lại sau."
+  },
   "ERROR_TIMEOUT": {
     "message": "Hết thời gian chờ: Kiểm tra mạng."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "Dịch thất bại: Kiểm tra cấu hình API."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Vui lòng đăng nhập để sử dụng Mira Translator."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "Dịch đoạn văn dưới con trỏ chuột"

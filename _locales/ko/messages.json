@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "API 오류: 서버 오류 (500)."
   },
+  "ERROR_503": {
+    "message": "API 오류: 서비스가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요."
+  },
   "ERROR_TIMEOUT": {
     "message": "요청 시간 초과: 네트워크를 확인하세요."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "번역 실패: API 설정을 확인하세요."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Mira 번역을 사용하려면 로그인하세요."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "마우스 포인터가 있는 문단 번역"

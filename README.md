@@ -1,8 +1,4 @@
 <p align="center">
-  English · <a href="README_zh-CN.md">简体中文</a> · <a href="README_ja.md">日本語</a>
-</p>
-
-<p align="center">
   <a href="https://chromewebstore.google.com/detail/mira-translator/hmmllfdmkbmmfffjekhmmbhhfhhnocmn" target="_blank">
     <img src="images/logo.png" width="120px" height="auto" alt="Mira Logo">
   </a>
@@ -16,7 +12,7 @@
 
 
 <p align="center">
-<img src="https://img.shields.io/badge/Version-3.5.7.997-blue" alt="Version">
+<img src="https://img.shields.io/badge/Version-3.5.7.998-blue" alt="Version">
   &nbsp;
   <img src="https://img.shields.io/badge/License-AGPL--3.0-orange" alt="License">
   &nbsp;

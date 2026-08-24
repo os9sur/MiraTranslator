@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "API Hatası: Sunucu hatası (500)."
   },
+  "ERROR_503": {
+    "message": "API Hatası: Hizmet geçici olarak kullanılamıyor. Lütfen daha sonra tekrar deneyin."
+  },
   "ERROR_TIMEOUT": {
     "message": "Zaman aşımı: Bağlantıyı kontrol edin."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "Çeviri başarısız: API ayarlarını kontrol edin."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Mira Translator'ı kullanmak için giriş yapın."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "İmlecin bulunduğu paragrafı çevir"

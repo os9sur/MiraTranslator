@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "API-Fehler: Serverfehler (500)."
   },
+  "ERROR_503": {
+    "message": "API-Fehler: Dienst vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut."
+  },
   "ERROR_TIMEOUT": {
     "message": "Zeitüberschreitung: Netzwerk prüfen."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "Fehler: API-Konfiguration prüfen."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "Bitte anmelden, um Mira Translator zu verwenden."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "Absatz unter dem Cursor übersetzen"

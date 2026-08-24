@@ -26,6 +26,9 @@
   "ERROR_500": {
     "message": "خطای API: خطای سرور (500)."
   },
+  "ERROR_503": {
+    "message": "خطای API: سرویس به طور موقت در دسترس نیست. لطفاً بعداً دوباره امتحان کنید."
+  },
   "ERROR_TIMEOUT": {
     "message": "زمان پایان یافت: شبکه را بررسی کنید."
   },
@@ -34,9 +37,6 @@
   },
   "ERROR_GENERIC": {
     "message": "خطا در ترجمه: تنظیمات را بررسی کنید."
-  },
-  "ERROR_NOT_SIGNED_IN": {
-    "message": "برای استفاده از Mira Translator وارد شوید."
   },
   "SHORT_CUT_TRANSLATE_HOVER": {
     "message": "ترجمه پاراگراف زیر نشانگر"

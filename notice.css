@@ -54,7 +54,7 @@
   border: 1px solid var(--notice-glow);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5), 0 0 16px var(--notice-glow);
   padding: 0 12px 10px;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 18px 18px;
   font-size: 12px;
   line-height: 1.6;
   flex-direction: column;
@@ -66,7 +66,7 @@
 
 #noticeContentText {
   margin: 8px 0;
-  max-height: 75px;
+  max-height: 120px;
   min-height: 0;
   white-space: pre-line;
   overflow-y: auto;
@@ -104,7 +104,7 @@
   align-self: flex-end;
   margin-top: 6px;
   border: 1px solid;
-  border-radius: 6px;
+  border-radius: 18px;
   padding: 4px 10px;
   font-size: 12px;
   background: transparent;
