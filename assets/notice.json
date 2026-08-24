@@ -1,6 +1,6 @@
 {
   "guide": {
-    "enabled": true,
+    "enabled": false,
     "minDays": 0,
     "zh-CN": [
       {
