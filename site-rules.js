@@ -6,7 +6,7 @@
  */
 
 // 提取公共排除规则
-const ignoreMenu = ":not(nav *):not(menu *):not(aside *):not([role='navigation'] *):not([class*='menu'] *):not([class*='nav'] *):not([class*='sidebar'] *):not([id*='sidebar'] *)";
+const ignoreMenu = "";
 
 const SiteRules = {
     defaults: {
@@ -290,7 +290,7 @@ const SiteRules = {
             `[role='main'] li${ignoreMenu}`,
             `.content li${ignoreMenu}`,
             `.post li${ignoreMenu}`,
-            `.entry li${ignoreMenu}`
+            `.entry li${ignoreMenu}`,
         ].join(", "),
         minLen: 5
     },

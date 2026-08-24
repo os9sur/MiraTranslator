@@ -1798,190 +1798,6 @@ const TranslationBatcher = {
     _miraProcessingSet.delete(el);
   },
 };
-function handleTwitterMultiParagraph(container, forceRefresh) {
-  if (!forceRefresh && container.dataset.translated === "true") return true;
-  if (forceRefresh) {
-    container
-      .querySelectorAll(".kt-paragraph-translation")
-      .forEach((n) => n.remove());
-  }
-  if (!forceRefresh && container.querySelector(".kt-paragraph-translation"))
-    return true;
-  const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
-  const isRTL = checkRTL(targetPrefix);
-  const isAlreadyTargetLang = (text) => {
-    if (forceRefresh) return false;
-    const cleanText = text
-      .replace(/@\w+/g, "")
-      .replace(/https?:\/\/\S+/g, "")
-      .replace(/[（）\(\)]/g, "")
-      .trim();
-    if (cleanText.length < 1) return true;
-    return detectIsAlreadyTarget(
-      cleanText,
-      window.currentTargetL || getBrowserLang() || "en",
-    );
-  };
-  const atoms = [];
-  function processNode(node) {
-    if (!node) return;
-    if (node.nodeType === 3) {
-      node.textContent.split("\n").forEach((part, i, arr) => {
-        atoms.push({ type: "text", content: part.trim() });
-        if (i < arr.length - 1) atoms.push({ type: "break" });
-      });
-      return;
-    }
-    if (node.nodeType !== 1) return;
-    if (node.classList?.contains("kt-paragraph-translation")) return;
-    if (node.tagName === "BUTTON") return;
-    if (node.nodeName === "A") {
-      atoms.push({ type: "link", node: node });
-    } else if (node.nodeName === "DIV" || node.nodeName === "SPAN") {
-      const isMention =
-        node.querySelector("a") && node.innerText.startsWith("@");
-      if (isMention) {
-        atoms.push({ type: "mention", node: node, text: node.innerText });
-        atoms.push({ type: "text", content: node.innerText });
-      } else {
-        Array.from(node.childNodes).forEach(processNode);
-        if (node.style && node.style.display === "block") {
-          atoms.push({ type: "break" });
-        }
-      }
-    }
-  }
-  Array.from(container.childNodes).forEach(processNode);
-  const paragraphs = [];
-  let current = { texts: [], links: [], mentions: [] };
-  let emptyBreakCount = 0;
-  const flushPara = (isBlankLine = false) => {
-    const text = current.texts
-      .filter((t) => t)
-      .join(" ")
-      .trim();
-    if (
-      text.length > 0 ||
-      current.links.length > 0 ||
-      current.mentions.length > 0
-    ) {
-      paragraphs.push({ ...current, text, isBlank: false });
-    } else if (isBlankLine) {
-      paragraphs.push({ text: "", isBlank: true, links: [], mentions: [] });
-    }
-    current = { texts: [], links: [], mentions: [] };
-  };
-  atoms.forEach((atom) => {
-    if (atom.type === "break") {
-      const hasContent =
-        current.texts.some((t) => t) ||
-        current.links.length > 0 ||
-        current.mentions.length > 0;
-      if (hasContent) {
-        flushPara(false);
-        emptyBreakCount = 0;
-      } else {
-        emptyBreakCount++;
-        if (emptyBreakCount >= 1) flushPara(true);
-      }
-    } else if (atom.type === "text") {
-      if (atom.content !== undefined) current.texts.push(atom.content);
-    } else if (atom.type === "link") {
-      current.links.push(atom.node);
-    } else if (atom.type === "mention") {
-      current.mentions.push(atom);
-    }
-  });
-  flushPara(false);
-  if (paragraphs.length <= 1) return false;
-  const nodesToRemove = Array.from(container.childNodes).filter((node) => {
-    if (node.classList?.contains("kt-paragraph-translation")) return false;
-    if (node.tagName === "BUTTON") return false;
-    return true;
-  });
-  nodesToRemove.forEach((n) => n.remove());
-  paragraphs.forEach(({ text, links, mentions, isBlank }) => {
-    if (!container || !container.parentNode) return;
-    const newSpan = document.createElement("span");
-    newSpan.style.display = "block";
-    if (isBlank) {
-      newSpan.innerHTML = "<br>";
-      container.appendChild(newSpan);
-      return;
-    }
-    newSpan.textContent = text;
-    links.forEach((a) => {
-      newSpan.appendChild(document.createTextNode(" "));
-      newSpan.appendChild(a.cloneNode(true));
-    });
-    mentions.forEach((m) => {
-      newSpan.appendChild(m.node.cloneNode(true));
-    });
-    container.appendChild(newSpan);
-    let textForTranslation = text;
-    const generatedLinkMap = {};
-    const mentionMap = {};
-    mentions.forEach((m, index) => {
-      const placeholder = `(M${index}: ${m.text})`;
-      textForTranslation = textForTranslation.replace(m.text, placeholder);
-      mentionMap[index] = {
-        node: m.node.cloneNode(true),
-        text: m.text,
-      };
-    });
-    links.forEach((a, index) => {
-      if (!a) return;
-      const placeholder = `(L${index}: ${a.textContent})`;
-      if (
-        textForTranslation.includes(a.textContent) &&
-        a.textContent.length > 1
-      ) {
-        textForTranslation = textForTranslation.replace(
-          a.textContent,
-          placeholder,
-        );
-      } else {
-        textForTranslation += ` ${placeholder}`;
-      }
-      generatedLinkMap[index] = {
-        href: a.href,
-        className: a.className,
-        target: a.target || "_blank",
-        textContent: a.textContent,
-      };
-    });
-    textForTranslation = textForTranslation.replace(/→\s*$/, "").trim();
-    if (isAlreadyTargetLang(textForTranslation)) return;
-    if (textForTranslation.length < 2) return;
-    const transContainer = document.createElement("div");
-    transContainer.className = "kt-paragraph-translation";
-    transContainer.style.setProperty("display", "block", "important");
-    transContainer.style.setProperty("white-space", "pre-wrap", "important");
-    transContainer.style.setProperty("margin-top", "2px", "important");
-    transContainer.style.setProperty("margin-bottom", "8px", "important");
-    transContainer.style.setProperty("line-height", "1.5", "important");
-    if (isRTL) {
-      transContainer.style.setProperty("direction", "rtl", "important");
-      transContainer.style.setProperty("text-align", "right", "important");
-    }
-    transContainer.innerText = t("loading");
-    transContainer.classList.add("kt-loading");
-    container.appendChild(transContainer);
-    TranslationBatcher.add(
-      {
-        el: newSpan,
-        text: textForTranslation,
-        container: transContainer,
-        linkMap: generatedLinkMap,
-        mentionMap: mentionMap,
-      },
-      forceRefresh,
-    );
-    newSpan.dataset.translating = "true";
-  });
-  container.dataset.translated = "true";
-  return true;
-}
 function extractTextWithLinks(node, el, linkMap, textHolder) {
   if (node.nodeType === Node.TEXT_NODE) {
     const content = node.textContent;
@@ -2040,6 +1856,38 @@ function shouldSkipTextNode(node) {
   return false;
 }
 
+function insertTranslationSafely(el, font) {
+  if (el.__mira_wrapped && el.parentElement?.classList.contains('kt-translation-wrapper')) {
+    el.parentElement.appendChild(font);
+    return;
+  }
+
+  const parent = el.parentElement;
+  if (!parent) { el.appendChild(font); return; }
+
+  const elStyle = getComputedStyle(el);
+ 
+  font.dataset.inheritFontSize = elStyle.fontSize;
+
+  const wrapper = document.createElement('span');
+  wrapper.className = 'kt-translation-wrapper';
+  wrapper.style.setProperty('margin', '0', 'important');
+  wrapper.style.setProperty('padding', '0', 'important');
+
+  const parentDisplay = getComputedStyle(parent).display;
+  if (parentDisplay.includes('flex') || parentDisplay.includes('grid')) {
+    wrapper.style.setProperty('display', elStyle.display.startsWith('inline') ? 'inline-flex' : 'flex', 'important');
+    wrapper.style.setProperty('flex-direction', 'column', 'important');
+  } else {
+    wrapper.style.setProperty('display', elStyle.display.startsWith('inline') ? 'inline' : 'block', 'important');
+  }
+
+  parent.insertBefore(wrapper, el);
+  wrapper.appendChild(el);
+  wrapper.appendChild(font);
+  el.__mira_wrapped = true;
+}
+
 function startGenericTranslation() {
   if (!window.__mira_generic_covered) window.__mira_generic_covered = new Set();
   const coveredNodes = window.__mira_generic_covered;
@@ -2053,8 +1901,7 @@ function startGenericTranslation() {
 
 
   blockEls.forEach(el => {
-    try {
-      //  检查是否有祖先仍在 coveredNodes 里且已产出翻译内容
+    try { 
       let ancestor = el.parentElement;
       let ancestorCovers = false;
       while (ancestor && ancestor !== document.body) {
@@ -2066,7 +1913,7 @@ function startGenericTranslation() {
         }
         ancestor = ancestor.parentElement;
       }
-      if (ancestorCovers) return;  // 祖先已经整体翻译过，跳过这个子孙
+      if (ancestorCovers) return;  
       if (coveredNodes.has(el)) {
         const stillHasTranslation =
           el.querySelector('.kt-paragraph-translation') ||
@@ -2077,7 +1924,9 @@ function startGenericTranslation() {
         delete el.dataset.translated;
       }
       if (shouldSkipTextNode({ parentElement: el })) return;
-      if (el.tagName === 'A' && el.querySelectorAll('p, h1, h2, h3, li').length > 0) return;
+      // A/LI 如果内部还嵌着标题、段落或子列表，说明它是"卡片容器"而非一段独立文字，
+      // 跳过它，让 forEach 后面处理到它内部真正的文字节点（标题、描述段等）时单独成段
+      if (['A', 'LI'].includes(el.tagName) && el.querySelectorAll('p, h1, h2, h3, h4, li, ul, ol').length > 0) return;
       const text = el.innerText?.trim();
       if (!text || text.length < 5) return;
       const hasChildTranslation = el.querySelector('.kt-paragraph-translation');
@@ -2147,11 +1996,7 @@ function startGenericTranslation() {
       font.style.setProperty('color', 'gray', 'important');
       font.style.setProperty('font-style', 'italic', 'important');
       font.innerText = t('loading');
-      if (el.tagName === 'P' && location.hostname.includes('wikipedia.org')) {
-        el.insertAdjacentElement('afterend', font);
-      } else {
-        el.appendChild(font);
-      }
+      insertTranslationSafely(el, font);
 
       coveredNodes.add(el);
       el.querySelectorAll('*').forEach(child => coveredNodes.add(child));
@@ -2209,8 +2054,8 @@ function startGenericTranslation() {
       // 排除只是"译文容器自己"的增删（避免自己触发自己）
       const hasRealChange = mutations.some((m) =>
         Array.from(m.addedNodes).concat(Array.from(m.removedNodes)).some((n) => {
-          if (n.nodeType !== 1) return true; // 文本节点变化 
-          return !n.classList?.contains('kt-paragraph-translation');
+          if (n.nodeType !== 1) return true;
+          return !n.classList?.contains('kt-paragraph-translation') && !n.classList?.contains('kt-translation-wrapper');
         })
       );
       if (!hasRealChange) return;
@@ -3299,6 +3144,190 @@ async function handleTranslateElement(el, forceRefresh = false) {
   );
 }
 
+function handleTwitterMultiParagraph(container, forceRefresh) {
+  if (!forceRefresh && container.dataset.translated === "true") return true;
+  if (forceRefresh) {
+    container
+      .querySelectorAll(".kt-paragraph-translation")
+      .forEach((n) => n.remove());
+  }
+  if (!forceRefresh && container.querySelector(".kt-paragraph-translation"))
+    return true;
+  const targetPrefix = (window.currentTargetL || "").toLowerCase().slice(0, 2);
+  const isRTL = checkRTL(targetPrefix);
+  const isAlreadyTargetLang = (text) => {
+    if (forceRefresh) return false;
+    const cleanText = text
+      .replace(/@\w+/g, "")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/[（）\(\)]/g, "")
+      .trim();
+    if (cleanText.length < 1) return true;
+    return detectIsAlreadyTarget(
+      cleanText,
+      window.currentTargetL || getBrowserLang() || "en",
+    );
+  };
+  const atoms = [];
+  function processNode(node) {
+    if (!node) return;
+    if (node.nodeType === 3) {
+      node.textContent.split("\n").forEach((part, i, arr) => {
+        atoms.push({ type: "text", content: part.trim() });
+        if (i < arr.length - 1) atoms.push({ type: "break" });
+      });
+      return;
+    }
+    if (node.nodeType !== 1) return;
+    if (node.classList?.contains("kt-paragraph-translation")) return;
+    if (node.tagName === "BUTTON") return;
+    if (node.nodeName === "A") {
+      atoms.push({ type: "link", node: node });
+    } else if (node.nodeName === "DIV" || node.nodeName === "SPAN") {
+      const isMention =
+        node.querySelector("a") && node.innerText.startsWith("@");
+      if (isMention) {
+        atoms.push({ type: "mention", node: node, text: node.innerText });
+        atoms.push({ type: "text", content: node.innerText });
+      } else {
+        Array.from(node.childNodes).forEach(processNode);
+        if (node.style && node.style.display === "block") {
+          atoms.push({ type: "break" });
+        }
+      }
+    }
+  }
+  Array.from(container.childNodes).forEach(processNode);
+  const paragraphs = [];
+  let current = { texts: [], links: [], mentions: [] };
+  let emptyBreakCount = 0;
+  const flushPara = (isBlankLine = false) => {
+    const text = current.texts
+      .filter((t) => t)
+      .join(" ")
+      .trim();
+    if (
+      text.length > 0 ||
+      current.links.length > 0 ||
+      current.mentions.length > 0
+    ) {
+      paragraphs.push({ ...current, text, isBlank: false });
+    } else if (isBlankLine) {
+      paragraphs.push({ text: "", isBlank: true, links: [], mentions: [] });
+    }
+    current = { texts: [], links: [], mentions: [] };
+  };
+  atoms.forEach((atom) => {
+    if (atom.type === "break") {
+      const hasContent =
+        current.texts.some((t) => t) ||
+        current.links.length > 0 ||
+        current.mentions.length > 0;
+      if (hasContent) {
+        flushPara(false);
+        emptyBreakCount = 0;
+      } else {
+        emptyBreakCount++;
+        if (emptyBreakCount >= 1) flushPara(true);
+      }
+    } else if (atom.type === "text") {
+      if (atom.content !== undefined) current.texts.push(atom.content);
+    } else if (atom.type === "link") {
+      current.links.push(atom.node);
+    } else if (atom.type === "mention") {
+      current.mentions.push(atom);
+    }
+  });
+  flushPara(false);
+  if (paragraphs.length <= 1) return false;
+  const nodesToRemove = Array.from(container.childNodes).filter((node) => {
+    if (node.classList?.contains("kt-paragraph-translation")) return false;
+    if (node.tagName === "BUTTON") return false;
+    return true;
+  });
+  nodesToRemove.forEach((n) => n.remove());
+  paragraphs.forEach(({ text, links, mentions, isBlank }) => {
+    if (!container || !container.parentNode) return;
+    const newSpan = document.createElement("span");
+    newSpan.style.display = "block";
+    if (isBlank) {
+      newSpan.innerHTML = "<br>";
+      container.appendChild(newSpan);
+      return;
+    }
+    newSpan.textContent = text;
+    links.forEach((a) => {
+      newSpan.appendChild(document.createTextNode(" "));
+      newSpan.appendChild(a.cloneNode(true));
+    });
+    mentions.forEach((m) => {
+      newSpan.appendChild(m.node.cloneNode(true));
+    });
+    container.appendChild(newSpan);
+    let textForTranslation = text;
+    const generatedLinkMap = {};
+    const mentionMap = {};
+    mentions.forEach((m, index) => {
+      const placeholder = `(M${index}: ${m.text})`;
+      textForTranslation = textForTranslation.replace(m.text, placeholder);
+      mentionMap[index] = {
+        node: m.node.cloneNode(true),
+        text: m.text,
+      };
+    });
+    links.forEach((a, index) => {
+      if (!a) return;
+      const placeholder = `(L${index}: ${a.textContent})`;
+      if (
+        textForTranslation.includes(a.textContent) &&
+        a.textContent.length > 1
+      ) {
+        textForTranslation = textForTranslation.replace(
+          a.textContent,
+          placeholder,
+        );
+      } else {
+        textForTranslation += ` ${placeholder}`;
+      }
+      generatedLinkMap[index] = {
+        href: a.href,
+        className: a.className,
+        target: a.target || "_blank",
+        textContent: a.textContent,
+      };
+    });
+    textForTranslation = textForTranslation.replace(/→\s*$/, "").trim();
+    if (isAlreadyTargetLang(textForTranslation)) return;
+    if (textForTranslation.length < 2) return;
+    const transContainer = document.createElement("div");
+    transContainer.className = "kt-paragraph-translation";
+    transContainer.style.setProperty("display", "block", "important");
+    transContainer.style.setProperty("white-space", "pre-wrap", "important");
+    transContainer.style.setProperty("margin-top", "2px", "important");
+    transContainer.style.setProperty("margin-bottom", "8px", "important");
+    transContainer.style.setProperty("line-height", "1.5", "important");
+    if (isRTL) {
+      transContainer.style.setProperty("direction", "rtl", "important");
+      transContainer.style.setProperty("text-align", "right", "important");
+    }
+    transContainer.innerText = t("loading");
+    transContainer.classList.add("kt-loading");
+    container.appendChild(transContainer);
+    TranslationBatcher.add(
+      {
+        el: newSpan,
+        text: textForTranslation,
+        container: transContainer,
+        linkMap: generatedLinkMap,
+        mentionMap: mentionMap,
+      },
+      forceRefresh,
+    );
+    newSpan.dataset.translating = "true";
+  });
+  container.dataset.translated = "true";
+  return true;
+}
 function getObserver() {
   if (!window.observer) {
     window.observer = new IntersectionObserver(
@@ -4548,6 +4577,7 @@ let _capturedContextTranslation = "";
 function isAIEngine(engineId) {
   return AI_LLM_WHITE_LIST.includes(engineId);
 }
+
 function initSelectionTranslate() {
   const logoUrl = chrome.runtime.getURL("icons/icon-128.png");
 
