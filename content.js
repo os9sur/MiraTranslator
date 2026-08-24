@@ -7191,6 +7191,7 @@ function initSelectionTranslate() {
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
       .then((result) => {
+         if (shadowHost?._detailFullyRendered) return;
         // 翻译完成，恢复发音按钮
         setActionBtns(shadow, true);
         if (basicEl) {
@@ -7239,6 +7240,7 @@ function initSelectionTranslate() {
           if (shadowHost?._engineDotEl)
             shadowHost._engineDotEl.style.background = "#22c55e";
         } else {
+           if (shadowHost?._detailFullyRendered) return;
           // logger.log("result.isPartial 为 false", result);
           if (shadowHost) {
             clearTimeout(shadowHost._slowTimer);
