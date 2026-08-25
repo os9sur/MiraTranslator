@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     let switchVersion = 0;
- 
+
     async function switchInstance(id) {
         await safeSetStorage({ lastActiveId: id });
         const myVersion = ++switchVersion;
@@ -735,66 +735,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         catch (e) {
-    logger.error("[Test] Failed:", e);
-    btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
-    btn.style.setProperty('border-color', '#f87171', 'important');
-    btn.style.userSelect = 'text';
-    testResult = false;
+            logger.error("[Test] Failed:", e);
+            btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
+            btn.style.setProperty('border-color', '#f87171', 'important');
+            btn.style.userSelect = 'text';
+            testResult = false;
 
-    if (tipsDesc) {
-        tipsDesc.style.color = "#f87171";
-        tipsDesc.style.userSelect = 'text';
-        tipsDesc.style.cursor = 'text';
-        
-        const errorText = e.message || String(e);
-        const match = errorText.match(/400|401|402|403|404|429|500|502|503|504|505/);
-        let displayMessage = "";
-        
-        if (match) {
-            let errorCode = match[0];
-            if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
-            
-            // 第一步：尝试获取友好消息
-            const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
-            
-            if (friendlyMsg) {
-                // ✅ 有翻译：显示友好消息
-                displayMessage = `${friendlyMsg} (Code: ${errorCode})`;
-            } else {
-                // ❌ 没有翻译：尝试提取 API 的详细错误信息
-                const jsonMatch = errorText.match(/\{.*\}/);
-                if (jsonMatch) {
-                    try {
-                        const errorObj = JSON.parse(jsonMatch[0]);
-                        const apiMessage = errorObj.error?.message || errorObj.message;
-                        if (apiMessage) {
-                            // ✅ 显示 API 返回的详细错误
-                            displayMessage = `HTTP ${errorCode}: ${apiMessage}`;
+            if (tipsDesc) {
+                tipsDesc.style.color = "#f87171";
+                tipsDesc.style.userSelect = 'text';
+                tipsDesc.style.cursor = 'text';
+
+                const errorText = e.message || String(e);
+                const match = errorText.match(/400|401|402|403|404|429|500|502|503|504|505/);
+                let displayMessage = "";
+
+                if (match) {
+                    let errorCode = match[0];
+                    if (errorCode === "400" && errorText.toLowerCase().includes("balance")) errorCode = "402";
+
+                    // 第一步：尝试获取友好消息
+                    const friendlyMsg = getSafeMessage(`ERROR_${errorCode}`);
+
+                    if (friendlyMsg) {
+                        // ✅ 有翻译：显示友好消息
+                        displayMessage = `${friendlyMsg} (Code: ${errorCode})`;
+                    } else {
+                        // ❌ 没有翻译：尝试提取 API 的详细错误信息
+                        const jsonMatch = errorText.match(/\{.*\}/);
+                        if (jsonMatch) {
+                            try {
+                                const errorObj = JSON.parse(jsonMatch[0]);
+                                const apiMessage = errorObj.error?.message || errorObj.message;
+                                if (apiMessage) {
+                                    // ✅ 显示 API 返回的详细错误
+                                    displayMessage = `HTTP ${errorCode}: ${apiMessage}`;
+                                } else {
+                                    displayMessage = `HTTP Error ${errorCode}`;
+                                }
+                            } catch {
+                                displayMessage = `HTTP Error ${errorCode}`;
+                            }
                         } else {
                             displayMessage = `HTTP Error ${errorCode}`;
                         }
-                    } catch {
-                        displayMessage = `HTTP Error ${errorCode}`;
                     }
+                } else if (errorText.toLowerCase().includes("timeout")) {
+                    const baseUrl = document.querySelector('[data-key="baseUrl"]')?.value || '';
+                    const isLocalModel = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+                    displayMessage = isLocalModel
+                        ? t('timeoutLocalModel')
+                        : (i18n.error_timeout || "Timeout ⌛");
+                } else if (errorText === "Same as Original") {
+                    displayMessage = i18n.error_same_as_original || "API returned original text";
                 } else {
-                    displayMessage = `HTTP Error ${errorCode}`;
+                    displayMessage = (errorText.length > 2 && errorText.length < 80) ? errorText : (i18n.error_generic || "Config Error");
                 }
+
+                tipsDesc.innerText = displayMessage;
             }
-        } else if (errorText.toLowerCase().includes("timeout")) {
-            const baseUrl = document.querySelector('[data-key="baseUrl"]')?.value || '';
-            const isLocalModel = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
-            displayMessage = isLocalModel
-                ? t('timeoutLocalModel')
-                : (i18n.error_timeout || "Timeout ⌛");
-        } else if (errorText === "Same as Original") {
-            displayMessage = i18n.error_same_as_original || "API returned original text";
-        } else {
-            displayMessage = (errorText.length > 2 && errorText.length < 80) ? errorText : (i18n.error_generic || "Config Error");
-        }
-        
-        tipsDesc.innerText = displayMessage;
-    }
-} finally {
+        } finally {
             setTimeout(() => {
                 if (btn) {
                     btn.disabled = false;

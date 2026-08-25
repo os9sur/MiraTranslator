@@ -2481,20 +2481,61 @@ const Translators = {
             else if (/\p{Script=Thai}/u.test(query)) sl = 'th';
         }
 
-        const buildUrl = (q, extraDt = '') =>
-            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sl}&tl=${target}&dt=t${extraDt}&q=${encodeURIComponent(q)}`;
+        const GOOGLE_HOSTS = [
+            'translate.googleapis.com',
+            'translate.google.com',
+            'translate.google.co.uk',
+        ];
+        // 上次成功的域名排最前面，减少大部分请求的重试次数
+        const hosts = Translators._lastGoodGoogleHost
+            ? [Translators._lastGoodGoogleHost, ...GOOGLE_HOSTS.filter(h => h !== Translators._lastGoodGoogleHost)]
+            : GOOGLE_HOSTS;
 
-        const url = buildUrl(query, '&dt=bd&dt=rm&dt=ex&dt=md');
+        const buildUrl = (host, q, extraDt = '') =>
+            `https://${host}/translate_a/single?client=gtx&sl=${sl}&tl=${target}&dt=t${extraDt}&q=${encodeURIComponent(q)}`;
+
+        // 按文本长度动态给超时预算，短文本快速失败，长文本留足时间
+        const timeoutMs = Math.min(4000 + Math.floor(query.length / 100) * 1000, 10000);
+
+        let data = null;
+        let lastErr = null;
+
+        for (const host of hosts) {
+            const url = buildUrl(host, query, '&dt=bd&dt=rm&dt=ex&dt=md');
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timer);
+
+                if (res.status === 429 || res.status === 400) {
+                    // 服务端秒级拒绝，不占超时预算，直接换下一个域名
+                    lastErr = new Error(`Google Blocked [${res.status}] on ${host}`);
+                    logger.warn(`[Google] ${host} 返回 ${res.status}，换下一个域名`);
+                    continue;
+                }
+                if (!res.ok) {
+                    lastErr = new Error(`Google Blocked [${res.status}] on ${host}`);
+                    continue;
+                }
+
+                data = await res.json();
+                Translators._lastGoodGoogleHost = host; // 记住这次成功的域名
+                break;
+
+            } catch (e) {
+                clearTimeout(timer);
+                lastErr = e;
+                logger.warn(`[Google] ${host} 请求异常:`, e.message);
+                continue;
+            }
+        }
+
+        if (!data) {
+            throw lastErr || new Error('Google all hosts failed');
+        }
 
         try {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), 10000);
-            const res = await fetch(url, { signal: controller.signal });
-            clearTimeout(timer);
-
-            if (!res.ok) throw new Error("Google Blocked");
-            const data = await res.json();
-
             let basic = data[0].map(item => item[0]).filter(i => i).join('');
             let phonetic = "";
             if (data[0] && data[0][data[0].length - 1][3]) {
@@ -2511,7 +2552,7 @@ const Translators = {
             if (data[13] && data[13][0] && !lightweight) {
                 const rawExamples = data[13][0].slice(0, 2).map(item =>
                     item[0].replace(/<\/?b>/g, '')
-                );//降低翻译次数
+                );
                 examples = rawExamples.map(en => ({ en, cn: '' }));
             }
             let targetPhonetic = "";
@@ -2530,63 +2571,38 @@ const Translators = {
                 }
             }
 
-            const detectedLang = data[2] || null;
-
+            const detectedLang = data[2] || '';
             const sourceLang = (hintSourceLang && hintSourceLang !== 'auto')
                 ? hintSourceLang
-                : (detectedLang ?? (sl !== 'auto' ? sl : 'en'));
+                : (detectedLang || (sl !== 'auto' ? sl : 'en'));
 
             const isEnToTw = detectedLang.startsWith('en') &&
                 (target.toLowerCase() === 'zh-tw' || target.toLowerCase() === 'zh-hk');
             if (isEnToTw) {
                 lightweight = true;
-                // 如果有例句，立即进行二次翻译
                 if (examples.length > 0) {
                     const { examples: translatedExamples } = await translateDictContent(
-                        [], // 不翻译词典
-                        examples, // 只翻译例句
-                        target,
-                        '',
-                        ''
+                        [], examples, target, '', ''
                     );
                     examples = translatedExamples;
                 }
             }
-            // lightweight 模式直接返回，不走词典补充
+
             if (lightweight) {
                 return {
-                    basic,
-                    phonetic,
-                    dictData,
-                    examples,
-                    targetPhonetic,
-                    sourcePhonetic,
-                    wordForms: [],
-                    langInfo: null,
-                    sourceUrl: null,
-                    source: 'Google'
+                    basic, phonetic, dictData, examples, targetPhonetic, sourcePhonetic,
+                    wordForms: [], langInfo: null, sourceUrl: null, source: 'Google'
                 };
             }
-            //  logger.log('[Google] 翻译结果:', basic, 'phonetic:', phonetic, 'dictData:', dictData, 'examples:', examples, 'sourcePhonetic:', sourcePhonetic, 'targetPhonetic:', targetPhonetic);
+
             return await Translators._withDictDetail(
-                basic,          // 翻译结果
-                query,          // 原文
-                target,         // 目标语言
-                'Google',       // 引擎名
-                sourcePhonetic,
-                targetPhonetic,
-                sourceLang,      // 源语言
-                dictData,
-                tabId,
-                '',
-                '',
-                cacheKey,
-                fromPopup,
-                examples
+                basic, query, target, 'Google',
+                sourcePhonetic, targetPhonetic, sourceLang,
+                dictData, tabId, '', '', cacheKey, fromPopup, examples
             );
 
         } catch (e) {
-            logger.warn('Google failed:', e.message);
+            logger.warn('Google 解析失败:', e.message);
             throw e;
         }
     },
@@ -3292,6 +3308,7 @@ const FALLBACK_RESET_MS = 5 * 60 * 1000; // 5分钟后重置
 let _bingFailStreak = 0;
 let _googleFailStreak = 0;
 const ENGINE_FAIL_THRESHOLD = 3; // 连续失败次数超过阈值
+Translators._lastGoodGoogleHost = null;
 async function processTranslate(req, tabId = null, cacheKey = null) {
     try {
         let engine;
@@ -3364,8 +3381,8 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         //用户自定义prompt
         const promptData = await safeGetStorage([AI_PROMPT_KEY]);
         const userCustomPrompt = promptData?.[AI_PROMPT_KEY] || { web: '', subtitle: '' };
-       
-        let actualEngine = effectiveEngine;  
+
+        let actualEngine = effectiveEngine;
 
         if (effectiveEngine === 'bing') {
             try {
@@ -3379,7 +3396,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }
             } catch (e) {
                 logger.warn('[主翻译] Bing 失败，降级 Google:', e.message);
-                actualEngine = 'google';  
+                actualEngine = 'google';
                 if (!req.isTest) {
                     _runtimeEngine = 'google';
                     _runtimeEngineFallbackTs = Date.now();
@@ -3407,7 +3424,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 }
             } catch (e) {
                 logger.warn('[主翻译] Google 失败，降级 Bing:', e.message);
-                actualEngine = 'bing';  
+                actualEngine = 'bing';
                 if (!req.isTest) {
                     _runtimeEngine = 'bing';
                     _runtimeEngineFallbackTs = Date.now();
@@ -3543,28 +3560,28 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         }
         finalData.basic = String(finalData.basic ?? "");
         if (!finalData.source) {
-           
-                const sourceNames = {
-                    'google': 'Google',
-                    'google_v3': 'Google Cloud',
-                    'bing': 'Bing',
-                    'openai': 'OpenAI',
-                    'deepseek': 'DeepSeek',
-                    'gemini': 'Gemini',
-                    'grok': 'Grok',
-                    'claude': 'Claude',
-                    'siliconflow': 'SiliconFlow',
-                    'baidu': 'Baidu',
-                    'deepl': 'DeepL',
-                    'tencent': 'Tencent',
-                    'microsoft': 'Microsoft',
-                    'custom_ai': 'Custom AI'
-                };
-                const engineName = sourceNames[actualEngine] || actualEngine;
-                finalData.source = finalModel
-                    ? `${engineName} (${finalModel})`
-                    : engineName;
-           
+
+            const sourceNames = {
+                'google': 'Google',
+                'google_v3': 'Google Cloud',
+                'bing': 'Bing',
+                'openai': 'OpenAI',
+                'deepseek': 'DeepSeek',
+                'gemini': 'Gemini',
+                'grok': 'Grok',
+                'claude': 'Claude',
+                'siliconflow': 'SiliconFlow',
+                'baidu': 'Baidu',
+                'deepl': 'DeepL',
+                'tencent': 'Tencent',
+                'microsoft': 'Microsoft',
+                'custom_ai': 'Custom AI'
+            };
+            const engineName = sourceNames[actualEngine] || actualEngine;
+            finalData.source = finalModel
+                ? `${engineName} (${finalModel})`
+                : engineName;
+
         }
         return { result: finalData };
     } catch (e) {
@@ -4518,7 +4535,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
             os,
             timezone,
         });
- 
+
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
         if (!isMobile) {
@@ -4561,18 +4578,18 @@ chrome.runtime.onStartup.addListener(updateUninstallURL);
 chrome.runtime.onInstalled.addListener(updateUninstallURL);
 
 chrome.commands.onCommand.addListener((command) => {
-  const actionMap = {
-    "translate-hover-target": "TRANSLATE_HOVER_TARGET",
-    "translate-hover-word": "TRANSLATE_HOVER_WORD",
-  };
-  const action = actionMap[command];
-  if (!action) return;
+    const actionMap = {
+        "translate-hover-target": "TRANSLATE_HOVER_TARGET",
+        "translate-hover-word": "TRANSLATE_HOVER_WORD",
+    };
+    const action = actionMap[command];
+    if (!action) return;
 
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    const tabId = tabs[0]?.id;
-    if (!tabId) return;
-    chrome.tabs.sendMessage(tabId, { action }, () => {
-      void chrome.runtime.lastError;
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const tabId = tabs[0]?.id;
+        if (!tabId) return;
+        chrome.tabs.sendMessage(tabId, { action }, () => {
+            void chrome.runtime.lastError;
+        });
     });
-  });
 });
