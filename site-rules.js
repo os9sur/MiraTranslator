@@ -290,7 +290,8 @@ const SiteRules = {
             `[role='main'] li${ignoreMenu}`,
             `.content li${ignoreMenu}`,
             `.post li${ignoreMenu}`,
-            `.entry li${ignoreMenu}`
+            `.entry li${ignoreMenu}`,
+            `font:not(font *):not(button *):not(header *):not(footer *):not(nav *)${ignoreMenu}`,
         ].join(", "),
         minLen: 5
     },

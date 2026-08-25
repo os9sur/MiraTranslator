@@ -1967,6 +1967,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
   } else if (node.nodeType === Node.ELEMENT_NODE) {
     if (node.tagName === "SCRIPT" || node.tagName === "STYLE") return;
     if (node.tagName === "SUP") return;
+    if (node.classList?.contains("sitebit") || node.classList?.contains("comhead")) return;
     if (node.classList?.contains("kt-paragraph-translation")) return;
     if (node.nodeName === "A") {
       const isCitation =
@@ -2065,7 +2066,7 @@ function startGenericTranslation() {
       if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
 
       // 处理 <br><br> 分隔的多个小段落：拆成独立分段，每段各自插入自己的译文
-      const directBrCount = el.tagName === 'P' ? el.querySelectorAll(':scope > br').length : 0;
+      const directBrCount = el.querySelectorAll(':scope > br').length;
       if (directBrCount >= 2) {
         const segments = [];
         let current = document.createElement('span');
