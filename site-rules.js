@@ -291,6 +291,7 @@ const SiteRules = {
             `.content li${ignoreMenu}`,
             `.post li${ignoreMenu}`,
             `.entry li${ignoreMenu}`,
+            `font:not(font *):not(button *):not(header *):not(footer *):not(nav *)${ignoreMenu}`,
         ].join(", "),
         minLen: 5
     },

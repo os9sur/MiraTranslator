@@ -4,7 +4,6 @@
  * License: AGPL-3.0 (https://github.com/os9sur)
  * Contact: mira.studio@proton.me
  */
-
 window.currentTargetL = getBrowserLang() || "en";
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
@@ -207,6 +206,8 @@ function smartClear(newSelectors) {
       el.removeAttribute("data-translating");
       delete el.dataset.translated;
       delete el.dataset.translating;
+      delete el.dataset.miraNoDiff;
+      delete el.dataset.miraRetryExhausted;
     }
   });
 }
@@ -680,6 +681,8 @@ function ensureYouTubeNavigationListener() {
             delete el.dataset.translating;
             delete el._miraSkippedHash;
             delete el._miraRetryCount;
+            delete el.dataset.miraNoDiff;
+            delete el.dataset.miraRetryExhausted;
           });
       } catch (e) {
         logger.error("[Mira] Cleanup error:", e);
@@ -938,6 +941,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         delete el._miraRetryCount;
         delete el._miraSkippedHash;
         delete el._miraLastText;
+        delete el.dataset.miraNoDiff;
+        delete el.dataset.miraRetryExhausted;
       });
 
       // 同时清空批处理队列里还没发出的待翻译任务，避免它们在重新
@@ -1300,6 +1305,7 @@ const TranslationBatcher = {
     if (el._miraRetryCount === undefined) el._miraRetryCount = 0;
     if (!forceRefresh && el._miraRetryCount >= 3) {
       el._miraSkippedHash = normalizeForCompare(item.text);
+      el.dataset.miraRetryExhausted = "true";
       this.unlock(el);
       if (item.container && item.container.parentNode) item.container.remove();
       return;
@@ -1675,24 +1681,29 @@ const TranslationBatcher = {
     this.unlock(el);
     try {
       if (!transContent || isSameLang || normalizedTrans === normalizedBase) {
-        if (
-          transContent &&
-          normalizedTrans === normalizedBase &&
-          item.singleKey
-        ) {
-          idb.remove(item.singleKey).catch(() => { });
+        // 之前这里会把缓存删掉（idb.remove），导致宿主页面重建 DOM 节点后
+        // 每次都要重新真正调用一次翻译引擎才能得出"不用翻译"的结论。
+        // 现在改成：把这个结论记到跟节点无关的 noDiffTextCache 里，
+        // 这样即使 el 是全新节点，startGenericTranslation 也能立刻跳过它，
+        // 不再插入 loading、也不再发请求。
+        if (transContent && normalizedTrans === normalizedBase) {
+          if (window.__mira_noDiffTextCache) {
+            const lang = (window.currentTargetL || getBrowserLang() || '').toLowerCase();
+            window.__mira_noDiffTextCache.add(`${normalizedBase}::${lang}`);
+          }
         }
         if (container && container.parentNode) container.remove();
         if (item._singleRetry) {
           el._miraSkippedHash = normalizedBase;
         }
+        el.dataset.miraNoDiff = "true";
         return;
       }
       container?.classList.remove("kt-loading");
       if (linkMap && Object.keys(linkMap).length > 0) {
         Object.keys(linkMap).forEach((idx) => {
           const pattern = new RegExp(
-            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([^)）]+?)\\s*[\\)）]`,
+            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([\\s\\S]+?)\\s*[\\)）](?=[，。！？；、,.!?;\\s]*(?:[\\(（]\\s*L\\d+\\s*[：:]|$))`,
             "gi",
           );
           transContent = transContent.replace(
@@ -1713,7 +1724,7 @@ const TranslationBatcher = {
       if (mentionMap && Object.keys(mentionMap).length > 0) {
         Object.keys(mentionMap).forEach((idx) => {
           const pattern = new RegExp(
-            `[\\(（]\\s*M${idx}\\s*[：:]\\s*([^)）]+?)\\s*[\\)）]`,
+            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([\\s\\S]+?)\\s*[\\)）](?=[，。！？；、,.!?;\\s]*(?:[\\(（]\\s*L\\d+\\s*[：:]|$))`,
             "gi",
           );
           transContent = transContent.replace(
@@ -1742,24 +1753,41 @@ const TranslationBatcher = {
           const looksLikeUrl =
             /^[\w\-\.\/]+$/.test(display) && !display.includes(" ");
           const LIMIT = 30;
-          if (display.length > LIMIT && !display.includes(" ")) {
+          const wasTruncated = display.length > LIMIT && !display.includes(" ");
+          if (wasTruncated) {
             // 没有空格（单个长 token，通常是 URL/路径）才做字符串截断
             // 有空格说明是正常译文句子，交给 CSS 换行，不能从中间砍断语义
             display = display.substring(0, LIMIT).replace(/\/$/, "") + "…";
           }
 
           link.textContent = display; // 不做字符串级截断，保留完整文本和语义
-          link.style.cssText = `
-  color: #1d9bf0 !important;
-  display: inline-block !important;
-  max-width: 100% !important;   
-  vertical-align: baseline !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  font-size: inherit !important;
-  letter-spacing: -0.2px !important;
-`;
+
+          // 只有真的做了截断（超长 URL/路径）才需要 inline-block + overflow:hidden
+          // 来配合省略号；这套组合会让该元素的基线变成"盒子底边"而不是文字基线
+          // （overflow != visible 的 inline-block 基线规则），跟旁边普通文字对不齐、
+          // 看起来往上偏移。普通译文短词（如"许可证"）不需要截断，就用正常的
+          // inline 展示，避免破坏基线对齐。
+          if (wasTruncated) {
+            link.style.cssText = `
+            color: #1d9bf0 !important;
+            display: inline-block !important;
+            max-width: 100% !important;
+            vertical-align: baseline !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
+          } else {
+            link.style.cssText = `
+            color: #1d9bf0 !important;
+            display: inline !important;
+            vertical-align: baseline !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
+          }
         }
         link.removeAttribute("data-mira-link");
       });
@@ -1778,6 +1806,7 @@ const TranslationBatcher = {
       Array.from(tempDiv.childNodes).forEach((node) => {
         container.appendChild(node.cloneNode(true));
       });
+      //logger.log('[Mira Debug] container 更新后:', container.innerHTML); 
       shrinkHeadingIfOverflow(container, el);
       container.style.fontStyle = "normal";
       container.style.color = "";
@@ -1807,6 +1836,7 @@ function extractTextWithLinks(node, el, linkMap, textHolder) {
   } else if (node.nodeType === Node.ELEMENT_NODE) {
     if (node.tagName === "SCRIPT" || node.tagName === "STYLE") return;
     if (node.tagName === "SUP") return;
+    if (node.classList?.contains("sitebit") || node.classList?.contains("comhead")) return;
     if (node.classList?.contains("kt-paragraph-translation")) return;
     if (node.nodeName === "A") {
       const isCitation =
@@ -1849,6 +1879,7 @@ function shouldSkipTextNode(node) {
   if (isInCodeHighlightContext(el)) return true;
   // 跳过已翻译
   if (el.closest('[data-translated="true"]')) return true;
+  if (el.closest('[data-mira-retry-exhausted="true"]')) return true;
   // 跳过译文容器本身
   if (el.closest('.kt-paragraph-translation')) return true;
   // 跳过可编辑区域
@@ -1866,7 +1897,7 @@ function insertTranslationSafely(el, font) {
   if (!parent) { el.appendChild(font); return; }
 
   const elStyle = getComputedStyle(el);
- 
+
   font.dataset.inheritFontSize = elStyle.fontSize;
 
   const wrapper = document.createElement('span');
@@ -1891,6 +1922,14 @@ function insertTranslationSafely(el, font) {
 function startGenericTranslation() {
   if (!window.__mira_generic_covered) window.__mira_generic_covered = new Set();
   const coveredNodes = window.__mira_generic_covered;
+  // 与具体 DOM 节点无关的"已确认无需翻译"缓存（key: 归一化文本::目标语言）。
+  // 用来应对宿主页面（React 等）反复重建同一段文字对应的 DOM 节点的场景：
+  // 节点变了，但文字没变，靠这个 Set 就能立刻跳过，不再重新走一遍
+  // 插入 loading -> 调用翻译 -> 发现无需翻译 -> 删除 loading 的完整流程。
+  if (!window.__mira_noDiffTextCache) window.__mira_noDiffTextCache = new Set();
+  const noDiffCache = window.__mira_noDiffTextCache;
+  const noDiffKey = (txt) =>
+    `${normalizeForCompare(txt)}::${(window.currentTargetL || getBrowserLang() || '').toLowerCase()}`;
 
   const domain = window.location.hostname.replace('www.', '');
   const customSelectors = window.__MIRA_SCAN_CONFIG?.custom?.[domain]?.selectors;
@@ -1901,23 +1940,25 @@ function startGenericTranslation() {
 
 
   blockEls.forEach(el => {
-    try { 
+    try {
       let ancestor = el.parentElement;
       let ancestorCovers = false;
       while (ancestor && ancestor !== document.body) {
         if (coveredNodes.has(ancestor)) {
           const ancestorHasTranslation =
             ancestor.querySelector('.kt-paragraph-translation') ||
-            ancestor.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+            ancestor.nextElementSibling?.classList?.contains('kt-paragraph-translation') ||
+            ancestor.dataset.miraNoDiff === 'true';
           if (ancestorHasTranslation) { ancestorCovers = true; break; }
         }
         ancestor = ancestor.parentElement;
       }
-      if (ancestorCovers) return;  
+      if (ancestorCovers) return;
       if (coveredNodes.has(el)) {
         const stillHasTranslation =
           el.querySelector('.kt-paragraph-translation') ||
-          el.nextElementSibling?.classList?.contains('kt-paragraph-translation');
+          el.nextElementSibling?.classList?.contains('kt-paragraph-translation') ||
+          el.dataset.miraNoDiff === 'true';
         if (stillHasTranslation) return;
         coveredNodes.delete(el);
         el.removeAttribute('data-translated');
@@ -1936,9 +1977,16 @@ function startGenericTranslation() {
         return;
       }
       if (detectIsAlreadyTarget(text, window.currentTargetL || getBrowserLang())) return;
+      // 这段文字之前已经确认过"翻译=原文，不用翻译"，即使这次是全新的 DOM 节点
+      // （宿主页面重渲染导致），也直接跳过，不再插入 loading / 不再发翻译请求
+      if (noDiffCache.has(noDiffKey(text))) {
+        coveredNodes.add(el);
+        el.dataset.miraNoDiff = "true";
+        return;
+      }
 
       // 处理 <br><br> 分隔的多个小段落：拆成独立分段，每段各自插入自己的译文
-      const directBrCount = el.tagName === 'P' ? el.querySelectorAll(':scope > br').length : 0;
+      const directBrCount = el.querySelectorAll(':scope > br').length;
       if (directBrCount >= 2) {
         const segments = [];
         let current = document.createElement('span');
@@ -1966,6 +2014,10 @@ function startGenericTranslation() {
           const segText = seg.innerText?.trim();
           if (!segText || segText.length < 5) return;
           if (detectIsAlreadyTarget(segText, window.currentTargetL || getBrowserLang())) return;
+          if (noDiffCache.has(noDiffKey(segText))) {
+            coveredNodes.add(seg);
+            return;
+          }
 
           const segFont = document.createElement('font');
           segFont.className = 'kt-paragraph-translation';
@@ -2033,8 +2085,16 @@ function startGenericTranslation() {
     const el = textNode.parentElement;
     if (!el) return;
     if (coveredNodes.has(el)) return;
+    if (el.dataset.miraNoDiff === 'true') return;
+    if (el.closest('[data-translated="true"]')) return;
     if (el.querySelector('.kt-paragraph-translation')) return;
-    if (detectIsAlreadyTarget(textNode.textContent.trim(), window.currentTargetL || getBrowserLang())) return;
+    const nodeText = textNode.textContent.trim();
+    if (detectIsAlreadyTarget(nodeText, window.currentTargetL || getBrowserLang())) return;
+    if (noDiffCache.has(noDiffKey(nodeText))) {
+      coveredNodes.add(el);
+      el.dataset.miraNoDiff = "true";
+      return;
+    }
 
     const font = document.createElement('font');
     font.className = 'kt-paragraph-translation';
@@ -2044,6 +2104,7 @@ function startGenericTranslation() {
     font.style.setProperty('font-style', 'italic', 'important');
     font.innerText = t('loading');
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
+    coveredNodes.add(el);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
   });
   if (!window.__mira_selfHealObserver) {
@@ -2535,7 +2596,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
         '[data-testid="tweetText"], [data-testid="UserDescription"]',
       ) || el;
   }
-  const existingContainer = el.querySelector(
+  const directChildContainer = el.querySelector(
     ":scope > .kt-paragraph-translation",
   );
   const nextSiblingContainer = el.nextElementSibling?.classList?.contains(
@@ -2543,6 +2604,21 @@ async function handleTranslateElement(el, forceRefresh = false) {
   )
     ? el.nextElementSibling
     : null;
+  // 兼容"通用扫描"路径（startGenericTranslation -> insertTranslationSafely）留下的结构：
+  // 那条路径会把 el 挪进一个新建的 <span class="kt-translation-wrapper">，
+  // 译文容器是 el 在这个新父级里的"兄弟节点"，既不是 el 的直接子节点，
+  // 也不是 el 在原来位置上的 nextElementSibling。重新扫描/重新翻译时如果
+  // 不识别这种情况，就会判断"没有已存在的译文"，在 el 内部又插入一份新的，
+  // 导致同一段文字出现两份重复的翻译。
+  const wrapperSiblingContainer = el.parentElement?.classList?.contains(
+    "kt-translation-wrapper",
+  )
+    ? Array.from(el.parentElement.children).find(
+      (c) => c !== el && c.classList?.contains("kt-paragraph-translation"),
+    ) || null
+    : null;
+  const existingContainer =
+    directChildContainer || nextSiblingContainer || wrapperSiblingContainer;
   const titleContainerSibling =
     youtubeListTitleLink?.nextElementSibling?.classList?.contains(
       "kt-paragraph-translation",
@@ -2551,7 +2627,7 @@ async function handleTranslateElement(el, forceRefresh = false) {
       : null;
   if (
     !forceRefresh &&
-    (existingContainer || nextSiblingContainer || titleContainerSibling)
+    (existingContainer || titleContainerSibling)
   ) {
     el.dataset.translated = "true";
     el.removeAttribute("data-translating");
@@ -2593,7 +2669,8 @@ async function handleTranslateElement(el, forceRefresh = false) {
       el.removeAttribute("data-translating");
       el.removeAttribute("data-mira-processing");
       _miraProcessingSet.delete(el);
-      const oldContainer = el.querySelector(".kt-paragraph-translation");
+      const oldContainer =
+        el.querySelector(".kt-paragraph-translation") || existingContainer;
       if (oldContainer) oldContainer.remove();
       return;
     }
