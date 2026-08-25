@@ -4,6 +4,7 @@
  * License: AGPL-3.0 (https://github.com/os9sur)
  * Contact: mira.studio@proton.me
  */
+
 window.currentTargetL = getBrowserLang() || "en";
 window.__LANG_READY__ = false;
 window.__LANG_PROMISE__ = null;
@@ -217,8 +218,7 @@ async function applyUserStyles(
   inheritFontSize = null,
 ) {
   const render = (config) => {
-    const finalFontSize =
-      inheritFontSize || transEl.dataset.inheritFontSize || null;
+    //  保留原本的变量定义
     const isWiki = location.hostname.includes("wikipedia.org");
     const isInstagram = location.hostname.includes("instagram.com");
     const isLinkedIn = location.hostname.includes("linkedin.com");
@@ -246,6 +246,10 @@ async function applyUserStyles(
     let sourceAlign = "inherit";
     let sourceMarginLeft = "0px";
     let sourcePaddingLeft = "0px";
+
+    //  定义原文字号变量 
+    let sourceFontSize = null;
+
     const isFacebook = location.hostname.includes("facebook.com");
     try {
       let sourceEl = transEl.previousElementSibling;
@@ -257,10 +261,18 @@ async function applyUserStyles(
         sourceAlign = computedStyle.textAlign;
         sourceMarginLeft = computedStyle.marginLeft;
         sourcePaddingLeft = computedStyle.paddingLeft;
+
+        //  直接读取对应原文的计算字号 
+        sourceFontSize = computedStyle.fontSize;
       }
     } catch (e) {
       logger.warn("无法获取原文对齐方式", e);
     }
+
+    // 优先级：优先使用原文 sourceEl 的真实字号 > dataset 记录的字号 > 传入的全局继承字号
+    const finalFontSize =
+      sourceFontSize || transEl.dataset.inheritFontSize || inheritFontSize || null;
+
     if (!config) {
       const verticalMargin = isInstagram ? "0px" : "6px";
       const bottomMargin = isInstagram ? "2px" : "4px";
@@ -1265,6 +1277,7 @@ function shrinkHeadingIfOverflow(container, el) {
     `${Math.max(lo, MIN_SIZE)}px`,
     "important",
   );
+
 }
 const TranslationBatcher = {
   queue: [],
@@ -1703,7 +1716,7 @@ const TranslationBatcher = {
       if (linkMap && Object.keys(linkMap).length > 0) {
         Object.keys(linkMap).forEach((idx) => {
           const pattern = new RegExp(
-            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([\\s\\S]+?)\\s*[\\)）](?=[，。！？；、,.!?;\\s]*(?:[\\(（]\\s*L\\d+\\s*[：:]|$))`,
+            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([\\s\\S]+?)\\s*[\\)）]`,
             "gi",
           );
           transContent = transContent.replace(
@@ -1724,7 +1737,7 @@ const TranslationBatcher = {
       if (mentionMap && Object.keys(mentionMap).length > 0) {
         Object.keys(mentionMap).forEach((idx) => {
           const pattern = new RegExp(
-            `[\\(（]\\s*L${idx}\\s*[：:]\\s*([\\s\\S]+?)\\s*[\\)）](?=[，。！？；、,.!?;\\s]*(?:[\\(（]\\s*L\\d+\\s*[：:]|$))`,
+            `[\\(（]\\s*M${idx}\\s*[：:]\\s*[\\s\\S]+?\\s*[\\)）]`,
             "gi",
           );
           transContent = transContent.replace(
@@ -1769,24 +1782,24 @@ const TranslationBatcher = {
           // inline 展示，避免破坏基线对齐。
           if (wasTruncated) {
             link.style.cssText = `
-            color: #1d9bf0 !important;
-            display: inline-block !important;
-            max-width: 100% !important;
-            vertical-align: baseline !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
-            font-size: inherit !important;
-            letter-spacing: -0.2px !important;
-          `;
+  color: #1d9bf0 !important;
+  display: inline-block !important;
+  max-width: 100% !important;
+  vertical-align: baseline !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: inherit !important;
+  letter-spacing: -0.2px !important;
+`;
           } else {
             link.style.cssText = `
-            color: #1d9bf0 !important;
-            display: inline !important;
-            vertical-align: baseline !important;
-            font-size: inherit !important;
-            letter-spacing: -0.2px !important;
-          `;
+  color: #1d9bf0 !important;
+  display: inline !important;
+  vertical-align: baseline !important;
+  font-size: inherit !important;
+  letter-spacing: -0.2px !important;
+`;
           }
         }
         link.removeAttribute("data-mira-link");
@@ -1889,6 +1902,7 @@ function shouldSkipTextNode(node) {
 
 function insertTranslationSafely(el, font) {
   if (el.__mira_wrapped && el.parentElement?.classList.contains('kt-translation-wrapper')) {
+
     el.parentElement.appendChild(font);
     return;
   }
@@ -3222,11 +3236,12 @@ async function handleTranslateElement(el, forceRefresh = false) {
 }
 
 function handleTwitterMultiParagraph(container, forceRefresh) {
+  if (!container.__miraOriginalHtml) {
+    container.__miraOriginalHtml = container.innerHTML;
+  }
   if (!forceRefresh && container.dataset.translated === "true") return true;
   if (forceRefresh) {
-    container
-      .querySelectorAll(".kt-paragraph-translation")
-      .forEach((n) => n.remove());
+    container.innerHTML = container.__miraOriginalHtml;
   }
   if (!forceRefresh && container.querySelector(".kt-paragraph-translation"))
     return true;
@@ -3265,7 +3280,6 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
         node.querySelector("a") && node.innerText.startsWith("@");
       if (isMention) {
         atoms.push({ type: "mention", node: node, text: node.innerText });
-        atoms.push({ type: "text", content: node.innerText });
       } else {
         Array.from(node.childNodes).forEach(processNode);
         if (node.style && node.style.display === "block") {
@@ -3341,17 +3355,24 @@ function handleTwitterMultiParagraph(container, forceRefresh) {
       newSpan.appendChild(m.node.cloneNode(true));
     });
     container.appendChild(newSpan);
+
     let textForTranslation = text;
     const generatedLinkMap = {};
     const mentionMap = {};
+
     mentions.forEach((m, index) => {
       const placeholder = `(M${index}: ${m.text})`;
-      textForTranslation = textForTranslation.replace(m.text, placeholder);
+
+      // mention 不在 text 中，不能用 replace()
+      // 直接把 mention 作为不可翻译占位符加入翻译文本
+      textForTranslation += ` ${placeholder}`;
+
       mentionMap[index] = {
         node: m.node.cloneNode(true),
         text: m.text,
       };
     });
+
     links.forEach((a, index) => {
       if (!a) return;
       const placeholder = `(L${index}: ${a.textContent})`;
@@ -4588,6 +4609,7 @@ async function scanContent(forcedSelectors = null) {
     ensureDynamicContentWatcher();
   }
 }
+
 /**
  * 监听：捕获来自拾取器（content_pick_script.js）的即时更新信号
  */
