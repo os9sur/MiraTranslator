@@ -796,6 +796,15 @@
       </svg>
       <span data-i18n="shortcutSettings">快捷键设置</span>
     </div>
+    <div class="menu-item" id="btnGoQuickInputTrans" dir="auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
+        <path d="M4 4h16v12H7l-3 3V4z"></path>
+        <line x1="8" y1="9" x2="16" y2="9"></line>
+        <line x1="8" y1="13" x2="12" y2="13"></line>
+      </svg>
+      <span data-i18n="quickInputTrans">输入框快捷翻译</span>
+    </div>
   </div>
   <!-- 云同步panel开始 -->
   <div id="syncSettingsPanel"
@@ -1031,6 +1040,39 @@
     </div>
   </div>
   <!-- 风格设置panel结束 -->
+   <!-- 输入框快捷翻译 panel 开始 -->
+<div id="quickInputTransPanel"
+  style="width: 100%; border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+  <div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
+    <span id="closeQuickInputTransPanel" class="close-btn-common">➥</span>
+    <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">QUICK INPUT
+      TRANSLATE</span>
+  </div>
+
+  <div class="row"
+    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 15px; border-bottom: 1px solid #334155;"
+    dir="auto">
+    <label data-i18n="quickInputTransEnable" style="font-size: 12px; color: #f1f5f9;">启用（在任意输入框连按 3
+      次空格触发）</label>
+    <div id="switch-quickInputTrans" class="switch" style="transform: scale(0.8);">
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 12px;" dir="auto">
+    <label data-i18n="quickInputTransSource"
+      style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">源语言（默认自动检测）</label>
+    <select id="quickInputTransSourceLang" class="select"></select>
+  </div>
+
+  <div style="margin-bottom: 12px;" dir="auto">
+    <label data-i18n="quickInputTransTarget"
+      style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">目标语言</label>
+    <select id="quickInputTransTargetLang" class="select"></select>
+  </div>
+</div>
+<!-- 输入框快捷翻译 panel 结束 -->
   <div dir="auto" id="toast" class="toast-hidden"></div>
   <script src="utils.js"></script>
   <script src="notice.js"></script>

@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'syncSettingsPanel',
       'settingsPanel',
       'styleSettingsPanel',
+      'quickInputTransPanel',
       'advancedMenu'
     ];
     allPanels.forEach(id => {
@@ -68,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const allPanels = [
       'syncSettingsPanel',
       'settingsPanel',
+      'quickInputTransPanel', 
       'advancedMenu'
     ];
     allPanels.forEach(id => {
@@ -1396,7 +1398,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
+document.getElementById('btnGoQuickInputTrans').addEventListener('click', () => {
+  showPanel('quickInputTransPanel');
+  initQuickInputTransPanel();
+});
 
+document.getElementById('closeQuickInputTransPanel').addEventListener('click', () => {
+  showMain();
+});
+ 
+// 目标语言下拉框：正常语言列表，不含"自动检测"
+populateSelect(document.getElementById('quickInputTransTargetLang'), {
+  selected: getBrowserLang() || 'en',
+});
+
+// 源语言下拉框：包含"自动检测"选项，默认选中它
+populateSelect(document.getElementById('quickInputTransSourceLang'), {
+  includeAuto: true,
+  selected: 'auto',
+});
+
+async function initQuickInputTransPanel() {
+  const r = await safeGetStorage([
+    'miraQuickTransEnabled',
+    'miraQuickTransSourceLang',
+    'miraQuickTransTargetLang',
+  ]);
+  const enabled = r?.miraQuickTransEnabled ?? true; // 默认开启输入框翻译
+  const switchEl = document.getElementById('switch-quickInputTrans');
+  switchEl.classList.toggle('on', enabled);
+
+  document.getElementById('quickInputTransSourceLang').value =
+    r?.miraQuickTransSourceLang || 'auto';
+  document.getElementById('quickInputTransTargetLang').value =
+    r?.miraQuickTransTargetLang || getBrowserLang() || 'en';
+}
+
+document.getElementById('switch-quickInputTrans').addEventListener('click', async function () {
+  const nowEnabled = !this.classList.contains('on');
+  this.classList.toggle('on', nowEnabled);
+  await safeSetStorage({ miraQuickTransEnabled: nowEnabled });
+});
+
+document.getElementById('quickInputTransSourceLang').addEventListener('change', async (e) => {
+  await safeSetStorage({ miraQuickTransSourceLang: e.target.value });
+});
+
+document.getElementById('quickInputTransTargetLang').addEventListener('change', async (e) => {
+  await safeSetStorage({ miraQuickTransTargetLang: e.target.value });
+});
   gearBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
     document.getElementById('p-engine-dropdown-popup')?.remove();

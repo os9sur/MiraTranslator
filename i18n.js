@@ -3592,40 +3592,87 @@ self.i18nAttach10 = {
 
 self.i18nAttach11 = {
   "zh-CN": {
-    "notice.auth": "请切换授权页完成操作，授权后返回重试。",
+    "quickInputTrans": "输入框翻译",
+    "quickInputTransEnable": "启用（在任意输入框连按 3 次空格触发）",
+    "quickInputTransSource": "源语言（默认自动检测）",
+    "quickInputTransTarget": "目标语言"
   },
+
   "zh-TW": {
-    "notice.auth": "請切換授權頁完成操作，授權後返回重試。",
+    "quickInputTrans": "輸入框翻譯",
+    "quickInputTransEnable": "啟用（在任意輸入框連按 3 次空白鍵觸發）",
+    "quickInputTransSource": "來源語言（預設自動偵測）",
+    "quickInputTransTarget": "目標語言"
   },
+
   "en": {
-    "notice.auth": "Please complete the authorization in the new tab and return here to retry.",
+    "quickInputTrans": "Input Translation",
+    "quickInputTransEnable": "Enable (press the spacebar 3 times in any input field)",
+    "quickInputTransSource": "Source language (auto-detect by default)",
+    "quickInputTransTarget": "Target language"
   },
+
   "ja": {
-    "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。",
+    "quickInputTrans": "入力欄翻訳",
+    "quickInputTransEnable": "有効にする（任意の入力欄でスペースキーを3回連続で押すと実行）",
+    "quickInputTransSource": "原文の言語（デフォルトは自動検出）",
+    "quickInputTransTarget": "翻訳先の言語"
   },
+
   "ko": {
-    "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요.",
+    "quickInputTrans": "입력창 번역",
+    "quickInputTransEnable": "사용 (입력창에서 스페이스바를 3번 연속 누르면 실행)",
+    "quickInputTransSource": "원본 언어 (기본값: 자동 감지)",
+    "quickInputTransTarget": "번역 언어"
   },
+
   "pt-BR": {
-    "notice.auth": "Conclua a autorização na nova aba e retorne para tentar novamente.",
+    "quickInputTrans": "Tradução em campos de texto",
+    "quickInputTransEnable": "Ativar (pressione a barra de espaço 3 vezes em qualquer campo de texto)",
+    "quickInputTransSource": "Idioma de origem (detecção automática por padrão)",
+    "quickInputTransTarget": "Idioma de destino"
   },
+
   "fr": {
-    "notice.auth": "Veuillez terminer l'autorisation dans le nouvel onglet et revenir ici pour réessayer.",
+    "quickInputTrans": "Traduction des champs de saisie",
+    "quickInputTransEnable": "Activer (appuyez 3 fois sur la barre d’espace dans n’importe quel champ de saisie)",
+    "quickInputTransSource": "Langue source (détection automatique par défaut)",
+    "quickInputTransTarget": "Langue cible"
   },
+
   "ru": {
-    "notice.auth": "Завершите авторизацию в новой вкладке и вернитесь, чтобы повторить попытку.",
+    "quickInputTrans": "Перевод в полях ввода",
+    "quickInputTransEnable": "Включить (нажмите пробел 3 раза подряд в любом поле ввода)",
+    "quickInputTransSource": "Исходный язык (по умолчанию определяется автоматически)",
+    "quickInputTransTarget": "Целевой язык"
   },
+
   "es": {
-    "notice.auth": "Complete la autorización en la nueva pestaña y regrese aquí para reintentar.",
+    "quickInputTrans": "Traducción en campos de texto",
+    "quickInputTransEnable": "Activar (pulse la barra espaciadora 3 veces en cualquier campo de texto)",
+    "quickInputTransSource": "Idioma de origen (detección automática de forma predeterminada)",
+    "quickInputTransTarget": "Idioma de destino"
   },
+
   "ar": {
-    "notice.auth": "يرجى إكمال التفويض في علامة التبويب الجديدة والعودة إلى هنا لإعادة المحاولة.",
+    "quickInputTrans": "ترجمة حقول الإدخال",
+    "quickInputTransEnable": "تفعيل (اضغط على مفتاح المسافة 3 مرات متتالية في أي حقل إدخال)",
+    "quickInputTransSource": "لغة المصدر (الاكتشاف التلقائي افتراضيًا)",
+    "quickInputTransTarget": "اللغة المستهدفة"
   },
+
   "fa": {
-    "notice.auth": "لطفاً احراز هویت را در برگه جدید تکمیل کرده و برای تلاش مجدد به اینجا بازگردید.",
+    "quickInputTrans": "ترجمه کادرهای ورودی",
+    "quickInputTransEnable": "فعال‌سازی (در هر کادر ورودی، کلید فاصله را ۳ بار پشت سر هم فشار دهید)",
+    "quickInputTransSource": "زبان مبدأ (تشخیص خودکار به‌صورت پیش‌فرض)",
+    "quickInputTransTarget": "زبان مقصد"
   },
+
   "he": {
-    "notice.auth": "אנא השלם את ההרשאה בכרטיסייה החדשה וחזור לכאן כדי לנסות שוב.",
+    "quickInputTrans": "תרגום בשדות קלט",
+    "quickInputTransEnable": "הפעלה (לחצו 3 פעמים ברצף על מקש הרווח בכל שדה קלט)",
+    "quickInputTransSource": "שפת המקור (זיהוי אוטומטי כברירת מחדל)",
+    "quickInputTransTarget": "שפת היעד"
   }
 };
 

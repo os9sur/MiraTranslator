@@ -1098,6 +1098,192 @@ document.addEventListener("MIRA_INTERNAL_RESCAN", (e) => {
     executeReScan(e.detail);
   }
 });
+
+//输入框连续空格翻译
+const __miraQuickTransState = new WeakMap();
+const MIRA_SPACE_WINDOW_MS = 600;
+
+async function getMiraSecondaryLang(targetLang) {
+  const storage = await safeGetStorage(['miraQuickTransSecondaryLang']);
+  if (storage?.miraQuickTransSecondaryLang) {
+    return storage.miraQuickTransSecondaryLang.toLowerCase();
+  }
+  const browserLang = (getBrowserLang() || "en").toLowerCase();
+  const targetBase = targetLang.split("-")[0];
+  const browserBase = browserLang.split("-")[0];
+  if (browserBase !== targetBase) return browserLang;
+  return targetBase === "en" ? "zh-CN" : "en";
+}
+
+function isMiraTranslatableInput(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  if (tag === "TEXTAREA") return true;
+  if (tag === "INPUT") {
+    const type = (el.type || "text").toLowerCase();
+    return ["text", "search", "email", "url", "tel"].includes(type);
+  }
+  if (el.isContentEditable) return true;
+  return false;
+}
+
+document.addEventListener(
+  "keydown",
+  (e) => {
+    const el = e.target;
+    logger.log("[Mira-Debug] keydown", e.key, el.tagName, isMiraTranslatableInput(el));
+    if (!isMiraTranslatableInput(el)) return;
+
+    if (e.key === " " || e.code === "Space") {
+      const now = Date.now();
+      const state = __miraQuickTransState.get(el) || { count: 0, lastTime: 0 };
+      if (now - state.lastTime > MIRA_SPACE_WINDOW_MS) state.count = 0;
+      state.count += 1;
+      state.lastTime = now;
+      __miraQuickTransState.set(el, state);
+      logger.log("[Mira-Debug] space count:", state.count);
+
+      if (state.count >= 3) {
+        state.count = 0;
+        __miraQuickTransState.set(el, state);
+        e.preventDefault();
+        logger.log("[Mira-Debug] 触发翻译");
+        handleMiraQuickTranslate(el);
+      }
+    } else {
+      __miraQuickTransState.delete(el);
+    }
+  },
+  true,
+);
+
+function getMiraInputText(el) {
+  if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") return el.value;
+  return el.innerText || el.textContent || "";
+}
+function fireMiraPasteEvent(el, text) {
+  const dt = new DataTransfer();
+  dt.setData("text/plain", text);
+  const pasteEvent = new ClipboardEvent("paste", {
+    bubbles: true,
+    cancelable: true,
+    clipboardData: dt,
+  });
+  const notCancelled = el.dispatchEvent(pasteEvent);
+  logger.log("[Mira-Debug] paste事件 未被拦截(未处理):", notCancelled);
+  return !notCancelled; // 返回 true 表示编辑器自己处理了这次粘贴
+}
+async function setMiraInputText(el, newText) {
+  if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+    const proto =
+      el.tagName === "INPUT"
+        ? window.HTMLInputElement.prototype
+        : window.HTMLTextAreaElement.prototype;
+    const nativeSetter = Object.getOwnPropertyDescriptor(proto, "value").set;
+    nativeSetter.call(el, newText);
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+
+  const waitFrame = () => new Promise((r) => requestAnimationFrame(r));
+
+  el.focus();
+  document.execCommand("selectAll", false, null);
+  await waitFrame(); // 等 selectionchange 派发，让 Lexical 同步到"全选"状态
+  document.execCommand("delete", false, null);
+  await waitFrame(); // 再等一帧，让 Lexical 把"删除"同步进它自己的模型
+
+  const pasteHandled = fireMiraPasteEvent(el, newText);
+  logger.log("[Mira-Debug] 粘贴是否被编辑器处理:", pasteHandled);
+
+  await new Promise((r) => setTimeout(r, 200));
+  const finalText = getMiraInputText(el).trim();
+  logger.log("[Mira-Debug] 粘贴后实际内容:", finalText);
+  if (finalText === newText.trim()) return;
+
+  // 兜底：execCommand insertText
+  el.focus();
+  document.execCommand("selectAll", false, null);
+  await waitFrame();
+  const ok = document.execCommand("insertText", false, newText);
+  logger.log("[Mira-Debug] execCommand 兜底结果:", ok);
+
+  await new Promise((r) => setTimeout(r, 200));
+  const finalText2 = getMiraInputText(el).trim();
+  if (finalText2 === newText.trim()) return;
+
+  logger.log("[Mira-Debug] 都没生效，直接写 DOM 兜底");
+  el.textContent = newText;
+  el.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }));
+}
+function showMiraQuickTranslateLoading(el) {
+  const rect = el.getBoundingClientRect();
+  const badge = document.createElement('div');
+  badge.textContent = t('loading');
+  badge.style.cssText = `
+    position: fixed;
+    left: ${rect.right}px;
+    top: ${rect.top}px;
+    transform: translate(-100%, -130%);
+    background: rgba(15, 23, 42, 0.92);
+    color: #38bdf8;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    z-index: 2147483647;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  `;
+  document.body.appendChild(badge);
+  return () => badge.remove();
+}
+async function handleMiraQuickTranslate(el) {
+  const enabledStorage = await safeGetStorage(['miraQuickTransEnabled']);
+  if (enabledStorage?.miraQuickTransEnabled === false) return;
+  if (el.dataset.miraQuickTranslating === "true") return;
+  const raw = getMiraInputText(el);
+  const text = raw.replace(/\s+$/g, "");
+  logger.log("[Mira-Debug] 待翻译文本:", JSON.stringify(text));
+  if (!text) return;
+
+  const langStorage = await safeGetStorage(['miraQuickTransTargetLang', 'miraQuickTransSourceLang']);
+  const destLang = (langStorage?.miraQuickTransTargetLang || getBrowserLang() || "en").toLowerCase();
+  const sourceLangSetting = (langStorage?.miraQuickTransSourceLang || 'auto').toLowerCase();
+  const hintSourceLang = sourceLangSetting === 'auto' ? null : sourceLangSetting;
+  logger.log("[Mira-Debug] sourceLangSetting:", sourceLangSetting, "destLang:", destLang);
+
+  // 如果明确指定了源语言，且和目标语言一致，直接跳过，避免无意义的 API 调用
+  if (hintSourceLang && hintSourceLang.split("-")[0] === destLang.split("-")[0]) {
+    logger.log("[Mira-Debug] 源语言与目标语言相同，跳过翻译");
+    return;
+  }
+
+  el.dataset.miraQuickTranslating = "true";
+  const hideLoading = showMiraQuickTranslateLoading(el);
+  try {
+    const res = await getDetailedTranslation(
+      text,
+      false,
+      destLang,
+      { skipCache: false, lightweight: true },
+      hintSourceLang,
+    );
+    logger.log("[Mira-Debug] 翻译结果:", res);
+    if (!res || res.isError || !res.basic) return;
+    await setMiraInputText(el, res.basic.trim());
+  } catch (err) {
+    logger.error("[Mira-Debug] 翻译出错:", err);
+  } finally {
+    delete el.dataset.miraQuickTranslating;
+    hideLoading();
+  }
+}
+
+//输入框翻译逻辑结束
+
+
 (async () => {
   const data = await safeGetStorage([
     "globalConfig",
