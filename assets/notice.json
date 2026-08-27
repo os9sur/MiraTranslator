@@ -11,112 +11,110 @@
         "gotIt": "知道了",
         "scope": "popup"
       }
-    ],
-   
+    ]
   },
- "notices": {
-  "enabled": true,
-  "minDays": 0,
-  "zh-CN": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 如何免费/原价用上顶级 AI 翻译？",
-      "level": "info",
-      "content": "本扩展完全免费且开源。AI 翻译需要消耗算力，可按需选择翻译服务：\n• 免费 AI：Groq 提供额度充足且速度很快的免费 API，适合 YouTube 等 AI 翻译；Gemini 也提供免费额度，但调用限制相对严格。\n\n• 灵活搭配：在主页的「高级菜单」中，可为不同功能分别选择翻译模型。例如网页使用 Google/Bing，避免消耗 AI Token；划词翻译和 YouTube 则使用 Groq 等 AI，在需要时获得更好的翻译效果。\n• 聚合平台：OpenRouter 提供多种免费模型，一个 Key 即可调用不同模型，但免费模型有调用限制。\n• 付费升级：需要更高额度或高级模型，可按量付费（Pay-as-you-go）。\n👉 点击「添加自定义翻译服务（API Key）」，选择模型后点击「获取 API Key」直达官网。",
-      "gotIt": "知道了",
-      "scope": "settings"
-    }
-  ],
-  "zh-TW": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 如何免費／原價使用頂級 AI 翻譯？",
-      "level": "info",
-      "content": "本擴充功能完全免費且開源。AI 翻譯需要消耗算力，可依需求選擇翻譯服務：\n• 免費 AI：Groq 提供相當充足且速度很快的免費額度，適合用於 YouTube 等 AI 翻譯；Gemini 也提供免費額度，但使用限制相對較嚴格。\n\n• 彈性搭配：在首頁的「進階選單」中，可為不同功能分別選擇翻譯模型。例如網頁使用 Google/Bing，避免消耗 AI Token；劃詞翻譯和 YouTube 則使用 Groq 等 AI，在需要時獲得更好的翻譯效果。\n• 聚合平台：OpenRouter 提供多種免費模型，一個 Key 即可使用不同模型，但免費模型有使用限制。\n• 付費升級：需要更高額度或進階模型，可採用按量付費（Pay-as-you-go）。\n👉 點擊「新增自訂翻譯服務（API Key）」，選擇模型後點擊「取得 API Key」即可前往官網。",
-      "gotIt": "知道了",
-      "scope": "settings"
-    }
-  ],
-  "en": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 How to use top-tier AI translation for free or at cost",
-      "level": "info",
-      "content": "Mira is completely free and open source. AI translation uses computing resources, so choose the service that fits your needs:\n• Free AI: Groq offers a generous free tier with very fast inference, making it a great choice for AI translation such as YouTube. Gemini also offers a free tier, but its usage limits can be more restrictive.\n\n• Flexible setup: In the “Advanced” menu on the main page, you can choose different translation models for different features. For example, use Google/Bing for web pages to avoid spending AI tokens, and Groq or other AI models for text selection and YouTube when better translation quality matters.\n• Aggregator: OpenRouter offers a range of free models, so one API key can give you access to different models, although free models have usage limits.\n• Pay as you go: For higher limits or advanced models, use official pay-as-you-go plans.\n👉 Click “Add Custom Translation Service (API Key)”, choose a model, then click “Get API Key” to visit its official website.",
-      "gotIt": "Got it",
-      "scope": "settings"
-    }
-  ],
-  "ja": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 高性能 AI 翻訳を無料・低コストで使うには？",
-      "level": "info",
-      "content": "Mira は完全無料のオープンソース拡張機能です。AI 翻訳には計算リソースが必要なため、用途に応じて翻訳サービスを選べます：\n• 無料 AI：Groq は無料枠が比較的充実しており、処理も非常に高速です。YouTube などの AI 翻訳にもおすすめです。Gemini にも無料枠がありますが、利用制限は比較的厳しめです。\n\n• 柔軟な使い分け：メイン画面の「詳細設定」メニューから、機能ごとに異なる翻訳モデルを指定できます。たとえば、Web ページには Google/Bing を使って AI のトークンを節約し、選択翻訳や YouTube には Groq などの AI モデルを使うことで、必要な場面でより高品質な翻訳ができます。\n• 集約サービス：OpenRouter では複数の無料モデルを利用でき、1 つの API キーでさまざまなモデルにアクセスできます。ただし、無料モデルには利用制限があります。\n• 従量課金：より高い利用上限や高性能モデルが必要な場合は、公式の従量課金プランを利用できます。\n👉 「カスタム翻訳サービスを追加（API Key）」をクリックし、モデルを選択して「API Key を取得」から公式サイトへ進んでください。",
-      "gotIt": "了解",
-      "scope": "settings"
-    }
-  ],
-  "ko": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 고성능 AI 번역을 무료 또는 실비로 사용하는 방법",
-      "level": "info",
-      "content": "Mira는 완전 무료 오픈소스 확장 프로그램입니다. AI 번역에는 컴퓨팅 자원이 필요하므로 용도에 맞는 번역 서비스를 선택할 수 있습니다:\n• 무료 AI: Groq는 무료 사용량이 비교적 넉넉하고 속도도 매우 빠르므로 YouTube 등의 AI 번역에 적합합니다. Gemini도 무료 티어를 제공하지만 사용 제한은 상대적으로 엄격한 편입니다.\n\n• 유연한 조합: 메인 화면의 「고급 메뉴」에서 기능별로 다른 번역 모델을 지정할 수 있습니다. 예를 들어 웹 페이지에는 Google/Bing을 사용해 AI 토큰을 아끼고, 선택 번역이나 YouTube에는 Groq 등의 AI 모델을 사용해 필요한 경우 더 나은 번역 품질을 얻을 수 있습니다.\n• 통합 플랫폼: OpenRouter에서는 다양한 무료 모델을 이용할 수 있으며, 하나의 API Key로 여러 모델에 접근할 수 있습니다. 단, 무료 모델에는 사용량 제한이 있습니다.\n• 종량제: 더 높은 한도나 고급 모델이 필요하다면 공식 종량제(Pay-as-you-go) 플랜을 이용할 수 있습니다.\n👉 「사용자 지정 번역 서비스 추가 (API Key)」를 클릭하고 모델을 선택한 후 「API Key 받기」를 눌러 공식 사이트로 이동하세요.",
-      "gotIt": "확인",
-      "scope": "settings"
-    }
-  ],
-  "es": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Cómo usar traducción IA avanzada gratis o al costo",
-      "level": "info",
-      "content": "Mira es completamente gratuita y de código abierto. La traducción con IA consume recursos, así que puedes elegir el servicio según tus necesidades:\n• IA gratuita: Groq ofrece una cuota gratuita bastante generosa y una velocidad muy alta, por lo que es una buena opción para traducciones con IA como las de YouTube. Gemini también ofrece una cuota gratuita, pero sus límites de uso pueden ser más estrictos.\n\n• Uso flexible: Desde el menú «Avanzado» de la página principal, puedes elegir distintos modelos para cada función. Por ejemplo, usa Google/Bing para las páginas web y evita gastar tokens de IA, y reserva Groq u otros modelos de IA para la traducción de texto seleccionado y YouTube cuando necesites una mayor calidad.\n• Plataforma agregadora: OpenRouter ofrece varios modelos gratuitos y permite acceder a distintos modelos con una sola API Key, aunque los modelos gratuitos tienen límites de uso.\n• Pago por uso: Si necesitas límites más altos o modelos avanzados, puedes utilizar planes oficiales de pago por uso.\n👉 Haz clic en «Añadir servicio de traducción personalizado (API Key)», selecciona un modelo y pulsa «Obtener API Key» para ir a su sitio oficial.",
-      "gotIt": "Entendido",
-      "scope": "settings"
-    }
-  ],
-  "pt-BR": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Como usar tradução com IA avançada de graça ou pelo custo",
-      "level": "info",
-      "content": "O Mira é totalmente gratuito e de código aberto. A tradução por IA consome recursos computacionais, então você pode escolher o serviço de acordo com a necessidade:\n• IA gratuita: O Groq oferece uma cota gratuita generosa e uma velocidade muito alta, sendo uma ótima opção para traduções com IA, como no YouTube. O Gemini também oferece uma cota gratuita, mas seus limites de uso podem ser mais restritivos.\n\n• Uso flexível: No menu «Avançado» da página principal, você pode escolher modelos diferentes para cada função. Por exemplo, use Google/Bing nas páginas da web para não gastar tokens de IA e deixe o Groq ou outros modelos de IA para a tradução de textos selecionados e do YouTube quando precisar de mais qualidade.\n• Plataforma agregadora: O OpenRouter oferece vários modelos gratuitos e permite acessar diferentes modelos com uma única API Key, embora os modelos gratuitos tenham limites de uso.\n• Pagamento por uso: Para limites maiores ou modelos avançados, use os planos oficiais de pagamento conforme o uso.\n👉 Clique em «Adicionar serviço de tradução personalizado (API Key)», escolha um modelo e clique em «Obter API Key» para acessar o site oficial.",
-      "gotIt": "Entendi",
-      "scope": "settings"
-    }
-  ],
-  "ru": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Как использовать продвинутый ИИ-перевод бесплатно или по себестоимости",
-      "level": "info",
-      "content": "Mira полностью бесплатен и имеет открытый исходный код. ИИ-перевод требует вычислительных ресурсов, поэтому сервис можно выбрать под свои задачи:\n• Бесплатный ИИ: Groq предлагает довольно щедрый бесплатный лимит и очень высокую скорость, поэтому отлично подходит для ИИ-перевода, например на YouTube. У Gemini тоже есть бесплатный лимит, но ограничения на использование могут быть строже.\n\n• Гибкая настройка: в меню «Расширенные настройки» на главной странице можно назначить разные модели для разных функций. Например, использовать Google/Bing для веб-страниц, не расходуя токены ИИ, а Groq или другие ИИ-модели — для перевода выделенного текста и YouTube, когда важнее качество перевода.\n• Агрегатор: OpenRouter предлагает несколько бесплатных моделей и позволяет использовать разные модели с одним API Key, однако у бесплатных моделей есть ограничения.\n• Оплата по факту: если нужны более высокие лимиты или продвинутые модели, доступны официальные тарифы Pay-as-you-go.\n👉 Нажмите «Добавить пользовательскую службу перевода (API Key)», выберите модель и нажмите «Получить API Key», чтобы перейти на официальный сайт.",
-      "gotIt": "Понятно",
-      "scope": "settings"
-    }
-  ],
-  "ar": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 كيف تستخدم ترجمة AI متقدمة مجانًا أو بسعر التكلفة؟",
-      "level": "info",
-      "content": "Mira إضافة مجانية بالكامل ومفتوحة المصدر. تتطلب الترجمة بالذكاء الاصطناعي موارد حوسبة، لذلك يمكنك اختيار الخدمة التي تناسب احتياجاتك:\n• الذكاء الاصطناعي المجاني: توفر Groq حصة مجانية سخية وسرعة عالية جدًا، ما يجعلها مناسبة للترجمة بالذكاء الاصطناعي، مثل ترجمة YouTube. كما توفر Gemini حصة مجانية، لكن حدود الاستخدام فيها قد تكون أكثر تشددًا.\n\n• استخدام مرن: من قائمة «متقدم» في الصفحة الرئيسية، يمكنك اختيار نموذج مختلف لكل ميزة. على سبيل المثال، استخدم Google/Bing لصفحات الويب لتوفير رموز AI، واستخدم Groq أو نماذج AI أخرى لترجمة النصوص المحددة وYouTube عندما تحتاج إلى جودة ترجمة أفضل.\n• منصة موحدة: يوفر OpenRouter مجموعة من النماذج المجانية، ويتيح لك الوصول إلى نماذج مختلفة باستخدام مفتاح API واحد، لكن النماذج المجانية تخضع لحدود استخدام.\n• الدفع حسب الاستخدام: إذا كنت بحاجة إلى حدود أعلى أو نماذج متقدمة، يمكنك استخدام الخطط الرسمية بنظام الدفع حسب الاستخدام.\n👉 اضغط على «إضافة خدمة ترجمة مخصصة (API Key)»، واختر النموذج ثم اضغط على «الحصول على API Key» للانتقال إلى الموقع الرسمي.",
-      "gotIt": "فهمت",
-      "scope": "settings"
-    }
-  ],
-  "tr": [
-    {
-      "id": "notice_20260817_free_ai",
-      "title": "💡 Gelişmiş AI çevirisini ücretsiz veya maliyetine kullanın",
-      "level": "info",
-      "content": "Mira tamamen ücretsiz ve açık kaynaklıdır. AI çevirisi işlem gücü gerektirir; bu nedenle ihtiyacınıza uygun çeviri hizmetini seçebilirsiniz:\n• Ücretsiz AI: Groq oldukça geniş bir ücretsiz kullanım kotası ve çok yüksek hız sunar; bu nedenle YouTube gibi AI çevirileri için iyi bir seçenektir. Gemini de ücretsiz kullanım sunar, ancak kullanım sınırları daha sıkı olabilir.\n\n• Esnek kullanım: Ana sayfadaki «Gelişmiş» menüsünden her özellik için farklı bir çeviri modeli seçebilirsiniz. Örneğin web sayfalarında Google/Bing kullanarak AI token'larını harcamaktan kaçınabilir, seçili metin ve YouTube çevirilerinde ise daha iyi kalite gerektiğinde Groq veya diğer AI modellerini kullanabilirsiniz.\n• Toplayıcı platform: OpenRouter çeşitli ücretsiz modeller sunar ve tek bir API Key ile farklı modellere erişmenizi sağlar; ancak ücretsiz modellerin kullanım limitleri vardır.\n• Kullandıkça öde: Daha yüksek limitlere veya gelişmiş modellere ihtiyacınız varsa resmi Pay-as-you-go planlarını kullanabilirsiniz.\n👉 «Özel çeviri hizmeti ekle (API Key)» seçeneğine tıklayın, modeli seçin ve «API Key al» düğmesine basarak resmi siteye gidin.",
-      "gotIt": "Anladım",
-      "scope": "settings"
-    }
-  ]
-}
+  "notices": {
+    "enabled": true,
+    "minDays": 0,
+    "zh-CN": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 如何免费/原价用上顶级 AI 翻译？",
+        "level": "info",
+        "content": "本扩展本身完全免费且开源（不收取任何软件费用）。由于 AI 翻译需要消耗算力，建议按需选择：\n• 长期免费：Groq、谷歌 (Gemini) 提供长期免费额度，若因调用过快触发 429 速率限制（Rate Limit），稍等即可自动恢复。\n• 聚合平台：嫌多平台注册繁琐，可选用 OpenRouter，单个 Key 即可调用海量模型。\n• 进阶付费：若需解除限频或调用高级模型，建议前往官网按量付费 (Pay-as-you-go)，无月费与中间溢价，数据直连更安全。\n👉 点击下方「添加自定义翻译服务 (API Key)」，选择模型后点击「获取 API Key」直达官网。",
+        "gotIt": "知道了",
+        "scope": "settings"
+      }
+    ],
+    "zh-TW": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 如何免費/原價用上頂級 AI 翻譯？",
+        "level": "info",
+        "content": "本擴充功能本身完全免費且開源（不收取任何軟體費用）。由於 AI 翻譯需要消耗算力，建議按需選擇：\n• 長期免費：Groq、Google (Gemini) 提供長期免費額度，若因調用過快觸發 429 速率限制（Rate Limit），稍等即可自動恢復。\n• 聚合平台：嫌多平台註冊繁瑣，可選用 OpenRouter，單個 Key 即可調用海量模型。\n• 進階付費：若需解除限頻或調用進階模型，建議前往官網按量付費 (Pay-as-you-go)，無月費與中間溢價，資料直連更安全。\n👉 點擊下方「新增自訂翻譯服務 (API Key)」，選擇模型後點擊「取得 API Key」直達官網。",
+        "gotIt": "知道了",
+        "scope": "settings"
+      }
+    ],
+    "en": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 How to get top-tier AI translation for free or at cost?",
+        "level": "info",
+        "content": "This extension is 100% free and open-source (no software fees). Since AI translation consumes computing power, choose what fits best:\n• Permanent Free Tiers: Groq and Google (Gemini) offer long-term free tiers. If you hit a 429 rate limit due to high frequency, it will automatically recover shortly.\n• Aggregator: Avoid multi-platform registration by using OpenRouter to access massive models with a single API key.\n• Pay-as-you-Go: For zero rate limits or advanced models, purchase directly via official sites (Pay-as-you-go) with no monthly fees, no markup, and direct connection for better security.\n👉 Click 'Add Custom Service (API Key)' below, select a model, and click 'Get API Key'.",
+        "gotIt": "Got it",
+        "scope": "settings"
+      }
+    ],
+    "ja": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 最高峰の AI 翻訳を無料・原価で使うには？",
+        "level": "info",
+        "content": "本拡張機能は完全無料・オープンソースです（ソフト自体の費用は一切かかりません）。AI 翻訳にはリソースが必要なため、以下からお選びください：\n• 長期無料枠：Groq と Google (Gemini) は長期無料枠を提供しています。高頻度の呼び出しにより 429 エラー（レートリミット）が発生した場合は、少し待つと自動で復旧します。\n• 集約プラットフォーム：複数サイトへの登録を避けるため、OpenRouter を使えば1つのキーで多様なモデルを利用可能です。\n• 従量課金：制限解除や高機能モデルが必要な場合は、公式サイトでの従量課金（Pay-as-you-go）をご利用ください（月額固定費・上乗せ料金なし、直接通信でより安全）。\n👉 下の「カスタム翻訳サービスを追加 (API Key)」からモデルを選択し、「API Key を取得」をクリックしてください。",
+        "gotIt": "了解",
+        "scope": "settings"
+      }
+    ],
+    "ko": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 최고급 AI 번역을 무료 또는 정가로 사용하는 방법",
+        "level": "info",
+        "content": "본 확장 프로그램은 완전 무료 및 오픈소스입니다 (소프트웨어 비용 없음). AI 번역에는 리소스가 소모되므로 다음 중 선택하세요:\n• 상시 무료 제공: Groq, Google(Gemini)은 장기 무료 티어를 제공합니다. 과도한 호출로 429 속도 제한(Rate Limit) 발생 시 잠시 후 자동으로 복구됩니다.\n• 통합 플랫폼: 다중 플랫폼 가입이 번거롭다면 OpenRouter를 통해 단일 키로 수많은 모델을 이용하세요.\n• 종량제 이용: 제한 해제나 고급 모델이 필요할 경우 공식 사이트에서 종량제(Pay-as-you-go)로 이용하세요 (월 구독료 및 마진 없음, 직접 연결되어 더 안전함).\n👉 아래 '사용자 지정 번역 서비스 추가 (API Key)'를 클릭하고 모델 선택 후 'API Key 받기'를 누르세요.",
+        "gotIt": "확인",
+        "scope": "settings"
+      }
+    ],
+    "es": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 ¿Cómo usar traducción IA de nivel superior gratis o al costo?",
+        "level": "info",
+        "content": "Esta extensión es 100% gratuita y de código abierto (sin tarifas de software). Como la traducción por IA requiere recursos, elige según tus necesidades:\n• Cuotas gratuitas permanentes: Groq y Google (Gemini) ofrecen niveles gratuitos a largo plazo. Si alcanzas el límite 429 (Rate Limit) por uso excesivo, se recuperará automáticamente en unos segundos.\n• Plataforma agregadora: Evita registros múltiples usando OpenRouter para acceder a modelos masivos con una sola clave.\n• Pago por uso: Para eliminar restricciones o usar modelos avanzados, cómpralo directamente en la web oficial (Pay-as-you-go, sin cuotas mensuales ni sobrecostes, y con conexión directa más segura).\n👉 Haz clic en 'Añadir servicio personalizado (API Key)' abajo, selecciona un modelo y pulsa 'Obtener API Key'.",
+        "gotIt": "Entendido",
+        "scope": "settings"
+      }
+    ],
+    "pt-BR": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Como usar tradução com IA de ponta de graça ou pelo preço de custo?",
+        "level": "info",
+        "content": "Esta extensão é de código aberto e 100% gratuita (sem taxas de software). Como a tradução por IA consome recursos, escolha a melhor opção:\n• Cotas gratuitas permanentes: Groq e Google (Gemini) oferecem planos gratuitos de longo prazo. Caso ocorra o limite 429 (Rate Limit) por excesso de chamadas, o serviço é retomado automaticamente após alguns segundos.\n• Plataforma agregadora: Evite cadastros múltiplos usando o OpenRouter para acessar diversos modelos com uma única chave.\n• Pague pelo uso: Para remover limites ou usar modelos avançados, adquira diretamente no site oficial (Pay-as-you-go, sem mensalidades ou sobretaxas, com conexão direta mais segura).\n👉 Clique em 'Adicionar serviço personalizado (API Key)' abaixo, escolha o modelo e clique em 'Obter API Key'.",
+        "gotIt": "Entendi",
+        "scope": "settings"
+      }
+    ],
+    "ru": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Как использовать топовый ИИ-перевод бесплатно или по себестоимости?",
+        "level": "info",
+        "content": "Это расширение абсолютно бесплатно и с открытым исходным кодом (без платы за софт). Поскольку ИИ-перевод требует ресурсов, выберите подходящий вариант:\n• Бесплатные лимиты: Groq и Google (Gemini) предоставляют долгосрочные бесплатные квоты. При превышении лимита 429 (Rate Limit) из-за частых запросов работа восстановится автоматически.\n• Платформа-агрегатор: Избегайте лишних регистраций — используйте OpenRouter для доступа к множеству моделей по одному ключу.\n• Оплата по факту: Для снятия ограничений или продвинутых моделей используйте официальную тарификацию Pay-as-you-go (без абонентской платы и наценок, с безопасным прямым подключением).\n👉 Нажмите «Добавить пользовательскую службу (API Key)» ниже, выберите модель и нажмите «Получить API Key».",
+        "gotIt": "Понятно",
+        "scope": "settings"
+      }
+    ],
+    "ar": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 كيف تستخدم ترجمة الذكاء الاصطناعي الممتازة مجانًا أو بسعر التكلفة؟",
+        "level": "info",
+        "content": "هذه الإضافة مجانية ومفتوحة المصدر بالكامل (بدون أي رسوم برمجية). ونظرًا لأن ترجمة الذكاء الاصطناعي تستهلك موارد، اختر ما يناسبك:\n• حصص مجانية دائمة: توفر Groq وGoogle (Gemini) حصص استهلاك مجانية طويلة الأجل. إذا واجهت حد التقييد 429 (Rate Limit) بسبب الاستخدام المكثف، فستعود للعمل تلقائيًا.\n• منصة التجميع: لتجنب تعدد التسجيلات، استخدم OpenRouter للوصول إلى نماذج متعددة بمفتاح واحد.\n• الدفع حسب الاستخدام: لإزالة القيود أو استخدام نماذج متقدمة، يُفضل الشراء مباشرة عبر الموقع الرسمي بنظام (Pay-as-you-go) بدون رسوم شهرية أو زيادات، وباتصال مباشر أكثر أمانًا.\n👉 اضغط على «إضافة خدمة ترجمة مخصصة (API Key)» أدناه، اختر النموذج ثم اضغط «الحصول على API Key».",
+        "gotIt": "حسنًا",
+        "scope": "settings"
+      }
+    ],
+    "tr": [
+      {
+        "id": "notice_20260817_free_ai",
+        "title": "💡 Üst düzey AI çevirisini ücretsiz veya maliyetine nasıl kullanırsınız?",
+        "level": "info",
+        "content": "Bu eklenti tamamen ücretsiz ve açık kaynaklıdır (yazılım ücreti yoktur). Yapay zeka çevirisi kaynak tüketimi gerektirdiğinden, size uygun olanı seçin:\n• Uzun Vadeli Ücretsiz Kotalar: Groq ve Google (Gemini) uzun vadeli ücretsiz kotalar sunar. Aşırı istek nedeniyle 429 oran sınırı (Rate Limit) hatası alırsanız kısa sürede otomatik düzelir.\n• Toplayıcı Platform: Çoklu kayıt zahmetinden kaçınmak için OpenRouter kullanarak tek bir anahtarla modellere erişebilirsiniz.\n• Kullandığın Kadar Öde: Sınırları kaldırmak veya gelişmiş modelleri kullanmak için resmi site üzerinden (Pay-as-you-go, aylık ücret, ek kar payı ve aracı olmadan doğrudan bağlantıyla daha güvenli) ödeme yapabilirsiniz.\n👉 Aşağıdaki 'Özel çeviri hizmeti ekle (API Key)' butonuna tıklayın, modeli seçip 'API Key al' butonuna basın.",
+        "gotIt": "Anladım",
+        "scope": "settings"
+      }
+    ]
   }
-
+}
