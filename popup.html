@@ -15,11 +15,11 @@
     }
 
     body {
-      width: 288px;
+      width: 298px;
       min-width: 250px;
       max-width: 580px;
       margin: 12px 10px 12px 10px;
-      min-height: fit-content;
+      min-height: 0;
       border-radius: 20px;
       /* padding: 3px 3px; */
       line-height: 1.1;
@@ -370,7 +370,7 @@
             line-height: 1;
           ">⌕</button>
     </div>
-    <div id="searchResultArea" style="display: none; flex: none; height: auto;max-height: 60vh; min-height: 0;
+    <div id="searchResultArea" style="display: none; flex: none; height: auto;max-height: 420px; min-height: 0;
             overflow-y: auto; background: rgba(15, 23, 42, 0.6);
             border: 1px solid #1e293b; border-radius: 8px; padding: 10px;
             padding-right: 6px;
@@ -774,6 +774,21 @@
       </svg>
       <span data-i18n="engineConfig">引擎配置</span>
     </div>
+    <div class="menu-item" id="btnGoEngineAssign" dir="auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="icon-main engine-assign-icon" style="width: 20px; height: 20px;">
+        <g class="assign-arrow assign-arrow-top">
+          <polyline points="16 3 21 3 21 8"></polyline>
+          <line x1="4" y1="20" x2="21" y2="3"></line>
+        </g>
+        <g class="assign-arrow assign-arrow-bottom">
+          <polyline points="21 16 21 21 16 21"></polyline>
+          <line x1="4" y1="4" x2="9" y2="9"></line>
+        </g>
+
+      </svg>
+      <span data-i18n="engineAssign">引擎分配</span>
+    </div>
     <div class="menu-item" id="openSyncPanel" dir="auto">
       <svg class="cloud-icon" viewBox="0 0 24 24">
         <path class="icon-main cloud-a" opacity="0.6"
@@ -786,23 +801,38 @@
     </div>
     <div class="menu-item" id="openShortcutSettings" dir="auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
+        stroke-linejoin="round" class="icon-main shortcut-icon" style="width: 20px; height: 20px;">
+
         <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-        <line x1="6" y1="10" x2="6" y2="10"></line>
-        <line x1="10" y1="10" x2="10" y2="10"></line>
-        <line x1="14" y1="10" x2="14" y2="10"></line>
-        <line x1="18" y1="10" x2="18" y2="10"></line>
-        <line x1="6" y1="14" x2="18" y2="14"></line>
+
+        <g class="keyboard-keys">
+          <line x1="6" y1="10" x2="6" y2="10"></line>
+          <line x1="10" y1="10" x2="10" y2="10"></line>
+          <line x1="14" y1="10" x2="14" y2="10"></line>
+          <line x1="18" y1="10" x2="18" y2="10"></line>
+          <line x1="6" y1="14" x2="18" y2="14"></line>
+        </g>
+
       </svg>
+
       <span data-i18n="shortcutSettings">快捷键设置</span>
     </div>
     <div class="menu-item" id="btnGoQuickInputTrans" dir="auto">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
-        <path d="M4 4h16v12H7l-3 3V4z"></path>
-        <line x1="8" y1="9" x2="16" y2="9"></line>
-        <line x1="8" y1="13" x2="12" y2="13"></line>
+        stroke-linejoin="round" class="icon-main quick-trans-icon" style="width: 20px; height: 20px;">
+
+        <path d="M3 5h18v11H7l-4 3V5z"></path>
+
+        <line x1="7" y1="9" x2="12" y2="9"></line>
+        <line x1="7" y1="12" x2="10" y2="12"></line>
+
+        <g class="quick-trans-arrow">
+          <line x1="12" y1="15" x2="19" y2="15"></line>
+          <polyline points="16 12 19 15 16 18"></polyline>
+        </g>
+
       </svg>
+
       <span data-i18n="quickInputTrans">输入框快捷翻译</span>
     </div>
   </div>
@@ -1040,39 +1070,82 @@
     </div>
   </div>
   <!-- 风格设置panel结束 -->
-   <!-- 输入框快捷翻译 panel 开始 -->
-<div id="quickInputTransPanel"
-  style="width: 100%; border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
-  <div
-    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
-    <span id="closeQuickInputTransPanel" class="close-btn-common">➥</span>
-    <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">QUICK INPUT
-      TRANSLATE</span>
-  </div>
+  <!-- 输入框快捷翻译 panel 开始 -->
+  <div id="quickInputTransPanel"
+    style="width: 100%; border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
+      <span id="closeQuickInputTransPanel" class="close-btn-common">➥</span>
+      <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">QUICK INPUT
+        TRANSLATE</span>
+    </div>
 
-  <div class="row"
-    style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 15px; border-bottom: 1px solid #334155;"
-    dir="auto">
-    <label data-i18n="quickInputTransEnable" style="font-size: 12px; color: #f1f5f9;">启用（在任意输入框连按 3
-      次空格触发）</label>
-    <div id="switch-quickInputTrans" class="switch" style="transform: scale(0.8);">
-      <div class="dot"></div>
+    <div class="row"
+      style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; margin-bottom: 15px; border-bottom: 1px solid #334155;"
+      dir="auto">
+      <label data-i18n="quickInputTransEnable" style="font-size: 12px; color: #f1f5f9;">启用（在任意输入框连按 3
+        次空格触发）</label>
+      <div id="switch-quickInputTrans" class="switch" style="transform: scale(0.8);">
+        <div class="dot"></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 12px;" dir="auto">
+      <label data-i18n="quickInputTransSource"
+        style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">源语言（默认自动检测）</label>
+      <select id="quickInputTransSourceLang" class="select"></select>
+    </div>
+
+    <div style="margin-bottom: 12px;" dir="auto">
+      <label data-i18n="quickInputTransTarget"
+        style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">目标语言</label>
+      <select id="quickInputTransTargetLang" class="select"></select>
     </div>
   </div>
+  <!-- 输入框快捷翻译 panel 结束 -->
+  <!-- 引擎分配 panel 开始 -->
+  <div id="engineAssignPanel"
+    style="width: 100%; border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
+      <span id="closeEngineAssignPanel" class="close-btn-common">➥</span>
+      <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">ENGINE
+        ASSIGN</span>
+    </div>
 
-  <div style="margin-bottom: 12px;" dir="auto">
-    <label data-i18n="quickInputTransSource"
-      style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">源语言（默认自动检测）</label>
-    <select id="quickInputTransSourceLang" class="select"></select>
-  </div>
+    <div style="padding-bottom: 12px; margin-bottom: 15px; border-bottom: 1px solid #334155;" dir="auto">
+      <label data-i18n="engineAssignGlobalHint"
+        style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">全局默认引擎（在主页面切换）</label>
+      <div id="engineAssignGlobalLabel" style="font-size: 12px; color: #00e5ff; font-weight: 600;">Google
+        Translate</div>
+    </div>
 
-  <div style="margin-bottom: 12px;" dir="auto">
-    <label data-i18n="quickInputTransTarget"
-      style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 5px;">目标语言</label>
-    <select id="quickInputTransTargetLang" class="select"></select>
+    <div class="row engineAssignRow" dir="auto">
+      <label data-i18n="engineAssignWebpage" class="engineAssignLabel">网页翻译</label>
+      <select id="engineAssign_webpage" class="select"></select>
+    </div>
+
+    <div class="row engineAssignRow" dir="auto">
+      <label data-i18n="engineAssignSelection" class="engineAssignLabel">划词/悬浮翻译</label>
+      <select id="engineAssign_selection" class="select"></select>
+    </div>
+
+    <div class="row engineAssignRow" dir="auto">
+      <label data-i18n="engineAssignInstant" class="engineAssignLabel">即时翻译</label>
+      <select id="engineAssign_instant" class="select"></select>
+    </div>
+
+    <div class="row engineAssignRow" dir="auto">
+      <label data-i18n="engineAssignQuickInput" class="engineAssignLabel">输入框翻译</label>
+      <select id="engineAssign_quickInput" class="select"></select>
+    </div>
+
+    <div class="row engineAssignRow" dir="auto">
+      <label data-i18n="engineAssignSubtitle" class="engineAssignLabel">YouTube 字幕翻译</label>
+      <select id="engineAssign_subtitle" class="select"></select>
+    </div>
   </div>
-</div>
-<!-- 输入框快捷翻译 panel 结束 -->
+  <!-- 引擎分配 panel 结束 -->
   <div dir="auto" id="toast" class="toast-hidden"></div>
   <script src="utils.js"></script>
   <script src="notice.js"></script>

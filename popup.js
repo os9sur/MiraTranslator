@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       'settingsPanel',
       'styleSettingsPanel',
       'quickInputTransPanel',
+      'engineAssignPanel',
       'advancedMenu'
     ];
     allPanels.forEach(id => {
@@ -69,7 +70,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const allPanels = [
       'syncSettingsPanel',
       'settingsPanel',
-      'quickInputTransPanel', 
+      'quickInputTransPanel',
+      'engineAssignPanel',
       'advancedMenu'
     ];
     allPanels.forEach(id => {
@@ -1398,60 +1400,153 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
-document.getElementById('btnGoQuickInputTrans').addEventListener('click', () => {
-  showPanel('quickInputTransPanel');
-  initQuickInputTransPanel();
-});
+  document.getElementById('btnGoQuickInputTrans').addEventListener('click', () => {
+    showPanel('quickInputTransPanel');
+    initQuickInputTransPanel();
+  });
 
-document.getElementById('closeQuickInputTransPanel').addEventListener('click', () => {
-  showMain();
-});
- 
-// 目标语言下拉框：正常语言列表，不含"自动检测"
-populateSelect(document.getElementById('quickInputTransTargetLang'), {
-  selected: getBrowserLang() || 'en',
-});
+  document.getElementById('closeQuickInputTransPanel').addEventListener('click', () => {
+    showMain();
+  });
 
-// 源语言下拉框：包含"自动检测"选项，默认选中它
-populateSelect(document.getElementById('quickInputTransSourceLang'), {
-  includeAuto: true,
-  selected: 'auto',
-});
+  // 目标语言下拉框：正常语言列表，不含"自动检测"
+  populateSelect(document.getElementById('quickInputTransTargetLang'), {
+    selected: getBrowserLang() || 'en',
+  });
 
-async function initQuickInputTransPanel() {
-  const r = await safeGetStorage([
-    'miraQuickTransEnabled',
-    'miraQuickTransSourceLang',
-    'miraQuickTransTargetLang',
-  ]);
-  const enabled = r?.miraQuickTransEnabled ?? true; // 默认开启输入框翻译
-  const switchEl = document.getElementById('switch-quickInputTrans');
-  switchEl.classList.toggle('on', enabled);
+  // 源语言下拉框：包含"自动检测"选项，默认选中它
+  populateSelect(document.getElementById('quickInputTransSourceLang'), {
+    includeAuto: true,
+    selected: 'auto',
+  });
 
-  document.getElementById('quickInputTransSourceLang').value =
-    r?.miraQuickTransSourceLang || 'auto';
-  document.getElementById('quickInputTransTargetLang').value =
-    r?.miraQuickTransTargetLang || getBrowserLang() || 'en';
-}
+  async function initQuickInputTransPanel() {
+    const r = await safeGetStorage([
+      'miraQuickTransEnabled',
+      'miraQuickTransSourceLang',
+      'miraQuickTransTargetLang',
+    ]);
+    const enabled = r?.miraQuickTransEnabled ?? false; // 默认开启输入框翻译
+    const switchEl = document.getElementById('switch-quickInputTrans');
+    switchEl.classList.toggle('on', enabled);
 
-document.getElementById('switch-quickInputTrans').addEventListener('click', async function () {
-  const nowEnabled = !this.classList.contains('on');
-  this.classList.toggle('on', nowEnabled);
-  await safeSetStorage({ miraQuickTransEnabled: nowEnabled });
-});
+    document.getElementById('quickInputTransSourceLang').value =
+      r?.miraQuickTransSourceLang || 'auto';
+    document.getElementById('quickInputTransTargetLang').value =
+      r?.miraQuickTransTargetLang || getBrowserLang() || 'en';
+  }
+  //storage key 命名为 miraEngineOverride_<feature>，值是配置的 id（比如 google_builtin 或自定义 AI 配置的 id），空字符串 '' 表示"跟随全局"。
+  document.getElementById('btnGoEngineAssign').addEventListener('click', () => {
+    showPanel('engineAssignPanel');
+    initEngineAssignPanel();
+  });
 
-document.getElementById('quickInputTransSourceLang').addEventListener('change', async (e) => {
-  await safeSetStorage({ miraQuickTransSourceLang: e.target.value });
-});
+  document.getElementById('closeEngineAssignPanel').addEventListener('click', () => {
+    showMain();
+  });
 
-document.getElementById('quickInputTransTargetLang').addEventListener('change', async (e) => {
-  await safeSetStorage({ miraQuickTransTargetLang: e.target.value });
-});
+  //枚举, 分功能指定翻译引擎
+  const MIRA_ENGINE_ASSIGN_FEATURES = ['webpage', 'selection', 'instant', 'quickInput', 'subtitle'];
+
+  // 填充单个功能的引擎下拉框：第一项固定"跟随全局"，其余为已配置的引擎列表
+  function populateEngineAssignSelect(selectEl, selectedId) {
+    const currentUiLang = window.currentConfig.ui_language;
+    selectEl.innerHTML = '';
+
+    const followOpt = document.createElement('option');
+    followOpt.value = '';
+    followOpt.dataset.i18n = 'followGlobal';
+    followOpt.textContent = t('followGlobal', currentUiLang) || 'Follow Global Default';
+    selectEl.appendChild(followOpt);
+
+    (window._popupUserConfigs || []).forEach((cfg) => {
+      const opt = document.createElement('option');
+      opt.value = cfg.id;
+      opt.textContent = cfg.alias || cfg.engine;
+      selectEl.appendChild(opt);
+    });
+
+    selectEl.value = selectedId || '';
+  }
+
+  async function initEngineAssignPanel() {
+    // 复用主弹窗已经初始化好的引擎列表；如果面板先于主逻辑打开则兜底初始化一次
+    if (!window._popupUserConfigs) {
+      await initPopupEngineSelector();
+    }
+
+    const globalCfg = (window._popupUserConfigs || []).find(
+      (c) => c.id === window._popupCurrentEngineId
+    );
+    document.getElementById('engineAssignGlobalLabel').textContent =
+      globalCfg ? getShortAliasPopup(globalCfg) : '-';
+
+    const overrideKeys = MIRA_ENGINE_ASSIGN_FEATURES.map((f) => `miraEngineOverride_${f}`);
+    const r = await safeGetStorage(overrideKeys);
+
+    MIRA_ENGINE_ASSIGN_FEATURES.forEach((feature) => {
+      const selectEl = document.getElementById(`engineAssign_${feature}`);
+      populateEngineAssignSelect(selectEl, r?.[`miraEngineOverride_${feature}`]);
+    });
+  }
+
+  MIRA_ENGINE_ASSIGN_FEATURES.forEach((feature) => {
+    document.getElementById(`engineAssign_${feature}`).addEventListener('change', async (e) => {
+      await safeSetStorage({ [`miraEngineOverride_${feature}`]: e.target.value });
+    });
+  });
+  document.getElementById('switch-quickInputTrans').addEventListener('click', async function () {
+    const nowEnabled = !this.classList.contains('on');
+    this.classList.toggle('on', nowEnabled);
+    await safeSetStorage({ miraQuickTransEnabled: nowEnabled });
+  });
+
+  document.getElementById('quickInputTransSourceLang').addEventListener('change', async (e) => {
+    await safeSetStorage({ miraQuickTransSourceLang: e.target.value });
+  });
+
+  document.getElementById('quickInputTransTargetLang').addEventListener('change', async (e) => {
+    await safeSetStorage({ miraQuickTransTargetLang: e.target.value });
+  });
+  function resizePopupForAdvancedMenu() {
+    requestAnimationFrame(() => {
+      const menu = document.getElementById('advancedMenu');
+      if (!menu || menu.style.display === 'none') return;
+
+      const menuRect = menu.getBoundingClientRect();
+      const bodyRect = document.body.getBoundingClientRect();
+
+      const requiredHeight = Math.ceil(
+        menuRect.bottom - bodyRect.top + 12
+      );
+
+      document.body.style.height = `${requiredHeight}px`;
+    });
+  }
+
+  function resetPopupHeight() {
+    document.body.style.height = '';
+  }
+
+  function closeAdvancedMenu() {
+    if (advMenu.style.display === 'block') {
+      advMenu.style.display = 'none';
+      resetPopupHeight();
+    }
+  }
   gearBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
+
     document.getElementById('p-engine-dropdown-popup')?.remove();
+
     const isVisible = advMenu.style.display === 'block';
-    advMenu.style.display = isVisible ? 'none' : 'block';
+
+    if (isVisible) {
+      closeAdvancedMenu();
+    } else {
+      advMenu.style.display = 'block';
+      resizePopupForAdvancedMenu();
+    }
 
     const { hasVisitedSettings } = await safeGetStorage('hasVisitedSettings');
     const isFirstTime = !hasVisitedSettings;
@@ -1463,8 +1558,19 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
     }
 
     const engineMenuItem = document.getElementById('btnGoEngine');
+
     if (!isVisible && isFirstTime) {
       engineMenuItem.classList.add('menu-item-pulse-strong');
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (!advMenu || advMenu.style.display !== 'block') return;
+
+    if (
+      !advMenu.contains(e.target) &&
+      !gearBtn.contains(e.target)
+    ) {
+      closeAdvancedMenu();
     }
   });
   // 切换UI语言
@@ -1923,14 +2029,14 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
           if (response.source) {
             const sourceWrapper = document.createElement('span');
             sourceWrapper.style.cssText = `
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 220px;
-        display: inline-flex;
-        align-items: center;
-        gap: 2px;
-      `;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 220px;
+            display: inline-block;
+            vertical-align: middle;
+          `;
+            sourceWrapper.title = `Source: ${response.source}`; // 完整来源信息，桌面端 hover 可见
 
             const label = document.createTextNode('Source: ');
             sourceWrapper.appendChild(label);
@@ -1942,16 +2048,20 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
               a.rel = 'noopener noreferrer';
               a.textContent = response.source;
               a.style.cssText = `
-          color: #38bdf8;
-          text-decoration: none;
-          font-weight: 500;
-          font-size: 10px;
-          font-style: italic;
-          border-radius: 4px;
-          background: rgba(56,189,248,0.08);
-          transition: all 0.2s ease;
-          margin-left: 4px;
-        `;
+              color: #38bdf8;
+              text-decoration: none;
+              font-weight: 500;
+              font-size: 10px;
+              font-style: italic;
+              border-radius: 4px;
+              background: rgba(56,189,248,0.08);
+              transition: all 0.2s ease;
+              margin-left: 4px;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              min-width: 0;
+            `;
               a.addEventListener('mouseover', () => {
                 a.style.background = 'rgba(56,189,248,0.2)';
                 a.style.color = '#7dd3fc';
@@ -2045,8 +2155,9 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
 
     if (typeof notebookBtn !== 'undefined') notebookBtn.style.display = 'none';
     let ui_lang = 'en';
+    let slowTimer;
     try {
-      const res = await safeGetStorage(['ui_language', 'activeConfig']);
+      const res = await safeGetStorage(['ui_language', 'activeConfig', 'miraEngineOverride_instant', 'userConfigs']);
       if (!res) return;
 
       ui_lang = res.ui_language || getBrowserLang() || 'en'
@@ -2060,11 +2171,28 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
       const baseA = langA.split('-')[0].toLowerCase();
       const baseB = langB.split('-')[0].toLowerCase();
 
-      let engine = res.activeConfig?.engine || _defaultEngine;
+      const instantOverrideCfg = res.miraEngineOverride_instant
+        ? [...MIRA_BUILTIN_ENGINES, ...(res.userConfigs || [])].find(
+          (c) => c.id === res.miraEngineOverride_instant
+        )
+        : null;
+
+      let effectiveConfig = res.activeConfig || { engine: _defaultEngine, data: {} };
+      if (instantOverrideCfg) {
+        const overrideData =
+          (await safeGetStorage(`data_${instantOverrideCfg.id}`))?.[`data_${instantOverrideCfg.id}`] || {};
+        effectiveConfig = {
+          id: instantOverrideCfg.id,
+          engine: instantOverrideCfg.engine,
+          alias: instantOverrideCfg.alias,
+          data: overrideData,
+        };
+      }
+      let engine = effectiveConfig.engine || _defaultEngine;
 
       if (window.currentConfig) {
         window.currentConfig.selectedEngine = engine;
-        window.currentConfig.activeConfig = res.activeConfig || { engine: _defaultEngine, data: {} };
+        window.currentConfig.activeConfig = effectiveConfig;
       }
       if (typeof currentEngine !== 'undefined') currentEngine = engine;
 
@@ -2111,7 +2239,7 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
       logger.log(`[Mira-LOG] 翻译请求: text="${text}", inputLang="${inputLang}", langA="${langA}", langB="${langB}", targetL="${targetL}", engine="${engine}"`);
       const TIMEOUT_MS = 8000;
       let timeoutTriggered = false;
-      const slowTimer = setTimeout(() => {
+      slowTimer = setTimeout(() => {
         timeoutTriggered = true;
         if (!resContent) return;
         resContent.innerHTML = `
@@ -2138,10 +2266,16 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
         }
       }, TIMEOUT_MS);
 
+      const usedConfig =
+        instantOverrideCfg ||
+        (res.userConfigs || []).find((c) => c.id === res.activeConfig?.id) ||
+        null;
+
       // 先注册 listener，再发请求
       window._detailUpdateListener = (msg) => {
         if (msg.action === 'TRANSLATE_DETAIL_UPDATE' && !msg.result?.isPartial) {
           clearTimeout(slowTimer);
+          applyMiraAliasToSource(msg.result, usedConfig);
           renderTranslationResult(msg.result, text, ui_lang, langA, langB);
           chrome.runtime.onMessage.removeListener(window._detailUpdateListener);
           window._detailUpdateListener = null;
@@ -2154,8 +2288,12 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
         hintInputLang: resolvedLang,
         hintLangA: langA,
         hintLangB: langB,
-        fromPopup: false
+        fromPopup: false,
+        translateMode: 'dictionary',
+        engineOverride: instantOverrideCfg ? effectiveConfig : null,
       });
+
+      applyMiraAliasToSource(response, usedConfig);
 
       clearTimeout(slowTimer);
       if (response) renderTranslationResult(response, text, ui_lang, langA, langB);
@@ -3133,7 +3271,7 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
     const manageItem = document.createElement('div');
     manageItem.style.cssText = `
       display:flex; align-items:center; gap:8px;
-      padding:6px 10px; border-radius:7px; cursor:pointer;
+      padding:6px 12px; border-radius:7px; cursor:pointer;
       color:${colors.accent}; font-weight:600;
       transition:background 0.15s;
     `;
@@ -3251,6 +3389,7 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
     }, 0);
   }
 
+
   async function switchPopupEngine(cfg) {
     const instanceData =
       (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
@@ -3269,6 +3408,29 @@ document.getElementById('quickInputTransTargetLang').addEventListener('change', 
 
     window._popupCurrentEngineId = cfg.id;
     updatePopupEngineLabel();
+
+    // 全局引擎已切换，列出哪些功能使用独立设置、不受影响
+    const featureLabelKeys = {
+      webpage: 'engineAssignWebpage',
+      selection: 'engineAssignSelection',
+      instant: 'engineAssignInstant',
+      quickInput: 'engineAssignQuickInput',
+      subtitle: 'engineAssignSubtitle',
+    };
+    const overrideKeys = MIRA_ENGINE_ASSIGN_FEATURES.map((f) => `miraEngineOverride_${f}`);
+    const overrides = await safeGetStorage(overrideKeys);
+    const overriddenFeatures = MIRA_ENGINE_ASSIGN_FEATURES.filter(
+      (f) => overrides?.[`miraEngineOverride_${f}`]
+    );
+
+    if (overriddenFeatures.length > 0) {
+      const names = overriddenFeatures
+        .map((f) => t(featureLabelKeys[f]) || f)
+        .join(' / ');
+      const msg = (t('engineSwitchedWithOverrides') || '已切换全局引擎（{names} 使用独立设置，不受影响）')
+        .replace('{names}', names);
+      showToast(msg, 'info');
+    }
   }
   initUILanguage();
   refreshUI();

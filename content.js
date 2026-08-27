@@ -49,12 +49,18 @@ loadTargetLanguage().then(async () => {
 
   await _defaultEngineReady;
 
-  let res = await safeGetStorage(["activeConfig", "targetLanguage"]);
+  let res = await safeGetStorage([
+    "activeConfig",
+    "targetLanguage",
+    "miraEngineOverride_subtitle",
+    "userConfigs",
+  ]);
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
     window.currentConfig.activeConfig = finalCfg;
     window.currentConfig.selectedEngine = finalCfg.engine;
     res = {
+      ...res,
       activeConfig: finalCfg,
       targetLanguage: window.currentTargetL,
     };
@@ -124,17 +130,47 @@ function getCommentFallbackSelectors(domain) {
 }
 if (typeof fastMemoryCache === "undefined") var fastMemoryCache = new Map();
 if (typeof pendingRequests === "undefined") var pendingRequests = new Set();
+
+
 window.currentConfig = {
   targetLanguage: (getBrowserLang() || "en").replace("_", "-"),
   selectedEngine: getRuntimeDefaultEngine(),
   activeConfig: { engine: getRuntimeDefaultEngine(), data: {} },
+  subtitleOverrideConfig: null, // 字幕翻译专属覆写，null 表示跟随全局 activeConfig
 };
+
+
+// 把 miraEngineOverride_subtitle 存的 config id 解析成完整的 {id, engine, data}
+async function resolveMiraSubtitleOverride(overrideId, userConfigs) {
+  if (!overrideId) return null;
+  const allConfigs = [...MIRA_BUILTIN_ENGINES, ...(userConfigs || [])];
+  const cfg = allConfigs.find((c) => c.id === overrideId);
+  if (!cfg) return null; // 覆写指向的配置已被删除，跟随全局
+  const instanceData = (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
+  return { id: cfg.id, engine: cfg.engine, data: instanceData };
+}
 async function syncLocalState(storageData) {
   if (storageData.targetLanguage) {
     const lang = storageData.targetLanguage.replace("_", "-");
     window.currentTargetL = lang;
     window.currentConfig.targetLanguage = lang;
     applyI18n(lang);
+  }
+
+  // 字幕翻译覆写：只要覆写 id 或 userConfigs 列表变了就重新解析
+  if ("miraEngineOverride_subtitle" in storageData || "userConfigs" in storageData) {
+    const overrideId =
+      "miraEngineOverride_subtitle" in storageData
+        ? storageData.miraEngineOverride_subtitle
+        : (await safeGetStorage("miraEngineOverride_subtitle"))?.miraEngineOverride_subtitle;
+    const userConfigs =
+      "userConfigs" in storageData
+        ? storageData.userConfigs
+        : (await safeGetStorage("userConfigs"))?.userConfigs;
+    window.currentConfig.subtitleOverrideConfig = await resolveMiraSubtitleOverride(
+      overrideId,
+      userConfigs,
+    );
   }
 
   if (storageData.activeConfig) {
@@ -155,7 +191,12 @@ async function syncLocalState(storageData) {
   if (typeof checkEngineStatus === "function") checkEngineStatus();
 }
 (async () => {
-  const data = await safeGetStorage(["targetLanguage", "activeConfig"]);
+  const data = await safeGetStorage([
+    "targetLanguage",
+    "activeConfig",
+    "miraEngineOverride_subtitle",
+    "userConfigs",
+  ]);
   if (!data) return;
   syncLocalState(data);
 })();
@@ -164,6 +205,9 @@ chrome.storage.onChanged.addListener((changes) => {
   if (changes.targetLanguage)
     update.targetLanguage = changes.targetLanguage.newValue;
   if (changes.activeConfig) update.activeConfig = changes.activeConfig.newValue;
+  if (changes.miraEngineOverride_subtitle)
+    update.miraEngineOverride_subtitle = changes.miraEngineOverride_subtitle.newValue;
+  if (changes.userConfigs) update.userConfigs = changes.userConfigs.newValue;
   if (Object.keys(update).length > 0) syncLocalState(update);
 });
 function hidePopup() {
@@ -1102,6 +1146,18 @@ document.addEventListener("MIRA_INTERNAL_RESCAN", (e) => {
 //输入框连续空格翻译
 const __miraQuickTransState = new WeakMap();
 const MIRA_SPACE_WINDOW_MS = 600;
+let __miraIsComposing = false;
+document.addEventListener("compositionstart", () => { __miraIsComposing = true; }, true);
+document.addEventListener("compositionend", (e) => {
+  __miraIsComposing = false;
+  // 组合结束后，说明有一次真正的文字输入落地，清零计数，避免和之后的空格误连
+  const el = e.target;
+  const state = __miraQuickTransState.get(el);
+  if (state) {
+    state.count = 0;
+    __miraQuickTransState.set(el, state);
+  }
+}, true);
 
 async function getMiraSecondaryLang(targetLang) {
   const storage = await safeGetStorage(['miraQuickTransSecondaryLang']);
@@ -1131,8 +1187,10 @@ document.addEventListener(
   "keydown",
   (e) => {
     const el = e.target;
-    logger.log("[Mira-Debug] keydown", e.key, el.tagName, isMiraTranslatableInput(el));
     if (!isMiraTranslatableInput(el)) return;
+
+    // 输入法组字过程中（包括用空格选字），完全跳过，不计数也不触发
+    if (__miraIsComposing || e.key === "Process" || e.isComposing) return;
 
     if (e.key === " " || e.code === "Space") {
       const now = Date.now();
@@ -1141,13 +1199,11 @@ document.addEventListener(
       state.count += 1;
       state.lastTime = now;
       __miraQuickTransState.set(el, state);
-      logger.log("[Mira-Debug] space count:", state.count);
 
       if (state.count >= 3) {
         state.count = 0;
         __miraQuickTransState.set(el, state);
         e.preventDefault();
-        logger.log("[Mira-Debug] 触发翻译");
         handleMiraQuickTranslate(el);
       }
     } else {
@@ -1188,6 +1244,10 @@ async function setMiraInputText(el, newText) {
   const waitFrame = () => new Promise((r) => requestAnimationFrame(r));
 
   el.focus();
+
+  // Todo...
+  //这是过时写法,已被标记 deprecated，但目前是兼容 Lexical 等富文本编辑器
+  // 最可靠的方式（Selection API 对这类编辑器内部状态同步不可靠），以后再研究...
   document.execCommand("selectAll", false, null);
   await waitFrame(); // 等 selectionchange 派发，让 Lexical 同步到"全选"状态
   document.execCommand("delete", false, null);
@@ -1216,10 +1276,10 @@ async function setMiraInputText(el, newText) {
   el.textContent = newText;
   el.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }));
 }
-function showMiraQuickTranslateLoading(el) {
+function showMiraQuickTranslateLoading(el, engineAlias = null) {
   const rect = el.getBoundingClientRect();
   const badge = document.createElement('div');
-  badge.textContent = t('loading');
+  badge.textContent = engineAlias ? `${t('loading')} (${engineAlias})` : t('loading');
   badge.style.cssText = `
     position: fixed;
     left: ${rect.right}px;
@@ -1260,14 +1320,16 @@ async function handleMiraQuickTranslate(el) {
     return;
   }
 
+  const quickInputOverride = await getMiraEngineOverride('quickInput');
+  const engineAliasForLoading = quickInputOverride?.alias || (await getMiraCurrentGlobalAlias());
   el.dataset.miraQuickTranslating = "true";
-  const hideLoading = showMiraQuickTranslateLoading(el);
+  const hideLoading = showMiraQuickTranslateLoading(el, engineAliasForLoading);
   try {
     const res = await getDetailedTranslation(
       text,
       false,
       destLang,
-      { skipCache: false, lightweight: true },
+      { skipCache: false, lightweight: true, engineOverride: quickInputOverride },
       hintSourceLang,
     );
     logger.log("[Mira-Debug] 翻译结果:", res);
@@ -1281,8 +1343,26 @@ async function handleMiraQuickTranslate(el) {
   }
 }
 
-//输入框翻译逻辑结束
+// 获取某个功能实际生效的引擎配置：优先用该功能的覆写，没有则跟随全局 activeConfig
+async function getMiraEngineConfigFor(feature) {
+  const overrideKey = `miraEngineOverride_${feature}`;
+  const r = await safeGetStorage([overrideKey, 'activeConfig', 'userConfigs']);
+  const overrideId = r?.[overrideKey];
 
+  if (!overrideId) {
+    return r?.activeConfig || null; // 没有覆写，跟随全局
+  }
+
+  const allConfigs = [...MIRA_BUILTIN_ENGINES, ...(r?.userConfigs || [])];
+  const cfg = allConfigs.find((c) => c.id === overrideId);
+  if (!cfg) {
+    // 覆写指向的配置已被删除/失效，兜底跟随全局，避免功能直接报错
+    return r?.activeConfig || null;
+  }
+
+  const instanceData = (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
+  return { id: cfg.id, engine: cfg.engine, data: instanceData };
+}
 
 (async () => {
   const data = await safeGetStorage([
@@ -1465,6 +1545,7 @@ function shrinkHeadingIfOverflow(container, el) {
   );
 
 }
+
 const TranslationBatcher = {
   queue: [],
   timer: null,
@@ -1594,9 +1675,13 @@ const TranslationBatcher = {
       this.isProcessing = false;
       return;
     }
+    const webpageOverrideCfg = await getMiraEngineOverride('webpage');
+    const effectiveWebpageCfg = webpageOverrideCfg || storage.activeConfig;
+
     const engine = (
-      storage.activeConfig?.engine || getRuntimeDefaultEngine()
+      effectiveWebpageCfg?.engine || getRuntimeDefaultEngine()
     ).toLowerCase();
+    const engineId = effectiveWebpageCfg?.id || null;
     const lang = (storage.targetLanguage || getBrowserLang() || "en")
       .replace("_", "-")
       .toLowerCase();
@@ -1631,7 +1716,7 @@ const TranslationBatcher = {
       const alreadyCached = [];
       for (const item of currentBatch) {
         const textToCache = item.textForTranslation || item.text;
-        item.singleKey = getCacheKey(textToCache, engine, lang);
+        item.singleKey = getCacheKey(textToCache, engine, lang, 'undefined', engineId);
         if (!item.forceRefresh && detectIsAlreadyTarget(item.text, lang)) {
           item.el.dataset.translated = "true";
           this.unlock(item.el);
@@ -1642,7 +1727,7 @@ const TranslationBatcher = {
           needTranslate.push(item);
           continue;
         }
-        const hit = await lookupCache(textToCache, engine, lang);
+        const hit = await lookupCache(textToCache, engine, lang, 'undefined', engineId);
         if (hit) {
           item.cachedContent = hit.result.basic;
           alreadyCached.push(item);
@@ -1725,9 +1810,10 @@ const TranslationBatcher = {
       const normalizedText = mergedText
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"');
-      const res = await getDetailedTranslation(normalizedText, true, null, {
+      const res = await getDetailedTranslation(normalizedText, true, lang, {
         skipCache: true,
         isBatch: true,
+        engineOverride: webpageOverrideCfg || null,
       });
       if (!chrome.runtime?.id) return;
       if (!res || res.isError) {
@@ -6319,11 +6405,9 @@ function initSelectionTranslate() {
       data: instanceData,
     };
 
-    // 存储操作不 await，fire-and-forget
+    // 存储操作不 await，fire-and-forget "划词翻译"专属覆写 
     safeSetStorage({
-      activeConfig,
-      lastActiveId: cfg.id,
-      selectedEngine: cfg.engine,
+      miraEngineOverride_selection: cfg.id,
     });
 
     // 立即更新 UI
@@ -6339,10 +6423,11 @@ function initSelectionTranslate() {
     const engineBtn = shadow.getElementById("p-engine-btn");
     if (engineBtn?._engineInitialized) return;  // 已初始化过，跳过
     if (engineBtn) engineBtn._engineInitialized = true;
-    // 1. 读取数据
+    // 读取数据
     const data = await safeGetStorage([
       "userConfigs",
       "activeConfig",
+      "miraEngineOverride_selection",
     ]);
     if (!data) return;
 
@@ -6365,6 +6450,7 @@ function initSelectionTranslate() {
       );
     };
     const currentId =
+      data.miraEngineOverride_selection ||
       activeConfig?.id ||
       userConfigs.find((c) => c.engine === data.selectedEngine)?.id ||
       userConfigs.find((c) => c.engine === _defaultEngine)?.id ||
@@ -6395,10 +6481,12 @@ function initSelectionTranslate() {
           "activeConfig",
           "selectedEngine",
           "_defaultEngine",
+          "miraEngineOverride_selection",
         ]);
 
         const latestConfig = latestData?.activeConfig;
         const latestId =
+          latestData?.miraEngineOverride_selection ||
           (latestData?.activeConfig?.id &&
             userConfigs.find((c) => c.id === latestData.activeConfig.id)?.id) ||
           (latestData?.selectedEngine &&
@@ -6476,6 +6564,7 @@ function initSelectionTranslate() {
     }, 1000);
   }
 
+
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
   async function renderAndShowPopup(
     text,
@@ -6493,7 +6582,9 @@ function initSelectionTranslate() {
     const wordText = text.trim();
     shadowHost.setAttribute("data-current-word", wordText);
     const engineInfo = await safeGetStorage(["activeConfig", "selectedEngine", "_defaultEngine"]);
+    const selectionOverride = await getMiraEngineOverride('selection');
     const currentEngineId =
+      selectionOverride?.engine ||
       engineInfo?.activeConfig?.engine ||
       engineInfo?.selectedEngine ||
       engineInfo?._defaultEngine ||
@@ -6726,9 +6817,12 @@ function initSelectionTranslate() {
       }
     }
     // 刷新翻译
-    function triggerRefresh() {
+    async function triggerRefresh() {
       const refreshBtn = shadow.getElementById("p-refresh");
       if (refreshBtn?.classList.contains("spinning")) return;
+
+      // 每次刷新都重新读取覆写值，确保切引擎后立即生效
+      const freshSelectionOverride = await getMiraEngineOverride('selection');
 
       if (refreshBtn) refreshBtn.classList.add("spinning");
 
@@ -6761,11 +6855,13 @@ function initSelectionTranslate() {
       // 直接用引擎全集拼出精确key去删，耗时恒定，不随缓存总量变慢  
       const safeLang = (currentTargetLang || 'zh-cn').replace('_', '-').toLowerCase();
       const ALL_ENGINES = [...AI_LLM_WHITE_LIST, ...TRADITIONAL_ENGINE_LIST];
-      // 加 modeSuffix,避免上下文/词典两种模式互相读到对方的缓存
       const modeSuffix = translateMode === "dictionary" ? "_dict" : "";
-      const keysToRemove = ALL_ENGINES.map(
-        (engine) => `tr_${engine.toLowerCase()}_${fingerprint}_${safeLang}${modeSuffix}`
-      );
+      const currentRefreshEngineId = freshSelectionOverride?.id || null;
+      const keysToRemove = ALL_ENGINES.map((engine) => {
+        const safeEngine = engine.toLowerCase();
+        const engineIdentifier = currentRefreshEngineId ? `${safeEngine}-${currentRefreshEngineId}` : safeEngine;
+        return `tr_${engineIdentifier}_${fingerprint}_${safeLang}${modeSuffix}`;
+      });
 
       Promise.all(keysToRemove.map((k) => idb.remove(k)))
         .then(() => {
@@ -6816,11 +6912,12 @@ function initSelectionTranslate() {
               translateMode,
               capturedContext: _capturedContext,
               capturedContextTranslation: _capturedContextTranslation,
+              engineOverride: freshSelectionOverride,
             },
             currentSourceLang,
           )
             .then((result) => {
-
+              applyMiraAliasToSource(result, freshSelectionOverride);
               if (basicEl) {
                 basicEl.style.color = "";
                 basicEl.style.fontStyle = "normal";
@@ -7393,6 +7490,7 @@ function initSelectionTranslate() {
         translateMode,
         capturedContext: _capturedContext,
         capturedContextTranslation: _capturedContextTranslation,
+        engineOverride: selectionOverride,
       },
       hintSourceLangNew !== "auto" ? hintSourceLangNew : null,
     )
@@ -7405,6 +7503,7 @@ function initSelectionTranslate() {
           basicEl.style.fontStyle = "normal";
         }
         if (!result) return;
+        applyMiraAliasToSource(result, selectionOverride);
         if (result?.isError) {
           if (shadowHost?._engineDotEl)
             shadowHost._engineDotEl.style.background = "#ef4444";
@@ -7565,10 +7664,10 @@ function initSelectionTranslate() {
         ${text}
       </div>
       
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+      <div style="display: flex;  align-items: center; margin-top: 4px;">
         <div id="p-phonetic" style="color:var(--p-phonetic); font-size:13px; opacity:0.6; font-family:sans-serif;  word-break:break-word;"></div>
 
-        <div style="display:flex; align-items:center; gap:6px;">
+        <div style="display:flex; align-items:center; gap:6px; margin-left: auto;">
         ${showDictToggle ? `<span id="mira-toggle-dict" class="mira-toggle-btn mira-toggle-btn--dict mira-font-family">${t("dictMode") || "Dictionary Mode"} ⇄</span>` : ""}
         <span id="mira-toggle-ja" class="mira-toggle-btn mira-toggle-btn--kana">Kana ▾</span>
       </div>
@@ -8844,6 +8943,7 @@ function initSelectionTranslate() {
 
       observer.observe(document.body, { childList: true, subtree: true });
 
+      //高亮单词,监听器
       chrome.storage.onChanged.addListener((changes) => {
         if (changes.vocabHighlight?.newValue === false) {
           observer.disconnect();
@@ -8985,16 +9085,19 @@ function initSelectionTranslate() {
           shadowHost._detailTimer = null;
           shadowHost._detailFullyRendered = true;
         }
-        const isRTL = checkRTL(window.currentTargetL);
-        fillPopupData(
-          msg.result,
-          shadow,
-          msg.originalText,
-          window.currentTargetL,
-          isRTL,
-          null,
-          shadowHost._effectiveHintLang || msg.result?.langInfo?.code || null,
-        );
+        getMiraEngineOverride('selection').then((override) => {
+          applyMiraAliasToSource(msg.result, override);
+          const isRTL = checkRTL(window.currentTargetL);
+          fillPopupData(
+            msg.result,
+            shadow,
+            msg.originalText,
+            window.currentTargetL,
+            isRTL,
+            null,
+            shadowHost._effectiveHintLang || msg.result?.langInfo?.code || null,
+          );
+        });
       }
 
       sendResponse({ status: "ok" });
@@ -9024,6 +9127,7 @@ let fullSubtitleData = [];
 let semanticGroups = [];
 lastSubIndex = -1;
 let lastDataLength = 0;
+let lastSemanticEngine = null;
 
 // ===== 字幕下载功能开始 =====
 // 全局下载锁
@@ -9066,7 +9170,7 @@ let downloadAbortController = null;
 
 async function fillMissingTranslations(
   translationMap,
-  engine,
+  activeCfg,
   lang,
   isAI,
   signal,
@@ -9095,13 +9199,15 @@ async function fillMissingTranslations(
     if (signal?.aborted) throw new Error("ABORTED");
 
     const text = semanticGroups[idx].text;
-    const key = getCacheKey(text, engine, lang);
+    const key = getCacheKey(text, activeCfg.engine, lang, undefined, activeCfg.id);
 
     let success = false;
     for (let retry = 0; retry < 5; retry++) {
       if (signal?.aborted) throw new Error("ABORTED");
       try {
-        const res = await getDetailedTranslation(text);
+        const res = await getDetailedTranslation(text, false, lang, {
+          engineOverride: activeCfg,
+        });
         if (res?.basic) {
           translationMap[idx] = res.basic;
           fastMemoryCache.set(key, { basic: res.basic });
@@ -9180,7 +9286,7 @@ function showMiraConfirm(msg) {
         font-weight: 600; transition: all 0.25s ease;
         position: relative; overflow: hidden;
         box-shadow: 0 0 0 rgba(56,189,248,0);
-      ">OK</button>
+      ">${t('confirm', window.uiLanguage) || OK} </button>
     </div>
   </div>
 `;
@@ -9263,11 +9369,15 @@ async function downloadSubtitles(withTranslation = false) {
     if (signal.aborted) throw new Error("ABORTED");
   }
 
-  const activeCfg = window.currentConfig?.activeConfig || {};
+  const activeCfg =
+    window.currentConfig?.subtitleOverrideConfig ||
+    window.currentConfig?.activeConfig ||
+    {};
   const engine =
     activeCfg.engine ||
     window.currentConfig?.selectedEngine ||
     getRuntimeDefaultEngine();
+  const engineId = activeCfg.id || null;
   const lang =
     window.currentConfig?.targetLanguage ||
     window.currentTargetL ||
@@ -9283,19 +9393,24 @@ async function downloadSubtitles(withTranslation = false) {
     const missing = [];
     let hitCount = 0;
 
+    const { userConfigs: dlUserConfigs } = (await safeGetStorage('userConfigs')) || {};
+    const aiInstances = (dlUserConfigs || []).filter((c) => AI_LLM_WHITE_LIST.includes(c.engine));
+
     semanticGroups.forEach((g, i) => {
-      const key = getCacheKey(g.text, engine, lang);
+      const key = getCacheKey(g.text, engine, lang, undefined, engineId);
       const cached = fastMemoryCache.get(key);
       if (cached?.basic) {
         translationMap[i] = cached.basic;
         hitCount++;
-      } else {
-        const fingerprint = key.substring(key.indexOf("_", 3));
-        const aiHit = AI_LLM_WHITE_LIST.find((ai) =>
-          fastMemoryCache.has(`tr_${ai}${fingerprint}`),
+      } else if (!isAI) {
+        // 非 AI 引擎，尝试借用任意已配置 AI 实例的缓存
+        const fingerprint = getContentFingerprint(g.text, lang);
+        const aiHitCfg = aiInstances.find((cfg) =>
+          fastMemoryCache.has(`tr_${cfg.engine.toLowerCase()}-${cfg.id}_${fingerprint}`),
         );
-        if (aiHit) {
-          const fallback = fastMemoryCache.get(`tr_${aiHit}${fingerprint}`);
+        if (aiHitCfg) {
+          const fallbackKey = `tr_${aiHitCfg.engine.toLowerCase()}-${aiHitCfg.id}_${fingerprint}`;
+          const fallback = fastMemoryCache.get(fallbackKey);
           if (fallback?.basic) {
             translationMap[i] = fallback.basic;
             fastMemoryCache.set(key, fallback);
@@ -9303,6 +9418,8 @@ async function downloadSubtitles(withTranslation = false) {
             return;
           }
         }
+        missing.push(i);
+      } else {
         missing.push(i);
       }
     });
@@ -9408,7 +9525,10 @@ async function downloadSubtitles(withTranslation = false) {
           .map((item) => `⟦KT_${item.absoluteIndex}⟧ ${item.text}`)
           .join("\n");
         try {
-          const res = await getDetailedTranslation(payload);
+          const res = await getDetailedTranslation(payload, false, lang, {
+            isBatch: true,
+            engineOverride: activeCfg,
+          });
           checkAborted();
           if (res?.basic) {
             const split = splitBatchTranslation(res.basic);
@@ -9452,7 +9572,7 @@ async function downloadSubtitles(withTranslation = false) {
           missing.slice(i, i + CHUNK_SIZE).map((idx) => ({
             absoluteIndex: idx,
             text: semanticGroups[idx].text,
-            key: getCacheKey(semanticGroups[idx].text, engine, lang),
+            key: getCacheKey(semanticGroups[idx].text, engine, lang, undefined, engineId),
           })),
         );
       }
@@ -9466,7 +9586,7 @@ async function downloadSubtitles(withTranslation = false) {
         }
         await fillMissingTranslations(
           translationMap,
-          engine,
+          activeCfg,
           lang,
           isAI,
           signal,
@@ -9628,7 +9748,7 @@ window.addEventListener("KT_DATA_READY", (e) => {
   });
 })();
 
-//断句
+//智能断句
 function mergeToSemantic(data, isAI = false) {
   if (!data || data.length === 0) return [];
   const groups = [];
@@ -9927,19 +10047,22 @@ async function batchPrefetch(startIndex) {
   const windowEnd = startIndex + PREFETCH_AHEAD;
   const slice = semanticGroups.slice(windowStart, windowEnd);
   if (!slice.length) return;
-  const activeCfg = window.currentConfig?.activeConfig || {};
+  const activeCfg =
+    window.currentConfig?.subtitleOverrideConfig ||
+    window.currentConfig?.activeConfig ||
+    {};
   const engine =
     activeCfg.engine ||
     window.currentConfig?.selectedEngine ||
     getRuntimeDefaultEngine();
+  const currentEngineId = activeCfg.id || null;
   let lang = getCurrentLang();
   lang = lang.replace("_", "-").toLowerCase();
-  const isTraditional = !AI_LLM_WHITE_LIST.includes(engine);
   const itemsToTranslate = [];
   for (let i = 0; i < slice.length; i++) {
     const group = slice[i];
     const absoluteIndex = windowStart + i;
-    const fullKey = getCacheKey(group.text, engine, lang);
+    const fullKey = getCacheKey(group.text, engine, lang, 'undefined', currentEngineId);
     if (fastMemoryCache.has(fullKey) || pendingRequests.has(fullKey)) continue;
     itemsToTranslate.push({
       absoluteIndex,
@@ -9959,7 +10082,8 @@ async function batchPrefetch(startIndex) {
       .map((item) => `⟦KT_${item.absoluteIndex}⟧ ${item.text}`)
       .join("\n");
     try {
-      const res = await getDetailedTranslation(textPayload);
+      const subtitleOverride = window.currentConfig?.subtitleOverrideConfig || null;
+      const res = await getDetailedTranslation(textPayload, false, null, { engineOverride: subtitleOverride });
       if (res?.basic) {
         const split = splitBatchTranslation(res.basic);
         chunk.forEach((item) => {
@@ -10040,6 +10164,16 @@ function applyAdaptiveFontSize(box, text) {
 }
 
 function syncSubtitleDisplay() {
+  const activeCfg =
+    window.currentConfig?.subtitleOverrideConfig ||
+    window.currentConfig?.activeConfig ||
+    {};
+
+  const currentEngine =
+    activeCfg.engine ||
+    window.currentConfig?.selectedEngine ||
+    getRuntimeDefaultEngine();
+
   const video = document.querySelector("video");
   const player = (document.querySelector(".html5-video-player") || document.querySelector("#player") || document.querySelector("ytm-app") || document.querySelector("video")?.parentElement);
   const box = document.getElementById("kt-yt-box");
@@ -10081,11 +10215,22 @@ function syncSubtitleDisplay() {
     }
     if (!shouldBeEnabled) return;
   }
+  //解决播放途中,切换引擎问题
   if (Array.isArray(fullSubtitleData) && fullSubtitleData.length > 0) {
-    const lenDiff = Math.abs(fullSubtitleData.length - lastDataLength);
-    if (lenDiff > 0) {
-      semanticGroups = mergeToSemantic(fullSubtitleData);
+    const lenDiff = Math.abs(
+      fullSubtitleData.length - lastDataLength
+    );
+
+    const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
+
+    if (lenDiff > 0 || currentEngine !== lastSemanticEngine) {
+      semanticGroups = mergeToSemantic(
+        fullSubtitleData,
+        isAI
+      );
+
       lastDataLength = fullSubtitleData.length;
+      lastSemanticEngine = currentEngine;
     }
   }
   if (!video || !semanticGroups || semanticGroups.length === 0) {
@@ -10116,13 +10261,11 @@ function syncSubtitleDisplay() {
     const group = semanticGroups[currentIndex];
     const tEl = document.getElementById("yt-t");
     const oEl = document.getElementById("yt-o");
-    const activeCfg = window.currentConfig?.activeConfig || {};
-    const currentEngine =
-      activeCfg.engine ||
-      window.currentConfig?.selectedEngine ||
-      getRuntimeDefaultEngine();
+    const currentEngineId = activeCfg.id || null;
+
+    //logger.log(' currentEngine ', currentEngine);
     const currentTargetL = getCurrentLang();
-    const cacheKey = getCacheKey(group.text, currentEngine, currentTargetL);
+    const cacheKey = getCacheKey(group.text, currentEngine, currentTargetL, 'undefined', currentEngineId);
     const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
     const isBing = currentEngine === "bing";
     const isBatchEngine = isAI || isBing;
@@ -10176,7 +10319,8 @@ function syncSubtitleDisplay() {
               ) {
                 logger.log("批量预取超时/失败，触发单句强制补漏...");
                 try {
-                  const res = await getDetailedTranslation(group.text);
+                  const subtitleOverride = window.currentConfig?.subtitleOverrideConfig || null;
+                  const res = await getDetailedTranslation(group.text, false, null, { engineOverride: subtitleOverride });
                   if (lastSubIndex === thisRequestIndex && res?.basic) {
                     currentTEl.innerText = res.basic;
                     currentTEl?.classList.remove("kt-loading");
@@ -10192,7 +10336,9 @@ function syncSubtitleDisplay() {
             tEl.innerText =
               typeof t === "function" ? t("loading") : "Translating...";
             tEl?.classList.add("kt-loading");
-            getDetailedTranslation(group.text)
+            getDetailedTranslation(group.text, false, null, {
+              engineOverride: window.currentConfig?.subtitleOverrideConfig || null,
+            })
               .then((res) => {
                 if (!res || res.isPending || !res.basic) return;
                 if (typeof fastMemoryCache !== "undefined")
@@ -10618,13 +10764,20 @@ async function handleWordMouseEnter(e, word) {
   const isCollected = !!(entry && entry.deleted === false);
 
   //  判断是否 AI 引擎
+  const activeCfg =
+    window.currentConfig?.subtitleOverrideConfig ||
+    window.currentConfig?.activeConfig ||
+    {};
   const currentEngineId =
+    activeCfg.engine ||
     engineInfo?.activeConfig?.engine ||
     engineInfo?.selectedEngine ||
     engineInfo?._defaultEngine ||
     "google";
   const useContextMode = isAIEngine(currentEngineId);
 
+  logger.log('useContextMode ', useContextMode);
+  logger.log(' activeCfg.engine ', activeCfg.engine);
   //  AI 引擎时采集当前字幕行文本作为语境
   let subtitleContext = "";
   let subtitleContextTranslation = "";
@@ -10707,6 +10860,7 @@ async function handleWordMouseEnter(e, word) {
           hintInputLang: getVideoSourceLang(),
           capturedContext: subtitleContext,
           capturedContextTranslation: subtitleContextTranslation,
+          engineOverride: activeCfg
         }
         : {
           lightweight: true,
@@ -10734,18 +10888,71 @@ async function handleWordMouseEnter(e, word) {
       };
 
       let dictHtml = "";
+      logger.log("AI hover 完整返回:", res);
+      logger.log("AI hover dictData:", res?.dictData);
+      logger.log("AI hover examples:", res?.examples);
+      logger.log("AI hover basic:", res?.basic);
       if (useContextMode) {
+        // context 模式下显示 definition
+        if (res.dictData?.length) {
+          dictHtml += res.dictData
+            .map((i) => {
+              const meaning =
+                typeof i.definition === "string" && i.definition
+                  ? i.definition
+                  : Array.isArray(i.definition)
+                    ? i.definition.join(", ")
+                    : Array.isArray(i.meanings)
+                      ? i.meanings.join(", ")
+                      : typeof i.meanings === "string"
+                        ? i.meanings
+                        : "";
+
+              if (!meaning) return "";
+
+              const localizedPos = localizePos(i.pos, currentLang);
+
+              return `
+          <div style="margin-top:4px; display:flex; align-items:flex-start; gap:8px;">
+            <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">
+              ${localizedPos}
+            </b>
+            <div style="color:#E2E8F0; font-size:13px; line-height:1.4; word-break:break-word;">
+              ${meaning}
+            </div>
+          </div>
+        `;
+            })
+            .filter(Boolean)
+            .join("");
+        }
+
+        // context 模式下显示例句
         if (res.examples?.length) {
-          dictHtml = res.examples.slice(0, 2).map(ex => {
-            const phrase = typeof ex === 'string' ? ex.split(' | ')[0] : (ex.en || '');
-            const gloss = typeof ex === 'string' ? (ex.split(' | ')[1] || '') : (ex.cn || '');
+          dictHtml += res.examples.slice(0, 2).map(ex => {
+            const phrase =
+              typeof ex === "string"
+                ? ex.split(" | ")[0]
+                : (ex.en || "");
+
+            const gloss =
+              typeof ex === "string"
+                ? (ex.split(" | ")[1] || "")
+                : (ex.cn || "");
+
             const highlightedPhrase = highlightWord(phrase, cleanWord);
-            return `<div style="margin-top:4px;font-size:12px;">
-              <span style="color:#94a3b8;font-style:italic;">${highlightedPhrase}</span>
-              <span style="color:#64748b;"> — ${gloss}</span>
-            </div>`;
+
+            return `
+        <div style="margin-top:4px;font-size:12px;">
+          <span style="color:#94a3b8;font-style:italic;">
+            ${highlightedPhrase}
+          </span>
+          <span style="color:#64748b;"> — ${gloss}</span>
+        </div>
+      `;
           }).join("");
         }
+
       } else if (res.dictData && res.dictData.length > 0) {
         // 原有词典模式渲染逻辑不变
         dictHtml = res.dictData
@@ -10765,17 +10972,23 @@ async function handleWordMouseEnter(e, word) {
 
             const localizedPos = localizePos(i.pos, currentLang);
             const maxH = index === 0 ? "4.2em" : "2.8em";
+
             return `
-            <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
-              <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">${localizedPos}</b>
-              <div style="position:relative; flex:1; min-width:0;">
-                <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block;
-                  max-height:${maxH}; overflow:hidden; white-space:normal; word-break:break-word;">${meaning}</span>
-                <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em;
-                  background:linear-gradient(to right, transparent, #1e293b);"></div>
-              </div>
+        <div style="margin-top: 4px; display: flex; align-items: flex-start; gap: 8px;">
+          <b style="color:#38BDF8; font-size:12px; font-style:italic; min-width:32px; flex-shrink:0;">
+            ${localizedPos}
+          </b>
+          <div style="position:relative; flex:1; min-width:0;">
+            <span style="color:#E2E8F0; font-size:13px; line-height:1.4; display:block; 
+              max-height:${maxH}; overflow:hidden; white-space:normal; word-break:break-word;">
+              ${meaning}
+            </span>
+            <div style="position:absolute; bottom:0; right:0; width:40px; height:1.4em; 
+              background:linear-gradient(to right, transparent, #1e293b);">
             </div>
-          `;
+          </div>
+        </div>
+      `;
           })
           .filter(Boolean)
           .join("");
@@ -10900,11 +11113,6 @@ async function handleWordDblClick(e, word) {
         .join(" ")
       : "";
     const translationText = ytT ? ytT.textContent.trim() : "";
-    const cleanEnding = (text) => {
-      return text
-        .replace(/[.\s]+$/g, "")   // 去掉结尾所有句号和空格
-        .trim();
-    };
     const cleanedOriginal = cleanSubtitle(originalText);
     const cleanedTranslation = cleanSubtitle(translationText);
 

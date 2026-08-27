@@ -3316,6 +3316,9 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
         if (req.isTest) {
             engine = req.engine;
             data = req.tempKeys || {};
+        } else if (req.engineOverrideConfig) {
+            engine = req.engineOverrideConfig.engine;
+            data = req.engineOverrideConfig.data || {};
         } else {
             const storage = await safeGetStorage('activeConfig');
             if (!storage) {
@@ -3330,6 +3333,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 data = config.data;
             }
         }
+        logger.log('engine ',engine);
         const trimmedText = req.text.trim();
         const hasSpace = trimmedText.includes(' ');
         const isSingleQuery = !req.text.includes('[[') && !req.text.includes('⟦KT_');
