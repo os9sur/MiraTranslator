@@ -70,16 +70,34 @@ This tool was created to fill the need for a functional, open-source bilingual t
 
 ### Features
 
-* **Performance:** The extension is built using native JavaScript with a core size of approximately 300KB, aimed at minimizing browser resource usage.
-* **Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied to the webpage.
-* **YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, and a feature to download subtitles.
+* **Performance:** The extension is built using native JavaScript with a core size of approximately 300KB+, aimed at minimizing browser resource usage.
+
+* **Visual Configuration:** A panel is provided to adjust translation styles, colors, and layout, which are applied directly to the webpage.
+
+* **YouTube Integration:** Includes dual-language subtitle rendering, player adjustments, subtitle downloading, and AI-powered subtitle segmentation for more natural sentence breaks while preserving subtitle timing.
+
+* **AI Subtitle Segmentation:** AI can automatically segment YouTube subtitles into more natural sentences based on context, improving readability while keeping the original subtitle timing aligned with speech.
+
+* **Input Field Translation:** Supports quick translation directly in text input fields. Press the configured shortcut or trigger method to translate text without leaving the current input field.
+
+* **Flexible Engine Assignment:** Different translation engines can be assigned to different translation scenarios. For example, one engine can be used for webpage translation, another for YouTube subtitles, and another for input field or selection translation, allowing users to choose the most suitable engine for each task.
+
 * **Privacy:** API keys are stored locally in the browser. The extension does not use intermediary servers for translation processing.
-* **Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models (like Ollama), and more. Users can also configure custom API endpoints.
+
+* **Multi-Engine Support:** Compatible with ChatGPT/OpenAI (and any OpenAI-compatible APIs), Claude, Gemini, DeepL, SiliconFlow, local models such as Ollama, and more. Users can also configure custom API endpoints.
+
 * **AI Context-Aware Translation:** Uses surrounding context to produce more accurate and natural translations, rather than translating isolated words or sentences.
+
 * **Element Selection:** Rather than translating the entire page by default, Mira focuses on main content areas out of the box — menus and other UI chrome are skipped to avoid layout breakage and visual clutter. Users can select additional areas to translate, or exclude specific ones, as needed.
+
 * **Data Synchronization:** Supports syncing configurations and saved vocabulary via Google Drive or WebDAV.
+
 * **Vocabulary Learning:** Enables users to save words or phrases directly from translated text into a local list, allowing for future review, editing, and cross-device synchronization.
-* **Mobile Support:** Compatible with mobile browsers (such as Microsoft Edge and Firefox on Android), allowing for seamless translation on the go.
+
+* **Mobile Support:** Compatible with mobile browsers such as Microsoft Edge and Firefox on Android, allowing for seamless translation on the go.
+
+* **Keyboard Shortcuts:** Supports configurable keyboard shortcuts for common translation actions, such as translating the paragraph or word under the mouse cursor. Users can customize shortcuts to fit their workflow.
+
 
 ---
 
