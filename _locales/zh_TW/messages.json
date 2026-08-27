@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "翻譯滑鼠所在單字"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "手動輸入翻譯"
   }
 }

@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             return `
         <div class="form-group">
-            <div class="field-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;margin-top:17px;">
+            <div class="field-header" style="display:flex; justify-content: flex-start; align-items:center; margin-bottom:8px; margin-top:17px; gap:12px;">
                 <label style="margin:0">${l.toUpperCase()}</label>
                 ${showGetKey ? `<a href="${tpl.url}" target="_blank" class="get-key-link">${t('getApiKey', uiLanguage)}</a>` : ''}
             </div>

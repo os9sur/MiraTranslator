@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "Перевести слово под курсором"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Перевести введённый текст"
   }
 }

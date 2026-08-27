@@ -764,23 +764,33 @@ const idb = {
   }
 };
 
-function getCacheKey(text, engine, lang, mode = 'context') {
-  if (!text) return '';
+// 只和"文本内容 + 目标语言 + 翻译模式"相关，不含引擎信息，方便跨引擎复用/借用缓存时精确匹配
+function getContentFingerprint(text, lang, mode = 'context') {
   const coreText = text
     .replace(/[\s\n\r\t.,!?;:。，！？、・「」]/g, "")
     .toLowerCase();
-  const safeEngine = (engine || getRuntimeDefaultEngine()).toLowerCase();
   const safeLang = (lang || 'zh-cn').replace('_', '-').toLowerCase();
   const modeSuffix = mode === 'dictionary' ? '_dict' : '';
-  let contentPart;
-  if (typeof hash === 'function') {
-    contentPart = hash(coreText);
-  } else {
-    contentPart = coreText.substring(0, 50);
-  }
-  return `tr_${safeEngine}_${contentPart}_${safeLang}${modeSuffix}`;
+  const contentPart = typeof hash === 'function' ? hash(coreText) : coreText.substring(0, 50);
+  return `${contentPart}_${safeLang}${modeSuffix}`;
 }
 
+function getCacheKey(text, engine, lang, mode = 'context', instanceId = null) {
+  if (!text) return '';
+  const safeEngine = (engine || getRuntimeDefaultEngine()).toLowerCase();
+  // 内置引擎（google/bing）全局唯一，id 本身已含引擎类型信息，不需要再拼一次
+  const isBuiltinInstance = instanceId === 'google_builtin' || instanceId === 'bing_builtin';
+  const engineIdentifier = (instanceId && !isBuiltinInstance) ? `${safeEngine}-${instanceId}` : safeEngine;
+  const fingerprint = getContentFingerprint(text, lang, mode);
+  return `tr_${engineIdentifier}_${fingerprint}`;
+}
+function esc(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 /**
  * 获取详细翻译结果
  * 适配多级数据结构：基础译文、音标、详细词典释义
@@ -1065,7 +1075,23 @@ function localizePos(pos, targetLang) {
 //需要同步的存储键列表
 const STORAGE_KEYS = {
   core: ['userConfigs', 'activeConfig', 'lastActiveId'],
-  settings: ['siteSettings', 'customRules', 'scanConfig', 'userStyleConfig', 'ytStyleSettings', 'globalConfig', 'ai_prompt_settings', 'vocabHighlight'],
+  settings: ['siteSettings',
+    'customRules',
+    'scanConfig',
+    'autoSync',
+    'userStyleConfig',
+    'ytStyleSettings',
+    'globalConfig',
+    'ai_prompt_settings',
+    'vocabHighlight',
+    'miraQuickTransEnabled',
+    'miraQuickTransTargetLang',
+    'miraEngineOverride_instant',
+    'miraEngineOverride_quickInput',
+    'miraEngineOverride_selection',
+    'miraEngineOverride_subtitle',
+    'miraEngineOverride_webpage'
+  ],
   sync: function () {
     return [...this.core, ...this.settings];
   },
@@ -1138,10 +1164,10 @@ const CACHE_POLICY = {
 const CLEAN_INTERVAL = 24 * 60 * 60 * 1000; // 每天检查一次是否需要清理
 
 
-async function lookupCache(text, engine, lang) {
+async function lookupCache(text, engine, lang, translateMode = 'context', instanceId = null) {
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
-  const singleKey = getCacheKey(text, engine, lang);
-  const commonFingerprint = singleKey.substring(singleKey.indexOf('_', 3));
+  const fingerprint = getContentFingerprint(text, lang, translateMode);
+  const singleKey = getCacheKey(text, engine, lang, translateMode, instanceId);
 
   let cachedData = null;
   let hitKey = null;
@@ -1152,18 +1178,22 @@ async function lookupCache(text, engine, lang) {
     hitKey = singleKey;
     cachedData = store?.[singleKey] || null;
   } else {
-    const aiKeys = AI_LLM_WHITE_LIST.map(ai => `tr_${ai}${commonFingerprint}`);
-    const keysToQuery = [...aiKeys, singleKey];
+    // 单向借用：遍历所有已配置的 AI 引擎实例（按具体 id，避免借到错误账号/模型的结果）
+    const { userConfigs } = (await safeGetStorage('userConfigs')) || {};
+    const aiInstanceKeys = (userConfigs || [])
+      .filter((c) => AI_LLM_WHITE_LIST.includes(c.engine))
+      .map((c) => `tr_${c.engine.toLowerCase()}-${c.id}_${fingerprint}`);
+
+    const keysToQuery = [...aiInstanceKeys, singleKey];
     const store = await idb.get(keysToQuery);
 
-    hitKey = aiKeys.find(k => store?.[k]) || null;
+    hitKey = aiInstanceKeys.find((k) => store?.[k]) || null;
     if (hitKey) {
       cachedData = store[hitKey];
       isAlias = true;
     } else if (store?.[singleKey]) {
       const own = store[singleKey];
       if (own.alias) {
-        // 别名指针指向的AI原始数据已被清理，指针失效，当作未命中
         await idb.remove(singleKey);
         cachedData = null;
       } else {
@@ -1180,7 +1210,6 @@ async function lookupCache(text, engine, lang) {
     || cachedData.response
     || cachedData;
 
-  // 没有时间戳 → 视为"刚创建"，补写，不删除
   if (!actualResult.timestamp && !cachedData.timestamp) {
     actualResult.timestamp = Date.now();
   }
@@ -1188,13 +1217,11 @@ async function lookupCache(text, engine, lang) {
   const ts = cachedData.timestamp || actualResult.timestamp;
   const ageMs = Date.now() - ts;
 
-  // 只有 fallback 结果按时间强制过期，正常结果交给后台LRU统一管理，. 不再168h强删
   if (actualResult.isFallback && ageMs >= CACHE_POLICY.fallback.expireMs) {
     await idb.remove(hitKey);
     return null;
   }
 
-  // 命中即续命(LRU touch)，fallback 不续命
   if (!actualResult.isFallback) {
     actualResult.timestamp = Date.now();
     const updates = { [hitKey]: actualResult };
@@ -1639,8 +1666,10 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     translateMode = 'context',
     capturedContext = '',
     capturedContextTranslation = '',
+    engineOverride = null, // {id, engine, data} 形式，来自某个功能的专属引擎覆写；不传则完全走原逻辑
   } = options;
   let engine = (
+    engineOverride?.engine ||
     storage.activeConfig?.engine ||
     (typeof currentEngine !== 'undefined' ? currentEngine : getRuntimeDefaultEngine())
   ).toLowerCase();
@@ -1717,12 +1746,13 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
   }
 
   //缓存
-  const cacheKey = getCacheKey(query, engine, lang, translateMode);
+  const engineId = engineOverride?.id || storage.activeConfig?.id || null;
+  const cacheKey = getCacheKey(query, engine, lang, translateMode, engineId);
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
   try {
     if (!forceRefresh && !isBatch) {
       // logger.log('[lookupCache] query:', JSON.stringify(query));
-      const hit = await lookupCache(query, engine, lang);
+      const hit = await lookupCache(query, engine, lang, translateMode, engineId);
       if (hit && !hit.result.isBatch) {
         const cached = hit.result;
         const basicStr = typeof cached.basic === 'string' ? cached.basic.trim() : '';
@@ -1756,6 +1786,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
           translateMode,
           capturedContext,
           capturedContextTranslation,
+          engineOverrideConfig: engineOverride || undefined, // 不传给 background 时保持原有行为
         }),
         new Promise(resolve => setTimeout(() => resolve({ error: 'TIMEOUT' }), 15000))
       ]);
@@ -1900,7 +1931,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     let displayMessage;
 
     if (match) {
-      let errorCode = match[0]; 
+      let errorCode = match[0];
       if (errorCode === "400" && errorText.toLowerCase().includes("balance")) {
         errorCode = "402";
       }
@@ -1908,9 +1939,9 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
       // 先尝试获取友好消息
       const i18nMsg = getSafeMessage(`ERROR_${errorCode}`);
 
-      if (i18nMsg) { 
+      if (i18nMsg) {
         displayMessage = `${i18nMsg} (Code: ${errorCode})`;
-      } else { 
+      } else {
         try {
           const jsonMatch = errorText.match(/\{.*\}/);
           if (jsonMatch) {
@@ -1939,6 +1970,7 @@ async function getDetailedTranslation(text, forceRefresh = false, manualLang = n
     pendingRequests.delete(cacheKey);
   }
 }
+
 async function refreshIcon() {
   const isYouTube = window.location.hostname.includes('youtube.com');
   const webActive = typeof isPageScanEnabled !== 'undefined' ? isPageScanEnabled : false;
@@ -2227,6 +2259,43 @@ function populateSelect(selectEl, { includeAuto = false, selected = 'en' } = {})
       selectEl.appendChild(opt);
     }
   }
+}
+
+const MIRA_BUILTIN_ENGINES = [
+  { id: "google_builtin", engine: "google", alias: "Google" },
+  { id: "bing_builtin", engine: "bing", alias: "Bing" },
+];
+//  按 feature 读取完整的覆写引擎配置 {id, engine, data}，没有覆写则返回 null
+async function getMiraEngineOverride(feature) {
+  const key = `miraEngineOverride_${feature}`;
+  const r = await safeGetStorage([key, 'userConfigs']);
+  const overrideId = r?.[key];
+  if (!overrideId) return null;
+
+  const allConfigs = [...MIRA_BUILTIN_ENGINES, ...(r?.userConfigs || [])];
+  const cfg = allConfigs.find((c) => c.id === overrideId);
+  if (!cfg) return null;
+
+  const overrideData = (await safeGetStorage(`data_${cfg.id}`))?.[`data_${cfg.id}`] || {};
+  return { id: cfg.id, engine: cfg.engine, alias: cfg.alias, data: overrideData };
+}
+// 用户自定义引擎（非内置 google/bing）时，用用户自己起的 alias 替换 background 返回的泛化引擎名，
+// 但保留括号里的模型名部分
+function applyMiraAliasToSource(response, usedConfig) {
+  if (!response?.source || !usedConfig?.alias) return;
+  const isBuiltin = MIRA_BUILTIN_ENGINES.some((b) => b.id === usedConfig.id);
+  if (isBuiltin) return; // 内置引擎沿用 background 原本的 sourceNames 映射 
+
+  const modelMatch = response.source.match(/\(([^)]+)\)\s*$/);
+  response.source = modelMatch ? `${usedConfig.alias} (${modelMatch[1]})` : usedConfig.alias;
+}
+// 获取当前全局默认引擎的 alias（用于没有功能覆写时的展示）
+async function getMiraCurrentGlobalAlias() {
+  const r = await safeGetStorage(['activeConfig', 'userConfigs']);
+  const activeId = r?.activeConfig?.id;
+  if (!activeId) return null;
+  const allConfigs = [...MIRA_BUILTIN_ENGINES, ...(r?.userConfigs || [])];
+  return allConfigs.find((c) => c.id === activeId)?.alias || null;
 }
 
 //剑桥词典URL 模板

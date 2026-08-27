@@ -33,7 +33,7 @@
     "message": "Délai expiré : Vérifiez votre réseau."
   },
   "ERROR_NETWORK": {
-    "message": "API bloqué : L'IP actuelle a déclenché une limite de sécurité ou de requêtes. Essayez de changer de VPN ou de service de traduction."
+    "message": "API bloquée : L'IP actuelle a déclenché une limite de sécurité ou de requêtes. Essayez de changer de VPN ou de service de traduction."
   },
   "ERROR_GENERIC": {
     "message": "Échec : Vérifiez la config API."
@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "Traduire le mot sous le curseur"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Traduire le texte saisi manuellement"
   }
 }

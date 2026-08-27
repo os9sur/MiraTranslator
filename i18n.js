@@ -1605,8 +1605,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ 已收藏，再次双击取消",
     alreadyAddedFeedback: "⭐ 已在生词本，双击取消",
     hintAddAction: "双击收藏到生词本",
-    dictMode: "词典模式",
-    contextMode: "上下文感知",
+    dictMode: "切换到词典模式",
+    contextMode: "切换到上下文感知",
     translationEngine: "管理翻译引擎"
   },
   "zh-TW": {
@@ -1614,8 +1614,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ 已收藏，再次雙擊取消",
     alreadyAddedFeedback: "⭐ 已在單字本，雙擊取消",
     hintAddAction: "雙擊收藏到單字本",
-    dictMode: "詞典模式",
-    contextMode: "上下文感知",
+    dictMode: "切換到詞典模式",
+    contextMode: "切換到上下文感知",
     translationEngine: "管理翻譯引擎"
   },
   "en": {
@@ -1623,8 +1623,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Added to collection, double-click to undo",
     alreadyAddedFeedback: "⭐ Already in vocabulary, double-click to undo",
     hintAddAction: "Double-click to save to vocabulary",
-    dictMode: "Dictionary Mode",
-    contextMode: "Context-Aware",
+    dictMode: "Switch to Dictionary Mode",
+    contextMode: "Switch to Context-Aware",
     translationEngine: "Manage Translation Engine"
   },
   "ja": {
@@ -1632,8 +1632,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ コレクションに追加しました、ダブルクリックで取り消し",
     alreadyAddedFeedback: "⭐ 単語帳に既に存在します、ダブルクリックで取り消し",
     hintAddAction: "ダブルクリックで単語帳に保存",
-    dictMode: "辞書モード",
-    contextMode: "文脈認識",
+    dictMode: "辞書モードに切替",
+    contextMode: "文脈認識に切替",
     translationEngine: "翻訳エンジンの管理"
   },
   "ko": {
@@ -1641,8 +1641,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ 콜렉션에 추가됨, 더블클릭하여 취소",
     alreadyAddedFeedback: "⭐ 이미 단어장에 있음, 더블클릭하여 취소",
     hintAddAction: "더블클릭하여 단어장에 저장",
-    dictMode: "사전 모드",
-    contextMode: "문맥 인식",
+    dictMode: "사전 모드로 전환",
+    contextMode: "문맥 인식으로 전환",
     translationEngine: "번역 엔진 관리"
   },
   "es": {
@@ -1650,8 +1650,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Añadido a la colección, doble clic para deshacer",
     alreadyAddedFeedback: "⭐ Ya está en el vocabulario, doble clic para deshacer",
     hintAddAction: "Doble clic para guardar en el vocabulario",
-    dictMode: "Modo Diccionario",
-    contextMode: "Consciente del contexto",
+    dictMode: "Cambiar a modo diccionario",
+    contextMode: "Cambiar a modo contextual",
     translationEngine: "Administrar motor de traducción"
   },
   "fr": {
@@ -1659,8 +1659,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Ajouté à la collection, double-clic pour annuler",
     alreadyAddedFeedback: "⭐ Déjà dans le lexique, double-clic pour annuler",
     hintAddAction: "Double-clic pour sauvegarder dans le lexique",
-    dictMode: "Mode Dictionnaire",
-    contextMode: "Sensible au contexte",
+    dictMode: "Passer en mode dictionnaire",
+    contextMode: "Passer en mode contextuel",
     translationEngine: "Gérer le moteur de traduction"
   },
   "de": {
@@ -1668,8 +1668,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Zur Sammlung hinzugefügt, Doppelklick zum Rückgängig",
     alreadyAddedFeedback: "⭐ Bereits im Vokabelheft, Doppelklick zum Rückgängig",
     hintAddAction: "Doppelklick zum Speichern im Vokabelheft",
-    dictMode: "Wörterbuchmodus",
-    contextMode: "Kontextsensitiv",
+    dictMode: "In den Wörterbuchmodus wechseln",
+    contextMode: "In den Kontextmodus wechseln",
     translationEngine: "Übersetzungs-Engine verwalten"
   },
   "ru": {
@@ -1677,8 +1677,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Добавлено в коллекцию, двойной щелчок для отмены",
     alreadyAddedFeedback: "⭐ Уже в словаре, двойной щелчок для отмены",
     hintAddAction: "Двойной щелчок для сохранения в словарь",
-    dictMode: "Режим словаря",
-    contextMode: "С учётом контекста",
+    dictMode: "Переключить в режим словаря",
+    contextMode: "Переключить в контекстный режим",
     translationEngine: "Управление движком перевода"
   },
   "pt": {
@@ -1686,8 +1686,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Adicionado à coleção, clique duplo para desfazer",
     alreadyAddedFeedback: "⭐ Já no vocabulário, clique duplo para desfazer",
     hintAddAction: "Clique duplo para salvar no vocabulário",
-    dictMode: "Modo Dicionário",
-    contextMode: "Sensível ao contexto",
+    dictMode: "Mudar para modo dicionário",
+    contextMode: "Mudar para modo contextual",
     translationEngine: "Gerenciar motor de tradução"
   },
   "it": {
@@ -1695,8 +1695,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Aggiunto alla collezione, doppio clic per annullare",
     alreadyAddedFeedback: "⭐ Già nel vocabolario, doppio clic per annullare",
     hintAddAction: "Doppio clic per salvare nel vocabolario",
-    dictMode: "Modalità Dizionario",
-    contextMode: "Consapevole del contesto",
+    dictMode: "Passa alla modalità dizionario",
+    contextMode: "Passa alla modalità contestuale",
     translationEngine: "Gestisci motore di traduzione"
   },
   "vi": {
@@ -1704,8 +1704,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Đã thêm vào bộ sưu tập, nhấp đôi để hoàn tác",
     alreadyAddedFeedback: "⭐ Đã có trong sổ từ vựng, nhấp đôi để hoàn tác",
     hintAddAction: "Nhấp đôi để lưu vào sổ từ vựng",
-    dictMode: "Chế độ Từ điển",
-    contextMode: "Nhận biết ngữ cảnh",
+    dictMode: "Chuyển sang chế độ từ điển",
+    contextMode: "Chuyển sang chế độ theo ngữ cảnh",
     translationEngine: "Quản lý công cụ dịch"
   },
   "th": {
@@ -1713,8 +1713,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ เพิ่มไปยังคอลเลกชันแล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     alreadyAddedFeedback: "⭐ อยู่ในสมุดคำศัพท์แล้ว, ดับเบิลคลิกเพื่อยกเลิก",
     hintAddAction: "ดับเบิลคลิกเพื่อบันทึกลงสมุดคำศัพท์",
-    dictMode: "โหมดพจนานุกรม",
-    contextMode: "รับรู้บริบท",
+    dictMode: "สลับเป็นโหมดพจนานุกรม",
+    contextMode: "สลับเป็นโหมดตามบริบท",
     translationEngine: "จัดการเครื่องมือแปลภาษา"
   },
   "ar": {
@@ -1722,8 +1722,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ تمت الإضافة إلى المجموعة، انقر نقرًا مزدوجًا للتراجع",
     alreadyAddedFeedback: "⭐ موجود بالفعل في مفكرة الكلمات، انقر نقرًا مزدوجًا للتراجع",
     hintAddAction: "انقر نقرًا مزدوجًا للحفظ في مفكرة الكلمات",
-    dictMode: "وضع القاموس",
-    contextMode: "إدراك السياق",
+    dictMode: "التبديل إلى وضع القاموس",
+    contextMode: "التبديل إلى الوضع السياقي",
     translationEngine: "إدارة محرك الترجمة"
   },
   "fa": {
@@ -1731,8 +1731,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ به مجموعه اضافه شد، دوبار کلیک برای لغو",
     alreadyAddedFeedback: "⭐ قبلاً در دفتر لغات است، دوبار کلیک برای لغو",
     hintAddAction: "دوبار کلیک برای ذخیره در دفتر لغات",
-    dictMode: "حالت واژه‌نامه",
-    contextMode: "آگاه از بافت",
+    dictMode: "تغییر به حالت واژه‌نامه",
+    contextMode: "تغییر به حالت متنی",
     translationEngine: "مدیریت موتور ترجمه"
   },
   "tr": {
@@ -1740,8 +1740,8 @@ self.i18nYTData = {
     addedFeedback: "⭐ Koleksiyona eklendi, geri almak için çift tıklayın",
     alreadyAddedFeedback: "⭐ Zaten kelime defterinde, geri almak için çift tıklayın",
     hintAddAction: "Kelime defterine kaydetmek için çift tıklayın",
-    dictMode: "Sözlük Modu",
-    contextMode: "Bağlama Duyarlı",
+    dictMode: "Sözlük moduna geç",
+    contextMode: "Bağlam moduna geç",
     translationEngine: "Çeviri Motorunu Yönet"
   }
 };
@@ -2800,7 +2800,7 @@ self.i18nAttach4 = {
   "en": {
     setLanguage: "What language would you like to translate into?",
     targetLang: "Translate into what language?",
-    uiLanguage: "App Language",
+    uiLanguage: "Interface Language",
     restrictedNotice: "This page is restricted by browser security policy (e.g., extension store, built-in pages) — nothing to do with Mira",
     btnGotIt: "Got it"
   },
@@ -2814,14 +2814,14 @@ self.i18nAttach4 = {
   "ko": {
     setLanguage: "어떤 언어로 번역하시겠어요?",
     targetLang: "어떤 언어로 번역할까요?",
-    uiLanguage: "앱 언어",
+    uiLanguage: "인터페이스 언어",
     restrictedNotice: "이 페이지는 브라우저 보안 정책에 의해 제한됩니다 (예: 확장 프로그램 스토어, 내장 페이지) — Mira와는 관련이 없습니다",
     btnGotIt: "알겠어요"
   },
   "de": {
     setLanguage: "In welche Sprache möchtest du übersetzen?",
     targetLang: "In welche Sprache übersetzen?",
-    uiLanguage: "Sprache",
+    uiLanguage: "Oberflächensprache",
     restrictedNotice: "Diese Seite ist durch die Browser-Sicherheitsrichtlinie eingeschränkt (z.B. Erweiterungsstore, interne Seiten) — hat nichts mit Mira zu tun",
     btnGotIt: "Verstanden"
   },
@@ -2835,49 +2835,49 @@ self.i18nAttach4 = {
   "es": {
     setLanguage: "¿A qué idioma quieres traducir?",
     targetLang: "¿Traducir a qué idioma?",
-    uiLanguage: "Idioma",
+    uiLanguage: "Idioma de la interfaz",
     restrictedNotice: "Esta página está restringida por la política de seguridad del navegador (ej. tienda de extensiones, páginas internas) — no tiene nada que ver con Mira",
     btnGotIt: "Entendido"
   },
   "fr": {
     setLanguage: "Vers quelle langue souhaites-tu traduire ?",
     targetLang: "Traduire dans quelle langue ?",
-    uiLanguage: "Langue",
-    restrictedNotice: "Cette page est restreinte par la politique de sécurité du navigateur (ex. boutique d'extensions, pages internes) — ça n'a rien à voir avec Mira",
+    uiLanguage: "Langue de l’interface",
+    restrictedNotice: "Cette page est restreinte par la politique de sécurité du navigateur (ex. boutique d’extensions, pages internes) — ça n'a rien à voir avec Mira",
     btnGotIt: "Compris"
   },
   "pt-BR": {
     setLanguage: "Para qual idioma você quer traduzir?",
     targetLang: "Traduzir para qual idioma?",
-    uiLanguage: "Idioma",
+    uiLanguage: "Idioma da interface",
     restrictedNotice: "Esta página é restrita pela política de segurança do navegador (ex. loja de extensões, páginas internas) — não tem nada a ver com o Mira",
     btnGotIt: "Entendi"
   },
   "it": {
     setLanguage: "In che lingua vuoi tradurre?",
     targetLang: "Tradurre in quale lingua?",
-    uiLanguage: "Lingua",
+    uiLanguage: "Lingua dell’interfaccia",
     restrictedNotice: "Questa pagina è limitata dalla politica di sicurezza del browser (es. store delle estensioni, pagine interne) — non ha niente a che fare con Mira",
     btnGotIt: "Capito"
   },
   "tr": {
     setLanguage: "Hangi dile çevirmek istiyorsun?",
     targetLang: "Hangi dile çevirelim?",
-    uiLanguage: "Dil",
+    uiLanguage: "Arayüz dili",
     restrictedNotice: "Bu sayfa tarayıcı güvenlik politikası nedeniyle kısıtlanmıştır (ör. eklenti mağazası, dahili sayfalar) — Mira ile ilgisi yok",
     btnGotIt: "Anladım"
   },
   "vi": {
     setLanguage: "Bạn muốn dịch sang ngôn ngữ nào?",
     targetLang: "Dịch sang ngôn ngữ nào?",
-    uiLanguage: "Ngôn ngữ",
+    uiLanguage: "Ngôn ngữ giao diện",
     restrictedNotice: "Trang này bị hạn chế bởi chính sách bảo mật của trình duyệt (vd. cửa hàng tiện ích, trang nội bộ) — không liên quan gì đến Mira",
     btnGotIt: "Đã hiểu"
   },
   "th": {
     setLanguage: "คุณต้องการแปลเป็นภาษาอะไร?",
     targetLang: "แปลเป็นภาษาอะไร?",
-    uiLanguage: "ภาษา",
+    uiLanguage: "ภาษาของอินเทอร์เฟซ",
     restrictedNotice: "หน้านี้ถูกจำกัดโดยนโยบายความปลอดภัยของเบราว์เซอร์ (เช่น ร้านค้าส่วนขยาย หน้าเว็บภายใน) — ไม่เกี่ยวกับ Mira",
     btnGotIt: "เข้าใจแล้ว"
   },
@@ -2891,11 +2891,12 @@ self.i18nAttach4 = {
   "fa": {
     setLanguage: "به چه زبانی ترجمه شود؟",
     targetLang: "ترجمه به چه زبانی؟",
-    uiLanguage: "زبان برنامه",
+    uiLanguage: "زبان رابط کاربری",
     restrictedNotice: "این صفحه توسط سیاست امنیتی مرورگر محدود شده است (مانند فروشگاه افزونه‌ها، صفحات داخلی) — ربطی به Mira ندارد",
     btnGotIt: "متوجه شدم"
   }
 };
+
 self.i18nAttach5 = {
   "zh-CN": {
     dlOriginal: "下载原文字幕",
@@ -2904,7 +2905,10 @@ self.i18nAttach5 = {
     shortcutCopied: "已复制 about:addons，请粘贴到地址栏打开，右上角齿轮图标里可设置快捷键",
     shortcutManual: "请在地址栏输入 about:addons 打开，右上角齿轮图标里可设置快捷键",
     firstTimeShortcutHint: "💡 小提示：点击浏览器工具栏上的 Mira 图标，可以设置划词翻译快捷键",
-    shortcutSettings: "快捷键设置"
+    firstTimeEditHint: "💡 可直接修改上方文本，按 Enter 翻译其他内容",
+    shortcutSettings: "快捷键设置",
+    confirm: "确定",
+    cancel: "取消"
   },
   "zh-TW": {
     dlOriginal: "下載原文字幕",
@@ -2913,7 +2917,10 @@ self.i18nAttach5 = {
     shortcutCopied: "已複製 about:addons，請貼到網址列開啟，右上角齒輪圖示可設定快捷鍵",
     shortcutManual: "請在網址列輸入 about:addons 開啟，右上角齒輪圖示可設定快捷鍵",
     firstTimeShortcutHint: "💡 小提示：點擊瀏覽器工具列上的 Mira 圖示，可以設定劃詞翻譯快捷鍵",
-    shortcutSettings: "快捷鍵設定"
+    firstTimeEditHint: "💡 可直接修改上方文字，按 Enter 翻譯其他內容",
+    shortcutSettings: "快捷鍵設定",
+    confirm: "確定",
+    cancel: "取消"
   },
   "en": {
     dlOriginal: "Download Original Subtitles",
@@ -2922,7 +2929,10 @@ self.i18nAttach5 = {
     shortcutCopied: "Copied \"about:addons\" — paste it into the address bar, then set your shortcut via the gear icon in the top right",
     shortcutManual: "Type \"about:addons\" into the address bar, then set your shortcut via the gear icon in the top right",
     firstTimeShortcutHint: "💡 Tip: Click the Mira icon in your browser toolbar to set up a keyboard shortcut",
-    shortcutSettings: "Shortcut Settings"
+    firstTimeEditHint: "💡 Tip: Edit the text above directly, then press Enter to translate something else",
+    shortcutSettings: "Shortcut Settings",
+    confirm: "OK",
+    cancel: "Cancel"
   },
   "ja": {
     dlOriginal: "原文字幕をダウンロード",
@@ -2931,7 +2941,10 @@ self.i18nAttach5 = {
     shortcutCopied: "「about:addons」をコピーしました。アドレスバーに貼り付けて開き、右上の歯車アイコンからショートカットを設定してください",
     shortcutManual: "アドレスバーに「about:addons」と入力して開き、右上の歯車アイコンからショートカットを設定してください",
     firstTimeShortcutHint: "💡 ヒント：ツールバーのMiraアイコンをクリックすると、ショートカットキーを設定できます",
-    shortcutSettings: "ショートカット設定"
+    firstTimeEditHint: "💡 ヒント：上のテキストを直接編集して、Enterキーを押すと別の内容を翻訳できます",
+    shortcutSettings: "ショートカット設定",
+    confirm: "確定",
+    cancel: "キャンセル"
   },
   "ko": {
     dlOriginal: "원본 자막 다운로드",
@@ -2940,7 +2953,10 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\"가 복사되었습니다. 주소창에 붙여넣어 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
     shortcutManual: "주소창에 \"about:addons\"를 입력하여 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
     firstTimeShortcutHint: "💡 팁: 브라우저 툴바의 Mira 아이콘을 클릭하면 단축키를 설정할 수 있어요",
-    shortcutSettings: "단축키 설정"
+    firstTimeEditHint: "💡 팁: 위의 텍스트를 직접 수정한 후 Enter 키를 누르면 다른 내용을 번역할 수 있어요",
+    shortcutSettings: "단축키 설정",
+    confirm: "확인",
+    cancel: "취소"
   },
   "es": {
     dlOriginal: "Descargar subtítulos originales",
@@ -2949,7 +2965,10 @@ self.i18nAttach5 = {
     shortcutCopied: "Se copió \"about:addons\": pégalo en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
     shortcutManual: "Escribe \"about:addons\" en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
     firstTimeShortcutHint: "💡 Consejo: haz clic en el icono de Mira en la barra de herramientas para configurar un atajo de teclado",
-    shortcutSettings: "Configuración de atajos"
+    firstTimeEditHint: "💡 Consejo: puedes editar directamente el texto de arriba y pulsar Enter para traducir otro contenido",
+    shortcutSettings: "Configuración de atajos",
+    confirm: "Aceptar",
+    cancel: "Cancelar"
   },
   "fr": {
     dlOriginal: "Télécharger les sous-titres originaux",
@@ -2958,7 +2977,10 @@ self.i18nAttach5 = {
     shortcutCopied: "« about:addons » copié : collez-le dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
     shortcutManual: "Saisissez « about:addons » dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
     firstTimeShortcutHint: "💡 Astuce : cliquez sur l'icône Mira dans la barre d'outils pour configurer un raccourci clavier",
-    shortcutSettings: "Paramètres des raccourcis"
+    firstTimeEditHint: "💡 Astuce : modifiez directement le texte ci-dessus, puis appuyez sur Entrée pour traduire autre chose",
+    shortcutSettings: "Paramètres des raccourcis",
+    confirm: "Confirmer",
+    cancel: "Annuler"
   },
   "de": {
     dlOriginal: "Original-Untertitel herunterladen",
@@ -2967,7 +2989,10 @@ self.i18nAttach5 = {
     shortcutCopied: "„about:addons“ kopiert – in die Adressleiste einfügen und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
     shortcutManual: "„about:addons“ in die Adressleiste eingeben und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
     firstTimeShortcutHint: "💡 Tipp: Klicke auf das Mira-Symbol in der Symbolleiste, um eine Tastenkombination festzulegen",
-    shortcutSettings: "Tastenkombinationen-Einstellungen"
+    firstTimeEditHint: "💡 Tipp: Du kannst den Text oben direkt bearbeiten und mit der Eingabetaste andere Inhalte übersetzen",
+    shortcutSettings: "Tastenkombinationen-Einstellungen",
+    confirm: "Bestätigen",
+    cancel: "Abbrechen"
   },
   "ru": {
     dlOriginal: "Скачать оригинальные субтитры",
@@ -2976,7 +3001,10 @@ self.i18nAttach5 = {
     shortcutCopied: "Скопировано «about:addons» — вставьте в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
     shortcutManual: "Введите «about:addons» в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
     firstTimeShortcutHint: "💡 Совет: нажмите на значок Mira на панели инструментов браузера, чтобы настроить сочетание клавиш",
-    shortcutSettings: "Настройки сочетаний клавиш"
+    firstTimeEditHint: "💡 Совет: можно изменить текст выше и нажать Enter, чтобы перевести другой текст",
+    shortcutSettings: "Настройки сочетаний клавиш",
+    confirm: "Подтвердить",
+    cancel: "Отмена"
   },
   "pt": {
     dlOriginal: "Baixar legendas originais",
@@ -2985,7 +3013,10 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" copiado: cole na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
     shortcutManual: "Digite \"about:addons\" na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
     firstTimeShortcutHint: "💡 Dica: clique no ícone do Mira na barra de ferramentas do navegador para configurar um atalho de teclado",
-    shortcutSettings: "Configurações de atalhos"
+    firstTimeEditHint: "💡 Dica: edite diretamente o texto acima e pressione Enter para traduzir outro conteúdo",
+    shortcutSettings: "Configurações de atalhos",
+    confirm: "Confirmar",
+    cancel: "Cancelar"
   },
   "it": {
     dlOriginal: "Scarica sottotitoli originali",
@@ -2994,7 +3025,10 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" copiato: incollalo nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
     shortcutManual: "Digita \"about:addons\" nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
     firstTimeShortcutHint: "💡 Suggerimento: clicca sull'icona di Mira nella barra degli strumenti per impostare una scorciatoia da tastiera",
-    shortcutSettings: "Impostazioni scorciatoie"
+    firstTimeEditHint: "💡 Suggerimento: modifica direttamente il testo qui sopra e premi Invio per tradurre altro contenuto",
+    shortcutSettings: "Impostazioni scorciatoie",
+    confirm: "Conferma",
+    cancel: "Annulla"
   },
   "vi": {
     dlOriginal: "Tải phụ đề gốc",
@@ -3003,7 +3037,10 @@ self.i18nAttach5 = {
     shortcutCopied: "Đã sao chép \"about:addons\", hãy dán vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
     shortcutManual: "Nhập \"about:addons\" vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
     firstTimeShortcutHint: "💡 Mẹo: nhấp vào biểu tượng Mira trên thanh công cụ trình duyệt để thiết lập phím tắt",
-    shortcutSettings: "Cài đặt phím tắt"
+    firstTimeEditHint: "💡 Mẹo: bạn có thể sửa trực tiếp nội dung ở trên, rồi nhấn Enter để dịch nội dung khác",
+    shortcutSettings: "Cài đặt phím tắt",
+    confirm: "Xác nhận",
+    cancel: "Hủy"
   },
   "th": {
     dlOriginal: "ดาวน์โหลดคำบรรยายต้นฉบับ",
@@ -3012,7 +3049,10 @@ self.i18nAttach5 = {
     shortcutCopied: "คัดลอก \"about:addons\" แล้ว วางในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
     shortcutManual: "พิมพ์ \"about:addons\" ในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
     firstTimeShortcutHint: "💡 เคล็ดลับ: คลิกไอคอน Mira บนแถบเครื่องมือของเบราว์เซอร์เพื่อตั้งค่าคีย์ลัด",
-    shortcutSettings: "ตั้งค่าคีย์ลัด"
+    firstTimeEditHint: "💡 เคล็ดลับ: แก้ไขข้อความด้านบนได้โดยตรง แล้วกด Enter เพื่อแปลเนื้อหาอื่น",
+    shortcutSettings: "ตั้งค่าคีย์ลัด",
+    confirm: "ยืนยัน",
+    cancel: "ยกเลิก"
   },
   "ar": {
     dlOriginal: "تحميل الترجمة الأصلية",
@@ -3021,7 +3061,10 @@ self.i18nAttach5 = {
     shortcutCopied: "تم نسخ \"about:addons\"، الصق الرابط في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
     shortcutManual: "اكتب \"about:addons\" في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
     firstTimeShortcutHint: "💡 نصيحة: انقر على أيقونة Mira في شريط أدوات المتصفح لإعداد اختصار لوحة المفاتيح",
-    shortcutSettings: "إعدادات الاختصارات"
+    firstTimeEditHint: "💡 نصيحة: يمكنك تعديل النص أعلاه مباشرةً، ثم الضغط على Enter لترجمة محتوى آخر",
+    shortcutSettings: "إعدادات الاختصارات",
+    confirm: "تأكيد",
+    cancel: "إلغاء"
   },
   "fa": {
     dlOriginal: "دانلود زیرنویس اصلی",
@@ -3030,7 +3073,10 @@ self.i18nAttach5 = {
     shortcutCopied: "«about:addons» کپی شد؛ آن را در نوار آدرس جای‌گذاری و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
     shortcutManual: "«about:addons» را در نوار آدرس تایپ و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
     firstTimeShortcutHint: "💡 نکته: روی آیکون Mira در نوار ابزار مرورگر کلیک کنید تا میان‌بر صفحه‌کلید را تنظیم کنید",
-    shortcutSettings: "تنظیمات میان‌برها"
+    firstTimeEditHint: "💡 نکته: می‌توانید متن بالا را مستقیماً ویرایش کنید و برای ترجمه محتوای دیگر Enter را بزنید",
+    shortcutSettings: "تنظیمات میان‌برها",
+    confirm: "تأیید",
+    cancel: "لغو"
   },
   "tr": {
     dlOriginal: "Orijinal altyazıları indir",
@@ -3039,7 +3085,10 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" kopyalandı; adres çubuğuna yapıştırıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
     shortcutManual: "Adres çubuğuna \"about:addons\" yazıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
     firstTimeShortcutHint: "💡 İpucu: Klavye kısayolu ayarlamak için tarayıcı araç çubuğundaki Mira simgesine tıklayın",
-    shortcutSettings: "Kısayol Ayarları"
+    firstTimeEditHint: "💡 İpucu: Yukarıdaki metni doğrudan düzenleyip Enter'a basarak başka bir içeriği çevirebilirsiniz",
+    shortcutSettings: "Kısayol Ayarları",
+    confirm: "Onayla",
+    cancel: "İptal"
   }
 };
 
@@ -3592,40 +3641,170 @@ self.i18nAttach10 = {
 
 self.i18nAttach11 = {
   "zh-CN": {
-    "notice.auth": "请切换授权页完成操作，授权后返回重试。",
+    "quickInputTrans": "输入框翻译",
+    "quickInputTransEnable": "启用（在任意输入框连按 3 次空格触发）",
+    "quickInputTransSource": "源语言（默认自动检测）",
+    "quickInputTransTarget": "目标语言",
+    "engineAssign": "引擎分配",
+    "engineAssignGlobalHint": "全局默认引擎（在主页面切换）",
+    "engineAssignWebpage": "网页翻译",
+    "engineAssignSelection": "划词/悬停翻译",
+    "engineAssignInstant": "即时翻译",
+    "engineAssignQuickInput": "输入框翻译",
+    "engineAssignSubtitle": "YouTube 字幕翻译",
+    "followGlobal": "跟随全局默认",
+    "engineSwitchedWithOverrides": "已切换全局引擎（{names} 使用独立设置，不受影响）"
   },
   "zh-TW": {
-    "notice.auth": "請切換授權頁完成操作，授權後返回重試。",
+    "quickInputTrans": "輸入框翻譯",
+    "quickInputTransEnable": "啟用（在任意輸入框連按 3 次空白鍵觸發）",
+    "quickInputTransSource": "來源語言（預設自動偵測）",
+    "quickInputTransTarget": "目標語言",
+    "engineAssign": "引擎分配",
+    "engineAssignGlobalHint": "全域預設引擎（在主頁面切換）",
+    "engineAssignWebpage": "網頁翻譯",
+    "engineAssignSelection": "劃詞／懸停翻譯",
+    "engineAssignInstant": "即時翻譯",
+    "engineAssignQuickInput": "輸入框翻譯",
+    "engineAssignSubtitle": "YouTube 字幕翻譯",
+    "followGlobal": "跟隨全域預設",
+    "engineSwitchedWithOverrides": "已切換全域引擎（{names} 使用獨立設定，不受影響）"
   },
   "en": {
-    "notice.auth": "Please complete the authorization in the new tab and return here to retry.",
+    "quickInputTrans": "Input Translation",
+    "quickInputTransEnable": "Enable (press the spacebar 3 times in any input field)",
+    "quickInputTransSource": "Source language (auto-detect by default)",
+    "quickInputTransTarget": "Target language",
+    "engineAssign": "Engine Assignment",
+    "engineAssignGlobalHint": "Global Default Engine (switch on the main page)",
+    "engineAssignWebpage": "Webpage Translation",
+    "engineAssignSelection": "Selection / Hover Translation",
+    "engineAssignInstant": "Instant Translation",
+    "engineAssignQuickInput": "Input Translation",
+    "engineAssignSubtitle": "YouTube Subtitle Translation",
+    "followGlobal": "Follow Global Default",
+    "engineSwitchedWithOverrides": "Default engine switched ({names} keep their own setting)"
   },
   "ja": {
-    "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。",
+    "quickInputTrans": "入力欄翻訳",
+    "quickInputTransEnable": "有効にする（任意の入力欄でスペースキーを3回連続で押すと実行）",
+    "quickInputTransSource": "原文の言語（デフォルトは自動検出）",
+    "quickInputTransTarget": "翻訳先の言語",
+    "engineAssign": "エンジンの割り当て",
+    "engineAssignGlobalHint": "グローバル既定エンジン（メイン画面で切り替え）",
+    "engineAssignWebpage": "ウェブページ翻訳",
+    "engineAssignSelection": "選択範囲／ホバー翻訳",
+    "engineAssignInstant": "即時翻訳",
+    "engineAssignQuickInput": "入力欄翻訳",
+    "engineAssignSubtitle": "YouTube 字幕翻訳",
+    "followGlobal": "グローバル既定に従う",
+    "engineSwitchedWithOverrides": "グローバルの既定エンジンを変更しました（{names} は個別の設定がそのまま適用されます）"
   },
   "ko": {
-    "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요.",
+    "quickInputTrans": "입력창 번역",
+    "quickInputTransEnable": "사용 (입력창에서 스페이스바를 3번 연속 누르면 실행)",
+    "quickInputTransSource": "원본 언어 (기본값: 자동 감지)",
+    "quickInputTransTarget": "번역 언어",
+    "engineAssign": "엔진 할당",
+    "engineAssignGlobalHint": "전역 기본 엔진 (메인 화면에서 변경)",
+    "engineAssignWebpage": "웹페이지 번역",
+    "engineAssignSelection": "선택 영역 / 마우스 오버 번역",
+    "engineAssignInstant": "즉시 번역",
+    "engineAssignQuickInput": "입력창 번역",
+    "engineAssignSubtitle": "YouTube 자막 번역",
+    "followGlobal": "전역 기본 설정 따르기",
+    "engineSwitchedWithOverrides": "전역 기본 엔진이 변경되었습니다 ({names}은(는) 개별 설정을 그대로 사용합니다)"
   },
   "pt-BR": {
-    "notice.auth": "Conclua a autorização na nova aba e retorne para tentar novamente.",
+    "quickInputTrans": "Tradução em campos de texto",
+    "quickInputTransEnable": "Ativar (pressione a barra de espaço 3 vezes em qualquer campo de texto)",
+    "quickInputTransSource": "Idioma de origem (detecção automática por padrão)",
+    "quickInputTransTarget": "Idioma de destino",
+    "engineAssign": "Atribuição de mecanismos",
+    "engineAssignGlobalHint": "Mecanismo padrão global (alterado na página principal)",
+    "engineAssignWebpage": "Tradução de páginas da web",
+    "engineAssignSelection": "Tradução de seleção / ao passar o mouse",
+    "engineAssignInstant": "Tradução instantânea",
+    "engineAssignQuickInput": "Tradução em campos de texto",
+    "engineAssignSubtitle": "Tradução de legendas do YouTube",
+    "followGlobal": "Seguir o padrão global",
+    "engineSwitchedWithOverrides": "Mecanismo padrão global alterado ({names} mantêm suas próprias configurações)"
   },
   "fr": {
-    "notice.auth": "Veuillez terminer l'autorisation dans le nouvel onglet et revenir ici pour réessayer.",
+    "quickInputTrans": "Traduction des champs de saisie",
+    "quickInputTransEnable": "Activer (appuyez 3 fois sur la barre d’espace dans n’importe quel champ de saisie)",
+    "quickInputTransSource": "Langue source (détection automatique par défaut)",
+    "quickInputTransTarget": "Langue cible",
+    "engineAssign": "Attribution des moteurs",
+    "engineAssignGlobalHint": "Moteur par défaut global (à modifier sur la page principale)",
+    "engineAssignWebpage": "Traduction des pages web",
+    "engineAssignSelection": "Traduction de sélection / au survol",
+    "engineAssignInstant": "Traduction instantanée",
+    "engineAssignQuickInput": "Traduction des champs de saisie",
+    "engineAssignSubtitle": "Traduction des sous-titres YouTube",
+    "followGlobal": "Suivre le moteur par défaut global",
+    "engineSwitchedWithOverrides": "Moteur par défaut global modifié ({names} conservent leurs propres paramètres)"
   },
   "ru": {
-    "notice.auth": "Завершите авторизацию в новой вкладке и вернитесь, чтобы повторить попытку.",
+    "quickInputTrans": "Перевод в полях ввода",
+    "quickInputTransEnable": "Включить (нажмите пробел 3 раза подряд в любом поле ввода)",
+    "quickInputTransSource": "Исходный язык (по умолчанию определяется автоматически)",
+    "quickInputTransTarget": "Целевой язык",
+    "engineAssign": "Назначение движков",
+    "engineAssignGlobalHint": "Глобальный движок по умолчанию (переключается на главной странице)",
+    "engineAssignWebpage": "Перевод веб-страниц",
+    "engineAssignSelection": "Перевод выделения / при наведении",
+    "engineAssignInstant": "Мгновенный перевод",
+    "engineAssignQuickInput": "Перевод в полях ввода",
+    "engineAssignSubtitle": "Перевод субтитров YouTube",
+    "followGlobal": "Следовать глобальному значению по умолчанию",
+    "engineSwitchedWithOverrides": "Глобальный движок по умолчанию изменён ({names} продолжают использовать собственные настройки)"
   },
   "es": {
-    "notice.auth": "Complete la autorización en la nueva pestaña y regrese aquí para reintentar.",
+    "quickInputTrans": "Traducción en campos de texto",
+    "quickInputTransEnable": "Activar (pulse la barra espaciadora 3 veces en cualquier campo de texto)",
+    "quickInputTransSource": "Idioma de origen (detección automática de forma predeterminada)",
+    "quickInputTransTarget": "Idioma de destino",
+    "engineAssign": "Asignación de motores",
+    "engineAssignGlobalHint": "Motor predeterminado global (se cambia desde la página principal)",
+    "engineAssignWebpage": "Traducción de páginas web",
+    "engineAssignSelection": "Traducción de selección / al pasar el cursor",
+    "engineAssignInstant": "Traducción instantánea",
+    "engineAssignQuickInput": "Traducción en campos de texto",
+    "engineAssignSubtitle": "Traducción de subtítulos de YouTube",
+    "followGlobal": "Seguir el valor predeterminado global",
+    "engineSwitchedWithOverrides": "Se ha cambiado el motor predeterminado global ({names} mantienen su propia configuración)"
   },
   "ar": {
-    "notice.auth": "يرجى إكمال التفويض في علامة التبويب الجديدة والعودة إلى هنا لإعادة المحاولة.",
+    "quickInputTrans": "ترجمة حقول الإدخال",
+    "quickInputTransEnable": "تفعيل (اضغط على مفتاح المسافة 3 مرات متتالية في أي حقل إدخال)",
+    "quickInputTransSource": "لغة المصدر (الاكتشاف التلقائي افتراضيًا)",
+    "quickInputTransTarget": "اللغة المستهدفة",
+    "engineAssign": "تعيين محركات الترجمة",
+    "engineAssignGlobalHint": "محرك الترجمة الافتراضي العام (يمكن تغييره من الصفحة الرئيسية)",
+    "engineAssignWebpage": "ترجمة صفحات الويب",
+    "engineAssignSelection": "ترجمة التحديد / عند تمرير المؤشر",
+    "engineAssignInstant": "الترجمة الفورية",
+    "engineAssignQuickInput": "ترجمة حقول الإدخال",
+    "engineAssignSubtitle": "ترجمة ترجمات YouTube",
+    "followGlobal": "اتباع الإعداد الافتراضي العام",
+    "engineSwitchedWithOverrides": "تم تغيير محرك الترجمة الافتراضي العام ({names} تحتفظ بإعداداتها الخاصة)"
   },
   "fa": {
-    "notice.auth": "لطفاً احراز هویت را در برگه جدید تکمیل کرده و برای تلاش مجدد به اینجا بازگردید.",
-  },
-  "he": {
-    "notice.auth": "אנא השלם את ההרשאה בכרטיסייה החדשה וחזור לכאן כדי לנסות שוב.",
+    "quickInputTrans": "ترجمه کادرهای ورودی",
+    "quickInputTransEnable": "فعال‌سازی (در هر کادر ورودی، کلید فاصله را ۳ بار پشت سر هم فشار دهید)",
+    "quickInputTransSource": "زبان مبدأ (تشخیص خودکار به‌صورت پیش‌فرض)",
+    "quickInputTransTarget": "زبان مقصد",
+    "engineAssign": "تخصیص موتورهای ترجمه",
+    "engineAssignGlobalHint": "موتور پیش‌فرض کلی (تغییر از صفحه اصلی)",
+    "engineAssignWebpage": "ترجمه صفحات وب",
+    "engineAssignSelection": "ترجمه انتخاب / هنگام قرار گرفتن نشانگر روی متن",
+    "engineAssignInstant": "ترجمه فوری",
+    "engineAssignQuickInput": "ترجمه کادرهای ورودی",
+    "engineAssignSubtitle": "ترجمه زیرنویس YouTube",
+    "followGlobal": "پیروی از پیش‌فرض کلی",
+    "engineSwitchedWithOverrides": "موتور پیش‌فرض کلی تغییر کرد ({names} تنظیمات مستقل خود را حفظ می‌کنند)"
   }
 };
+
 

@@ -105,6 +105,13 @@
         "mac": "Alt+Q"
       },
       "description": "__MSG_SHORT_CUT_TRANSLATE_WORD__"
+    },
+    "translate-manual-input": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "__MSG_SHORT_CUT_TRANSLATE_MANUAL__"
     }
   },
   "icons": {

@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "마우스 포인터가 있는 단어 번역"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "입력한 텍스트 번역"
   }
 }

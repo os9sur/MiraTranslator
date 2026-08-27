@@ -179,7 +179,7 @@ body {
 .engine-item {
     margin: 8px 16px;
     padding: 15px 15px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.03) !important;
     border-radius: calc(var(--radius-m) + 5px) !important;
     cursor: pointer;
