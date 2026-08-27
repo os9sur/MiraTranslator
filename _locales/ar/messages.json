@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "ترجمة الكلمة الموجودة تحت المؤشر"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "ترجمة النص المُدخل يدويًا"
   }
 }

@@ -2355,3 +2355,16 @@ yt-attributed-string+.kt-paragraph-translation {
 .engineAssignRow:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
+
+#p-query[contenteditable="true"]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--p-text-main);
+  opacity: 0.4;
+  font-weight: 400;
+  pointer-events: none;
+}
+#p-query:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.45;
+  pointer-events: none;
+}

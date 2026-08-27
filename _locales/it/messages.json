@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "Traduci la parola sotto il cursore"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Traduci il testo inserito manualmente"
   }
 }

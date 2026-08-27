@@ -1279,7 +1279,7 @@ async function setMiraInputText(el, newText) {
 function showMiraQuickTranslateLoading(el, engineAlias = null) {
   const rect = el.getBoundingClientRect();
   const badge = document.createElement('div');
-  badge.textContent = engineAlias ? `${t('loading')} (${engineAlias})` : t('loading');
+  badge.textContent = engineAlias ? `${t('loading', window.uiLanguage)} (${engineAlias})` : t('loading', window.uiLanguage);
   badge.style.cssText = `
     position: fixed;
     left: ${rect.right}px;
@@ -2313,7 +2313,7 @@ function startGenericTranslation() {
           segFont.style.setProperty('margin-bottom', '12px', 'important');
           segFont.style.setProperty('color', 'gray', 'important');
           segFont.style.setProperty('font-style', 'italic', 'important');
-          segFont.innerText = t('loading');
+          segFont.innerText = t('loading', window.uiLanguage);
           seg.appendChild(segFont);
 
           coveredNodes.add(seg);
@@ -2333,7 +2333,7 @@ function startGenericTranslation() {
       font.style.setProperty('margin-top', '4px', 'important');
       font.style.setProperty('color', 'gray', 'important');
       font.style.setProperty('font-style', 'italic', 'important');
-      font.innerText = t('loading');
+      font.innerText = t('loading', window.uiLanguage);
       insertTranslationSafely(el, font);
 
       coveredNodes.add(el);
@@ -2388,7 +2388,7 @@ function startGenericTranslation() {
     font.style.setProperty('margin-left', '4px', 'important');
     font.style.setProperty('color', 'gray', 'important');
     font.style.setProperty('font-style', 'italic', 'important');
-    font.innerText = t('loading');
+    font.innerText = t('loading', window.uiLanguage);
     textNode.parentNode.insertBefore(font, textNode.nextSibling);
     coveredNodes.add(el);
     TranslationBatcher.add({ el, text: textNode.textContent.trim(), container: font, linkMap: [] });
@@ -4966,10 +4966,12 @@ function initSelectionTranslate() {
     startY,
     initialX,
     initialY;
+
   let shadowHost = null,
     popupEl = null,
     logoBtn = null;
   let closeTimer = null;
+  let popupPosToken = 0;
   function clampPopupToViewport(el) {
     const margin = 10;
     const rect = el.getBoundingClientRect();
@@ -5327,16 +5329,29 @@ function initSelectionTranslate() {
       .panel:hover                  { animation-duration: 3s !important; }
       :host([theme="light"]) .panel:hover { animation-duration: 4s !important; }
 
-      
-
+     /*动画问题导致定位异常, 这个问题解决的过程很麻烦, 记录一下*/
       .is-hidden {
-        opacity: 0 !important;
-        transform: scale(0.06, 0.02) translateY(4px) !important;
-        pointer-events: none !important;
-        transition:
-            transform 0.35s cubic-bezier(0.55, 0, 1, 0.45),
-            opacity 0.28s ease-in 0.05s !important;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none; 
      }
+
+      #p-query[contenteditable="true"]:empty::before {
+        content: attr(data-placeholder);
+        color: var(--p-text-muted);
+        opacity: 0.6;
+        font-weight: 400;
+      }
+      #p-query[contenteditable="true"] {
+        cursor: text;
+        border-radius: 6px;
+        padding: 2px 4px;
+        margin: -2px -4px;
+        transition: background 0.2s ease;
+      }
+      #p-query[contenteditable="true"]:focus {
+        background: color-mix(in srgb, var(--p-accent) 8%, transparent);
+      }
 
       /* ── 拖拽区 ── */
       #drag-zone {
@@ -6553,34 +6568,76 @@ function initSelectionTranslate() {
 
   async function maybeShowShortcutHint() {
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice) return;
+    if (isTouchDevice) return false;
 
     const storage = await safeGetStorage(['hasShownShortcutHint']);
-    if (storage?.hasShownShortcutHint) return;
+    if (storage?.hasShownShortcutHint) return false;
     await safeSetStorage({ hasShownShortcutHint: true });
 
     setTimeout(() => {
-      showToast(t('firstTimeShortcutHint'), 'info', 5000);
+      showToast(t('firstTimeShortcutHint', window.uiLanguage), 'info', 5000);
     }, 1000);
+    return true;
+  }
+  async function maybeShowEditHint(isManualInputMode) {
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) return false;
+    if (isManualInputMode) return false;
+
+    const storage = await safeGetStorage(['hasShownEditHint']);
+    if (storage?.hasShownEditHint) return false;
+    await safeSetStorage({ hasShownEditHint: true });
+
+    setTimeout(() => {
+      showToast(t('firstTimeEditHint', window.uiLanguage), 'info', 5000);
+    }, 1000);
+    return true;
+  }
+  //diaodu
+  let lastHintShownAt = 0;
+  const HINT_COOLDOWN_MS = 60 * 1000; // 两次提示至少间隔 60 秒，天然错开到不同的弹窗
+
+  async function maybeShowFirstUseHint(isManualInputMode) {
+    const now = Date.now();
+    if (now - lastHintShownAt < HINT_COOLDOWN_MS) return;
+
+    const shownShortcut = await maybeShowShortcutHint();
+    if (shownShortcut) {
+      lastHintShownAt = now;
+      return;
+    }
+
+    const shownEdit = await maybeShowEditHint(isManualInputMode);
+    if (shownEdit) lastHintShownAt = now;
   }
 
 
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
+
   async function renderAndShowPopup(
     text,
     pos,
     shadow,
     manualLang = "auto",
     hintSourceLang = null,
+    { manualInput = false } = {},
   ) {
+
+    const myPosToken = ++popupPosToken;   //  记录本次定位请求的令牌
     const state = {
       sourceLang: hintSourceLang || "auto",
       targetLang:
         window.currentTargetL || manualLang || getBrowserLang() || "en",
     };
     const isPinnedNow = shadowHost.getAttribute("data-pinned") === "true";
+
     const wordText = text.trim();
+    const isManualInputMode =
+      manualInput ||
+      shadowHost.getAttribute("data-manual-input") === "true";
+
     shadowHost.setAttribute("data-current-word", wordText);
+    if (!manualInput) shadowHost.removeAttribute("data-manual-input");
     const engineInfo = await safeGetStorage(["activeConfig", "selectedEngine", "_defaultEngine"]);
     const selectionOverride = await getMiraEngineOverride('selection');
     const currentEngineId =
@@ -6589,8 +6646,13 @@ function initSelectionTranslate() {
       engineInfo?.selectedEngine ||
       engineInfo?._defaultEngine ||
       "google";
-    let translateMode = "context"; // 每次新开弹窗都重置为默认上下文模式
-    const showDictToggle = isAIEngine(currentEngineId) && isWordText(wordText);
+    // 手动输入模式没有"选中上下文"的概念，直接固定为词典模式，且不显示切换按钮
+    let translateMode = isManualInputMode ? "dictionary" : "context";
+
+    const showDictToggle =
+      !isManualInputMode &&
+      isAIEngine(currentEngineId) &&
+      isWordText(wordText);
 
     const targetPrefix = (window.currentTargetL || "")
       .toLowerCase()
@@ -6624,7 +6686,8 @@ function initSelectionTranslate() {
     direction:${isRTL ? "rtl" : "ltr"};
     text-align:${isRTL ? "right" : "left"};`;
 
-    contentContainer.innerHTML = buildContentHTML(text, isSaved, showDictToggle);
+    contentContainer.innerHTML =
+      buildContentHTML(text, isSaved, showDictToggle, isManualInputMode);
     // 异步读取上次保存的源语言并更新显示
     safeGetStorage("lpLangA").then((res) => {
       const saved = res?.lpLangA;
@@ -6684,7 +6747,7 @@ function initSelectionTranslate() {
     const pQuery = shadow.getElementById("p-query");
     if (!pQuery?.style) {
       // DOM 不完整，重新构建内容区
-      contentContainer.innerHTML = buildContentHTML(text, isSaved, showDictToggle);
+      contentContainer.innerHTML = buildContentHTML(text, isSaved, showDictToggle, isManualInputMode)
       // 重新获取
       const pQueryRetry = shadow.getElementById("p-query");
       if (!pQueryRetry?.style) return;
@@ -6697,27 +6760,39 @@ function initSelectionTranslate() {
     setPanelGlowColor(popupEl);
 
     // 定位
-    if (!isPinnedNow) {
-      popupEl.style.visibility = "hidden"; // 先隐藏，避免左上角闪烁
+    // 未固定时，每次重新划词都根据新的选区位置重新定位。
+    // 只有固定状态下，才保持用户拖动后的位置。
+    if (!isPinnedNow && !manualInput) {
+      popupEl.style.visibility = "hidden";
+
+
       requestAnimationFrame(() => {
+        if (myPosToken !== popupPosToken) return;   //  已经有更新的划词请求，放弃本次定位
+
         const pw = popupEl.offsetWidth || 300;
         const ph = popupEl.offsetHeight || 200;
+
         let left = Math.max(
           10,
           Math.min(pos.clientX + 10, window.innerWidth - pw - 20),
         );
+
         let top =
           pos.clientY + ph + 15 > window.innerHeight - 20
             ? pos.clientY - ph - 15
             : pos.clientY + 15;
+
         top = Math.max(10, top);
+
         popupEl.style.left = left + "px";
         popupEl.style.top = top + "px";
-        clampPopupToViewport(popupEl);
-        popupEl.style.visibility = "visible"; //  定位完成后再显示
-      });
 
+        clampPopupToViewport(popupEl);
+
+        popupEl.style.visibility = "visible";
+      });
     } else {
+      // 固定状态：保持用户当前拖动后的位置
       popupEl.style.visibility = "visible";
     }
 
@@ -6729,6 +6804,7 @@ function initSelectionTranslate() {
       const existingDropdown = shadowHost.shadowRoot.getElementById("p-lang-dropdown");
       if (existingDropdown) existingDropdown.remove();
       shadowHost.setAttribute("data-pinned", "false");
+      shadowHost.removeAttribute("data-manual-input");
       stopSpeech();
       closePopup();
     };
@@ -6745,6 +6821,42 @@ function initSelectionTranslate() {
       e.stopPropagation();
       updatePinUI(shadowHost.getAttribute("data-pinned") !== "true");
     };
+
+
+    // p-query 始终支持 Enter 重新翻译
+    const queryEl = shadow.getElementById("p-query");
+
+    if (queryEl) {
+      // 输入内容变化
+      queryEl.oninput = () => {
+        // contenteditable 清空后可能残留 <br>，统一清理
+        if (!queryEl.textContent.trim()) {
+          queryEl.innerHTML = "";
+        }
+      };
+
+      // Enter 重新翻译
+      queryEl.onkeydown = (e) => {
+        if (e.key !== "Enter" || e.shiftKey) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const inputText = queryEl.textContent.trim();
+        if (!inputText) return;
+
+        shadowHost.setAttribute("data-manual-input", "true");
+
+        renderAndShowPopup(
+          inputText,
+          pos,
+          shadow,
+          window.currentTargetL || getBrowserLang() || "en",
+          null,
+          { manualInput: true }
+        );
+      };
+    }
 
     // 发音 
     shadow.getElementById("p-speak").onclick = (e) => {
@@ -7410,6 +7522,16 @@ function initSelectionTranslate() {
     const basicEl = shadow?.getElementById("p-basic");
     if (!basicEl?.style) return;
 
+    // 手动输入模式下，初次打开文本为空，不进入 loading 状态，等待用户输入
+    if (manualInput && !wordText) {
+      setActionBtns(shadow, false);
+      requestAnimationFrame(() => {
+        const inputEl = shadow.getElementById("p-query");
+        if (inputEl) inputEl.focus();
+      });
+      return;
+    }
+
     //  刷新时重置状态，允许新的 partial/完整消息正常处理
     if (shadowHost) {
       shadowHost._detailFullyRendered = false;
@@ -7563,8 +7685,8 @@ function initSelectionTranslate() {
             null,
             shadowHost._effectiveHintLang || result?.langInfo?.code || null,
           );
-          //  首次划词翻译完成后，提示快捷键设置
-          maybeShowShortcutHint();
+          //  首次划词翻译完成后，提示快捷键设置/直接快速翻译
+          maybeShowFirstUseHint(isManualInputMode);
         }
       })
       .catch((err) => {
@@ -7585,9 +7707,29 @@ function initSelectionTranslate() {
     requestAnimationFrame(() => { clampPopupToViewport?.(popupEl); });
   }
 
+  async function openManualInputPopup() {
+    if (!shadowHost) initShadowDOM();
+
+    // 如果面板已经显示且正处于手动输入模式，直接聚焦输入框，不重复渲染
+    const shadow = shadowHost.shadowRoot;
+    if (popupEl.style.display !== "none" && shadowHost.getAttribute("data-manual-input") === "true") {
+      shadow.getElementById("p-query")?.focus();
+      return;
+    }
+
+    shadowHost.setAttribute("data-manual-input", "true");
+
+    // 默认展示位置：屏幕居中偏上，避免挡住正在看的内容
+    const pos = {
+      clientX: window.innerWidth / 2 - 150,
+      clientY: Math.max(80, window.innerHeight * 0.25),
+    };
+
+    await renderAndShowPopup("", pos, shadow, window.currentTargetL || getBrowserLang() || "en", null, { manualInput: true });
+  }
   // ─── 内容 HTML 模板 ──
 
-  function buildContentHTML(text, isSaved, showDictToggle = false) {
+  function buildContentHTML(text, isSaved, showDictToggle = false, manualInput = false) {
     const isMultiline = text.length > 40 || text.includes("\n");
     const targetLang = (
       window.currentTargetL ||
@@ -7598,7 +7740,7 @@ function initSelectionTranslate() {
       LANG_DISPLAY[targetLang] || targetLang.toUpperCase().slice(0, 2);
 
     return `
-    <div style="line-height:1.4; display:flex; flex-direction:column; gap:8px;margin-top:4px;">
+    <div dir="auto" style="line-height:1.4; display:flex; flex-direction:column; gap:8px;margin-top:4px;">
       <div id="p-tools-header" style="display:flex; align-items:center; justify-content:space-between; width:100%; padding-bottom:4px; border-bottom:1px solid var(--p-border);">
 
         <div style="display:inline-flex; align-items:center; gap:2px;white-space:nowrap; background:color-mix(in srgb, var(--p-accent) 10%, transparent); border-radius:28px; padding:3px;">
@@ -7659,10 +7801,11 @@ function initSelectionTranslate() {
         </div>
       </div>
 
-    <div id="p-query-container" style="padding: 4px 2px 0;">
-      <div id="p-query" class="mira-font-family" style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); word-break:break-word; overflow-wrap:break-word; line-height:1.3;">
-        ${text}
-      </div>
+        <div id="p-query-container" style="padding: 4px 2px 0;">
+    <div id="p-query" class="mira-font-family" dir="auto" 
+  contenteditable="true"
+  data-placeholder="${esc(t("inputAndEnter") || "Type or paste text, then press Enter")}"
+  style="font-size:${isMultiline ? '18px' : '22px'}; font-weight:700; color:var(--p-text-main); word-break:break-word; overflow-wrap:break-word; line-height:1.3; outline:none;">${esc(text)}</div>
       
       <div style="display: flex;  align-items: center; margin-top: 4px;">
         <div id="p-phonetic" style="color:var(--p-phonetic); font-size:13px; opacity:0.6; font-family:sans-serif;  word-break:break-word;"></div>
@@ -7680,7 +7823,7 @@ function initSelectionTranslate() {
   </div>
 
       <div id="p-result-container" style="display:flex; flex-direction:column; gap:6px;">
-       <div id="p-basic" class="basic" style="font-size:18px;font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif !important; color:var(--p-accent); font-weight:500;">Loading...</div>
+       <div id="p-basic" class="basic" style="font-size:18px;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei','Segoe UI',Roboto,sans-serif !important;color:var(--p-accent);font-weight:500;"></div>
         <div id="p-detail" class="detail" style="display:none; margin-top:2px;"></div>
         <div id="p-examples" style="display:none; margin-top:4px;"></div>
       </div>
@@ -9114,6 +9257,11 @@ function initSelectionTranslate() {
         forceTranslateWordAtCursor(__miraLastMouseX, __miraLastMouseY);
       } else {
         logger.warn('[Mira Debug] forceTranslateWordAtCursor 未定义');
+      }
+      sendResponse({ status: "ok" });
+    } else if (msg.action === "TRANSLATE_MANUAL_INPUT") {
+      if (typeof openManualInputPopup === "function") {
+        openManualInputPopup();
       }
       sendResponse({ status: "ok" });
     }

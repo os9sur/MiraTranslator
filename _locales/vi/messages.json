@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "Dịch từ dưới con trỏ chuột"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Dịch văn bản nhập thủ công"
   }
 }

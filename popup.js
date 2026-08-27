@@ -1583,6 +1583,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const success = await safeSetStorage({ ui_language: selectedLang });
       if (success) {
         globalUiLang = selectedLang;
+        window.uiLanguage = selectedLang;
         applyI18n(selectedLang);
         const menu = document.getElementById('advancedMenu');
         if (menu) menu.style.display = 'none';
@@ -3425,9 +3426,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (overriddenFeatures.length > 0) {
       const names = overriddenFeatures
-        .map((f) => t(featureLabelKeys[f]) || f)
+        .map((f) => t(featureLabelKeys[f], globalUiLang) || f)
         .join(' / ');
-      const msg = (t('engineSwitchedWithOverrides') || '已切换全局引擎（{names} 使用独立设置，不受影响）')
+      const msg = (t('engineSwitchedWithOverrides', globalUiLang) || '已切换全局引擎（{names} 使用独立设置，不受影响）')
         .replace('{names}', names);
       showToast(msg, 'info');
     }

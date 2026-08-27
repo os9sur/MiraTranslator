@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "İmlecin bulunduğu kelimeyi çevir"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Manuel girilen metni çevir"
   }
 }

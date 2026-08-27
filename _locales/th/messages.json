@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "แปลคำที่เคอร์เซอร์ชี้อยู่"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "แปลข้อความที่ป้อนด้วยตนเอง"
   }
 }

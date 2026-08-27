@@ -2905,6 +2905,7 @@ self.i18nAttach5 = {
     shortcutCopied: "已复制 about:addons，请粘贴到地址栏打开，右上角齿轮图标里可设置快捷键",
     shortcutManual: "请在地址栏输入 about:addons 打开，右上角齿轮图标里可设置快捷键",
     firstTimeShortcutHint: "💡 小提示：点击浏览器工具栏上的 Mira 图标，可以设置划词翻译快捷键",
+    firstTimeEditHint: "💡 可直接修改上方文本，按 Enter 翻译其他内容",
     shortcutSettings: "快捷键设置",
     confirm: "确定",
     cancel: "取消"
@@ -2916,6 +2917,7 @@ self.i18nAttach5 = {
     shortcutCopied: "已複製 about:addons，請貼到網址列開啟，右上角齒輪圖示可設定快捷鍵",
     shortcutManual: "請在網址列輸入 about:addons 開啟，右上角齒輪圖示可設定快捷鍵",
     firstTimeShortcutHint: "💡 小提示：點擊瀏覽器工具列上的 Mira 圖示，可以設定劃詞翻譯快捷鍵",
+    firstTimeEditHint: "💡 可直接修改上方文字，按 Enter 翻譯其他內容",
     shortcutSettings: "快捷鍵設定",
     confirm: "確定",
     cancel: "取消"
@@ -2927,6 +2929,7 @@ self.i18nAttach5 = {
     shortcutCopied: "Copied \"about:addons\" — paste it into the address bar, then set your shortcut via the gear icon in the top right",
     shortcutManual: "Type \"about:addons\" into the address bar, then set your shortcut via the gear icon in the top right",
     firstTimeShortcutHint: "💡 Tip: Click the Mira icon in your browser toolbar to set up a keyboard shortcut",
+    firstTimeEditHint: "💡 Tip: Edit the text above directly, then press Enter to translate something else",
     shortcutSettings: "Shortcut Settings",
     confirm: "OK",
     cancel: "Cancel"
@@ -2938,6 +2941,7 @@ self.i18nAttach5 = {
     shortcutCopied: "「about:addons」をコピーしました。アドレスバーに貼り付けて開き、右上の歯車アイコンからショートカットを設定してください",
     shortcutManual: "アドレスバーに「about:addons」と入力して開き、右上の歯車アイコンからショートカットを設定してください",
     firstTimeShortcutHint: "💡 ヒント：ツールバーのMiraアイコンをクリックすると、ショートカットキーを設定できます",
+    firstTimeEditHint: "💡 ヒント：上のテキストを直接編集して、Enterキーを押すと別の内容を翻訳できます",
     shortcutSettings: "ショートカット設定",
     confirm: "確定",
     cancel: "キャンセル"
@@ -2949,6 +2953,7 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\"가 복사되었습니다. 주소창에 붙여넣어 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
     shortcutManual: "주소창에 \"about:addons\"를 입력하여 열고, 오른쪽 상단 톱니바퀴 아이콘에서 단축키를 설정하세요",
     firstTimeShortcutHint: "💡 팁: 브라우저 툴바의 Mira 아이콘을 클릭하면 단축키를 설정할 수 있어요",
+    firstTimeEditHint: "💡 팁: 위의 텍스트를 직접 수정한 후 Enter 키를 누르면 다른 내용을 번역할 수 있어요",
     shortcutSettings: "단축키 설정",
     confirm: "확인",
     cancel: "취소"
@@ -2960,6 +2965,7 @@ self.i18nAttach5 = {
     shortcutCopied: "Se copió \"about:addons\": pégalo en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
     shortcutManual: "Escribe \"about:addons\" en la barra de direcciones y configura el atajo desde el icono de engranaje arriba a la derecha",
     firstTimeShortcutHint: "💡 Consejo: haz clic en el icono de Mira en la barra de herramientas para configurar un atajo de teclado",
+    firstTimeEditHint: "💡 Consejo: puedes editar directamente el texto de arriba y pulsar Enter para traducir otro contenido",
     shortcutSettings: "Configuración de atajos",
     confirm: "Aceptar",
     cancel: "Cancelar"
@@ -2971,6 +2977,7 @@ self.i18nAttach5 = {
     shortcutCopied: "« about:addons » copié : collez-le dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
     shortcutManual: "Saisissez « about:addons » dans la barre d'adresse, puis configurez le raccourci via l'icône d'engrenage en haut à droite",
     firstTimeShortcutHint: "💡 Astuce : cliquez sur l'icône Mira dans la barre d'outils pour configurer un raccourci clavier",
+    firstTimeEditHint: "💡 Astuce : modifiez directement le texte ci-dessus, puis appuyez sur Entrée pour traduire autre chose",
     shortcutSettings: "Paramètres des raccourcis",
     confirm: "Confirmer",
     cancel: "Annuler"
@@ -2982,6 +2989,7 @@ self.i18nAttach5 = {
     shortcutCopied: "„about:addons“ kopiert – in die Adressleiste einfügen und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
     shortcutManual: "„about:addons“ in die Adressleiste eingeben und öffnen, dann über das Zahnradsymbol oben rechts die Tastenkombination festlegen",
     firstTimeShortcutHint: "💡 Tipp: Klicke auf das Mira-Symbol in der Symbolleiste, um eine Tastenkombination festzulegen",
+    firstTimeEditHint: "💡 Tipp: Du kannst den Text oben direkt bearbeiten und mit der Eingabetaste andere Inhalte übersetzen",
     shortcutSettings: "Tastenkombinationen-Einstellungen",
     confirm: "Bestätigen",
     cancel: "Abbrechen"
@@ -2993,6 +3001,7 @@ self.i18nAttach5 = {
     shortcutCopied: "Скопировано «about:addons» — вставьте в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
     shortcutManual: "Введите «about:addons» в адресную строку и откройте, затем настройте сочетание клавиш через значок шестерёнки в правом верхнем углу",
     firstTimeShortcutHint: "💡 Совет: нажмите на значок Mira на панели инструментов браузера, чтобы настроить сочетание клавиш",
+    firstTimeEditHint: "💡 Совет: можно изменить текст выше и нажать Enter, чтобы перевести другой текст",
     shortcutSettings: "Настройки сочетаний клавиш",
     confirm: "Подтвердить",
     cancel: "Отмена"
@@ -3004,6 +3013,7 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" copiado: cole na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
     shortcutManual: "Digite \"about:addons\" na barra de endereços e abra, depois configure o atalho pelo ícone de engrenagem no canto superior direito",
     firstTimeShortcutHint: "💡 Dica: clique no ícone do Mira na barra de ferramentas do navegador para configurar um atalho de teclado",
+    firstTimeEditHint: "💡 Dica: edite diretamente o texto acima e pressione Enter para traduzir outro conteúdo",
     shortcutSettings: "Configurações de atalhos",
     confirm: "Confirmar",
     cancel: "Cancelar"
@@ -3015,6 +3025,7 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" copiato: incollalo nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
     shortcutManual: "Digita \"about:addons\" nella barra degli indirizzi e apri, poi imposta la scorciatoia dall'icona a forma di ingranaggio in alto a destra",
     firstTimeShortcutHint: "💡 Suggerimento: clicca sull'icona di Mira nella barra degli strumenti per impostare una scorciatoia da tastiera",
+    firstTimeEditHint: "💡 Suggerimento: modifica direttamente il testo qui sopra e premi Invio per tradurre altro contenuto",
     shortcutSettings: "Impostazioni scorciatoie",
     confirm: "Conferma",
     cancel: "Annulla"
@@ -3026,6 +3037,7 @@ self.i18nAttach5 = {
     shortcutCopied: "Đã sao chép \"about:addons\", hãy dán vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
     shortcutManual: "Nhập \"about:addons\" vào thanh địa chỉ để mở, sau đó thiết lập phím tắt qua biểu tượng bánh răng ở góc trên bên phải",
     firstTimeShortcutHint: "💡 Mẹo: nhấp vào biểu tượng Mira trên thanh công cụ trình duyệt để thiết lập phím tắt",
+    firstTimeEditHint: "💡 Mẹo: bạn có thể sửa trực tiếp nội dung ở trên, rồi nhấn Enter để dịch nội dung khác",
     shortcutSettings: "Cài đặt phím tắt",
     confirm: "Xác nhận",
     cancel: "Hủy"
@@ -3037,6 +3049,7 @@ self.i18nAttach5 = {
     shortcutCopied: "คัดลอก \"about:addons\" แล้ว วางในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
     shortcutManual: "พิมพ์ \"about:addons\" ในแถบที่อยู่แล้วเปิด จากนั้นตั้งค่าคีย์ลัดที่ไอคอนรูปเฟืองมุมขวาบน",
     firstTimeShortcutHint: "💡 เคล็ดลับ: คลิกไอคอน Mira บนแถบเครื่องมือของเบราว์เซอร์เพื่อตั้งค่าคีย์ลัด",
+    firstTimeEditHint: "💡 เคล็ดลับ: แก้ไขข้อความด้านบนได้โดยตรง แล้วกด Enter เพื่อแปลเนื้อหาอื่น",
     shortcutSettings: "ตั้งค่าคีย์ลัด",
     confirm: "ยืนยัน",
     cancel: "ยกเลิก"
@@ -3048,6 +3061,7 @@ self.i18nAttach5 = {
     shortcutCopied: "تم نسخ \"about:addons\"، الصق الرابط في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
     shortcutManual: "اكتب \"about:addons\" في شريط العنوان وافتحه، ثم اضبط الاختصار من أيقونة الترس أعلى يمين الصفحة",
     firstTimeShortcutHint: "💡 نصيحة: انقر على أيقونة Mira في شريط أدوات المتصفح لإعداد اختصار لوحة المفاتيح",
+    firstTimeEditHint: "💡 نصيحة: يمكنك تعديل النص أعلاه مباشرةً، ثم الضغط على Enter لترجمة محتوى آخر",
     shortcutSettings: "إعدادات الاختصارات",
     confirm: "تأكيد",
     cancel: "إلغاء"
@@ -3059,6 +3073,7 @@ self.i18nAttach5 = {
     shortcutCopied: "«about:addons» کپی شد؛ آن را در نوار آدرس جای‌گذاری و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
     shortcutManual: "«about:addons» را در نوار آدرس تایپ و باز کنید، سپس میان‌بر را از آیکون چرخ‌دنده بالا سمت راست تنظیم کنید",
     firstTimeShortcutHint: "💡 نکته: روی آیکون Mira در نوار ابزار مرورگر کلیک کنید تا میان‌بر صفحه‌کلید را تنظیم کنید",
+    firstTimeEditHint: "💡 نکته: می‌توانید متن بالا را مستقیماً ویرایش کنید و برای ترجمه محتوای دیگر Enter را بزنید",
     shortcutSettings: "تنظیمات میان‌برها",
     confirm: "تأیید",
     cancel: "لغو"
@@ -3070,6 +3085,7 @@ self.i18nAttach5 = {
     shortcutCopied: "\"about:addons\" kopyalandı; adres çubuğuna yapıştırıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
     shortcutManual: "Adres çubuğuna \"about:addons\" yazıp açın, ardından sağ üstteki dişli simgesinden kısayolu ayarlayın",
     firstTimeShortcutHint: "💡 İpucu: Klavye kısayolu ayarlamak için tarayıcı araç çubuğundaki Mira simgesine tıklayın",
+    firstTimeEditHint: "💡 İpucu: Yukarıdaki metni doğrudan düzenleyip Enter'a basarak başka bir içeriği çevirebilirsiniz",
     shortcutSettings: "Kısayol Ayarları",
     confirm: "Onayla",
     cancel: "İptal"

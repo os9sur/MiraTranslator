@@ -784,7 +784,13 @@ function getCacheKey(text, engine, lang, mode = 'context', instanceId = null) {
   const fingerprint = getContentFingerprint(text, lang, mode);
   return `tr_${engineIdentifier}_${fingerprint}`;
 }
-
+function esc(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 /**
  * 获取详细翻译结果
  * 适配多级数据结构：基础译文、音标、详细词典释义

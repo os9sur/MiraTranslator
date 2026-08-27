@@ -43,5 +43,8 @@
   },
   "SHORT_CUT_TRANSLATE_WORD": {
     "message": "Translate Word Under Cursor"
+  },
+  "SHORT_CUT_TRANSLATE_MANUAL": {
+    "message": "Translate Manually Entered Text"
   }
 }

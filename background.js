@@ -4585,6 +4585,7 @@ chrome.commands.onCommand.addListener((command) => {
     const actionMap = {
         "translate-hover-target": "TRANSLATE_HOVER_TARGET",
         "translate-hover-word": "TRANSLATE_HOVER_WORD",
+        "translate-manual-input": "TRANSLATE_MANUAL_INPUT",
     };
     const action = actionMap[command];
     if (!action) return;
