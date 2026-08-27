@@ -3638,7 +3638,6 @@ self.i18nAttach10 = {
   },
 };
 
-
 self.i18nAttach11 = {
   "zh-CN": {
     "quickInputTrans": "输入框翻译",
@@ -3653,7 +3652,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "输入框翻译",
     "engineAssignSubtitle": "YouTube 字幕翻译",
     "followGlobal": "跟随全局默认",
-    "engineSwitchedWithOverrides": "已切换全局引擎（{names} 使用独立设置，不受影响）"
+    "engineSwitchedWithOverrides": "已切换全局引擎（{names} 使用独立设置，不受影响）",
+    "notice.auth": "请切换授权页完成操作，授权后返回重试。"
   },
   "zh-TW": {
     "quickInputTrans": "輸入框翻譯",
@@ -3668,7 +3668,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "輸入框翻譯",
     "engineAssignSubtitle": "YouTube 字幕翻譯",
     "followGlobal": "跟隨全域預設",
-    "engineSwitchedWithOverrides": "已切換全域引擎（{names} 使用獨立設定，不受影響）"
+    "engineSwitchedWithOverrides": "已切換全域引擎（{names} 使用獨立設定，不受影響）",
+    "notice.auth": "請切換授權頁完成操作，授權後返回重試。"
   },
   "en": {
     "quickInputTrans": "Input Translation",
@@ -3683,7 +3684,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "Input Translation",
     "engineAssignSubtitle": "YouTube Subtitle Translation",
     "followGlobal": "Follow Global Default",
-    "engineSwitchedWithOverrides": "Default engine switched ({names} keep their own setting)"
+    "engineSwitchedWithOverrides": "Default engine switched ({names} keep their own setting)",
+    "notice.auth": "Please complete the authorization in the new tab and return here to retry."
   },
   "ja": {
     "quickInputTrans": "入力欄翻訳",
@@ -3698,7 +3700,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "入力欄翻訳",
     "engineAssignSubtitle": "YouTube 字幕翻訳",
     "followGlobal": "グローバル既定に従う",
-    "engineSwitchedWithOverrides": "グローバルの既定エンジンを変更しました（{names} は個別の設定がそのまま適用されます）"
+    "engineSwitchedWithOverrides": "グローバルの既定エンジンを変更しました（{names} は個別の設定がそのまま適用されます）",
+    "notice.auth": "認証ページで操作を完了し、元のページに戻ってやり直してください。"
   },
   "ko": {
     "quickInputTrans": "입력창 번역",
@@ -3713,7 +3716,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "입력창 번역",
     "engineAssignSubtitle": "YouTube 자막 번역",
     "followGlobal": "전역 기본 설정 따르기",
-    "engineSwitchedWithOverrides": "전역 기본 엔진이 변경되었습니다 ({names}은(는) 개별 설정을 그대로 사용합니다)"
+    "engineSwitchedWithOverrides": "전역 기본 엔진이 변경되었습니다 ({names}은(는) 개별 설정을 그대로 사용합니다)",
+    "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요."
   },
   "pt-BR": {
     "quickInputTrans": "Tradução em campos de texto",
@@ -3728,7 +3732,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "Tradução em campos de texto",
     "engineAssignSubtitle": "Tradução de legendas do YouTube",
     "followGlobal": "Seguir o padrão global",
-    "engineSwitchedWithOverrides": "Mecanismo padrão global alterado ({names} mantêm suas próprias configurações)"
+    "engineSwitchedWithOverrides": "Mecanismo padrão global alterado ({names} mantêm suas próprias configurações)",
+    "notice.auth": "Conclua a autorização na nova aba e retorne para tentar novamente."
   },
   "fr": {
     "quickInputTrans": "Traduction des champs de saisie",
@@ -3743,7 +3748,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "Traduction des champs de saisie",
     "engineAssignSubtitle": "Traduction des sous-titres YouTube",
     "followGlobal": "Suivre le moteur par défaut global",
-    "engineSwitchedWithOverrides": "Moteur par défaut global modifié ({names} conservent leurs propres paramètres)"
+    "engineSwitchedWithOverrides": "Moteur par défaut global modifié ({names} conservent leurs propres paramètres)",
+    "notice.auth": "Veuillez terminer l'autorisation dans le nouvel onglet et revenir ici pour réessayer."
   },
   "ru": {
     "quickInputTrans": "Перевод в полях ввода",
@@ -3758,7 +3764,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "Перевод в полях ввода",
     "engineAssignSubtitle": "Перевод субтитров YouTube",
     "followGlobal": "Следовать глобальному значению по умолчанию",
-    "engineSwitchedWithOverrides": "Глобальный движок по умолчанию изменён ({names} продолжают использовать собственные настройки)"
+    "engineSwitchedWithOverrides": "Глобальный движок по умолчанию изменён ({names} продолжают использовать собственные настройки)",
+    "notice.auth": "Завершите авторизацию в новой вкладке и вернитесь, чтобы повторить попытку."
   },
   "es": {
     "quickInputTrans": "Traducción en campos de texto",
@@ -3773,7 +3780,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "Traducción en campos de texto",
     "engineAssignSubtitle": "Traducción de subtítulos de YouTube",
     "followGlobal": "Seguir el valor predeterminado global",
-    "engineSwitchedWithOverrides": "Se ha cambiado el motor predeterminado global ({names} mantienen su propia configuración)"
+    "engineSwitchedWithOverrides": "Se ha cambiado el motor predeterminado global ({names} mantienen su propia configuración)",
+    "notice.auth": "Complete la autorización en la nueva pestaña y regrese aquí para reintentar."
   },
   "ar": {
     "quickInputTrans": "ترجمة حقول الإدخال",
@@ -3788,7 +3796,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "ترجمة حقول الإدخال",
     "engineAssignSubtitle": "ترجمة ترجمات YouTube",
     "followGlobal": "اتباع الإعداد الافتراضي العام",
-    "engineSwitchedWithOverrides": "تم تغيير محرك الترجمة الافتراضي العام ({names} تحتفظ بإعداداتها الخاصة)"
+    "engineSwitchedWithOverrides": "تم تغيير محرك الترجمة الافتراضي العام ({names} تحتفظ بإعداداتها الخاصة)",
+    "notice.auth": "يرجى إكمال التفويض في علامة التبويب الجديدة والعودة إلى هنا لإعادة المحاولة."
   },
   "fa": {
     "quickInputTrans": "ترجمه کادرهای ورودی",
@@ -3803,8 +3812,8 @@ self.i18nAttach11 = {
     "engineAssignQuickInput": "ترجمه کادرهای ورودی",
     "engineAssignSubtitle": "ترجمه زیرنویس YouTube",
     "followGlobal": "پیروی از پیش‌فرض کلی",
-    "engineSwitchedWithOverrides": "موتور پیش‌فرض کلی تغییر کرد ({names} تنظیمات مستقل خود را حفظ می‌کنند)"
-  }
+    "engineSwitchedWithOverrides": "موتور پیش‌فرض کلی تغییر کرد ({names} تنظیمات مستقل خود را حفظ می‌کنند)",
+    "notice.auth": "لطفاً احراز هویت را در برگه جدید تکمیل کرده و برای تلاش مجدد به اینجا بازگردید."
+  },
 };
-
 
