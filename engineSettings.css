@@ -454,30 +454,42 @@ body {
 }
 
 .btn-test,
-.btn-save {
-    width: auto !important;
+.btn-save,
+.btn-enable {
+    width: 150px !important;
+    min-width: 150px !important;
+    max-width: 150px !important;
+
     height: 44px !important;
+
     border-radius: 8px !important;
     padding: 10px 20px !important;
+    box-sizing: border-box !important;
+
     font-size: 13px;
     font-weight: 600 !important;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     white-space: nowrap;
     position: relative;
     overflow: hidden;
-    flex: 0 1 auto !important;
-    min-width: 120px;
+
+    flex: 0 0 150px !important;
 }
 
 .btn-test {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(56, 189, 248, 0.08) !important;
+    border: 1px solid rgba(56, 189, 248, 0.45) !important;
+    color: rgba(186, 230, 253, 0.95) !important;
     border-radius: var(--radius-s) !important;
+
+    box-shadow:
+        0 4px 12px rgba(56, 189, 248, 0.10) !important;
 }
 
 .btn-test::before {
@@ -487,20 +499,25 @@ body {
     left: -150%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg,
-            transparent,
-            rgba(255, 255, 255, 0.25),
-            transparent);
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.18),
+        transparent
+    );
+
     transform: skewX(-25deg);
 }
 
 .btn-test:hover {
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-color: #fff !important;
-    color: #fff !important;
+    background: rgba(56, 189, 248, 0.16) !important;
+    border-color: rgba(56, 189, 248, 0.8) !important;
+    color: #ffffff !important;
+
     box-shadow:
-        0 0 12px 2px rgba(255, 255, 255, 0.15),
-        0 0 24px 6px rgba(255, 255, 255, 0.08) !important;
+        0 0 12px 2px rgba(56, 189, 248, 0.25),
+        0 0 24px 6px rgba(56, 189, 248, 0.12) !important;
 }
 
 .btn-test:hover::before {
@@ -508,6 +525,7 @@ body {
     transition: left 0.7s ease-in-out;
 }
 
+ 
 .btn-save {
     background: var(--neon-blue) !important;
     color: #000 !important;
@@ -524,8 +542,27 @@ body {
         0 0 28px 8px rgba(56, 189, 248, 0.3) !important;
 }
 
+ 
+.btn-enable {
+    background: rgb(48 212 7) !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4) !important;
+    border-radius: var(--radius-s) !important;
+    padding: 10px 30px !important;
+}
+
+.btn-enable:hover {
+    filter: brightness(1.15);
+    box-shadow:
+        0 0 12px 2px rgba(34, 197, 94, 0.5),
+        0 0 28px 8px rgba(34, 197, 94, 0.3) !important;
+}
+
+ 
 .btn-save:active,
-.btn-test:active {
+.btn-test:active,
+.btn-enable:active {
     transform: scale(0.96);
 }
 

@@ -647,7 +647,7 @@ self.i18nEngineData = {
     configAlias: "配置别名",
     notEnabled: "未启用",
     enableEngineNow: "立即启用此引擎",
-    save: "应用并保存",
+    save: "保存",
     testConnection: "测试连接",
     confirmDelete: "确认删除？",
     confirmClose: "确认关闭？",
@@ -658,6 +658,7 @@ self.i18nEngineData = {
     failed: "失败",
     freeInterfaceTipsInfo: "此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥",
   },
+
   "zh-TW": {
     engineListTitle: "引擎列表",
     addTranslationService: "+ 新增自訂翻譯服務（API Key）",
@@ -670,7 +671,7 @@ self.i18nEngineData = {
     configAlias: "配置別名",
     notEnabled: "未啟用",
     enableEngineNow: "立即啟用此引擎",
-    save: "應用並儲存",
+    save: "儲存",
     testConnection: "測試連線",
     confirmDelete: "確認刪除？",
     confirmClose: "確認關閉？",
@@ -681,6 +682,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "本介面基於公共網路請求驅動，僅供個人學習及非商業用途。無需配置金鑰",
   },
+
   "en": {
     engineListTitle: "Engine List",
     addTranslationService: "+ Add Custom Translation Service (API Key)",
@@ -693,7 +695,7 @@ self.i18nEngineData = {
     configAlias: "Config Alias",
     notEnabled: "Not Enabled",
     enableEngineNow: "Enable This Engine",
-    save: "Apply & Save",
+    save: "Save",
     testConnection: "Test Connection",
     confirmDelete: "Confirm Delete?",
     confirmClose: "Confirm Close?",
@@ -704,6 +706,7 @@ self.i18nEngineData = {
     failed: "Failed",
     freeInterfaceTipsInfo: "Powered by public requests. For personal learning and non-commercial use only. No API key required.",
   },
+
   "ja": {
     engineListTitle: "エンジンリスト",
     addTranslationService: "+ カスタム翻訳サービスを追加（API Key）",
@@ -716,7 +719,7 @@ self.i18nEngineData = {
     configAlias: "設定エイリアス",
     notEnabled: "未有効化",
     enableEngineNow: "このエンジンを有効にする",
-    save: "適用して保存",
+    save: "保存",
     testConnection: "接続テスト",
     confirmDelete: "削除しますか？",
     confirmClose: "閉じてもよろしいですか？",
@@ -727,6 +730,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "パブリックリクエストに基づいています。個人の学習および非営利目的のみ。APIキーは不要です",
   },
+
   "ko": {
     engineListTitle: "엔진 목록",
     addTranslationService: "+ 커스텀 번역 서비스 추가（API Key）",
@@ -739,7 +743,7 @@ self.i18nEngineData = {
     configAlias: "설정 별칭",
     notEnabled: "활성화되지 않음",
     enableEngineNow: "이 엔진 활성화",
-    save: "적용 및 저장",
+    save: "저장",
     testConnection: "연결 테스트",
     confirmDelete: "삭제하시겠습니까?",
     confirmClose: "창을 닫으시겠습니까?",
@@ -750,6 +754,7 @@ self.i18nEngineData = {
     failed: "실패",
     freeInterfaceTipsInfo: "공용 네트워크 요청 기반입니다. 개인 학습 및 비상업적 용도로만 사용 가능. API 키 불필요",
   },
+
   "es": {
     engineListTitle: "Lista de motores",
     addTranslationService: "+ Agregar servicio de traducción personalizado (API Key)",
@@ -762,7 +767,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuración",
     notEnabled: "No habilitado",
     enableEngineNow: "Habilitar este motor",
-    save: "Aplicar y guardar",
+    save: "Guardar",
     testConnection: "Probar conexión",
     confirmDelete: "¿Confirmar eliminación?",
     confirmClose: "¿Confirmar cierre?",
@@ -773,6 +778,7 @@ self.i18nEngineData = {
     failed: "Fallo",
     freeInterfaceTipsInfo: "Basado en red pública. Solo para uso personal y no comercial. No requiere clave API",
   },
+
   "fr": {
     engineListTitle: "Liste des moteurs",
     addTranslationService: "+ Ajouter un service de traduction personnalisé (API Key)",
@@ -785,7 +791,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuration",
     notEnabled: "Non activé",
     enableEngineNow: "Activer ce moteur",
-    save: "Appliquer et enregistrer",
+    save: "Enregistrer",
     testConnection: "Tester la connexion",
     confirmDelete: "Confirmer la suppression ?",
     confirmClose: "Confirmer la fermeture ?",
@@ -796,6 +802,7 @@ self.i18nEngineData = {
     failed: "Échec",
     freeInterfaceTipsInfo: "Basé sur le réseau public. Usage personnel et non commercial uniquement. Aucune clé requise",
   },
+
   "de": {
     engineListTitle: "Engine-Liste",
     addTranslationService: "+ Eigenen Übersetzungsdienst hinzufügen (API Key)",
@@ -808,7 +815,7 @@ self.i18nEngineData = {
     configAlias: "Konfigurations-Alias",
     notEnabled: "Nicht aktiviert",
     enableEngineNow: "Diese Engine aktivieren",
-    save: "Anwenden & Speichern",
+    save: "Speichern",
     testConnection: "Verbindung testen",
     confirmDelete: "Löschen bestätigen?",
     confirmClose: "Schließen bestätigen?",
@@ -819,6 +826,7 @@ self.i18nEngineData = {
     failed: "Fehlgeschlagen",
     freeInterfaceTipsInfo: "Basiert auf öffentlichen Anfragen. Nur für persönlichen/nicht-kommerziellen Gebrauch. Kein Schlüssel nötig",
   },
+
   "ru": {
     engineListTitle: "Список движков",
     addTranslationService: "+ Добавить пользовательский сервис перевода (API Key)",
@@ -831,7 +839,7 @@ self.i18nEngineData = {
     configAlias: "Псевдоним конфигурации",
     notEnabled: "Не включено",
     enableEngineNow: "Включить этот движок",
-    save: "Применить и сохранить",
+    save: "Сохранить",
     testConnection: "Проверить соединение",
     confirmDelete: "Подтвердить удаление?",
     confirmClose: "Подтвердить закрытие?",
@@ -842,6 +850,7 @@ self.i18nEngineData = {
     failed: "Ошибка",
     freeInterfaceTipsInfo: "На основе публичных запросов. Только для личного некоммерческого использования. Ключ не нужен",
   },
+
   "pt": {
     engineListTitle: "Lista de motores",
     addTranslationService: "+ Adicionar serviço de tradução personalizado (API Key)",
@@ -854,7 +863,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuração",
     notEnabled: "Não ativado",
     enableEngineNow: "Ativar este motor",
-    save: "Aplicar e salvar",
+    save: "Salvar",
     testConnection: "Testar conexão",
     confirmDelete: "Confirmar exclusão?",
     confirmClose: "Confirmar fechamento?",
@@ -865,6 +874,7 @@ self.i18nEngineData = {
     failed: "Falha",
     freeInterfaceTipsInfo: "Baseado em rede pública. Apenas uso pessoal/não comercial. Nenhuma chave necessária",
   },
+
   "it": {
     engineListTitle: "Elenco motori",
     addTranslationService: "+ Aggiungi servizio di traduzione personalizzato (API Key)",
@@ -877,7 +887,7 @@ self.i18nEngineData = {
     configAlias: "Alias configurazione",
     notEnabled: "Non abilitato",
     enableEngineNow: "Abilita questo motore",
-    save: "Applica e salva",
+    save: "Salva",
     testConnection: "Testa connessione",
     confirmDelete: "Conferma eliminazione?",
     confirmClose: "Conferma chiusura?",
@@ -888,6 +898,7 @@ self.i18nEngineData = {
     failed: "Fallito",
     freeInterfaceTipsInfo: "Basado su richieste pubbliche. Solo uso personale/non commerciale. Nessuna chiave richiesta",
   },
+
   "vi": {
     engineListTitle: "Danh sách công cụ",
     addTranslationService: "+ Thêm dịch vụ dịch thuật tùy chỉnh (API Key)",
@@ -900,7 +911,7 @@ self.i18nEngineData = {
     configAlias: "Tên cấu hình",
     notEnabled: "Chưa bật",
     enableEngineNow: "Kích hoạt công cụ này",
-    save: "Áp dụng và lưu",
+    save: "Lưu",
     testConnection: "Kiểm tra kết nối",
     confirmDelete: "Xác nhận xóa?",
     confirmClose: "Xác nhận đóng?",
@@ -911,6 +922,7 @@ self.i18nEngineData = {
     failed: "Thất bại",
     freeInterfaceTipsInfo: "Dựa trên yêu cầu mạng công cộng. Chỉ dùng cho cá nhân/phi thương mại. Không cần khóa",
   },
+
   "th": {
     engineListTitle: "รายการเครื่องยนต์",
     addTranslationService: "+ เพิ่มบริการแปลแบบกำหนดเอง (API Key)",
@@ -923,7 +935,7 @@ self.i18nEngineData = {
     configAlias: "ชื่อเรียกการตั้งค่า",
     notEnabled: "ยังไม่เปิดใช้งาน",
     enableEngineNow: "เปิดใช้งานเครื่องยนต์นี้",
-    save: "ปรับใช้และบันทึก",
+    save: "บันทึก",
     testConnection: "ทดสอบการเชื่อมต่อ",
     confirmDelete: "ยืนยันการลบ?",
     confirmClose: "ยืนยันการปิด?",
@@ -934,6 +946,7 @@ self.i18nEngineData = {
     failed: "ล้มเหลว",
     freeInterfaceTipsInfo: "ใช้คำขอเครือข่ายสาธารณะ สำหรับการเรียนรู้ส่วนบุคคล/ไม่ใช่เชิงพาณิชย์ ไม่ต้องใช้คีย์",
   },
+
   "ar": {
     engineListTitle: "قائمة المحركات",
     addTranslationService: "+ إضافة خدمة ترجمة مخصصة (API Key)",
@@ -946,7 +959,7 @@ self.i18nEngineData = {
     configAlias: "اسم التكوين",
     notEnabled: "غير مفعل",
     enableEngineNow: "تفعيل هذا المحرك",
-    save: "تطبيق وحفظ",
+    save: "حفظ",
     testConnection: "اختبار الاتصال",
     confirmDelete: "تأكيد الحذف؟",
     confirmClose: "تأكيد الإغلاق؟",
@@ -957,6 +970,7 @@ self.i18nEngineData = {
     failed: "فشل",
     freeInterfaceTipsInfo: "مدعوم بطلبات الشبكة العامة. للاستخدام الشخصي وغير التجاري فقط. لا يتطلب مفتاح",
   },
+
   "fa": {
     engineListTitle: "لیست موتورها",
     addTranslationService: "+ افزودن سرویس ترجمه سفارشی (API Key)",
@@ -969,7 +983,7 @@ self.i18nEngineData = {
     configAlias: "نام مستعار پیکربندی",
     notEnabled: "فعال نشده",
     enableEngineNow: "فعال‌سازی این موتور",
-    save: "اعمال و ذخیره",
+    save: "ذخیره",
     testConnection: "تست اتصال",
     confirmDelete: "تأیید حذف؟",
     confirmClose: "تأیید بستن؟",
@@ -980,6 +994,7 @@ self.i18nEngineData = {
     failed: "ناموفق",
     freeInterfaceTipsInfo: "مبتنی بر شبکه عمومی. فقط استفاده شخصی/غیرتجاری. بدون نیاز به کلید",
   },
+
   "tr": {
     engineListTitle: "Motor Listesi",
     addTranslationService: "+ Özel çeviri servisi ekle (API Key)",
@@ -992,7 +1007,7 @@ self.i18nEngineData = {
     configAlias: "Yapılandırma Takma Adı",
     notEnabled: "Etkin Değil",
     enableEngineNow: "Bu Motoru Etkinleştir",
-    save: "Uygula ve Kaydet",
+    save: "Kaydet",
     testConnection: "Bağlantıyı Test Et",
     confirmDelete: "Silmeyi onayla?",
     confirmClose: "Kapatmayı onayla?",
@@ -1003,6 +1018,7 @@ self.i18nEngineData = {
     failed: "Başarısız",
     freeInterfaceTipsInfo: "Genel ağ isteklerine dayalıdır. Yalnızca kişisel/ticari olmayan kullanım. Anahtar gerekmez",
   }
+
 };
 self.i18nStyleData = {
   "zh-CN": {

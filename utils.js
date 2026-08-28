@@ -393,6 +393,26 @@ const TRADITIONAL_ENGINE_LIST = [
   'deeplx',
   'bing'
 ];
+const HOST_KEY_MAP = {
+    'openai': 'oaApiHost',
+    'deepseek': 'dsHost',
+    'custom_ai': 'customHost',
+    'siliconflow': 'siliconflowHost',
+    'gemini': 'geminiHost',
+    'claude': 'claudeApiHost',
+    'grok': 'grokHost',
+    'groq': 'groqHost',
+};
+
+function isLocalModelHost(host) {
+    const h = (host || '').toLowerCase();
+    return h.includes('localhost') ||
+        h.includes('127.0.0.1') ||
+        h.includes('0.0.0.0') ||
+        /https?:\/\/192\.168\./.test(h) ||
+        /https?:\/\/10\./.test(h) ||
+        /https?:\/\/172\.(1[6-9]|2\d|3[01])\./.test(h);
+}
 let isNoticeShowing = false;
 function showUpdateNotice() {
   if (isNoticeShowing || document.getElementById('mira-update-notice')) return;

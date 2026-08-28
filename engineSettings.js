@@ -358,6 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         const testBtn = document.getElementById('testApiConfig');
         const saveBtn = document.getElementById('saveApiConfig');
+        const enableBtn = document.getElementById('enableCurrentEngine');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
             testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
@@ -368,6 +369,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveBtn.innerHTML = `${t('save', uiLanguage)}`;
             saveBtn.style.backgroundColor = "";
             saveBtn.disabled = false;
+        }
+        if (enableBtn) {
+            enableBtn.innerText = t('enableEngineNow', uiLanguage);
+            enableBtn.style.removeProperty('background-color');
+            enableBtn.disabled = false;
         }
 
         // ----  isBuiltIn 逻辑（google / bing）----
@@ -424,7 +430,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     
                 </div>
-                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px; display:none;">
+                <button id="activateBuiltIn" class="btn-enable" style="margin-top:25px; display:none;">
                     ${t('enableEngineNow', uiLanguage)}
                 </button>
             </div>`;
@@ -666,13 +672,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 400);
     }
     init();
-    document.getElementById('testApiConfig').onclick = async () => {
-        const btn = document.getElementById('testApiConfig');
-        const tipsDesc = document.getElementById('tips');
-        if (!btn) return;
+
+    // ── 连接测试核心逻辑，供"测试连接"按钮和"启用当前引擎"按钮共用 ──
+    // 只负责跑测试 + 把结果画到 btn/tipsDesc 上，返回 boolean；不做延时重置、不碰 lastActiveId
+    async function runEngineTest(btn, tipsDesc) {
         const i18n = {
-            testConnection: t('testConnection', uiLanguage),
-            testing: t('testing', uiLanguage),
             success: t('success', uiLanguage),
             failed: t('failed', uiLanguage),
             error_no_response: t('error_no_response', uiLanguage),
@@ -680,20 +684,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             error_same_as_original: t('error_same_as_original', uiLanguage),
             error_generic: t('error_generic', uiLanguage),
         };
-        btn.disabled = true;
-        const originalHTML = `⚡ ${i18n.testConnection}`;
-        btn.innerHTML = `<span>⏳ ${i18n.testing}</span>`;
         if (tipsDesc) {
             tipsDesc.style.color = "";
             tipsDesc.innerText = "";
         }
 
         const userConfig = userConfigs.find(c => c.id === currentId);
-        if (!userConfig) {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            return;
-        }
+        if (!userConfig) return false;
 
         let testResult = false;
         try {
@@ -727,8 +724,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
             const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
             if (hasValidStructure && isNotOriginal) {
-                btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
-                btn.style.setProperty('border-color', '#10a37f', 'important');
+                if (btn) {
+                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                    btn.style.setProperty('border-color', '#10a37f', 'important');
+                }
                 testResult = true;
             } else {
                 throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
@@ -736,9 +735,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         catch (e) {
             logger.error("[Test] Failed:", e);
-            btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
-            btn.style.setProperty('border-color', '#f87171', 'important');
-            btn.style.userSelect = 'text';
+            if (btn) {
+                btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
+                btn.style.setProperty('border-color', '#f87171', 'important');
+                btn.style.userSelect = 'text';
+            }
             testResult = false;
 
             if (tipsDesc) {
@@ -781,8 +782,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } else if (errorText.toLowerCase().includes("timeout")) {
-                    const baseUrl = document.querySelector('[data-key="baseUrl"]')?.value || '';
-                    const isLocalModel = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+                    const hostKey = HOST_KEY_MAP[userConfig.engine] || 'baseUrl';
+                    const baseUrl = document.querySelector(`[data-key="${hostKey}"]`)?.value || '';
+                    const isLocalModel = isLocalModelHost(baseUrl);
                     displayMessage = isLocalModel
                         ? t('timeoutLocalModel')
                         : (i18n.error_timeout || "Timeout ⌛");
@@ -794,84 +796,155 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 tipsDesc.innerText = displayMessage;
             }
-        } finally {
-            setTimeout(() => {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                    btn.style.removeProperty('border-color');
-                }
-                // 测试完成后更新sidebar状态点和当前引擎激活状态
-                if (userConfig && testResult) {
-                    // 测试成功 - 激活这个引擎为当前使用的引擎
-                    safeSetStorage({ lastActiveId: currentId }).then(() => {
-                        if (typeof renderSidebar === 'function') {
-                            renderSidebar();
-                        }
-                    });
-                } else if (typeof renderSidebar === 'function') {
-                    // 测试失败或其他情况 - 只更新状态点
-                    renderSidebar();
-                }
-            }, 3000);
         }
+        return testResult;
+    }
+
+    // ── 收集表单数据并落盘，供"保存"按钮和"启用当前引擎"共用 ──
+    // 返回 { finalEngine, data }；找不到当前配置实例时返回 null
+    async function persistCurrentConfig() {
+        const config = userConfigs.find(c => c.id === currentId);
+        if (!config) {
+            logger.error("[Mira] 找不到当前配置实例");
+            return null;
+        }
+
+        const inputs = document.querySelectorAll('#dynamic-form-container input');
+        const data = {};
+        inputs.forEach(i => {
+            const key = i.dataset.key;
+            if (key) data[key] = i.value.trim();
+        });
+
+        const idx = userConfigs.findIndex(c => c.id === currentId);
+        let finalEngine = config.engine;
+        if (idx > -1) {
+            const detectedEngine = Object.keys(TEMPLATES).find(key => {
+                const tpl = TEMPLATES[key];
+                return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
+            });
+            if (detectedEngine && userConfigs[idx].engine === 'google') {
+                userConfigs[idx].engine = detectedEngine;
+            }
+            finalEngine = userConfigs[idx].engine;
+            const engineTemplate = TEMPLATES[finalEngine] || {};
+            userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+        }
+
+        const webTA = document.getElementById('ai-prompt-web');
+        const subTA = document.getElementById('ai-prompt-subtitle');
+        const storagePayload = {
+            [`data_${currentId}`]: data,
+            userConfigs: userConfigs,
+            lastActiveId: currentId
+        };
+        if (webTA || subTA) {
+            storagePayload[AI_PROMPT_KEY] = {
+                web: (webTA?.value || '').trim(),
+                subtitle: (subTA?.value || '').trim()
+            };
+        }
+
+        await safeSetStorage(storagePayload);
+        logger.log("配置已保存: ", uiLanguage);
+
+        return { finalEngine, data };
+    }
+
+    document.getElementById('testApiConfig').onclick = async () => {
+        const btn = document.getElementById('testApiConfig');
+        const tipsDesc = document.getElementById('tips');
+        if (!btn) return;
+        btn.disabled = true;
+        const originalHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+        btn.innerHTML = `<span>⏳ ${t('testing', uiLanguage)}</span>`;
+
+        const testResult = await runEngineTest(btn, tipsDesc);
+
+        setTimeout(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.removeProperty('border-color');
+            }
+            // 测试完成后更新sidebar状态点和当前引擎激活状态
+            if (testResult) {
+                // 测试成功 - 激活这个引擎为当前使用的引擎
+                safeSetStorage({ lastActiveId: currentId }).then(() => {
+                    if (typeof renderSidebar === 'function') {
+                        renderSidebar();
+                    }
+                });
+            } else if (typeof renderSidebar === 'function') {
+                // 测试失败或其他情况 - 只更新状态点
+                renderSidebar();
+            }
+        }, 3000);
+    };
+
+    // ── 启用当前引擎：必须测试通过才真正切换线上使用的引擎 ──
+    document.getElementById('enableCurrentEngine').onclick = async () => {
+        const enableBtn = document.getElementById('enableCurrentEngine');
+        const testBtn = document.getElementById('testApiConfig');
+        const tipsDesc = document.getElementById('tips');
+        if (!enableBtn) return;
+
+        enableBtn.disabled = true;
+        if (testBtn) testBtn.disabled = true;
+        const originalText = t('enableEngineNow', uiLanguage);
+        enableBtn.innerText = `⏳ ${t('testing', uiLanguage)}`;
+
+        const saved = await persistCurrentConfig();
+        if (!saved) {
+            enableBtn.disabled = false;
+            if (testBtn) testBtn.disabled = false;
+            enableBtn.innerText = originalText;
+            return;
+        }
+
+        const testResult = await runEngineTest(testBtn, tipsDesc);
+
+        if (testResult) {
+            if (typeof syncGlobalConfig === 'function') {
+                await syncGlobalConfig(currentId, saved.finalEngine, saved.data);
+            }
+            await safeSetStorage({ lastActiveId: currentId });
+            enableBtn.innerText = t('enabled', uiLanguage);
+            enableBtn.style.setProperty('background-color', '#22c55e', 'important');
+            if (typeof renderSidebar === 'function') renderSidebar();
+        } else {
+            enableBtn.innerText = t('failed', uiLanguage);
+            enableBtn.style.setProperty('background-color', '#ef4444', 'important');
+        }
+
+        setTimeout(() => {
+            if (testBtn) {
+                testBtn.disabled = false;
+                testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+                testBtn.style.removeProperty('border-color');
+            }
+            enableBtn.disabled = false;
+            enableBtn.innerText = originalText;
+            enableBtn.style.removeProperty('background-color');
+        }, 1500);
     };
 
     document.getElementById('saveApiConfig').onclick = async () => {
         const saveBtn = document.getElementById('saveApiConfig');
         if (!saveBtn) return;
-        const config = userConfigs.find(c => c.id === currentId);
-        if (!config) {
-            logger.error("[Mira] 找不到当前配置实例");
-            return;
-        }
 
         saveBtn.disabled = true;
         const originalText = saveBtn.innerText;
         const originalBg = saveBtn.style.backgroundColor;
         try {
-
-            // 其他自定义引擎的处理逻辑 - 先保存配置
-            const inputs = document.querySelectorAll('#dynamic-form-container input');
-            const data = {};
-            inputs.forEach(i => {
-                const key = i.dataset.key;
-                if (key) data[key] = i.value.trim();
-            });
-
-            const idx = userConfigs.findIndex(c => c.id === currentId);
-            let finalEngine = config.engine;
-            if (idx > -1) {
-                const detectedEngine = Object.keys(TEMPLATES).find(key => {
-                    const tpl = TEMPLATES[key];
-                    return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
-                });
-                if (detectedEngine && userConfigs[idx].engine === 'google') {
-                    userConfigs[idx].engine = detectedEngine;
-                }
-                finalEngine = userConfigs[idx].engine;
-                const engineTemplate = TEMPLATES[finalEngine] || {};
-                userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            const result = await persistCurrentConfig();
+            if (!result) {
+                saveBtn.disabled = false;
+                return;
             }
 
-            await safeSetStorage({
-                [`data_${currentId}`]: data,
-                userConfigs: userConfigs,
-                lastActiveId: currentId
-            });
-
-            if (typeof syncGlobalConfig === 'function') {
-                await syncGlobalConfig(currentId, finalEngine, data);
-            }
-
-            logger.log("配置已保存，准备测试: ", uiLanguage);
-
-            // 现在触发自动测试连接
-            const testBtn = document.getElementById('testApiConfig');
-            if (testBtn) {
-                // 触发测试连接的点击事件
-                testBtn.click();
-            }
+            //  保存只做持久化，不再自动切换线上生效引擎、也不再自动触发测试连接。
+            // 想切换到这个引擎，用户需要单独点"启用当前引擎"（会先保存、再测试，通过才生效）。 
 
             // 显示保存成功提示（固定时间）
             saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
@@ -1180,18 +1253,6 @@ function _buildAIPromptHTML(saved) {
     <div class="ai-prompt-style-hint" dir="auto">${t('cpHint')}</div>
   </div>
 
-  <div class="ai-prompt-footer">
-    <button class="ai-prompt-save-btn" id="ai-prompt-save-btn" disabled>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-        <polyline points="17 21 17 13 7 13 7 21"/>
-        <polyline points="7 3 7 8 15 8"/>
-      </svg>
-      ${t('cpSave')}
-    </button>
-  </div>
 
 </div>
     `;
@@ -1201,14 +1262,10 @@ function _bindAIPromptEvents(section, initialSaved) {
     const toggle = section.querySelector('#ai-prompt-toggle');
     const body = section.querySelector('#ai-prompt-body');
     const chevron = section.querySelector('#ai-prompt-chevron');
-    const saveBtn = section.querySelector('#ai-prompt-save-btn');
     const webTA = section.querySelector('#ai-prompt-web');
     const subTA = section.querySelector('#ai-prompt-subtitle');
     const webCount = section.querySelector('#ai-prompt-web-count');
     const subCount = section.querySelector('#ai-prompt-subtitle-count');
-
-    let isDirty = false;
-    let saveTimer = null;
 
     toggle.addEventListener('click', () => {
         const isOpen = body.classList.toggle('open');
@@ -1228,27 +1285,16 @@ function _bindAIPromptEvents(section, initialSaved) {
     }
 
     // ── dirty 标记 → 激活保存按钮
-    function markDirty() {
-        clearTimeout(saveTimer);
-        if (!isDirty) {
-            isDirty = true;
-            saveBtn.disabled = false;
-            _setPromptBtnState(saveBtn, 'idle');
-        }
-    }
-
     webTA.addEventListener('input', () => {
         updateCount(webTA, webCount);
         section.querySelector('[data-target="ai-prompt-web"]')
             .classList.toggle('visible', webTA.value.length > 0);
-        markDirty();
     });
 
     subTA.addEventListener('input', () => {
         updateCount(subTA, subCount);
         section.querySelector('[data-target="ai-prompt-subtitle"]')
             .classList.toggle('visible', subTA.value.length > 0);
-        markDirty();
     });
 
     section.querySelectorAll('.ai-prompt-clear-btn').forEach(btn => {
@@ -1260,54 +1306,8 @@ function _bindAIPromptEvents(section, initialSaved) {
             btn.classList.remove('visible');
             const countEl = document.getElementById(btn.dataset.target + '-count');
             if (countEl) updateCount(ta, countEl);
-            markDirty();
         });
     });
-
-    // ── 保存 ───
-    saveBtn.addEventListener('click', async () => {
-        if (!isDirty || saveBtn.disabled) return;
-
-        saveBtn.disabled = true;
-
-        try {
-            await safeSetStorage({
-                [AI_PROMPT_KEY]: {
-                    web: webTA.value.trim(),
-                    subtitle: subTA.value.trim(),
-                }
-            });
-
-            isDirty = false;
-            _setPromptBtnState(saveBtn, 'saved');
-
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => {
-                _setPromptBtnState(saveBtn, 'idle');
-                saveBtn.disabled = true;
-            }, 2000);
-
-        } catch (e) {
-            _setPromptBtnState(saveBtn, 'error');
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => {
-                _setPromptBtnState(saveBtn, 'idle');
-                saveBtn.disabled = false;
-            }, 2000);
-        }
-    });
-}
-
-// ── 按钮状态切换 ────  
-function _setPromptBtnState(btn, state) {
-    btn.classList.remove('state-saving', 'state-saved', 'state-error');
-    const icons = {
-        idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${t('cpSave')}`,
-        saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${t('success')}`,
-        error: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${t('failed')}`,
-    };
-    if (state !== 'idle') btn.classList.add(`state-${state}`);
-    btn.innerHTML = icons[state] || icons.idle;
 }
 
 // ── HTML 转义（防止 saved prompt 里有 < > 破坏 innerHTML）──
