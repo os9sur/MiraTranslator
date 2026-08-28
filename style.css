@@ -2328,8 +2328,32 @@ yt-attributed-string+.kt-paragraph-translation {
   transition: transform 0.15s ease;
 }
 
+.shortcut-icon .keyboard-keys line {
+  transition: stroke 0.25s ease, opacity 0.25s ease;
+}
+
 #openShortcutSettings:hover .keyboard-keys {
   transform: translateY(1px);
+}
+
+#openShortcutSettings:hover .keyboard-keys line:nth-child(1) {
+  stroke: #22c55e;
+}
+
+#openShortcutSettings:hover .keyboard-keys line:nth-child(2) {
+  stroke: #4ade80;
+}
+
+#openShortcutSettings:hover .keyboard-keys line:nth-child(3) {
+  stroke: #86efac;
+}
+
+#openShortcutSettings:hover .keyboard-keys line:nth-child(4) {
+  stroke: #22c55e;
+}
+
+#openShortcutSettings:hover .keyboard-keys line:nth-child(5) {
+  stroke: #22c55e;
 }
 
 .quick-trans-icon .quick-trans-arrow {
