@@ -11,7 +11,7 @@ window.browser = (function () {
 let userConfig = null;
 let currentId = '';
 let userConfigs = [];
-
+let uiLanguage = getBrowserLang() || 'en';
 document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiKeys: res.apiKeys || {}
     };
     initNoticeBar('settings');
-    const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
+    uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
     // RTL布局调整
 
     if (checkRTL(uiLanguage)) {
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     let switchVersion = 0;
-
+    const TEST_BTN_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="rgb(0 255 73)" style="margin-right:6px;flex-shrink:0;"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>';
     async function switchInstance(id) {
         await safeSetStorage({ lastActiveId: id });
         const myVersion = ++switchVersion;
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const enableBtn = document.getElementById('enableCurrentEngine');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
-            testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+            testBtn.innerHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
             testBtn.style.borderColor = "";
             testBtn.disabled = false;
         }
@@ -369,6 +369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveBtn.innerHTML = `${t('save', uiLanguage)}`;
             saveBtn.style.backgroundColor = "";
             saveBtn.disabled = false;
+            saveBtn.style.display = '';
         }
         if (enableBtn) {
             enableBtn.innerText = t('enableEngineNow', uiLanguage);
@@ -378,7 +379,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ----  isBuiltIn 逻辑（google / bing）----
         if (tpl.isBuiltIn) {
-            actions.classList.add('hidden');
+            actions.classList.remove('hidden');
+            if (saveBtn) saveBtn.style.display = 'none';
+
             const githubLink = '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>';
 
             // 渲染时识别 ---
@@ -421,82 +424,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <div class="form-container">
                 <div class="built-in-notice" dir="auto" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
-                    <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
-                    <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                    <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
                     
                     <div style="max-height: 460px;cursor: default; overflow-y: auto; padding-right: 5px;">
                         ${noticeLines}
                     </div>
                     
                 </div>
-                <button id="activateBuiltIn" class="btn-enable" style="margin-top:25px; display:none;">
-                    ${t('enableEngineNow', uiLanguage)}
-                </button>
             </div>`;
             container.innerHTML = builtInTemplate;
-            const checkConnectivity = async () => {
-
-                if (myVersion !== switchVersion) return;
-                const icon = document.getElementById('statusIcon');
-                const text = document.getElementById('statusText');
-                const btn = document.getElementById('activateBuiltIn');
-                if (!icon || !text || !btn) return;
-                let isOk = false;
-                let errorMsg = '';
-                try {
-                    const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                    const targetLang = storage?.ui_language || 'en';
-                    const isTargetEn = targetLang.toLowerCase().startsWith('en');
-                    const testText = isTargetEn ? '早上好' : 'Good morning';
-                    const res = await Promise.race([
-                        safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang, isTest: true, engine: config.engine }),
-                        new Promise(resolve => setTimeout(() => resolve(null), 5000))
-                    ]);
-                    if (!res) { errorMsg = 'Timeout'; }
-                    else if (res.error) { errorMsg = res.error; }
-                    else {
-                        const data = res.currentTranslationResponse;
-                        if (!data || data.error) { errorMsg = data?.error || 'No response'; }
-                        else {
-                            const translatedText = (typeof data === 'string' ? data : (data?.translatedText || data?.basic || '')).trim();
-                            isOk = translatedText.length > 0 && translatedText.toLowerCase() !== testText.toLowerCase() && !data?.isError;
-                            if (!isOk) errorMsg = 'Invalid result';
-                        }
-                    }
-                } catch (e) { errorMsg = e.message; }
-                if (!document.getElementById('statusIcon')) return;
-                if (isOk) {
-                    icon.innerText = '✓'; icon.style.color = '#3fb950';
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
-                    btn.style.display = 'flex';
-                    await safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
-                } else {
-                    icon.innerText = '✕'; icon.style.color = '#f85149';
-                    const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px;opacity:0.7;display:block;margin-top:11px;line-height:1.4;">${friendlyError}</span>` : ''}`;
-                    btn.style.display = 'flex'; btn.style.opacity = '0.6';
-                    await safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
-                }
-            };
-
-            checkConnectivity();
-
-            const activateBtn = document.getElementById('activateBuiltIn');
-            if (activateBtn) {
-                activateBtn.onclick = async (e) => {
-                    const btn = e.target;
-                    btn.disabled = true;
-                    // 直接切换并激活这个内置引擎
-                    await safeSetStorage({ lastActiveId: id });
-                    if (typeof syncGlobalConfig === 'function') await syncGlobalConfig(id, config.engine, {});
-                    btn.innerText = t('enabled', uiLanguage);
-                    btn.style.background = "#22c55e";
-                    isDirty = false;
-                    renderSidebar();
-                    setTimeout(() => { btn.disabled = false; btn.innerText = t('enableEngineNow', uiLanguage); btn.style.background = ""; }, 1000);
-                };
-            }
             return;
         }
         actions.classList.remove('hidden');
@@ -513,14 +448,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="api-input-wrapper">
             <input type="password" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">
             <button type="button" class="toggle-visibility-btn" tabindex="-1" title="${t('common.toggleVisibility', uiLanguage)}">
-                <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg class="icon-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.4 18.4 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
+                <svg class="icon-eye" viewBox="0 0 28 20" width="18" height="16" fill="none" stroke="rgb(0 255 73)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                <path d="M1.5 10s4.5-7 12.5-7 12.5 7 12.5 7-4.5 7-12.5 7S1.5 10 1.5 10z"></path>
+                <ellipse cx="14" cy="7.2" rx="5.2" ry="5.5" fill="rgb(0 255 73)" stroke="none"></ellipse>
+            </svg>
+               <svg class="icon-eye-off" viewBox="0 0 28 20" width="18" height="16" fill="none" stroke="rgb(0 255 73)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <path d="M1.5 10s4.5-7 12.5-7 12.5 7 12.5 7-4.5 7-12.5 7S1.5 10 1.5 10z"></path>
+                <ellipse cx="14" cy="7.2" rx="5.2" ry="5.5" fill="rgb(0 255 73)" stroke="none"></ellipse>
+                <line x1="2" y1="2" x2="26" y2="18" stroke-width="3"></line>
+            </svg>
             </button>
         </div>`;
             } else {
@@ -725,7 +661,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
             if (hasValidStructure && isNotOriginal) {
                 if (btn) {
-                    btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                    btn.innerHTML = `<span style="color: rgb(0 255 73); font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
                     btn.style.setProperty('border-color', '#10a37f', 'important');
                 }
                 testResult = true;
@@ -828,7 +764,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             finalEngine = userConfigs[idx].engine;
             const engineTemplate = TEMPLATES[finalEngine] || {};
-            userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            if (!engineTemplate.isBuiltIn) {
+                userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            }
         }
 
         const webTA = document.getElementById('ai-prompt-web');
@@ -856,7 +794,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         if (!btn) return;
         btn.disabled = true;
-        const originalHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+        const originalHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
         btn.innerHTML = `<span>⏳ ${t('testing', uiLanguage)}</span>`;
 
         const testResult = await runEngineTest(btn, tipsDesc);
@@ -920,7 +858,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => {
             if (testBtn) {
                 testBtn.disabled = false;
-                testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+                testBtn.innerHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
                 testBtn.style.removeProperty('border-color');
             }
             enableBtn.disabled = false;
@@ -1051,7 +989,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             setTimeout(() => {
                 btn.innerText = `${t('completed', uiLanguage)} ✓`;
-                btn.style.setProperty('color', '#4ade80', 'important');
+                btn.style.setProperty('color', 'rgb(0 255 73)', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
                 if (typeof showToast === 'function') showToast(t("cacheCleared"), "success");
@@ -1203,12 +1141,12 @@ function _buildAIPromptHTML(saved) {
                      stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
-                <span class="ai-prompt-title">${t('cpTitle')}</span>
-                <span class="ai-prompt-badge">${t('cpOptional')}</span>
+                <span class="ai-prompt-title">${t('cpTitle', uiLanguage)}</span>
+                <span class="ai-prompt-badge">${t('cpOptional', uiLanguage)}</span>
             </div>
             <svg class="ai-prompt-chevron ${webVal || subVal ? 'open' : ''}"
                  id="ai-prompt-chevron"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24" fill="none" stroke="rgb(0 255 73)"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -1221,13 +1159,13 @@ function _buildAIPromptHTML(saved) {
       style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
       <div class="ai-prompt-item-label" 
         style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
-        🌐 <span>${t('cpWeb')}</span>
+        🌐 <span>${t('cpWeb', uiLanguage)}</span>
       </div>
       <button class="ai-prompt-clear-btn ${webVal ? 'visible' : ''}"
-        data-target="ai-prompt-web">${t('cpClear')}</button>
+        data-target="ai-prompt-web">${t('cpClear', uiLanguage)}</button>
     </div>
     <textarea id="ai-prompt-web" dir="auto" class="ai-prompt-textarea"
-      maxlength="150" placeholder="${t('cpWebPH')}" spellcheck="false"
+      maxlength="150" placeholder="${t('cpWebPH', uiLanguage)}" spellcheck="false"
     >${_escapeHtml(webVal)}</textarea>
     <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
   </div>
@@ -1241,16 +1179,16 @@ function _buildAIPromptHTML(saved) {
           <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
           <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
         </svg>
-        YouTube<span>${t('cpSub')}</span>
+        YouTube<span>${t('cpSub', uiLanguage)}</span>
       </div>
       <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
-        data-target="ai-prompt-subtitle">${t('cpClear')}</button>
+        data-target="ai-prompt-subtitle">${t('cpClear', uiLanguage)}</button>
     </div>
     <textarea id="ai-prompt-subtitle" dir="auto" class="ai-prompt-textarea"
-      maxlength="150" placeholder="${t('cpSubPH')}" spellcheck="false"
+      maxlength="150" placeholder="${t('cpSubPH', uiLanguage)}" spellcheck="false"
     >${_escapeHtml(subVal)}</textarea>
     <div class="ai-prompt-char-count" id="ai-prompt-subtitle-count">${subVal.length} / 150</div>
-    <div class="ai-prompt-style-hint" dir="auto">${t('cpHint')}</div>
+    <div class="ai-prompt-style-hint" dir="auto">${t('cpHint', uiLanguage)}</div>
   </div>
 
 

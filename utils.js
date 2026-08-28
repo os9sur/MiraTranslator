@@ -394,24 +394,24 @@ const TRADITIONAL_ENGINE_LIST = [
   'bing'
 ];
 const HOST_KEY_MAP = {
-    'openai': 'oaApiHost',
-    'deepseek': 'dsHost',
-    'custom_ai': 'customHost',
-    'siliconflow': 'siliconflowHost',
-    'gemini': 'geminiHost',
-    'claude': 'claudeApiHost',
-    'grok': 'grokHost',
-    'groq': 'groqHost',
+  'openai': 'oaApiHost',
+  'deepseek': 'dsHost',
+  'custom_ai': 'customHost',
+  'siliconflow': 'siliconflowHost',
+  'gemini': 'geminiHost',
+  'claude': 'claudeApiHost',
+  'grok': 'grokHost',
+  'groq': 'groqHost',
 };
 
 function isLocalModelHost(host) {
-    const h = (host || '').toLowerCase();
-    return h.includes('localhost') ||
-        h.includes('127.0.0.1') ||
-        h.includes('0.0.0.0') ||
-        /https?:\/\/192\.168\./.test(h) ||
-        /https?:\/\/10\./.test(h) ||
-        /https?:\/\/172\.(1[6-9]|2\d|3[01])\./.test(h);
+  const h = (host || '').toLowerCase();
+  return h.includes('localhost') ||
+    h.includes('127.0.0.1') ||
+    h.includes('0.0.0.0') ||
+    /https?:\/\/192\.168\./.test(h) ||
+    /https?:\/\/10\./.test(h) ||
+    /https?:\/\/172\.(1[6-9]|2\d|3[01])\./.test(h);
 }
 let isNoticeShowing = false;
 function showUpdateNotice() {
@@ -506,7 +506,7 @@ let isSynced = false;
 function syncI18nDict(force = false) {
   if (isSynced && !force) return;
   const root = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : {});
-  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10', 'i18nAttach11'];
+  const dataKeys = ['i18nData', 'i18nContent', 'i18nEngineData', 'i18nStyleData', 'i18nDonateData', 'i18nSyncData', 'i18nCacheData', 'i18nThemeData', 'i18nYTData', 'i18nAttach1', 'i18nAttach2', 'i18nAttach3', 'i18nAttach4', 'i18nAttach5', 'i18nAttach6', 'i18nAttach7', 'i18nAttach8', 'i18nAttach9', 'i18nAttach10', 'i18nAttach11', 'i18nAttach12'];
   let foundAny = false;
   dataKeys.forEach(key => {
     const data = root[key];
