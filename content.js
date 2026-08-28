@@ -5084,7 +5084,10 @@ function initSelectionTranslate() {
     shadowHost.setAttribute("data-pinned", "false");
     shadowHost.style.cssText =
       "position:absolute;top:0;left:0;width:0;height:0;z-index:2147483647;pointer-events:none;";
-    document.documentElement.appendChild(shadowHost);
+
+
+    // document.documentElement.appendChild(shadowHost);
+    document.body.appendChild(shadowHost);
 
     const shadow = shadowHost.attachShadow({ mode: "open" });
     shadow.appendChild(buildStyle());
@@ -6859,7 +6862,143 @@ function initSelectionTranslate() {
         );
       };
     }
+    // ===== Firefox测试 =====
+    // if (!shadow.getElementById("firefox-test-editable")) {
 
+    //   const firefoxTest = document.createElement("div");
+
+    // firefoxTest.id = "firefox-test-editable";
+    // firefoxTest.contentEditable = "true";
+    // firefoxTest.textContent = "abcdef";
+
+    // firefoxTest.style.cssText = `
+    //   position: relative;
+    //   z-index: 1;
+    //   background: white;
+    //   color: black;
+    //   border: 2px solid red;
+    //   padding: 20px;
+    //   font-size: 24px;
+    //   min-width: 300px;
+    //   outline: none;
+    // `;
+
+    // shadow.appendChild(firefoxTest);
+
+    // firefoxTest.addEventListener("keydown", (e) => {
+    //   const selection = window.getSelection();
+
+    //   console.log(
+    //     "[TEST keydown]",
+    //     e.key,
+    //     "activeElement =",
+    //     document.activeElement,
+    //     "shadow.activeElement =",
+    //     shadow.activeElement,
+    //     "selection.anchorNode =",
+    //     selection?.anchorNode,
+    //     "selection.anchorOffset =",
+    //     selection?.anchorOffset,
+    //     "selection.focusNode =",
+    //     selection?.focusNode,
+    //     "selection.focusOffset =",
+    //     selection?.focusOffset
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("beforeinput", (e) => {
+    //   console.log(
+    //     "[TEST beforeinput]",
+    //     "inputType =",
+    //     e.inputType,
+    //     "cancelable =",
+    //     e.cancelable,
+    //     "isTrusted =",
+    //     e.isTrusted,
+    //     "defaultPrevented =",
+    //     e.defaultPrevented
+    //   );
+    // });
+
+    // // ===== 调试事件 =====
+
+    // firefoxTest.addEventListener("keydown", (e) => {
+    //   console.log(
+    //     "[TEST keydown]",
+    //     "key =", e.key,
+    //     "defaultPrevented =", e.defaultPrevented
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("beforeinput", (e) => {
+    //   console.log(
+    //     "[TEST beforeinput]",
+    //     "inputType =", e.inputType,
+    //     "defaultPrevented =", e.defaultPrevented
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("input", () => {
+    //   console.log(
+    //     "[TEST input]",
+    //     firefoxTest.textContent
+    //   );
+    // });
+
+    // // ===== 检查 beforeinput 在各阶段是否被 preventDefault =====
+
+    // shadow.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[SHADOW CAPTURE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   },
+    //   true
+    // );
+
+    // shadow.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[SHADOW BUBBLE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   }
+    // );
+
+    // document.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[DOCUMENT CAPTURE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   },
+    //   true
+    // );
+
+    // document.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[DOCUMENT BUBBLE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   }
+    // );
+
+
+    // }
     // 发音 
     shadow.getElementById("p-speak").onclick = (e) => {
       e.stopPropagation();
