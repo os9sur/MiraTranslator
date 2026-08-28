@@ -647,7 +647,7 @@ self.i18nEngineData = {
     configAlias: "配置别名",
     notEnabled: "未启用",
     enableEngineNow: "立即启用此引擎",
-    save: "应用并保存",
+    save: "保存",
     testConnection: "测试连接",
     confirmDelete: "确认删除？",
     confirmClose: "确认关闭？",
@@ -658,6 +658,7 @@ self.i18nEngineData = {
     failed: "失败",
     freeInterfaceTipsInfo: "此接口通过公共网络请求实现，仅供个人学习与非商业使用，无需配置密钥",
   },
+
   "zh-TW": {
     engineListTitle: "引擎列表",
     addTranslationService: "+ 新增自訂翻譯服務（API Key）",
@@ -670,7 +671,7 @@ self.i18nEngineData = {
     configAlias: "配置別名",
     notEnabled: "未啟用",
     enableEngineNow: "立即啟用此引擎",
-    save: "應用並儲存",
+    save: "儲存",
     testConnection: "測試連線",
     confirmDelete: "確認刪除？",
     confirmClose: "確認關閉？",
@@ -681,6 +682,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "本介面基於公共網路請求驅動，僅供個人學習及非商業用途。無需配置金鑰",
   },
+
   "en": {
     engineListTitle: "Engine List",
     addTranslationService: "+ Add Custom Translation Service (API Key)",
@@ -693,7 +695,7 @@ self.i18nEngineData = {
     configAlias: "Config Alias",
     notEnabled: "Not Enabled",
     enableEngineNow: "Enable This Engine",
-    save: "Apply & Save",
+    save: "Save",
     testConnection: "Test Connection",
     confirmDelete: "Confirm Delete?",
     confirmClose: "Confirm Close?",
@@ -704,6 +706,7 @@ self.i18nEngineData = {
     failed: "Failed",
     freeInterfaceTipsInfo: "Powered by public requests. For personal learning and non-commercial use only. No API key required.",
   },
+
   "ja": {
     engineListTitle: "エンジンリスト",
     addTranslationService: "+ カスタム翻訳サービスを追加（API Key）",
@@ -716,7 +719,7 @@ self.i18nEngineData = {
     configAlias: "設定エイリアス",
     notEnabled: "未有効化",
     enableEngineNow: "このエンジンを有効にする",
-    save: "適用して保存",
+    save: "保存",
     testConnection: "接続テスト",
     confirmDelete: "削除しますか？",
     confirmClose: "閉じてもよろしいですか？",
@@ -727,6 +730,7 @@ self.i18nEngineData = {
     failed: "失敗",
     freeInterfaceTipsInfo: "パブリックリクエストに基づいています。個人の学習および非営利目的のみ。APIキーは不要です",
   },
+
   "ko": {
     engineListTitle: "엔진 목록",
     addTranslationService: "+ 커스텀 번역 서비스 추가（API Key）",
@@ -739,7 +743,7 @@ self.i18nEngineData = {
     configAlias: "설정 별칭",
     notEnabled: "활성화되지 않음",
     enableEngineNow: "이 엔진 활성화",
-    save: "적용 및 저장",
+    save: "저장",
     testConnection: "연결 테스트",
     confirmDelete: "삭제하시겠습니까?",
     confirmClose: "창을 닫으시겠습니까?",
@@ -750,6 +754,7 @@ self.i18nEngineData = {
     failed: "실패",
     freeInterfaceTipsInfo: "공용 네트워크 요청 기반입니다. 개인 학습 및 비상업적 용도로만 사용 가능. API 키 불필요",
   },
+
   "es": {
     engineListTitle: "Lista de motores",
     addTranslationService: "+ Agregar servicio de traducción personalizado (API Key)",
@@ -762,7 +767,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuración",
     notEnabled: "No habilitado",
     enableEngineNow: "Habilitar este motor",
-    save: "Aplicar y guardar",
+    save: "Guardar",
     testConnection: "Probar conexión",
     confirmDelete: "¿Confirmar eliminación?",
     confirmClose: "¿Confirmar cierre?",
@@ -773,6 +778,7 @@ self.i18nEngineData = {
     failed: "Fallo",
     freeInterfaceTipsInfo: "Basado en red pública. Solo para uso personal y no comercial. No requiere clave API",
   },
+
   "fr": {
     engineListTitle: "Liste des moteurs",
     addTranslationService: "+ Ajouter un service de traduction personnalisé (API Key)",
@@ -785,7 +791,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuration",
     notEnabled: "Non activé",
     enableEngineNow: "Activer ce moteur",
-    save: "Appliquer et enregistrer",
+    save: "Enregistrer",
     testConnection: "Tester la connexion",
     confirmDelete: "Confirmer la suppression ?",
     confirmClose: "Confirmer la fermeture ?",
@@ -796,6 +802,7 @@ self.i18nEngineData = {
     failed: "Échec",
     freeInterfaceTipsInfo: "Basé sur le réseau public. Usage personnel et non commercial uniquement. Aucune clé requise",
   },
+
   "de": {
     engineListTitle: "Engine-Liste",
     addTranslationService: "+ Eigenen Übersetzungsdienst hinzufügen (API Key)",
@@ -808,7 +815,7 @@ self.i18nEngineData = {
     configAlias: "Konfigurations-Alias",
     notEnabled: "Nicht aktiviert",
     enableEngineNow: "Diese Engine aktivieren",
-    save: "Anwenden & Speichern",
+    save: "Speichern",
     testConnection: "Verbindung testen",
     confirmDelete: "Löschen bestätigen?",
     confirmClose: "Schließen bestätigen?",
@@ -819,6 +826,7 @@ self.i18nEngineData = {
     failed: "Fehlgeschlagen",
     freeInterfaceTipsInfo: "Basiert auf öffentlichen Anfragen. Nur für persönlichen/nicht-kommerziellen Gebrauch. Kein Schlüssel nötig",
   },
+
   "ru": {
     engineListTitle: "Список движков",
     addTranslationService: "+ Добавить пользовательский сервис перевода (API Key)",
@@ -831,7 +839,7 @@ self.i18nEngineData = {
     configAlias: "Псевдоним конфигурации",
     notEnabled: "Не включено",
     enableEngineNow: "Включить этот движок",
-    save: "Применить и сохранить",
+    save: "Сохранить",
     testConnection: "Проверить соединение",
     confirmDelete: "Подтвердить удаление?",
     confirmClose: "Подтвердить закрытие?",
@@ -842,6 +850,7 @@ self.i18nEngineData = {
     failed: "Ошибка",
     freeInterfaceTipsInfo: "На основе публичных запросов. Только для личного некоммерческого использования. Ключ не нужен",
   },
+
   "pt": {
     engineListTitle: "Lista de motores",
     addTranslationService: "+ Adicionar serviço de tradução personalizado (API Key)",
@@ -854,7 +863,7 @@ self.i18nEngineData = {
     configAlias: "Alias de configuração",
     notEnabled: "Não ativado",
     enableEngineNow: "Ativar este motor",
-    save: "Aplicar e salvar",
+    save: "Salvar",
     testConnection: "Testar conexão",
     confirmDelete: "Confirmar exclusão?",
     confirmClose: "Confirmar fechamento?",
@@ -865,6 +874,7 @@ self.i18nEngineData = {
     failed: "Falha",
     freeInterfaceTipsInfo: "Baseado em rede pública. Apenas uso pessoal/não comercial. Nenhuma chave necessária",
   },
+
   "it": {
     engineListTitle: "Elenco motori",
     addTranslationService: "+ Aggiungi servizio di traduzione personalizzato (API Key)",
@@ -877,7 +887,7 @@ self.i18nEngineData = {
     configAlias: "Alias configurazione",
     notEnabled: "Non abilitato",
     enableEngineNow: "Abilita questo motore",
-    save: "Applica e salva",
+    save: "Salva",
     testConnection: "Testa connessione",
     confirmDelete: "Conferma eliminazione?",
     confirmClose: "Conferma chiusura?",
@@ -888,6 +898,7 @@ self.i18nEngineData = {
     failed: "Fallito",
     freeInterfaceTipsInfo: "Basado su richieste pubbliche. Solo uso personale/non commerciale. Nessuna chiave richiesta",
   },
+
   "vi": {
     engineListTitle: "Danh sách công cụ",
     addTranslationService: "+ Thêm dịch vụ dịch thuật tùy chỉnh (API Key)",
@@ -900,7 +911,7 @@ self.i18nEngineData = {
     configAlias: "Tên cấu hình",
     notEnabled: "Chưa bật",
     enableEngineNow: "Kích hoạt công cụ này",
-    save: "Áp dụng và lưu",
+    save: "Lưu",
     testConnection: "Kiểm tra kết nối",
     confirmDelete: "Xác nhận xóa?",
     confirmClose: "Xác nhận đóng?",
@@ -911,6 +922,7 @@ self.i18nEngineData = {
     failed: "Thất bại",
     freeInterfaceTipsInfo: "Dựa trên yêu cầu mạng công cộng. Chỉ dùng cho cá nhân/phi thương mại. Không cần khóa",
   },
+
   "th": {
     engineListTitle: "รายการเครื่องยนต์",
     addTranslationService: "+ เพิ่มบริการแปลแบบกำหนดเอง (API Key)",
@@ -923,7 +935,7 @@ self.i18nEngineData = {
     configAlias: "ชื่อเรียกการตั้งค่า",
     notEnabled: "ยังไม่เปิดใช้งาน",
     enableEngineNow: "เปิดใช้งานเครื่องยนต์นี้",
-    save: "ปรับใช้และบันทึก",
+    save: "บันทึก",
     testConnection: "ทดสอบการเชื่อมต่อ",
     confirmDelete: "ยืนยันการลบ?",
     confirmClose: "ยืนยันการปิด?",
@@ -934,6 +946,7 @@ self.i18nEngineData = {
     failed: "ล้มเหลว",
     freeInterfaceTipsInfo: "ใช้คำขอเครือข่ายสาธารณะ สำหรับการเรียนรู้ส่วนบุคคล/ไม่ใช่เชิงพาณิชย์ ไม่ต้องใช้คีย์",
   },
+
   "ar": {
     engineListTitle: "قائمة المحركات",
     addTranslationService: "+ إضافة خدمة ترجمة مخصصة (API Key)",
@@ -946,7 +959,7 @@ self.i18nEngineData = {
     configAlias: "اسم التكوين",
     notEnabled: "غير مفعل",
     enableEngineNow: "تفعيل هذا المحرك",
-    save: "تطبيق وحفظ",
+    save: "حفظ",
     testConnection: "اختبار الاتصال",
     confirmDelete: "تأكيد الحذف؟",
     confirmClose: "تأكيد الإغلاق؟",
@@ -957,6 +970,7 @@ self.i18nEngineData = {
     failed: "فشل",
     freeInterfaceTipsInfo: "مدعوم بطلبات الشبكة العامة. للاستخدام الشخصي وغير التجاري فقط. لا يتطلب مفتاح",
   },
+
   "fa": {
     engineListTitle: "لیست موتورها",
     addTranslationService: "+ افزودن سرویس ترجمه سفارشی (API Key)",
@@ -969,7 +983,7 @@ self.i18nEngineData = {
     configAlias: "نام مستعار پیکربندی",
     notEnabled: "فعال نشده",
     enableEngineNow: "فعال‌سازی این موتور",
-    save: "اعمال و ذخیره",
+    save: "ذخیره",
     testConnection: "تست اتصال",
     confirmDelete: "تأیید حذف؟",
     confirmClose: "تأیید بستن؟",
@@ -980,6 +994,7 @@ self.i18nEngineData = {
     failed: "ناموفق",
     freeInterfaceTipsInfo: "مبتنی بر شبکه عمومی. فقط استفاده شخصی/غیرتجاری. بدون نیاز به کلید",
   },
+
   "tr": {
     engineListTitle: "Motor Listesi",
     addTranslationService: "+ Özel çeviri servisi ekle (API Key)",
@@ -992,7 +1007,7 @@ self.i18nEngineData = {
     configAlias: "Yapılandırma Takma Adı",
     notEnabled: "Etkin Değil",
     enableEngineNow: "Bu Motoru Etkinleştir",
-    save: "Uygula ve Kaydet",
+    save: "Kaydet",
     testConnection: "Bağlantıyı Test Et",
     confirmDelete: "Silmeyi onayla?",
     confirmClose: "Kapatmayı onayla?",
@@ -1003,6 +1018,7 @@ self.i18nEngineData = {
     failed: "Başarısız",
     freeInterfaceTipsInfo: "Genel ağ isteklerine dayalıdır. Yalnızca kişisel/ticari olmayan kullanım. Anahtar gerekmez",
   }
+
 };
 self.i18nStyleData = {
   "zh-CN": {
@@ -2846,7 +2862,7 @@ self.i18nAttach4 = {
     restrictedNotice: "Cette page est restreinte par la politique de sécurité du navigateur (ex. boutique d’extensions, pages internes) — ça n'a rien à voir avec Mira",
     btnGotIt: "Compris"
   },
-  "pt-BR": {
+  "pt": {
     setLanguage: "Para qual idioma você quer traduzir?",
     targetLang: "Traduzir para qual idioma?",
     uiLanguage: "Idioma da interface",
@@ -3373,268 +3389,231 @@ self.i18nAttach8 = {
 
 self.i18nAttach10 = {
   "zh-CN": {
-    cpTitle: "自定义提示词",
+    cpTitle: "自定义翻译风格",
     cpOptional: "可选",
     translate_failed: "翻译失败",
     cpWeb: "网页翻译",
     cpSub: "字幕翻译",
     cpWebPH: "例：使用正式语气，专业术语保留英文",
     cpSubPH: "例：保持口语化，避免过于字面的翻译",
-    cpHint: "⚠ 仅支持风格描述，例如：正式语气 / 简洁 / 医学术语等",
+    cpHint: "描述你希望的语气、风格或表达方式即可",
     cpSave: "保存",
     cpClear: "清除",
     footerReview: "⭐ 好评支持",
     footerFeedback: "✉️ 问题反馈",
     restoreRules: "恢复默认规则",
-    builtInNoticeBody: `⬆ 此功能通过公开网络请求实现，仅供个人学习与非商业用途使用，无需设置密钥。
----
-    🔑 **关于设置：** 如需进阶 AI 翻译，可前往各大 AI 平台自行申请 API Key 并点击左下角按钮进行设置。若本地显卡性能较佳，亦可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度会比商业 AI 大模型明显较慢。
-    💡 **AI 翻译性能说明：** AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，此为正常现象。
-    💰 **提示：** AI 翻译并非模型越新越好。翻译任务并不需要复杂推理，主流模型已能完全胜任，最新模型的价格往往高出数倍。
-    ❤️ **关于项目：**  {0} 这是一个追求极致轻量的开源翻译项目（仅约300kb），最初是为了满足我个人的翻译需求而独立开发，因此在交互设计上可能带有较强的个人习惯。
-    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。因个人维护精力有限，无法保证完美兼容全网所有特定网站，后续的更新维护亦无法做到即时响应。感谢理解。`,
   },
   "zh-TW": {
-    cpTitle: "自訂提示詞",
+    cpTitle: "自訂翻譯風格",
     cpOptional: "選填",
     translate_failed: "翻譯失敗",
     cpWeb: "網頁翻譯",
     cpSub: "字幕翻譯",
     cpWebPH: "例：使用正式語氣，專業術語保留英文",
     cpSubPH: "例：保持口語化，避免過於字面的翻譯",
-    cpHint: "⚠ 僅支援風格描述，例如：正式語氣 / 簡潔 / 醫學術語",
+    cpHint: "描述你希望的語氣、風格或表達方式即可",
     cpSave: "儲存",
     cpClear: "清除",
     footerReview: "⭐ 好評支持",
     footerFeedback: "✉️ 問題回饋",
     restoreRules: "恢復預設規則",
-    builtInNoticeBody: `⬆ 此功能透過公開網路請求實現，僅供個人學習與非商業用途使用，無需設定金鑰。
----
-    🔑 **關於設定：** 如需進階 AI 翻譯，可前往各大 AI 平台自行申請 API Key 並點擊左下角按鈕進行設定。若本地顯示卡效能較佳，亦可部署本地 AI 模型，無需連網、無限次免費使用，但翻譯速度會比商業 AI 大模型明顯較慢。
-    💡 **AI 翻譯效能說明：** AI 翻譯效果更自然，但由於模型逐字生成的機制，速度比 Google、Bing 等傳統引擎慢，此為正常現象。
-    💰 **提醒：** AI 翻譯並非模型越新越好。翻譯任務不需要複雜推理，主流模型已完全勝任，最新模型的價格往往高出數倍。
-    ❤️ **關於專案：** {0} 是一個追求極致輕量的開源翻譯專案（僅約 300KB），最初是為了滿足我個人的翻譯需求而獨立開發，因此在互動設計上可能帶有較強的個人習慣。
-    ⚠️ **注意：** 本工具預設內建基礎的免費翻譯引擎，**不額外提供免費的高級 AI 翻譯額度及服務**。因個人維護精力有限，無法保證完美相容全網所有特定網站，後續的更新維護亦無法做到即時回應。感謝理解。`,
   },
   "en": {
-    cpTitle: "Custom Prompt",
+    cpTitle: "Custom Translation Style",
     cpOptional: "Optional",
     translate_failed: "Unable to translate",
     cpWeb: "Web Translation",
     cpSub: "Subtitle Translation",
-    cpWebPH: "e.g. Use formal tone. Focus on medical terminology.",
-    cpSubPH: "e.g. Keep it conversational. Avoid overly literal translation.",
-    cpHint: "⚠ Style hint only, e.g. formal / concise / medical terms",
+    cpWebPH: "e.g. Use a formal tone. Keep technical terms in English.",
+    cpSubPH: "e.g. Keep it conversational. Avoid overly literal translations.",
+    cpHint: "Describe the tone, style, or way you want the translation to read",
     cpSave: "Save",
     cpClear: "Clear",
     footerReview: "⭐ Rate on Store",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Restore default rules",
-    builtInNoticeBody: `⬆ This feature uses public web requests and is for personal/non-commercial use only; no API key is required.
----
-    🔑 **Settings:** For advanced AI translation, you can obtain an API key from major AI platforms and configure it via the button in the bottom-left corner. If you have a capable GPU, you can deploy a local AI model for offline, unlimited free use, though it will be significantly slower than commercial AI models.
-    💡 **Performance Note:** AI translations are more natural but, due to their token-by-token generation, are slower than traditional engines like Google or Bing. This is normal.
-    💰 **Tip:** Newer isn't always better for AI models. Translation does not require complex reasoning, so mainstream models are fully sufficient, while newer models often cost several times more.
-    ❤️ **About {0}:** This is an ultra-lightweight open-source project (~300KB). It was developed independently for my personal needs, so the UI/UX may reflect my personal preferences.
-    ⚠️ **Note:** This tool includes built-in basic free translation engines by default but **does not provide additional free premium AI credits**. Due to limited maintenance capacity, I cannot guarantee perfect compatibility with all websites or provide instant support. Thanks for your understanding.`,
   },
   "ja": {
-    cpTitle: "カスタムプロンプト",
+    cpTitle: "翻訳スタイルをカスタマイズ",
     cpOptional: "任意",
     translate_failed: "翻訳に失敗しました",
     cpWeb: "ウェブ翻訳",
     cpSub: "字幕翻訳",
     cpWebPH: "例：丁寧な文体で、専門用語は英語のまま残す",
     cpSubPH: "例：自然な話し言葉で、直訳を避ける",
-    cpHint: "⚠ スタイルのみ、例：丁寧な文体 / 簡潔に / 医学用語",
+    cpHint: "希望する語調や文体、表現方法を入力してください",
     cpSave: "保存",
     cpClear: "クリア",
     footerReview: "⭐ レビューする",
     footerFeedback: "✉️ フィードバック",
     restoreRules: "デフォルト規則に戻す",
-    builtInNoticeBody: `⬆ 本機能は公開ネットワークリクエストを介して動作し、個人学習および非商用目的でのみ使用してください。APIキー設定は不要です。
----
-    🔑 **設定について：** 高度なAI翻訳が必要な場合は、各AIプラットフォームでAPI Keyを取得し、左下のボタンから設定してください。高性能なGPUをお持ちであれば、ローカルAIモデルを導入することで、オフラインかつ無制限に無料で利用可能です（ただし、商用AIモデルより翻訳速度は大幅に低下します）。
-    💡 **AI翻訳の性能：** AI翻訳は自然な結果を出力しますが、逐次生成の仕組み上、GoogleやBingなどの従来型エンジンより低速です。これは仕様です。
-    💰 **TIPS：** AIモデルは最新が常にベストとは限りません。翻訳タスクには高度な推論は不要であり、主流のモデルで十分です。最新モデルはコストが数倍になる傾向があります。
-    ❤️ **プロジェクトについて：** {0} は軽量さを追求したオープンソースプロジェクト（約300KB）です。もともと自身の翻訳ニーズのために開発したため、操作設計に個人の好みが反映されている場合があります。
-    ⚠️ **注意：** 本ツールは基本的な無料翻訳エンジンを内蔵していますが、**追加の無料AI翻訳枠やサービスは提供していません**。個人開発のため、全サイトでの完全な互換性や即時のメンテナンスは保証できかねます。ご理解いただけますと幸いです。`,
   },
   "ko": {
-    cpTitle: "커스텀 프롬프트",
+    cpTitle: "번역 스타일 사용자 지정",
     cpOptional: "선택사항",
     translate_failed: "번역 실패",
     cpWeb: "웹 번역",
     cpSub: "자막 번역",
-    cpWebPH: "예: 격식체 사용, 전문 용어는 영어 그대로 유지",
-    cpSubPH: "예: 자연스러운 구어체로, 지나친 직역 지양",
-    cpHint: "⚠ 스타일 힌트만 가능, 예: 격식체 / 간결하게 / 의학 용어",
+    cpWebPH: "예: 격식 있는 문체를 사용하고, 전문 용어는 영어로 유지",
+    cpSubPH: "예: 자연스러운 구어체로 번역하고, 지나친 직역은 피하기",
+    cpHint: "원하는 말투, 문체 또는 표현 방식을 입력해 주세요",
     cpSave: "저장",
     cpClear: "지우기",
     footerReview: "⭐ 평가하기",
     footerFeedback: "✉️ 피드백",
     restoreRules: "기본 규칙으로 복구",
-    builtInNoticeBody: `⬆ 이 기능은 공개 네트워크 요청을 통해 작동하며, 개인 학습 및 비상업적 용도로만 사용 가능합니다. 별도의 API 키 설정은 필요하지 않습니다.
----
-    🔑 **설정 안내:** 고급 AI 번역이 필요한 경우, 주요 AI 플랫폼에서 API Key를 발급받아 왼쪽 하단 버튼을 통해 설정할 수 있습니다. GPU 성능이 좋다면 로컬 AI 모델을 설치하여 오프라인으로 무제한 무료 번역이 가능하지만, 상업용 AI 모델보다는 속도가 훨씬 느립니다.
-    💡 **성능 안내:** AI 번역은 결과물이 더 자연스럽지만, 토큰 단위 생성 방식 특성상 Google이나 Bing 같은 기존 번역 엔진보다 속도가 느릴 수 있습니다. 이는 정상적인 현상입니다.
-    💰 **팁:** AI 모델은 최신 버전이 항상 좋은 것은 아닙니다. 번역 작업에는 복잡한 추론이 필요 없으므로 주류 모델로도 충분하며, 최신 모델은 비용이 수배 이상 높습니다.
-    ❤️ **프로젝트 정보:** {0}은 300KB 정도의 매우 가벼운 오픈소스 프로젝트입니다. 애초에 제 개인적인 번역 니즈를 해결하기 위해 개발했기 때문에, UI/UX 설계에 개인적인 취향이 다소 반영되어 있을 수 있습니다.
-    ⚠️ **주의:** 본 도구는 기본 무료 번역 엔진을 내장하고 있으며, **무료 고급 AI 번역 서비스는 추가로 제공하지 않습니다**. 개인 개발 특성상 모든 웹사이트와의 완벽한 호환성이나 즉각적인 대응을 보장할 수 없음을 양해 부탁드립니다.`,
   },
-  "pt-BR": {
-    cpTitle: "Prompt Personalizado",
+  "pt": {
+    cpTitle: "Estilo de Tradução Personalizado",
     cpOptional: "Opcional",
     translate_failed: "Falha na tradução",
     cpWeb: "Tradução de Páginas",
     cpSub: "Tradução de Legendas",
-    cpWebPH: "Ex: Use um tom formal. Mantenha os termos técnicos em inglês.",
-    cpSubPH: "Ex: Mantenha um tom coloquial. Evite traduções literais demais.",
-    cpHint: "⚠ Apenas dicas de estilo, ex: tom formal / conciso / termos médicos",
+    cpWebPH: "Ex.: Use um tom formal. Mantenha os termos técnicos em inglês.",
+    cpSubPH: "Ex.: Mantenha um tom coloquial. Evite traduções excessivamente literais.",
+    cpHint: "Descreva o tom, o estilo ou a forma de expressão que você deseja",
     cpSave: "Salvar",
     cpClear: "Limpar",
     footerReview: "⭐ Avaliar na Loja",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Restaurar regras padrão",
-    builtInNoticeBody: `⬆ Este recurso utiliza requisições de rede públicas e destina-se apenas a uso pessoal e não comercial; não requer chave de API.
----
-    🔑 **Configurações:** Para tradução avançada via IA, você pode obter uma chave de API nas principais plataformas e configurá-la no botão no canto inferior esquerdo. Se tiver uma GPU potente, pode usar modelos locais para tradução offline e ilimitada, embora a velocidade seja consideravelmente menor que a de modelos comerciais.
-    💡 **Performance:** Traduções por IA são mais naturais, mas devido ao mecanismo de geração palavra por palavra, são mais lentas que motores tradicionais (Google/Bing). Isso é normal.
-    💰 **Dica:** Modelos de IA mais novos não são necessariamente melhores. Tarefas de tradução não exigem raciocínio complexo; modelos populares são suficientes e custam muito menos.
-    ❤️ **Sobre o {0}:** Este é um projeto open-source extremamente leve (~300KB). Desenvolvido por mim para uso próprio, por isso o design reflete minhas preferências pessoais.
-    ⚠️ **Nota:** Esta ferramenta inclui motores gratuitos básicos, mas **não fornece créditos extras gratuitos de IA premium**. Devido à manutenção individual, não garanto compatibilidade perfeita com todos os sites nem suporte imediato. Obrigado pela compreensão.`,
   },
   "es": {
-    cpTitle: "Prompt Personalizado",
+    cpTitle: "Estilo de Traducción Personalizado",
     cpOptional: "Opcional",
     translate_failed: "Error al traducir",
     cpWeb: "Traducción Web",
     cpSub: "Traducción de Subtítulos",
-    cpWebPH: "p. ej., Usar tono formal. Mantener la terminología técnica en inglés.",
+    cpWebPH: "p. ej., Usar un tono formal. Mantener la terminología técnica en inglés.",
     cpSubPH: "p. ej., Mantener un tono conversacional. Evitar traducciones demasiado literales.",
-    cpHint: "⚠ Solo indicaciones de estilo, p. ej., formal / conciso / términos médicos",
+    cpHint: "Describe el tono, estilo o forma de expresión que quieres para la traducción",
     cpSave: "Guardar",
     cpClear: "Borrar",
     footerReview: "⭐ Calificar",
     footerFeedback: "✉️ Comentarios",
     restoreRules: "Restaurar reglas por defecto",
-    builtInNoticeBody: `⬆ Esta función utiliza peticiones de red públicas y es solo para uso personal y no comercial; no requiere configuración de clave.
----
-    🔑 **Configuración:** Para una traducción por IA avanzada, obtenga una API Key en las plataformas principales y configúrela en el botón inferior izquierdo. Si tiene una GPU potente, puede usar modelos locales para uso offline ilimitado, aunque será notablemente más lento que los modelos comerciales.
-    💡 **Nota de rendimiento:** Las traducciones por IA son más naturales, pero debido a su mecanismo de generación palabra por palabra, son más lentas que los motores tradicionales como Google o Bing. Esto es normal.
-    💰 **Consejo:** Los modelos más nuevos no siempre son mejores para traducir. Las tareas de traducción no requieren razonamiento complejo; los modelos estándar son suficientes y los nuevos suelen costar mucho más.
-    ❤️ **Sobre el proyecto {0}:** Es un proyecto open-source ultraligero (~300KB). Lo desarrollé para mi uso personal, por lo que el diseño refleja mis preferencias personales.
-    ⚠️ **Nota:** Esta herramienta incluye motores gratuitos básicos, pero **no ofrece créditos gratuitos de IA premium adicionales**. Debido a que es un desarrollo individual, no puedo garantizar compatibilidad total con todos los sitios ni soporte inmediato. Gracias por su comprensión.`,
   },
   "fr": {
-    cpTitle: "Prompt Personnalisé",
+    cpTitle: "Style de Traduction Personnalisé",
     cpOptional: "Optionnel",
     translate_failed: "Échec de la traduction",
     cpWeb: "Traduction Web",
     cpSub: "Traduction de Sous-titres",
     cpWebPH: "ex. Utiliser un ton formel. Conserver la terminologie technique en anglais.",
-    cpSubPH: "ex. Garder un ton familier. Éviter les traductions trop littérales.",
-    cpHint: "⚠ Indications de style uniquement, ex. formel / concis / termes médicaux",
+    cpSubPH: "ex. Garder un ton naturel et conversationnel. Éviter les traductions trop littérales.",
+    cpHint: "Décrivez le ton, le style ou la manière dont vous souhaitez que la traduction soit formulée",
     cpSave: "Enregistrer",
     cpClear: "Effacer",
     footerReview: "⭐ Noter",
     footerFeedback: "✉️ Commentaires",
     restoreRules: "Restaurer les règles par défaut",
-    builtInNoticeBody: `⬆ Cette fonctionnalité utilise des requêtes réseau publiques et est réservée à un usage personnel et non commercial ; aucune clé n'est requise.
----
-    🔑 **Configuration :** Pour une traduction IA avancée, obtenez une clé API sur les plateformes principales et configurez-la via le bouton en bas à gauche. Si vous avez un bon GPU, vous pouvez utiliser des modèles locaux pour un usage illimité hors ligne, bien que ce soit plus lent que les modèles commerciaux.
-    💡 **Performance :** La traduction IA est plus naturelle mais, en raison de sa génération mot à mot, elle est plus lente que les moteurs traditionnels (Google/Bing). C'est normal.
-    💰 **Conseil :** Les nouveaux modèles ne sont pas toujours les meilleurs pour la traduction. Les modèles grand public suffisent amplement, tandis que les plus récents coûtent souvent beaucoup plus cher.
-    ❤️ **À propos de {0} :** C'est un projet open-source ultra-léger (~300KB). Développé pour mes besoins personnels, le design reflète mes préférences habituelles.
-    ⚠️ **Note :** Cet outil inclut des moteurs gratuits par défaut mais **ne fournit pas de crédits IA premium gratuits supplémentaires**. En raison d'une maintenance individuelle, je ne peux garantir une compatibilité parfaite avec tous les sites ni un support immédiat. Merci de votre compréhension.`,
   },
   "de": {
-    cpTitle: "Benutzerdefinierter Prompt",
+    cpTitle: "Individueller Übersetzungsstil",
     cpOptional: "Optional",
     translate_failed: "Übersetzung fehlgeschlagen",
     cpWeb: "Web-Übersetzung",
     cpSub: "Untertitel-Übersetzung",
-    cpWebPH: "z. B. Formalen Ton verwenden. Technische Fachbegriffe auf Englisch belassen.",
-    cpSubPH: "z. B. Umgangssprachlich halten. Zu wörtliche Übersetzungen vermeiden.",
-    cpHint: "⚠ Nur Stil-Hinweise, z. B. formal / prägnant / medizinische Fachbegriffe",
+    cpWebPH: "z. B. Einen formellen Ton verwenden. Technische Fachbegriffe auf Englisch belassen.",
+    cpSubPH: "z. B. Natürlich und umgangssprachlich formulieren. Zu wörtliche Übersetzungen vermeiden.",
+    cpHint: "Beschreiben Sie den gewünschten Ton, Stil oder die Ausdrucksweise der Übersetzung",
     cpSave: "Speichern",
     cpClear: "Leeren",
     footerReview: "⭐ Bewerten",
     footerFeedback: "✉️ Feedback",
     restoreRules: "Standardregeln wiederherstellen",
-    builtInNoticeBody: `⬆ Diese Funktion verwendet öffentliche Netzwerkanfragen und ist nur für den persönlichen, nicht-kommerziellen Gebrauch bestimmt; kein Schlüssel erforderlich.
----
-    🔑 **Einstellungen:** Für fortgeschrittene KI-Übersetzung können Sie einen API-Schlüssel bei KI-Plattformen erhalten und diesen über den Button unten links konfigurieren. Mit einer leistungsstarken GPU können Sie lokale KI-Modelle für unbegrenzte Offline-Nutzung verwenden, was jedoch langsamer als bei kommerziellen Modellen ist.
-    💡 **Leistung:** KI-Übersetzungen sind natürlicher, aber aufgrund der wortweisen Generierung langsamer als Google oder Bing. Das ist normal.
-    💰 **Tipp:** Neuere KI-Modelle sind nicht immer besser für Übersetzungen. Gängige Modelle reichen völlig aus, während neue oft ein Vielfaches kosten.
-    ❤️ **Über {0}:** Ein extrem leichtes Open-Source-Projekt (~300KB). Da ich es für meine Bedürfnisse entwickelt habe, spiegelt das Design meine persönlichen Gewohnheiten wider.
-    ⚠️ **Hinweis:** Dieses Tool bietet grundlegende kostenlose Engines, **keine zusätzlichen kostenlosen KI-Credits**. Aufgrund der individuellen Wartung kann ich keine perfekte Kompatibilität mit allen Seiten oder sofortigen Support garantieren. Danke für Ihr Verständnis.`,
   },
   "ru": {
-    cpTitle: "Пользовательский промпт",
+    cpTitle: "Настройка стиля перевода",
     cpOptional: "Необязательно",
     translate_failed: "Ошибка перевода",
     cpWeb: "Перевод веб-страниц",
     cpSub: "Перевод субтитров",
-    cpWebPH: "Пример: Использовать официальный тон. Сохранять технические термины на английском.",
-    cpSubPH: "Пример: Сохранять разговорный стиль. Избегать слишком буквального перевода.",
-    cpHint: "⚠ Только указания по стилю, например: официальный тон / кратко / медицинские термины",
+    cpWebPH: "Например: Использовать официальный тон. Сохранять технические термины на английском.",
+    cpSubPH: "Например: Сохранять разговорный стиль. Избегать слишком буквального перевода.",
+    cpHint: "Опишите желаемый тон, стиль или особенности выражения перевода",
     cpSave: "Сохранить",
     cpClear: "Очистить",
     footerReview: "⭐ Оценить",
     footerFeedback: "✉️ Отзыв",
     restoreRules: "Восстановить настройки по умолчанию",
-    builtInNoticeBody: `⬆ Эта функция работает через публичные запросы и предназначена только для личного некоммерческого использования; ключ не требуется.
----
-    🔑 **Настройки:** Для продвинутого ИИ-перевода получите API Key на платформе ИИ и настройте его через кнопку в левом нижнем углу. Если у вас мощный GPU, можно использовать локальные модели для неограниченного оффлайн-перевода (хотя это медленнее коммерческих моделей).
-    💡 **Производительность:** ИИ-перевод естественнее, но из-за пословной генерации он медленнее традиционных движков (Google/Bing). Это нормально.
-    💰 **Совет:** Новые модели не всегда лучше для перевода. Стандартные модели отлично справляются, а новые часто стоят в разы дороже.
-    ❤️ **О проекте {0}:** Это ультралегкий open-source проект (~300KB). Я разработал его для своих нужд, поэтому дизайн может отражать мои личные привычки.
-    ⚠️ **Примечание:** Инструмент включает базовые бесплатные движки, но **не предоставляет бесплатные кредиты для премиум-ИИ**. Из-за индивидуальной разработки я не гарантирую полную совместимость со всеми сайтами и мгновенную поддержку. Спасибо за понимание.`,
   },
   "vi": {
-    cpTitle: "Prompt Tùy Chỉnh",
+    cpTitle: "Tùy Chỉnh Phong Cách Dịch",
     cpOptional: "Tùy chọn",
     translate_failed: "Dịch thất bại",
     cpWeb: "Dịch Trang Web",
     cpSub: "Dịch Phụ Đề",
     cpWebPH: "Ví dụ: Sử dụng giọng điệu trang trọng. Giữ nguyên thuật ngữ kỹ thuật bằng tiếng Anh.",
     cpSubPH: "Ví dụ: Giữ giọng điệu tự nhiên, gần gũi. Tránh dịch quá sát nghĩa đen.",
-    cpHint: "⚠ Chỉ hỗ trợ mô tả phong cách, ví dụ: giọng điệu trang trọng / ngắn gọn / thuật ngữ y học",
+    cpHint: "Mô tả giọng điệu, phong cách hoặc cách diễn đạt mà bạn mong muốn",
     cpSave: "Lưu",
     cpClear: "Xóa",
     footerReview: "⭐ Đánh giá",
     footerFeedback: "✉️ Phản hồi",
     restoreRules: "Khôi phục quy tắc mặc định",
-    builtInNoticeBody: `⬆ Tính năng này sử dụng yêu cầu mạng công cộng, chỉ dành cho mục đích học tập/phi thương mại; không cần khóa API.
----
-    🔑 **Cài đặt:** Để dịch AI nâng cao, bạn có thể lấy API Key từ các nền tảng AI và cấu hình qua nút ở góc dưới bên trái. Nếu có GPU mạnh, bạn có thể cài đặt mô hình AI cục bộ để dùng offline miễn phí không giới hạn, dù tốc độ sẽ chậm hơn các mô hình thương mại.
-    💡 **Hiệu suất:** Dịch AI tự nhiên hơn nhưng do cơ chế tạo từng từ, tốc độ sẽ chậm hơn Google/Bing. Đây là điều bình thường.
-    💰 **Mẹo:** Mô hình AI mới không phải lúc nào cũng tốt hơn cho việc dịch. Các mô hình phổ biến là đủ dùng, trong khi mô hình mới thường đắt hơn nhiều.
-    ❤️ **Về dự án {0}:** Đây là dự án mã nguồn mở siêu nhẹ (~300KB). Vì tôi tự phát triển cho nhu cầu cá nhân nên thiết kế có thể mang đậm thói quen sử dụng của tôi.
-    ⚠️ **Lưu ý:** Công cụ này tích hợp sẵn các công cụ dịch miễn phí, **không cung cấp thêm hạn mức AI cao cấp miễn phí**. Do phát triển cá nhân, tôi không đảm bảo tương thích hoàn hảo với mọi trang web hay hỗ trợ tức thì. Cảm ơn bạn đã thông cảm.`,
   },
   "ar": {
-    cpTitle: "موجه مخصص",
+    cpTitle: "تخصيص أسلوب الترجمة",
     cpOptional: "اختياري",
     translate_failed: "تعذّر الترجمة",
     cpWeb: "ترجمة الويب",
     cpSub: "ترجمة الترجمات",
-    cpWebPH: "مثال: استخدم أسلوبًا رسميًا. ركّز على المصطلحات الطبية.",
-    cpSubPH: "مثال: اجعلها محادثة. تجنّب الترجمة الحرفية.",
-    cpHint: "⚠ تلميح أسلوبي فقط، مثل: رسمي / موجز / مصطلحات طبية",
+    cpWebPH: "مثال: استخدم أسلوبًا رسميًا. أبقِ المصطلحات التقنية باللغة الإنجليزية.",
+    cpSubPH: "مثال: استخدم أسلوبًا حواريًا طبيعيًا. تجنّب الترجمة الحرفية المفرطة.",
+    cpHint: "صف النبرة أو الأسلوب أو طريقة التعبير التي تفضلها في الترجمة",
     cpSave: "حفظ",
     cpClear: "مسح",
     footerReview: "⭐ قيّم في المتجر",
     footerFeedback: "✉️ ملاحظات",
     restoreRules: "استعادة القواعد الافتراضية",
-    builtInNoticeBody: `⬆ هذه الميزة تعمل عبر طلبات شبكة عامة، وهي مخصصة للاستخدام الشخصي التعليمي وغير التجاري فقط، ولا تتطلب إعداد مفاتيح تشفير.
----
-    🔑 **حول الإعدادات:** للحصول على ترجمة AI متقدمة، يمكنك الحصول على مفتاح API من منصات الذكاء الاصطناعي وإعداده عبر الزر في الزاوية اليسرى السفلية. إذا كان أداء بطاقة الرسوميات (GPU) لديك جيداً، يمكنك أيضاً تشغيل نموذج محلي للترجمة بدون إنترنت وبلا حدود، لكن السرعة ستكون أبطأ مقارنة بالنماذج التجارية.
-    💡 **ملاحظة حول الأداء:** نتائج ترجمة الذكاء الاصطناعي تبدو أكثر طبيعية، لكن نظراً لآلية التوليد كلمة بكلمة، فهي أبطأ من محركات الترجمة التقليدية مثل Google و Bing، وهذا أمر طبيعي.
-    💰 **تنبيه:** ليس بالضرورة أن يكون النموذج الأحدث هو الأفضل للترجمة. النماذج الشائعة كافية تماماً، بينما تكون تكلفة النماذج الأحدث أعلى بعدة أضعاف.
-    ❤️ **حول المشروع {0}:** هو مشروع مفتوح المصدر يسعى لتحقيق أقصى درجات الخفة (حجمه حوالي 300 كيلوبايت فقط). قمت بتطويره في الأصل لتلبية احتياجاتي الشخصية، لذا قد تعكس طريقة تصميمه بعض تفضيلاتي الشخصية.
-    ⚠️ **تنبيه:** هذه الأداة تتضمن محركات ترجمة مجانية أساسية افتراضياً، **ولا توفر رصيداً أو خدمات ترجمة AI متقدمة مجانية إضافية**. نظراً لمحدودية وقتي في الصيانة، لا يمكنني ضمان التوافق التام مع جميع المواقع أو تقديم دعم فوري. شكراً لتفهمك.`,
+  },
+  "th": {
+    cpTitle: "ปรับแต่งรูปแบบการแปล",
+    cpOptional: "ไม่บังคับ",
+    translate_failed: "แปลไม่สำเร็จ",
+    cpWeb: "แปลหน้าเว็บ",
+    cpSub: "แปลคำบรรยาย",
+    cpWebPH: "เช่น ใช้ภาษาที่เป็นทางการ และคงคำศัพท์เฉพาะเป็นภาษาอังกฤษ",
+    cpSubPH: "เช่น ใช้ภาษาที่เป็นธรรมชาติและเป็นกันเอง หลีกเลี่ยงการแปลตรงตัวมากเกินไป",
+    cpHint: "อธิบายน้ำเสียง รูปแบบ หรือวิธีการใช้ภาษาที่คุณต้องการ",
+    cpSave: "บันทึก",
+    cpClear: "ล้าง",
+    footerReview: "⭐ ให้คะแนน",
+    footerFeedback: "✉️ ส่งความคิดเห็น",
+    restoreRules: "คืนค่ากฎเริ่มต้น",
+  },
+
+  "tr": {
+    cpTitle: "Özel Çeviri Stili",
+    cpOptional: "İsteğe bağlı",
+    translate_failed: "Çeviri başarısız oldu",
+    cpWeb: "Web Sayfası Çevirisi",
+    cpSub: "Altyazı Çevirisi",
+    cpWebPH: "Örn.: Resmî bir üslup kullanın. Teknik terimleri İngilizce bırakın.",
+    cpSubPH: "Örn.: Doğal ve konuşma diline yakın bir üslup kullanın. Aşırı kelimesi kelimesine çeviriden kaçının.",
+    cpHint: "Çevirinin nasıl bir üslup, ton veya ifade tarzına sahip olmasını istediğinizi açıklayın",
+    cpSave: "Kaydet",
+    cpClear: "Temizle",
+    footerReview: "⭐ Puan Ver",
+    footerFeedback: "✉️ Geri Bildirim",
+    restoreRules: "Varsayılan kuralları geri yükle",
+  },
+
+  "fa": {
+    cpTitle: "سبک ترجمه سفارشی",
+    cpOptional: "اختیاری",
+    translate_failed: "ترجمه انجام نشد",
+    cpWeb: "ترجمه صفحات وب",
+    cpSub: "ترجمه زیرنویس",
+    cpWebPH: "مثال: از لحنی رسمی استفاده کنید و اصطلاحات تخصصی را به انگلیسی نگه دارید.",
+    cpSubPH: "مثال: ترجمه‌ای روان و محاوره‌ای داشته باشید و از ترجمه بیش از حد تحت‌اللفظی پرهیز کنید.",
+    cpHint: "لحن، سبک یا شیوه بیان موردنظر خود را برای ترجمه توضیح دهید",
+    cpSave: "ذخیره",
+    cpClear: "پاک کردن",
+    footerReview: "⭐ امتیاز دهید",
+    footerFeedback: "✉️ ارسال بازخورد",
+    restoreRules: "بازیابی قوانین پیش‌فرض",
   },
 };
 
@@ -3719,7 +3698,7 @@ self.i18nAttach11 = {
     "engineSwitchedWithOverrides": "전역 기본 엔진이 변경되었습니다 ({names}은(는) 개별 설정을 그대로 사용합니다)",
     "notice.auth": "인증 페이지에서 작업을 완료한 후, 다시 돌아와 재시도해 주세요."
   },
-  "pt-BR": {
+  "pt": {
     "quickInputTrans": "Tradução em campos de texto",
     "quickInputTransEnable": "Ativar (pressione a barra de espaço 3 vezes em qualquer campo de texto)",
     "quickInputTransSource": "Idioma de origem (detecção automática por padrão)",
@@ -3817,3 +3796,113 @@ self.i18nAttach11 = {
   },
 };
 
+self.i18nAttach12 = {
+  "zh-CN": {
+    builtInNoticeBody: `⬆ 此功能通过公开网络请求实现，仅供个人学习与非商业用途使用，无需设置密钥。 
+--- 
+    🔑 **关于设置：** 如需进阶 AI 翻译，可前往各大 AI 平台自行申请 API Key 并点击左下角按钮进行设置。若本地显卡性能较佳，亦可部署本地 AI 模型，无需联网、无限次免费使用，但翻译速度会比商业 AI 大模型明显较慢。 
+    💡 **AI 翻译性能说明：** AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，此为正常现象。 
+    💰 **提示：** AI 翻译并非模型越新越好。翻译任务并不需要复杂推理，主流模型已能完全胜任，最新模型的价格往往高出数倍。 
+    ❤️ **关于项目：**  {0} 这是一个追求极致轻量的开源翻译项目（仅约300kb），最初是为了满足我个人的翻译需求而独立开发，因此在交互设计上可能带有较强的个人习惯。 
+    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。因个人维护精力有限，无法保证完美兼容全网所有特定网站，后续的更新维护亦无法做到即时响应。感谢理解。`,
+  },
+  "zh-TW": {
+    builtInNoticeBody: `⬆ 此功能透過公開網路請求實現，僅供個人學習與非商業用途使用，無需設定金鑰。 
+--- 
+    🔑 **關於設定：** 如需進階 AI 翻譯，可前往各大 AI 平台自行申請 API Key 並點擊左下角按鈕進行設定。若本地顯示卡效能較佳，亦可部署本地 AI 模型，無需連網、無限次免費使用，但翻譯速度會比商業 AI 大模型明顯較慢。 
+    💡 **AI 翻譯效能說明：** AI 翻譯效果更自然，但由於模型逐字生成的機制，速度比 Google、Bing 等傳統引擎慢，此為正常現象。 
+    💰 **提醒：** AI 翻譯並非模型越新越好。翻譯任務不需要複雜推理，主流模型已完全勝任，最新模型的價格往往高出數倍。 
+    ❤️ **關於專案：** {0} 是一個追求極致輕量的開源翻譯專案（僅約 300KB），最初是為了滿足我個人的翻譯需求而獨立開發，因此在互動設計上可能帶有較強的個人習慣。 
+    ⚠️ **注意：** 本工具預設內建基礎的免費翻譯引擎，**不額外提供免費的高級 AI 翻譯額度及服務**。因個人維護精力有限，無法保證完美相容全網所有特定網站，後續的更新維護亦無法做到即時回應。感謝理解。`,
+  },
+  "en": {
+    builtInNoticeBody: `⬆ This feature uses public web requests and is for personal/non-commercial use only; no API key is required. 
+--- 
+    🔑 **Settings:** For advanced AI translation, you can obtain an API key from major AI platforms and configure it via the button in the bottom-left corner. If you have a capable GPU, you can deploy a local AI model for offline, unlimited free use, though it will be significantly slower than commercial AI models. 
+    💡 **Performance Note:** AI translations are more natural but, due to their token-by-token generation, are slower than traditional engines like Google or Bing. This is normal. 
+    💰 **Tip:** Newer isn't always better for AI models. Translation does not require complex reasoning, so mainstream models are fully sufficient, while newer models often cost several times more. 
+    ❤️ **About {0}:** This is an ultra-lightweight open-source project (~300KB). It was developed independently for my personal needs, so the UI/UX may reflect my personal preferences. 
+    ⚠️ **Note:** This tool includes built-in basic free translation engines by default but **does not provide additional free premium AI credits**. Due to limited maintenance capacity, I cannot guarantee perfect compatibility with all websites or provide instant support. Thanks for your understanding.`,
+  },
+  "ja": {
+    builtInNoticeBody: `⬆ 本機能は公開ネットワークリクエストを介して動作し、個人学習および非商用目的でのみ使用してください。APIキー設定は不要です。 
+--- 
+    🔑 **設定について：** 高度なAI翻訳が必要な場合は、各AIプラットフォームでAPI Keyを取得し、左下のボタンから設定してください。高性能なGPUをお持ちであれば、ローカルAIモデルを導入することで、オフラインかつ無制限に無料で利用可能です（ただし、商用AIモデルより翻訳速度は大幅に低下します）。 
+    💡 **AI翻訳の性能：** AI翻訳は自然な結果を出力しますが、逐次生成の仕組み上、GoogleやBingなどの従来型エンジンより低速です。これは仕様です。 
+    💰 **TIPS：** AIモデルは最新が常にベストとは限りません。翻訳タスクには高度な推論は不要であり、主流のモデルで十分です。最新モデルはコストが数倍になる傾向があります。 
+    ❤️ **プロジェクトについて：** {0} は軽量さを追求したオープンソースプロジェクト（約300KB）です。もともと自身の翻訳ニーズのために開発したため、操作設計に個人の好みが反映されている場合があります。 
+    ⚠️ **注意：** 本ツールは基本的な無料翻訳エンジンを内蔵していますが、**追加の無料AI翻訳枠やサービスは提供していません**。個人開発のため、全サイトでの完全な互換性や即時のメンテナンスは保証できかねます。ご理解いただけますと幸いです。`,
+  },
+  "ko": {
+    builtInNoticeBody: `⬆ 이 기능은 공개 네트워크 요청을 통해 작동하며, 개인 학습 및 비상업적 용도로만 사용 가능합니다. 별도의 API 키 설정은 필요하지 않습니다. 
+--- 
+    🔑 **설정 안내:** 고급 AI 번역이 필요한 경우, 주요 AI 플랫폼에서 API Key를 발급받아 왼쪽 하단 버튼을 통해 설정할 수 있습니다. GPU 성능이 좋다면 로컬 AI 모델을 설치하여 오프라인으로 무제한 무료 번역이 가능하지만, 상업용 AI 모델보다는 속도가 훨씬 느립니다. 
+    💡 **성능 안내:** AI 번역은 결과물이 더 자연스럽지만, 토큰 단위 생성 방식 특성상 Google이나 Bing 같은 기존 번역 엔진보다 속도가 느릴 수 있습니다. 이는 정상적인 현상입니다. 
+    💰 **팁:** AI 모델은 최신 버전이 항상 좋은 것은 아닙니다. 번역 작업에는 복잡한 추론이 필요 없으므로 주류 모델로도 충분하며, 최신 모델은 비용이 수배 이상 높습니다. 
+    ❤️ **프로젝트 정보:** {0}은 300KB 정도의 매우 가벼운 오픈소스 프로젝트입니다. 애초에 제 개인적인 번역 니즈를 해결하기 위해 개발했기 때문에, UI/UX 설계에 개인적인 취향이 다소 반영되어 있을 수 있습니다. 
+    ⚠️ **주의:** 본 도구는 기본 무료 번역 엔진을 내장하고 있으며, **무료 고급 AI 번역 서비스는 추가로 제공하지 않습니다**. 개인 개발 특성상 모든 웹사이트와의 완벽한 호환성이나 즉각적인 대응을 보장할 수 없음을 양해 부탁드립니다.`,
+  },
+  "pt": {
+    builtInNoticeBody: `⬆ Este recurso utiliza requisições de rede públicas e destina-se apenas a uso pessoal e não comercial; não requer chave de API. 
+--- 
+    🔑 **Configurações:** Para tradução avançada via IA, você pode obter uma chave de API nas principais plataformas e configurá-la no botão no canto inferior esquerdo. Se tiver uma GPU potente, pode usar modelos locais para tradução offline e ilimitada, embora a velocidade seja consideravelmente menor que a de modelos comerciais. 
+    💡 **Performance:** Traduções por IA são mais naturais, mas devido ao mecanismo de geração palavra por palavra, são mais lentas que motores tradicionais (Google/Bing). Isso é normal. 
+    💰 **Dica:** Modelos de IA mais novos não são necessariamente melhores. Tarefas de tradução não exigem raciocínio complexo; modelos populares são suficientes e custam muito menos. 
+    ❤️ **Sobre o {0}:** Este é um projeto open-source extremamente leve (~300KB). Desenvolvido por mim para uso próprio, por isso o design reflete minhas preferências pessoais. 
+    ⚠️ **Nota:** Esta ferramenta inclui motores gratuitos básicos, mas **não fornece créditos extras gratuitos de IA premium**. Devido à manutenção individual, não garanto compatibilidade perfeita com todos os sites nem suporte imediato. Obrigado pela compreensão.`,
+  },
+  "es": {
+    builtInNoticeBody: `⬆ Esta función utiliza peticiones de red públicas y es solo para uso personal y no comercial; no requiere configuración de clave. 
+--- 
+    🔑 **Configuración:** Para una traducción por IA avanzada, obtenga una API Key en las plataformas principales y configúrela en el botón inferior izquierdo. Si tiene una GPU potente, puede usar modelos locales para uso offline ilimitado, aunque será notablemente más lento que los modelos comerciales. 
+    💡 **Nota de rendimiento:** Las traducciones por IA son más naturales, pero debido a su mecanismo de generación palabra por palabra, son más lentas que los motores tradicionales como Google o Bing. Esto es normal. 
+    💰 **Consejo:** Los modelos más nuevos no siempre son mejores para traducir. Las tareas de traducción no requieren razonamiento complejo; los modelos estándar son suficientes y los nuevos suelen costar mucho más. 
+    ❤️ **Sobre el proyecto {0}:** Es un proyecto open-source ultraligero (~300KB). Lo desarrollé para mi uso personal, por lo que el diseño refleja mis preferencias personales. 
+    ⚠️ **Nota:** Esta herramienta incluye motores gratuitos básicos, pero **no ofrece créditos gratuitos de IA premium adicionales**. Debido a que es un desarrollo individual, no puedo garantizar compatibilidad total con todos los sitios ni soporte inmediato. Gracias por su comprensión.`,
+  },
+  "fr": {
+    builtInNoticeBody: `⬆ Cette fonctionnalité utilise des requêtes réseau publiques et est réservée à un usage personnel et non commercial ; aucune clé n'est requise. 
+--- 
+    🔑 **Configuration :** Pour une traduction IA avancée, obtenez une clé API sur les plateformes principales et configurez-la via le bouton en bas à gauche. Si vous avez un bon GPU, vous pouvez utiliser des modèles locaux pour un usage illimité hors ligne, bien que ce soit plus lent que les modèles commerciaux. 
+    💡 **Performance :** La traduction IA est plus naturelle mais, en raison de sa génération mot à mot, elle est plus lente que les moteurs traditionnels (Google/Bing). C'est normal. 
+    💰 **Conseil :** Les nouveaux modèles ne sont pas toujours les meilleurs pour la traduction. Les modèles grand public suffisent amplement, tandis que les plus récents coûtent souvent beaucoup plus cher. 
+    ❤️ **À propos de {0} :** C'est un projet open-source ultra-léger (~300KB). Développé pour mes besoins personnels, le design reflète mes préférences habituelles. 
+    ⚠️ **Note :** Cet outil inclut des moteurs gratuits par défaut mais **ne fournit pas de crédits IA premium gratuits supplémentaires**. En raison d'une maintenance individuelle, je ne peux garantir une compatibilité parfaite avec tous les sites ni un support immédiat. Merci de votre compréhension.`,
+  },
+  "de": {
+    builtInNoticeBody: `⬆ Diese Funktion verwendet öffentliche Netzwerkanfragen und ist nur für den persönlichen, nicht-kommerziellen Gebrauch bestimmt; kein Schlüssel erforderlich. 
+--- 
+    🔑 **Einstellungen:** Für fortgeschrittene KI-Übersetzung können Sie einen API-Schlüssel bei KI-Plattformen erhalten und diesen über den Button unten links konfigurieren. Mit einer leistungsstarken GPU können Sie lokale KI-Modelle für unbegrenzte Offline-Nutzung verwenden, was jedoch langsamer als bei kommerziellen Modellen ist. 
+    💡 **Leistung:** KI-Übersetzungen sind natürlicher, aber aufgrund der wortweisen Generierung langsamer als Google oder Bing. Das ist normal. 
+    💰 **Tipp:** Neuere KI-Modelle sind nicht immer besser für Übersetzungen. Gängige Modelle reichen völlig aus, während neue oft ein Vielfaches kosten. 
+    ❤️ **Über {0}:** Ein extrem leichtes Open-Source-Projekt (~300KB). Da ich es für meine Bedürfnisse entwickelt habe, spiegelt das Design meine persönlichen Gewohnheiten wider. 
+    ⚠️ **Hinweis:** Dieses Tool bietet grundlegende kostenlose Engines, **keine zusätzlichen kostenlosen KI-Credits**. Aufgrund der individuellen Wartung kann ich keine perfekte Kompatibilität mit allen Seiten oder sofortigen Support garantieren. Danke für Ihr Verständnis.`,
+  },
+  "ru": {
+    builtInNoticeBody: `⬆ Эта функция работает через публичные запросы и предназначена только для личного некоммерческого использования; ключ не требуется. 
+--- 
+    🔑 **Настройки:** Для продвинутого ИИ-перевода получите API Key на платформе ИИ и настройте его через кнопку в левом нижнем углу. Если у вас мощный GPU, можно использовать локальные модели для неограниченного оффлайн-перевода (хотя это медленнее коммерческих моделей). 
+    💡 **Производительность:** ИИ-перевод естественнее, но из-за пословной генерации он медленнее традиционных движков (Google/Bing). Это нормально. 
+    💰 **Совет:** Новые модели не всегда лучше для перевода. Стандартные модели отлично справляются, а новые часто стоят в разы дороже. 
+    ❤️ **О проекте {0}:** Это ультралегкий open-source проект (~300KB). Я разработал его для своих нужд, поэтому дизайн может отражать мои личные привычки. 
+    ⚠️ **Примечание:** Инструмент включает базовые бесплатные движки, но **не предоставляет бесплатные кредиты для премиум-ИИ**. Из-за индивидуальной разработки я не гарантирую полную совместимость со всеми сайтами и мгновенную поддержку. Спасибо за понимание.`,
+  },
+  "vi": {
+    builtInNoticeBody: `⬆ Tính năng này sử dụng yêu cầu mạng công cộng, chỉ dành cho mục đích học tập/phi thương mại; không cần khóa API. 
+--- 
+    🔑 **Cài đặt:** Để dịch AI nâng cao, bạn có thể lấy API Key từ các nền tảng AI và cấu hình qua nút ở góc dưới bên trái. Nếu có GPU mạnh, bạn có thể cài đặt mô hình AI cục bộ để dùng offline miễn phí không giới hạn, dù tốc độ sẽ chậm hơn các mô hình thương mại. 
+    💡 **Hiệu suất:** Dịch AI tự nhiên hơn nhưng do cơ chế tạo từng từ, tốc độ sẽ chậm hơn Google/Bing. Đây là điều bình thường. 
+    💰 **Mẹo:** Mô hình AI mới không phải lúc nào cũng tốt hơn cho việc dịch. Các mô hình phổ biến là đủ dùng, trong khi mô hình mới thường đắt hơn nhiều. 
+    ❤️ **Về dự án {0}:** Đây là dự án mã nguồn mở siêu nhẹ (~300KB). Vì tôi tự phát triển cho nhu cầu cá nhân nên thiết kế có thể mang đậm thói quen sử dụng của tôi. 
+    ⚠️ **Lưu ý:** Công cụ này tích hợp sẵn các công cụ dịch miễn phí, **không cung cấp thêm hạn mức AI cao cấp miễn phí**. Do phát triển cá nhân, tôi không đảm bảo tương thích hoàn hảo với mọi trang web hay hỗ trợ tức thì. Cảm ơn bạn đã thông cảm.`,
+  },
+  "ar": {
+    builtInNoticeBody: `⬆ هذه الميزة تعمل عبر طلبات شبكة عامة، وهي مخصصة للاستخدام الشخصي التعليمي وغير التجاري فقط، ولا تتطلب إعداد مفاتيح تشفير. 
+--- 
+    🔑 **حول الإعدادات:** للحصول على ترجمة AI متقدمة، يمكنك الحصول على مفتاح API من منصات الذكاء الاصطناعي وإعداده عبر الزر في الزاوية اليسرى السفلية. إذا كان أداء بطاقة الرسوميات (GPU) لديك جيداً، يمكنك أيضاً تشغيل نموذج محلي للترجمة بدون إنترنت وبلا حدود، لكن السرعة ستكون أبطأ مقارنة بالنماذج التجارية. 
+    💡 **ملاحظة حول الأداء:** نتائج ترجمة الذكاء الاصطناعي تبدو أكثر طبيعية، لكن نظراً لآلية التوليد كلمة بكلمة، فهي أبطأ من محركات الترجمة التقليدية مثل Google و Bing، وهذا أمر طبيعي. 
+    💰 **تنبيه:** ليس بالضرورة أن يكون النموذج الأحدث هو الأفضل للترجمة. النماذج الشائعة كافية تماماً، بينما تكون تكلفة النماذج الأحدث أعلى بعدة أضعاف. 
+    ❤️ **حول المشروع {0}:** هو مشروع مفتوح المصدر يسعى لتحقيق أقصى درجات الخفة (حجمه حوالي 300 كيلوبايت فقط). قمت بتطويره في الأصل لتلبية احتياجاتي الشخصية، لذا قد تعكس طريقة تصميمه بعض تفضيلاتي الشخصية. 
+    ⚠️ **تنبيه:** هذه الأداة تتضمن محركات ترجمة مجانية أساسية افتراضياً، **ولا توفر رصيداً أو خدمات ترجمة AI متقدمة مجانية إضافية**. نظراً لمحدودية وقتي في الصيانة، لا يمكنني ضمان التوافق التام مع جميع المواقع أو تقديم دعم فوري. شكراً لتفهمك.`,
+  },
+};

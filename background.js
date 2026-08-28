@@ -2631,17 +2631,10 @@ const Translators = {
         }
     },
     ai_family: async (text, target, config) => {
-        const controller = new AbortController();
-        const host = (config.host || '').toLowerCase();
-        const isLocalModel = config.engine === 'custom_ai' ||
-            host.includes('localhost') ||
-            host.includes('127.0.0.1') ||
-            host.includes('0.0.0.0') ||
-            /https?:\/\/192\.168\./.test(host) ||
-            /https?:\/\/10\./.test(host) ||
-            /https?:\/\/172\.(1[6-9]|2\d|3[01])\./.test(host);
+        const controller = new AbortController(); 
+        const isLocalModel = isLocalModelHost(config.host);
 
-        const timeoutMs = isLocalModel ? 60000 : 8000;
+        const timeoutMs = isLocalModel ? 30000 : 8000;
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         const isWord = text.trim().split(/\s+/).length === 1;
         const isSubtitle = !!(config.systemPrompt && config.systemPrompt.toLowerCase().includes('subtitle'));
@@ -2725,7 +2718,7 @@ const Translators = {
         } catch (e) {
             clearTimeout(timeoutId);
             logger.error("AI 翻译请求失败:", e);
-            if (e.name === 'AbortError') throw new Error("Request timeout (15s).");
+            if (e.name === 'AbortError') throw new Error(`Request timeout (${timeoutMs / 1000}s).`);
             throw e;
         }
     },

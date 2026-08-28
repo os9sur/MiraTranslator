@@ -11,7 +11,7 @@ window.browser = (function () {
 let userConfig = null;
 let currentId = '';
 let userConfigs = [];
-
+let uiLanguage = getBrowserLang() || 'en';
 document.addEventListener('DOMContentLoaded', async () => {
     const res = await safeGetStorage(['ui_language', 'selectedEngine', 'apiKeys']);
     if (!res) return;
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         apiKeys: res.apiKeys || {}
     };
     initNoticeBar('settings');
-    const uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
+    uiLanguage = window.currentConfig?.ui_language || getBrowserLang() || 'en';
     // RTL布局调整
 
     if (checkRTL(uiLanguage)) {
@@ -333,7 +333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     let switchVersion = 0;
-
+    const TEST_BTN_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="rgb(0 255 73)" style="margin-right:6px;flex-shrink:0;"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>';
     async function switchInstance(id) {
         await safeSetStorage({ lastActiveId: id });
         const myVersion = ++switchVersion;
@@ -358,9 +358,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tipsDesc = document.getElementById('tips');
         const testBtn = document.getElementById('testApiConfig');
         const saveBtn = document.getElementById('saveApiConfig');
+        const enableBtn = document.getElementById('enableCurrentEngine');
         if (tipsDesc) { tipsDesc.innerText = ""; tipsDesc.style.color = ""; }
         if (testBtn) {
-            testBtn.innerHTML = `⚡ ${t('testConnection', uiLanguage)}`;
+            testBtn.innerHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
             testBtn.style.borderColor = "";
             testBtn.disabled = false;
         }
@@ -368,11 +369,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveBtn.innerHTML = `${t('save', uiLanguage)}`;
             saveBtn.style.backgroundColor = "";
             saveBtn.disabled = false;
+            saveBtn.style.display = '';
+        }
+        if (enableBtn) {
+            enableBtn.innerText = t('enableEngineNow', uiLanguage);
+            enableBtn.style.removeProperty('background-color');
+            enableBtn.disabled = false;
         }
 
         // ----  isBuiltIn 逻辑（google / bing）----
         if (tpl.isBuiltIn) {
-            actions.classList.add('hidden');
+            actions.classList.remove('hidden');
+            if (saveBtn) saveBtn.style.display = 'none';
+
             const githubLink = '<a href="https://github.com/os9sur/MiraTranslator" target="_blank" class="github-link">GitHub ↗</a>';
 
             // 渲染时识别 ---
@@ -415,82 +424,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <div class="form-container">
                 <div class="built-in-notice" dir="auto" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
-                    <div id="statusIcon" class="notice-icon" style="color:#8b949e;font-size:24px;margin-bottom:10px;">⌛</div>
-                    <p style="margin:0 0 15px 0;"><strong id="statusText">${displayAlias} ${t('testing', uiLanguage)}</strong></p>
-                    <hr style="border:0;border-top:1px solid #30363d;margin:15px 0;">
                     
                     <div style="max-height: 460px;cursor: default; overflow-y: auto; padding-right: 5px;">
                         ${noticeLines}
                     </div>
                     
                 </div>
-                <button id="activateBuiltIn" class="btn-save" style="margin-top:25px; display:none;">
-                    ${t('enableEngineNow', uiLanguage)}
-                </button>
             </div>`;
             container.innerHTML = builtInTemplate;
-            const checkConnectivity = async () => {
-
-                if (myVersion !== switchVersion) return;
-                const icon = document.getElementById('statusIcon');
-                const text = document.getElementById('statusText');
-                const btn = document.getElementById('activateBuiltIn');
-                if (!icon || !text || !btn) return;
-                let isOk = false;
-                let errorMsg = '';
-                try {
-                    const storage = await safeGetStorage(['ui_language']).catch(() => ({}));
-                    const targetLang = storage?.ui_language || 'en';
-                    const isTargetEn = targetLang.toLowerCase().startsWith('en');
-                    const testText = isTargetEn ? '早上好' : 'Good morning';
-                    const res = await Promise.race([
-                        safeSendMessage({ type: 'TRANSLATE', text: testText, targetLang, isTest: true, engine: config.engine }),
-                        new Promise(resolve => setTimeout(() => resolve(null), 5000))
-                    ]);
-                    if (!res) { errorMsg = 'Timeout'; }
-                    else if (res.error) { errorMsg = res.error; }
-                    else {
-                        const data = res.currentTranslationResponse;
-                        if (!data || data.error) { errorMsg = data?.error || 'No response'; }
-                        else {
-                            const translatedText = (typeof data === 'string' ? data : (data?.translatedText || data?.basic || '')).trim();
-                            isOk = translatedText.length > 0 && translatedText.toLowerCase() !== testText.toLowerCase() && !data?.isError;
-                            if (!isOk) errorMsg = 'Invalid result';
-                        }
-                    }
-                } catch (e) { errorMsg = e.message; }
-                if (!document.getElementById('statusIcon')) return;
-                if (isOk) {
-                    icon.innerText = '✓'; icon.style.color = '#3fb950';
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('ready', uiLanguage)}`;
-                    btn.style.display = 'flex';
-                    await safeSetStorage({ _engineAvailable: true, _engineCheckTime: Date.now() });
-                } else {
-                    icon.innerText = '✕'; icon.style.color = '#f85149';
-                    const friendlyError = getFriendlyEngineError(config.engine, errorMsg);
-                    text.innerHTML = `<strong>${displayAlias}</strong> ${t('failed', uiLanguage)}${friendlyError ? `<span style="font-size:11px;opacity:0.7;display:block;margin-top:11px;line-height:1.4;">${friendlyError}</span>` : ''}`;
-                    btn.style.display = 'flex'; btn.style.opacity = '0.6';
-                    await safeSetStorage({ _engineAvailable: false, _engineCheckTime: Date.now() });
-                }
-            };
-
-            checkConnectivity();
-
-            const activateBtn = document.getElementById('activateBuiltIn');
-            if (activateBtn) {
-                activateBtn.onclick = async (e) => {
-                    const btn = e.target;
-                    btn.disabled = true;
-                    // 直接切换并激活这个内置引擎
-                    await safeSetStorage({ lastActiveId: id });
-                    if (typeof syncGlobalConfig === 'function') await syncGlobalConfig(id, config.engine, {});
-                    btn.innerText = t('enabled', uiLanguage);
-                    btn.style.background = "#22c55e";
-                    isDirty = false;
-                    renderSidebar();
-                    setTimeout(() => { btn.disabled = false; btn.innerText = t('enableEngineNow', uiLanguage); btn.style.background = ""; }, 1000);
-                };
-            }
             return;
         }
         actions.classList.remove('hidden');
@@ -507,14 +448,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="api-input-wrapper">
             <input type="password" data-key="${k}" class="api-input-field" placeholder="${placeholder}" value="${val}" spellcheck="false">
             <button type="button" class="toggle-visibility-btn" tabindex="-1" title="${t('common.toggleVisibility', uiLanguage)}">
-                <svg class="icon-eye" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg class="icon-eye-off" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
-                    <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.4 18.4 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                    <line x1="1" y1="1" x2="23" y2="23"/>
-                </svg>
+                <svg class="icon-eye" viewBox="0 0 28 20" width="18" height="16" fill="none" stroke="rgb(0 255 73)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: block;">
+                <path d="M1.5 10s4.5-7 12.5-7 12.5 7 12.5 7-4.5 7-12.5 7S1.5 10 1.5 10z"></path>
+                <ellipse cx="14" cy="7.2" rx="5.2" ry="5.5" fill="rgb(0 255 73)" stroke="none"></ellipse>
+            </svg>
+               <svg class="icon-eye-off" viewBox="0 0 28 20" width="18" height="16" fill="none" stroke="rgb(0 255 73)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <path d="M1.5 10s4.5-7 12.5-7 12.5 7 12.5 7-4.5 7-12.5 7S1.5 10 1.5 10z"></path>
+                <ellipse cx="14" cy="7.2" rx="5.2" ry="5.5" fill="rgb(0 255 73)" stroke="none"></ellipse>
+                <line x1="2" y1="2" x2="26" y2="18" stroke-width="3"></line>
+            </svg>
             </button>
         </div>`;
             } else {
@@ -666,13 +608,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 400);
     }
     init();
-    document.getElementById('testApiConfig').onclick = async () => {
-        const btn = document.getElementById('testApiConfig');
-        const tipsDesc = document.getElementById('tips');
-        if (!btn) return;
+
+    // ── 连接测试核心逻辑，供"测试连接"按钮和"启用当前引擎"按钮共用 ──
+    // 只负责跑测试 + 把结果画到 btn/tipsDesc 上，返回 boolean；不做延时重置、不碰 lastActiveId
+    async function runEngineTest(btn, tipsDesc) {
         const i18n = {
-            testConnection: t('testConnection', uiLanguage),
-            testing: t('testing', uiLanguage),
             success: t('success', uiLanguage),
             failed: t('failed', uiLanguage),
             error_no_response: t('error_no_response', uiLanguage),
@@ -680,20 +620,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             error_same_as_original: t('error_same_as_original', uiLanguage),
             error_generic: t('error_generic', uiLanguage),
         };
-        btn.disabled = true;
-        const originalHTML = `⚡ ${i18n.testConnection}`;
-        btn.innerHTML = `<span>⏳ ${i18n.testing}</span>`;
         if (tipsDesc) {
             tipsDesc.style.color = "";
             tipsDesc.innerText = "";
         }
 
         const userConfig = userConfigs.find(c => c.id === currentId);
-        if (!userConfig) {
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            return;
-        }
+        if (!userConfig) return false;
 
         let testResult = false;
         try {
@@ -727,8 +660,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isNotOriginal = translatedText.trim().toLowerCase() !== testText.toLowerCase();
             const hasValidStructure = translatedText.length > 0 || (data.dictData?.length > 0);
             if (hasValidStructure && isNotOriginal) {
-                btn.innerHTML = `<span style="color: #3fb950; font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
-                btn.style.setProperty('border-color', '#10a37f', 'important');
+                if (btn) {
+                    btn.innerHTML = `<span style="color: rgb(0 255 73); font-size: 20px; margin-right: 8px;">✓</span><span> ${i18n.success}</span>`;
+                    btn.style.setProperty('border-color', '#10a37f', 'important');
+                }
                 testResult = true;
             } else {
                 throw new Error(translatedText.length === 0 ? "Empty Content" : "Same as Original");
@@ -736,9 +671,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         catch (e) {
             logger.error("[Test] Failed:", e);
-            btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
-            btn.style.setProperty('border-color', '#f87171', 'important');
-            btn.style.userSelect = 'text';
+            if (btn) {
+                btn.innerHTML = `<span>❌ ${i18n.failed}</span>`;
+                btn.style.setProperty('border-color', '#f87171', 'important');
+                btn.style.userSelect = 'text';
+            }
             testResult = false;
 
             if (tipsDesc) {
@@ -781,8 +718,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } else if (errorText.toLowerCase().includes("timeout")) {
-                    const baseUrl = document.querySelector('[data-key="baseUrl"]')?.value || '';
-                    const isLocalModel = baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1');
+                    const hostKey = HOST_KEY_MAP[userConfig.engine] || 'baseUrl';
+                    const baseUrl = document.querySelector(`[data-key="${hostKey}"]`)?.value || '';
+                    const isLocalModel = isLocalModelHost(baseUrl);
                     displayMessage = isLocalModel
                         ? t('timeoutLocalModel')
                         : (i18n.error_timeout || "Timeout ⌛");
@@ -794,84 +732,157 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 tipsDesc.innerText = displayMessage;
             }
-        } finally {
-            setTimeout(() => {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                    btn.style.removeProperty('border-color');
-                }
-                // 测试完成后更新sidebar状态点和当前引擎激活状态
-                if (userConfig && testResult) {
-                    // 测试成功 - 激活这个引擎为当前使用的引擎
-                    safeSetStorage({ lastActiveId: currentId }).then(() => {
-                        if (typeof renderSidebar === 'function') {
-                            renderSidebar();
-                        }
-                    });
-                } else if (typeof renderSidebar === 'function') {
-                    // 测试失败或其他情况 - 只更新状态点
-                    renderSidebar();
-                }
-            }, 3000);
         }
+        return testResult;
+    }
+
+    // ── 收集表单数据并落盘，供"保存"按钮和"启用当前引擎"共用 ──
+    // 返回 { finalEngine, data }；找不到当前配置实例时返回 null
+    async function persistCurrentConfig() {
+        const config = userConfigs.find(c => c.id === currentId);
+        if (!config) {
+            logger.error("[Mira] 找不到当前配置实例");
+            return null;
+        }
+
+        const inputs = document.querySelectorAll('#dynamic-form-container input');
+        const data = {};
+        inputs.forEach(i => {
+            const key = i.dataset.key;
+            if (key) data[key] = i.value.trim();
+        });
+
+        const idx = userConfigs.findIndex(c => c.id === currentId);
+        let finalEngine = config.engine;
+        if (idx > -1) {
+            const detectedEngine = Object.keys(TEMPLATES).find(key => {
+                const tpl = TEMPLATES[key];
+                return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
+            });
+            if (detectedEngine && userConfigs[idx].engine === 'google') {
+                userConfigs[idx].engine = detectedEngine;
+            }
+            finalEngine = userConfigs[idx].engine;
+            const engineTemplate = TEMPLATES[finalEngine] || {};
+            if (!engineTemplate.isBuiltIn) {
+                userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            }
+        }
+
+        const webTA = document.getElementById('ai-prompt-web');
+        const subTA = document.getElementById('ai-prompt-subtitle');
+        const storagePayload = {
+            [`data_${currentId}`]: data,
+            userConfigs: userConfigs,
+            lastActiveId: currentId
+        };
+        if (webTA || subTA) {
+            storagePayload[AI_PROMPT_KEY] = {
+                web: (webTA?.value || '').trim(),
+                subtitle: (subTA?.value || '').trim()
+            };
+        }
+
+        await safeSetStorage(storagePayload);
+        logger.log("配置已保存: ", uiLanguage);
+
+        return { finalEngine, data };
+    }
+
+    document.getElementById('testApiConfig').onclick = async () => {
+        const btn = document.getElementById('testApiConfig');
+        const tipsDesc = document.getElementById('tips');
+        if (!btn) return;
+        btn.disabled = true;
+        const originalHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
+        btn.innerHTML = `<span>⏳ ${t('testing', uiLanguage)}</span>`;
+
+        const testResult = await runEngineTest(btn, tipsDesc);
+
+        setTimeout(() => {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.removeProperty('border-color');
+            }
+            // 测试完成后更新sidebar状态点和当前引擎激活状态
+            if (testResult) {
+                // 测试成功 - 激活这个引擎为当前使用的引擎
+                safeSetStorage({ lastActiveId: currentId }).then(() => {
+                    if (typeof renderSidebar === 'function') {
+                        renderSidebar();
+                    }
+                });
+            } else if (typeof renderSidebar === 'function') {
+                // 测试失败或其他情况 - 只更新状态点
+                renderSidebar();
+            }
+        }, 3000);
+    };
+
+    // ── 启用当前引擎：必须测试通过才真正切换线上使用的引擎 ──
+    document.getElementById('enableCurrentEngine').onclick = async () => {
+        const enableBtn = document.getElementById('enableCurrentEngine');
+        const testBtn = document.getElementById('testApiConfig');
+        const tipsDesc = document.getElementById('tips');
+        if (!enableBtn) return;
+
+        enableBtn.disabled = true;
+        if (testBtn) testBtn.disabled = true;
+        const originalText = t('enableEngineNow', uiLanguage);
+        enableBtn.innerText = `⏳ ${t('testing', uiLanguage)}`;
+
+        const saved = await persistCurrentConfig();
+        if (!saved) {
+            enableBtn.disabled = false;
+            if (testBtn) testBtn.disabled = false;
+            enableBtn.innerText = originalText;
+            return;
+        }
+
+        const testResult = await runEngineTest(testBtn, tipsDesc);
+
+        if (testResult) {
+            if (typeof syncGlobalConfig === 'function') {
+                await syncGlobalConfig(currentId, saved.finalEngine, saved.data);
+            }
+            await safeSetStorage({ lastActiveId: currentId });
+            enableBtn.innerText = t('enabled', uiLanguage);
+            enableBtn.style.setProperty('background-color', '#22c55e', 'important');
+            if (typeof renderSidebar === 'function') renderSidebar();
+        } else {
+            enableBtn.innerText = t('failed', uiLanguage);
+            enableBtn.style.setProperty('background-color', '#ef4444', 'important');
+        }
+
+        setTimeout(() => {
+            if (testBtn) {
+                testBtn.disabled = false;
+                testBtn.innerHTML = `${TEST_BTN_ICON}${t('testConnection', uiLanguage)}`;
+                testBtn.style.removeProperty('border-color');
+            }
+            enableBtn.disabled = false;
+            enableBtn.innerText = originalText;
+            enableBtn.style.removeProperty('background-color');
+        }, 1500);
     };
 
     document.getElementById('saveApiConfig').onclick = async () => {
         const saveBtn = document.getElementById('saveApiConfig');
         if (!saveBtn) return;
-        const config = userConfigs.find(c => c.id === currentId);
-        if (!config) {
-            logger.error("[Mira] 找不到当前配置实例");
-            return;
-        }
 
         saveBtn.disabled = true;
         const originalText = saveBtn.innerText;
         const originalBg = saveBtn.style.backgroundColor;
         try {
-
-            // 其他自定义引擎的处理逻辑 - 先保存配置
-            const inputs = document.querySelectorAll('#dynamic-form-container input');
-            const data = {};
-            inputs.forEach(i => {
-                const key = i.dataset.key;
-                if (key) data[key] = i.value.trim();
-            });
-
-            const idx = userConfigs.findIndex(c => c.id === currentId);
-            let finalEngine = config.engine;
-            if (idx > -1) {
-                const detectedEngine = Object.keys(TEMPLATES).find(key => {
-                    const tpl = TEMPLATES[key];
-                    return tpl.fields?.length > 0 && data[tpl.fields[0].k] !== undefined;
-                });
-                if (detectedEngine && userConfigs[idx].engine === 'google') {
-                    userConfigs[idx].engine = detectedEngine;
-                }
-                finalEngine = userConfigs[idx].engine;
-                const engineTemplate = TEMPLATES[finalEngine] || {};
-                userConfigs[idx].alias = data.alias || engineTemplate.name || finalEngine;
+            const result = await persistCurrentConfig();
+            if (!result) {
+                saveBtn.disabled = false;
+                return;
             }
 
-            await safeSetStorage({
-                [`data_${currentId}`]: data,
-                userConfigs: userConfigs,
-                lastActiveId: currentId
-            });
-
-            if (typeof syncGlobalConfig === 'function') {
-                await syncGlobalConfig(currentId, finalEngine, data);
-            }
-
-            logger.log("配置已保存，准备测试: ", uiLanguage);
-
-            // 现在触发自动测试连接
-            const testBtn = document.getElementById('testApiConfig');
-            if (testBtn) {
-                // 触发测试连接的点击事件
-                testBtn.click();
-            }
+            //  保存只做持久化，不再自动切换线上生效引擎、也不再自动触发测试连接。
+            // 想切换到这个引擎，用户需要单独点"启用当前引擎"（会先保存、再测试，通过才生效）。 
 
             // 显示保存成功提示（固定时间）
             saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
@@ -978,7 +989,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             setTimeout(() => {
                 btn.innerText = `${t('completed', uiLanguage)} ✓`;
-                btn.style.setProperty('color', '#4ade80', 'important');
+                btn.style.setProperty('color', 'rgb(0 255 73)', 'important');
                 btn.style.setProperty('background', 'rgba(74, 222, 128, 0.1)', 'important');
                 btn.style.setProperty('border-color', '#4ade80', 'important');
                 if (typeof showToast === 'function') showToast(t("cacheCleared"), "success");
@@ -1130,12 +1141,12 @@ function _buildAIPromptHTML(saved) {
                      stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
-                <span class="ai-prompt-title">${t('cpTitle')}</span>
-                <span class="ai-prompt-badge">${t('cpOptional')}</span>
+                <span class="ai-prompt-title">${t('cpTitle', uiLanguage)}</span>
+                <span class="ai-prompt-badge">${t('cpOptional', uiLanguage)}</span>
             </div>
             <svg class="ai-prompt-chevron ${webVal || subVal ? 'open' : ''}"
                  id="ai-prompt-chevron"
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 viewBox="0 0 24 24" fill="none" stroke="rgb(0 255 73)"
                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9"/>
             </svg>
@@ -1148,13 +1159,13 @@ function _buildAIPromptHTML(saved) {
       style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
       <div class="ai-prompt-item-label" 
         style="${checkRTL(window.currentConfig.ui_language) ? 'flex-direction:row-reverse;' : ''}">
-        🌐 <span>${t('cpWeb')}</span>
+        🌐 <span>${t('cpWeb', uiLanguage)}</span>
       </div>
       <button class="ai-prompt-clear-btn ${webVal ? 'visible' : ''}"
-        data-target="ai-prompt-web">${t('cpClear')}</button>
+        data-target="ai-prompt-web">${t('cpClear', uiLanguage)}</button>
     </div>
     <textarea id="ai-prompt-web" dir="auto" class="ai-prompt-textarea"
-      maxlength="150" placeholder="${t('cpWebPH')}" spellcheck="false"
+      maxlength="150" placeholder="${t('cpWebPH', uiLanguage)}" spellcheck="false"
     >${_escapeHtml(webVal)}</textarea>
     <div class="ai-prompt-char-count" id="ai-prompt-web-count">${webVal.length} / 150</div>
   </div>
@@ -1168,30 +1179,18 @@ function _buildAIPromptHTML(saved) {
           <path fill="#FF0000" d="M21.593 5.72a2.61 2.61 0 0 0-1.842-1.844C18.337 3.5 12 3.5 12 3.5s-6.337 0-7.751.376A2.61 2.61 0 0 0 2.407 5.72 27.6 27.6 0 0 0 2 12c0 2.21.033 4.39.407 6.28a2.61 2.61 0 0 0 1.842 1.844C5.663 20.5 12 20.5 12 20.5s6.337 0 7.751-.376a2.61 2.61 0 0 0 1.842-1.844C21.967 16.39 22 14.21 22 12c0-2.21-.033-4.39-.407-6.28z"/>
           <path fill="#FFFFFF" d="M10 15.5V8.5l7 3.5-7 3.5z"/>
         </svg>
-        YouTube<span>${t('cpSub')}</span>
+        YouTube<span>${t('cpSub', uiLanguage)}</span>
       </div>
       <button class="ai-prompt-clear-btn ${subVal ? 'visible' : ''}"
-        data-target="ai-prompt-subtitle">${t('cpClear')}</button>
+        data-target="ai-prompt-subtitle">${t('cpClear', uiLanguage)}</button>
     </div>
     <textarea id="ai-prompt-subtitle" dir="auto" class="ai-prompt-textarea"
-      maxlength="150" placeholder="${t('cpSubPH')}" spellcheck="false"
+      maxlength="150" placeholder="${t('cpSubPH', uiLanguage)}" spellcheck="false"
     >${_escapeHtml(subVal)}</textarea>
     <div class="ai-prompt-char-count" id="ai-prompt-subtitle-count">${subVal.length} / 150</div>
-    <div class="ai-prompt-style-hint" dir="auto">${t('cpHint')}</div>
+    <div class="ai-prompt-style-hint" dir="auto">${t('cpHint', uiLanguage)}</div>
   </div>
 
-  <div class="ai-prompt-footer">
-    <button class="ai-prompt-save-btn" id="ai-prompt-save-btn" disabled>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-        <polyline points="17 21 17 13 7 13 7 21"/>
-        <polyline points="7 3 7 8 15 8"/>
-      </svg>
-      ${t('cpSave')}
-    </button>
-  </div>
 
 </div>
     `;
@@ -1201,14 +1200,10 @@ function _bindAIPromptEvents(section, initialSaved) {
     const toggle = section.querySelector('#ai-prompt-toggle');
     const body = section.querySelector('#ai-prompt-body');
     const chevron = section.querySelector('#ai-prompt-chevron');
-    const saveBtn = section.querySelector('#ai-prompt-save-btn');
     const webTA = section.querySelector('#ai-prompt-web');
     const subTA = section.querySelector('#ai-prompt-subtitle');
     const webCount = section.querySelector('#ai-prompt-web-count');
     const subCount = section.querySelector('#ai-prompt-subtitle-count');
-
-    let isDirty = false;
-    let saveTimer = null;
 
     toggle.addEventListener('click', () => {
         const isOpen = body.classList.toggle('open');
@@ -1228,27 +1223,16 @@ function _bindAIPromptEvents(section, initialSaved) {
     }
 
     // ── dirty 标记 → 激活保存按钮
-    function markDirty() {
-        clearTimeout(saveTimer);
-        if (!isDirty) {
-            isDirty = true;
-            saveBtn.disabled = false;
-            _setPromptBtnState(saveBtn, 'idle');
-        }
-    }
-
     webTA.addEventListener('input', () => {
         updateCount(webTA, webCount);
         section.querySelector('[data-target="ai-prompt-web"]')
             .classList.toggle('visible', webTA.value.length > 0);
-        markDirty();
     });
 
     subTA.addEventListener('input', () => {
         updateCount(subTA, subCount);
         section.querySelector('[data-target="ai-prompt-subtitle"]')
             .classList.toggle('visible', subTA.value.length > 0);
-        markDirty();
     });
 
     section.querySelectorAll('.ai-prompt-clear-btn').forEach(btn => {
@@ -1260,54 +1244,8 @@ function _bindAIPromptEvents(section, initialSaved) {
             btn.classList.remove('visible');
             const countEl = document.getElementById(btn.dataset.target + '-count');
             if (countEl) updateCount(ta, countEl);
-            markDirty();
         });
     });
-
-    // ── 保存 ───
-    saveBtn.addEventListener('click', async () => {
-        if (!isDirty || saveBtn.disabled) return;
-
-        saveBtn.disabled = true;
-
-        try {
-            await safeSetStorage({
-                [AI_PROMPT_KEY]: {
-                    web: webTA.value.trim(),
-                    subtitle: subTA.value.trim(),
-                }
-            });
-
-            isDirty = false;
-            _setPromptBtnState(saveBtn, 'saved');
-
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => {
-                _setPromptBtnState(saveBtn, 'idle');
-                saveBtn.disabled = true;
-            }, 2000);
-
-        } catch (e) {
-            _setPromptBtnState(saveBtn, 'error');
-            clearTimeout(saveTimer);
-            saveTimer = setTimeout(() => {
-                _setPromptBtnState(saveBtn, 'idle');
-                saveBtn.disabled = false;
-            }, 2000);
-        }
-    });
-}
-
-// ── 按钮状态切换 ────  
-function _setPromptBtnState(btn, state) {
-    btn.classList.remove('state-saving', 'state-saved', 'state-error');
-    const icons = {
-        idle: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> ${t('cpSave')}`,
-        saved: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${t('success')}`,
-        error: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${t('failed')}`,
-    };
-    if (state !== 'idle') btn.classList.add(`state-${state}`);
-    btn.innerHTML = icons[state] || icons.idle;
 }
 
 // ── HTML 转义（防止 saved prompt 里有 < > 破坏 innerHTML）──

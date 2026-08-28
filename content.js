@@ -1088,6 +1088,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   } else if (msg.action === "PREVIEW_YT_STYLE") {
     if (typeof applySubtitleSettings === "function")
       applySubtitleSettings(msg.settings);
+    // 立刻刷新 
+    if (typeof lastSubIndex !== "undefined") lastSubIndex = -1;
     sendResponse({ status: "ok" });
   } else if (msg.action === "REFRESH_YT") {
     if (typeof isYTEnabled === "undefined") {
@@ -9270,12 +9272,12 @@ function initSelectionTranslate() {
 }
 
 //yt
-
 let fullSubtitleData = [];
 let semanticGroups = [];
 lastSubIndex = -1;
 let lastDataLength = 0;
 let lastSemanticEngine = null;
+let lastIsSameLang = null;
 
 // ===== 字幕下载功能开始 =====
 // 全局下载锁
@@ -9852,7 +9854,12 @@ window.addEventListener("KT_DATA_READY", (e) => {
   const engine =
     window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
   const isAI = AI_LLM_WHITE_LIST.includes(engine);
-  semanticGroups = mergeToSemantic(fullSubtitleData, isAI);
+  const __srcLang = getVideoSourceLang();
+  const __tgtLang = getCurrentLang()?.split("-")[0].toLowerCase();
+  const __isSameLang = __srcLang && __tgtLang && __srcLang === __tgtLang;
+  semanticGroups = mergeToSemantic(fullSubtitleData, isAI, __isSameLang);
+  lastSemanticEngine = engine;
+  lastIsSameLang = __isSameLang;
   lastDataLength = fullSubtitleData.length;
   if (semanticGroups.length > 0) {
     setTimeout(() => {
@@ -9897,8 +9904,21 @@ window.addEventListener("KT_DATA_READY", (e) => {
 })();
 
 //智能断句
-function mergeToSemantic(data, isAI = false) {
+function mergeToSemantic(data, isAI = false, skipMerge = false) {
   if (!data || data.length === 0) return [];
+  // 源语言 === 目标语言时不需要翻译，直接按原始字幕逐条展示，
+  // 不做语义合并，效果和 YouTube 原生字幕一样"一句一句"出现
+  if (skipMerge) {
+    return data.map((item) => {
+      const start = parseFloat(item.start);
+      const dur = parseFloat(item.duration) || 1.0;
+      return {
+        start,
+        end: start + dur,
+        text: item.text.replace(/\n/g, " ").trim(),
+      };
+    });
+  }
   const groups = [];
   let temp = null;
   const cjkRegex =
@@ -9958,18 +9978,28 @@ function mergeToSemantic(data, isAI = false) {
       shouldBreak = true;
       breakReason = "End of Data";
     } else if (isCJK) {
-      if (/[。？！?!]$/.test(trimmedText) && charCount > 15) {
+      if (/[。？！?!]$/.test(trimmedText) && charCount > 8) {
         shouldBreak = true;
         breakReason = "Punc";
-      } else if (charCount > LIMITS.MAX_CHARS) {
+      } else if (charCount > LIMITS.FORCE_CUT) {
+        // 硬上限兜底
         shouldBreak = true;
-        breakReason = "Max";
+        breakReason = "Force Cut";
       } else if (
-        charCount > LIMITS.MIN_CHARS_PAUSE &&
-        safeGap > LIMITS.PAUSE_GAP
+        /[，、,；;]$/.test(trimmedText) &&
+        charCount > LIMITS.MIN_CHARS_PAUSE
       ) {
         shouldBreak = true;
-        breakReason = "Pause";
+        breakReason = "Comma";
+      } else {
+        // 默认行为改成"跟原生字幕节奏一致，一条就断"，
+        // 只有当前片段明显是被硬切的短碎片（字数很少 + 和下一条几乎无间隔）时，才继续拼下一条
+        const looksLikeHardSplitFragment =
+          charCount < LIMITS.MIN_CHARS_PAUSE && safeGap < 0.3;
+        if (!looksLikeHardSplitFragment) {
+          shouldBreak = true;
+          breakReason = "Native Cue";
+        }
       }
     } else if (isEnglish) {
       const words = trimmedText.split(/\s+/);
@@ -10188,6 +10218,10 @@ function splitBatchTranslation(translatedText) {
 
 async function batchPrefetch(startIndex) {
   if (isDownloading) return;
+  // 源语言 === 目标语言时无需翻译，不发起任何预取请求
+  const __prefetchSrc = getVideoSourceLang();
+  const __prefetchTgt = getCurrentLang()?.split("-")[0].toLowerCase();
+  if (__prefetchSrc && __prefetchTgt && __prefetchSrc === __prefetchTgt) return;
   const now = Date.now();
   if (now - lastBatchTime < BATCH_GAP) return;
   lastBatchTime = now;
@@ -10364,6 +10398,11 @@ function syncSubtitleDisplay() {
     if (!shouldBeEnabled) return;
   }
   //解决播放途中,切换引擎问题
+  //源语言 === 目标语言时，不做语义合并，直接逐条显示原始字幕
+  const __syncSrcLang = getVideoSourceLang();
+  const __syncTgtLang = getCurrentLang()?.split("-")[0].toLowerCase();
+  const __syncIsSameLang =
+    __syncSrcLang && __syncTgtLang && __syncSrcLang === __syncTgtLang;
   if (Array.isArray(fullSubtitleData) && fullSubtitleData.length > 0) {
     const lenDiff = Math.abs(
       fullSubtitleData.length - lastDataLength
@@ -10371,14 +10410,20 @@ function syncSubtitleDisplay() {
 
     const isAI = AI_LLM_WHITE_LIST.includes(currentEngine);
 
-    if (lenDiff > 0 || currentEngine !== lastSemanticEngine) {
+    if (
+      lenDiff > 0 ||
+      currentEngine !== lastSemanticEngine ||
+      __syncIsSameLang !== lastIsSameLang
+    ) {
       semanticGroups = mergeToSemantic(
         fullSubtitleData,
-        isAI
+        isAI,
+        __syncIsSameLang
       );
 
       lastDataLength = fullSubtitleData.length;
       lastSemanticEngine = currentEngine;
+      lastIsSameLang = __syncIsSameLang;
     }
   }
   if (!video || !semanticGroups || semanticGroups.length === 0) {
@@ -10421,6 +10466,7 @@ function syncSubtitleDisplay() {
       if (typeof closeTooltipAndResume === "function") closeTooltipAndResume();
       lastSubIndex = currentIndex;
       applyAdaptiveFontSize(box, group.text);
+
       let cached =
         typeof fastMemoryCache !== "undefined"
           ? fastMemoryCache.get(cacheKey)
@@ -10436,9 +10482,8 @@ function syncSubtitleDisplay() {
         }
       }
       //源语言 === 目标语言时，隐藏翻译行
-      const sourceLang = getVideoSourceLang();
-      const targetLang = getCurrentLang()?.split("-")[0].toLowerCase();
-      const isSameLang = sourceLang && targetLang && sourceLang === targetLang;
+      const sourceLang = __syncSrcLang;
+      const isSameLang = __syncIsSameLang;
 
       if (oEl) renderWords(group.text, oEl, sourceLang, isSameLang);
 
@@ -10447,9 +10492,22 @@ function syncSubtitleDisplay() {
         if (isSameLang) {
           tEl.style.display = "none";
           tEl.innerText = "";
-          tEl.classList.remove("kt-loading");
+          tEl.classList.remove("kt-loading"); // 先去掉 loading 态，避免读到灰色/20px 的临时样式
+
+          // 同语言场景：原文套用译文行当前真实生效的样式（颜色 + 字号）
+          // 不管是默认蓝色还是用户自定义的颜色/字号 
+          const transStyle = getComputedStyle(tEl);
+          if (oEl) {
+            oEl.style.setProperty("color", transStyle.color, "important");
+            oEl.style.setProperty("font-size", transStyle.fontSize, "important");
+          }
         } else {
           tEl.style.display = "";
+          if (oEl) {
+            oEl.style.removeProperty("color");
+            oEl.style.removeProperty("font-size");
+          }
+          applyAdaptiveFontSize(box, group.text);
         }
         if (cached && cached.basic) {
           tEl.innerText = cached.basic;

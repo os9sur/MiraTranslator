@@ -1508,21 +1508,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('quickInputTransTargetLang').addEventListener('change', async (e) => {
     await safeSetStorage({ miraQuickTransTargetLang: e.target.value });
   });
-  function resizePopupForAdvancedMenu() {
-    requestAnimationFrame(() => {
-      const menu = document.getElementById('advancedMenu');
-      if (!menu || menu.style.display === 'none') return;
+function resizePopupForAdvancedMenu() {
+  requestAnimationFrame(() => {
+    const menu = document.getElementById('advancedMenu');
+    if (!menu || menu.style.display === 'none') return;
 
-      const menuRect = menu.getBoundingClientRect();
-      const bodyRect = document.body.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
 
-      const requiredHeight = Math.ceil(
-        menuRect.bottom - bodyRect.top + 12
-      );
+    // 菜单实际需要的高度
+    const menuRequiredHeight = Math.ceil(menuRect.bottom - bodyRect.top + 12);
 
-      document.body.style.height = `${requiredHeight}px`;
-    });
-  }
+    // 当前 body 已经有的高度（不管是浏览器自动撑起来的，还是之前手动设置的）
+    const currentHeight = document.body.getBoundingClientRect().height;
+
+    // 只有菜单真的会超出当前高度时，才手动覆盖；否则保持原样 
+    if (menuRequiredHeight > currentHeight) {
+      document.body.style.height = `${menuRequiredHeight}px`;
+    }
+  });
+}
 
   function resetPopupHeight() {
     document.body.style.height = '';
