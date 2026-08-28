@@ -9978,18 +9978,28 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
       shouldBreak = true;
       breakReason = "End of Data";
     } else if (isCJK) {
-      if (/[。？！?!]$/.test(trimmedText) && charCount > 15) {
+      if (/[。？！?!]$/.test(trimmedText) && charCount > 8) {
         shouldBreak = true;
         breakReason = "Punc";
-      } else if (charCount > LIMITS.MAX_CHARS) {
+      } else if (charCount > LIMITS.FORCE_CUT) {
+        // 硬上限兜底
         shouldBreak = true;
-        breakReason = "Max";
+        breakReason = "Force Cut";
       } else if (
-        charCount > LIMITS.MIN_CHARS_PAUSE &&
-        safeGap > LIMITS.PAUSE_GAP
+        /[，、,；;]$/.test(trimmedText) &&
+        charCount > LIMITS.MIN_CHARS_PAUSE
       ) {
         shouldBreak = true;
-        breakReason = "Pause";
+        breakReason = "Comma";
+      } else {
+        // 默认行为改成"跟原生字幕节奏一致，一条就断"，
+        // 只有当前片段明显是被硬切的短碎片（字数很少 + 和下一条几乎无间隔）时，才继续拼下一条
+        const looksLikeHardSplitFragment =
+          charCount < LIMITS.MIN_CHARS_PAUSE && safeGap < 0.3;
+        if (!looksLikeHardSplitFragment) {
+          shouldBreak = true;
+          breakReason = "Native Cue";
+        }
       }
     } else if (isEnglish) {
       const words = trimmedText.split(/\s+/);
