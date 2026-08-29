@@ -72,7 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       'settingsPanel',
       'quickInputTransPanel',
       'engineAssignPanel',
-      'advancedMenu'
+      'advancedMenu',
+      'contextMenuTransPanel'
     ];
     allPanels.forEach(id => {
       const el = document.getElementById(id);
@@ -1400,6 +1401,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
+  document.getElementById('btnGoContextMenuTrans').addEventListener('click', () => {
+  showPanel('contextMenuTransPanel');
+  initContextMenuTransPanel();
+});
   document.getElementById('btnGoQuickInputTrans').addEventListener('click', () => {
     showPanel('quickInputTransPanel');
     initQuickInputTransPanel();
@@ -1408,7 +1413,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('closeQuickInputTransPanel').addEventListener('click', () => {
     showMain();
   });
-
+document.getElementById('closeContextMenuTransPanel').addEventListener('click', () => {
+    showMain();
+  });
   // 目标语言下拉框：正常语言列表，不含"自动检测"
   populateSelect(document.getElementById('quickInputTransTargetLang'), {
     selected: getBrowserLang() || 'en',
@@ -1435,6 +1442,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('quickInputTransTargetLang').value =
       r?.miraQuickTransTargetLang || getBrowserLang() || 'en';
   }
+  async function initContextMenuTransPanel() {
+  const r = await safeGetStorage([
+    'miraContextMenuSelectionEnabled',
+    'miraContextMenuPageEnabled',
+  ]);
+  const selectionEnabled = r?.miraContextMenuSelectionEnabled ?? true; // 默认开启
+  const pageEnabled = r?.miraContextMenuPageEnabled ?? true; // 默认开启
+
+  document.getElementById('switch-contextMenuSelection').classList.toggle('on', selectionEnabled);
+  document.getElementById('switch-contextMenuPage').classList.toggle('on', pageEnabled);
+}
+
+document.getElementById('switch-contextMenuSelection').addEventListener('click', async (e) => {
+  const el = e.currentTarget;
+  const next = !el.classList.contains('on');
+  el.classList.toggle('on', next);
+  await safeSetStorage({ miraContextMenuSelectionEnabled: next });
+  chrome.runtime.sendMessage({ action: 'UPDATE_CONTEXT_MENU' });
+});
+
+document.getElementById('switch-contextMenuPage').addEventListener('click', async (e) => {
+  const el = e.currentTarget;
+  const next = !el.classList.contains('on');
+  el.classList.toggle('on', next);
+  await safeSetStorage({ miraContextMenuPageEnabled: next });
+  chrome.runtime.sendMessage({ action: 'UPDATE_CONTEXT_MENU' });
+});
+
   //storage key 命名为 miraEngineOverride_<feature>，值是配置的 id（比如 google_builtin 或自定义 AI 配置的 id），空字符串 '' 表示"跟随全局"。
   document.getElementById('btnGoEngineAssign').addEventListener('click', () => {
     showPanel('engineAssignPanel');

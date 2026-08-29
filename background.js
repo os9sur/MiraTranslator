@@ -2631,7 +2631,7 @@ const Translators = {
         }
     },
     ai_family: async (text, target, config) => {
-        const controller = new AbortController(); 
+        const controller = new AbortController();
         const isLocalModel = isLocalModelHost(config.host);
 
         const timeoutMs = isLocalModel ? 30000 : 8000;
@@ -3326,7 +3326,7 @@ async function processTranslate(req, tabId = null, cacheKey = null) {
                 data = config.data;
             }
         }
-        logger.log('engine ',engine);
+        logger.log('engine ', engine);
         const trimmedText = req.text.trim();
         const hasSpace = trimmedText.includes(' ');
         const isSingleQuery = !req.text.includes('[[') && !req.text.includes('⟦KT_');
@@ -4110,6 +4110,63 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     if (details.reason === 'install') {
         await safeSetStorage({ vocabHighlight: true });
     }
+});
+
+async function rebuildContextMenus() {
+  const r = await safeGetStorage([
+    'miraContextMenuSelectionEnabled',
+    'miraContextMenuPageEnabled',
+  ]);
+  const selectionEnabled = r?.miraContextMenuSelectionEnabled ?? true;
+  const pageEnabled = r?.miraContextMenuPageEnabled ?? true;
+
+  await chrome.contextMenus.removeAll();
+
+  if (selectionEnabled) {
+    chrome.contextMenus.create({
+      id: "mira-translate-selection",
+      title: "翻译选中内容", //todo 多语言化
+      contexts: ["selection"],
+    });
+  }
+  if (pageEnabled) {
+    chrome.contextMenus.create({
+      id: "mira-translate-page",
+      title: "翻译此网页",
+      contexts: ["page"],
+    });
+  }
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  rebuildContextMenus();
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === 'UPDATE_CONTEXT_MENU') {
+    rebuildContextMenus();
+    sendResponse({ status: 'ok' });
+  }
+});
+
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (!tab?.id) return;
+
+  if (info.menuItemId === "mira-translate-selection") {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "CONTEXT_MENU_TRANSLATE",
+      text: info.selectionText,
+    }, (res) => {
+      if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+    });
+  } else if (info.menuItemId === "mira-translate-page") {
+    chrome.tabs.sendMessage(tab.id, {
+      action: "SET_PAGE_SCAN_STATE",
+      enabled: true,
+    }, (res) => {
+      if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+    });
+  }
 });
 
 chrome.runtime.onStartup.addListener(async () => {

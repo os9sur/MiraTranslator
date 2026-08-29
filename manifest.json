@@ -24,7 +24,8 @@
     "activeTab",
     "alarms",
     "identity",
-    "tabs"
+    "tabs",
+    "contextMenus"
   ],
   "oauth2": {
     "client_id": "{{MY_ID}}",

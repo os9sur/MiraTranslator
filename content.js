@@ -1064,7 +1064,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     if (typeof executeReScan === "function") executeReScan(msg.config);
     sendResponse({ status: "success" });
-  } else if (msg.action === "SET_SELECT_STATE") {
+  }
+  else if (msg.action === "SET_SELECT_STATE") {
     isSelectEnabled = msg.enabled;
     if (!isSelectEnabled && typeof popupEl !== "undefined" && popupEl) {
       if (typeof logoBtn !== "undefined" && logoBtn)
@@ -6618,6 +6619,9 @@ function initSelectionTranslate() {
 
 
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
+  window.addEventListener("contextmenu", (e) => {
+    lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
+  }, true);
 
   async function renderAndShowPopup(
     text,
@@ -7847,7 +7851,32 @@ function initSelectionTranslate() {
 
     requestAnimationFrame(() => { clampPopupToViewport?.(popupEl); });
   }
+ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!chrome.runtime || !chrome.runtime.id) return;
+    if (msg.action !== "CONTEXT_MENU_TRANSLATE") return;
 
+    if (!msg.text || !msg.text.trim()) {
+      sendResponse({ status: "no-text" });
+      return;
+    }
+    if (!shadowHost) initShadowDOM();
+    const shadow = shadowHost.shadowRoot;
+
+    renderAndShowPopup(
+      msg.text,
+      lastSelectionPos,
+      shadow,
+      window.currentTargetL || getBrowserLang() || "en",
+      null,
+      { manualInput: false }
+    );
+    sendResponse({ status: "success" });
+  });
+
+  //  记录右键点击坐标，供上面的 renderAndShowPopup 定位使用
+  window.addEventListener("contextmenu", (e) => {
+    lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
+  }, true);
   async function openManualInputPopup() {
     if (!shadowHost) initShadowDOM();
 
