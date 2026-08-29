@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             //  保存只做持久化，不再自动切换线上生效引擎、也不再自动触发测试连接。
             // 想切换到这个引擎，用户需要单独点"启用当前引擎"（会先保存、再测试，通过才生效）。 
-
+            if (typeof renderSidebar === 'function') renderSidebar();
             // 显示保存成功提示（固定时间）
             saveBtn.innerText = `${t('save', uiLanguage)}${t('success', uiLanguage)}`;
             saveBtn.style.setProperty('background-color', '#22c55e', 'important');

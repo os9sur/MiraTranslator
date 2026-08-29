@@ -9413,6 +9413,10 @@ function initSelectionTranslate() {
 //yt
 let fullSubtitleData = [];
 let semanticGroups = [];
+window.ktSegmentDensity = "standard"; // 'compact' | 'standard' | 'loose'
+safeGetStorage(["ktSegmentDensity"]).then((data) => {
+  if (data?.ktSegmentDensity) window.ktSegmentDensity = data.ktSegmentDensity;
+});
 lastSubIndex = -1;
 let lastDataLength = 0;
 let lastSemanticEngine = null;
@@ -9975,14 +9979,109 @@ function injectDownloadButton() {
   btnBilingual.title = '';
   btnBilingual.innerHTML = `⬇ ${t("bilingual", window.uiLanguage)} TXT<span class="kt-tooltip">${t("dlBilingual", window.uiLanguage)}</span>`; //下载双语字幕（含翻译）
   btnBilingual.onclick = () => downloadSubtitles(true);
-
+  const btnSegment = document.createElement("button");
+  btnSegment.id = "kt-segment-btn";
+  btnSegment.className = "kt-dl-btn";
+  btnSegment.innerHTML = `✂️<span dir="auto" class="kt-tooltip">${t("segmentSettings", window.uiLanguage) || "断句密度"}</span>`;
+  btnSegment.onclick = (e) => {
+    e.stopPropagation();
+    toggleSegmentPanel(btnSegment);
+  };
   wrapper.appendChild(btnOriginal);
   wrapper.appendChild(btnBilingual);
+  wrapper.appendChild(btnSegment);
   target.prepend(wrapper);
 }
 
 function removeDownloadButton() {
   document.getElementById("kt-subtitle-download")?.remove();
+}
+
+function toggleSegmentPanel(anchorBtn) {
+  const existing = document.getElementById("kt-segment-panel");
+  if (existing) {
+    existing.remove();
+    return;
+  }
+  const panel = document.createElement("div");
+  panel.id = "kt-segment-panel";
+  panel.style.cssText = `
+    position: fixed; background: rgba(28,28,28,0.92);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; padding: 6px; display: flex; flex-direction: column;
+    gap: 4px; z-index: 2147483647; min-width: 110px;
+    visibility: hidden;
+  `;
+  const options = [
+    { key: "compact", label: t("segmentCompact", window.uiLanguage) || "紧凑（短句）" },
+    { key: "standard", label: t("segmentStandard", window.uiLanguage) || "标准" },
+    { key: "loose", label: t("segmentLoose", window.uiLanguage) || "宽松（长句）" },
+  ];
+  options.forEach((opt) => {
+    const item = document.createElement("div");
+    item.textContent = opt.label;
+    const isActive = window.ktSegmentDensity === opt.key;
+    item.style.cssText = `
+      padding: 5px 10px; border-radius: 6px; cursor: pointer;
+      color: white; font-size: 12px; white-space: nowrap;
+      background: ${isActive ? "rgba(56,189,248,0.3)" : "transparent"};
+    `;
+    item.onmouseenter = () => { if (window.ktSegmentDensity !== opt.key) item.style.background = "rgba(255,255,255,0.15)"; };
+    item.onmouseleave = () => { item.style.background = window.ktSegmentDensity === opt.key ? "rgba(56,189,248,0.3)" : "transparent"; };
+    item.onclick = () => {
+      window.ktSegmentDensity = opt.key;
+      safeSetStorage({ ktSegmentDensity: opt.key });
+      panel.remove();
+      applySegmentDensityChange();
+    };
+    panel.appendChild(item);
+  });
+
+  document.body.appendChild(panel);
+
+  // 用按钮的实际屏幕坐标定位，出现在按钮正上方
+  const rect = anchorBtn.getBoundingClientRect();
+  const panelWidth = panel.offsetWidth;
+  let left = rect.right - panelWidth;
+  if (left < 10) left = 10;
+  if (left + panelWidth > window.innerWidth - 10) {
+    left = window.innerWidth - 10 - panelWidth;
+  }
+  const top = rect.top - panel.offsetHeight - 8;
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+  panel.style.visibility = "visible";
+
+  const closeOnOutside = (ev) => {
+    if (!panel.contains(ev.target) && ev.target !== anchorBtn) {
+      panel.remove();
+      document.removeEventListener("click", closeOnOutside);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", closeOnOutside), 0);
+}
+
+function applySegmentDensityChange() {
+  if (!fullSubtitleData || fullSubtitleData.length === 0) return;
+  const engine = window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
+  const isAI = AI_LLM_WHITE_LIST.includes(engine);
+  const srcLang = getVideoSourceLang();
+  const tgtLang = getCurrentLang()?.split("-")[0].toLowerCase();
+  const isSameLang = srcLang && tgtLang && srcLang === tgtLang;
+
+  semanticGroups = mergeToSemantic(fullSubtitleData, isAI, isSameLang);
+  lastSemanticEngine = engine;
+  lastIsSameLang = isSameLang;
+  lastDataLength = fullSubtitleData.length;
+  lastSubIndex = -1; // 强制 syncSubtitleDisplay 重新渲染当前行
+
+  // 断句变了，旧缓存的分段译文和新分段对不上，清掉重新翻译
+  if (typeof fastMemoryCache !== "undefined") fastMemoryCache.clear();
+  if (typeof pendingRequests !== "undefined") pendingRequests.clear();
+
+  if (semanticGroups.length > 0) {
+    setTimeout(() => batchPrefetch(0), 200);
+  }
 }
 //字幕下载功能结束--------
 
@@ -10068,19 +10167,35 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
     window.innerWidth <= 768;
-  const LIMITS = isAI
+  const baseLimits = isAI
     ? {
-      MAX_CHARS: isMobile ? 90 : 150,
-      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
-      PAUSE_GAP: 1.5,
-      FORCE_CUT: isMobile ? 120 : 210,
+      MAX_CHARS: isMobile ? 55 : 90,
+      MIN_CHARS_PAUSE: isMobile ? 30 : 50,
+      PAUSE_GAP: 1.1,
+      FORCE_CUT: isMobile ? 75 : 130,
+      MIN_PUNC_LEN: 35,
+      MIN_PUNC_LEN_CJK: 6,
     }
     : {
-      MAX_CHARS: isMobile ? 75 : 120,
-      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
-      PAUSE_GAP: 1.2,
-      FORCE_CUT: isMobile ? 100 : 180,
+      MAX_CHARS: isMobile ? 45 : 70,
+      MIN_CHARS_PAUSE: isMobile ? 30 : 45,
+      PAUSE_GAP: 0.9,
+      FORCE_CUT: isMobile ? 60 : 100,
+      MIN_PUNC_LEN: 20,
+      MIN_PUNC_LEN_CJK: 6,
     };
+  // compact = 断句更密（短句），loose = 断句更松（长句）
+  const DENSITY_MULTIPLIER =
+    { compact: 0.55, standard: 1, loose: 1.5 }[window.ktSegmentDensity] || 1;
+  const LIMITS = {
+    MAX_CHARS: Math.round(baseLimits.MAX_CHARS * DENSITY_MULTIPLIER),
+    MIN_CHARS_PAUSE: Math.round(baseLimits.MIN_CHARS_PAUSE * DENSITY_MULTIPLIER),
+    PAUSE_GAP: baseLimits.PAUSE_GAP,
+    FORCE_CUT: Math.round(baseLimits.FORCE_CUT * DENSITY_MULTIPLIER),
+    // 设个下限，避免 compact 档把句子切得过碎（尤其中文）
+    MIN_PUNC_LEN: Math.max(15, Math.round(baseLimits.MIN_PUNC_LEN * DENSITY_MULTIPLIER)),
+    MIN_PUNC_LEN_CJK: Math.max(4, Math.round(baseLimits.MIN_PUNC_LEN_CJK * DENSITY_MULTIPLIER)),
+  };
   data.forEach((item, index) => {
     const currentRawText = item.text.replace(/\n/g, " ").trim();
     const startTime = parseFloat(item.start);
@@ -10117,7 +10232,7 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
       shouldBreak = true;
       breakReason = "End of Data";
     } else if (isCJK) {
-      if (/[。？！?!]$/.test(trimmedText) && charCount > 8) {
+      if (/[。？！?!]$/.test(trimmedText) && charCount > LIMITS.MIN_PUNC_LEN_CJK) {
         shouldBreak = true;
         breakReason = "Punc";
       } else if (charCount > LIMITS.FORCE_CUT) {
@@ -10187,10 +10302,10 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
         protectionList.includes(lastWord) ||
         /\b(how|why|what|when|where|who|like|than)\b\s*$/i.test(trimmedText);
       const dynamicPauseGap = isHanging
-        ? LIMITS.PAUSE_GAP * 2
+        ? LIMITS.PAUSE_GAP * 1.4
         : LIMITS.PAUSE_GAP;
       const endsWithSentencePunc = /[.?!]["']?\s*$/.test(trimmedText);
-      const minPuncLen = isAI ? 70 : 40;
+      const minPuncLen = LIMITS.MIN_PUNC_LEN;
       if (endsWithSentencePunc && charCount > minPuncLen && !isHanging) {
         shouldBreak = true;
         breakReason = "Full Sentence";
@@ -10242,7 +10357,7 @@ if (!document.getElementById("mira-global-style")) {
         --kt-origin-color: #f3f4f6;
         --kt-origin-size: 24px;
         --kt-trans-size: 22px;
-        --kt-trans-color: #38bdf8;
+        --kt-trans-color: #38bdf8; 
     }
         .html5-video-player.kt-enabled .ytp-subtitles-player-content,
         .html5-video-player.kt-enabled .caption-window,
@@ -10294,9 +10409,9 @@ if (!document.getElementById("mira-global-style")) {
             width: 100%;
             line-height: 1.4;
         }
-        .kt-word {
+                .kt-word {
             cursor: pointer;
-            transition: color 0.2s;
+            transition: color 0.2s, opacity 0.18s ease-out;
             display: inline-block;
         }
         .kt-word:hover {
@@ -10624,7 +10739,7 @@ function syncSubtitleDisplay() {
       const sourceLang = __syncSrcLang;
       const isSameLang = __syncIsSameLang;
 
-      if (oEl) renderWords(group.text, oEl, sourceLang, isSameLang);
+      if (oEl) renderWords(group.text, oEl, sourceLang, __syncIsSameLang, __syncIsSameLang ? null : { start: group.start, end: group.end });
 
       if (tEl) {
         const isBatchEngineLocal = isBatchEngine;
@@ -10712,6 +10827,9 @@ function syncSubtitleDisplay() {
           tEl.classList.remove("kt-loading");
         }
       }
+    }
+    if (oEl && !__syncIsSameLang) {
+      updateKaraokeColors(oEl, now, group.start, group.end);
     }
   } else if (currentIndex === -1 && lastSubIndex !== -1) {
     lastSubIndex = -1;
@@ -10941,7 +11059,7 @@ function initSettingsAvoidance() {
 setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 //卡片
-function renderWords(text, container, sourceLang = null, disableInteraction = false) {
+function renderWords(text, container, sourceLang = null, disableInteraction = false, timing = null) {
   if (!container) return;
   container.innerHTML = "";
 
@@ -10976,21 +11094,50 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
 
   const isCompactStyle = ['ja', 'zh', 'th', 'my', 'km'].some(l => currentLang?.startsWith(l));
 
-  words.forEach((word) => {
+  const useKaraoke = !!(timing && Number.isFinite(timing.start) && Number.isFinite(timing.end) && timing.end > timing.start);
+  const weights = [];
+  let totalWeight = 0;
+  if (useKaraoke) {
+    words.forEach((w) => {
+      const wt = w.trim().length;
+      weights.push(wt);
+      totalWeight += wt;
+    });
+  }
+  let cumWeight = 0;
+
+  words.forEach((word, wIndex) => {
     const trimmed = word.trim();
     const cleanWord = trimmed.replace(
       /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」【】『』""''\s]/g,
       ""
     );
 
+    let pStart = 0, pEnd = 0;
+    if (useKaraoke) {
+      pStart = totalWeight > 0 ? cumWeight / totalWeight : 0;
+      cumWeight += weights[wIndex];
+      pEnd = totalWeight > 0 ? cumWeight / totalWeight : 0;
+    }
+
     if (trimmed.length === 0 || cleanWord.length === 0) {
       container.appendChild(document.createTextNode(word));
       return;
     }
 
-    // 同语言场景：只渲染纯文本，不绑定任何 hover/click 交互
+    // 同语言场景：不绑定交互，但仍创建 span 以支持卡拉OK变色
     if (disableInteraction) {
-      container.appendChild(document.createTextNode(word));
+      if (useKaraoke) {
+        const span = document.createElement("span");
+        span.className = "kt-word";
+        span.innerText = word;
+        span.dataset.pStart = pStart;
+        span.dataset.pEnd = pEnd;
+        span.style.opacity = "0.45";
+        container.appendChild(span);
+      } else {
+        container.appendChild(document.createTextNode(word));
+      }
       return;
     }
 
@@ -10999,6 +11146,11 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
     span.innerText = word;
     span.style.display = "inline-block";
     span.style.margin = isCompactStyle ? "0 0.5px" : "0 1px";
+    if (useKaraoke) {
+      span.dataset.pStart = pStart;
+      span.dataset.pEnd = pEnd;
+      span.style.opacity = "0.45";
+    }
 
     if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
       span.style.color = "#facc15";
@@ -11035,6 +11187,26 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
     container.appendChild(span);
   });
 }
+
+function updateKaraokeColors(container, currentTime, groupStart, groupEnd) {
+  if (!container) return;
+  const duration = groupEnd - groupStart;
+  if (!(duration > 0)) return;
+  const progress = (currentTime - groupStart) / duration;
+  const spans = container.querySelectorAll('[data-p-start]');
+  spans.forEach((span) => {
+    const pStart = parseFloat(span.dataset.pStart);
+    // 词的中点作为"点亮"临界点，读到这个词一半时整词切换为高亮
+    const pMid = (pStart + parseFloat(span.dataset.pEnd)) / 2;
+    const isSung = progress >= pMid ? "1" : "0";
+
+    if (span.dataset.lastSung === isSung) return;
+    span.dataset.lastSung = isSung;
+    //未点亮颜色
+    span.style.opacity = isSung === "1" ? "1" : "0.7";
+  });
+}
+
 function applySubtitleSettings(settings) {
   const box = document.getElementById("kt-yt-box");
   if (!box) return;
