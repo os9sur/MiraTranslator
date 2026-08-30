@@ -4113,60 +4113,60 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 });
 
 async function rebuildContextMenus() {
-  const r = await safeGetStorage([
-    'miraContextMenuSelectionEnabled',
-    'miraContextMenuPageEnabled',
-  ]);
-  const selectionEnabled = r?.miraContextMenuSelectionEnabled ?? true;
-  const pageEnabled = r?.miraContextMenuPageEnabled ?? true;
+    const r = await safeGetStorage([
+        'miraContextMenuSelectionEnabled',
+        'miraContextMenuPageEnabled',
+    ]);
+    const selectionEnabled = r?.miraContextMenuSelectionEnabled ?? true;
+    const pageEnabled = r?.miraContextMenuPageEnabled ?? true;
 
-  await chrome.contextMenus.removeAll();
+    await chrome.contextMenus.removeAll();
 
-  if (selectionEnabled) {
-    chrome.contextMenus.create({
-      id: "mira-translate-selection",
-      title: "翻译选中内容", //todo 多语言化
-      contexts: ["selection"],
-    });
-  }
-  if (pageEnabled) {
-    chrome.contextMenus.create({
-      id: "mira-translate-page",
-      title: "翻译此网页",
-      contexts: ["page"],
-    });
-  }
+    if (selectionEnabled) {
+        chrome.contextMenus.create({
+            id: "mira-translate-selection",
+            title: t('translateSelectedText') || "翻译选中内容",
+            contexts: ["selection"],
+        });
+    }
+    if (pageEnabled) {
+        chrome.contextMenus.create({
+            id: "mira-translate-page",
+            title: t('translateThisPage') || "翻译此网页",
+            contexts: ["page"],
+        });
+    }
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  rebuildContextMenus();
+    rebuildContextMenus();
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === 'UPDATE_CONTEXT_MENU') {
-    rebuildContextMenus();
-    sendResponse({ status: 'ok' });
-  }
+    if (msg.action === 'UPDATE_CONTEXT_MENU') {
+        rebuildContextMenus();
+        sendResponse({ status: 'ok' });
+    }
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (!tab?.id) return;
+    if (!tab?.id) return;
 
-  if (info.menuItemId === "mira-translate-selection") {
-    chrome.tabs.sendMessage(tab.id, {
-      action: "CONTEXT_MENU_TRANSLATE",
-      text: info.selectionText,
-    }, (res) => {
-      if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
-    });
-  } else if (info.menuItemId === "mira-translate-page") {
-    chrome.tabs.sendMessage(tab.id, {
-      action: "SET_PAGE_SCAN_STATE",
-      enabled: true,
-    }, (res) => {
-      if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
-    });
-  }
+    if (info.menuItemId === "mira-translate-selection") {
+        chrome.tabs.sendMessage(tab.id, {
+            action: "CONTEXT_MENU_TRANSLATE",
+            text: info.selectionText,
+        }, (res) => {
+            if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+        });
+    } else if (info.menuItemId === "mira-translate-page") {
+        chrome.tabs.sendMessage(tab.id, {
+            action: "SET_PAGE_SCAN_STATE",
+            enabled: true,
+        }, (res) => {
+            if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+        });
+    }
 });
 
 chrome.runtime.onStartup.addListener(async () => {

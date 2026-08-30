@@ -1,3 +1,10 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai 
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+
 // notice.js —— popup.html 与 engineSettings.html 共用
 
 const NOTICE_DISMISSED_KEY = 'mira_notice_dismissed_v';

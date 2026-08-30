@@ -1,3 +1,9 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai 
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
 const _root = typeof window !== 'undefined' ? window : self;
 _root.browser = _root.msBrowser || _root.browser || _root.chrome;
 self.i18nData = {
@@ -2675,7 +2681,14 @@ self.i18nAttach3 = {
     highlightVocab: "在网页高亮生词",
     toggleKatakana: "点击切换片假名",
     pagination: "第 {current} / {total} 页",
-    goPlaceholder: "跳转..."
+    goPlaceholder: "跳转...",
+    contextMenuTrans: "右键菜单翻译",
+    contextMenuSelectionHint: "选中文字时显示“翻译选中内容”",
+    contextMenuPageHint: "右键空白处显示“翻译此网页”",
+    showBilingual: "显示双语对照",
+    showTranslationOnly: "仅显示译文",
+    translateSelectedText: "翻译选中内容",
+    translateThisPage: "翻译此网页"
   },
   "zh-TW": {
     note: "備註",
@@ -2683,7 +2696,14 @@ self.i18nAttach3 = {
     highlightVocab: "在網頁上標示生字",
     toggleKatakana: "點擊切換片假名",
     pagination: "第 {current} / {total} 頁",
-    goPlaceholder: "跳轉..."
+    goPlaceholder: "跳轉...",
+    contextMenuTrans: "右鍵選單翻譯",
+    contextMenuSelectionHint: "選取文字時顯示「翻譯選取內容」",
+    contextMenuPageHint: "在空白處按右鍵時顯示「翻譯此網頁」",
+    showBilingual: "顯示雙語對照",
+    showTranslationOnly: "僅顯示譯文",
+    translateSelectedText: "翻譯選取內容",
+    translateThisPage: "翻譯此網頁"
   },
   "en": {
     note: "Note",
@@ -2691,7 +2711,14 @@ self.i18nAttach3 = {
     highlightVocab: "Highlight words on page",
     toggleKatakana: "Click to toggle Katakana",
     pagination: "Page {current} / {total}",
-    goPlaceholder: "Go..."
+    goPlaceholder: "Go...",
+    contextMenuTrans: "Translate via context menu",
+    contextMenuSelectionHint: "Show “Translate selected text” when text is selected",
+    contextMenuPageHint: "Show “Translate this page” when right-clicking on a blank area",
+    showBilingual: "Show bilingual text",
+    showTranslationOnly: "Show translation only",
+    translateSelectedText: "Translate selected text",
+    translateThisPage: "Translate this page"
   },
   "ja": {
     note: "メモ",
@@ -2699,7 +2726,14 @@ self.i18nAttach3 = {
     highlightVocab: "ページ上で単語を強調",
     toggleKatakana: "クリックでカタカナに切り替え",
     pagination: "{current} / {total} ページ",
-    goPlaceholder: "移動..."
+    goPlaceholder: "移動...",
+    contextMenuTrans: "右クリックメニューから翻訳",
+    contextMenuSelectionHint: "文字を選択すると「選択範囲を翻訳」を表示",
+    contextMenuPageHint: "空白部分を右クリックすると「このページを翻訳」を表示",
+    showBilingual: "対訳を表示",
+    showTranslationOnly: "訳文のみ表示",
+    translateSelectedText: "選択範囲を翻訳",
+    translateThisPage: "このページを翻訳"
   },
   "ko": {
     note: "메모",
@@ -2707,7 +2741,14 @@ self.i18nAttach3 = {
     highlightVocab: "페이지에서 단어 강조",
     toggleKatakana: "클릭하여 가타카나로 전환",
     pagination: "{current} / {total} 페이지",
-    goPlaceholder: "이동..."
+    goPlaceholder: "이동...",
+    contextMenuTrans: "마우스 오른쪽 버튼 메뉴로 번역",
+    contextMenuSelectionHint: "텍스트를 선택하면 ‘선택한 내용 번역’ 표시",
+    contextMenuPageHint: "빈 곳을 마우스 오른쪽 버튼으로 클릭하면 ‘이 페이지 번역’ 표시",
+    showBilingual: "원문과 번역문 함께 보기",
+    showTranslationOnly: "번역문만 보기",
+    translateSelectedText: "선택한 텍스트 번역",
+    translateThisPage: "이 페이지 번역"
   },
   "es": {
     note: "Nota",
@@ -2715,23 +2756,44 @@ self.i18nAttach3 = {
     highlightVocab: "Resaltar en la página",
     toggleKatakana: "Haz clic para cambiar a Katakana",
     pagination: "Pág. {current} / {total}",
-    goPlaceholder: "Ir..."
+    goPlaceholder: "Ir...",
+    contextMenuTrans: "Traducir desde el menú contextual",
+    contextMenuSelectionHint: "Mostrar «Traducir texto seleccionado» al seleccionar texto",
+    contextMenuPageHint: "Mostrar «Traducir esta página» al hacer clic derecho en un área vacía",
+    showBilingual: "Mostrar texto bilingüe",
+    showTranslationOnly: "Mostrar solo la traducción",
+    translateSelectedText: "Traducir el texto seleccionado",
+    translateThisPage: "Traducir esta página"
   },
   "fr": {
     note: "Note",
-    notePlaceholder: "ex: TOEFL/Contexte...",
+    notePlaceholder: "ex. : TOEFL/Contexte...",
     highlightVocab: "Surligner sur la page",
-    toggleKatakana: "Cliquez pour basculer en katakana",
+    toggleKatakana: "Cliquez pour passer au katakana",
     pagination: "Page {current} / {total}",
-    goPlaceholder: "Aller..."
+    goPlaceholder: "Aller...",
+    contextMenuTrans: "Traduire depuis le menu contextuel",
+    contextMenuSelectionHint: "Afficher « Traduire le texte sélectionné » lors de la sélection de texte",
+    contextMenuPageHint: "Afficher « Traduire cette page » en cliquant avec le bouton droit sur une zone vide",
+    showBilingual: "Afficher le texte bilingue",
+    showTranslationOnly: "Afficher uniquement la traduction",
+    translateSelectedText: "Traduire le texte sélectionné",
+    translateThisPage: "Traduire cette page"
   },
   "de": {
     note: "Notiz",
-    notePlaceholder: "z.B. TOEFL/Kontext...",
+    notePlaceholder: "z. B. TOEFL/Kontext...",
     highlightVocab: "Auf Seite hervorheben",
     toggleKatakana: "Klicken, um zu Katakana zu wechseln",
     pagination: "Seite {current} / {total}",
-    goPlaceholder: "Gehe zu..."
+    goPlaceholder: "Gehe zu...",
+    contextMenuTrans: "Über das Kontextmenü übersetzen",
+    contextMenuSelectionHint: "„Ausgewählten Text übersetzen“ anzeigen, wenn Text markiert ist",
+    contextMenuPageHint: "„Diese Seite übersetzen“ anzeigen, wenn auf einen leeren Bereich rechtsgeklickt wird",
+    showBilingual: "Original und Übersetzung anzeigen",
+    showTranslationOnly: "Nur Übersetzung anzeigen",
+    translateSelectedText: "Ausgewählten Text übersetzen",
+    translateThisPage: "Diese Seite übersetzen"
   },
   "ru": {
     note: "Заметка",
@@ -2739,23 +2801,44 @@ self.i18nAttach3 = {
     highlightVocab: "Выделить на странице",
     toggleKatakana: "Нажмите, чтобы переключить на катакану",
     pagination: "Стр. {current} / {total}",
-    goPlaceholder: "Перейти..."
+    goPlaceholder: "Перейти...",
+    contextMenuTrans: "Перевод через контекстное меню",
+    contextMenuSelectionHint: "Показывать «Перевести выделенный текст» при выделении текста",
+    contextMenuPageHint: "Показывать «Перевести эту страницу» при щелчке правой кнопкой по пустому месту",
+    showBilingual: "Показывать оригинал и перевод",
+    showTranslationOnly: "Показывать только перевод",
+    translateSelectedText: "Перевести выделенный текст",
+    translateThisPage: "Перевести эту страницу"
   },
   "pt": {
     note: "Nota",
-    notePlaceholder: "ex: TOEFL/Contexto...",
+    notePlaceholder: "ex.: TOEFL/Contexto...",
     highlightVocab: "Destacar na página",
     toggleKatakana: "Clique para alternar para Katakana",
     pagination: "Pág. {current} / {total}",
-    goPlaceholder: "Ir..."
+    goPlaceholder: "Ir...",
+    contextMenuTrans: "Traduzir pelo menu de contexto",
+    contextMenuSelectionHint: "Mostrar “Traduzir texto selecionado” ao selecionar um texto",
+    contextMenuPageHint: "Mostrar “Traduzir esta página” ao clicar com o botão direito em uma área vazia",
+    showBilingual: "Mostrar texto bilíngue",
+    showTranslationOnly: "Mostrar apenas a tradução",
+    translateSelectedText: "Traduzir texto selecionado",
+    translateThisPage: "Traduzir esta página"
   },
   "it": {
     note: "Nota",
     notePlaceholder: "es. TOEFL/Contesto...",
     highlightVocab: "Evidenzia nella pagina",
-    toggleKatakana: "Clicca per passare a Katakana",
+    toggleKatakana: "Clicca per passare al Katakana",
     pagination: "Pag. {current} / {total}",
-    goPlaceholder: "Vai..."
+    goPlaceholder: "Vai...",
+    contextMenuTrans: "Traduci dal menu contestuale",
+    contextMenuSelectionHint: "Mostra «Traduci testo selezionato» quando selezioni del testo",
+    contextMenuPageHint: "Mostra «Traduci questa pagina» facendo clic con il tasto destro su un'area vuota",
+    showBilingual: "Mostra testo bilingue",
+    showTranslationOnly: "Mostra solo la traduzione",
+    translateSelectedText: "Traduci il testo selezionato",
+    translateThisPage: "Traduci questa pagina"
   },
   "vi": {
     note: "Ghi chú",
@@ -2763,7 +2846,14 @@ self.i18nAttach3 = {
     highlightVocab: "Làm nổi bật từ vựng",
     toggleKatakana: "Nhấp để chuyển sang Katakana",
     pagination: "Trang {current} / {total}",
-    goPlaceholder: "Đi đến..."
+    goPlaceholder: "Đi đến...",
+    contextMenuTrans: "Dịch bằng menu chuột phải",
+    contextMenuSelectionHint: "Hiển thị “Dịch phần văn bản đã chọn” khi chọn văn bản",
+    contextMenuPageHint: "Hiển thị “Dịch trang này” khi nhấp chuột phải vào vùng trống",
+    showBilingual: "Hiển thị song ngữ",
+    showTranslationOnly: "Chỉ hiển thị bản dịch",
+    translateSelectedText: "Dịch văn bản đã chọn",
+    translateThisPage: "Dịch trang này"
   },
   "th": {
     note: "บันทึก",
@@ -2771,23 +2861,44 @@ self.i18nAttach3 = {
     highlightVocab: "เน้นคำบนหน้าเว็บ",
     toggleKatakana: "คลิกเพื่อสลับเป็นคาตาคานะ",
     pagination: "หน้า {current} / {total}",
-    goPlaceholder: "ไปที่..."
+    goPlaceholder: "ไปที่...",
+    contextMenuTrans: "แปลผ่านเมนูคลิกขวา",
+    contextMenuSelectionHint: "แสดง “แปลข้อความที่เลือก” เมื่อเลือกข้อความ",
+    contextMenuPageHint: "แสดง “แปลหน้านี้” เมื่อคลิกขวาบริเวณพื้นที่ว่าง",
+    showBilingual: "แสดงต้นฉบับและคำแปล",
+    showTranslationOnly: "แสดงเฉพาะคำแปล",
+    translateSelectedText: "แปลข้อความที่เลือก",
+    translateThisPage: "แปลหน้านี้"
   },
   "ar": {
     note: "ملاحظة",
     notePlaceholder: "مثال: TOEFL/سياق...",
-    highlightVocab: "تمييز على الصفحة",
+    highlightVocab: "تمييز الكلمات في الصفحة",
     toggleKatakana: "انقر للتبديل إلى الكاتاكانا",
-    pagination: "{total} / {current} صفحة ",
-    goPlaceholder: "اذهب..."
+    pagination: "الصفحة {current} / {total}",
+    goPlaceholder: "انتقال...",
+    contextMenuTrans: "الترجمة من قائمة النقر بزر الماوس الأيمن",
+    contextMenuSelectionHint: "إظهار «ترجمة النص المحدد» عند تحديد نص",
+    contextMenuPageHint: "إظهار «ترجمة هذه الصفحة» عند النقر بزر الماوس الأيمن على مساحة فارغة",
+    showBilingual: "عرض النص باللغتين",
+    showTranslationOnly: "عرض الترجمة فقط",
+    translateSelectedText: "ترجمة النص المحدد",
+    translateThisPage: "ترجمة هذه الصفحة"
   },
   "fa": {
     note: "یادداشت",
     notePlaceholder: "مثال: TOEFL/زمینه...",
-    highlightVocab: "برجسته در صفحه",
+    highlightVocab: "برجسته کردن کلمات در صفحه",
     toggleKatakana: "برای تغییر به کاتاکانا کلیک کنید",
-    pagination: "{total} / {current} صفحه",
-    goPlaceholder: "برو..."
+    pagination: "صفحه {current} / {total}",
+    goPlaceholder: "برو...",
+    contextMenuTrans: "ترجمه از طریق منوی راست‌کلیک",
+    contextMenuSelectionHint: "هنگام انتخاب متن، «ترجمه متن انتخاب‌شده» نمایش داده شود",
+    contextMenuPageHint: "با راست‌کلیک روی قسمت خالی، «ترجمه این صفحه» نمایش داده شود",
+    showBilingual: "نمایش متن دوزبانه",
+    showTranslationOnly: "فقط نمایش ترجمه",
+    translateSelectedText: "ترجمه متن انتخاب‌شده",
+    translateThisPage: "ترجمه این صفحه"
   },
   "tr": {
     note: "Not",
@@ -2795,7 +2906,14 @@ self.i18nAttach3 = {
     highlightVocab: "Sayfada vurgula",
     toggleKatakana: "Katakana'ya geçmek için tıklayın",
     pagination: "Sayfa {current} / {total}",
-    goPlaceholder: "Git..."
+    goPlaceholder: "Git...",
+    contextMenuTrans: "Bağlam menüsünden çevir",
+    contextMenuSelectionHint: "Metin seçildiğinde “Seçili metni çevir” seçeneğini göster",
+    contextMenuPageHint: "Boş bir alana sağ tıklandığında “Bu sayfayı çevir” seçeneğini göster",
+    showBilingual: "İki dilli metni göster",
+    showTranslationOnly: "Yalnızca çeviriyi göster",
+    translateSelectedText: "Seçili metni çevir",
+    translateThisPage: "Bu sayfayı çevir"
   }
 };
 self.i18nAttach4 = {

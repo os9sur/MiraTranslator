@@ -40,6 +40,18 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 let APP_NAME = "Mira Translator";
 
+(function injectHideOriginalStyle() {
+  if (document.getElementById('mira-hide-original-style')) return; // 避免重复注入
+  const style = document.createElement('style');
+  style.id = 'mira-hide-original-style';
+  style.textContent = `
+    [data-mira-hide-original] [data-translated]:not(.kt-paragraph-translation) {
+      display: none !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 loadTargetLanguage().then(async () => {
   APP_NAME = t("appName") || "Mira Translator";
   logger.log(
@@ -54,7 +66,11 @@ loadTargetLanguage().then(async () => {
     "targetLanguage",
     "miraEngineOverride_subtitle",
     "userConfigs",
+    "miraHideOriginalText",
   ]);
+  if (res.miraHideOriginalText) {
+    document.documentElement.setAttribute('data-mira-hide-original', 'true');
+  }
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
     window.currentConfig.activeConfig = finalCfg;
@@ -1100,6 +1116,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (typeof fastMemoryCache !== "undefined") fastMemoryCache.clear();
     if (typeof lastSubIndex !== "undefined") lastSubIndex = -1;
     sendResponse({ status: "ok" });
+  } else if (msg.action === "TOGGLE_HIDE_ORIGINAL_YT") {
+    logger.log('youtube 原文关闭');
+    window.__mira_ytHideOriginal = !!msg.enabled;
+    const box = document.getElementById("kt-yt-box");
+    if (box) box.classList.toggle('kt-hide-original', window.__mira_ytHideOriginal);
+    sendResponse({ status: "ok" });
   } else if (msg.action === "GET_CURRENT_CONFIG") {
     if (typeof applyUserStyles === "function") applyUserStyles(msg.config);
     sendResponse({ status: "ok" });
@@ -1375,6 +1397,9 @@ async function getMiraEngineConfigFor(feature) {
     "scanConfig",
   ]);
   if (!data) return;
+  if (data.hideOriginalText) {
+    document.documentElement.setAttribute('data-mira-hide-original', 'true');
+  }
   const domain = window.location.hostname.replace("www.", "");
   if (data.targetLanguage) window.currentTargetL = data.targetLanguage;
   const customScanConfig = data.scanConfig?.custom?.[domain];
@@ -7851,7 +7876,7 @@ function initSelectionTranslate() {
 
     requestAnimationFrame(() => { clampPopupToViewport?.(popupEl); });
   }
- chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (!chrome.runtime || !chrome.runtime.id) return;
     if (msg.action !== "CONTEXT_MENU_TRANSLATE") return;
 
@@ -9422,6 +9447,11 @@ function initSelectionTranslate() {
         }
       }
       sendResponse({ status: "ok" });
+    } else if (msg.action === "TOGGLE_HIDE_ORIGINAL") {
+      console.log("[Mira Debug] 收到 TOGGLE_HIDE_ORIGINAL, enabled =", msg.enabled, typeof msg.enabled);
+      document.documentElement.toggleAttribute('data-mira-hide-original', msg.enabled);
+      console.log("[Mira Debug] 设置后 hasAttribute =", document.documentElement.hasAttribute('data-mira-hide-original'));
+      sendResponse({ status: "ok" });
     } else if (msg.action === "TRANSLATE_HOVER_WORD") {
       if (typeof forceTranslateWordAtCursor === "function") {
         forceTranslateWordAtCursor(__miraLastMouseX, __miraLastMouseY);
@@ -10377,6 +10407,7 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
   });
   return groups;
 }
+
 if (!document.getElementById("mira-global-style")) {
   const style = document.createElement("style");
   style.id = "mira-global-style";
@@ -10415,6 +10446,9 @@ if (!document.getElementById("mira-global-style")) {
             opacity: 0;
             transition: opacity 0.2s, visibility 0.2s, transform 0.3s ease-out;
         }
+            #kt-yt-box.kt-hide-original #yt-o {
+        display: none !important;
+      }
         #kt-yt-box:hover, #kt-yt-box.dragging {
             background: rgba(0, 0, 0, 0.8);
             outline: 1px dashed rgba(255, 255, 255, 0.2);
@@ -10902,7 +10936,7 @@ async function createSubtitleBox(player) {
     player.appendChild(tempHint);
   }
   try {
-    const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings"]);
+    const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings", "miraHideOriginalYT"]);
     if (!data) return;
     if (data.ytBoxBottom && parseInt(data.ytBoxBottom) > 10) {
       box.style.bottom = data.ytBoxBottom;
@@ -10912,6 +10946,8 @@ async function createSubtitleBox(player) {
     if (data.ytStyleSettings) {
       applySubtitleSettings(data.ytStyleSettings);
     }
+    window.__mira_ytHideOriginal = !!data.miraHideOriginalYT;
+    box.classList.toggle('kt-hide-original', window.__mira_ytHideOriginal);
   } catch (e) {
     if (e.message?.includes("context invalidated")) {
       showUpdateNotice();
