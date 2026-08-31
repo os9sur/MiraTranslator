@@ -4113,6 +4113,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 });
 
 async function rebuildContextMenus() {
+    if (!chrome.contextMenus) return;
+
     const r = await safeGetStorage([
         'miraContextMenuSelectionEnabled',
         'miraContextMenuPageEnabled',
@@ -4149,25 +4151,27 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
 });
 
-chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (!tab?.id) return;
+if (chrome.contextMenus) {
+    chrome.contextMenus.onClicked.addListener((info, tab) => {
+        if (!tab?.id) return;
 
-    if (info.menuItemId === "mira-translate-selection") {
-        chrome.tabs.sendMessage(tab.id, {
-            action: "CONTEXT_MENU_TRANSLATE",
-            text: info.selectionText,
-        }, (res) => {
-            if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
-        });
-    } else if (info.menuItemId === "mira-translate-page") {
-        chrome.tabs.sendMessage(tab.id, {
-            action: "SET_PAGE_SCAN_STATE",
-            enabled: true,
-        }, (res) => {
-            if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
-        });
-    }
-});
+        if (info.menuItemId === "mira-translate-selection") {
+            chrome.tabs.sendMessage(tab.id, {
+                action: "CONTEXT_MENU_TRANSLATE",
+                text: info.selectionText,
+            }, (res) => {
+                if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+            });
+        } else if (info.menuItemId === "mira-translate-page") {
+            chrome.tabs.sendMessage(tab.id, {
+                action: "SET_PAGE_SCAN_STATE",
+                enabled: true,
+            }, (res) => {
+                if (chrome.runtime.lastError) console.warn("[Mira]", chrome.runtime.lastError.message);
+            });
+        }
+    });
+}
 
 chrome.runtime.onStartup.addListener(async () => {
     detectAndCacheDefaultEngine(false);

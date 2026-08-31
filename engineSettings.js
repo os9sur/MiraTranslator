@@ -234,14 +234,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const proTag = tpl.isPro ? `<span style="background:#7c3aed;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px;">Pro</span>` : '';
 
             return `
-    <div dir="auto" class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
-        <div class="engine-info">
-            ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
-            <span class="engine-name">${c.alias}</span>${proTag}
-        </div>
-        ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
+            <div dir="auto" class="engine-item ${isEditing ? 'active' : ''}" data-id="${c.id}">
+                <div class="engine-info">
+                    ${isRunning ? `<span class="status-dot checking" data-id="${c.id}"></span>` : ''}
+                    <span class="engine-name">${c.alias}</span>${proTag}
+                </div>
+                ${(c.id !== 'google_builtin' && c.id !== 'bing_builtin') ?
                     `<span class="del-icon" data-id="${c.id}">×</span>` : ''}
-    </div>`;
+            </div>`;
         }).join('');
         list.querySelectorAll('.engine-item').forEach(el => {
             el.onclick = (e) => {
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!icon.classList.contains('confirming')) {
             const originalHtml = icon.innerHTML;
             icon.classList.add('confirming');
-            icon.innerHTML = "确认删除?";
+            icon.innerHTML = t('confirmDelete', uiLanguage);
             const timer = setTimeout(() => {
                 if (icon) {
                     icon.classList.remove('confirming');
@@ -599,7 +599,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (currentId === id) {
                 currentId = userConfigs.length > 0 ? userConfigs[0].id : '';
             }
-            showToast("引擎已移除", "info");
+            showToast(t('removed', uiLanguage), "info");
             if (typeof init === 'function') {
                 init();
             } else if (typeof renderSidebar === 'function') {
@@ -959,7 +959,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             btn.dataset.originalText = btn.innerText;
             const rawCount = typeof formatCountByLang === 'function' ? formatCountByLang(count, targetLang) : count;
             const formattedCount = `\u2066${rawCount}\u2069`;
-            btn.innerText = t("confirm", uiLanguage).replace('{0}', formattedCount);
+            btn.innerText = t("confirmDelCache", uiLanguage).replace('{0}', formattedCount);
             btn.style.setProperty('background', 'rgba(248, 113, 113, 0.2)', 'important');
             btn.style.setProperty('border-color', '#f87171', 'important');
             btn.style.setProperty('color', '#f87171', 'important');

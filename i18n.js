@@ -2350,112 +2350,112 @@ self.i18nCacheData = {
   "zh-CN": {
     cacheTitle: "翻译缓存",
     clearBtn: "清除缓存",
-    confirm: "确认清理 {0} 条?",
+    confirmDelCache: "确认清理 {0} 条?",
     clearing: "清理中...",
     completed: "已清空"
   },
   "zh-TW": {
     cacheTitle: "翻譯快取",
     clearBtn: "清除快取",
-    confirm: "確認清理 {0} 條?",
+    confirmDelCache: "確認清理 {0} 條?",
     clearing: "清理中...",
     completed: "已清空"
   },
   "en": {
     cacheTitle: "Cache",
     clearBtn: "Clear",
-    confirm: "Delete {0}?",
+    confirmDelCache: "Delete {0}?",
     clearing: "Clearing...",
     completed: "Cleared"
   },
   "ja": {
     cacheTitle: "キャッシュ",
     clearBtn: "削除",
-    confirm: "{0}件を削除?",
+    confirmDelCache: "{0}件を削除?",
     clearing: "削除中...",
     completed: "完了"
   },
   "ko": {
     cacheTitle: "캐시",
     clearBtn: "정리",
-    confirm: "{0}건 삭제?",
+    confirmDelCache: "{0}건 삭제?",
     clearing: "삭제 중...",
     completed: "완료"
   },
   "es": {
     cacheTitle: "Caché",
     clearBtn: "Borrar",
-    confirm: "¿Borrar {0}?",
+    confirmDelCache: "¿Borrar {0}?",
     clearing: "Borrando...",
     completed: "Borrado"
   },
   "fr": {
     cacheTitle: "Cache",
     clearBtn: "Effacer",
-    confirm: "Effacer {0}?",
+    confirmDelCache: "Effacer {0}?",
     clearing: "Effacement...",
     completed: "Effacé"
   },
   "de": {
     cacheTitle: "Cache",
     clearBtn: "Leeren",
-    confirm: "{0} löschen?",
+    confirmDelCache: "{0} löschen?",
     clearing: "Wird geleert...",
     completed: "Geleert"
   },
   "ru": {
     cacheTitle: "Кэш",
     clearBtn: "Очистить",
-    confirm: "Удалить {0}?",
+    confirmDelCache: "Удалить {0}?",
     clearing: "Очистка...",
     completed: "Готово"
   },
   "pt": {
     cacheTitle: "Cache",
     clearBtn: "Limpar",
-    confirm: "Limpar {0}?",
+    confirmDelCache: "Limpar {0}?",
     clearing: "Limpando...",
     completed: "Limpo"
   },
   "it": {
     cacheTitle: "Cache",
     clearBtn: "Pulisci",
-    confirm: "Elimina {0}?",
+    confirmDelCache: "Elimina {0}?",
     clearing: "Pulizia...",
     completed: "Pulito"
   },
   "vi": {
     cacheTitle: "Bộ nhớ đệm",
     clearBtn: "Xóa",
-    confirm: "Xóa {0} mục?",
+    confirmDelCache: "Xóa {0} mục?",
     clearing: "Đang xóa...",
     completed: "Đã xóa"
   },
   "th": {
     cacheTitle: "แคช",
     clearBtn: "ล้าง",
-    confirm: "ลบ {0} รายการ?",
+    confirmDelCache: "ลบ {0} รายการ?",
     clearing: "กำลังล้าง...",
     completed: "ล้างแล้ว"
   },
   "ar": {
     cacheTitle: "التخزين المؤقت",
     clearBtn: "مسح",
-    confirm: "مسح {0}؟",
+    confirmDelCache: "مسح {0}؟",
     clearing: "جارٍ المسح...",
     completed: "تم"
   },
   "fa": {
     cacheTitle: "کش",
     clearBtn: "پاکسازی",
-    confirm: "پاکسازی {0}؟",
+    confirmDelCache: "پاکسازی {0}؟",
     clearing: "در حال پاکسازی...",
     completed: "انجام شد"
   },
   "tr": {
     cacheTitle: "Önbellek",
     clearBtn: "Temizle",
-    confirm: "{0} öğeyi sil?",
+    confirmDelCache: "{0} öğeyi sil?",
     clearing: "Temizleniyor...",
     completed: "Silindi"
   }
@@ -4165,7 +4165,7 @@ self.i18nAttach12 = {
     💡 **AI 翻译性能说明：** AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，此为正常现象。 
     💰 **提示：** AI 翻译并非模型越新越好。翻译任务并不需要复杂推理，主流模型已能完全胜任，最新模型的价格往往高出数倍。 
     ❤️ **关于项目：**  {0} 这是一个追求极致轻量的开源翻译项目（仅约300kb），最初是为了满足我个人的翻译需求而独立开发，因此在交互设计上可能带有较强的个人习惯。 
-    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。因个人维护精力有限，无法保证完美兼容全网所有特定网站，后续的更新维护亦无法做到即时响应。感谢理解。`,
+    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。`,
   },
   "zh-TW": {
     builtInNoticeBody: `⬆ 此功能透過公開網路請求實現，僅供個人學習與非商業用途使用，無需設定金鑰。 

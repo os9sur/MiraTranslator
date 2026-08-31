@@ -41,12 +41,16 @@ chrome.storage.onChanged.addListener((changes, area) => {
 let APP_NAME = "Mira Translator";
 
 (function injectHideOriginalStyle() {
-  if (document.getElementById('mira-hide-original-style')) return; // 避免重复注入
+  if (document.getElementById('mira-hide-original-style')) return;
   const style = document.createElement('style');
   style.id = 'mira-hide-original-style';
   style.textContent = `
     [data-mira-hide-original] [data-translated]:not(.kt-paragraph-translation) {
-      display: none !important;
+      visibility: hidden !important;
+    }
+    [data-mira-hide-original] [data-translated] .kt-paragraph-translation,
+    [data-mira-hide-original] [data-translated] .kt-paragraph-translation * {
+      visibility: visible !important;
     }
   `;
   document.head.appendChild(style);
@@ -1002,14 +1006,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (typeof refreshIcon === "function") refreshIcon();
       if (typeof scanContent === "function") scanContent();
     } else {
+      //  先把之前"仅显示译文"包裹/隐藏过的原文全部还原，
+      // 否则接下来删掉译文元素后，原文还卡在隐藏的 wrapper 里出不来
+      querySelectorAllDeep("[data-translated]").forEach((el) => {
+        if (typeof showOriginalEl === "function") showOriginalEl(el);
+      });
+
       document.querySelectorAll(".kt-paragraph-translation").forEach((el) => el.remove());
       document.querySelectorAll("[data-translated], [data-translating], [data-mira-processing]").forEach((el) => {
         el.removeAttribute("data-translated");
         el.removeAttribute("data-translating");
         el.removeAttribute("data-mira-processing");
-        // 清理挂在元素对象上的重试计数/跳过标记，防止快速开关翻译时
-        // 因为上一轮翻译还没完成就被再次 add()，导致重试计数虚高，
-        // 最终把该元素永久标记为"已跳过翻译"（只有刷新页面才能重置）
         delete el._miraRetryCount;
         delete el._miraSkippedHash;
         delete el._miraLastText;
@@ -1398,7 +1405,7 @@ async function getMiraEngineConfigFor(feature) {
   ]);
   if (!data) return;
   if (data.hideOriginalText) {
-    document.documentElement.setAttribute('data-mira-hide-original', 'true');
+    applyHideOriginalState(true);
   }
   const domain = window.location.hostname.replace("www.", "");
   if (data.targetLanguage) window.currentTargetL = data.targetLanguage;
@@ -2082,24 +2089,24 @@ const TranslationBatcher = {
           // inline 展示，避免破坏基线对齐。
           if (wasTruncated) {
             link.style.cssText = `
-  color: #1d9bf0 !important;
-  display: inline-block !important;
-  max-width: 100% !important;
-  vertical-align: baseline !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  font-size: inherit !important;
-  letter-spacing: -0.2px !important;
-`;
+            color: #1d9bf0 !important;
+            display: inline-block !important;
+            max-width: 100% !important;
+            vertical-align: baseline !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
           } else {
             link.style.cssText = `
-  color: #1d9bf0 !important;
-  display: inline !important;
-  vertical-align: baseline !important;
-  font-size: inherit !important;
-  letter-spacing: -0.2px !important;
-`;
+            color: #1d9bf0 !important;
+            display: inline !important;
+            vertical-align: baseline !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
           }
         }
         link.removeAttribute("data-mira-link");
@@ -2132,6 +2139,9 @@ const TranslationBatcher = {
     } catch (e) {
       logger.error("[Batcher] 渲染出错:", e);
       if (container && container.parentNode) container.remove();
+    }
+    if (window.__mira_hideOriginalEnabled) {
+      hideOriginalEl(el);
     }
   },
   unlock(el) {
@@ -4324,6 +4334,51 @@ function querySelectorAllDeep(selector, root = document) {
     }
   }
   return nodes;
+}
+
+
+function hideOriginalEl(el) {
+  const childTranslation = el.querySelector(':scope > .kt-paragraph-translation');
+  if (childTranslation) {
+    // 译文是 el 的子节点：把"除译文外的其他内容"包进一个隐藏的 span 挪走
+    // el 本身不加任何隐藏样式，高度会自动收缩成只剩译文的高度，不留空白
+    if (el.querySelector(':scope > [data-mira-orig-wrap]')) return; // 已经处理过，避免重复包裹
+    const wrapper = document.createElement('span');
+    wrapper.setAttribute('data-mira-orig-wrap', 'true');
+    wrapper.style.setProperty('display', 'none', 'important');
+    Array.from(el.childNodes).forEach((n) => {
+      if (n.nodeType === 1 && n.classList.contains('kt-paragraph-translation')) return;
+      wrapper.appendChild(n);
+    });
+    el.insertBefore(wrapper, el.firstChild);
+  } else {
+    // 译文是兄弟节点：整个 el 直接隐藏，零空间占用，译文正常显示
+    el.style.setProperty('display', 'none', 'important');
+  }
+}
+
+function showOriginalEl(el) {
+  const wrapper = el.querySelector(':scope > [data-mira-orig-wrap]');
+  if (wrapper) {
+    while (wrapper.firstChild) {
+      el.insertBefore(wrapper.firstChild, wrapper);
+    }
+    wrapper.remove();
+  }
+  el.style.removeProperty('display');
+}
+
+function applyHideOriginalState(enabled) {
+  window.__mira_hideOriginalEnabled = enabled;
+  const originals = querySelectorAllDeep("[data-translated]");
+  originals.forEach((el) => {
+    if (el.classList.contains("kt-paragraph-translation")) return;
+    if (enabled) {
+      hideOriginalEl(el);
+    } else {
+      showOriginalEl(el);
+    }
+  });
 }
 function resolveActiveSelectors(inputSelectors) {
   if (typeof SiteRules === "undefined") return (inputSelectors || "p").trim();
@@ -9448,9 +9503,7 @@ function initSelectionTranslate() {
       }
       sendResponse({ status: "ok" });
     } else if (msg.action === "TOGGLE_HIDE_ORIGINAL") {
-      console.log("[Mira Debug] 收到 TOGGLE_HIDE_ORIGINAL, enabled =", msg.enabled, typeof msg.enabled);
-      document.documentElement.toggleAttribute('data-mira-hide-original', msg.enabled);
-      console.log("[Mira Debug] 设置后 hasAttribute =", document.documentElement.hasAttribute('data-mira-hide-original'));
+      applyHideOriginalState(!!msg.enabled);
       sendResponse({ status: "ok" });
     } else if (msg.action === "TRANSLATE_HOVER_WORD") {
       if (typeof forceTranslateWordAtCursor === "function") {

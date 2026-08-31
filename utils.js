@@ -1440,7 +1440,7 @@ function speakText(text, speakBtn, forcedLang) {
       stopUI();
     };
     utt.onerror = (e) => {
-      logger.log('[TTS] 系统TTS onerror:', e.error);
+      logger.log('[TTS] 系统TTS onerror:', e);
       clearTimeout(sysStartCheckTimer);
       stopUI();
       if (typeof showToast === 'function') {
