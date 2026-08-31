@@ -72,7 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       'settingsPanel',
       'quickInputTransPanel',
       'engineAssignPanel',
-      'advancedMenu'
+      'advancedMenu',
+      'contextMenuTransPanel'
     ];
     allPanels.forEach(id => {
       const el = document.getElementById(id);
@@ -934,14 +935,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (currentConfig.ytStyleSettings) {
     const ytSizeInput = document.getElementById('yt-style-fontSize');
     const ytOpacityInput = document.getElementById('yt-style-bgOpacity');
+
     ytSizeInput.value = currentConfig.ytStyleSettings.fontSize;
     ytOpacityInput.value = currentConfig.ytStyleSettings.bgOpacity;
-    document.getElementById('ytFontSizeVal').innerText = currentConfig.ytStyleSettings.fontSize + 'px';
-    document.getElementById('ytBgOpacityVal').innerText = currentConfig.ytStyleSettings.bgOpacity;
+
+    document.getElementById('ytFontSizeVal').innerText =
+      currentConfig.ytStyleSettings.fontSize + 'px';
+
+    document.getElementById('ytBgOpacityVal').innerText =
+      currentConfig.ytStyleSettings.bgOpacity;
+
     if (currentConfig.ytStyleSettings.color) {
       const ytColorInput = document.getElementById('yt-style-color');
+
       ytColorInput.value = currentConfig.ytStyleSettings.color;
-      ytColorInput.style.background = currentConfig.ytStyleSettings.color;
+      ytColorInput.style.background =
+        currentConfig.ytStyleSettings.color;
     }
   }
 
@@ -1059,13 +1068,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPopupUI();
   const res = await safeGetStorage(['targetLanguage', 'activeConfig', 'userConfigs']);
   if (!res) return;
-  window.currentConfig = {
+  Object.assign(window.currentConfig, {
     targetLanguage: res.targetLanguage || targetLang,
     selectedEngine: res.activeConfig?.engine || _defaultEngine,
     apiKeys: res.activeConfig?.data || {},
     activeConfig: res.activeConfig || { engine: _defaultEngine, data: {} },
     userConfigs: res.userConfigs || []
-  };
+  });
+  await initHideOriginalYTBtnState();
   window.currentTargetL = normalizeLang(window.currentTargetL || getBrowserLang() || 'en');
   const langEl = document.getElementById('targetLang');
   if (langEl) {
@@ -1400,6 +1410,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     this.classList.toggle('on');
     updatePreview();
   });
+  document.getElementById('btnGoContextMenuTrans').addEventListener('click', () => {
+    showPanel('contextMenuTransPanel');
+    initContextMenuTransPanel();
+  });
   document.getElementById('btnGoQuickInputTrans').addEventListener('click', () => {
     showPanel('quickInputTransPanel');
     initQuickInputTransPanel();
@@ -1408,7 +1422,171 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('closeQuickInputTransPanel').addEventListener('click', () => {
     showMain();
   });
+  document.getElementById('closeContextMenuTransPanel').addEventListener('click', () => {
+    showMain();
+  });
 
+  function getBilingualIcon(translationColor = "#3B82F6") {
+    return `
+    <line x1="3" y1="7" x2="21" y2="7"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"></line>
+    <line x1="3" y1="17" x2="21" y2="17"
+          stroke="${translationColor}"
+          stroke-width="2.4"
+          stroke-linecap="round"></line>
+  `;
+  }
+
+  function getTranslationOnlyIcon(translationColor = "#3B82F6") {
+    return `
+    <line x1="3" y1="7" x2="21" y2="7"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-dasharray="2 3"
+          stroke-linecap="round"
+          opacity="0.35"></line>
+    <line x1="3" y1="17" x2="21" y2="17"
+          stroke="${translationColor}"
+          stroke-width="2.4"
+          stroke-linecap="round"></line>
+  `;
+  }
+
+
+
+  async function initHideOriginalYTBtnState() {
+    const currentUILang = window.currentConfig.ui_language;
+    const r = await safeGetStorage(['miraHideOriginalYT']);
+    const enabled = r?.miraHideOriginalYT ?? false;
+    const btn = document.getElementById('btnToggleHideOriginalYT');
+
+    if (!btn) return;
+
+    const translationColor =
+      window.currentConfig?.ytStyleSettings?.color || "#3B82F6";
+
+    btn.classList.toggle('active', enabled);
+    btn.title = enabled ? t('showBilingual', currentUILang) || 'Show bilingual text' : t('showTranslationOnly', currentUILang) || 'Show translation only';
+
+    btn.querySelector('svg').innerHTML =
+      enabled
+        ? getTranslationOnlyIcon(translationColor)
+        : getBilingualIcon(translationColor);
+  }
+
+
+
+  async function initHideOriginalBtnState() {
+    const currentUILang = window.currentConfig.ui_language;
+    const r = await safeGetStorage(['miraHideOriginalText']);
+    const enabled = r?.miraHideOriginalText ?? false;
+    const btn = document.getElementById('btnToggleHideOriginal');
+
+    if (!btn) return;
+
+    const translationColor =
+      window.currentConfig?.userStyleConfig?.color || "#3B82F6";
+
+    btn.classList.toggle('active', enabled);//'显示原文对照' : '仅显示译文';
+    btn.title = enabled ? t('showBilingual', currentUILang) || 'Show bilingual text' : t('showTranslationOnly', currentUILang) || 'Show translation only';
+
+    btn.querySelector('svg').innerHTML =
+      enabled
+        ? getTranslationOnlyIcon(translationColor)
+        : getBilingualIcon(translationColor);
+  }
+
+
+
+  document.getElementById('btnToggleHideOriginal').addEventListener('click', async (e) => {
+    const currentUILang = window.currentConfig.ui_language;
+    const btn = e.currentTarget;
+    const next = !btn.classList.contains('active');
+
+    btn.classList.toggle('active', next);
+    btn.title = next ? t('showBilingual', currentUILang) || 'Show bilingual text' : t('showTranslationOnly', currentUILang) || 'Show translation only';
+
+    const translationColor =
+      window.currentConfig?.userStyleConfig?.color || "#3B82F6";
+
+    btn.querySelector('svg').innerHTML =
+      next
+        ? getTranslationOnlyIcon(translationColor)
+        : getBilingualIcon(translationColor);
+
+    await safeSetStorage({
+      miraHideOriginalText: next
+    });
+
+    // 通知当前 tab 的 content script
+    // 立即生效，不需要重新扫描 / 重新请求翻译
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+
+    if (tab?.id) {
+      chrome.tabs.sendMessage(
+        tab.id,
+        {
+          action: 'TOGGLE_HIDE_ORIGINAL',
+          enabled: next,
+        },
+        () => {
+          if (chrome.runtime.lastError) {
+            // 忽略：可能是特殊页面
+          }
+        }
+      );
+    }
+  });
+
+
+
+  document.getElementById('btnToggleHideOriginalYT').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const next = !btn.classList.contains('active');
+    const currentUILang = window.currentConfig.ui_language;
+    const translationColor =
+      window.currentConfig?.ytStyleSettings?.color || "#3B82F6";
+
+    btn.classList.toggle('active', next);
+    btn.title = next ? t('showBilingual', currentUILang) || 'Show bilingual text' : t('showTranslationOnly', currentUILang) || 'Show translation only';
+
+    btn.querySelector('svg').innerHTML =
+      next
+        ? getTranslationOnlyIcon(translationColor)
+        : getBilingualIcon(translationColor);
+
+    await safeSetStorage({
+      miraHideOriginalYT: next
+    });
+
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true
+    });
+
+    if (tab?.id) {
+      chrome.tabs.sendMessage(
+        tab.id,
+        {
+          action: 'TOGGLE_HIDE_ORIGINAL_YT',
+          enabled: next,
+        },
+        (res) => {
+          if (chrome.runtime.lastError) {
+            console.warn(
+              "[Mira] TOGGLE_HIDE_ORIGINAL_YT 发送失败:",
+              chrome.runtime.lastError.message
+            );
+          }
+        }
+      );
+    }
+  });
   // 目标语言下拉框：正常语言列表，不含"自动检测"
   populateSelect(document.getElementById('quickInputTransTargetLang'), {
     selected: getBrowserLang() || 'en',
@@ -1435,6 +1613,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('quickInputTransTargetLang').value =
       r?.miraQuickTransTargetLang || getBrowserLang() || 'en';
   }
+  async function initContextMenuTransPanel() {
+    const r = await safeGetStorage([
+      'miraContextMenuSelectionEnabled',
+      'miraContextMenuPageEnabled',
+    ]);
+    const selectionEnabled = r?.miraContextMenuSelectionEnabled ?? true; // 默认开启
+    const pageEnabled = r?.miraContextMenuPageEnabled ?? true; // 默认开启
+
+    document.getElementById('switch-contextMenuSelection').classList.toggle('on', selectionEnabled);
+    document.getElementById('switch-contextMenuPage').classList.toggle('on', pageEnabled);
+  }
+
+  document.getElementById('switch-contextMenuSelection').addEventListener('click', async (e) => {
+    const el = e.currentTarget;
+    const next = !el.classList.contains('on');
+    el.classList.toggle('on', next);
+    await safeSetStorage({ miraContextMenuSelectionEnabled: next });
+    chrome.runtime.sendMessage({ action: 'UPDATE_CONTEXT_MENU' });
+  });
+
+  document.getElementById('switch-contextMenuPage').addEventListener('click', async (e) => {
+    const el = e.currentTarget;
+    const next = !el.classList.contains('on');
+    el.classList.toggle('on', next);
+    await safeSetStorage({ miraContextMenuPageEnabled: next });
+    chrome.runtime.sendMessage({ action: 'UPDATE_CONTEXT_MENU' });
+  });
+
   //storage key 命名为 miraEngineOverride_<feature>，值是配置的 id（比如 google_builtin 或自定义 AI 配置的 id），空字符串 '' 表示"跟随全局"。
   document.getElementById('btnGoEngineAssign').addEventListener('click', () => {
     showPanel('engineAssignPanel');
@@ -1508,26 +1714,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('quickInputTransTargetLang').addEventListener('change', async (e) => {
     await safeSetStorage({ miraQuickTransTargetLang: e.target.value });
   });
-function resizePopupForAdvancedMenu() {
-  requestAnimationFrame(() => {
-    const menu = document.getElementById('advancedMenu');
-    if (!menu || menu.style.display === 'none') return;
+  function resizePopupForAdvancedMenu() {
+    requestAnimationFrame(() => {
+      const menu = document.getElementById('advancedMenu');
+      if (!menu || menu.style.display === 'none') return;
 
-    const menuRect = menu.getBoundingClientRect();
-    const bodyRect = document.body.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      const bodyRect = document.body.getBoundingClientRect();
 
-    // 菜单实际需要的高度
-    const menuRequiredHeight = Math.ceil(menuRect.bottom - bodyRect.top + 12);
+      // 菜单实际需要的高度
+      const menuRequiredHeight = Math.ceil(menuRect.bottom - bodyRect.top + 12);
 
-    // 当前 body 已经有的高度（不管是浏览器自动撑起来的，还是之前手动设置的）
-    const currentHeight = document.body.getBoundingClientRect().height;
+      // 当前 body 已经有的高度（不管是浏览器自动撑起来的，还是之前手动设置的）
+      const currentHeight = document.body.getBoundingClientRect().height;
 
-    // 只有菜单真的会超出当前高度时，才手动覆盖；否则保持原样 
-    if (menuRequiredHeight > currentHeight) {
-      document.body.style.height = `${menuRequiredHeight}px`;
-    }
-  });
-}
+      // 只有菜单真的会超出当前高度时，才手动覆盖；否则保持原样 
+      if (menuRequiredHeight > currentHeight) {
+        document.body.style.height = `${menuRequiredHeight}px`;
+      }
+    });
+  }
 
   function resetPopupHeight() {
     document.body.style.height = '';
@@ -1634,6 +1840,10 @@ function resizePopupForAdvancedMenu() {
       'userStyleConfig': config,
       'ytStyleSettings': ytConfig
     });
+    currentConfig.userStyleConfig = config;
+    currentConfig.ytStyleSettings = ytConfig;
+    await initHideOriginalBtnState();
+    await initHideOriginalYTBtnState();
     const tab = await getActiveTab();
     if (tab?.id) {
       try {
@@ -2590,7 +2800,16 @@ function resizePopupForAdvancedMenu() {
       if (tab && tab.url) {
         window.domain = new URL(tab.url).hostname.replace('www.', '');
       }
-      const keys = ['siteSettings', 'globalConfig', 'autoSync', 'syncConfig', 'lastSyncTime', 'scanConfig', 'ui_language'];
+      const keys = [
+        'siteSettings',
+        'globalConfig',
+        'autoSync',
+        'syncConfig',
+        'lastSyncTime',
+        'scanConfig',
+        'ui_language',
+        'ytStyleSettings'
+      ];
       const storage = await safeGetStorage(keys);
       if (myToken !== refreshToken) return; //  已经有更新的调用，本次作废
       if (!storage) {
@@ -2625,12 +2844,17 @@ function resizePopupForAdvancedMenu() {
       const btnPage = document.getElementById('btnRefreshPage');
       if (btnPage) {
         btnPage.style.setProperty('display', conf.page ? 'flex' : 'none', 'important');
-        btnPage.title = t('retranslate') || "Retranslate this page";
+        btnPage.title = t('retranslate', currentUiLang) || "Retranslate this page";
       }
-
+      const btnHideOriginal = document.getElementById('btnToggleHideOriginal');
+      if (btnHideOriginal) {
+        btnHideOriginal.style.setProperty('display', conf.page ? 'flex' : 'none', 'important');
+      }
+      initHideOriginalBtnState();
       // 控制显隐youtube操作提示
       if (ytSwitch && btnYT) {
         const ytContainer = document.getElementById('youtube-option-container');
+        const btnHideOriginalYT = document.getElementById('btnToggleHideOriginalYT');
 
         if (currentMode === 'global' || !isYouTube) {
           // 全局模式 或 非 YouTube 页面，直接隐藏
@@ -2645,6 +2869,15 @@ function resizePopupForAdvancedMenu() {
           const isYTOn = !!conf.yt;
           ytSwitch.classList.toggle('on', isYTOn);
           btnYT.style.setProperty('display', isYTOn ? 'flex' : 'none', 'important');
+          if (btnHideOriginalYT) {
+            btnHideOriginalYT.style.setProperty(
+              'display',
+              isYTOn ? 'flex' : 'none',
+              'important'
+            );
+          }
+
+          await initHideOriginalYTBtnState();
 
           if (ytHint) {
             const finalShouldShow = isYTOn && isYouTube && !window.isRestricted;

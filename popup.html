@@ -1,3 +1,10 @@
+<!--
+ * Mira Translator
+ * Copyright (C) 2026 David Bai 
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
+-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 
@@ -26,7 +33,7 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 14px;
-      background: #0f172a;
+      background: #181818;
       color: #e5e7eb;
       display: flex;
       flex-direction: column;
@@ -571,7 +578,15 @@
     <div class="row-text" id="webTranslationOptionContainer" dir="auto">
       <label for="autoSwitchPage" data-i18n="pageTrans" style="font-size: 14px;">网页翻译</label>
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" title="重新翻译此页" style="display: none; padding: 2px;">
+        <button id="btnToggleHideOriginal" data-i18n="showTranslationOnly" class="icon-btn refresh-btn-ui"
+          data-i18n-title title="仅显示译文" style="display: none; padding: 2px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+            stroke-linejoin="round" style="width: 20px; height: 20px;">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title title="重新翻译此页" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
             stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
@@ -595,7 +610,15 @@
     <div class="row-text" id="youtube-option-container" dir="auto">
       <label for="autoSwitchYT" data-i18n="ytTrans" style="font-size: 14px;">Youtube双语字幕</label>
       <div style="display: flex; align-items: center; gap: 4px;">
-        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" title="重新预翻译字幕" style="display: none; padding: 2px;">
+        <button id="btnToggleHideOriginalYT" data-i18n="showTranslationOnly" class="icon-btn refresh-btn-ui"
+          data-i18n-title title="仅显示译文" style="display: none; padding: 2px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" style="width: 20px; height: 20px;">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title title="重新预翻译字幕" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
             stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
@@ -817,16 +840,24 @@
 
       <span data-i18n="shortcutSettings">快捷键设置</span>
     </div>
-<div class="menu-item" id="btnGoQuickInputTrans" dir="auto">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-    stroke-linejoin="round" class="icon-main quick-trans-icon" style="width: 20px; height: 20px;">
-    <path d="M3 5h18v11H7l-4 3V5z"></path>
-    <line x1="7" y1="9" x2="12" y2="9"></line>
-    <line x1="7" y1="12" x2="10" y2="12"></line>
-    <line class="quick-trans-cursor" x1="7" y1="2" x2="7" y2="22"></line>
-  </svg>
-  <span data-i18n="quickInputTrans">输入框快捷翻译</span>
-</div>
+    <div class="menu-item" id="btnGoQuickInputTrans" dir="auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="icon-main quick-trans-icon" style="width: 20px; height: 20px;">
+        <path d="M3 5h18v11H7l-4 3V5z"></path>
+        <line x1="7" y1="9" x2="12" y2="9"></line>
+        <line x1="7" y1="12" x2="10" y2="12"></line>
+        <line class="quick-trans-cursor" x1="7" y1="2" x2="7" y2="22"></line>
+      </svg>
+      <span data-i18n="quickInputTrans">输入框快捷翻译</span>
+    </div>
+    <div class="menu-item" id="btnGoContextMenuTrans" dir="auto">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="icon-main" style="width: 20px; height: 20px;">
+        <rect x="3.5" y="2.5" width="15" height="15" rx="1.5"></rect>
+        <path class="cursor-pointer" d="M11.5 11L19 16.5L16.2 17.1L18 20.2L16 21.4L13.8 18.2L11.8 19.8Z"></path>
+      </svg>
+      <span data-i18n="contextMenuTrans">右键菜单翻译</span>
+    </div>
   </div>
   <!-- 云同步panel开始 -->
   <div id="syncSettingsPanel"
@@ -1138,6 +1169,36 @@
     </div>
   </div>
   <!-- 引擎分配 panel 结束 -->
+  <!-- 右键菜单翻译 panel 开始 -->
+  <div id="contextMenuTransPanel"
+    style="width: 100%; border-radius: 9px; background: radial-gradient(circle at center, #1e293b 0%, #020617 100%); z-index: 120; display: none; padding: 22px 10px 10px 10px; box-sizing: border-box; flex-direction: column; overflow-y: auto;">
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-shrink: 0;">
+      <span id="closeContextMenuTransPanel" class="close-btn-common">➥</span>
+      <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">CONTEXT MENU</span>
+    </div>
+
+    <div class="row-text" dir="auto" style="margin-bottom: 14px;"> 
+      <label for="switch-contextMenuSelection" data-i18n="contextMenuSelectionHint"
+        style="font-size: 12px; color: #cbd5e1;">选中文字时显示"翻译选中内容"</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <div id="switch-contextMenuSelection" class="switch">
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-text" dir="auto">
+      <label for="switch-contextMenuPage" data-i18n="contextMenuPageHint"
+        style="font-size: 12px; color: #cbd5e1;">右键空白处显示"翻译此网页"</label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <div id="switch-contextMenuPage" class="switch">
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 右键菜单翻译 panel 结束 -->
   <div dir="auto" id="toast" class="toast-hidden"></div>
   <script src="utils.js"></script>
   <script src="notice.js"></script>

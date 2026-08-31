@@ -40,6 +40,22 @@ chrome.storage.onChanged.addListener((changes, area) => {
 
 let APP_NAME = "Mira Translator";
 
+(function injectHideOriginalStyle() {
+  if (document.getElementById('mira-hide-original-style')) return;
+  const style = document.createElement('style');
+  style.id = 'mira-hide-original-style';
+  style.textContent = `
+    [data-mira-hide-original] [data-translated]:not(.kt-paragraph-translation) {
+      visibility: hidden !important;
+    }
+    [data-mira-hide-original] [data-translated] .kt-paragraph-translation,
+    [data-mira-hide-original] [data-translated] .kt-paragraph-translation * {
+      visibility: visible !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
 loadTargetLanguage().then(async () => {
   APP_NAME = t("appName") || "Mira Translator";
   logger.log(
@@ -54,7 +70,11 @@ loadTargetLanguage().then(async () => {
     "targetLanguage",
     "miraEngineOverride_subtitle",
     "userConfigs",
+    "miraHideOriginalText",
   ]);
+  if (res.miraHideOriginalText) {
+    document.documentElement.setAttribute('data-mira-hide-original', 'true');
+  }
   if (!res || !res.activeConfig) {
     const finalCfg = { engine: _defaultEngine, data: {} };
     window.currentConfig.activeConfig = finalCfg;
@@ -986,14 +1006,17 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       if (typeof refreshIcon === "function") refreshIcon();
       if (typeof scanContent === "function") scanContent();
     } else {
+      //  先把之前"仅显示译文"包裹/隐藏过的原文全部还原，
+      // 否则接下来删掉译文元素后，原文还卡在隐藏的 wrapper 里出不来
+      querySelectorAllDeep("[data-translated]").forEach((el) => {
+        if (typeof showOriginalEl === "function") showOriginalEl(el);
+      });
+
       document.querySelectorAll(".kt-paragraph-translation").forEach((el) => el.remove());
       document.querySelectorAll("[data-translated], [data-translating], [data-mira-processing]").forEach((el) => {
         el.removeAttribute("data-translated");
         el.removeAttribute("data-translating");
         el.removeAttribute("data-mira-processing");
-        // 清理挂在元素对象上的重试计数/跳过标记，防止快速开关翻译时
-        // 因为上一轮翻译还没完成就被再次 add()，导致重试计数虚高，
-        // 最终把该元素永久标记为"已跳过翻译"（只有刷新页面才能重置）
         delete el._miraRetryCount;
         delete el._miraSkippedHash;
         delete el._miraLastText;
@@ -1064,7 +1087,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     if (typeof executeReScan === "function") executeReScan(msg.config);
     sendResponse({ status: "success" });
-  } else if (msg.action === "SET_SELECT_STATE") {
+  }
+  else if (msg.action === "SET_SELECT_STATE") {
     isSelectEnabled = msg.enabled;
     if (!isSelectEnabled && typeof popupEl !== "undefined" && popupEl) {
       if (typeof logoBtn !== "undefined" && logoBtn)
@@ -1098,6 +1122,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
     if (typeof fastMemoryCache !== "undefined") fastMemoryCache.clear();
     if (typeof lastSubIndex !== "undefined") lastSubIndex = -1;
+    sendResponse({ status: "ok" });
+  } else if (msg.action === "TOGGLE_HIDE_ORIGINAL_YT") {
+    logger.log('youtube 原文关闭');
+    window.__mira_ytHideOriginal = !!msg.enabled;
+    const box = document.getElementById("kt-yt-box");
+    if (box) box.classList.toggle('kt-hide-original', window.__mira_ytHideOriginal);
     sendResponse({ status: "ok" });
   } else if (msg.action === "GET_CURRENT_CONFIG") {
     if (typeof applyUserStyles === "function") applyUserStyles(msg.config);
@@ -1374,6 +1404,9 @@ async function getMiraEngineConfigFor(feature) {
     "scanConfig",
   ]);
   if (!data) return;
+  if (data.hideOriginalText) {
+    applyHideOriginalState(true);
+  }
   const domain = window.location.hostname.replace("www.", "");
   if (data.targetLanguage) window.currentTargetL = data.targetLanguage;
   const customScanConfig = data.scanConfig?.custom?.[domain];
@@ -2056,24 +2089,24 @@ const TranslationBatcher = {
           // inline 展示，避免破坏基线对齐。
           if (wasTruncated) {
             link.style.cssText = `
-  color: #1d9bf0 !important;
-  display: inline-block !important;
-  max-width: 100% !important;
-  vertical-align: baseline !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  font-size: inherit !important;
-  letter-spacing: -0.2px !important;
-`;
+            color: #1d9bf0 !important;
+            display: inline-block !important;
+            max-width: 100% !important;
+            vertical-align: baseline !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
           } else {
             link.style.cssText = `
-  color: #1d9bf0 !important;
-  display: inline !important;
-  vertical-align: baseline !important;
-  font-size: inherit !important;
-  letter-spacing: -0.2px !important;
-`;
+            color: #1d9bf0 !important;
+            display: inline !important;
+            vertical-align: baseline !important;
+            font-size: inherit !important;
+            letter-spacing: -0.2px !important;
+          `;
           }
         }
         link.removeAttribute("data-mira-link");
@@ -2106,6 +2139,9 @@ const TranslationBatcher = {
     } catch (e) {
       logger.error("[Batcher] 渲染出错:", e);
       if (container && container.parentNode) container.remove();
+    }
+    if (window.__mira_hideOriginalEnabled) {
+      hideOriginalEl(el);
     }
   },
   unlock(el) {
@@ -4299,6 +4335,51 @@ function querySelectorAllDeep(selector, root = document) {
   }
   return nodes;
 }
+
+
+function hideOriginalEl(el) {
+  const childTranslation = el.querySelector(':scope > .kt-paragraph-translation');
+  if (childTranslation) {
+    // 译文是 el 的子节点：把"除译文外的其他内容"包进一个隐藏的 span 挪走
+    // el 本身不加任何隐藏样式，高度会自动收缩成只剩译文的高度，不留空白
+    if (el.querySelector(':scope > [data-mira-orig-wrap]')) return; // 已经处理过，避免重复包裹
+    const wrapper = document.createElement('span');
+    wrapper.setAttribute('data-mira-orig-wrap', 'true');
+    wrapper.style.setProperty('display', 'none', 'important');
+    Array.from(el.childNodes).forEach((n) => {
+      if (n.nodeType === 1 && n.classList.contains('kt-paragraph-translation')) return;
+      wrapper.appendChild(n);
+    });
+    el.insertBefore(wrapper, el.firstChild);
+  } else {
+    // 译文是兄弟节点：整个 el 直接隐藏，零空间占用，译文正常显示
+    el.style.setProperty('display', 'none', 'important');
+  }
+}
+
+function showOriginalEl(el) {
+  const wrapper = el.querySelector(':scope > [data-mira-orig-wrap]');
+  if (wrapper) {
+    while (wrapper.firstChild) {
+      el.insertBefore(wrapper.firstChild, wrapper);
+    }
+    wrapper.remove();
+  }
+  el.style.removeProperty('display');
+}
+
+function applyHideOriginalState(enabled) {
+  window.__mira_hideOriginalEnabled = enabled;
+  const originals = querySelectorAllDeep("[data-translated]");
+  originals.forEach((el) => {
+    if (el.classList.contains("kt-paragraph-translation")) return;
+    if (enabled) {
+      hideOriginalEl(el);
+    } else {
+      showOriginalEl(el);
+    }
+  });
+}
 function resolveActiveSelectors(inputSelectors) {
   if (typeof SiteRules === "undefined") return (inputSelectors || "p").trim();
   const hasSpecificRule = SiteRules.hasRule(location.hostname);
@@ -5084,7 +5165,10 @@ function initSelectionTranslate() {
     shadowHost.setAttribute("data-pinned", "false");
     shadowHost.style.cssText =
       "position:absolute;top:0;left:0;width:0;height:0;z-index:2147483647;pointer-events:none;";
-    document.documentElement.appendChild(shadowHost);
+
+
+    // document.documentElement.appendChild(shadowHost);
+    document.body.appendChild(shadowHost);
 
     const shadow = shadowHost.attachShadow({ mode: "open" });
     shadow.appendChild(buildStyle());
@@ -6615,6 +6699,9 @@ function initSelectionTranslate() {
 
 
   let lastSelectionPos = { clientX: window.innerWidth / 2, clientY: window.innerHeight / 2 };
+  window.addEventListener("contextmenu", (e) => {
+    lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
+  }, true);
 
   async function renderAndShowPopup(
     text,
@@ -6859,7 +6946,143 @@ function initSelectionTranslate() {
         );
       };
     }
+    // ===== Firefox测试 =====
+    // if (!shadow.getElementById("firefox-test-editable")) {
 
+    //   const firefoxTest = document.createElement("div");
+
+    // firefoxTest.id = "firefox-test-editable";
+    // firefoxTest.contentEditable = "true";
+    // firefoxTest.textContent = "abcdef";
+
+    // firefoxTest.style.cssText = `
+    //   position: relative;
+    //   z-index: 1;
+    //   background: white;
+    //   color: black;
+    //   border: 2px solid red;
+    //   padding: 20px;
+    //   font-size: 24px;
+    //   min-width: 300px;
+    //   outline: none;
+    // `;
+
+    // shadow.appendChild(firefoxTest);
+
+    // firefoxTest.addEventListener("keydown", (e) => {
+    //   const selection = window.getSelection();
+
+    //   console.log(
+    //     "[TEST keydown]",
+    //     e.key,
+    //     "activeElement =",
+    //     document.activeElement,
+    //     "shadow.activeElement =",
+    //     shadow.activeElement,
+    //     "selection.anchorNode =",
+    //     selection?.anchorNode,
+    //     "selection.anchorOffset =",
+    //     selection?.anchorOffset,
+    //     "selection.focusNode =",
+    //     selection?.focusNode,
+    //     "selection.focusOffset =",
+    //     selection?.focusOffset
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("beforeinput", (e) => {
+    //   console.log(
+    //     "[TEST beforeinput]",
+    //     "inputType =",
+    //     e.inputType,
+    //     "cancelable =",
+    //     e.cancelable,
+    //     "isTrusted =",
+    //     e.isTrusted,
+    //     "defaultPrevented =",
+    //     e.defaultPrevented
+    //   );
+    // });
+
+    // // ===== 调试事件 =====
+
+    // firefoxTest.addEventListener("keydown", (e) => {
+    //   console.log(
+    //     "[TEST keydown]",
+    //     "key =", e.key,
+    //     "defaultPrevented =", e.defaultPrevented
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("beforeinput", (e) => {
+    //   console.log(
+    //     "[TEST beforeinput]",
+    //     "inputType =", e.inputType,
+    //     "defaultPrevented =", e.defaultPrevented
+    //   );
+    // });
+
+    // firefoxTest.addEventListener("input", () => {
+    //   console.log(
+    //     "[TEST input]",
+    //     firefoxTest.textContent
+    //   );
+    // });
+
+    // // ===== 检查 beforeinput 在各阶段是否被 preventDefault =====
+
+    // shadow.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[SHADOW CAPTURE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   },
+    //   true
+    // );
+
+    // shadow.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[SHADOW BUBBLE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   }
+    // );
+
+    // document.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[DOCUMENT CAPTURE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   },
+    //   true
+    // );
+
+    // document.addEventListener(
+    //   "beforeinput",
+    //   (e) => {
+    //     console.log(
+    //       "[DOCUMENT BUBBLE beforeinput]",
+    //       e.inputType,
+    //       "defaultPrevented =",
+    //       e.defaultPrevented
+    //     );
+    //   }
+    // );
+
+
+    // }
     // 发音 
     shadow.getElementById("p-speak").onclick = (e) => {
       e.stopPropagation();
@@ -7708,7 +7931,32 @@ function initSelectionTranslate() {
 
     requestAnimationFrame(() => { clampPopupToViewport?.(popupEl); });
   }
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!chrome.runtime || !chrome.runtime.id) return;
+    if (msg.action !== "CONTEXT_MENU_TRANSLATE") return;
 
+    if (!msg.text || !msg.text.trim()) {
+      sendResponse({ status: "no-text" });
+      return;
+    }
+    if (!shadowHost) initShadowDOM();
+    const shadow = shadowHost.shadowRoot;
+
+    renderAndShowPopup(
+      msg.text,
+      lastSelectionPos,
+      shadow,
+      window.currentTargetL || getBrowserLang() || "en",
+      null,
+      { manualInput: false }
+    );
+    sendResponse({ status: "success" });
+  });
+
+  //  记录右键点击坐标，供上面的 renderAndShowPopup 定位使用
+  window.addEventListener("contextmenu", (e) => {
+    lastSelectionPos = { clientX: e.clientX, clientY: e.clientY };
+  }, true);
   async function openManualInputPopup() {
     if (!shadowHost) initShadowDOM();
 
@@ -9254,6 +9502,9 @@ function initSelectionTranslate() {
         }
       }
       sendResponse({ status: "ok" });
+    } else if (msg.action === "TOGGLE_HIDE_ORIGINAL") {
+      applyHideOriginalState(!!msg.enabled);
+      sendResponse({ status: "ok" });
     } else if (msg.action === "TRANSLATE_HOVER_WORD") {
       if (typeof forceTranslateWordAtCursor === "function") {
         forceTranslateWordAtCursor(__miraLastMouseX, __miraLastMouseY);
@@ -9274,6 +9525,10 @@ function initSelectionTranslate() {
 //yt
 let fullSubtitleData = [];
 let semanticGroups = [];
+window.ktSegmentDensity = "standard"; // 'compact' | 'standard' | 'loose'
+safeGetStorage(["ktSegmentDensity"]).then((data) => {
+  if (data?.ktSegmentDensity) window.ktSegmentDensity = data.ktSegmentDensity;
+});
 lastSubIndex = -1;
 let lastDataLength = 0;
 let lastSemanticEngine = null;
@@ -9836,14 +10091,109 @@ function injectDownloadButton() {
   btnBilingual.title = '';
   btnBilingual.innerHTML = `⬇ ${t("bilingual", window.uiLanguage)} TXT<span class="kt-tooltip">${t("dlBilingual", window.uiLanguage)}</span>`; //下载双语字幕（含翻译）
   btnBilingual.onclick = () => downloadSubtitles(true);
-
+  const btnSegment = document.createElement("button");
+  btnSegment.id = "kt-segment-btn";
+  btnSegment.className = "kt-dl-btn";
+  btnSegment.innerHTML = `✂️<span dir="auto" class="kt-tooltip">${t("segmentSettings", window.uiLanguage) || "断句密度"}</span>`;
+  btnSegment.onclick = (e) => {
+    e.stopPropagation();
+    toggleSegmentPanel(btnSegment);
+  };
   wrapper.appendChild(btnOriginal);
   wrapper.appendChild(btnBilingual);
+  wrapper.appendChild(btnSegment);
   target.prepend(wrapper);
 }
 
 function removeDownloadButton() {
   document.getElementById("kt-subtitle-download")?.remove();
+}
+
+function toggleSegmentPanel(anchorBtn) {
+  const existing = document.getElementById("kt-segment-panel");
+  if (existing) {
+    existing.remove();
+    return;
+  }
+  const panel = document.createElement("div");
+  panel.id = "kt-segment-panel";
+  panel.style.cssText = `
+    position: fixed; background: rgba(28,28,28,0.92);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px; padding: 6px; display: flex; flex-direction: column;
+    gap: 4px; z-index: 2147483647; min-width: 110px;
+    visibility: hidden;
+  `;
+  const options = [
+    { key: "compact", label: t("segmentCompact", window.uiLanguage) || "紧凑（短句）" },
+    { key: "standard", label: t("segmentStandard", window.uiLanguage) || "标准" },
+    { key: "loose", label: t("segmentLoose", window.uiLanguage) || "宽松（长句）" },
+  ];
+  options.forEach((opt) => {
+    const item = document.createElement("div");
+    item.textContent = opt.label;
+    const isActive = window.ktSegmentDensity === opt.key;
+    item.style.cssText = `
+      padding: 5px 10px; border-radius: 6px; cursor: pointer;
+      color: white; font-size: 12px; white-space: nowrap;
+      background: ${isActive ? "rgba(56,189,248,0.3)" : "transparent"};
+    `;
+    item.onmouseenter = () => { if (window.ktSegmentDensity !== opt.key) item.style.background = "rgba(255,255,255,0.15)"; };
+    item.onmouseleave = () => { item.style.background = window.ktSegmentDensity === opt.key ? "rgba(56,189,248,0.3)" : "transparent"; };
+    item.onclick = () => {
+      window.ktSegmentDensity = opt.key;
+      safeSetStorage({ ktSegmentDensity: opt.key });
+      panel.remove();
+      applySegmentDensityChange();
+    };
+    panel.appendChild(item);
+  });
+
+  document.body.appendChild(panel);
+
+  // 用按钮的实际屏幕坐标定位，出现在按钮正上方
+  const rect = anchorBtn.getBoundingClientRect();
+  const panelWidth = panel.offsetWidth;
+  let left = rect.right - panelWidth;
+  if (left < 10) left = 10;
+  if (left + panelWidth > window.innerWidth - 10) {
+    left = window.innerWidth - 10 - panelWidth;
+  }
+  const top = rect.top - panel.offsetHeight - 8;
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+  panel.style.visibility = "visible";
+
+  const closeOnOutside = (ev) => {
+    if (!panel.contains(ev.target) && ev.target !== anchorBtn) {
+      panel.remove();
+      document.removeEventListener("click", closeOnOutside);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", closeOnOutside), 0);
+}
+
+function applySegmentDensityChange() {
+  if (!fullSubtitleData || fullSubtitleData.length === 0) return;
+  const engine = window.currentConfig?.selectedEngine || getRuntimeDefaultEngine();
+  const isAI = AI_LLM_WHITE_LIST.includes(engine);
+  const srcLang = getVideoSourceLang();
+  const tgtLang = getCurrentLang()?.split("-")[0].toLowerCase();
+  const isSameLang = srcLang && tgtLang && srcLang === tgtLang;
+
+  semanticGroups = mergeToSemantic(fullSubtitleData, isAI, isSameLang);
+  lastSemanticEngine = engine;
+  lastIsSameLang = isSameLang;
+  lastDataLength = fullSubtitleData.length;
+  lastSubIndex = -1; // 强制 syncSubtitleDisplay 重新渲染当前行
+
+  // 断句变了，旧缓存的分段译文和新分段对不上，清掉重新翻译
+  if (typeof fastMemoryCache !== "undefined") fastMemoryCache.clear();
+  if (typeof pendingRequests !== "undefined") pendingRequests.clear();
+
+  if (semanticGroups.length > 0) {
+    setTimeout(() => batchPrefetch(0), 200);
+  }
 }
 //字幕下载功能结束--------
 
@@ -9929,19 +10279,35 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
     window.innerWidth <= 768;
-  const LIMITS = isAI
+  const baseLimits = isAI
     ? {
-      MAX_CHARS: isMobile ? 90 : 150,
-      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
-      PAUSE_GAP: 1.5,
-      FORCE_CUT: isMobile ? 120 : 210,
+      MAX_CHARS: isMobile ? 55 : 90,
+      MIN_CHARS_PAUSE: isMobile ? 30 : 50,
+      PAUSE_GAP: 1.1,
+      FORCE_CUT: isMobile ? 75 : 130,
+      MIN_PUNC_LEN: 35,
+      MIN_PUNC_LEN_CJK: 6,
     }
     : {
-      MAX_CHARS: isMobile ? 75 : 120,
-      MIN_CHARS_PAUSE: isMobile ? 50 : 80,
-      PAUSE_GAP: 1.2,
-      FORCE_CUT: isMobile ? 100 : 180,
+      MAX_CHARS: isMobile ? 45 : 70,
+      MIN_CHARS_PAUSE: isMobile ? 30 : 45,
+      PAUSE_GAP: 0.9,
+      FORCE_CUT: isMobile ? 60 : 100,
+      MIN_PUNC_LEN: 20,
+      MIN_PUNC_LEN_CJK: 6,
     };
+  // compact = 断句更密（短句），loose = 断句更松（长句）
+  const DENSITY_MULTIPLIER =
+    { compact: 0.55, standard: 1, loose: 1.5 }[window.ktSegmentDensity] || 1;
+  const LIMITS = {
+    MAX_CHARS: Math.round(baseLimits.MAX_CHARS * DENSITY_MULTIPLIER),
+    MIN_CHARS_PAUSE: Math.round(baseLimits.MIN_CHARS_PAUSE * DENSITY_MULTIPLIER),
+    PAUSE_GAP: baseLimits.PAUSE_GAP,
+    FORCE_CUT: Math.round(baseLimits.FORCE_CUT * DENSITY_MULTIPLIER),
+    // 设个下限，避免 compact 档把句子切得过碎（尤其中文）
+    MIN_PUNC_LEN: Math.max(15, Math.round(baseLimits.MIN_PUNC_LEN * DENSITY_MULTIPLIER)),
+    MIN_PUNC_LEN_CJK: Math.max(4, Math.round(baseLimits.MIN_PUNC_LEN_CJK * DENSITY_MULTIPLIER)),
+  };
   data.forEach((item, index) => {
     const currentRawText = item.text.replace(/\n/g, " ").trim();
     const startTime = parseFloat(item.start);
@@ -9978,7 +10344,7 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
       shouldBreak = true;
       breakReason = "End of Data";
     } else if (isCJK) {
-      if (/[。？！?!]$/.test(trimmedText) && charCount > 8) {
+      if (/[。？！?!]$/.test(trimmedText) && charCount > LIMITS.MIN_PUNC_LEN_CJK) {
         shouldBreak = true;
         breakReason = "Punc";
       } else if (charCount > LIMITS.FORCE_CUT) {
@@ -10048,10 +10414,10 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
         protectionList.includes(lastWord) ||
         /\b(how|why|what|when|where|who|like|than)\b\s*$/i.test(trimmedText);
       const dynamicPauseGap = isHanging
-        ? LIMITS.PAUSE_GAP * 2
+        ? LIMITS.PAUSE_GAP * 1.4
         : LIMITS.PAUSE_GAP;
       const endsWithSentencePunc = /[.?!]["']?\s*$/.test(trimmedText);
-      const minPuncLen = isAI ? 70 : 40;
+      const minPuncLen = LIMITS.MIN_PUNC_LEN;
       if (endsWithSentencePunc && charCount > minPuncLen && !isHanging) {
         shouldBreak = true;
         breakReason = "Full Sentence";
@@ -10094,6 +10460,7 @@ function mergeToSemantic(data, isAI = false, skipMerge = false) {
   });
   return groups;
 }
+
 if (!document.getElementById("mira-global-style")) {
   const style = document.createElement("style");
   style.id = "mira-global-style";
@@ -10103,7 +10470,7 @@ if (!document.getElementById("mira-global-style")) {
         --kt-origin-color: #f3f4f6;
         --kt-origin-size: 24px;
         --kt-trans-size: 22px;
-        --kt-trans-color: #38bdf8;
+        --kt-trans-color: #38bdf8; 
     }
         .html5-video-player.kt-enabled .ytp-subtitles-player-content,
         .html5-video-player.kt-enabled .caption-window,
@@ -10132,6 +10499,9 @@ if (!document.getElementById("mira-global-style")) {
             opacity: 0;
             transition: opacity 0.2s, visibility 0.2s, transform 0.3s ease-out;
         }
+            #kt-yt-box.kt-hide-original #yt-o {
+        display: none !important;
+      }
         #kt-yt-box:hover, #kt-yt-box.dragging {
             background: rgba(0, 0, 0, 0.8);
             outline: 1px dashed rgba(255, 255, 255, 0.2);
@@ -10155,9 +10525,9 @@ if (!document.getElementById("mira-global-style")) {
             width: 100%;
             line-height: 1.4;
         }
-        .kt-word {
+                .kt-word {
             cursor: pointer;
-            transition: color 0.2s;
+            transition: color 0.2s, opacity 0.18s ease-out;
             display: inline-block;
         }
         .kt-word:hover {
@@ -10485,7 +10855,7 @@ function syncSubtitleDisplay() {
       const sourceLang = __syncSrcLang;
       const isSameLang = __syncIsSameLang;
 
-      if (oEl) renderWords(group.text, oEl, sourceLang, isSameLang);
+      if (oEl) renderWords(group.text, oEl, sourceLang, __syncIsSameLang, __syncIsSameLang ? null : { start: group.start, end: group.end });
 
       if (tEl) {
         const isBatchEngineLocal = isBatchEngine;
@@ -10574,6 +10944,9 @@ function syncSubtitleDisplay() {
         }
       }
     }
+    if (oEl && !__syncIsSameLang) {
+      updateKaraokeColors(oEl, now, group.start, group.end);
+    }
   } else if (currentIndex === -1 && lastSubIndex !== -1) {
     lastSubIndex = -1;
     if (box) {
@@ -10616,7 +10989,7 @@ async function createSubtitleBox(player) {
     player.appendChild(tempHint);
   }
   try {
-    const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings"]);
+    const data = await safeGetStorage(["ytBoxBottom", "ytStyleSettings", "miraHideOriginalYT"]);
     if (!data) return;
     if (data.ytBoxBottom && parseInt(data.ytBoxBottom) > 10) {
       box.style.bottom = data.ytBoxBottom;
@@ -10626,6 +10999,8 @@ async function createSubtitleBox(player) {
     if (data.ytStyleSettings) {
       applySubtitleSettings(data.ytStyleSettings);
     }
+    window.__mira_ytHideOriginal = !!data.miraHideOriginalYT;
+    box.classList.toggle('kt-hide-original', window.__mira_ytHideOriginal);
   } catch (e) {
     if (e.message?.includes("context invalidated")) {
       showUpdateNotice();
@@ -10802,7 +11177,7 @@ function initSettingsAvoidance() {
 setTimeout(initSettingsAvoidance, 2000);
 setTimeout(initSubtitleAvoidance, 2000);
 //卡片
-function renderWords(text, container, sourceLang = null, disableInteraction = false) {
+function renderWords(text, container, sourceLang = null, disableInteraction = false, timing = null) {
   if (!container) return;
   container.innerHTML = "";
 
@@ -10837,21 +11212,50 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
 
   const isCompactStyle = ['ja', 'zh', 'th', 'my', 'km'].some(l => currentLang?.startsWith(l));
 
-  words.forEach((word) => {
+  const useKaraoke = !!(timing && Number.isFinite(timing.start) && Number.isFinite(timing.end) && timing.end > timing.start);
+  const weights = [];
+  let totalWeight = 0;
+  if (useKaraoke) {
+    words.forEach((w) => {
+      const wt = w.trim().length;
+      weights.push(wt);
+      totalWeight += wt;
+    });
+  }
+  let cumWeight = 0;
+
+  words.forEach((word, wIndex) => {
     const trimmed = word.trim();
     const cleanWord = trimmed.replace(
       /[.,\/#!$%\^&\*;:{}=\-_`~()。、？！「」【】『』""''\s]/g,
       ""
     );
 
+    let pStart = 0, pEnd = 0;
+    if (useKaraoke) {
+      pStart = totalWeight > 0 ? cumWeight / totalWeight : 0;
+      cumWeight += weights[wIndex];
+      pEnd = totalWeight > 0 ? cumWeight / totalWeight : 0;
+    }
+
     if (trimmed.length === 0 || cleanWord.length === 0) {
       container.appendChild(document.createTextNode(word));
       return;
     }
 
-    // 同语言场景：只渲染纯文本，不绑定任何 hover/click 交互
+    // 同语言场景：不绑定交互，但仍创建 span 以支持卡拉OK变色
     if (disableInteraction) {
-      container.appendChild(document.createTextNode(word));
+      if (useKaraoke) {
+        const span = document.createElement("span");
+        span.className = "kt-word";
+        span.innerText = word;
+        span.dataset.pStart = pStart;
+        span.dataset.pEnd = pEnd;
+        span.style.opacity = "0.45";
+        container.appendChild(span);
+      } else {
+        container.appendChild(document.createTextNode(word));
+      }
       return;
     }
 
@@ -10860,6 +11264,11 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
     span.innerText = word;
     span.style.display = "inline-block";
     span.style.margin = isCompactStyle ? "0 0.5px" : "0 1px";
+    if (useKaraoke) {
+      span.dataset.pStart = pStart;
+      span.dataset.pEnd = pEnd;
+      span.style.opacity = "0.45";
+    }
 
     if (window.__subtitleWordMap?.[cleanWord.toLowerCase()]) {
       span.style.color = "#facc15";
@@ -10896,6 +11305,26 @@ function renderWords(text, container, sourceLang = null, disableInteraction = fa
     container.appendChild(span);
   });
 }
+
+function updateKaraokeColors(container, currentTime, groupStart, groupEnd) {
+  if (!container) return;
+  const duration = groupEnd - groupStart;
+  if (!(duration > 0)) return;
+  const progress = (currentTime - groupStart) / duration;
+  const spans = container.querySelectorAll('[data-p-start]');
+  spans.forEach((span) => {
+    const pStart = parseFloat(span.dataset.pStart);
+    // 词的中点作为"点亮"临界点，读到这个词一半时整词切换为高亮
+    const pMid = (pStart + parseFloat(span.dataset.pEnd)) / 2;
+    const isSung = progress >= pMid ? "1" : "0";
+
+    if (span.dataset.lastSung === isSung) return;
+    span.dataset.lastSung = isSung;
+    //未点亮颜色
+    span.style.opacity = isSung === "1" ? "1" : "0.7";
+  });
+}
+
 function applySubtitleSettings(settings) {
   const box = document.getElementById("kt-yt-box");
   if (!box) return;

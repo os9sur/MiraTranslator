@@ -1,3 +1,9 @@
+/**
+ * Mira Translator
+ * Copyright (C) 2026 David Bai 
+ * License: AGPL-3.0 (https://github.com/os9sur)
+ * Contact: mira.studio@proton.me
+ */
 const _root = typeof window !== 'undefined' ? window : self;
 _root.browser = _root.msBrowser || _root.browser || _root.chrome;
 self.i18nData = {
@@ -2344,112 +2350,112 @@ self.i18nCacheData = {
   "zh-CN": {
     cacheTitle: "翻译缓存",
     clearBtn: "清除缓存",
-    confirm: "确认清理 {0} 条?",
+    confirmDelCache: "确认清理 {0} 条?",
     clearing: "清理中...",
     completed: "已清空"
   },
   "zh-TW": {
     cacheTitle: "翻譯快取",
     clearBtn: "清除快取",
-    confirm: "確認清理 {0} 條?",
+    confirmDelCache: "確認清理 {0} 條?",
     clearing: "清理中...",
     completed: "已清空"
   },
   "en": {
     cacheTitle: "Cache",
     clearBtn: "Clear",
-    confirm: "Delete {0}?",
+    confirmDelCache: "Delete {0}?",
     clearing: "Clearing...",
     completed: "Cleared"
   },
   "ja": {
     cacheTitle: "キャッシュ",
     clearBtn: "削除",
-    confirm: "{0}件を削除?",
+    confirmDelCache: "{0}件を削除?",
     clearing: "削除中...",
     completed: "完了"
   },
   "ko": {
     cacheTitle: "캐시",
     clearBtn: "정리",
-    confirm: "{0}건 삭제?",
+    confirmDelCache: "{0}건 삭제?",
     clearing: "삭제 중...",
     completed: "완료"
   },
   "es": {
     cacheTitle: "Caché",
     clearBtn: "Borrar",
-    confirm: "¿Borrar {0}?",
+    confirmDelCache: "¿Borrar {0}?",
     clearing: "Borrando...",
     completed: "Borrado"
   },
   "fr": {
     cacheTitle: "Cache",
     clearBtn: "Effacer",
-    confirm: "Effacer {0}?",
+    confirmDelCache: "Effacer {0}?",
     clearing: "Effacement...",
     completed: "Effacé"
   },
   "de": {
     cacheTitle: "Cache",
     clearBtn: "Leeren",
-    confirm: "{0} löschen?",
+    confirmDelCache: "{0} löschen?",
     clearing: "Wird geleert...",
     completed: "Geleert"
   },
   "ru": {
     cacheTitle: "Кэш",
     clearBtn: "Очистить",
-    confirm: "Удалить {0}?",
+    confirmDelCache: "Удалить {0}?",
     clearing: "Очистка...",
     completed: "Готово"
   },
   "pt": {
     cacheTitle: "Cache",
     clearBtn: "Limpar",
-    confirm: "Limpar {0}?",
+    confirmDelCache: "Limpar {0}?",
     clearing: "Limpando...",
     completed: "Limpo"
   },
   "it": {
     cacheTitle: "Cache",
     clearBtn: "Pulisci",
-    confirm: "Elimina {0}?",
+    confirmDelCache: "Elimina {0}?",
     clearing: "Pulizia...",
     completed: "Pulito"
   },
   "vi": {
     cacheTitle: "Bộ nhớ đệm",
     clearBtn: "Xóa",
-    confirm: "Xóa {0} mục?",
+    confirmDelCache: "Xóa {0} mục?",
     clearing: "Đang xóa...",
     completed: "Đã xóa"
   },
   "th": {
     cacheTitle: "แคช",
     clearBtn: "ล้าง",
-    confirm: "ลบ {0} รายการ?",
+    confirmDelCache: "ลบ {0} รายการ?",
     clearing: "กำลังล้าง...",
     completed: "ล้างแล้ว"
   },
   "ar": {
     cacheTitle: "التخزين المؤقت",
     clearBtn: "مسح",
-    confirm: "مسح {0}؟",
+    confirmDelCache: "مسح {0}؟",
     clearing: "جارٍ المسح...",
     completed: "تم"
   },
   "fa": {
     cacheTitle: "کش",
     clearBtn: "پاکسازی",
-    confirm: "پاکسازی {0}؟",
+    confirmDelCache: "پاکسازی {0}؟",
     clearing: "در حال پاکسازی...",
     completed: "انجام شد"
   },
   "tr": {
     cacheTitle: "Önbellek",
     clearBtn: "Temizle",
-    confirm: "{0} öğeyi sil?",
+    confirmDelCache: "{0} öğeyi sil?",
     clearing: "Temizleniyor...",
     completed: "Silindi"
   }
@@ -2675,7 +2681,14 @@ self.i18nAttach3 = {
     highlightVocab: "在网页高亮生词",
     toggleKatakana: "点击切换片假名",
     pagination: "第 {current} / {total} 页",
-    goPlaceholder: "跳转..."
+    goPlaceholder: "跳转...",
+    contextMenuTrans: "右键菜单翻译",
+    contextMenuSelectionHint: "选中文字时显示“翻译选中内容”",
+    contextMenuPageHint: "右键空白处显示“翻译此网页”",
+    showBilingual: "显示双语对照",
+    showTranslationOnly: "仅显示译文",
+    translateSelectedText: "翻译选中内容",
+    translateThisPage: "翻译此网页"
   },
   "zh-TW": {
     note: "備註",
@@ -2683,7 +2696,14 @@ self.i18nAttach3 = {
     highlightVocab: "在網頁上標示生字",
     toggleKatakana: "點擊切換片假名",
     pagination: "第 {current} / {total} 頁",
-    goPlaceholder: "跳轉..."
+    goPlaceholder: "跳轉...",
+    contextMenuTrans: "右鍵選單翻譯",
+    contextMenuSelectionHint: "選取文字時顯示「翻譯選取內容」",
+    contextMenuPageHint: "在空白處按右鍵時顯示「翻譯此網頁」",
+    showBilingual: "顯示雙語對照",
+    showTranslationOnly: "僅顯示譯文",
+    translateSelectedText: "翻譯選取內容",
+    translateThisPage: "翻譯此網頁"
   },
   "en": {
     note: "Note",
@@ -2691,7 +2711,14 @@ self.i18nAttach3 = {
     highlightVocab: "Highlight words on page",
     toggleKatakana: "Click to toggle Katakana",
     pagination: "Page {current} / {total}",
-    goPlaceholder: "Go..."
+    goPlaceholder: "Go...",
+    contextMenuTrans: "Translate via context menu",
+    contextMenuSelectionHint: "Show “Translate selected text” when text is selected",
+    contextMenuPageHint: "Show “Translate this page” when right-clicking on a blank area",
+    showBilingual: "Show bilingual text",
+    showTranslationOnly: "Show translation only",
+    translateSelectedText: "Translate selected text",
+    translateThisPage: "Translate this page"
   },
   "ja": {
     note: "メモ",
@@ -2699,7 +2726,14 @@ self.i18nAttach3 = {
     highlightVocab: "ページ上で単語を強調",
     toggleKatakana: "クリックでカタカナに切り替え",
     pagination: "{current} / {total} ページ",
-    goPlaceholder: "移動..."
+    goPlaceholder: "移動...",
+    contextMenuTrans: "右クリックメニューから翻訳",
+    contextMenuSelectionHint: "文字を選択すると「選択範囲を翻訳」を表示",
+    contextMenuPageHint: "空白部分を右クリックすると「このページを翻訳」を表示",
+    showBilingual: "対訳を表示",
+    showTranslationOnly: "訳文のみ表示",
+    translateSelectedText: "選択範囲を翻訳",
+    translateThisPage: "このページを翻訳"
   },
   "ko": {
     note: "메모",
@@ -2707,7 +2741,14 @@ self.i18nAttach3 = {
     highlightVocab: "페이지에서 단어 강조",
     toggleKatakana: "클릭하여 가타카나로 전환",
     pagination: "{current} / {total} 페이지",
-    goPlaceholder: "이동..."
+    goPlaceholder: "이동...",
+    contextMenuTrans: "마우스 오른쪽 버튼 메뉴로 번역",
+    contextMenuSelectionHint: "텍스트를 선택하면 ‘선택한 내용 번역’ 표시",
+    contextMenuPageHint: "빈 곳을 마우스 오른쪽 버튼으로 클릭하면 ‘이 페이지 번역’ 표시",
+    showBilingual: "원문과 번역문 함께 보기",
+    showTranslationOnly: "번역문만 보기",
+    translateSelectedText: "선택한 텍스트 번역",
+    translateThisPage: "이 페이지 번역"
   },
   "es": {
     note: "Nota",
@@ -2715,23 +2756,44 @@ self.i18nAttach3 = {
     highlightVocab: "Resaltar en la página",
     toggleKatakana: "Haz clic para cambiar a Katakana",
     pagination: "Pág. {current} / {total}",
-    goPlaceholder: "Ir..."
+    goPlaceholder: "Ir...",
+    contextMenuTrans: "Traducir desde el menú contextual",
+    contextMenuSelectionHint: "Mostrar «Traducir texto seleccionado» al seleccionar texto",
+    contextMenuPageHint: "Mostrar «Traducir esta página» al hacer clic derecho en un área vacía",
+    showBilingual: "Mostrar texto bilingüe",
+    showTranslationOnly: "Mostrar solo la traducción",
+    translateSelectedText: "Traducir el texto seleccionado",
+    translateThisPage: "Traducir esta página"
   },
   "fr": {
     note: "Note",
-    notePlaceholder: "ex: TOEFL/Contexte...",
+    notePlaceholder: "ex. : TOEFL/Contexte...",
     highlightVocab: "Surligner sur la page",
-    toggleKatakana: "Cliquez pour basculer en katakana",
+    toggleKatakana: "Cliquez pour passer au katakana",
     pagination: "Page {current} / {total}",
-    goPlaceholder: "Aller..."
+    goPlaceholder: "Aller...",
+    contextMenuTrans: "Traduire depuis le menu contextuel",
+    contextMenuSelectionHint: "Afficher « Traduire le texte sélectionné » lors de la sélection de texte",
+    contextMenuPageHint: "Afficher « Traduire cette page » en cliquant avec le bouton droit sur une zone vide",
+    showBilingual: "Afficher le texte bilingue",
+    showTranslationOnly: "Afficher uniquement la traduction",
+    translateSelectedText: "Traduire le texte sélectionné",
+    translateThisPage: "Traduire cette page"
   },
   "de": {
     note: "Notiz",
-    notePlaceholder: "z.B. TOEFL/Kontext...",
+    notePlaceholder: "z. B. TOEFL/Kontext...",
     highlightVocab: "Auf Seite hervorheben",
     toggleKatakana: "Klicken, um zu Katakana zu wechseln",
     pagination: "Seite {current} / {total}",
-    goPlaceholder: "Gehe zu..."
+    goPlaceholder: "Gehe zu...",
+    contextMenuTrans: "Über das Kontextmenü übersetzen",
+    contextMenuSelectionHint: "„Ausgewählten Text übersetzen“ anzeigen, wenn Text markiert ist",
+    contextMenuPageHint: "„Diese Seite übersetzen“ anzeigen, wenn auf einen leeren Bereich rechtsgeklickt wird",
+    showBilingual: "Original und Übersetzung anzeigen",
+    showTranslationOnly: "Nur Übersetzung anzeigen",
+    translateSelectedText: "Ausgewählten Text übersetzen",
+    translateThisPage: "Diese Seite übersetzen"
   },
   "ru": {
     note: "Заметка",
@@ -2739,23 +2801,44 @@ self.i18nAttach3 = {
     highlightVocab: "Выделить на странице",
     toggleKatakana: "Нажмите, чтобы переключить на катакану",
     pagination: "Стр. {current} / {total}",
-    goPlaceholder: "Перейти..."
+    goPlaceholder: "Перейти...",
+    contextMenuTrans: "Перевод через контекстное меню",
+    contextMenuSelectionHint: "Показывать «Перевести выделенный текст» при выделении текста",
+    contextMenuPageHint: "Показывать «Перевести эту страницу» при щелчке правой кнопкой по пустому месту",
+    showBilingual: "Показывать оригинал и перевод",
+    showTranslationOnly: "Показывать только перевод",
+    translateSelectedText: "Перевести выделенный текст",
+    translateThisPage: "Перевести эту страницу"
   },
   "pt": {
     note: "Nota",
-    notePlaceholder: "ex: TOEFL/Contexto...",
+    notePlaceholder: "ex.: TOEFL/Contexto...",
     highlightVocab: "Destacar na página",
     toggleKatakana: "Clique para alternar para Katakana",
     pagination: "Pág. {current} / {total}",
-    goPlaceholder: "Ir..."
+    goPlaceholder: "Ir...",
+    contextMenuTrans: "Traduzir pelo menu de contexto",
+    contextMenuSelectionHint: "Mostrar “Traduzir texto selecionado” ao selecionar um texto",
+    contextMenuPageHint: "Mostrar “Traduzir esta página” ao clicar com o botão direito em uma área vazia",
+    showBilingual: "Mostrar texto bilíngue",
+    showTranslationOnly: "Mostrar apenas a tradução",
+    translateSelectedText: "Traduzir texto selecionado",
+    translateThisPage: "Traduzir esta página"
   },
   "it": {
     note: "Nota",
     notePlaceholder: "es. TOEFL/Contesto...",
     highlightVocab: "Evidenzia nella pagina",
-    toggleKatakana: "Clicca per passare a Katakana",
+    toggleKatakana: "Clicca per passare al Katakana",
     pagination: "Pag. {current} / {total}",
-    goPlaceholder: "Vai..."
+    goPlaceholder: "Vai...",
+    contextMenuTrans: "Traduci dal menu contestuale",
+    contextMenuSelectionHint: "Mostra «Traduci testo selezionato» quando selezioni del testo",
+    contextMenuPageHint: "Mostra «Traduci questa pagina» facendo clic con il tasto destro su un'area vuota",
+    showBilingual: "Mostra testo bilingue",
+    showTranslationOnly: "Mostra solo la traduzione",
+    translateSelectedText: "Traduci il testo selezionato",
+    translateThisPage: "Traduci questa pagina"
   },
   "vi": {
     note: "Ghi chú",
@@ -2763,7 +2846,14 @@ self.i18nAttach3 = {
     highlightVocab: "Làm nổi bật từ vựng",
     toggleKatakana: "Nhấp để chuyển sang Katakana",
     pagination: "Trang {current} / {total}",
-    goPlaceholder: "Đi đến..."
+    goPlaceholder: "Đi đến...",
+    contextMenuTrans: "Dịch bằng menu chuột phải",
+    contextMenuSelectionHint: "Hiển thị “Dịch phần văn bản đã chọn” khi chọn văn bản",
+    contextMenuPageHint: "Hiển thị “Dịch trang này” khi nhấp chuột phải vào vùng trống",
+    showBilingual: "Hiển thị song ngữ",
+    showTranslationOnly: "Chỉ hiển thị bản dịch",
+    translateSelectedText: "Dịch văn bản đã chọn",
+    translateThisPage: "Dịch trang này"
   },
   "th": {
     note: "บันทึก",
@@ -2771,23 +2861,44 @@ self.i18nAttach3 = {
     highlightVocab: "เน้นคำบนหน้าเว็บ",
     toggleKatakana: "คลิกเพื่อสลับเป็นคาตาคานะ",
     pagination: "หน้า {current} / {total}",
-    goPlaceholder: "ไปที่..."
+    goPlaceholder: "ไปที่...",
+    contextMenuTrans: "แปลผ่านเมนูคลิกขวา",
+    contextMenuSelectionHint: "แสดง “แปลข้อความที่เลือก” เมื่อเลือกข้อความ",
+    contextMenuPageHint: "แสดง “แปลหน้านี้” เมื่อคลิกขวาบริเวณพื้นที่ว่าง",
+    showBilingual: "แสดงต้นฉบับและคำแปล",
+    showTranslationOnly: "แสดงเฉพาะคำแปล",
+    translateSelectedText: "แปลข้อความที่เลือก",
+    translateThisPage: "แปลหน้านี้"
   },
   "ar": {
     note: "ملاحظة",
     notePlaceholder: "مثال: TOEFL/سياق...",
-    highlightVocab: "تمييز على الصفحة",
+    highlightVocab: "تمييز الكلمات في الصفحة",
     toggleKatakana: "انقر للتبديل إلى الكاتاكانا",
-    pagination: "{total} / {current} صفحة ",
-    goPlaceholder: "اذهب..."
+    pagination: "الصفحة {current} / {total}",
+    goPlaceholder: "انتقال...",
+    contextMenuTrans: "الترجمة من قائمة النقر بزر الماوس الأيمن",
+    contextMenuSelectionHint: "إظهار «ترجمة النص المحدد» عند تحديد نص",
+    contextMenuPageHint: "إظهار «ترجمة هذه الصفحة» عند النقر بزر الماوس الأيمن على مساحة فارغة",
+    showBilingual: "عرض النص باللغتين",
+    showTranslationOnly: "عرض الترجمة فقط",
+    translateSelectedText: "ترجمة النص المحدد",
+    translateThisPage: "ترجمة هذه الصفحة"
   },
   "fa": {
     note: "یادداشت",
     notePlaceholder: "مثال: TOEFL/زمینه...",
-    highlightVocab: "برجسته در صفحه",
+    highlightVocab: "برجسته کردن کلمات در صفحه",
     toggleKatakana: "برای تغییر به کاتاکانا کلیک کنید",
-    pagination: "{total} / {current} صفحه",
-    goPlaceholder: "برو..."
+    pagination: "صفحه {current} / {total}",
+    goPlaceholder: "برو...",
+    contextMenuTrans: "ترجمه از طریق منوی راست‌کلیک",
+    contextMenuSelectionHint: "هنگام انتخاب متن، «ترجمه متن انتخاب‌شده» نمایش داده شود",
+    contextMenuPageHint: "با راست‌کلیک روی قسمت خالی، «ترجمه این صفحه» نمایش داده شود",
+    showBilingual: "نمایش متن دوزبانه",
+    showTranslationOnly: "فقط نمایش ترجمه",
+    translateSelectedText: "ترجمه متن انتخاب‌شده",
+    translateThisPage: "ترجمه این صفحه"
   },
   "tr": {
     note: "Not",
@@ -2795,7 +2906,14 @@ self.i18nAttach3 = {
     highlightVocab: "Sayfada vurgula",
     toggleKatakana: "Katakana'ya geçmek için tıklayın",
     pagination: "Sayfa {current} / {total}",
-    goPlaceholder: "Git..."
+    goPlaceholder: "Git...",
+    contextMenuTrans: "Bağlam menüsünden çevir",
+    contextMenuSelectionHint: "Metin seçildiğinde “Seçili metni çevir” seçeneğini göster",
+    contextMenuPageHint: "Boş bir alana sağ tıklandığında “Bu sayfayı çevir” seçeneğini göster",
+    showBilingual: "İki dilli metni göster",
+    showTranslationOnly: "Yalnızca çeviriyi göster",
+    translateSelectedText: "Seçili metni çevir",
+    translateThisPage: "Bu sayfayı çevir"
   }
 };
 self.i18nAttach4 = {
@@ -3272,120 +3390,363 @@ self.i18nAttach7 = {
     "common.toggleVisibility": "نمایش/پنهان"
   }
 };
+
 self.i18nAttach8 = {
+
   "zh_CN": {
+
     "smartPickerHint": "⚠ 提示：由于网页限制，部分区域可能无法识别",
+
     "loadingMore": "正在加载更多...",
+
     "loadingSlow": "接口响应速度较慢",
+
     "retry": "重试",
-    "loadingSubtitles": "正在加载字幕..."
+
+    "loadingSubtitles": "正在加载字幕...",
+
+    "segmentSettings": "断句设置",
+
+    "segmentCompact": "紧凑",
+
+    "segmentStandard": "标准",
+
+    "segmentLoose": "宽松"
+
   },
+
   "zh_TW": {
+
     "smartPickerHint": "⚠ 提示：由於網頁限制，部分區域可能無法識別",
+
     "loadingMore": "正在載入更多...",
+
     "loadingSlow": "介面響應速度較慢",
+
     "retry": "重試",
-    "loadingSubtitles": "正在載入字幕..."
+
+    "loadingSubtitles": "正在載入字幕...",
+
+    "segmentSettings": "斷句設定",
+
+    "segmentCompact": "緊湊",
+
+    "segmentStandard": "標準",
+
+    "segmentLoose": "寬鬆"
+
   },
+
   "en": {
+
     "smartPickerHint": "⚠ Note: Some areas may be restricted by the web page",
+
     "loadingMore": "Loading more...",
+
     "loadingSlow": "Interface is responding slowly",
+
     "retry": "Retry",
-    "loadingSubtitles": "Loading subtitles..."
+
+    "loadingSubtitles": "Loading subtitles...",
+
+    "segmentSettings": "Segmentation",
+
+    "segmentCompact": "Compact",
+
+    "segmentStandard": "Standard",
+
+    "segmentLoose": "Loose"
+
   },
+
   "ja": {
+
     "smartPickerHint": "⚠ 注：ページの制限により選択できない場合があります",
+
     "loadingMore": "さらに読み込んでいます...",
+
     "loadingSlow": "応答に時間がかかっています",
+
     "retry": "再試行",
-    "loadingSubtitles": "字幕を読み込んでいます..."
+
+    "loadingSubtitles": "字幕を読み込んでいます...",
+
+    "segmentSettings": "分割設定",
+
+    "segmentCompact": "コンパクト",
+
+    "segmentStandard": "標準",
+
+    "segmentLoose": "ゆったり"
+
   },
+
   "ko": {
+
     "smartPickerHint": "⚠ 참고: 웹페이지 제한으로 인해 일부 선택이 불가할 수 있습니다",
+
     "loadingMore": "더 불러오는 중...",
+
     "loadingSlow": "응답이 지연되고 있습니다",
+
     "retry": "재시도",
-    "loadingSubtitles": "자막을 불러오는 중..."
+
+    "loadingSubtitles": "자막을 불러오는 중...",
+
+    "segmentSettings": "분할 설정",
+
+    "segmentCompact": "간결하게",
+
+    "segmentStandard": "표준",
+
+    "segmentLoose": "여유 있게"
+
   },
+
   "fr": {
+
     "smartPickerHint": "⚠ Note : Certaines zones sont restreintes par la page web",
+
     "loadingMore": "Chargement en cours...",
+
     "loadingSlow": "La réponse est lente",
+
     "retry": "Réessayer",
-    "loadingSubtitles": "Chargement des sous-titres..."
+
+    "loadingSubtitles": "Chargement des sous-titres...",
+
+    "segmentSettings": "Paramètres de segmentation",
+
+    "segmentCompact": "Compact",
+
+    "segmentStandard": "Standard",
+
+    "segmentLoose": "Espacé"
+
   },
+
   "de": {
+
     "smartPickerHint": "⚠ Hinweis: Einige Bereiche sind seitenbedingt nicht wählbar",
+
     "loadingMore": "Wird geladen...",
-    "loadingSlow": "Langsamer Server-Antwort",
+
+    "loadingSlow": "Langsame Serverantwort",
+
     "retry": "Wiederholen",
-    "loadingSubtitles": "Untertitel werden geladen..."
+
+    "loadingSubtitles": "Untertitel werden geladen...",
+
+    "segmentSettings": "Segmentierung",
+
+    "segmentCompact": "Kompakt",
+
+    "segmentStandard": "Standard",
+
+    "segmentLoose": "Locker"
+
   },
+
   "es": {
+
     "smartPickerHint": "⚠ Nota: Algunas áreas están restringidas por la página",
+
     "loadingMore": "Cargando más...",
+
     "loadingSlow": "La respuesta es lenta",
+
     "retry": "Reintentar",
-    "loadingSubtitles": "Cargando subtítulos..."
+
+    "loadingSubtitles": "Cargando subtítulos...",
+
+    "segmentSettings": "Configuración de segmentación",
+
+    "segmentCompact": "Compacta",
+
+    "segmentStandard": "Estándar",
+
+    "segmentLoose": "Espaciada"
+
   },
+
   "it": {
+
     "smartPickerHint": "⚠ Nota: Alcune aree sono limitate dalla pagina web",
+
     "loadingMore": "Caricamento in corso...",
+
     "loadingSlow": "Risposta del server lenta",
+
     "retry": "Riprova",
-    "loadingSubtitles": "Caricamento dei sottotitoli..."
+
+    "loadingSubtitles": "Caricamento dei sottotitoli...",
+
+    "segmentSettings": "Impostazioni di segmentazione",
+
+    "segmentCompact": "Compatta",
+
+    "segmentStandard": "Standard",
+
+    "segmentLoose": "Ampia"
+
   },
+
   "ru": {
+
     "smartPickerHint": "⚠ Прим.: Некоторые области могут быть недоступны",
+
     "loadingMore": "Загрузка...",
+
     "loadingSlow": "Низкая скорость ответа",
+
     "retry": "Повторить",
-    "loadingSubtitles": "Загрузка субтитров..."
+
+    "loadingSubtitles": "Загрузка субтитров...",
+
+    "segmentSettings": "Настройки сегментации",
+
+    "segmentCompact": "Компактная",
+
+    "segmentStandard": "Стандартная",
+
+    "segmentLoose": "Свободная"
+
   },
+
   "pt": {
+
     "smartPickerHint": "⚠ Nota: Algumas áreas podem estar restritas pela página",
+
     "loadingMore": "Carregando mais...",
+
     "loadingSlow": "Resposta lenta do servidor",
+
     "retry": "Repetir",
-    "loadingSubtitles": "Carregando legendas..."
+
+    "loadingSubtitles": "Carregando legendas...",
+
+    "segmentSettings": "Configurações de segmentação",
+
+    "segmentCompact": "Compacta",
+
+    "segmentStandard": "Padrão",
+
+    "segmentLoose": "Espaçada"
+
   },
+
   "vi": {
+
     "smartPickerHint": "⚠ Lưu ý: Một số vùng có thể bị hạn chế do trang web",
+
     "loadingMore": "Đang tải thêm...",
+
     "loadingSlow": "Phản hồi chậm",
+
     "retry": "Thử lại",
-    "loadingSubtitles": "Đang tải phụ đề..."
+
+    "loadingSubtitles": "Đang tải phụ đề...",
+
+    "segmentSettings": "Cài đặt phân đoạn",
+
+    "segmentCompact": "Gọn",
+
+    "segmentStandard": "Tiêu chuẩn",
+
+    "segmentLoose": "Thoáng"
+
   },
+
   "th": {
+
     "smartPickerHint": "⚠ หมายเหตุ: พื้นที่บางส่วนอาจถูกจำกัดโดยหน้าเว็บ",
+
     "loadingMore": "กำลังโหลดเพิ่มเติม...",
+
     "loadingSlow": "การตอบสนองช้า",
+
     "retry": "ลองใหม่",
-    "loadingSubtitles": "กำลังโหลดซับไตเติ้ล..."
+
+    "loadingSubtitles": "กำลังโหลดซับไตเติ้ล...",
+
+    "segmentSettings": "การตั้งค่าการแบ่งส่วน",
+
+    "segmentCompact": "กระชับ",
+
+    "segmentStandard": "มาตรฐาน",
+
+    "segmentLoose": "โปร่ง"
+
   },
+
   "tr": {
+
     "smartPickerHint": "⚠ Not: Bazı alanlar sayfa kısıtlamaları nedeniyle seçilemeyebilir",
+
     "loadingMore": "Daha fazla yükleniyor...",
+
     "loadingSlow": "Yanıt hızı yavaş",
+
     "retry": "Tekrar dene",
-    "loadingSubtitles": "Altyazılar yükleniyor..."
+
+    "loadingSubtitles": "Altyazılar yükleniyor...",
+
+    "segmentSettings": "Bölümlendirme ayarları",
+
+    "segmentCompact": "Sıkı",
+
+    "segmentStandard": "Standart",
+
+    "segmentLoose": "Geniş"
+
   },
+
   "ar": {
+
     "smartPickerHint": "⚠ ملاحظة: قد تكون بعض المناطق مقيدة بسبب صفحة الويب",
+
     "loadingMore": "جاري تحميل المزيد...",
+
     "loadingSlow": "الاستجابة بطيئة",
+
     "retry": "إعادة المحاولة",
-    "loadingSubtitles": "جاري تحميل الترجمة..."
+
+    "loadingSubtitles": "جاري تحميل الترجمة...",
+
+    "segmentSettings": "إعدادات التقسيم",
+
+    "segmentCompact": "متقارب",
+
+    "segmentStandard": "قياسي",
+
+    "segmentLoose": "متباعد"
+
   },
+
   "fa": {
+
     "smartPickerHint": "⚠ توجه: برخی نواحی ممکن است به دلیل محدودیت صفحه محدود شده باشند",
+
     "loadingMore": "در حال بارگذاری...",
+
     "loadingSlow": "سرعت پاسخگویی کم است",
+
     "retry": "تلاش مجدد",
-    "loadingSubtitles": "در حال بارگذاری زیرنویس..."
+
+    "loadingSubtitles": "در حال بارگذاری زیرنویس...",
+
+    "segmentSettings": "تنظیمات بخش‌بندی",
+
+    "segmentCompact": "فشرده",
+
+    "segmentStandard": "استاندارد",
+
+    "segmentLoose": "باز"
+
   }
+
 };
+
 
 self.i18nAttach10 = {
   "zh-CN": {
@@ -3804,7 +4165,7 @@ self.i18nAttach12 = {
     💡 **AI 翻译性能说明：** AI 翻译效果更自然，但由于模型逐字生成的机制，速度比 Google、Bing 等传统引擎慢，此为正常现象。 
     💰 **提示：** AI 翻译并非模型越新越好。翻译任务并不需要复杂推理，主流模型已能完全胜任，最新模型的价格往往高出数倍。 
     ❤️ **关于项目：**  {0} 这是一个追求极致轻量的开源翻译项目（仅约300kb），最初是为了满足我个人的翻译需求而独立开发，因此在交互设计上可能带有较强的个人习惯。 
-    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。因个人维护精力有限，无法保证完美兼容全网所有特定网站，后续的更新维护亦无法做到即时响应。感谢理解。`,
+    ⚠️ **注意：** 本工具默认内置基础的免费翻译引擎，**不额外提供免费的高级 AI 翻译额度及服务**。`,
   },
   "zh-TW": {
     builtInNoticeBody: `⬆ 此功能透過公開網路請求實現，僅供個人學習與非商業用途使用，無需設定金鑰。 
