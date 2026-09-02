@@ -1,7 +1,10 @@
 /**
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
  */
 
@@ -2134,7 +2137,12 @@ const TranslationBatcher = {
       if (typeof applyUserStyles === "function") {
         // 从 container 上读取之前存的字体大小
         const savedFontSize = container.dataset.inheritFontSize || null;
-        applyUserStyles(container, null, savedFontSize);
+        const stylePromise = applyUserStyles(container, null, savedFontSize);
+        if (savedFontSize && stylePromise?.then) {
+          stylePromise.then(() => {
+            container.style.setProperty("font-size", savedFontSize, "important");
+          });
+        }
       }
     } catch (e) {
       logger.error("[Batcher] 渲染出错:", e);
@@ -5353,8 +5361,12 @@ function initSelectionTranslate() {
 
       /* ── 光晕动画 ── */
       @keyframes eclipseHalo {
-        0%,100% { box-shadow: 0 0 8px 2px rgba(56,189,248,0.25), 0 0 20px 4px rgba(124,222,255,0.15), 0 0 35px 6px rgba(186,230,253,0.08), 0 10px 30px var(--p-shadow); }
-        50%     { box-shadow: 0 0 15px 4px rgba(56,189,248,0.5), 0 0 30px 8px rgba(124,222,255,0.3), 0 0 50px 12px rgba(186,230,253,0.15), 0 0 80px 20px rgba(219,239,255,0.05), 0 10px 30px var(--p-shadow); }
+        0%, 50%, 100% { 
+            box-shadow: inset 0 0 6px 1.5px rgba(255,255,255,0.25),
+                        0 0 15px 4px rgba(255,255,255,0.35),
+                        0 0 35px 8px rgba(240,245,255,0.18),
+                        0 10px 30px var(--p-shadow);
+        }
       }
       @keyframes eclipseHaloLightWarm {
         0%,100% { box-shadow: 0 0 8px 2px rgba(245,158,11,0.3), 0 0 20px 4px rgba(251,191,36,0.25), 0 0 35px 6px rgba(253,230,138,0.2), 0 10px 30px var(--p-shadow); }

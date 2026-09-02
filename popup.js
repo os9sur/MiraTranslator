@@ -1,9 +1,13 @@
 /**
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
  */
+
 if (typeof chrome.identity === 'undefined') {
   chrome.identity = {
     getRedirectURL: () => '',
@@ -3444,7 +3448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentModel = window._popupCurrentModel;
 
     const colors = {
-      bg: "rgba(18,18,18,0.85)",
+      bg: "rgb(38 32 32 / 85%)",
       border: "rgba(255,255,255,0.27)",
       shadow: "rgb(184 178 178 / 60%) 0px 8px 24px",
       text: "#ffffffb7",
@@ -3783,5 +3787,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     openExternalLink('https://github.com/os9sur/MiraTranslator/issues');
   });
+  
 
 });

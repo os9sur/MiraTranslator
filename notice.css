@@ -1,7 +1,10 @@
 /**
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
  */
 
@@ -54,11 +57,11 @@
     left: 0;
     right: 0;
     z-index: 50;
-    margin-top: 4px; 
-    background: #1e293b !important; 
+    margin-top: 4px;
+    background: #282a2f !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5) !important;
-    padding: 10px 12px;  
+    box-shadow: 0 12px 24px rgb(191 191 191 / 50%) !important;
+    padding: 10px 12px;
     border-radius: 5px 8px 18px 18px;
     font-size: 12px;
     line-height: 1.6;

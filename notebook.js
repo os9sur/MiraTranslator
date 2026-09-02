@@ -1,7 +1,10 @@
 /**
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
  */
 
@@ -69,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const thumb = document.getElementById('highlightThumb');
 
   const updateToggleUI = (enabled) => {
-    toggle.style.background = enabled ? '#48f838c9' : '#334155';
+    toggle.style.background = enabled ? '#48f8389a' : '#334155';
     thumb.style.left = enabled ? '18px' : '2px';
   };
 

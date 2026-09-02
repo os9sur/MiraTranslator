@@ -1,7 +1,10 @@
 /**
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
  */
 
@@ -423,7 +426,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h2 dir="auto" style="margin:0">${displayAlias}</h2>
             </div>
             <div class="form-container">
-                <div class="built-in-notice" dir="auto" style="border:1px dashed #30363d;padding:20px;border-radius:8px;margin-top:10px;">
+                <div class="built-in-notice" dir="auto" style="border:1px dashed #57595b;padding:20px;border-radius:8px;margin-top:10px;">
                     
                     <div style="max-height: 460px;cursor: default; overflow-y: auto; padding-right: 5px;">
                         ${noticeLines}

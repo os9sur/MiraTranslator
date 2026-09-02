@@ -1,9 +1,13 @@
 <!--
+ **
  * Mira Translator
- * Copyright (C) 2026 David Bai 
- * License: AGPL-3.0 (https://github.com/os9sur)
+ * Copyright (C) 2026 David Bai
+ * Licensed under a custom Source-Available License.
+ * Unauthorized modification, redistribution, or rebranding is
+ * prohibited. See LICENSE file or:
+ * https://github.com/os9sur/MiraTranslator/blob/main/LICENSE
  * Contact: mira.studio@proton.me
- */
+ *
 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -15,10 +19,13 @@
   <title>Mira Translator</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="notice.css">
-  <style>
+<style>
     html {
       padding-right: 0px;
-      margin-right: 0px;
+      margin-right: 0px; 
+      box-shadow: 
+    inset 0 0 15px rgba(255, 255, 255, 0.04),
+    inset 0 0 30px rgba(10, 132, 255, 0.02);
     }
 
     body {
@@ -33,8 +40,8 @@
       box-sizing: border-box;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 14px;
-      background: #181818;
-      color: #e5e7eb;
+      background: #1c1c1e;
+      color: #f5f5f7;
       display: flex;
       flex-direction: column;
       scrollbar-gutter: stable;
@@ -45,13 +52,13 @@
     }
 
     .footer-link {
-      color: #a9a1a1c4;
+      color: #98989Dc4;
       text-decoration: none;
       transition: color 0.2s;
     }
 
     .footer-link:hover {
-      color: #cccccc;
+      color: #d1d1d6;
     }
 
     @supports (-moz-appearance:none) {
@@ -65,7 +72,7 @@
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      background: #555;
+      background: #3A3A3C;
       color: #fff;
       font-size: 10px;
       text-align: center;
@@ -77,15 +84,15 @@
 
     @keyframes mira-pulse {
       0% {
-        box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.35), 0 0 6px 2px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 3px 1px rgba(10, 132, 255, 0.35), 0 0 6px 2px rgba(10, 132, 255, 0.15);
       }
 
       50% {
-        box-shadow: 0 0 4px 2px rgba(59, 130, 246, 0.45), 0 0 8px 3px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 4px 2px rgba(10, 132, 255, 0.45), 0 0 8px 3px rgba(10, 132, 255, 0.2);
       }
 
       100% {
-        box-shadow: 0 0 3px 1px rgba(59, 130, 246, 0.35), 0 0 6px 2px rgba(59, 130, 246, 0.15);
+        box-shadow: 0 0 3px 1px rgba(10, 132, 255, 0.35), 0 0 6px 2px rgba(10, 132, 255, 0.15);
       }
     }
 
@@ -117,20 +124,20 @@
       padding: 6px;
       font-size: 11px;
       cursor: pointer;
-      color: #94a3b8;
+      color: #98989D;
       border-radius: 28px;
       transition: background 0.3s ease, color 0.3s ease;
     }
 
     .style-tab.active {
-      background: #38bdf8;
-      color: #020617;
+      background: #0A84FF;
+      color: #fff;
       font-weight: bold;
     }
 
     .style-tab:not(.active):hover {
-      background: rgba(56, 189, 248, 0.15);
-      color: #38bdf8;
+      background: rgba(10, 132, 255, 0.15);
+      color: #0A84FF;
     }
 
     .color-preset,
@@ -139,19 +146,19 @@
     #style-borderColor {
       transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
         box-shadow 0.3s ease-out;
-      box-shadow: 0 0 0 0 rgba(56, 189, 248, 0);
+      box-shadow: 0 0 0 0 rgba(10, 132, 255, 0);
     }
 
     .color-preset:hover {
       transform: scale(1.15);
-      box-shadow: 0 0 10px 3px var(--glow, rgba(56, 189, 248, 0.6));
+      box-shadow: 0 0 10px 3px var(--glow, rgba(10, 132, 255, 0.6));
     }
 
     #style-color:hover,
     #yt-style-color:hover,
     #style-borderColor:hover {
       transform: scale(1.1);
-      box-shadow: 0 0 8px 3px rgba(56, 189, 248, 0.6);
+      box-shadow: 0 0 8px 3px rgba(10, 132, 255, 0.6);
       border-radius: 28px;
     }
 
@@ -172,16 +179,16 @@
       0% {
         box-shadow:
           0 0 20px rgba(0, 0, 0, 0.8),
-          0 0 35px rgba(56, 189, 248, 0.25),
-          0 0 60px rgba(56, 189, 248, 0.1);
+          0 0 35px rgba(10, 132, 255, 0.25),
+          0 0 60px rgba(10, 132, 255, 0.1);
       }
 
       100% {
         box-shadow:
           0 0 40px rgba(0, 0, 0, 0.6),
-          0 0 60px rgba(56, 189, 248, 0.5),
-          0 0 100px rgba(56, 189, 248, 0.35),
-          0 0 150px rgba(56, 189, 248, 0.15);
+          0 0 60px rgba(10, 132, 255, 0.5),
+          0 0 100px rgba(10, 132, 255, 0.35),
+          0 0 150px rgba(10, 132, 255, 0.15);
       }
     }
 
@@ -189,7 +196,7 @@
       font-size: 10px;
       border-radius: 20px;
       border: none;
-      background: #127e3df5;
+      background: #248A3Df5;
       color: rgb(251 252 253 / 92%);
       cursor: pointer;
       transition: all 0.2s ease;
@@ -197,14 +204,14 @@
     }
 
     .tinyBtn:hover {
-      background: rgba(75, 139, 243, 0.5);
-      border-color: rgba(59, 130, 246, 0.9);
-      color: #8ac4ff;
-      box-shadow: 0 0 16px rgba(59, 130, 246, 0.5);
+      background: rgba(10, 132, 255, 0.5);
+      border-color: rgba(10, 132, 255, 0.9);
+      color: #7BB8FF;
+      box-shadow: 0 0 16px rgba(10, 132, 255, 0.5);
     }
 
     .tinyBtn:active {
-      background: rgba(59, 130, 246, 0.45);
+      background: rgba(10, 132, 255, 0.45);
       transform: scale(0.95);
     }
 
@@ -228,9 +235,9 @@
       flex: 1;
       min-width: 0;
       font-size: 11px;
-      color: #f0f6fc;
-      background: rgba(15, 23, 42, 0.9);
-      border: 0.5px solid #1e3a5f;
+      color: #f5f5f7;
+      background: rgba(28, 28, 30, 0.9);
+      border: 0.5px solid #3A3A3C;
       border-radius: 6px;
       padding: 4px 6px;
       outline: none;
@@ -242,20 +249,20 @@
     #lpDoneBtn,
     .lpBadge {
       color: #38bdf8;
-      background: rgba(56, 189, 248, 0.08);
+      background: rgba(10, 132, 255, 0.08);
       border: none;
-      box-shadow: 0 0 0 1.5px rgba(56, 189, 248, 0.25);
+      box-shadow: 0 0 0 1.5px rgba(10, 132, 255, 0.25);
       border-radius: 20px;
       transition: box-shadow 0.25s ease, background 0.25s ease;
     }
 
     #lpDoneBtn:hover,
     .lpBadge:hover {
-      background: rgba(56, 189, 248, 0.12);
+      background: rgba(10, 132, 255, 0.12);
       box-shadow:
-        /* inset 0 0 8px 1px rgba(56, 189, 248, 0.35), */
-        0 0 10px 2px rgba(56, 189, 248, 0.35),
-        0 0 20px 6px rgba(56, 189, 248, 0.2);
+        /* inset 0 0 8px 1px rgba(10, 132, 255, 0.35), */
+        0 0 10px 2px rgba(10, 132, 255, 0.35),
+        0 0 20px 6px rgba(10, 132, 255, 0.2);
     }
 
     #lpDoneBtn {
@@ -273,17 +280,17 @@
 
     .pencil {
       font-size: 16px;
-      color: #627186;
+      color: #8E8E93;
     }
 
     .pencil:hover {
-      color: #73e2f0;
+      color: #5AC8FA;
     }
 
     .swapBtn {
       flex: 0 0 auto;
       font-size: 16px;
-      color: #94a3b8;
+      color: #98989D;
       background: none;
       border: none;
       cursor: pointer;
@@ -291,7 +298,7 @@
     }
 
     .swapBtn:hover {
-      color: #73e2f0;
+      color: #5AC8FA;
     }
 
     @media (pointer: coarse) {
@@ -436,7 +443,7 @@
     </div>
     <div id="actionArea" style="margin-top: 12px; display: none; flex-shrink: 0;">
       <button id="openNotebookSecondary" class="openNotebook"
-        style="height: 35px; display: flex; align-items: center; justify-content: center; gap: 6px; background: #3b82f6; color: white; border-radius: 20px; padding: 0 16px;">
+        style="height: 35px; display: flex; align-items: center; justify-content: center; gap: 6px; ">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -479,13 +486,8 @@
       <div
         style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 9px;">
 
-        <div id="openSettings" style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(15, 23, 42, 0.85)); 
-  border: 1.05px solid rgba(56, 189, 248, 0.5); 
-  cursor: pointer; color: rgb(56, 189, 248); padding: 0 8px; min-width: 0; position: relative;">
-          <span id="currentEngineName"
-            style="color: #38bdf8; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: inline-block; line-height: 1.4; padding-bottom: 1px;">Google
-            Translate</span>
+        <div id="openSettings" style="flex: 1; min-width: 0; position: relative;">
+          <span id="currentEngineName">Google Translate</span>
           <svg id="p-engine-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             stroke-width="3"
             style="opacity: 0.75; flex-shrink: 0; margin-left: 5px; pointer-events: none; vertical-align: middle;">
@@ -494,8 +496,7 @@
           <!-- 实际红点由 showEngineWarning() 动态插入的 .engine-warning 负责 -->
         </div>
 
-        <div id="quickSearchBtn"
-          style="flex: 1; display: flex; align-items: center; justify-content: center; height: 31px; font-size: 11px; border-radius: 15px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; cursor: pointer; padding: 0 8px;">
+        <div id="quickSearchBtn" style="flex: 1; min-width: 0; position: relative;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
             style="margin-right: 6px;">
             <circle cx="11" cy="11" r="8"></circle>
@@ -586,7 +587,8 @@
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
         </button>
-        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title title="重新翻译此页" style="display: none; padding: 2px;">
+        <button id="btnRefreshPage" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title
+          title="重新翻译此页" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
             stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
@@ -618,7 +620,8 @@
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
         </button>
-        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title title="重新预翻译字幕" style="display: none; padding: 2px;">
+        <button id="btnRefreshYT" class="icon-btn refresh-btn-ui" data-i18n="retranslate" data-i18n-title
+          title="重新预翻译字幕" style="display: none; padding: 2px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
             stroke-linejoin="round" style="width: 16px; height: 16px;">
             <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"></path>
@@ -668,7 +671,7 @@
         style="width: 100%; box-sizing: border-box; background: #0d1117; color: #f0f6fc; border: 1px solid #30363d; padding: 6px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; appearance: auto;"></select>
     </div>
     <div id="sharpDivideLine"
-      style="width: 88%;height: 1.5px;background: linear-gradient(to right, transparent, #0c65ad 50%, transparent);border-radius: 50%;margin: 3px auto 11px auto;">
+      style="width: 88%;height: 1.5px;background: linear-gradient(to right, transparent, rgba(243, 248, 248, 0.736) 50%, transparent);;border-radius: 50%;margin: 3px auto 11px auto;">
     </div>
     <div id="inspectContainer" class="row-group">
 
@@ -882,7 +885,7 @@
           <span data-i18n="syncContent" style="opacity: 0.8;">同步内容</span>
           <span style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
             • <span data-i18n="wordBook" style="color: #38bdf8;">生词本</span>
-            <span style="color: #38bdf8;">• AppData</span>
+            <span style="color: #38bdf8;">• Preferences</span>
           </span>
         </div>
       </div>
@@ -1178,7 +1181,7 @@
       <span style="color: #38bdf8; font-weight: bold; font-size: 13px; letter-spacing: 0.5px;">CONTEXT MENU</span>
     </div>
 
-    <div class="row-text" dir="auto" style="margin-bottom: 14px;"> 
+    <div class="row-text" dir="auto" style="margin-bottom: 14px;">
       <label for="switch-contextMenuSelection" data-i18n="contextMenuSelectionHint"
         style="font-size: 12px; color: #cbd5e1;">选中文字时显示"翻译选中内容"</label>
       <div style="display: flex; align-items: center; gap: 4px;">
