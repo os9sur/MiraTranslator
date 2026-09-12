@@ -70,16 +70,21 @@
 
 ## 💡 Project Scope & Free Alternatives
 
-If you are simply looking for a completely free, zero-setup AI translation tool, your current browser likely already provides excellent built-in options:
+If you are simply looking for a completely free, zero-setup AI translation tool, your current browser may already offer excellent built-in options:
 
-- **Chrome Users:** The Gemini side panel offers powerful, out-of-the-box webpage reading and content analysis capabilities.
-- **Edge Users:** The built-in Copilot can easily analyze webpage content and generate video subtitle summaries.
+* **Chrome Users:** The Gemini side panel provides convenient webpage reading and content analysis without additional setup.
+* **Edge Users:** Copilot can analyze webpage content and help generate summaries, including for video content.
 
 **So why develop Mira?**
 
-I couldn't find a translation tool that was truly handy, respected my privacy, and didn't leave me wondering whether my browsing data was being collected in the background. So I decided to build one myself in my spare time.
+I wanted a translation tool that was genuinely convenient to use, respected user privacy, and did not rely on unnecessary tracking or intermediary services.
 
-Mira is designed around my own needs and preferences. It's not built as a commercial product for the general public, and I maintain it at my own pace. If this little tool happens to meet your needs too, you're welcome to use it under the terms set out in the [License & Usage Terms](#license--usage-terms) section below. But please understand that due to limited time, I can't guarantee compatibility with every website or provide immediate bug fixes.
+Mira is built with a focus on privacy, simplicity, lightweight performance, and practical everyday use. It is an independent open-source project, continuously developed and maintained based on real-world usage.
+
+If Mira fits your needs, you're welcome to use it according to the terms set out in the [License & Usage Terms](https://github.com/os9sur/MiraTranslator#license--usage-terms) section below.
+
+As with any independently maintained project, compatibility may vary across websites and some issues may take time to address.
+
 
 ---
 
