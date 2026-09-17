@@ -134,28 +134,7 @@ You're still in control of the essentials: AI tones/personas, global or site-spe
 
 For AI translation, Mira batches multiple pieces of text into a single request whenever possible, helping reduce unnecessary API calls and improve translation efficiency.
 
-## Development & Build
-
-### 1. Prerequisites
-Ensure you have [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed.
-
-### 2. Configuration
-API keys are kept in a private file. Create your local config from the template:
-```bash
-cp private_config.example.js private_config.js
-```
-
-Edit `private_config.js` and fill in your `CLIENT_ID`, `MANIFEST_KEY`.
-
-### 3. Build Commands
-
-| Command | Target Browser |
-| --- | --- |
-| `pnpm dev` | **Chrome** |
-| `pnpm dev:edge` | **Edge** |
-| `pnpm dev:firefox` | **Firefox** |
-
----
+----
 
 ## License & Usage Terms
 
