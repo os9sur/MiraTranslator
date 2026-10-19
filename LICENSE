@@ -4,6 +4,11 @@ Copyright © 2026 David Bai. All rights reserved.
 
 ## English
 
+**By accessing, viewing, downloading, or using the Software, or by
+creating a Derivative Work, you agree to be bound by the terms of
+this License. If you do not agree to these terms, you must not
+access, download, or use the Software or create a Derivative Work.**
+
 ### 0. Definitions
 
 * **"Software"** means the source code, object code, documentation
@@ -16,7 +21,11 @@ Copyright © 2026 David Bai. All rights reserved.
   extension installation packages), and any code obtained by
   decompiling, deobfuscating, or otherwise reverse-engineering such a
   build, regardless of whether it was obtained from this repository
-  or from a published, distributed copy.**
+  or from a published, distributed copy.** "Software" does not
+  include third-party components bundled with it (including epub.js
+  and JSZip). Such components are not licensed under this License;
+  they remain governed by their own respective licenses, which are
+  reproduced in the file THIRD_PARTY_LICENSES.txt.
 
 * **"Derivative Work"** means any work that modifies, translates,
   adapts, incorporates, reproduces, or is otherwise based on the
@@ -70,7 +79,8 @@ Copyright © 2026 David Bai. All rights reserved.
 
 ### 1. Permitted Use
 
-* You may view, read, and study the source code for any purpose.
+* You may view, read, and study the source code for any purpose,
+  subject to Section 3.
 
 * You may use the Software for Personal, Non-Commercial Use as
   defined above.
@@ -168,12 +178,13 @@ License.
 
 ### 4. Trademark
 
-"Mira" and the Software's associated logo and icon are trademarks and
+"Mira" (米拉) and the Software's associated logo and icon are trademarks and
 trade dress of the copyright holder, asserted independently of any
 copyright in the Software. No license, express or implied, to use
 these marks is granted under this License or by the availability of
 the Software's source code. Without limiting the foregoing, you may
-not use the "Mira" mark — whether alone, combined with a generic word
+not use the "Mira" mark (including its Chinese transliteration "米拉")
+— whether alone, combined with a generic word
 (e.g. "Translator", "Translate", "翻译"), or combined with any
 localized, translated, or transliterated equivalent of such a generic
 word in any language — or use the project's logo/icon, or any name,
@@ -224,9 +235,8 @@ damages arising from use prior to termination.
 The parties acknowledge that a violation of Section 3 will cause the
 copyright holder harm that cannot be fully remedied by monetary
 damages alone. Accordingly, the copyright holder is entitled to seek
-injunctive or other equitable relief in addition to damages, without
-the necessity of posting a bond, to the extent permitted by
-applicable law.
+an injunction, preservation measures, or other relief available under
+applicable law, in addition to damages.
 
 ### 8. Contributions
 
@@ -294,7 +304,9 @@ that provision or of the right to enforce it later.
   还包括上述内容的任何编译版本、打包版本（包括但不限于 .crx、.xpi 等
   浏览器扩展安装包）、压缩或混淆版本，以及通过对上述版本进行反编译、
   反混淆或其他逆向工程手段所获得的代码，无论其来源于本仓库，还是来源于
-  已发布、已分发的副本。**
+  已发布、已分发的副本。**"本软件"不包括与其捆绑的第三方组件
+  （包括 epub.js 和 JSZip）。这些组件不适用本许可证，仍受其各自
+  许可证约束，相关许可证全文见文件 THIRD_PARTY_LICENSES.txt。
 
 * **"衍生作品"** 指对本软件进行修改、翻译、改编、包含、复制或以其他方式
   基于本软件全部或实质性部分形成的任何作品，但仅限于该作品使用或包含
@@ -332,7 +344,7 @@ that provision or of the right to enforce it later.
 
 ### 1. 允许的使用方式
 
-* 你可以出于任何目的查看、阅读、研究源代码。
+* 你可以出于任何目的查看、阅读、研究源代码，但须遵守第3条的限制。
 
 * 你可以按上述定义将本软件用于个人非商业使用。
 
@@ -406,11 +418,16 @@ that provision or of the right to enforce it later.
 
 ### 4. 商标
 
-"Mira"及本软件相关的 logo、图标是版权持有人独立主张的商标及商业
-外观权利，其主张不依赖于本软件的版权。本许可证或本软件源代码的
-可获取性，均不构成对上述标识的任何明示或默示许可。无论底层代码
-是否依据商业许可被使用、修改或分发，对上述标识的使用仍受本条及
-第3条限制事项的约束。
+"Mira"（米拉）及本软件相关的 logo、图标是版权持有人的商标及商业外观，
+其主张独立于本软件的任何版权。本许可证或本软件源代码的可获取性，
+均不构成对上述标识的任何明示或默示许可。在不限制前述规定的前提下，
+你不得在任何司法管辖区使用"Mira"或"米拉"标识（无论单独使用，
+或与通用词（例如"Translator"、"Translate"、"翻译"）组合使用，
+或与任何语言中该通用词的本地化、翻译或音译对应词组合使用），
+也不得使用本项目的 logo/图标，或与上述标识容易造成混淆的任何
+名称、标识或 logo，来标识任何其他产品或服务。无论底层代码是否依据
+商业许可被使用、修改或分发，对上述标识的使用仍受本条及第3条
+限制事项的约束。
 
 ### 5. 商业许可
 
@@ -441,7 +458,7 @@ that provision or of the right to enforce it later.
 
 双方确认，违反第3条的行为将对版权持有人造成金钱赔偿难以完全
 弥补的损害。据此，在法律允许的范围内，版权持有人有权在寻求
-损害赔偿的同时，无需提供担保即可寻求禁令等衡平法救济。
+损害赔偿的同时，请求停止侵害、申请行为保全等救济。
 
 ### 8. 贡献条款
 
@@ -466,12 +483,12 @@ DCO，https://developercertificate.org/）的条款，你确认自己拥有权�
 
 ### 10. 适用法律与管辖权
 
-本许可协议受中华人民共和国法律管辖，并依其进行解释，但不适用其法律冲突规则。
-本条的任何内容均不得解释为限制著作权人根据侵权行为发生地的强制性法律
+本许可证受中华人民共和国法律管辖，并依其进行解释，但不适用其法律冲突规则。
+本条的任何内容均不得解释为限制版权持有人根据侵权行为发生地的强制性法律
 所享有的任何权利或可获得的救济。
-在适用法律允许的范围内，著作权人可以向侵权行为实施地、侵权结果发生地、
-侵权人住所地或著作权人住所地的人民法院提起诉讼。
-本条任何内容均不妨碍著作权人在任何依法对该争议或侵权行为享有管辖权的
+在适用法律允许的范围内，版权持有人可以向侵权行为实施地、侵权结果发生地、
+侵权人住所地或版权持有人住所地的人民法院提起诉讼。
+本条任何内容均不妨碍版权持有人在任何依法对该争议或侵权行为享有管辖权的
 其他法院或司法管辖区提起诉讼，包括侵权发生地所在的司法管辖区，但以适用法律允许为限。
 
 
