@@ -151,7 +151,7 @@ Full terms: see [LICENSE](LICENSE). Commercial licensing inquiries: [mira.studio
 
 ### Contributing
 
-Pull requests are welcome. By submitting a PR, you agree to the Developer Certificate of Origin (DCO) and the contribution terms set out in [LICENSE](LICENSE), Section 8 — in short, you confirm you have the right to submit the contribution, and you grant the project owner the right to use, modify, and (where applicable) commercially (sub)license it as part of the Software.
+By submitting a PR, you agree to the Developer Certificate of Origin (DCO) and the contribution terms set out in [LICENSE](LICENSE), Section 8 — in short, you confirm you have the right to submit the contribution, and you grant the project owner the right to use, modify, and (where applicable) commercially (sub)license it as part of the Software.
 
 ## 许可与使用条款
 
@@ -168,7 +168,7 @@ Pull requests are welcome. By submitting a PR, you agree to the Developer Certif
 
 ### 贡献说明
 
-欢迎提交 Pull Request。提交 Pull Request 即表示你同意《开发者原创声明》（DCO）以及 [LICENSE](LICENSE) 文件第8条所述的贡献条款——即你确认拥有权利提交该贡献内容，并授予项目所有者使用、修改及（在适用情况下）进行商业转授权的权利，将其作为本软件的一部分。
+提交 Pull Request 即表示你同意《开发者原创声明》（DCO）以及 [LICENSE](LICENSE) 文件第8条所述的贡献条款——即你确认拥有权利提交该贡献内容，并授予项目所有者使用、修改及（在适用情况下）进行商业转授权的权利，将其作为本软件的一部分。
 
 ---
 
