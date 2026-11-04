@@ -1,6 +1,6 @@
 {
    "guide": {
-    "enabled": true,
+    "enabled": false,
     "minDays": 0,
     "zh-CN": [
         {
@@ -9,36 +9,6 @@
             "level": "warning",
             "content": "受影响版本：3.5.8.8833。此版本的引擎配置页面存在临时问题，可能无法正常打开或使用。修复版本预计很快发布，请在扩展更新后重新打开引擎配置页面。",
             "gotIt": "知道了",
-            "scope": "popup"
-        }
-    ],
-    "ja": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ エンジン設定ページの一時的な不具合",
-            "level": "warning",
-            "content": "影響を受けるバージョン：3.5.8.8833。このバージョンでは、エンジン設定ページが正常に開かない、または動作しない場合があります。修正版は近日中に公開予定です。拡張機能の更新後、エンジン設定ページを再度開いてください。",
-            "gotIt": "了解",
-            "scope": "popup"
-        }
-    ],
-    "ko": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ 엔진 설정 페이지 일시적 오류",
-            "level": "warning",
-            "content": "영향을 받는 버전: 3.5.8.8833. 이 버전에서는 엔진 설정 페이지가 정상적으로 열리지 않거나 작동하지 않을 수 있습니다. 수정 버전은 곧 배포될 예정입니다. 확장 프로그램을 업데이트한 후 엔진 설정 페이지를 다시 열어 주세요.",
-            "gotIt": "확인",
-            "scope": "popup"
-        }
-    ],
-    "en": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ Temporary Issue with Engine Settings",
-            "level": "warning",
-            "content": "Affected version: 3.5.8.8833. The engine settings page in this version may fail to open or work properly. A fixed version is expected to be available soon. Please update the extension and reopen the engine settings page.",
-            "gotIt": "Got it",
             "scope": "popup"
         }
     ]
