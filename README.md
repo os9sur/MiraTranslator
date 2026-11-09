@@ -52,11 +52,6 @@
 
 <p align="center">
   <img src="images/bird_screenshot.png" width="415" alt="Translation Preview">
-  <img src="images/caddy_screenshot.png" width="415" alt="Feature Preview">
-</p>
-
-<p align="center">
-  <img src="images/style_setting_screenshot.png" width="415" alt="Style Settings">
   <img src="images/settings_screenshot.png" width="415" alt="Settings">
 </p>
 
