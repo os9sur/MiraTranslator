@@ -1,48 +1,18 @@
 {
     "guide": {
-    "enabled": false,
-    "minDays": 0,
-    "zh-CN": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ 引擎配置页面临时异常",
-            "level": "warning",
-            "content": "受影响版本：3.5.8.8833。此版本的引擎配置页面存在临时问题，可能无法正常打开或使用。修复版本预计很快发布，请在扩展更新后重新打开引擎配置页面。",
-            "gotIt": "知道了",
-            "scope": "popup"
-        }
-    ],
-    "ja": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ エンジン設定ページの一時的な不具合",
-            "level": "warning",
-            "content": "影響を受けるバージョン：3.5.8.8833。このバージョンでは、エンジン設定ページが正常に開かない、または動作しない場合があります。修正版は近日中に公開予定です。拡張機能の更新後、エンジン設定ページを再度開いてください。",
-            "gotIt": "了解",
-            "scope": "popup"
-        }
-    ],
-    "ko": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ 엔진 설정 페이지 일시적 오류",
-            "level": "warning",
-            "content": "영향을 받는 버전: 3.5.8.8833. 이 버전에서는 엔진 설정 페이지가 정상적으로 열리지 않거나 작동하지 않을 수 있습니다. 수정 버전은 곧 배포될 예정입니다. 확장 프로그램을 업데이트한 후 엔진 설정 페이지를 다시 열어 주세요.",
-            "gotIt": "확인",
-            "scope": "popup"
-        }
-    ],
-    "en": [
-        {
-            "id": "notice_20261103_engine_settings_fix",
-            "title": "⚠️ Temporary Issue with Engine Settings",
-            "level": "warning",
-            "content": "Affected version: 3.5.8.8833. The engine settings page in this version may fail to open or work properly. A fixed version is expected to be available soon. Please update the extension and reopen the engine settings page.",
-            "gotIt": "Got it",
-            "scope": "popup"
-        }
-    ]
-},
+        "enabled": false,
+        "minDays": 0,
+        "zh-CN": [
+            {
+                "id": "notice_20261103_engine_settings_fix",
+                "title": "⚠️ 引擎配置页面临时异常",
+                "level": "warning",
+                "content": "受影响版本：3.5.8.8833。此版本的引擎配置页面存在临时问题，可能无法正常打开或使用。修复版本预计很快发布，请在扩展更新后重新打开引擎配置页面。",
+                "gotIt": "知道了",
+                "scope": "popup"
+            }
+        ]
+    },
     "notices": {
         "enabled": true,
         "minDays": 0,
@@ -51,9 +21,55 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 AI 翻译服务选择建议 · 点击这里查看",
                 "level": "info",
-                "content": "本插件内置 Google/Bing 翻译，无需 API Key，开箱即用。\n\n【关于网站兼容性与页面布局】\n> 本插件最初是因为一直找不到一款符合自己使用习惯的翻译工具，所以才开始开发的。目前无需登录即可免费使用，定位是面向多种网站的通用翻译工具，并非提供逐站定制适配的商业服务，因此无法保证所有网站都能完美翻译，也无法保证翻译后始终完整保留原有页面布局。\n>\n> 不同网站的页面结构、样式规则和前端技术实现各不相同，翻译内容插入或替换后，可能与个别网站原有的布局规则发生冲突，导致排版错位或其他显示异常。通用插件无法逐一适配所有网站及其特殊实现，部分网站可能无法正常翻译。\n\n【关于翻译准确度】\n> 本插件只是连接网页与翻译引擎的桥梁，译文质量由所选翻译引擎决定。如遇译文不准确，通常是引擎本身的表现，而非插件问题。使用更强的 AI 模型，通常能获得更自然、更准确的译文。\n\n【关于 AI 翻译】\n> AI 翻译需要消耗算力成本，因此本插件不提供内置免费 AI 服务，也不提供或销售任何 Pro 会员、AI 套餐或第三方服务。如需更好的译文效果，可连接自己的 AI 服务：在服务商官方渠道申请 API Key，再选择合适的模型即可。\n\n> 为了说明为什么我们更推荐自备 API Key，可以看看以下两种使用方式：\n\n>> ① 假设通过 Mira Translator 购买 Pro 会员：\n\n>>> 用户购买 Pro 会员 → Mira 向 AI 服务商购买并管理同一个 API Key → 多个用户共用 Mira 管理的这个 API Key 进行 AI 翻译。\n\n>>> 在这种模式下，用户需要翻译的内容会先发送到 Mira 服务器，再由 Mira 服务器使用该 API Key 转发给 AI 服务商进行处理。翻译结果随后通过 Mira 服务器返回给用户，相关 API 使用成本则计入会员价格。\n\n>> ② 自备 API Key（Mira Translator 推荐）：\n\n>>> 自己在 AI 服务商官方渠道申请 API Key → 将 Key 填入插件 → 插件直接向 AI 服务商发送翻译请求，并使用其模型。\n\n>>> 这种方式下，API Key 由用户自行管理，费用和用量由 AI 服务商直接管理。\n\n> 两种方式最终都是通过 AI 服务商提供的模型进行翻译。主要区别在于 API Key 的管理方式、费用结算方式以及翻译内容的数据传输路径。自备 API Key 可以让用户直接管理自己的消费和额度，自主选择或更换模型，同时减少额外的中间传输环节。\n\n> 支持的服务与模型包括：\n\n>> • OpenRouter：一个 Key 即可使用几乎所有主流模型；\n>> • Groq：有免费额度，响应快；\n>> • Gemini：有免费额度，但限制较严格；\n>> • GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何兼容 OpenAI 接口的服务。\n\n> 具体规则和额度请以各服务商官方说明为准。\n\n【关于翻译速度与稳定性之间的取舍】\n> 为尽量降低触发翻译服务请求频率限制的概率，网页内容会分块排队翻译，而不是同时发送大量请求，因此较长的网页可能需要一些时间。实际速度也取决于所选翻译引擎和网络状况。\n\n【关于简繁转换】\n> 本插件不提供简繁转换，目前也没有加入该功能的计划。简体中文与繁体中文在不同地区的用词习惯有很大差异，单纯转换字形并不合适。考虑到大多数人都看得懂简繁文字，目前不打算为此增加软件复杂度。\n\n本插件无需登录，免费使用，但开发与维护需要投入大量时间。本项目不提供免费定制开发，功能更新将视整体规划和维护情况安排。",
                 "gotIt": "知道了",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "本插件内置 Google/Bing 翻译，无需 API Key，开箱即用。",
+                    "compatibility1": "本插件定位为面向多种网站的通用翻译工具，并非提供逐站定制适配的商业服务，因此无法保证所有网站都能完美翻译，也无法保证翻译后始终完整保留原有页面布局。",
+                    "compatibility2": "不同网站的页面结构、样式规则和前端技术实现各不相同，翻译内容插入或替换后，可能与个别网站原有的布局规则发生冲突，导致排版错位或其他显示异常。通用插件无法逐一适配所有网站及其特殊实现，部分网站可能无法正常翻译。",
+                    "accuracy": "本插件只是连接网页与翻译引擎的桥梁，译文质量由所选翻译引擎决定。如遇译文不准确，通常是引擎本身的表现，而非插件问题。使用更强的 AI 模型，通常能获得更自然、更准确的译文。",
+                    "aiIntro": "AI 翻译需要消耗算力成本，因此本插件不提供内置免费 AI 服务，也不提供或销售任何 Pro 会员、AI 套餐或第三方服务。如需更好的译文效果，可连接自己的 AI 服务：在服务商官方渠道申请 API Key，再选择合适的模型即可。",
+                    "aiWhy": "为了说明为什么我们更推荐自备 API Key，可以看看以下两种使用方式：",
+                    "proTitle": "① 假设通过 Mira Translator 购买 Pro 会员：",
+                    "proFlow": "用户购买 Pro 会员 → Mira 向 AI 服务商购买并管理同一个 API Key → 多个用户共用 Mira 管理的这个 API Key 进行 AI 翻译。",
+                    "proDetails": "在这种模式下，用户需要翻译的内容会先发送到 Mira 服务器，再由 Mira 服务器使用该 API Key 转发给 AI 服务商进行处理。翻译结果随后通过 Mira 服务器返回给用户，相关 API 使用成本则计入会员价格。",
+                    "byokTitle": "② 自备 API Key（Mira Translator 推荐）：",
+                    "byokFlow": "自己在 AI 服务商官方渠道申请 API Key → 将 Key 填入插件 → 插件直接向 AI 服务商发送翻译请求，并使用其模型。",
+                    "byokDetails": "这种方式下，API Key 由用户自行管理，费用和用量由 AI 服务商直接管理。",
+                    "aiComparison": "两种方式最终都是通过 AI 服务商提供的模型进行翻译。主要区别在于 API Key 的管理方式、费用结算方式以及翻译内容的数据传输路径。自备 API Key 可以让用户直接管理自己的消费和额度，自主选择或更换模型，同时减少额外的中间传输环节。",
+                    "providersIntro": "支持的服务与模型包括：",
+                    "providers": [
+                        "OpenRouter：一个 Key 即可使用几乎所有主流模型；",
+                        "Groq：有免费额度，响应快；",
+                        "Gemini：有免费额度，但限制较严格；",
+                        "GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何兼容 OpenAI 接口的服务。"
+                    ],
+                    "providerLimits": "具体规则和额度请以各服务商官方说明为准。",
+                    "speed": "为尽量降低触发翻译服务请求频率限制的概率，网页内容会分块排队翻译，而不是同时发送大量请求，因此较长的网页可能需要一些时间。实际速度也取决于所选翻译引擎和网络状况。",
+                    "simplified": "本插件不提供简繁转换，目前也没有加入该功能的计划。简体中文与繁体中文在不同地区的用词习惯有很大差异，单纯转换字形并不合适。考虑到大多数人都看得懂简繁文字，目前不打算为此增加软件复杂度。",
+                    "footer": "Mira Translator 最初是为了满足个人使用需求而开发的，后来决定免费分享给大家。本插件无需注册账号或登录即可使用。不收取任何使用费用，也不接受打赏或捐赠。开发与维护需要投入大量时间和精力，因此，本项目不提供免费定制开发。未来的功能更新将根据整体规划和维护情况安排。",
+                    "summaryTitle": "先了解这几点",
+                    "summaryBuiltinLabel": "内置翻译",
+                    "summaryAiLabel": "AI 翻译",
+                    "summaryByokLabel": "推荐方式",
+                    "summaryAi": "不提供内置免费 AI 服务，也不提供或销售 Pro 会员、AI 套餐或第三方服务。",
+                    "summaryByok": "只需在所选 AI 服务商处申请一个 API Key，在插件中填入并选择一个模型，即可直接使用该服务商的 AI 服务。",
+                    "compatTitle": "关于网站兼容性与页面布局",
+                    "accuracyTitle": "关于翻译准确度",
+                    "aiTitle": "关于 AI 翻译",
+                    "speedTitle": "关于翻译速度与稳定性之间的取舍",
+                    "simplifiedTitle": "关于简繁转换",
+                    "footerTitle": "关于项目与维护",
+                    "footerLead": "Mira Translator 最初是为了满足个人使用需求而开发的，后来决定免费分享给大家。本插件无需注册账号或登录即可使用。",
+                    "footerEmphasis": "本项目不提供免费定制开发。",
+                    "footerTail": "未来的功能更新将根据整体规划和维护情况安排。",
+                    "footerFreeEmphasis": "不收取任何使用费用，也不接受打赏或捐赠。",
+                    "footerMiddle": "开发与维护需要投入大量时间和精力，因此，",
+                    "permissionsTitle": "关于浏览器权限",
+                    "permissionsTabs": "标签页访问：用于识别当前打开的网页，以执行双语翻译并应用对应的网站设置。Chrome/Edge 可能将其显示为“读取您的浏览记录”。",
+                    "permissionsSites": "网站和本地文件访问：用于读取待翻译网页、连接 Google/Bing 翻译及 YouTube 等相关服务，以及打开本地文档。Firefox 将这些列为可选权限。",
+                    "permissionsPdf": "PDF 阅读：将符合条件的 PDF 页面交由 Mira 内置阅读器打开。Chrome/Edge 可能将相关权限显示为“屏蔽所有页面上的内容”；读取部分受保护的 PDF 时，还会按需补充 Referer，以提高加载成功率。"
+                }
             }
         ],
         "zh-TW": [
@@ -61,9 +77,55 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 AI 翻譯服務選擇建議 · 點擊這裡查看",
                 "level": "info",
-                "content": "本擴充功能內建 Google/Bing 翻譯，無須 API Key，安裝後即可使用。\n\n【關於網站相容性與版面配置】\n> 本擴充功能最初是因為一直找不到一款符合自己使用習慣的翻譯工具，才開始著手開發。目前無須登入即可免費使用，定位是適用於多種網站的通用翻譯工具，並非提供逐站客製化調整的商業服務，因此無法保證所有網站都能完美翻譯，也無法保證翻譯後仍能完整保留原有版面。\n>\n> 不同網站的頁面結構、樣式規則與前端技術實作各不相同，插入或替換譯文後，可能與部分網站原有的版面規則產生衝突，造成排版錯亂或其他顯示異常。通用型擴充功能無法針對所有網站及其特殊實作逐一調整，部分網站可能無法正常翻譯。\n\n【關於翻譯準確度】\n> 本擴充功能只是連接網頁與翻譯引擎的橋樑，譯文品質取決於所選用的翻譯引擎。如果譯文不夠準確，通常是翻譯引擎本身的表現所致，而非擴充功能的問題。使用能力更強的 AI 模型，通常能得到更自然、更準確的譯文。\n\n【關於 AI 翻譯】\n> AI 翻譯需要消耗運算資源並產生費用，因此本擴充功能不提供內建的免費 AI 翻譯服務，也不提供或販售任何 Pro 會員、AI 方案或第三方服務。如需更好的翻譯品質，可以串接自己的 AI 服務：透過服務供應商的官方管道申請 API Key，再選擇適合的模型即可。\n\n> 為了說明為什麼我們更推薦自行準備 API Key，可以看看以下兩種使用方式：\n\n>> ① 假設透過 Mira Translator 購買 Pro 會員：\n\n>>> 使用者購買 Pro 會員 → Mira 向 AI 服務供應商購買並管理同一組 API Key → 多位使用者共用由 Mira 管理的這組 API Key 進行 AI 翻譯。\n\n>>> 在這種模式下，使用者需要翻譯的內容會先傳送到 Mira 的伺服器，再由 Mira 的伺服器使用該 API Key，轉送至 AI 服務供應商進行處理。翻譯結果隨後透過 Mira 的伺服器傳回使用者，而相關 API 使用費用則計入會員價格。\n\n>> ② 自備 API Key（Mira Translator 推薦）：\n\n>>> 自行透過 AI 服務供應商的官方管道申請 API Key → 將 Key 填入擴充功能 → 擴充功能直接向 AI 服務供應商發送翻譯請求，使用其模型進行翻譯。\n\n>>> 這種方式下，API Key 由使用者自行管理，費用與用量也由 AI 服務供應商直接管理。\n\n> 兩種方式最終都是透過 AI 服務供應商提供的模型進行翻譯。主要差異在於 API Key 的管理方式、費用計算方式，以及翻譯內容的傳輸路徑。自備 API Key 可以讓使用者直接掌握自己的花費與使用額度，自行選擇或更換模型，同時減少額外的中介傳輸環節。\n\n> 支援的服務與模型包括：\n\n>> • OpenRouter：一組 Key 即可使用幾乎所有主流模型；\n>> • Groq：提供免費額度，回應速度快；\n>> • Gemini：提供免費額度，但使用限制較多；\n>> • GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何相容 OpenAI API 的服務。\n\n> 具體使用規則與額度，請以各服務供應商的官方說明為準。\n\n【關於翻譯速度與穩定性之間的取捨】\n> 為了盡可能降低觸發翻譯服務請求頻率限制的機率，網頁內容會分批排隊翻譯，而不是同時送出大量請求，因此較長的網頁可能需要一些時間。實際翻譯速度也取決於所選用的翻譯引擎與網路狀況。\n\n【關於簡繁轉換】\n> 本擴充功能不提供簡繁轉換，目前也沒有加入這項功能的計畫。簡體中文與繁體中文在不同地區的用語習慣有很大差異，單純轉換字形並不合適。考量到大多數人都看得懂簡體與繁體中文，目前不打算為此增加軟體的複雜度。\n\n本擴充功能無須登入，免費使用，但開發與維護需要投入大量時間。本專案不提供免費客製化開發，功能更新將視整體規劃與維護情況安排。",
                 "gotIt": "知道了",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "本擴充功能內建 Google/Bing 翻譯，無須 API Key，安裝後即可使用。",
+                    "compatibility1": "本擴充功能定位為適用於多種網站的通用翻譯工具，並非提供逐站客製化調整的商業服務，因此無法保證所有網站都能完美翻譯，也無法保證翻譯後仍能完整保留原有版面。",
+                    "compatibility2": "不同網站的頁面結構、樣式規則與前端技術實作各不相同，插入或替換譯文後，可能與部分網站原有的版面規則產生衝突，造成排版錯亂或其他顯示異常。通用型擴充功能無法針對所有網站及其特殊實作逐一調整，部分網站可能無法正常翻譯。",
+                    "accuracy": "本擴充功能只是連接網頁與翻譯引擎的橋樑，譯文品質取決於所選用的翻譯引擎。如果譯文不夠準確，通常是翻譯引擎本身的表現所致，而非擴充功能的問題。使用能力更強的 AI 模型，通常能得到更自然、更準確的譯文。",
+                    "aiIntro": "AI 翻譯需要消耗運算資源並產生費用，因此本擴充功能不提供內建的免費 AI 翻譯服務，也不提供或販售任何 Pro 會員、AI 方案或第三方服務。如需更好的翻譯品質，可以串接自己的 AI 服務：透過服務供應商的官方管道申請 API Key，再選擇適合的模型即可。",
+                    "aiWhy": "為了說明為什麼我們更推薦自行準備 API Key，可以看看以下兩種使用方式：",
+                    "proTitle": "① 假設透過 Mira Translator 購買 Pro 會員：",
+                    "proFlow": "使用者購買 Pro 會員 → Mira 向 AI 服務供應商購買並管理同一組 API Key → 多位使用者共用由 Mira 管理的這組 API Key 進行 AI 翻譯。",
+                    "proDetails": "在這種模式下，使用者需要翻譯的內容會先傳送到 Mira 的伺服器，再由 Mira 的伺服器使用該 API Key，轉送至 AI 服務供應商進行處理。翻譯結果隨後透過 Mira 的伺服器傳回使用者，而相關 API 使用費用則計入會員價格。",
+                    "byokTitle": "② 自備 API Key（Mira Translator 推薦）：",
+                    "byokFlow": "自行透過 AI 服務供應商的官方管道申請 API Key → 將 Key 填入擴充功能 → 擴充功能直接向 AI 服務供應商發送翻譯請求，使用其模型進行翻譯。",
+                    "byokDetails": "這種方式下，API Key 由使用者自行管理，費用與用量也由 AI 服務供應商直接管理。",
+                    "aiComparison": "兩種方式最終都是透過 AI 服務供應商提供的模型進行翻譯。主要差異在於 API Key 的管理方式、費用計算方式，以及翻譯內容的傳輸路徑。自備 API Key 可以讓使用者直接掌握自己的花費與使用額度，自行選擇或更換模型，同時減少額外的中介傳輸環節。",
+                    "providersIntro": "支援的服務與模型包括：",
+                    "providers": [
+                        "OpenRouter：一組 Key 即可使用幾乎所有主流模型；",
+                        "Groq：提供免費額度，回應速度快；",
+                        "Gemini：提供免費額度，但使用限制較多；",
+                        "GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何相容 OpenAI API 的服務。"
+                    ],
+                    "providerLimits": "具體使用規則與額度，請以各服務供應商的官方說明為準。",
+                    "speed": "為了盡可能降低觸發翻譯服務請求頻率限制的機率，網頁內容會分批排隊翻譯，而不是同時送出大量請求，因此較長的網頁可能需要一些時間。實際翻譯速度也取決於所選用的翻譯引擎與網路狀況。",
+                    "simplified": "本擴充功能不提供簡繁轉換，目前也沒有加入這項功能的計畫。簡體中文與繁體中文在不同地區的用語習慣有很大差異，單純轉換字形並不合適。考量到大多數人都看得懂簡體與繁體中文，目前不打算為此增加軟體的複雜度。",
+                    "footer": "Mira Translator 最初是為了滿足個人使用需求而開發的，後來決定免費分享給大家。本擴充功能無須註冊帳號或登入即可使用。不收取任何使用費用，也不接受打賞或捐贈。開發與維護需要投入大量時間與精力，因此，本專案不提供免費客製化開發。未來的功能更新將依照整體規劃與實際維護情況安排。",
+                    "summaryTitle": "使用前，先了解這幾點",
+                    "summaryBuiltinLabel": "內建翻譯",
+                    "summaryAiLabel": "AI 翻譯",
+                    "summaryByokLabel": "推薦方式",
+                    "summaryAi": "不提供內建免費 AI 翻譯服務，也不提供或販售 Pro 會員、AI 方案或第三方服務。",
+                    "summaryByok": "只需向選定的 AI 服務供應商申請一組 API Key，在擴充功能中填入並選擇一個模型，即可直接使用該服務供應商的 AI 服務。",
+                    "compatTitle": "關於網站相容性與版面配置",
+                    "accuracyTitle": "關於翻譯準確度",
+                    "aiTitle": "關於 AI 翻譯",
+                    "speedTitle": "關於翻譯速度與穩定性之間的取捨",
+                    "simplifiedTitle": "關於簡繁轉換",
+                    "footerTitle": "關於專案與維護",
+                    "footerLead": "Mira Translator 最初是為了滿足個人使用需求而開發的，後來決定免費分享給大家。本擴充功能無須註冊帳號或登入即可使用。",
+                    "footerEmphasis": "本專案不提供免費客製化開發。",
+                    "footerTail": "未來的功能更新將依照整體規劃與實際維護情況安排。",
+                    "footerFreeEmphasis": "不收取任何使用費用，也不接受打賞或捐贈。",
+                    "footerMiddle": "開發與維護需要投入大量時間與精力，因此，",
+                    "permissionsTitle": "關於瀏覽器權限",
+                    "permissionsTabs": "分頁存取：用於識別目前開啟的網頁，以執行雙語翻譯並套用對應的網站設定。Chrome/Edge 可能會將其顯示為「讀取瀏覽記錄」。",
+                    "permissionsSites": "網站與本機檔案存取：用於讀取需要翻譯的網頁、連接 Google/Bing 翻譯及 YouTube 等相關服務，以及開啟本機文件。Firefox 會將這些列為選用權限。",
+                    "permissionsPdf": "PDF 閱讀：將符合條件的 PDF 頁面交由 Mira 內建閱讀器開啟。Chrome/Edge 可能會將相關權限顯示為「封鎖所有網頁上的內容」；讀取部分受保護的 PDF 時，也會視需要補上 Referer，以提高載入成功率。"
+                }
             }
         ],
         "en": [
@@ -71,9 +133,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Choosing an AI Translation Service · Click to learn more",
                 "level": "info",
-                "content": "This extension includes built-in Google/Bing translation. No API Key is required, and it works right out of the box.\n\n【About Translation Accuracy】\n> This extension acts as a bridge between web pages and translation engines. Translation quality depends on the engine you choose. If a translation is inaccurate, the issue is generally with the engine itself rather than the extension. More capable AI models typically produce more natural and accurate translations.\n\n【About AI Translation】\n> AI translation requires computing resources and comes with associated costs. Therefore, this extension does not provide a built-in free AI service, nor does it offer or sell Pro memberships, AI plans, or third-party services. For better translation quality, you can connect your own AI service by obtaining an API Key through the provider's official channels and selecting a suitable model.\n\n> To explain why we recommend using your own API Key, here are two possible approaches:\n\n>> ① Hypothetically, purchasing a Pro membership through Mira Translator:\n>>> Users purchase a Pro membership → Mira obtains and manages a single API Key from an AI provider → Multiple users share that same API Key managed by Mira to use AI translation.\n>>> In this setup, the content users want to translate is first sent to Mira's server. Mira's server then uses the shared API Key to forward the content to the AI provider for processing. The translation results are subsequently returned to users through Mira's server. The associated API usage costs are included in the membership price.\n\n>> ② Use your own API Key (recommended by Mira Translator):\n>>> Apply for your own API Key directly through the AI provider's official channels → Enter the Key in the extension → The extension sends translation requests directly to the AI provider and uses its models.\n>>> With this approach, you manage your own API Key, while the AI provider directly handles billing and usage tracking.\n\n> Both approaches ultimately use models provided by AI service providers. The main differences are who manages the API Key, how usage is billed, and how translation content is transmitted. With your own API Key, you can manage your spending and usage limits directly, freely choose or switch between models, and avoid an additional intermediary in the data transfer process.\n\n> Supported services and models include:\n>> • OpenRouter: One Key provides access to almost all major models;\n>> • Groq: Offers a free tier and fast responses;\n>> • Gemini: Offers a free tier, but with relatively strict usage limits;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama, and any service compatible with the OpenAI API.\n\n> Please refer to each provider's official documentation for the latest rules and usage limits.\n\n【About the Trade-off Between Translation Speed and Stability】\n> To reduce the likelihood of hitting translation service rate limits, webpage content is translated in queued batches rather than sending a large number of requests simultaneously. As a result, longer webpages may take some time to translate. Actual performance also depends on the selected translation engine and network conditions.\n\nBecause websites vary considerably in page structure and technical implementation, compatibility with every website cannot be guaranteed. Some specialized websites may not translate correctly.\n\nThis project is currently free to use, but development and maintenance require a considerable investment of time. Free custom development is not provided. Future feature updates will depend on the overall development roadmap and maintenance priorities.",
                 "gotIt": "Got it",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "This extension includes built-in Google/Bing translation. No API Key is required, and it works right out of the box.",
+                    "compatibility1": "Because websites vary considerably in page structure and technical implementation, compatibility with every website cannot be guaranteed. Some specialized websites may not translate correctly.",
+                    "accuracy": "This extension acts as a bridge between web pages and translation engines. Translation quality depends on the engine you choose. If a translation is inaccurate, the issue is generally with the engine itself rather than the extension. More capable AI models typically produce more natural and accurate translations.",
+                    "aiIntro": "AI translation requires computing resources and comes with associated costs. Therefore, this extension does not provide a built-in free AI service, nor does it offer or sell Pro memberships, AI plans, or third-party services. For better translation quality, you can connect your own AI service by obtaining an API Key through the provider's official channels and selecting a suitable model.",
+                    "aiWhy": "To explain why we recommend using your own API Key, here are two possible approaches:",
+                    "proTitle": "① Hypothetically, purchasing a Pro membership through Mira Translator:",
+                    "proFlow": "Users purchase a Pro membership → Mira obtains and manages a single API Key from an AI provider → Multiple users share that same API Key managed by Mira to use AI translation.",
+                    "proDetails": "In this setup, the content users want to translate is first sent to Mira's server. Mira's server then uses the shared API Key to forward the content to the AI provider for processing. The translation results are subsequently returned to users through Mira's server. The associated API usage costs are included in the membership price.",
+                    "byokTitle": "② Use your own API Key (recommended by Mira Translator):",
+                    "byokFlow": "Apply for your own API Key directly through the AI provider's official channels → Enter the Key in the extension → The extension sends translation requests directly to the AI provider and uses its models.",
+                    "byokDetails": "With this approach, you manage your own API Key, while the AI provider directly handles billing and usage tracking.",
+                    "aiComparison": "Both approaches ultimately use models provided by AI service providers. The main differences are who manages the API Key, how usage is billed, and how translation content is transmitted. With your own API Key, you can manage your spending and usage limits directly, freely choose or switch between models, and avoid an additional intermediary in the data transfer process.",
+                    "providersIntro": "Supported services and models include:",
+                    "providers": [
+                        "OpenRouter: One Key provides access to almost all major models;",
+                        "Groq: Offers a free tier and fast responses;",
+                        "Gemini: Offers a free tier, but with relatively strict usage limits;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama, and any service compatible with the OpenAI API."
+                    ],
+                    "providerLimits": "Please refer to each provider's official documentation for the latest rules and usage limits.",
+                    "speed": "To reduce the likelihood of hitting translation service rate limits, webpage content is translated in queued batches rather than sending a large number of requests simultaneously. As a result, longer webpages may take some time to translate. Actual performance also depends on the selected translation engine and network conditions.",
+                    "footer": "Mira Translator was originally developed to meet my own needs, and I later decided to share it with everyone for free. The extension can be used without creating an account or signing in. There is no charge for using the extension, and we do not accept tips or donations. Development and maintenance require a significant investment of time and effort; therefore, free custom development is not offered. Future feature updates will be determined by the overall roadmap and maintenance needs.",
+                    "summaryTitle": "At a glance",
+                    "summaryBuiltinLabel": "Built-in translation",
+                    "summaryAiLabel": "AI translation",
+                    "summaryByokLabel": "Recommended setup",
+                    "summaryAi": "No built-in free AI service is provided, and no Pro memberships, AI plans, or third-party services are offered or sold.",
+                    "summaryByok": "Simply get an API Key from your chosen AI provider, enter it in the extension, and select a model to use that provider’s AI service directly.",
+                    "compatTitle": "Website Compatibility and Page Layout",
+                    "accuracyTitle": "About Translation Accuracy",
+                    "aiTitle": "About AI Translation",
+                    "speedTitle": "Translation Speed and Stability",
+                    "footerTitle": "About the Project and Maintenance",
+                    "footerLead": "Mira Translator was originally developed to meet my own needs, and I later decided to share it with everyone for free. The extension can be used without creating an account or signing in. ",
+                    "footerEmphasis": "free custom development is not offered.",
+                    "footerTail": " Future feature updates will be determined by the overall roadmap and maintenance needs.",
+                    "footerFreeEmphasis": "There is no charge for using the extension, and we do not accept tips or donations.",
+                    "footerMiddle": " Development and maintenance require a significant investment of time and effort; therefore, ",
+                    "permissionsTitle": "About browser permissions",
+                    "permissionsTabs": "Tab access: Used to identify the page currently open so Mira can provide bilingual translation and apply the corresponding site settings. Chrome/Edge may label this permission “Read your browsing history.”",
+                    "permissionsSites": "Website and local-file access: Used to read pages you choose to translate, connect to services for Google/Bing translation and YouTube features, and open local documents. Firefox lists these as optional permissions.",
+                    "permissionsPdf": "PDF reading: Eligible PDF pages are opened in Mira’s built-in reader. Chrome/Edge may label the related permission “Block content on all pages.” For some protected PDFs, a Referer header is added when needed to help the document load."
+                }
             }
         ],
         "ja": [
@@ -81,9 +186,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 AI翻訳サービスの選び方 · クリックして詳細を確認",
                 "level": "info",
-                "content": "この拡張機能にはGoogle/Bing翻訳が標準搭載されており、API Keyは不要です。インストール後すぐに利用できます。\n\n【翻訳精度について】\n> この拡張機能は、ウェブページと翻訳エンジンをつなぐ役割を果たします。翻訳の品質は、選択した翻訳エンジンによって決まります。翻訳が不正確な場合、その原因は通常、拡張機能ではなく翻訳エンジン自体の性能にあります。より高性能なAIモデルを使用することで、一般的に、より自然で正確な翻訳が期待できます。\n\n【AI翻訳について】\n> AI翻訳には計算リソースが必要であり、それに伴うコストも発生します。そのため、この拡張機能では無料のAI翻訳サービスを内蔵しておらず、Pro会員プラン、AIプラン、第三者サービスの提供や販売も行っていません。より高品質な翻訳を利用したい場合は、サービス提供元の公式窓口からAPI Keyを取得し、適切なモデルを選択して、ご自身のAIサービスを接続できます。\n\n> なぜご自身のAPI Keyの利用をおすすめするのか、2つの利用方法を例に説明します。\n\n>> ① Mira TranslatorでPro会員プランを購入すると仮定した場合：\n>>> ユーザーがPro会員プランを購入 → MiraがAIサービス提供元から1つのAPI Keyを取得・管理 → 複数のユーザーがMiraの管理する同じAPI Keyを共有してAI翻訳を利用します。\n>>> この方式では、翻訳したい内容がまずMiraのサーバーに送信されます。その後、Miraのサーバーが共有API Keyを使ってAIサービス提供元に内容を転送し、処理を依頼します。翻訳結果はMiraのサーバーを経由してユーザーに返されます。APIの利用にかかる費用は会員料金に含まれます。\n\n>> ② 自分のAPI Keyを使用する場合（Mira Translator推奨）：\n>>> AIサービス提供元の公式窓口から自分のAPI Keyを取得 → 拡張機能に入力 → 拡張機能からAIサービス提供元へ直接翻訳リクエストを送信し、そのモデルを利用します。\n>>> この方式では、API Keyはユーザー自身が管理し、料金の請求や利用量の管理はAIサービス提供元が直接行います。\n\n> どちらの方法でも、最終的にはAIサービス提供元が提供するモデルを利用して翻訳します。主な違いは、API Keyの管理者、料金の決済方法、そして翻訳内容のデータ転送経路です。自分でAPI Keyを取得すれば、利用料金や使用上限を直接管理でき、モデルの選択や変更も自由に行えます。また、データ転送における余分な中継経路を減らすことができます。\n\n> 対応しているサービスとモデル：\n\n>> • OpenRouter：1つのKeyで、ほぼすべての主要モデルを利用できます。\n>> • Groq：無料利用枠があり、応答も高速です。\n>> • Gemini：無料利用枠がありますが、利用制限は比較的厳しめです。\n>> • GPT、Claude、DeepL、SiliconFlow、Ollama、およびOpenAI API互換のサービス。\n\n> 具体的な利用条件や上限については、各サービス提供元の公式情報をご確認ください。\n\n【翻訳速度と安定性のバランスについて】\n> 翻訳サービスのリクエスト制限に達する可能性をできるだけ抑えるため、ウェブページのコンテンツは大量のリクエストを同時に送信するのではなく、分割して順番に翻訳します。そのため、長いページでは翻訳に時間がかかる場合があります。実際の速度は、選択した翻訳エンジンやネットワーク環境にも左右されます。\n\nウェブサイトごとにページ構造や技術的な実装が大きく異なるため、すべてのサイトとの互換性を保証することはできません。一部の特殊なサイトでは、正常に翻訳できない場合があります。\n\n本プロジェクトは現在無料で利用できますが、開発とメンテナンスには多くの時間が必要です。無償での個別カスタマイズ開発には対応していません。今後の機能追加や更新は、全体的な開発方針とメンテナンス状況に応じて行います。",
                 "gotIt": "了解",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "この拡張機能にはGoogle/Bing翻訳が標準搭載されており、API Keyは不要です。インストール後すぐに利用できます。",
+                    "compatibility1": "ウェブサイトごとにページ構造や技術的な実装が大きく異なるため、すべてのサイトとの互換性を保証することはできません。一部の特殊なサイトでは、正常に翻訳できない場合があります。",
+                    "accuracy": "この拡張機能は、ウェブページと翻訳エンジンをつなぐ役割を果たします。翻訳の品質は、選択した翻訳エンジンによって決まります。翻訳が不正確な場合、その原因は通常、拡張機能ではなく翻訳エンジン自体の性能にあります。より高性能なAIモデルを使用することで、一般的に、より自然で正確な翻訳が期待できます。",
+                    "aiIntro": "AI翻訳には計算リソースが必要であり、それに伴うコストも発生します。そのため、この拡張機能では無料のAI翻訳サービスを内蔵しておらず、Pro会員プラン、AIプラン、第三者サービスの提供や販売も行っていません。より高品質な翻訳を利用したい場合は、サービス提供元の公式窓口からAPI Keyを取得し、適切なモデルを選択して、ご自身のAIサービスを接続できます。",
+                    "aiWhy": "なぜご自身のAPI Keyの利用をおすすめするのか、2つの利用方法を例に説明します。",
+                    "proTitle": "① Mira TranslatorでPro会員プランを購入すると仮定した場合：",
+                    "proFlow": "ユーザーがPro会員プランを購入 → MiraがAIサービス提供元から1つのAPI Keyを取得・管理 → 複数のユーザーがMiraの管理する同じAPI Keyを共有してAI翻訳を利用します。",
+                    "proDetails": "この方式では、翻訳したい内容がまずMiraのサーバーに送信されます。その後、Miraのサーバーが共有API Keyを使ってAIサービス提供元に内容を転送し、処理を依頼します。翻訳結果はMiraのサーバーを経由してユーザーに返されます。APIの利用にかかる費用は会員料金に含まれます。",
+                    "byokTitle": "② 自分のAPI Keyを使用する場合（Mira Translator推奨）：",
+                    "byokFlow": "AIサービス提供元の公式窓口から自分のAPI Keyを取得 → 拡張機能に入力 → 拡張機能からAIサービス提供元へ直接翻訳リクエストを送信し、そのモデルを利用します。",
+                    "byokDetails": "この方式では、API Keyはユーザー自身が管理し、料金の請求や利用量の管理はAIサービス提供元が直接行います。",
+                    "aiComparison": "どちらの方法でも、最終的にはAIサービス提供元が提供するモデルを利用して翻訳します。主な違いは、API Keyの管理者、料金の決済方法、そして翻訳内容のデータ転送経路です。自分でAPI Keyを取得すれば、利用料金や使用上限を直接管理でき、モデルの選択や変更も自由に行えます。また、データ転送における余分な中継経路を減らすことができます。",
+                    "providersIntro": "対応しているサービスとモデル：",
+                    "providers": [
+                        "OpenRouter：1つのKeyで、ほぼすべての主要モデルを利用できます。",
+                        "Groq：無料利用枠があり、応答も高速です。",
+                        "Gemini：無料利用枠がありますが、利用制限は比較的厳しめです。",
+                        "GPT、Claude、DeepL、SiliconFlow、Ollama、およびOpenAI API互換のサービス。"
+                    ],
+                    "providerLimits": "具体的な利用条件や上限については、各サービス提供元の公式情報をご確認ください。",
+                    "speed": "翻訳サービスのリクエスト制限に達する可能性をできるだけ抑えるため、ウェブページのコンテンツは大量のリクエストを同時に送信するのではなく、分割して順番に翻訳します。そのため、長いページでは翻訳に時間がかかる場合があります。実際の速度は、選択した翻訳エンジンやネットワーク環境にも左右されます。",
+                    "footer": "Mira Translator は、もともと自分自身の利用ニーズを満たすために開発し、その後、皆さんに無料で共有することにしました。この拡張機能はアカウント登録やログインなしで利用できます。利用料金は一切かからず、投げ銭や寄付も受け付けていません。開発とメンテナンスには多くの時間と労力が必要なため、個別のカスタマイズ開発を無料で行うことはありません。今後の機能更新は、全体的な開発方針とメンテナンスの状況に応じて行います。",
+                    "summaryTitle": "最初にご確認ください",
+                    "summaryBuiltinLabel": "標準搭載の翻訳",
+                    "summaryAiLabel": "AI翻訳",
+                    "summaryByokLabel": "おすすめの利用方法",
+                    "summaryAi": "無料のAI翻訳サービスは内蔵しておらず、Pro会員プラン、AIプラン、第三者サービスの提供・販売も行っていません。",
+                    "summaryByok": "利用したいAIサービス提供元からAPI Keyを取得し、拡張機能に入力してモデルを選ぶだけで、そのサービスを直接利用できます。",
+                    "compatTitle": "ウェブサイトとの互換性とページレイアウト",
+                    "accuracyTitle": "翻訳精度について",
+                    "aiTitle": "AI翻訳について",
+                    "speedTitle": "翻訳速度と安定性のバランスについて",
+                    "footerTitle": "プロジェクトとメンテナンスについて",
+                    "footerLead": "Mira Translator は、もともと自分自身の利用ニーズを満たすために開発し、その後、皆さんに無料で共有することにしました。この拡張機能はアカウント登録やログインなしで利用できます。",
+                    "footerEmphasis": "個別のカスタマイズ開発を無料で行うことはありません。",
+                    "footerTail": "今後の機能更新は、全体的な開発方針とメンテナンスの状況に応じて行います。",
+                    "footerFreeEmphasis": "利用料金は一切かからず、投げ銭や寄付も受け付けていません。",
+                    "footerMiddle": "開発とメンテナンスには多くの時間と労力が必要なため、",
+                    "permissionsTitle": "ブラウザー権限について",
+                    "permissionsTabs": "タブへのアクセス：現在開いているページを識別し、二言語翻訳とサイト別設定の適用に使用します。Chrome/Edge では「閲覧履歴の読み取り」と表示される場合があります。",
+                    "permissionsSites": "ウェブサイトとローカルファイルへのアクセス：翻訳対象のページの読み取り、Google/Bing 翻訳や YouTube 関連機能への接続、ローカル文書の表示に使用します。Firefox ではこれらは任意の権限として表示されます。",
+                    "permissionsPdf": "PDF の閲覧：条件に合う PDF を Mira 内蔵リーダーで開きます。Chrome/Edge では関連する権限が「すべてのページのコンテンツをブロック」と表示される場合があります。一部の保護された PDF では、読み込みを助けるため必要に応じて Referer ヘッダーを追加します。"
+                }
             }
         ],
         "ko": [
@@ -91,9 +239,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 AI 번역 서비스 선택 안내 · 클릭하여 자세히 보기",
                 "level": "info",
-                "content": "이 확장 프로그램에는 Google/Bing 번역이 기본으로 내장되어 있어 API Key 없이 바로 사용할 수 있습니다.\n\n【번역 정확도에 관하여】\n> 이 확장 프로그램은 웹페이지와 번역 엔진을 연결하는 역할을 합니다. 번역 품질은 사용자가 선택한 번역 엔진에 따라 달라집니다. 번역이 부정확한 경우 대체로 확장 프로그램 자체의 문제가 아니라 번역 엔진의 성능에 따른 것입니다. 일반적으로 더 뛰어난 AI 모델을 사용하면 더 자연스럽고 정확한 번역 결과를 얻을 수 있습니다.\n\n【AI 번역에 관하여】\n> AI 번역에는 컴퓨팅 리소스가 필요하며 이에 따른 비용도 발생합니다. 따라서 이 확장 프로그램은 기본 제공 무료 AI 서비스를 제공하지 않으며, Pro 멤버십, AI 요금제 또는 제3자 서비스를 제공하거나 판매하지도 않습니다. 더 나은 번역 품질을 원한다면 서비스 제공업체의 공식 채널에서 API Key를 발급받고 적합한 모델을 선택하여 자신의 AI 서비스를 연결할 수 있습니다.\n\n> 왜 개인 API Key 사용을 더 권장하는지 설명하기 위해, 두 가지 사용 방식을 살펴보겠습니다.\n\n>> ① Mira Translator에서 Pro 멤버십을 구매한다고 가정하면:\n>>> 사용자가 Pro 멤버십 구매 → Mira가 AI 서비스 제공업체에서 API Key 하나를 발급받아 관리 → 여러 사용자가 Mira가 관리하는 동일한 API Key를 함께 사용해 AI 번역을 이용합니다.\n>>> 이 방식에서는 번역할 내용이 먼저 Mira 서버로 전송됩니다. 이후 Mira 서버가 공유 API Key를 사용해 해당 내용을 AI 서비스 제공업체로 전달하고 처리를 요청합니다. 번역 결과는 Mira 서버를 거쳐 사용자에게 반환됩니다. API 사용에 따른 비용은 멤버십 가격에 포함됩니다.\n\n>> ② 개인 API Key 사용 (Mira Translator 권장):\n>>> AI 서비스 제공업체의 공식 채널에서 직접 API Key 발급 → 확장 프로그램에 입력 → 확장 프로그램이 AI 서비스 제공업체에 번역 요청을 직접 전송하고 해당 업체의 모델을 사용합니다.\n>>> 이 방식에서는 API Key를 사용자가 직접 관리하며, 요금 청구와 사용량 관리는 AI 서비스 제공업체에서 직접 처리합니다.\n\n> 두 방식 모두 최종적으로 AI 서비스 제공업체가 제공하는 모델을 사용합니다. 주요 차이는 API Key의 관리 주체, 비용 정산 방식, 번역 내용의 데이터 전송 경로에 있습니다. 직접 API Key를 발급받으면 지출과 사용 한도를 직접 관리할 수 있고, 원하는 모델을 자유롭게 선택하거나 변경할 수도 있습니다. 또한 데이터 전송 과정에서 추가적인 중간 경유 단계를 줄일 수 있습니다.\n\n> 지원하는 서비스 및 모델은 다음과 같습니다.\n\n>> • OpenRouter: 하나의 Key로 거의 모든 주요 모델 이용 가능;\n>> • Groq: 무료 사용량을 제공하며 응답 속도가 빠릅니다;\n>> • Gemini: 무료 사용량을 제공하지만 이용 제한이 비교적 엄격합니다;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama 및 OpenAI API와 호환되는 모든 서비스.\n\n> 구체적인 이용 규칙과 한도는 각 서비스 제공업체의 공식 안내를 확인해 주세요.\n\n【번역 속도와 안정성 사이의 균형】\n> 번역 서비스의 요청 빈도 제한에 걸릴 가능성을 최대한 줄이기 위해 웹페이지 콘텐츠를 한꺼번에 대량 요청하는 대신 여러 부분으로 나누어 순차적으로 번역합니다. 따라서 내용이 긴 웹페이지는 번역에 시간이 걸릴 수 있습니다. 실제 속도는 선택한 번역 엔진과 네트워크 환경에도 영향을 받습니다.\n\n웹사이트마다 페이지 구조와 기술적인 구현 방식이 크게 다르므로 모든 웹사이트와의 호환성을 보장할 수는 없습니다. 일부 특수한 웹사이트에서는 번역이 정상적으로 작동하지 않을 수 있습니다.\n\n이 프로젝트는 현재 무료로 제공되지만 개발과 유지 관리에는 상당한 시간과 노력이 필요합니다. 무료 맞춤형 개발은 제공하지 않으며, 기능 업데이트는 전체 개발 계획과 유지 관리 상황에 따라 결정됩니다.",
                 "gotIt": "확인",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "이 확장 프로그램에는 Google/Bing 번역이 기본으로 내장되어 있어 API Key 없이 바로 사용할 수 있습니다.",
+                    "compatibility1": "웹사이트마다 페이지 구조와 기술적인 구현 방식이 크게 다르므로 모든 웹사이트와의 호환성을 보장할 수는 없습니다. 일부 특수한 웹사이트에서는 번역이 정상적으로 작동하지 않을 수 있습니다.",
+                    "accuracy": "이 확장 프로그램은 웹페이지와 번역 엔진을 연결하는 역할을 합니다. 번역 품질은 사용자가 선택한 번역 엔진에 따라 달라집니다. 번역이 부정확한 경우 대체로 확장 프로그램 자체의 문제가 아니라 번역 엔진의 성능에 따른 것입니다. 일반적으로 더 뛰어난 AI 모델을 사용하면 더 자연스럽고 정확한 번역 결과를 얻을 수 있습니다.",
+                    "aiIntro": "AI 번역에는 컴퓨팅 리소스가 필요하며 이에 따른 비용도 발생합니다. 따라서 이 확장 프로그램은 기본 제공 무료 AI 서비스를 제공하지 않으며, Pro 멤버십, AI 요금제 또는 제3자 서비스를 제공하거나 판매하지도 않습니다. 더 나은 번역 품질을 원한다면 서비스 제공업체의 공식 채널에서 API Key를 발급받고 적합한 모델을 선택하여 자신의 AI 서비스를 연결할 수 있습니다.",
+                    "aiWhy": "왜 개인 API Key 사용을 더 권장하는지 설명하기 위해, 두 가지 사용 방식을 살펴보겠습니다.",
+                    "proTitle": "① Mira Translator에서 Pro 멤버십을 구매한다고 가정하면:",
+                    "proFlow": "사용자가 Pro 멤버십 구매 → Mira가 AI 서비스 제공업체에서 API Key 하나를 발급받아 관리 → 여러 사용자가 Mira가 관리하는 동일한 API Key를 함께 사용해 AI 번역을 이용합니다.",
+                    "proDetails": "이 방식에서는 번역할 내용이 먼저 Mira 서버로 전송됩니다. 이후 Mira 서버가 공유 API Key를 사용해 해당 내용을 AI 서비스 제공업체로 전달하고 처리를 요청합니다. 번역 결과는 Mira 서버를 거쳐 사용자에게 반환됩니다. API 사용에 따른 비용은 멤버십 가격에 포함됩니다.",
+                    "byokTitle": "② 개인 API Key 사용 (Mira Translator 권장):",
+                    "byokFlow": "AI 서비스 제공업체의 공식 채널에서 직접 API Key 발급 → 확장 프로그램에 입력 → 확장 프로그램이 AI 서비스 제공업체에 번역 요청을 직접 전송하고 해당 업체의 모델을 사용합니다.",
+                    "byokDetails": "이 방식에서는 API Key를 사용자가 직접 관리하며, 요금 청구와 사용량 관리는 AI 서비스 제공업체에서 직접 처리합니다.",
+                    "aiComparison": "두 방식 모두 최종적으로 AI 서비스 제공업체가 제공하는 모델을 사용합니다. 주요 차이는 API Key의 관리 주체, 비용 정산 방식, 번역 내용의 데이터 전송 경로에 있습니다. 직접 API Key를 발급받으면 지출과 사용 한도를 직접 관리할 수 있고, 원하는 모델을 자유롭게 선택하거나 변경할 수도 있습니다. 또한 데이터 전송 과정에서 추가적인 중간 경유 단계를 줄일 수 있습니다.",
+                    "providersIntro": "지원하는 서비스 및 모델은 다음과 같습니다.",
+                    "providers": [
+                        "OpenRouter: 하나의 Key로 거의 모든 주요 모델 이용 가능;",
+                        "Groq: 무료 사용량을 제공하며 응답 속도가 빠릅니다;",
+                        "Gemini: 무료 사용량을 제공하지만 이용 제한이 비교적 엄격합니다;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama 및 OpenAI API와 호환되는 모든 서비스."
+                    ],
+                    "providerLimits": "구체적인 이용 규칙과 한도는 각 서비스 제공업체의 공식 안내를 확인해 주세요.",
+                    "speed": "번역 서비스의 요청 빈도 제한에 걸릴 가능성을 최대한 줄이기 위해 웹페이지 콘텐츠를 한꺼번에 대량 요청하는 대신 여러 부분으로 나누어 순차적으로 번역합니다. 따라서 내용이 긴 웹페이지는 번역에 시간이 걸릴 수 있습니다. 실제 속도는 선택한 번역 엔진과 네트워크 환경에도 영향을 받습니다.",
+                    "footer": "Mira Translator는 원래 개인적인 사용 요구를 충족하기 위해 개발했으며, 이후 모든 분과 무료로 공유하기로 했습니다. 이 확장 프로그램은 계정 등록이나 로그인 없이 사용할 수 있습니다. 이용 요금은 없으며, 후원이나 기부도 받지 않습니다. 개발과 유지 관리에는 상당한 시간과 노력이 필요하므로 무료 맞춤 개발은 제공하지 않습니다. 향후 기능 업데이트는 전체 개발 계획과 유지 관리 상황에 따라 결정됩니다.",
+                    "summaryTitle": "먼저 확인해 주세요",
+                    "summaryBuiltinLabel": "기본 제공 번역",
+                    "summaryAiLabel": "AI 번역",
+                    "summaryByokLabel": "권장 사용 방식",
+                    "summaryAi": "기본 제공 무료 AI 서비스는 없으며, Pro 멤버십, AI 요금제 또는 제3자 서비스도 제공하거나 판매하지 않습니다.",
+                    "summaryByok": "원하는 AI 서비스 제공업체에서 API Key를 발급받아 확장 프로그램에 입력하고 모델을 선택하면 해당 서비스를 바로 이용할 수 있습니다.",
+                    "compatTitle": "웹사이트 호환성 및 페이지 레이아웃",
+                    "accuracyTitle": "번역 정확도에 관하여",
+                    "aiTitle": "AI 번역에 관하여",
+                    "speedTitle": "번역 속도와 안정성 사이의 균형",
+                    "footerTitle": "프로젝트 및 유지 관리 안내",
+                    "footerLead": "Mira Translator는 원래 개인적인 사용 요구를 충족하기 위해 개발했으며, 이후 모든 분과 무료로 공유하기로 했습니다. 이 확장 프로그램은 계정 등록이나 로그인 없이 사용할 수 있습니다. ",
+                    "footerEmphasis": "무료 맞춤 개발은 제공하지 않습니다.",
+                    "footerTail": " 향후 기능 업데이트는 전체 개발 계획과 유지 관리 상황에 따라 결정됩니다.",
+                    "footerFreeEmphasis": "이용 요금은 없으며, 후원이나 기부도 받지 않습니다.",
+                    "footerMiddle": " 개발과 유지 관리에는 상당한 시간과 노력이 필요하므로 ",
+                    "permissionsTitle": "브라우저 권한 안내",
+                    "permissionsTabs": "탭 액세스: 현재 열린 웹페이지를 식별해 이중 언어 번역을 제공하고 해당 사이트 설정을 적용하는 데 사용합니다. Chrome/Edge에서는 ‘인터넷 사용 기록 읽기’로 표시될 수 있습니다.",
+                    "permissionsSites": "웹사이트 및 로컬 파일 액세스: 번역할 웹페이지를 읽고 Google/Bing 번역 및 YouTube 관련 기능에 연결하며 로컬 문서를 여는 데 사용합니다. Firefox에서는 선택적 권한으로 표시됩니다.",
+                    "permissionsPdf": "PDF 열기: 조건에 맞는 PDF를 Mira 내장 리더에서 엽니다. Chrome/Edge에서는 관련 권한이 ‘모든 페이지의 콘텐츠 차단’으로 표시될 수 있습니다. 일부 보호된 PDF는 로딩을 돕기 위해 필요할 때 Referer 헤더를 추가합니다."
+                }
             }
         ],
         "es": [
@@ -101,9 +292,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Cómo elegir un servicio de traducción con IA · Haz clic para más información",
                 "level": "info",
-                "content": "Esta extensión incluye traducción integrada de Google/Bing. No necesitas una API Key: está lista para usar desde el primer momento.\n\n【Sobre la precisión de las traducciones】\n> Esta extensión actúa como un puente entre las páginas web y los motores de traducción. La calidad de las traducciones depende del motor que elijas. Si una traducción no es precisa, normalmente se debe al rendimiento del propio motor y no a un problema de la extensión. Los modelos de IA más avanzados suelen ofrecer traducciones más naturales y precisas.\n\n【Sobre la traducción con IA】\n> La traducción con IA requiere recursos de computación y genera costes asociados. Por eso, esta extensión no incluye un servicio de IA gratuito ni ofrece o vende membresías Pro, planes de IA o servicios de terceros. Para obtener mejores traducciones, puedes conectar tu propio servicio de IA: solicita una API Key a través de los canales oficiales del proveedor y elige el modelo que mejor se adapte a tus necesidades.\n\n> Para explicar por qué recomendamos utilizar tu propia API Key, aquí tienes dos posibles formas de utilizar la traducción con IA:\n\n>> ① Supongamos que compras una membresía Pro a través de Mira Translator:\n>>> Los usuarios compran una membresía Pro → Mira adquiere y administra una única API Key de un proveedor de IA → Varios usuarios comparten esa misma API Key gestionada por Mira para utilizar la traducción con IA.\n>>> En este modelo, el contenido que los usuarios desean traducir se envía primero al servidor de Mira. A continuación, el servidor utiliza la API Key compartida para reenviar el contenido al proveedor de IA, donde se procesa. Los resultados de la traducción se devuelven a los usuarios a través del servidor de Mira. Los costes asociados al uso de la API se incluyen en el precio de la membresía.\n\n>> ② Utilizar tu propia API Key (recomendado por Mira Translator):\n>>> Solicita tu propia API Key directamente a través de los canales oficiales del proveedor de IA → Introduce la clave en la extensión → La extensión envía las solicitudes de traducción directamente al proveedor de IA y utiliza sus modelos.\n>>> Con este método, tú gestionas tu propia API Key, mientras que el proveedor de IA se encarga directamente de la facturación y del control del consumo.\n\n> En ambos casos, las traducciones se realizan utilizando modelos proporcionados por servicios de IA. Las principales diferencias están en quién administra la API Key, cómo se facturan los costes y cuál es la ruta que siguen los datos durante la traducción. Al utilizar tu propia API Key, puedes controlar directamente tus gastos y límites de uso, elegir o cambiar de modelo libremente y reducir los intermediarios en la transmisión de datos.\n\n> Entre los servicios y modelos compatibles se incluyen:\n\n>> • OpenRouter: Una sola Key permite acceder a casi todos los modelos principales;\n>> • Groq: Ofrece un nivel gratuito y respuestas rápidas;\n>> • Gemini: Ofrece un nivel gratuito, pero sus límites de uso son relativamente estrictos;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama y cualquier servicio compatible con la API de OpenAI.\n\n> Consulta la documentación oficial de cada proveedor para conocer las condiciones y los límites de uso específicos.\n\n【Sobre el equilibrio entre la velocidad y la estabilidad de la traducción】\n> Para reducir al máximo la posibilidad de alcanzar los límites de frecuencia de las solicitudes del servicio de traducción, el contenido de las páginas web se traduce por bloques y en cola, en lugar de enviar muchas solicitudes al mismo tiempo. Por eso, las páginas más largas pueden tardar un poco en traducirse. La velocidad real también depende del motor de traducción elegido y de las condiciones de la red.\n\nDebido a las grandes diferencias en la estructura y la implementación técnica de cada sitio web, no podemos garantizar la compatibilidad con todos ellos. Es posible que algunos sitios web con características especiales no se traduzcan correctamente.\n\nEste proyecto es gratuito actualmente, pero su desarrollo y mantenimiento requieren una inversión considerable de tiempo. No ofrecemos desarrollo personalizado gratuito. Las futuras actualizaciones de funciones dependerán de la planificación general del proyecto y de las necesidades de mantenimiento.",
                 "gotIt": "Entendido",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Esta extensión incluye traducción integrada de Google/Bing. No necesitas una API Key: está lista para usar desde el primer momento.",
+                    "compatibility1": "Debido a las grandes diferencias en la estructura y la implementación técnica de cada sitio web, no podemos garantizar la compatibilidad con todos ellos. Es posible que algunos sitios web con características especiales no se traduzcan correctamente.",
+                    "accuracy": "Esta extensión actúa como un puente entre las páginas web y los motores de traducción. La calidad de las traducciones depende del motor que elijas. Si una traducción no es precisa, normalmente se debe al rendimiento del propio motor y no a un problema de la extensión. Los modelos de IA más avanzados suelen ofrecer traducciones más naturales y precisas.",
+                    "aiIntro": "La traducción con IA requiere recursos de computación y genera costes asociados. Por eso, esta extensión no incluye un servicio de IA gratuito ni ofrece o vende membresías Pro, planes de IA o servicios de terceros. Para obtener mejores traducciones, puedes conectar tu propio servicio de IA: solicita una API Key a través de los canales oficiales del proveedor y elige el modelo que mejor se adapte a tus necesidades.",
+                    "aiWhy": "Para explicar por qué recomendamos utilizar tu propia API Key, aquí tienes dos posibles formas de utilizar la traducción con IA:",
+                    "proTitle": "① Supongamos que compras una membresía Pro a través de Mira Translator:",
+                    "proFlow": "Los usuarios compran una membresía Pro → Mira adquiere y administra una única API Key de un proveedor de IA → Varios usuarios comparten esa misma API Key gestionada por Mira para utilizar la traducción con IA.",
+                    "proDetails": "En este modelo, el contenido que los usuarios desean traducir se envía primero al servidor de Mira. A continuación, el servidor utiliza la API Key compartida para reenviar el contenido al proveedor de IA, donde se procesa. Los resultados de la traducción se devuelven a los usuarios a través del servidor de Mira. Los costes asociados al uso de la API se incluyen en el precio de la membresía.",
+                    "byokTitle": "② Utilizar tu propia API Key (recomendado por Mira Translator):",
+                    "byokFlow": "Solicita tu propia API Key directamente a través de los canales oficiales del proveedor de IA → Introduce la clave en la extensión → La extensión envía las solicitudes de traducción directamente al proveedor de IA y utiliza sus modelos.",
+                    "byokDetails": "Con este método, tú gestionas tu propia API Key, mientras que el proveedor de IA se encarga directamente de la facturación y del control del consumo.",
+                    "aiComparison": "En ambos casos, las traducciones se realizan utilizando modelos proporcionados por servicios de IA. Las principales diferencias están en quién administra la API Key, cómo se facturan los costes y cuál es la ruta que siguen los datos durante la traducción. Al utilizar tu propia API Key, puedes controlar directamente tus gastos y límites de uso, elegir o cambiar de modelo libremente y reducir los intermediarios en la transmisión de datos.",
+                    "providersIntro": "Entre los servicios y modelos compatibles se incluyen:",
+                    "providers": [
+                        "OpenRouter: Una sola Key permite acceder a casi todos los modelos principales;",
+                        "Groq: Ofrece un nivel gratuito y respuestas rápidas;",
+                        "Gemini: Ofrece un nivel gratuito, pero sus límites de uso son relativamente estrictos;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama y cualquier servicio compatible con la API de OpenAI."
+                    ],
+                    "providerLimits": "Consulta la documentación oficial de cada proveedor para conocer las condiciones y los límites de uso específicos.",
+                    "speed": "Para reducir al máximo la posibilidad de alcanzar los límites de frecuencia de las solicitudes del servicio de traducción, el contenido de las páginas web se traduce por bloques y en cola, en lugar de enviar muchas solicitudes al mismo tiempo. Por eso, las páginas más largas pueden tardar un poco en traducirse. La velocidad real también depende del motor de traducción elegido y de las condiciones de la red.",
+                    "footer": "Mira Translator se desarrolló originalmente para satisfacer mis propias necesidades y, más adelante, decidí compartirlo con todos de forma gratuita. La extensión se puede utilizar sin crear una cuenta ni iniciar sesión. No tiene ningún coste de uso y tampoco aceptamos propinas ni donaciones. El desarrollo y el mantenimiento requieren una inversión considerable de tiempo y esfuerzo; por eso, no ofrecemos desarrollo personalizado gratuito. Las futuras actualizaciones dependerán del plan general del proyecto y de las necesidades de mantenimiento.",
+                    "summaryTitle": "Información esencial",
+                    "summaryBuiltinLabel": "Traducción integrada",
+                    "summaryAiLabel": "Traducción con IA",
+                    "summaryByokLabel": "Opción recomendada",
+                    "summaryAi": "No se ofrece un servicio de IA gratuito integrado ni se proporcionan o venden membresías Pro, planes de IA o servicios de terceros.",
+                    "summaryByok": "Solo tienes que obtener una API Key del proveedor de IA que prefieras, introducirla en la extensión y elegir un modelo para utilizar su servicio directamente.",
+                    "compatTitle": "Compatibilidad con sitios web y diseño de las páginas",
+                    "accuracyTitle": "Sobre la precisión de las traducciones",
+                    "aiTitle": "Sobre la traducción con IA",
+                    "speedTitle": "Equilibrio entre la velocidad y la estabilidad de la traducción",
+                    "footerTitle": "Sobre el proyecto y su mantenimiento",
+                    "footerLead": "Mira Translator se desarrolló originalmente para satisfacer mis propias necesidades y, más adelante, decidí compartirlo con todos de forma gratuita. La extensión se puede utilizar sin crear una cuenta ni iniciar sesión. ",
+                    "footerEmphasis": "no ofrecemos desarrollo personalizado gratuito.",
+                    "footerTail": " Las futuras actualizaciones dependerán del plan general del proyecto y de las necesidades de mantenimiento.",
+                    "footerFreeEmphasis": "No tiene ningún coste de uso y tampoco aceptamos propinas ni donaciones.",
+                    "footerMiddle": " El desarrollo y el mantenimiento requieren una inversión considerable de tiempo y esfuerzo; por eso, ",
+                    "permissionsTitle": "Acerca de los permisos del navegador",
+                    "permissionsTabs": "Acceso a pestañas: permite identificar la página abierta para ofrecer traducción bilingüe y aplicar la configuración correspondiente del sitio. Chrome/Edge puede mostrar este permiso como «Leer tu historial de navegación».",
+                    "permissionsSites": "Acceso a sitios web y archivos locales: permite leer las páginas que eliges traducir, conectarse a los servicios de Google/Bing y a las funciones de YouTube, y abrir documentos locales. Firefox los muestra como permisos opcionales.",
+                    "permissionsPdf": "Lectura de PDF: los PDF compatibles se abren en el lector integrado de Mira. Chrome/Edge puede mostrar el permiso relacionado como «Bloquear contenido en todas las páginas». Para algunos PDF protegidos, se añade un encabezado Referer cuando es necesario para facilitar la carga."
+                }
             }
         ],
         "pt-BR": [
@@ -111,9 +345,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Como escolher um serviço de tradução com IA · Clique para saber mais",
                 "level": "info",
-                "content": "Esta extensão já inclui a tradução do Google/Bing. Não é necessário ter uma API Key: basta instalar e começar a usar.\n\n【Sobre a precisão das traduções】\n> Esta extensão funciona como uma ponte entre as páginas da web e os mecanismos de tradução. A qualidade da tradução depende do mecanismo escolhido. Quando uma tradução não é precisa, geralmente isso se deve ao desempenho do próprio mecanismo, e não a um problema da extensão. Modelos de IA mais avançados costumam produzir traduções mais naturais e precisas.\n\n【Sobre a tradução com IA】\n> A tradução com IA exige recursos computacionais e gera custos. Por isso, esta extensão não oferece um serviço de IA gratuito integrado, nem fornece ou vende assinaturas Pro, planos de IA ou serviços de terceiros. Para obter traduções de melhor qualidade, você pode conectar seu próprio serviço de IA: solicite uma API Key pelos canais oficiais do provedor e escolha o modelo mais adequado.\n\n> Para explicar por que recomendamos usar sua própria API Key, veja duas formas possíveis de utilizar a tradução com IA:\n\n>> ① Supondo que você comprasse uma assinatura Pro pelo Mira Translator:\n>>> Os usuários compram uma assinatura Pro → Mira adquire e gerencia uma única API Key de um provedor de IA → Vários usuários compartilham essa mesma API Key gerenciada pela Mira para utilizar a tradução com IA.\n>>> Nesse modelo, o conteúdo que os usuários desejam traduzir é primeiro enviado ao servidor da Mira. Em seguida, o servidor utiliza a API Key compartilhada para encaminhar o conteúdo ao provedor de IA, onde ele é processado. Os resultados da tradução são então enviados de volta aos usuários por meio do servidor da Mira. Os custos relacionados ao uso da API são incluídos no preço da assinatura.\n\n>> ② Use sua própria API Key (recomendado pelo Mira Translator):\n>>> Solicite sua própria API Key diretamente pelos canais oficiais do provedor de IA → Insira a chave na extensão → A extensão envia as solicitações de tradução diretamente ao provedor de IA e utiliza seus modelos.\n>>> Nesse caso, você gerencia sua própria API Key, enquanto o provedor de IA cuida diretamente da cobrança e do controle do consumo.\n\n> Nos dois casos, a tradução é feita com modelos fornecidos por serviços de IA. As principais diferenças estão em quem gerencia a API Key, como os custos são cobrados e por onde o conteúdo passa durante a tradução. Ao usar sua própria API Key, você pode controlar diretamente seus gastos e limites de uso, escolher ou trocar de modelo livremente e reduzir as etapas intermediárias na transmissão dos dados.\n\n> Entre os serviços e modelos compatíveis estão:\n>> • OpenRouter: uma única Key permite acessar praticamente todos os principais modelos;\n>> • Groq: oferece uma cota gratuita e respostas rápidas;\n>> • Gemini: oferece uma cota gratuita, mas com limites de uso relativamente rigorosos;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama e qualquer serviço compatível com a API da OpenAI.\n\n> Consulte as informações oficiais de cada provedor para conhecer as regras e os limites de uso específicos.\n\n【Sobre o equilíbrio entre velocidade e estabilidade da tradução】\n> Para reduzir ao máximo a possibilidade de atingir os limites de frequência do serviço de tradução, o conteúdo das páginas é traduzido em blocos, em uma fila, em vez de enviar muitas solicitações ao mesmo tempo. Por isso, páginas mais longas podem levar algum tempo para serem traduzidas. A velocidade real também depende do mecanismo de tradução escolhido e das condições da rede.\n\nComo cada site possui uma estrutura de página e uma implementação técnica diferentes, não é possível garantir compatibilidade com todos eles. Alguns sites com características específicas podem não ser traduzidos corretamente.\n\nEste projeto é gratuito no momento, mas seu desenvolvimento e manutenção exigem um investimento considerável de tempo. Não oferecemos desenvolvimento personalizado gratuito. As futuras atualizações de recursos serão realizadas de acordo com o planejamento geral e as necessidades de manutenção do projeto.",
                 "gotIt": "Entendi",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Esta extensão já inclui a tradução do Google/Bing. Não é necessário ter uma API Key: basta instalar e começar a usar.",
+                    "compatibility1": "Como cada site possui uma estrutura de página e uma implementação técnica diferentes, não é possível garantir compatibilidade com todos eles. Alguns sites com características específicas podem não ser traduzidos corretamente.",
+                    "accuracy": "Esta extensão funciona como uma ponte entre as páginas da web e os mecanismos de tradução. A qualidade da tradução depende do mecanismo escolhido. Quando uma tradução não é precisa, geralmente isso se deve ao desempenho do próprio mecanismo, e não a um problema da extensão. Modelos de IA mais avançados costumam produzir traduções mais naturais e precisas.",
+                    "aiIntro": "A tradução com IA exige recursos computacionais e gera custos. Por isso, esta extensão não oferece um serviço de IA gratuito integrado, nem fornece ou vende assinaturas Pro, planos de IA ou serviços de terceiros. Para obter traduções de melhor qualidade, você pode conectar seu próprio serviço de IA: solicite uma API Key pelos canais oficiais do provedor e escolha o modelo mais adequado.",
+                    "aiWhy": "Para explicar por que recomendamos usar sua própria API Key, veja duas formas possíveis de utilizar a tradução com IA:",
+                    "proTitle": "① Supondo que você comprasse uma assinatura Pro pelo Mira Translator:",
+                    "proFlow": "Os usuários compram uma assinatura Pro → Mira adquire e gerencia uma única API Key de um provedor de IA → Vários usuários compartilham essa mesma API Key gerenciada pela Mira para utilizar a tradução com IA.",
+                    "proDetails": "Nesse modelo, o conteúdo que os usuários desejam traduzir é primeiro enviado ao servidor da Mira. Em seguida, o servidor utiliza a API Key compartilhada para encaminhar o conteúdo ao provedor de IA, onde ele é processado. Os resultados da tradução são então enviados de volta aos usuários por meio do servidor da Mira. Os custos relacionados ao uso da API são incluídos no preço da assinatura.",
+                    "byokTitle": "② Use sua própria API Key (recomendado pelo Mira Translator):",
+                    "byokFlow": "Solicite sua própria API Key diretamente pelos canais oficiais do provedor de IA → Insira a chave na extensão → A extensão envia as solicitações de tradução diretamente ao provedor de IA e utiliza seus modelos.",
+                    "byokDetails": "Nesse caso, você gerencia sua própria API Key, enquanto o provedor de IA cuida diretamente da cobrança e do controle do consumo.",
+                    "aiComparison": "Nos dois casos, a tradução é feita com modelos fornecidos por serviços de IA. As principais diferenças estão em quem gerencia a API Key, como os custos são cobrados e por onde o conteúdo passa durante a tradução. Ao usar sua própria API Key, você pode controlar diretamente seus gastos e limites de uso, escolher ou trocar de modelo livremente e reduzir as etapas intermediárias na transmissão dos dados.",
+                    "providersIntro": "Entre os serviços e modelos compatíveis estão:",
+                    "providers": [
+                        "OpenRouter: uma única Key permite acessar praticamente todos os principais modelos;",
+                        "Groq: oferece uma cota gratuita e respostas rápidas;",
+                        "Gemini: oferece uma cota gratuita, mas com limites de uso relativamente rigorosos;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama e qualquer serviço compatível com a API da OpenAI."
+                    ],
+                    "providerLimits": "Consulte as informações oficiais de cada provedor para conhecer as regras e os limites de uso específicos.",
+                    "speed": "Para reduzir ao máximo a possibilidade de atingir os limites de frequência do serviço de tradução, o conteúdo das páginas é traduzido em blocos, em uma fila, em vez de enviar muitas solicitações ao mesmo tempo. Por isso, páginas mais longas podem levar algum tempo para serem traduzidas. A velocidade real também depende do mecanismo de tradução escolhido e das condições da rede.",
+                    "footer": "O Mira Translator foi desenvolvido originalmente para atender às minhas próprias necessidades de uso e, posteriormente, decidi compartilhá-lo gratuitamente com todos. A extensão pode ser usada sem criar uma conta ou fazer login. Não há nenhuma cobrança pelo uso, e também não aceitamos gorjetas nem doações. O desenvolvimento e a manutenção exigem um investimento considerável de tempo e esforço. Por isso, não oferecemos desenvolvimento personalizado gratuito. As futuras atualizações de recursos dependerão do planejamento geral do projeto e das necessidades de manutenção.",
+                    "summaryTitle": "Informações importantes",
+                    "summaryBuiltinLabel": "Tradução integrada",
+                    "summaryAiLabel": "Tradução com IA",
+                    "summaryByokLabel": "Opção recomendada",
+                    "summaryAi": "Não oferecemos um serviço de IA gratuito integrado, nem fornecemos ou vendemos assinaturas Pro, planos de IA ou serviços de terceiros.",
+                    "summaryByok": "Basta obter uma API Key do provedor de IA que você escolher, inseri-la na extensão e selecionar um modelo para usar o serviço diretamente.",
+                    "compatTitle": "Compatibilidade com sites e layout das páginas",
+                    "accuracyTitle": "Sobre a precisão das traduções",
+                    "aiTitle": "Sobre a tradução com IA",
+                    "speedTitle": "Equilíbrio entre velocidade e estabilidade da tradução",
+                    "footerTitle": "Sobre o projeto e sua manutenção",
+                    "footerLead": "O Mira Translator foi desenvolvido originalmente para atender às minhas próprias necessidades de uso e, posteriormente, decidi compartilhá-lo gratuitamente com todos. A extensão pode ser usada sem criar uma conta ou fazer login. ",
+                    "footerEmphasis": "não oferecemos desenvolvimento personalizado gratuito.",
+                    "footerTail": " As futuras atualizações de recursos dependerão do planejamento geral do projeto e das necessidades de manutenção.",
+                    "footerFreeEmphasis": "Não há nenhuma cobrança pelo uso, e também não aceitamos gorjetas nem doações.",
+                    "footerMiddle": " O desenvolvimento e a manutenção exigem um investimento considerável de tempo e esforço. Por isso, ",
+                    "permissionsTitle": "Sobre as permissões do navegador",
+                    "permissionsTabs": "Acesso às abas: usado para identificar a página aberta, oferecer tradução bilíngue e aplicar as configurações específicas do site. Chrome/Edge pode exibir essa permissão como “Ler seu histórico de navegação”.",
+                    "permissionsSites": "Acesso a sites e arquivos locais: usado para ler as páginas que você escolhe traduzir, conectar-se aos serviços de tradução Google/Bing e aos recursos do YouTube, além de abrir documentos locais. No Firefox, essas permissões são opcionais.",
+                    "permissionsPdf": "Leitura de PDF: os PDFs compatíveis são abertos no leitor integrado do Mira. Chrome/Edge pode exibir a permissão relacionada como “Bloquear conteúdo em todas as páginas”. Para alguns PDFs protegidos, um cabeçalho Referer é adicionado quando necessário para ajudar no carregamento."
+                }
             }
         ],
         "ru": [
@@ -121,9 +398,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Как выбрать сервис ИИ-перевода · Нажмите, чтобы узнать больше",
                 "level": "info",
-                "content": "В расширение уже встроен перевод Google/Bing. API Key не требуется — можно пользоваться сразу после установки.\n\n【О точности перевода】\n> Это расширение служит связующим звеном между веб-страницами и движками перевода. Качество перевода зависит от выбранного движка. Если перевод получается неточным, обычно причина заключается в возможностях самого движка, а не в расширении. Более мощные модели ИИ, как правило, обеспечивают более естественный и точный перевод.\n\n【Об ИИ-переводе】\n> Для работы ИИ-перевода требуются вычислительные ресурсы, что связано с определёнными затратами. Поэтому расширение не предоставляет встроенный бесплатный сервис ИИ и не предлагает и не продаёт Pro-подписки, тарифы на ИИ или сторонние услуги. Для получения более качественного перевода можно подключить собственный сервис ИИ: получить API Key через официальные каналы поставщика и выбрать подходящую модель.\n\n> Чтобы объяснить, почему мы рекомендуем использовать собственный API Key, рассмотрим два возможных варианта:\n\n>> ① Предположим, что вы покупаете Pro-подписку через Mira Translator:\n>>> Пользователи покупают Pro-подписку → Mira приобретает и управляет одним API Key у поставщика ИИ → Несколько пользователей совместно используют этот же API Key, находящийся под управлением Mira, для ИИ-перевода.\n>>> В этой модели текст, который пользователи хотят перевести, сначала отправляется на сервер Mira. Затем сервер Mira использует общий API Key, чтобы переслать содержимое поставщику ИИ для обработки. Результаты перевода возвращаются пользователям через сервер Mira. Соответствующие расходы на использование API включаются в стоимость подписки.\n\n>> ② Использование собственного API Key (рекомендует Mira Translator):\n>>> Получить собственный API Key непосредственно через официальные каналы поставщика ИИ → Ввести ключ в расширение → Расширение напрямую отправляет запросы на перевод поставщику ИИ и использует его модели.\n>>> В этом случае пользователь самостоятельно управляет своим API Key, а поставщик ИИ напрямую занимается выставлением счетов и учётом использования.\n\n> В обоих случаях перевод выполняется с помощью моделей, предоставляемых поставщиками ИИ. Основные различия заключаются в том, кто управляет API Key, как оплачивается использование и по какому маршруту передаётся содержимое для перевода. При использовании собственного API Key вы можете самостоятельно контролировать расходы и лимиты, свободно выбирать и менять модели, а также сократить количество промежуточных этапов при передаче данных.\n\n> Поддерживаемые сервисы и модели:\n>> • OpenRouter: один Key открывает доступ практически ко всем основным моделям;\n>> • Groq: предоставляет бесплатный лимит и отличается высокой скоростью ответа;\n>> • Gemini: предоставляет бесплатный лимит, но ограничения на использование сравнительно строгие;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama и любые сервисы, совместимые с OpenAI API.\n\n> Актуальные правила и лимиты использования уточняйте в официальной документации соответствующих поставщиков.\n\n【О балансе между скоростью и стабильностью перевода】\n> Чтобы снизить вероятность достижения лимитов запросов переводческого сервиса, содержимое веб-страниц переводится частями, последовательно, а не посредством одновременной отправки большого количества запросов. Поэтому перевод длинных страниц может занимать некоторое время. Фактическая скорость также зависит от выбранного движка перевода и качества сетевого соединения.\n\nПоскольку структура страниц и техническая реализация разных сайтов существенно отличаются, мы не можем гарантировать совместимость со всеми сайтами. На некоторых специализированных сайтах перевод может работать некорректно.\n\nПроект в настоящее время предоставляется бесплатно, однако его разработка и поддержка требуют значительных затрат времени. Бесплатная индивидуальная разработка по запросу не предоставляется. Дальнейшее развитие и обновление функций будут зависеть от общего плана развития проекта и потребностей в техническом обслуживании.",
                 "gotIt": "Понятно",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "В расширение уже встроен перевод Google/Bing. API Key не требуется — можно пользоваться сразу после установки.",
+                    "compatibility1": "Поскольку структура страниц и техническая реализация разных сайтов существенно отличаются, мы не можем гарантировать совместимость со всеми сайтами. На некоторых специализированных сайтах перевод может работать некорректно.",
+                    "accuracy": "Это расширение служит связующим звеном между веб-страницами и движками перевода. Качество перевода зависит от выбранного движка. Если перевод получается неточным, обычно причина заключается в возможностях самого движка, а не в расширении. Более мощные модели ИИ, как правило, обеспечивают более естественный и точный перевод.",
+                    "aiIntro": "Для работы ИИ-перевода требуются вычислительные ресурсы, что связано с определёнными затратами. Поэтому расширение не предоставляет встроенный бесплатный сервис ИИ и не предлагает и не продаёт Pro-подписки, тарифы на ИИ или сторонние услуги. Для получения более качественного перевода можно подключить собственный сервис ИИ: получить API Key через официальные каналы поставщика и выбрать подходящую модель.",
+                    "aiWhy": "Чтобы объяснить, почему мы рекомендуем использовать собственный API Key, рассмотрим два возможных варианта:",
+                    "proTitle": "① Предположим, что вы покупаете Pro-подписку через Mira Translator:",
+                    "proFlow": "Пользователи покупают Pro-подписку → Mira приобретает и управляет одним API Key у поставщика ИИ → Несколько пользователей совместно используют этот же API Key, находящийся под управлением Mira, для ИИ-перевода.",
+                    "proDetails": "В этой модели текст, который пользователи хотят перевести, сначала отправляется на сервер Mira. Затем сервер Mira использует общий API Key, чтобы переслать содержимое поставщику ИИ для обработки. Результаты перевода возвращаются пользователям через сервер Mira. Соответствующие расходы на использование API включаются в стоимость подписки.",
+                    "byokTitle": "② Использование собственного API Key (рекомендует Mira Translator):",
+                    "byokFlow": "Получить собственный API Key непосредственно через официальные каналы поставщика ИИ → Ввести ключ в расширение → Расширение напрямую отправляет запросы на перевод поставщику ИИ и использует его модели.",
+                    "byokDetails": "В этом случае пользователь самостоятельно управляет своим API Key, а поставщик ИИ напрямую занимается выставлением счетов и учётом использования.",
+                    "aiComparison": "В обоих случаях перевод выполняется с помощью моделей, предоставляемых поставщиками ИИ. Основные различия заключаются в том, кто управляет API Key, как оплачивается использование и по какому маршруту передаётся содержимое для перевода. При использовании собственного API Key вы можете самостоятельно контролировать расходы и лимиты, свободно выбирать и менять модели, а также сократить количество промежуточных этапов при передаче данных.",
+                    "providersIntro": "Поддерживаемые сервисы и модели:",
+                    "providers": [
+                        "OpenRouter: один Key открывает доступ практически ко всем основным моделям;",
+                        "Groq: предоставляет бесплатный лимит и отличается высокой скоростью ответа;",
+                        "Gemini: предоставляет бесплатный лимит, но ограничения на использование сравнительно строгие;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama и любые сервисы, совместимые с OpenAI API."
+                    ],
+                    "providerLimits": "Актуальные правила и лимиты использования уточняйте в официальной документации соответствующих поставщиков.",
+                    "speed": "Чтобы снизить вероятность достижения лимитов запросов переводческого сервиса, содержимое веб-страниц переводится частями, последовательно, а не посредством одновременной отправки большого количества запросов. Поэтому перевод длинных страниц может занимать некоторое время. Фактическая скорость также зависит от выбранного движка перевода и качества сетевого соединения.",
+                    "footer": "Mira Translator изначально разрабатывался для удовлетворения моих личных потребностей, а затем я решил бесплатно поделиться им со всеми. Расширением можно пользоваться без регистрации учётной записи и входа в систему. Плата за использование не взимается; мы также не принимаем чаевые и пожертвования. Разработка и поддержка требуют значительных затрат времени и усилий, поэтому бесплатная индивидуальная разработка не предоставляется. Дальнейшие обновления функций будут зависеть от общего плана развития проекта и потребностей в техническом обслуживании.",
+                    "summaryTitle": "Кратко о главном",
+                    "summaryBuiltinLabel": "Встроенный перевод",
+                    "summaryAiLabel": "ИИ-перевод",
+                    "summaryByokLabel": "Рекомендуемый способ",
+                    "summaryAi": "Встроенный бесплатный ИИ-сервис не предоставляется; также не предлагаются и не продаются Pro-подписки, тарифы на ИИ или сторонние услуги.",
+                    "summaryByok": "Достаточно получить API Key у выбранного ИИ-провайдера, ввести её в расширение и выбрать модель — после этого вы сможете пользоваться его сервисом напрямую.",
+                    "compatTitle": "Совместимость с сайтами и структура страниц",
+                    "accuracyTitle": "О точности перевода",
+                    "aiTitle": "Об ИИ-переводе",
+                    "speedTitle": "Баланс между скоростью и стабильностью перевода",
+                    "footerTitle": "О проекте и его поддержке",
+                    "footerLead": "Mira Translator изначально разрабатывался для удовлетворения моих личных потребностей, а затем я решил бесплатно поделиться им со всеми. Расширением можно пользоваться без регистрации учётной записи и входа в систему. ",
+                    "footerEmphasis": "бесплатная индивидуальная разработка не предоставляется.",
+                    "footerTail": " Дальнейшие обновления функций будут зависеть от общего плана развития проекта и потребностей в техническом обслуживании.",
+                    "footerFreeEmphasis": "Плата за использование не взимается; мы также не принимаем чаевые и пожертвования.",
+                    "footerMiddle": " Разработка и поддержка требуют значительных затрат времени и усилий, поэтому ",
+                    "permissionsTitle": "О разрешениях браузера",
+                    "permissionsTabs": "Доступ к вкладкам: нужен, чтобы определить открытую страницу, выполнять двуязычный перевод и применять настройки для сайта. В Chrome/Edge это разрешение может отображаться как «Чтение истории посещений».",
+                    "permissionsSites": "Доступ к сайтам и локальным файлам: нужен для чтения переводимых страниц, подключения служб Google/Bing и функций YouTube, а также открытия локальных документов. В Firefox эти разрешения указаны как дополнительные.",
+                    "permissionsPdf": "Чтение PDF: подходящие PDF-документы открываются во встроенном средстве просмотра Mira. В Chrome/Edge связанное разрешение может отображаться как «Блокировка содержимого на всех страницах». Для некоторых защищённых PDF при необходимости добавляется заголовок Referer, чтобы документ загрузился."
+                }
             }
         ],
         "ar": [
@@ -131,9 +451,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 كيفية اختيار خدمة الترجمة بالذكاء الاصطناعي · اضغط لمعرفة المزيد",
                 "level": "info",
-                "content": "يتضمن هذا الملحق ترجمة Google/Bing بشكل مدمج، ولا تحتاج إلى API Key. يمكنك استخدامه مباشرة بعد التثبيت.\n\n【حول دقة الترجمة】\n> يعمل هذا الملحق كحلقة وصل بين صفحات الويب ومحركات الترجمة. وتعتمد جودة الترجمة على محرك الترجمة الذي تختاره. إذا كانت الترجمة غير دقيقة، فعادةً ما يكون السبب هو أداء محرك الترجمة نفسه، وليس الملحق. وبشكل عام، يمكن لنماذج الذكاء الاصطناعي الأكثر تطورًا تقديم ترجمات أكثر طبيعية ودقة.\n\n【حول الترجمة بالذكاء الاصطناعي】\n> تتطلب الترجمة بالذكاء الاصطناعي موارد حوسبة وتترتب عليها تكاليف. لذلك، لا يوفر هذا الملحق خدمة ذكاء اصطناعي مجانية مدمجة، كما أنه لا يقدم أو يبيع عضويات Pro أو باقات الذكاء الاصطناعي أو خدمات الجهات الخارجية. للحصول على ترجمة بجودة أفضل، يمكنك ربط خدمة الذكاء الاصطناعي الخاصة بك: احصل على API Key من خلال القنوات الرسمية لمزود الخدمة، ثم اختر النموذج المناسب.\n\n> لتوضيح سبب توصيتنا باستخدام API Key خاص بك، إليك طريقتان محتملتان لاستخدام الترجمة بالذكاء الاصطناعي:\n\n>> ① لنفترض أنك اشتريت عضوية Pro من خلال Mira Translator:\n>>> يشتري المستخدمون عضوية Pro، ثم تحصل Mira على مفتاح API من مزود خدمة الذكاء الاصطناعي وتتولى إدارته. بعد ذلك، يتشارك عدة مستخدمين مفتاح API نفسه الذي تديره Mira لاستخدام الترجمة بالذكاء الاصطناعي.\n>>> في هذه الحالة، يُرسل المحتوى الذي يريد المستخدمون ترجمته أولاً إلى خادم Mira. ثم يستخدم خادم Mira مفتاح API المشترك لإعادة توجيه المحتوى إلى مزود خدمة الذكاء الاصطناعي لمعالجته. وبعد اكتمال الترجمة، تُعاد النتائج إلى المستخدمين عبر خادم Mira. وتُدرج تكاليف استخدام API المرتبطة بذلك ضمن سعر العضوية.\n\n>> ② استخدام API Key الخاص بك (توصية Mira Translator):\n>>> احصل على API Key خاص بك مباشرةً من خلال القنوات الرسمية لمزود خدمة الذكاء الاصطناعي، ثم أدخله في الملحق. بعد ذلك، يرسل الملحق طلبات الترجمة مباشرةً إلى مزود الخدمة ويستخدم نماذجه.\n>>> في هذه الطريقة، يدير المستخدم API Key الخاص به، بينما يتولى مزود خدمة الذكاء الاصطناعي مباشرةً احتساب الرسوم وإدارة سجل الاستخدام.\n\n> في كلتا الحالتين، تتم الترجمة باستخدام النماذج التي يوفرها مزودو خدمات الذكاء الاصطناعي. ويكمن الاختلاف الأساسي في الجهة التي تدير مفتاح API، وطريقة احتساب التكاليف، ومسار نقل محتوى الترجمة. عند استخدام API Key الخاص بك، يمكنك إدارة نفقاتك وحدود الاستخدام بنفسك، واختيار النماذج أو تغييرها بحرية، بالإضافة إلى تقليل خطوات نقل البيانات عبر الوسطاء.\n\n> تشمل الخدمات والنماذج المدعومة:\n>> • OpenRouter: يتيح مفتاح واحد الوصول إلى جميع النماذج الرئيسية تقريبًا؛\n>> • Groq: يوفر حصة استخدام مجانية مع سرعة استجابة عالية؛\n>> • Gemini: يوفر حصة استخدام مجانية، لكن قيود الاستخدام أكثر صرامة نسبيًا؛\n>> • GPT وClaude وDeepL وSiliconFlow وOllama، بالإضافة إلى أي خدمة متوافقة مع OpenAI API.\n\n> يرجى الرجوع إلى الوثائق الرسمية لكل مزود خدمة للاطلاع على القواعد وحدود الاستخدام المحددة.\n\n【حول الموازنة بين سرعة الترجمة واستقرارها】\n> للحد قدر الإمكان من احتمالية تجاوز حدود الطلبات التي تفرضها خدمات الترجمة، تتم ترجمة محتوى صفحات الويب على دفعات متتابعة بدلًا من إرسال عدد كبير من الطلبات في الوقت نفسه. لذلك قد تستغرق ترجمة الصفحات الطويلة بعض الوقت. وتعتمد السرعة الفعلية أيضًا على محرك الترجمة المختار وظروف الشبكة.\n\nنظرًا لاختلاف بنية الصفحات وطرق التنفيذ التقنية من موقع إلى آخر، لا يمكننا ضمان التوافق مع جميع المواقع. وقد لا تعمل الترجمة بشكل صحيح على بعض المواقع ذات الخصائص التقنية الخاصة.\n\nهذا المشروع مجاني حاليًا، لكن تطويره وصيانته يتطلبان استثمارًا كبيرًا من الوقت والجهد. لا نقدم خدمات تطوير مخصصة مجانًا. وستعتمد التحديثات المستقبلية للميزات على خطة التطوير العامة واحتياجات الصيانة.",
                 "gotIt": "فهمت",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "يتضمن هذا الملحق ترجمة Google/Bing بشكل مدمج، ولا تحتاج إلى API Key. يمكنك استخدامه مباشرة بعد التثبيت.",
+                    "compatibility1": "نظرًا لاختلاف بنية الصفحات وطرق التنفيذ التقنية من موقع إلى آخر، لا يمكننا ضمان التوافق مع جميع المواقع. وقد لا تعمل الترجمة بشكل صحيح على بعض المواقع ذات الخصائص التقنية الخاصة.",
+                    "accuracy": "يعمل هذا الملحق كحلقة وصل بين صفحات الويب ومحركات الترجمة. وتعتمد جودة الترجمة على محرك الترجمة الذي تختاره. إذا كانت الترجمة غير دقيقة، فعادةً ما يكون السبب هو أداء محرك الترجمة نفسه، وليس الملحق. وبشكل عام، يمكن لنماذج الذكاء الاصطناعي الأكثر تطورًا تقديم ترجمات أكثر طبيعية ودقة.",
+                    "aiIntro": "تتطلب الترجمة بالذكاء الاصطناعي موارد حوسبة وتترتب عليها تكاليف. لذلك، لا يوفر هذا الملحق خدمة ذكاء اصطناعي مجانية مدمجة، كما أنه لا يقدم أو يبيع عضويات Pro أو باقات الذكاء الاصطناعي أو خدمات الجهات الخارجية. للحصول على ترجمة بجودة أفضل، يمكنك ربط خدمة الذكاء الاصطناعي الخاصة بك: احصل على API Key من خلال القنوات الرسمية لمزود الخدمة، ثم اختر النموذج المناسب.",
+                    "aiWhy": "لتوضيح سبب توصيتنا باستخدام API Key خاص بك، إليك طريقتان محتملتان لاستخدام الترجمة بالذكاء الاصطناعي:",
+                    "proTitle": "① لنفترض أنك اشتريت عضوية Pro من خلال Mira Translator:",
+                    "proFlow": "يشتري المستخدمون عضوية Pro، ثم تحصل Mira على مفتاح API من مزود خدمة الذكاء الاصطناعي وتتولى إدارته. بعد ذلك، يتشارك عدة مستخدمين مفتاح API نفسه الذي تديره Mira لاستخدام الترجمة بالذكاء الاصطناعي.",
+                    "proDetails": "في هذه الحالة، يُرسل المحتوى الذي يريد المستخدمون ترجمته أولاً إلى خادم Mira. ثم يستخدم خادم Mira مفتاح API المشترك لإعادة توجيه المحتوى إلى مزود خدمة الذكاء الاصطناعي لمعالجته. وبعد اكتمال الترجمة، تُعاد النتائج إلى المستخدمين عبر خادم Mira. وتُدرج تكاليف استخدام API المرتبطة بذلك ضمن سعر العضوية.",
+                    "byokTitle": "② استخدام API Key الخاص بك (توصية Mira Translator):",
+                    "byokFlow": "احصل على API Key خاص بك مباشرةً من خلال القنوات الرسمية لمزود خدمة الذكاء الاصطناعي، ثم أدخله في الملحق. بعد ذلك، يرسل الملحق طلبات الترجمة مباشرةً إلى مزود الخدمة ويستخدم نماذجه.",
+                    "byokDetails": "في هذه الطريقة، يدير المستخدم API Key الخاص به، بينما يتولى مزود خدمة الذكاء الاصطناعي مباشرةً احتساب الرسوم وإدارة سجل الاستخدام.",
+                    "aiComparison": "في كلتا الحالتين، تتم الترجمة باستخدام النماذج التي يوفرها مزودو خدمات الذكاء الاصطناعي. ويكمن الاختلاف الأساسي في الجهة التي تدير مفتاح API، وطريقة احتساب التكاليف، ومسار نقل محتوى الترجمة. عند استخدام API Key الخاص بك، يمكنك إدارة نفقاتك وحدود الاستخدام بنفسك، واختيار النماذج أو تغييرها بحرية، بالإضافة إلى تقليل خطوات نقل البيانات عبر الوسطاء.",
+                    "providersIntro": "تشمل الخدمات والنماذج المدعومة:",
+                    "providers": [
+                        "OpenRouter: يتيح مفتاح واحد الوصول إلى جميع النماذج الرئيسية تقريبًا؛",
+                        "Groq: يوفر حصة استخدام مجانية مع سرعة استجابة عالية؛",
+                        "Gemini: يوفر حصة استخدام مجانية، لكن قيود الاستخدام أكثر صرامة نسبيًا؛",
+                        "GPT وClaude وDeepL وSiliconFlow وOllama، بالإضافة إلى أي خدمة متوافقة مع OpenAI API."
+                    ],
+                    "providerLimits": "يرجى الرجوع إلى الوثائق الرسمية لكل مزود خدمة للاطلاع على القواعد وحدود الاستخدام المحددة.",
+                    "speed": "للحد قدر الإمكان من احتمالية تجاوز حدود الطلبات التي تفرضها خدمات الترجمة، تتم ترجمة محتوى صفحات الويب على دفعات متتابعة بدلًا من إرسال عدد كبير من الطلبات في الوقت نفسه. لذلك قد تستغرق ترجمة الصفحات الطويلة بعض الوقت. وتعتمد السرعة الفعلية أيضًا على محرك الترجمة المختار وظروف الشبكة.",
+                    "footer": "تم تطوير Mira Translator في الأصل لتلبية احتياجاتي الشخصية، ثم قررت مشاركته مع الجميع مجانًا. يمكن استخدام الإضافة دون إنشاء حساب أو تسجيل الدخول. لا توجد أي رسوم للاستخدام، كما أننا لا نقبل الإكراميات أو التبرعات. يتطلب التطوير والصيانة استثمارًا كبيرًا من الوقت والجهد، لذلك لا نقدم تطويرًا مخصصًا مجانًا. وستعتمد تحديثات الميزات مستقبلًا على خطة التطوير العامة واحتياجات الصيانة.",
+                    "summaryTitle": "أهم المعلومات باختصار",
+                    "summaryBuiltinLabel": "الترجمة المدمجة",
+                    "summaryAiLabel": "الترجمة بالذكاء الاصطناعي",
+                    "summaryByokLabel": "الطريقة الموصى بها",
+                    "summaryAi": "لا تتوفر خدمة ذكاء اصطناعي مجانية مدمجة، ولا نقدم أو نبيع عضويات Pro أو باقات الذكاء الاصطناعي أو خدمات الجهات الخارجية.",
+                    "summaryByok": "ما عليك سوى الحصول على API Key من مزوّد خدمة الذكاء الاصطناعي الذي تختاره، وإدخاله في الإضافة، ثم تحديد نموذج لاستخدام خدمته مباشرةً.",
+                    "compatTitle": "التوافق مع المواقع وتخطيط الصفحات",
+                    "accuracyTitle": "حول دقة الترجمة",
+                    "aiTitle": "حول الترجمة بالذكاء الاصطناعي",
+                    "speedTitle": "التوازن بين سرعة الترجمة واستقرارها",
+                    "footerTitle": "نبذة عن المشروع وصيانته",
+                    "footerLead": "تم تطوير Mira Translator في الأصل لتلبية احتياجاتي الشخصية، ثم قررت مشاركته مع الجميع مجانًا. يمكن استخدام الإضافة دون إنشاء حساب أو تسجيل الدخول. ",
+                    "footerEmphasis": "لا نقدم تطويرًا مخصصًا مجانًا.",
+                    "footerTail": " وستعتمد تحديثات الميزات مستقبلًا على خطة التطوير العامة واحتياجات الصيانة.",
+                    "footerFreeEmphasis": "لا توجد أي رسوم للاستخدام، كما أننا لا نقبل الإكراميات أو التبرعات.",
+                    "footerMiddle": " يتطلب التطوير والصيانة استثمارًا كبيرًا من الوقت والجهد، لذلك ",
+                    "permissionsTitle": "حول أذونات المتصفح",
+                    "permissionsTabs": "الوصول إلى علامات التبويب: يُستخدم للتعرّف على الصفحة المفتوحة حاليًا، وتوفير الترجمة ثنائية اللغة، وتطبيق إعدادات الموقع المناسبة. قد تعرض Chrome/Edge هذا الإذن باسم «قراءة سجل التصفح».",
+                    "permissionsSites": "الوصول إلى المواقع والملفات المحلية: يُستخدم لقراءة الصفحات المطلوب ترجمتها، والاتصال بخدمات ترجمة Google/Bing وميزات YouTube، وفتح المستندات المحلية. يعرض Firefox هذه الأذونات كأذونات اختيارية.",
+                    "permissionsPdf": "قراءة PDF: تُفتح ملفات PDF المطابقة للشروط في قارئ Mira المدمج. قد تعرض Chrome/Edge الإذن المرتبط باسم «حظر المحتوى على جميع الصفحات». وبالنسبة إلى بعض ملفات PDF المحمية، تتم إضافة ترويسة Referer عند الحاجة للمساعدة في تحميلها."
+                }
             }
         ],
         "tr": [
@@ -141,9 +504,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Yapay Zekâ Çeviri Hizmeti Nasıl Seçilir? · Ayrıntılar için tıklayın",
                 "level": "info",
-                "content": "Bu eklentide Google/Bing çevirisi yerleşik olarak bulunur. API Key gerekmez; kurulumdan hemen sonra kullanmaya başlayabilirsiniz.\n\n【Çeviri Doğruluğu Hakkında】\n> Bu eklenti, web sayfaları ile çeviri motorları arasında bir köprü görevi görür. Çeviri kalitesi, seçtiğiniz çeviri motoruna bağlıdır. Çeviri hatalıysa bunun nedeni genellikle eklentinin kendisi değil, kullanılan motorun performansıdır. Daha gelişmiş yapay zekâ modelleri genellikle daha doğal ve doğru çeviriler sunar.\n\n【Yapay Zekâ ile Çeviri Hakkında】\n> Yapay zekâ ile çeviri, hesaplama kaynakları gerektirir ve bununla ilişkili maliyetler doğurur. Bu nedenle bu eklenti yerleşik ücretsiz bir yapay zekâ hizmeti sunmaz; Pro üyelik, yapay zekâ paketleri veya üçüncü taraf hizmetleri de sağlamaz ya da satmaz. Daha kaliteli çeviriler için kendi yapay zekâ hizmetinizi bağlayabilirsiniz: Hizmet sağlayıcının resmî kanallarından bir API Key alın ve ihtiyaçlarınıza uygun modeli seçin.\n\n> Neden kendi API Key'inizi kullanmanızı önerdiğimizi açıklamak için iki olası kullanım yöntemine bakalım:\n\n>> ① Mira Translator üzerinden Pro üyelik satın aldığınızı varsayalım:\n>>> Kullanıcılar Pro üyelik satın alır → Mira, bir yapay zekâ hizmet sağlayıcısından tek bir API Key alır ve yönetir → Birden fazla kullanıcı, Mira'nın yönettiği aynı API Key'i ortak kullanarak yapay zekâ çevirisinden yararlanır.\n>>> Bu modelde, kullanıcıların çevirmek istediği içerik önce Mira'nın sunucusuna gönderilir. Ardından Mira'nın sunucusu, paylaşılan API Key'i kullanarak içeriği işlenmek üzere yapay zekâ hizmet sağlayıcısına iletir. Çeviri sonuçları daha sonra Mira'nın sunucusu üzerinden kullanıcılara geri gönderilir. API kullanımına ilişkin maliyetler üyelik ücretine dahil edilir.\n\n>> ② Kendi API Key'inizi kullanın (Mira Translator tarafından önerilir):\n>>> Yapay zekâ hizmet sağlayıcısının resmî kanallarından kendi API Key'inizi alın → Key'i eklentiye girin → Eklenti, çeviri isteklerini doğrudan yapay zekâ hizmet sağlayıcısına gönderir ve sağlayıcının modellerini kullanır.\n>>> Bu yöntemde API Key'inizi siz yönetirsiniz; ücretlendirme ve kullanım takibi ise doğrudan yapay zekâ hizmet sağlayıcısı tarafından yapılır.\n\n> Her iki yöntemde de çeviri, yapay zekâ hizmet sağlayıcılarının sunduğu modeller kullanılarak yapılır. Temel farklar; API Key'i kimin yönettiği, maliyetlerin nasıl tahsil edildiği ve çeviri içeriğinin hangi veri aktarım yolunu izlediğidir. Kendi API Key'inizi kullandığınızda harcamalarınızı ve kullanım limitlerinizi doğrudan yönetebilir, modelleri özgürce seçebilir veya değiştirebilirsiniz. Ayrıca verilerin aktarımı sırasında aradaki ek aktarım adımlarını azaltabilirsiniz.\n\n> Desteklenen hizmetler ve modeller:\n>> • OpenRouter: Tek bir Key ile neredeyse tüm önemli modellere erişebilirsiniz;\n>> • Groq: Ücretsiz kullanım kotası sunar ve hızlı yanıt verir;\n>> • Gemini: Ücretsiz kullanım kotası sunar ancak kullanım kısıtlamaları nispeten katıdır;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama ve OpenAI API ile uyumlu tüm hizmetler.\n\n> Güncel kullanım koşulları ve limitler için lütfen ilgili hizmet sağlayıcıların resmî belgelerini inceleyin.\n\n【Çeviri Hızı ve Kararlılık Arasındaki Denge】\n> Çeviri hizmetlerinin istek sınırlarına takılma olasılığını azaltmak için web sayfası içeriği aynı anda çok sayıda istek gönderilerek değil, parçalara ayrılıp sırayla çevrilir. Bu nedenle uzun web sayfalarının çevrilmesi biraz zaman alabilir. Gerçek çeviri hızı, seçilen çeviri motoruna ve ağ koşullarına da bağlıdır.\n\nWeb sitelerinin sayfa yapıları ve teknik uygulamaları birbirinden oldukça farklı olduğundan tüm sitelerle uyumluluk garanti edilemez. Bazı özel yapıdaki sitelerde çeviri düzgün çalışmayabilir.\n\nBu proje şu anda ücretsizdir ancak geliştirme ve bakım çalışmaları önemli miktarda zaman gerektirir. Ücretsiz özel yazılım geliştirme hizmeti sunmuyoruz. Gelecekteki özellik güncellemeleri genel geliştirme planına ve bakım ihtiyaçlarına göre yapılacaktır.",
                 "gotIt": "Anladım",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Bu eklentide Google/Bing çevirisi yerleşik olarak bulunur. API Key gerekmez; kurulumdan hemen sonra kullanmaya başlayabilirsiniz.",
+                    "compatibility1": "Web sitelerinin sayfa yapıları ve teknik uygulamaları birbirinden oldukça farklı olduğundan tüm sitelerle uyumluluk garanti edilemez. Bazı özel yapıdaki sitelerde çeviri düzgün çalışmayabilir.",
+                    "accuracy": "Bu eklenti, web sayfaları ile çeviri motorları arasında bir köprü görevi görür. Çeviri kalitesi, seçtiğiniz çeviri motoruna bağlıdır. Çeviri hatalıysa bunun nedeni genellikle eklentinin kendisi değil, kullanılan motorun performansıdır. Daha gelişmiş yapay zekâ modelleri genellikle daha doğal ve doğru çeviriler sunar.",
+                    "aiIntro": "Yapay zekâ ile çeviri, hesaplama kaynakları gerektirir ve bununla ilişkili maliyetler doğurur. Bu nedenle bu eklenti yerleşik ücretsiz bir yapay zekâ hizmeti sunmaz; Pro üyelik, yapay zekâ paketleri veya üçüncü taraf hizmetleri de sağlamaz ya da satmaz. Daha kaliteli çeviriler için kendi yapay zekâ hizmetinizi bağlayabilirsiniz: Hizmet sağlayıcının resmî kanallarından bir API Key alın ve ihtiyaçlarınıza uygun modeli seçin.",
+                    "aiWhy": "Neden kendi API Key'inizi kullanmanızı önerdiğimizi açıklamak için iki olası kullanım yöntemine bakalım:",
+                    "proTitle": "① Mira Translator üzerinden Pro üyelik satın aldığınızı varsayalım:",
+                    "proFlow": "Kullanıcılar Pro üyelik satın alır → Mira, bir yapay zekâ hizmet sağlayıcısından tek bir API Key alır ve yönetir → Birden fazla kullanıcı, Mira'nın yönettiği aynı API Key'i ortak kullanarak yapay zekâ çevirisinden yararlanır.",
+                    "proDetails": "Bu modelde, kullanıcıların çevirmek istediği içerik önce Mira'nın sunucusuna gönderilir. Ardından Mira'nın sunucusu, paylaşılan API Key'i kullanarak içeriği işlenmek üzere yapay zekâ hizmet sağlayıcısına iletir. Çeviri sonuçları daha sonra Mira'nın sunucusu üzerinden kullanıcılara geri gönderilir. API kullanımına ilişkin maliyetler üyelik ücretine dahil edilir.",
+                    "byokTitle": "② Kendi API Key'inizi kullanın (Mira Translator tarafından önerilir):",
+                    "byokFlow": "Yapay zekâ hizmet sağlayıcısının resmî kanallarından kendi API Key'inizi alın → Key'i eklentiye girin → Eklenti, çeviri isteklerini doğrudan yapay zekâ hizmet sağlayıcısına gönderir ve sağlayıcının modellerini kullanır.",
+                    "byokDetails": "Bu yöntemde API Key'inizi siz yönetirsiniz; ücretlendirme ve kullanım takibi ise doğrudan yapay zekâ hizmet sağlayıcısı tarafından yapılır.",
+                    "aiComparison": "Her iki yöntemde de çeviri, yapay zekâ hizmet sağlayıcılarının sunduğu modeller kullanılarak yapılır. Temel farklar; API Key'i kimin yönettiği, maliyetlerin nasıl tahsil edildiği ve çeviri içeriğinin hangi veri aktarım yolunu izlediğidir. Kendi API Key'inizi kullandığınızda harcamalarınızı ve kullanım limitlerinizi doğrudan yönetebilir, modelleri özgürce seçebilir veya değiştirebilirsiniz. Ayrıca verilerin aktarımı sırasında aradaki ek aktarım adımlarını azaltabilirsiniz.",
+                    "providersIntro": "Desteklenen hizmetler ve modeller:",
+                    "providers": [
+                        "OpenRouter: Tek bir Key ile neredeyse tüm önemli modellere erişebilirsiniz;",
+                        "Groq: Ücretsiz kullanım kotası sunar ve hızlı yanıt verir;",
+                        "Gemini: Ücretsiz kullanım kotası sunar ancak kullanım kısıtlamaları nispeten katıdır;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama ve OpenAI API ile uyumlu tüm hizmetler."
+                    ],
+                    "providerLimits": "Güncel kullanım koşulları ve limitler için lütfen ilgili hizmet sağlayıcıların resmî belgelerini inceleyin.",
+                    "speed": "Çeviri hizmetlerinin istek sınırlarına takılma olasılığını azaltmak için web sayfası içeriği aynı anda çok sayıda istek gönderilerek değil, parçalara ayrılıp sırayla çevrilir. Bu nedenle uzun web sayfalarının çevrilmesi biraz zaman alabilir. Gerçek çeviri hızı, seçilen çeviri motoruna ve ağ koşullarına da bağlıdır.",
+                    "footer": "Mira Translator ilk olarak kendi kullanım ihtiyaçlarımı karşılamak için geliştirildi; daha sonra herkesle ücretsiz olarak paylaşmaya karar verdim. Eklenti, hesap oluşturmadan veya giriş yapmadan kullanılabilir. Kullanım için herhangi bir ücret alınmaz; bahşiş veya bağış da kabul etmiyoruz. Geliştirme ve bakım önemli ölçüde zaman ve emek gerektiriyor. Bu nedenle ücretsiz özel geliştirme hizmeti sunmuyoruz. Gelecekteki özellik güncellemeleri genel geliştirme planına ve bakım ihtiyaçlarına göre belirlenecektir.",
+                    "summaryTitle": "Önemli bilgiler",
+                    "summaryBuiltinLabel": "Yerleşik çeviri",
+                    "summaryAiLabel": "Yapay zekâ çevirisi",
+                    "summaryByokLabel": "Önerilen yöntem",
+                    "summaryAi": "Yerleşik ücretsiz bir yapay zekâ hizmeti sunulmaz; Pro üyelikleri, yapay zekâ paketleri veya üçüncü taraf hizmetleri de sağlanmaz ya da satılmaz.",
+                    "summaryByok": "Seçtiğiniz yapay zekâ sağlayıcısından bir API Key alıp eklentiye girmeniz ve bir model seçmeniz yeterlidir; ardından hizmeti doğrudan kullanabilirsiniz.",
+                    "compatTitle": "Web Sitesi Uyumluluğu ve Sayfa Düzeni",
+                    "accuracyTitle": "Çeviri Doğruluğu Hakkında",
+                    "aiTitle": "Yapay Zekâ ile Çeviri Hakkında",
+                    "speedTitle": "Çeviri Hızı ve Kararlılığı Arasındaki Denge",
+                    "footerTitle": "Proje ve bakım hakkında",
+                    "footerLead": "Mira Translator ilk olarak kendi kullanım ihtiyaçlarımı karşılamak için geliştirildi; daha sonra herkesle ücretsiz olarak paylaşmaya karar verdim. Eklenti, hesap oluşturmadan veya giriş yapmadan kullanılabilir. ",
+                    "footerEmphasis": "ücretsiz özel geliştirme hizmeti sunmuyoruz.",
+                    "footerTail": " Gelecekteki özellik güncellemeleri genel geliştirme planına ve bakım ihtiyaçlarına göre belirlenecektir.",
+                    "footerFreeEmphasis": "Kullanım için herhangi bir ücret alınmaz; bahşiş veya bağış da kabul etmiyoruz.",
+                    "footerMiddle": " Geliştirme ve bakım önemli ölçüde zaman ve emek gerektiriyor. Bu nedenle ",
+                    "permissionsTitle": "Tarayıcı izinleri hakkında",
+                    "permissionsTabs": "Sekme erişimi: Açık olan sayfayı tanımak, çift dilli çeviri sunmak ve ilgili site ayarlarını uygulamak için kullanılır. Chrome/Edge bu izni “Tarama geçmişinizi okuma” olarak gösterebilir.",
+                    "permissionsSites": "Web sitesi ve yerel dosya erişimi: Çevrilmesini seçtiğiniz sayfaları okumak, Google/Bing çeviri hizmetlerine ve YouTube özelliklerine bağlanmak ve yerel belgeleri açmak için kullanılır. Firefox bu izinleri isteğe bağlı olarak listeler.",
+                    "permissionsPdf": "PDF görüntüleme: Koşulları karşılayan PDF dosyaları Mira’nın yerleşik okuyucusunda açılır. Chrome/Edge ilgili izni “Tüm sayfalardaki içeriği engelle” olarak gösterebilir. Bazı korumalı PDF dosyalarında yüklemeye yardımcı olmak için gerektiğinde Referer başlığı eklenir."
+                }
             }
         ],
         "de": [
@@ -151,9 +557,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Den passenden KI-Übersetzungsdienst auswählen · Hier klicken für mehr Informationen",
                 "level": "info",
-                "content": "Diese Erweiterung enthält bereits die integrierte Übersetzung von Google/Bing. Ein API Key ist nicht erforderlich – einfach installieren und sofort loslegen.\n\n【Zur Übersetzungsgenauigkeit】\n> Diese Erweiterung dient als Schnittstelle zwischen Webseiten und Übersetzungsdiensten. Die Qualität der Übersetzung hängt vom jeweils gewählten Übersetzungsdienst ab. Wenn eine Übersetzung ungenau ist, liegt das in der Regel an der Leistungsfähigkeit des Übersetzungsdienstes selbst und nicht an der Erweiterung. Leistungsfähigere KI-Modelle liefern normalerweise natürlichere und genauere Übersetzungen.\n\n【Zur KI-Übersetzung】\n> KI-Übersetzungen benötigen Rechenleistung und verursachen entsprechende Kosten. Deshalb bietet diese Erweiterung keinen integrierten kostenlosen KI-Dienst und stellt auch keine Pro-Mitgliedschaften, KI-Pakete oder Drittanbieterdienste bereit oder verkauft diese. Wenn du bessere Übersetzungsergebnisse möchtest, kannst du deinen eigenen KI-Dienst verbinden: Beantrage dazu einen API Key über die offiziellen Kanäle des Anbieters und wähle anschließend ein passendes Modell aus.\n\n> Warum wir die Verwendung eines eigenen API Keys empfehlen, lässt sich anhand von zwei möglichen Nutzungsmodellen erklären:\n\n>> ① Angenommen, du würdest eine Pro-Mitgliedschaft über Mira Translator kaufen:\n>>> Nutzer kaufen eine Pro-Mitgliedschaft → Mira beschafft einen einzelnen API Key bei einem KI-Anbieter und verwaltet ihn → mehrere Nutzer teilen sich denselben von Mira verwalteten API Key für KI-Übersetzungen.\n>>> Bei diesem Modell werden die zu übersetzenden Inhalte zunächst an den Server von Mira gesendet. Anschließend leitet der Mira-Server die Inhalte mithilfe des gemeinsam genutzten API Keys zur Verarbeitung an den KI-Anbieter weiter. Die Übersetzungsergebnisse werden danach über den Mira-Server an die Nutzer zurückgesendet. Die entsprechenden Kosten für die API-Nutzung sind im Mitgliedspreis enthalten.\n\n>> ② Einen eigenen API Key verwenden (Empfehlung von Mira Translator):\n>>> Einen eigenen API Key direkt über die offiziellen Kanäle eines KI-Anbieters beantragen → Den Key in der Erweiterung hinterlegen → Die Erweiterung sendet Übersetzungsanfragen direkt an den KI-Anbieter und nutzt dessen Modelle.\n>>> Bei dieser Variante verwaltest du deinen API Key selbst. Die Abrechnung und Erfassung der Nutzung erfolgt direkt durch den KI-Anbieter.\n\n> Bei beiden Varianten werden letztlich Modelle der jeweiligen KI-Anbieter für die Übersetzung verwendet. Die wesentlichen Unterschiede liegen darin, wer den API Key verwaltet, wie die Kosten abgerechnet werden und über welchen Weg die zu übersetzenden Inhalte übertragen werden. Mit einem eigenen API Key kannst du deine Ausgaben und Nutzungslimits direkt kontrollieren, Modelle frei auswählen oder wechseln und zusätzliche Zwischenstationen bei der Datenübertragung vermeiden.\n\n> Unterstützte Dienste und Modelle sind unter anderem:\n>> • OpenRouter: Mit einem einzigen Key erhältst du Zugriff auf nahezu alle gängigen Modelle;\n>> • Groq: Bietet ein kostenloses Kontingent und schnelle Antworten;\n>> • Gemini: Bietet ein kostenloses Kontingent, allerdings mit vergleichsweise strengen Nutzungslimits;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama sowie alle Dienste, die mit der OpenAI API kompatibel sind.\n\n> Die genauen Nutzungsbedingungen und Kontingente findest du in den offiziellen Informationen der jeweiligen Anbieter.\n\n【Zum Verhältnis zwischen Übersetzungsgeschwindigkeit und Stabilität】\n> Um das Risiko zu verringern, die Anfragelimits der Übersetzungsdienste zu erreichen, werden Webseiteninhalte in mehreren aufeinanderfolgenden Abschnitten übersetzt, anstatt eine große Anzahl von Anfragen gleichzeitig zu senden. Deshalb kann die Übersetzung längerer Webseiten etwas Zeit in Anspruch nehmen. Die tatsächliche Geschwindigkeit hängt außerdem vom gewählten Übersetzungsdienst und der Netzwerkverbindung ab.\n\nDa sich Webseiten hinsichtlich ihrer Seitenstruktur und technischen Umsetzung teilweise erheblich unterscheiden, können wir die Kompatibilität mit allen Webseiten nicht garantieren. Bei einigen speziell aufgebauten Webseiten funktioniert die Übersetzung möglicherweise nicht richtig.\n\nDieses Projekt ist derzeit kostenlos, allerdings erfordern Entwicklung und Wartung einen erheblichen Zeitaufwand. Kostenlose individuelle Anpassungsentwicklungen bieten wir nicht an. Welche Funktionen künftig ergänzt oder aktualisiert werden, hängt von der allgemeinen Projektplanung und dem Wartungsaufwand ab.",
                 "gotIt": "Verstanden",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Diese Erweiterung enthält bereits die integrierte Übersetzung von Google/Bing. Ein API Key ist nicht erforderlich – einfach installieren und sofort loslegen.",
+                    "compatibility1": "Da sich Webseiten hinsichtlich ihrer Seitenstruktur und technischen Umsetzung teilweise erheblich unterscheiden, können wir die Kompatibilität mit allen Webseiten nicht garantieren. Bei einigen speziell aufgebauten Webseiten funktioniert die Übersetzung möglicherweise nicht richtig.",
+                    "accuracy": "Diese Erweiterung dient als Schnittstelle zwischen Webseiten und Übersetzungsdiensten. Die Qualität der Übersetzung hängt vom jeweils gewählten Übersetzungsdienst ab. Wenn eine Übersetzung ungenau ist, liegt das in der Regel an der Leistungsfähigkeit des Übersetzungsdienstes selbst und nicht an der Erweiterung. Leistungsfähigere KI-Modelle liefern normalerweise natürlichere und genauere Übersetzungen.",
+                    "aiIntro": "KI-Übersetzungen benötigen Rechenleistung und verursachen entsprechende Kosten. Deshalb bietet diese Erweiterung keinen integrierten kostenlosen KI-Dienst und stellt auch keine Pro-Mitgliedschaften, KI-Pakete oder Drittanbieterdienste bereit oder verkauft diese. Wenn du bessere Übersetzungsergebnisse möchtest, kannst du deinen eigenen KI-Dienst verbinden: Beantrage dazu einen API Key über die offiziellen Kanäle des Anbieters und wähle anschließend ein passendes Modell aus.",
+                    "aiWhy": "Warum wir die Verwendung eines eigenen API Keys empfehlen, lässt sich anhand von zwei möglichen Nutzungsmodellen erklären:",
+                    "proTitle": "① Angenommen, du würdest eine Pro-Mitgliedschaft über Mira Translator kaufen:",
+                    "proFlow": "Nutzer kaufen eine Pro-Mitgliedschaft → Mira beschafft einen einzelnen API Key bei einem KI-Anbieter und verwaltet ihn → mehrere Nutzer teilen sich denselben von Mira verwalteten API Key für KI-Übersetzungen.",
+                    "proDetails": "Bei diesem Modell werden die zu übersetzenden Inhalte zunächst an den Server von Mira gesendet. Anschließend leitet der Mira-Server die Inhalte mithilfe des gemeinsam genutzten API Keys zur Verarbeitung an den KI-Anbieter weiter. Die Übersetzungsergebnisse werden danach über den Mira-Server an die Nutzer zurückgesendet. Die entsprechenden Kosten für die API-Nutzung sind im Mitgliedspreis enthalten.",
+                    "byokTitle": "② Einen eigenen API Key verwenden (Empfehlung von Mira Translator):",
+                    "byokFlow": "Einen eigenen API Key direkt über die offiziellen Kanäle eines KI-Anbieters beantragen → Den Key in der Erweiterung hinterlegen → Die Erweiterung sendet Übersetzungsanfragen direkt an den KI-Anbieter und nutzt dessen Modelle.",
+                    "byokDetails": "Bei dieser Variante verwaltest du deinen API Key selbst. Die Abrechnung und Erfassung der Nutzung erfolgt direkt durch den KI-Anbieter.",
+                    "aiComparison": "Bei beiden Varianten werden letztlich Modelle der jeweiligen KI-Anbieter für die Übersetzung verwendet. Die wesentlichen Unterschiede liegen darin, wer den API Key verwaltet, wie die Kosten abgerechnet werden und über welchen Weg die zu übersetzenden Inhalte übertragen werden. Mit einem eigenen API Key kannst du deine Ausgaben und Nutzungslimits direkt kontrollieren, Modelle frei auswählen oder wechseln und zusätzliche Zwischenstationen bei der Datenübertragung vermeiden.",
+                    "providersIntro": "Unterstützte Dienste und Modelle sind unter anderem:",
+                    "providers": [
+                        "OpenRouter: Mit einem einzigen Key erhältst du Zugriff auf nahezu alle gängigen Modelle;",
+                        "Groq: Bietet ein kostenloses Kontingent und schnelle Antworten;",
+                        "Gemini: Bietet ein kostenloses Kontingent, allerdings mit vergleichsweise strengen Nutzungslimits;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama sowie alle Dienste, die mit der OpenAI API kompatibel sind."
+                    ],
+                    "providerLimits": "Die genauen Nutzungsbedingungen und Kontingente findest du in den offiziellen Informationen der jeweiligen Anbieter.",
+                    "speed": "Um das Risiko zu verringern, die Anfragelimits der Übersetzungsdienste zu erreichen, werden Webseiteninhalte in mehreren aufeinanderfolgenden Abschnitten übersetzt, anstatt eine große Anzahl von Anfragen gleichzeitig zu senden. Deshalb kann die Übersetzung längerer Webseiten etwas Zeit in Anspruch nehmen. Die tatsächliche Geschwindigkeit hängt außerdem vom gewählten Übersetzungsdienst und der Netzwerkverbindung ab.",
+                    "footer": "Mira Translator wurde ursprünglich entwickelt, um meinen eigenen Anforderungen gerecht zu werden. Später habe ich mich entschieden, die Erweiterung kostenlos mit allen zu teilen. Die Erweiterung kann ohne Konto und ohne Anmeldung genutzt werden. Für die Nutzung fallen keine Gebühren an; Trinkgelder oder Spenden nehmen wir ebenfalls nicht an. Entwicklung und Wartung erfordern einen erheblichen Zeit- und Arbeitsaufwand. Daher bieten wir keine kostenlose individuelle Entwicklung an. Künftige Funktionsupdates richten sich nach der allgemeinen Projektplanung und dem Wartungsbedarf.",
+                    "summaryTitle": "Das Wichtigste auf einen Blick",
+                    "summaryBuiltinLabel": "Integrierte Übersetzung",
+                    "summaryAiLabel": "KI-Übersetzung",
+                    "summaryByokLabel": "Empfohlene Nutzung",
+                    "summaryAi": "Es gibt keinen integrierten kostenlosen KI-Dienst. Pro-Mitgliedschaften, KI-Pakete oder Drittanbieterdienste werden ebenfalls weder angeboten noch verkauft.",
+                    "summaryByok": "Du benötigst nur einen API Key deines gewünschten KI-Anbieters: Trage ihn in die Erweiterung ein und wähle ein Modell aus, um den Dienst direkt zu nutzen.",
+                    "compatTitle": "Website-Kompatibilität und Seitenlayout",
+                    "accuracyTitle": "Zur Übersetzungsgenauigkeit",
+                    "aiTitle": "Zur KI-Übersetzung",
+                    "speedTitle": "Verhältnis zwischen Übersetzungsgeschwindigkeit und Stabilität",
+                    "footerTitle": "Über das Projekt und seine Wartung",
+                    "footerLead": "Mira Translator wurde ursprünglich entwickelt, um meinen eigenen Anforderungen gerecht zu werden. Später habe ich mich entschieden, die Erweiterung kostenlos mit allen zu teilen. Die Erweiterung kann ohne Konto und ohne Anmeldung genutzt werden. ",
+                    "footerEmphasis": "bieten wir keine kostenlose individuelle Entwicklung an.",
+                    "footerTail": " Künftige Funktionsupdates richten sich nach der allgemeinen Projektplanung und dem Wartungsbedarf.",
+                    "footerFreeEmphasis": "Für die Nutzung fallen keine Gebühren an; Trinkgelder oder Spenden nehmen wir ebenfalls nicht an.",
+                    "footerMiddle": " Entwicklung und Wartung erfordern einen erheblichen Zeit- und Arbeitsaufwand. Daher ",
+                    "permissionsTitle": "Zu den Browserberechtigungen",
+                    "permissionsTabs": "Tab-Zugriff: Dient dazu, die aktuell geöffnete Seite zu erkennen, zweisprachig zu übersetzen und die passenden Website-Einstellungen anzuwenden. Chrome/Edge kann diese Berechtigung als „Browserverlauf lesen“ anzeigen.",
+                    "permissionsSites": "Zugriff auf Websites und lokale Dateien: Dient dazu, zu übersetzende Seiten zu lesen, Verbindungen zu Google-/Bing-Übersetzungsdiensten und YouTube-Funktionen herzustellen sowie lokale Dokumente zu öffnen. Firefox führt diese als optionale Berechtigungen auf.",
+                    "permissionsPdf": "PDF-Anzeige: Geeignete PDF-Dateien werden im integrierten Mira-Reader geöffnet. Chrome/Edge kann die zugehörige Berechtigung als „Inhalte auf allen Seiten blockieren“ anzeigen. Bei einigen geschützten PDFs wird bei Bedarf ein Referer-Header ergänzt, damit das Dokument geladen werden kann."
+                }
             }
         ],
         "fr": [
@@ -161,9 +610,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Bien choisir son service de traduction IA · Cliquez ici pour en savoir plus",
                 "level": "info",
-                "content": "Cette extension intègre déjà la traduction Google/Bing. Aucune API Key n'est nécessaire : installez-la et utilisez-la immédiatement.\n\n【À propos de la précision des traductions】\n> Cette extension sert simplement d'intermédiaire entre les pages web et les moteurs de traduction. La qualité des traductions dépend du moteur que vous choisissez. Lorsqu'une traduction manque de précision, cela est généralement dû aux performances du moteur lui-même, et non à l'extension. Les modèles d'IA plus performants permettent généralement d'obtenir des traductions plus naturelles et plus précises.\n\n【À propos de la traduction par IA】\n> La traduction par IA nécessite des ressources de calcul et entraîne donc des coûts. C'est pourquoi cette extension ne propose aucun service d'IA gratuit intégré et ne fournit ni ne vend d'abonnements Pro, de forfaits IA ou de services tiers. Pour obtenir de meilleures traductions, vous pouvez connecter votre propre service d'IA : demandez une API Key auprès du fournisseur, via ses canaux officiels, puis choisissez le modèle qui vous convient.\n\n> Pour expliquer pourquoi nous recommandons d'utiliser votre propre API Key, voici deux façons possibles de procéder :\n\n>> ① Imaginons que vous achetiez un abonnement Pro auprès de Mira Translator :\n>>> Les utilisateurs achètent un abonnement Pro → Mira obtient et gère une seule API Key auprès d'un fournisseur d'IA → Plusieurs utilisateurs partagent cette même API Key gérée par Mira pour utiliser la traduction par IA.\n>>> Dans ce modèle, le contenu que les utilisateurs souhaitent traduire est d'abord envoyé au serveur de Mira. Celui-ci utilise ensuite l'API Key partagée pour transmettre le contenu au fournisseur d'IA, qui se charge du traitement. Les résultats sont ensuite renvoyés aux utilisateurs via le serveur de Mira. Les coûts liés à l'utilisation de l'API sont inclus dans le prix de l'abonnement.\n\n>> ② Utiliser sa propre API Key (recommandé par Mira Translator) :\n>>> Obtenir sa propre API Key directement auprès du fournisseur d'IA, via ses canaux officiels → Saisir la clé dans l'extension → L'extension envoie directement les demandes de traduction au fournisseur d'IA et utilise ses modèles.\n>>> Avec cette méthode, vous gérez vous-même votre API Key, tandis que le fournisseur d'IA s'occupe directement de la facturation et du suivi de votre consommation.\n\n> Dans les deux cas, les traductions reposent sur les modèles fournis par les services d'IA. Les principales différences concernent la gestion de l'API Key, la facturation et le chemin emprunté par les données pendant la traduction. En utilisant votre propre API Key, vous gardez le contrôle direct sur vos dépenses et vos limites d'utilisation, vous pouvez choisir ou changer librement de modèle et vous évitez une étape intermédiaire supplémentaire dans le transfert des données.\n\n> Les services et modèles compatibles comprennent notamment :\n>> • OpenRouter : une seule Key permet d'accéder à presque tous les principaux modèles ;\n>> • Groq : propose un quota gratuit et des réponses rapides ;\n>> • Gemini : propose un quota gratuit, mais avec des limites d'utilisation relativement strictes ;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama, ainsi que tout service compatible avec l'API OpenAI.\n\n> Pour connaître les conditions et les quotas exacts, veuillez consulter les informations officielles de chaque fournisseur.\n\n【À propos de l'équilibre entre vitesse et stabilité de la traduction】\n> Afin de réduire autant que possible le risque d'atteindre les limites de requêtes des services de traduction, le contenu des pages web est traduit par blocs successifs, plutôt que d'envoyer un grand nombre de requêtes simultanément. Les pages plus longues peuvent donc prendre un certain temps à traduire. La vitesse réelle dépend également du moteur de traduction choisi et de la qualité de votre connexion réseau.\n\nLes sites web présentant des structures de pages et des implémentations techniques très différentes, nous ne pouvons pas garantir la compatibilité avec tous les sites. Certaines pages utilisant des technologies particulières peuvent ne pas être correctement traduites.\n\nCe projet est actuellement gratuit, mais son développement et sa maintenance demandent un investissement important en temps. Nous ne proposons pas de développement personnalisé gratuit. Les futures mises à jour et évolutions dépendront de la planification générale du projet et des besoins de maintenance.",
                 "gotIt": "Compris",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Cette extension intègre déjà la traduction Google/Bing. Aucune API Key n'est nécessaire : installez-la et utilisez-la immédiatement.",
+                    "compatibility1": "Les sites web présentant des structures de pages et des implémentations techniques très différentes, nous ne pouvons pas garantir la compatibilité avec tous les sites. Certaines pages utilisant des technologies particulières peuvent ne pas être correctement traduites.",
+                    "accuracy": "Cette extension sert simplement d'intermédiaire entre les pages web et les moteurs de traduction. La qualité des traductions dépend du moteur que vous choisissez. Lorsqu'une traduction manque de précision, cela est généralement dû aux performances du moteur lui-même, et non à l'extension. Les modèles d'IA plus performants permettent généralement d'obtenir des traductions plus naturelles et plus précises.",
+                    "aiIntro": "La traduction par IA nécessite des ressources de calcul et entraîne donc des coûts. C'est pourquoi cette extension ne propose aucun service d'IA gratuit intégré et ne fournit ni ne vend d'abonnements Pro, de forfaits IA ou de services tiers. Pour obtenir de meilleures traductions, vous pouvez connecter votre propre service d'IA : demandez une API Key auprès du fournisseur, via ses canaux officiels, puis choisissez le modèle qui vous convient.",
+                    "aiWhy": "Pour expliquer pourquoi nous recommandons d'utiliser votre propre API Key, voici deux façons possibles de procéder :",
+                    "proTitle": "① Imaginons que vous achetiez un abonnement Pro auprès de Mira Translator :",
+                    "proFlow": "Les utilisateurs achètent un abonnement Pro → Mira obtient et gère une seule API Key auprès d'un fournisseur d'IA → Plusieurs utilisateurs partagent cette même API Key gérée par Mira pour utiliser la traduction par IA.",
+                    "proDetails": "Dans ce modèle, le contenu que les utilisateurs souhaitent traduire est d'abord envoyé au serveur de Mira. Celui-ci utilise ensuite l'API Key partagée pour transmettre le contenu au fournisseur d'IA, qui se charge du traitement. Les résultats sont ensuite renvoyés aux utilisateurs via le serveur de Mira. Les coûts liés à l'utilisation de l'API sont inclus dans le prix de l'abonnement.",
+                    "byokTitle": "② Utiliser sa propre API Key (recommandé par Mira Translator) :",
+                    "byokFlow": "Obtenir sa propre API Key directement auprès du fournisseur d'IA, via ses canaux officiels → Saisir la clé dans l'extension → L'extension envoie directement les demandes de traduction au fournisseur d'IA et utilise ses modèles.",
+                    "byokDetails": "Avec cette méthode, vous gérez vous-même votre API Key, tandis que le fournisseur d'IA s'occupe directement de la facturation et du suivi de votre consommation.",
+                    "aiComparison": "Dans les deux cas, les traductions reposent sur les modèles fournis par les services d'IA. Les principales différences concernent la gestion de l'API Key, la facturation et le chemin emprunté par les données pendant la traduction. En utilisant votre propre API Key, vous gardez le contrôle direct sur vos dépenses et vos limites d'utilisation, vous pouvez choisir ou changer librement de modèle et vous évitez une étape intermédiaire supplémentaire dans le transfert des données.",
+                    "providersIntro": "Les services et modèles compatibles comprennent notamment :",
+                    "providers": [
+                        "OpenRouter : une seule Key permet d'accéder à presque tous les principaux modèles ;",
+                        "Groq : propose un quota gratuit et des réponses rapides ;",
+                        "Gemini : propose un quota gratuit, mais avec des limites d'utilisation relativement strictes ;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama, ainsi que tout service compatible avec l'API OpenAI."
+                    ],
+                    "providerLimits": "Pour connaître les conditions et les quotas exacts, veuillez consulter les informations officielles de chaque fournisseur.",
+                    "speed": "Afin de réduire autant que possible le risque d'atteindre les limites de requêtes des services de traduction, le contenu des pages web est traduit par blocs successifs, plutôt que d'envoyer un grand nombre de requêtes simultanément. Les pages plus longues peuvent donc prendre un certain temps à traduire. La vitesse réelle dépend également du moteur de traduction choisi et de la qualité de votre connexion réseau.",
+                    "footer": "Mira Translator a été développé à l’origine pour répondre à mes propres besoins, puis j’ai décidé de le partager gratuitement avec tout le monde. L’extension peut être utilisée sans créer de compte ni se connecter. Son utilisation est entièrement gratuite, et nous n’acceptons ni pourboires ni dons. Le développement et la maintenance demandent beaucoup de temps et d’efforts ; c’est pourquoi nous ne proposons pas de développement personnalisé gratuit. Les futures mises à jour dépendront de la feuille de route générale du projet et des besoins de maintenance.",
+                    "summaryTitle": "L’essentiel à retenir",
+                    "summaryBuiltinLabel": "Traduction intégrée",
+                    "summaryAiLabel": "Traduction par IA",
+                    "summaryByokLabel": "Méthode recommandée",
+                    "summaryAi": "Aucun service d’IA gratuit intégré n’est proposé, et aucun abonnement Pro, forfait IA ou service tiers n’est fourni ni vendu.",
+                    "summaryByok": "Il suffit d’obtenir une API Key auprès du fournisseur d’IA de votre choix, de la saisir dans l’extension et de sélectionner un modèle pour utiliser directement son service.",
+                    "compatTitle": "Compatibilité avec les sites web et mise en page",
+                    "accuracyTitle": "À propos de la précision des traductions",
+                    "aiTitle": "À propos de la traduction par IA",
+                    "speedTitle": "Équilibre entre vitesse et stabilité de la traduction",
+                    "footerTitle": "À propos du projet et de sa maintenance",
+                    "footerLead": "Mira Translator a été développé à l’origine pour répondre à mes propres besoins, puis j’ai décidé de le partager gratuitement avec tout le monde. L’extension peut être utilisée sans créer de compte ni se connecter. ",
+                    "footerEmphasis": "nous ne proposons pas de développement personnalisé gratuit.",
+                    "footerTail": " Les futures mises à jour dépendront de la feuille de route générale du projet et des besoins de maintenance.",
+                    "footerFreeEmphasis": "Son utilisation est entièrement gratuite, et nous n’acceptons ni pourboires ni dons.",
+                    "footerMiddle": " Le développement et la maintenance demandent beaucoup de temps et d’efforts ; c’est pourquoi ",
+                    "permissionsTitle": "À propos des autorisations du navigateur",
+                    "permissionsTabs": "Accès aux onglets : permet d’identifier la page actuellement ouverte, d’afficher la traduction bilingue et d’appliquer les paramètres propres au site. Chrome/Edge peut présenter cette autorisation comme « Lire votre historique de navigation ».",
+                    "permissionsSites": "Accès aux sites web et aux fichiers locaux : permet de lire les pages à traduire, de se connecter aux services de traduction Google/Bing et aux fonctions YouTube, ainsi que d’ouvrir des documents locaux. Firefox les présente comme des autorisations facultatives.",
+                    "permissionsPdf": "Lecture des PDF : les PDF compatibles s’ouvrent dans le lecteur intégré de Mira. Chrome/Edge peut présenter l’autorisation associée comme « Bloquer le contenu sur toutes les pages ». Pour certains PDF protégés, un en-tête Referer est ajouté si nécessaire afin de faciliter leur chargement."
+                }
             }
         ],
         "it": [
@@ -171,9 +663,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Come scegliere un servizio di traduzione AI · Clicca qui per saperne di più",
                 "level": "info",
-                "content": "Questa estensione include già la traduzione integrata di Google/Bing. Non serve alcuna API Key: basta installarla per iniziare subito a usarla.\n\n【Sulla precisione delle traduzioni】\n> Questa estensione funge semplicemente da collegamento tra le pagine web e i motori di traduzione. La qualità delle traduzioni dipende dal motore scelto. Quando una traduzione non è accurata, in genere il problema dipende dalle prestazioni del motore stesso e non dall'estensione. I modelli AI più avanzati offrono generalmente traduzioni più naturali e precise.\n\n【Sulla traduzione AI】\n> La traduzione AI richiede risorse di calcolo e comporta dei costi. Per questo motivo, l'estensione non include un servizio AI gratuito integrato e non offre né vende abbonamenti Pro, pacchetti AI o servizi di terze parti. Per ottenere traduzioni migliori, puoi collegare un tuo servizio AI: richiedi una API Key tramite i canali ufficiali del fornitore e scegli il modello più adatto alle tue esigenze.\n\n> Per spiegare perché consigliamo di utilizzare una propria API Key, ecco due possibili modalità di utilizzo:\n\n>> ① Supponiamo di acquistare un abbonamento Pro tramite Mira Translator:\n>>> Gli utenti acquistano un abbonamento Pro → Mira ottiene e gestisce una sola API Key presso un fornitore AI → Più utenti condividono la stessa API Key gestita da Mira per utilizzare la traduzione AI.\n>>> In questo modello, il contenuto che gli utenti desiderano tradurre viene prima inviato al server di Mira. Il server utilizza poi la API Key condivisa per inoltrare il contenuto al fornitore AI, che si occupa dell'elaborazione. I risultati della traduzione vengono infine restituiti agli utenti tramite il server di Mira. I costi relativi all'utilizzo della API sono inclusi nel prezzo dell'abbonamento.\n\n>> ② Utilizzare una propria API Key (consigliato da Mira Translator):\n>>> Richiedere una propria API Key direttamente tramite i canali ufficiali del fornitore AI → Inserire la chiave nell'estensione → L'estensione invia le richieste di traduzione direttamente al fornitore AI e utilizza i suoi modelli.\n>>> Con questa modalità, gestisci personalmente la tua API Key, mentre il fornitore AI si occupa direttamente della fatturazione e del monitoraggio dei consumi.\n\n> In entrambi i casi, la traduzione viene effettuata utilizzando i modelli forniti dai servizi AI. Le principali differenze riguardano chi gestisce la API Key, come vengono addebitati i costi e il percorso seguito dai contenuti durante la trasmissione. Utilizzando una propria API Key, puoi controllare direttamente le spese e i limiti di utilizzo, scegliere o cambiare liberamente modello ed evitare un ulteriore passaggio intermedio nella trasmissione dei dati.\n\n> Tra i servizi e i modelli supportati figurano:\n>> • OpenRouter: una sola Key consente di accedere a quasi tutti i principali modelli;\n>> • Groq: offre una quota gratuita e risposte rapide;\n>> • Gemini: offre una quota gratuita, ma con limiti di utilizzo relativamente restrittivi;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama e qualsiasi servizio compatibile con l'API OpenAI.\n\n> Per conoscere le condizioni e i limiti di utilizzo aggiornati, consulta la documentazione ufficiale dei rispettivi fornitori.\n\n【Sul compromesso tra velocità e stabilità della traduzione】\n> Per ridurre il più possibile il rischio di raggiungere i limiti di richieste dei servizi di traduzione, i contenuti delle pagine web vengono tradotti in blocchi successivi, anziché inviare un gran numero di richieste contemporaneamente. Di conseguenza, le pagine più lunghe possono richiedere un po' di tempo per essere tradotte. La velocità effettiva dipende anche dal motore di traduzione scelto e dalle condizioni della rete.\n\nPoiché i siti web possono avere strutture delle pagine e implementazioni tecniche molto diverse, non è possibile garantire la compatibilità con tutti i siti. Alcuni siti con caratteristiche particolari potrebbero non essere tradotti correttamente.\n\nQuesto progetto è attualmente gratuito, ma il suo sviluppo e la sua manutenzione richiedono un notevole investimento di tempo. Non offriamo servizi gratuiti di sviluppo personalizzato. I futuri aggiornamenti e le nuove funzionalità dipenderanno dalla pianificazione generale del progetto e dalle esigenze di manutenzione.",
                 "gotIt": "Ho capito",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Questa estensione include già la traduzione integrata di Google/Bing. Non serve alcuna API Key: basta installarla per iniziare subito a usarla.",
+                    "compatibility1": "Poiché i siti web possono avere strutture delle pagine e implementazioni tecniche molto diverse, non è possibile garantire la compatibilità con tutti i siti. Alcuni siti con caratteristiche particolari potrebbero non essere tradotti correttamente.",
+                    "accuracy": "Questa estensione funge semplicemente da collegamento tra le pagine web e i motori di traduzione. La qualità delle traduzioni dipende dal motore scelto. Quando una traduzione non è accurata, in genere il problema dipende dalle prestazioni del motore stesso e non dall'estensione. I modelli AI più avanzati offrono generalmente traduzioni più naturali e precise.",
+                    "aiIntro": "La traduzione AI richiede risorse di calcolo e comporta dei costi. Per questo motivo, l'estensione non include un servizio AI gratuito integrato e non offre né vende abbonamenti Pro, pacchetti AI o servizi di terze parti. Per ottenere traduzioni migliori, puoi collegare un tuo servizio AI: richiedi una API Key tramite i canali ufficiali del fornitore e scegli il modello più adatto alle tue esigenze.",
+                    "aiWhy": "Per spiegare perché consigliamo di utilizzare una propria API Key, ecco due possibili modalità di utilizzo:",
+                    "proTitle": "① Supponiamo di acquistare un abbonamento Pro tramite Mira Translator:",
+                    "proFlow": "Gli utenti acquistano un abbonamento Pro → Mira ottiene e gestisce una sola API Key presso un fornitore AI → Più utenti condividono la stessa API Key gestita da Mira per utilizzare la traduzione AI.",
+                    "proDetails": "In questo modello, il contenuto che gli utenti desiderano tradurre viene prima inviato al server di Mira. Il server utilizza poi la API Key condivisa per inoltrare il contenuto al fornitore AI, che si occupa dell'elaborazione. I risultati della traduzione vengono infine restituiti agli utenti tramite il server di Mira. I costi relativi all'utilizzo della API sono inclusi nel prezzo dell'abbonamento.",
+                    "byokTitle": "② Utilizzare una propria API Key (consigliato da Mira Translator):",
+                    "byokFlow": "Richiedere una propria API Key direttamente tramite i canali ufficiali del fornitore AI → Inserire la chiave nell'estensione → L'estensione invia le richieste di traduzione direttamente al fornitore AI e utilizza i suoi modelli.",
+                    "byokDetails": "Con questa modalità, gestisci personalmente la tua API Key, mentre il fornitore AI si occupa direttamente della fatturazione e del monitoraggio dei consumi.",
+                    "aiComparison": "In entrambi i casi, la traduzione viene effettuata utilizzando i modelli forniti dai servizi AI. Le principali differenze riguardano chi gestisce la API Key, come vengono addebitati i costi e il percorso seguito dai contenuti durante la trasmissione. Utilizzando una propria API Key, puoi controllare direttamente le spese e i limiti di utilizzo, scegliere o cambiare liberamente modello ed evitare un ulteriore passaggio intermedio nella trasmissione dei dati.",
+                    "providersIntro": "Tra i servizi e i modelli supportati figurano:",
+                    "providers": [
+                        "OpenRouter: una sola Key consente di accedere a quasi tutti i principali modelli;",
+                        "Groq: offre una quota gratuita e risposte rapide;",
+                        "Gemini: offre una quota gratuita, ma con limiti di utilizzo relativamente restrittivi;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama e qualsiasi servizio compatibile con l'API OpenAI."
+                    ],
+                    "providerLimits": "Per conoscere le condizioni e i limiti di utilizzo aggiornati, consulta la documentazione ufficiale dei rispettivi fornitori.",
+                    "speed": "Per ridurre il più possibile il rischio di raggiungere i limiti di richieste dei servizi di traduzione, i contenuti delle pagine web vengono tradotti in blocchi successivi, anziché inviare un gran numero di richieste contemporaneamente. Di conseguenza, le pagine più lunghe possono richiedere un po' di tempo per essere tradotte. La velocità effettiva dipende anche dal motore di traduzione scelto e dalle condizioni della rete.",
+                    "footer": "Mira Translator è stato sviluppato inizialmente per soddisfare le mie esigenze personali e in seguito ho deciso di condividerlo gratuitamente con tutti. L’estensione può essere utilizzata senza creare un account né effettuare l’accesso. L’utilizzo non prevede alcun costo e non accettiamo mance o donazioni. Lo sviluppo e la manutenzione richiedono un notevole investimento di tempo e impegno; pertanto non offriamo sviluppo personalizzato gratuito. I futuri aggiornamenti dipenderanno dal piano generale del progetto e dalle esigenze di manutenzione.",
+                    "summaryTitle": "Le informazioni principali",
+                    "summaryBuiltinLabel": "Traduzione integrata",
+                    "summaryAiLabel": "Traduzione AI",
+                    "summaryByokLabel": "Metodo consigliato",
+                    "summaryAi": "Non è disponibile un servizio AI gratuito integrato e non vengono forniti né venduti abbonamenti Pro, pacchetti AI o servizi di terze parti.",
+                    "summaryByok": "Basta ottenere una API Key dal provider AI che preferisci, inserirla nell’estensione e scegliere un modello per utilizzare direttamente il suo servizio.",
+                    "compatTitle": "Compatibilità con i siti web e layout delle pagine",
+                    "accuracyTitle": "Sulla precisione delle traduzioni",
+                    "aiTitle": "Sulla traduzione AI",
+                    "speedTitle": "Compromesso tra velocità e stabilità della traduzione",
+                    "footerTitle": "Informazioni sul progetto e sulla manutenzione",
+                    "footerLead": "Mira Translator è stato sviluppato inizialmente per soddisfare le mie esigenze personali e in seguito ho deciso di condividerlo gratuitamente con tutti. L’estensione può essere utilizzata senza creare un account né effettuare l’accesso. ",
+                    "footerEmphasis": "non offriamo sviluppo personalizzato gratuito.",
+                    "footerTail": " I futuri aggiornamenti dipenderanno dal piano generale del progetto e dalle esigenze di manutenzione.",
+                    "footerFreeEmphasis": "L’utilizzo non prevede alcun costo e non accettiamo mance o donazioni.",
+                    "footerMiddle": " Lo sviluppo e la manutenzione richiedono un notevole investimento di tempo e impegno; pertanto ",
+                    "permissionsTitle": "Informazioni sulle autorizzazioni del browser",
+                    "permissionsTabs": "Accesso alle schede: serve a identificare la pagina attualmente aperta, fornire la traduzione bilingue e applicare le impostazioni del sito. Chrome/Edge può mostrare questa autorizzazione come “Leggere la cronologia di navigazione”.",
+                    "permissionsSites": "Accesso ai siti web e ai file locali: serve a leggere le pagine da tradurre, collegarsi ai servizi di traduzione Google/Bing e alle funzioni di YouTube e aprire documenti locali. Firefox elenca queste autorizzazioni come facoltative.",
+                    "permissionsPdf": "Lettura dei PDF: i PDF compatibili vengono aperti nel lettore integrato di Mira. Chrome/Edge può mostrare l’autorizzazione correlata come “Bloccare i contenuti su tutte le pagine”. Per alcuni PDF protetti, quando necessario viene aggiunta un’intestazione Referer per facilitarne il caricamento."
+                }
             }
         ],
         "vi": [
@@ -181,9 +716,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 Cách chọn dịch vụ dịch thuật AI · Nhấn để tìm hiểu thêm",
                 "level": "info",
-                "content": "Tiện ích này tích hợp sẵn Google/Bing Translate. Bạn không cần API Key và có thể sử dụng ngay sau khi cài đặt.\n\n【Về độ chính xác của bản dịch】\n> Tiện ích này đóng vai trò cầu nối giữa trang web và các công cụ dịch thuật. Chất lượng bản dịch phụ thuộc vào công cụ dịch mà bạn lựa chọn. Nếu bản dịch không chính xác, nguyên nhân thường nằm ở khả năng của chính công cụ dịch đó, chứ không phải do tiện ích. Các mô hình AI mạnh hơn thường mang lại bản dịch tự nhiên và chính xác hơn.\n\n【Về dịch thuật bằng AI】\n> Dịch thuật bằng AI cần tài nguyên tính toán và phát sinh chi phí. Vì vậy, tiện ích này không tích hợp dịch vụ AI miễn phí, cũng không cung cấp hoặc bán tư cách thành viên Pro, các gói AI hay dịch vụ của bên thứ ba. Nếu muốn có bản dịch chất lượng tốt hơn, bạn có thể kết nối dịch vụ AI của riêng mình: đăng ký API Key thông qua kênh chính thức của nhà cung cấp, sau đó chọn mô hình phù hợp.\n\n> Để giải thích vì sao chúng tôi khuyến nghị sử dụng API Key riêng, hãy cùng xem hai cách sử dụng sau:\n\n>> ① Giả sử bạn mua gói thành viên Pro thông qua Mira Translator:\n>>> Người dùng mua gói Pro → Mira đăng ký và quản lý một API Key duy nhất từ nhà cung cấp AI → Nhiều người dùng cùng sử dụng chung API Key đó do Mira quản lý để dịch bằng AI.\n>>> Với mô hình này, nội dung người dùng muốn dịch trước tiên được gửi đến máy chủ của Mira. Sau đó, máy chủ Mira sử dụng API Key dùng chung để chuyển tiếp nội dung đến nhà cung cấp AI xử lý. Kết quả dịch thuật được gửi trả lại cho người dùng thông qua máy chủ Mira. Chi phí sử dụng API liên quan được tính vào giá gói thành viên.\n\n>> ② Sử dụng API Key riêng (Mira Translator khuyến nghị):\n>>> Tự đăng ký API Key trực tiếp qua kênh chính thức của nhà cung cấp AI → Nhập Key vào tiện ích → Tiện ích gửi yêu cầu dịch trực tiếp đến nhà cung cấp AI và sử dụng các mô hình của họ.\n>>> Với cách này, bạn tự quản lý API Key của mình, còn nhà cung cấp AI trực tiếp phụ trách việc tính phí và theo dõi mức sử dụng.\n\n> Cả hai cách đều sử dụng các mô hình do nhà cung cấp dịch vụ AI cung cấp. Điểm khác biệt chính nằm ở việc ai quản lý API Key, cách tính phí và đường truyền dữ liệu trong quá trình dịch. Khi sử dụng API Key riêng, bạn có thể trực tiếp kiểm soát chi tiêu và hạn mức sử dụng, tự do lựa chọn hoặc thay đổi mô hình, đồng thời giảm bớt các khâu trung gian trong quá trình truyền dữ liệu.\n\n> Các dịch vụ và mô hình được hỗ trợ bao gồm:\n>> • OpenRouter: Một Key có thể truy cập gần như tất cả các mô hình phổ biến;\n>> • Groq: Có hạn mức miễn phí và tốc độ phản hồi nhanh;\n>> • Gemini: Có hạn mức miễn phí nhưng giới hạn sử dụng tương đối nghiêm ngặt;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama và mọi dịch vụ tương thích với OpenAI API.\n\n> Vui lòng tham khảo thông tin chính thức của từng nhà cung cấp để biết các quy định và hạn mức sử dụng cụ thể.\n\n【Về sự cân bằng giữa tốc độ và độ ổn định khi dịch】\n> Để hạn chế tối đa khả năng chạm đến giới hạn yêu cầu của dịch vụ dịch thuật, nội dung trang web được chia thành từng phần và xử lý lần lượt, thay vì gửi một lượng lớn yêu cầu cùng lúc. Vì vậy, những trang web dài có thể cần thêm thời gian để dịch. Tốc độ thực tế cũng phụ thuộc vào công cụ dịch được chọn và tình trạng mạng.\n\nDo cấu trúc trang và cách triển khai kỹ thuật của mỗi website rất khác nhau, chúng tôi không thể đảm bảo tương thích với tất cả các trang web. Một số website có cấu trúc đặc biệt có thể không được dịch chính xác.\n\nDự án hiện được cung cấp miễn phí, nhưng việc phát triển và bảo trì đòi hỏi rất nhiều thời gian và công sức. Chúng tôi không cung cấp dịch vụ phát triển tính năng theo yêu cầu miễn phí. Các bản cập nhật và tính năng mới trong tương lai sẽ phụ thuộc vào kế hoạch phát triển tổng thể và tình hình bảo trì của dự án.",
                 "gotIt": "Đã hiểu",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "Tiện ích này tích hợp sẵn Google/Bing Translate. Bạn không cần API Key và có thể sử dụng ngay sau khi cài đặt.",
+                    "compatibility1": "Do cấu trúc trang và cách triển khai kỹ thuật của mỗi website rất khác nhau, chúng tôi không thể đảm bảo tương thích với tất cả các trang web. Một số website có cấu trúc đặc biệt có thể không được dịch chính xác.",
+                    "accuracy": "Tiện ích này đóng vai trò cầu nối giữa trang web và các công cụ dịch thuật. Chất lượng bản dịch phụ thuộc vào công cụ dịch mà bạn lựa chọn. Nếu bản dịch không chính xác, nguyên nhân thường nằm ở khả năng của chính công cụ dịch đó, chứ không phải do tiện ích. Các mô hình AI mạnh hơn thường mang lại bản dịch tự nhiên và chính xác hơn.",
+                    "aiIntro": "Dịch thuật bằng AI cần tài nguyên tính toán và phát sinh chi phí. Vì vậy, tiện ích này không tích hợp dịch vụ AI miễn phí, cũng không cung cấp hoặc bán tư cách thành viên Pro, các gói AI hay dịch vụ của bên thứ ba. Nếu muốn có bản dịch chất lượng tốt hơn, bạn có thể kết nối dịch vụ AI của riêng mình: đăng ký API Key thông qua kênh chính thức của nhà cung cấp, sau đó chọn mô hình phù hợp.",
+                    "aiWhy": "Để giải thích vì sao chúng tôi khuyến nghị sử dụng API Key riêng, hãy cùng xem hai cách sử dụng sau:",
+                    "proTitle": "① Giả sử bạn mua gói thành viên Pro thông qua Mira Translator:",
+                    "proFlow": "Người dùng mua gói Pro → Mira đăng ký và quản lý một API Key duy nhất từ nhà cung cấp AI → Nhiều người dùng cùng sử dụng chung API Key đó do Mira quản lý để dịch bằng AI.",
+                    "proDetails": "Với mô hình này, nội dung người dùng muốn dịch trước tiên được gửi đến máy chủ của Mira. Sau đó, máy chủ Mira sử dụng API Key dùng chung để chuyển tiếp nội dung đến nhà cung cấp AI xử lý. Kết quả dịch thuật được gửi trả lại cho người dùng thông qua máy chủ Mira. Chi phí sử dụng API liên quan được tính vào giá gói thành viên.",
+                    "byokTitle": "② Sử dụng API Key riêng (Mira Translator khuyến nghị):",
+                    "byokFlow": "Tự đăng ký API Key trực tiếp qua kênh chính thức của nhà cung cấp AI → Nhập Key vào tiện ích → Tiện ích gửi yêu cầu dịch trực tiếp đến nhà cung cấp AI và sử dụng các mô hình của họ.",
+                    "byokDetails": "Với cách này, bạn tự quản lý API Key của mình, còn nhà cung cấp AI trực tiếp phụ trách việc tính phí và theo dõi mức sử dụng.",
+                    "aiComparison": "Cả hai cách đều sử dụng các mô hình do nhà cung cấp dịch vụ AI cung cấp. Điểm khác biệt chính nằm ở việc ai quản lý API Key, cách tính phí và đường truyền dữ liệu trong quá trình dịch. Khi sử dụng API Key riêng, bạn có thể trực tiếp kiểm soát chi tiêu và hạn mức sử dụng, tự do lựa chọn hoặc thay đổi mô hình, đồng thời giảm bớt các khâu trung gian trong quá trình truyền dữ liệu.",
+                    "providersIntro": "Các dịch vụ và mô hình được hỗ trợ bao gồm:",
+                    "providers": [
+                        "OpenRouter: Một Key có thể truy cập gần như tất cả các mô hình phổ biến;",
+                        "Groq: Có hạn mức miễn phí và tốc độ phản hồi nhanh;",
+                        "Gemini: Có hạn mức miễn phí nhưng giới hạn sử dụng tương đối nghiêm ngặt;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama và mọi dịch vụ tương thích với OpenAI API."
+                    ],
+                    "providerLimits": "Vui lòng tham khảo thông tin chính thức của từng nhà cung cấp để biết các quy định và hạn mức sử dụng cụ thể.",
+                    "speed": "Để hạn chế tối đa khả năng chạm đến giới hạn yêu cầu của dịch vụ dịch thuật, nội dung trang web được chia thành từng phần và xử lý lần lượt, thay vì gửi một lượng lớn yêu cầu cùng lúc. Vì vậy, những trang web dài có thể cần thêm thời gian để dịch. Tốc độ thực tế cũng phụ thuộc vào công cụ dịch được chọn và tình trạng mạng.",
+                    "footer": "Mira Translator ban đầu được phát triển để đáp ứng nhu cầu sử dụng cá nhân của tôi, sau đó tôi quyết định chia sẻ miễn phí với mọi người. Bạn có thể sử dụng tiện ích mà không cần tạo tài khoản hoặc đăng nhập. Việc sử dụng hoàn toàn miễn phí và chúng tôi cũng không nhận tiền tip hay quyên góp. Việc phát triển và bảo trì đòi hỏi nhiều thời gian và công sức, vì vậy chúng tôi không cung cấp dịch vụ phát triển tùy chỉnh miễn phí. Các bản cập nhật tính năng trong tương lai sẽ tùy thuộc vào kế hoạch phát triển chung và nhu cầu bảo trì của dự án.",
+                    "summaryTitle": "Những điều cần biết",
+                    "summaryBuiltinLabel": "Dịch thuật tích hợp",
+                    "summaryAiLabel": "Dịch thuật AI",
+                    "summaryByokLabel": "Cách sử dụng được khuyến nghị",
+                    "summaryAi": "Tiện ích không tích hợp dịch vụ AI miễn phí, cũng không cung cấp hoặc bán tư cách thành viên Pro, gói AI hay dịch vụ của bên thứ ba.",
+                    "summaryByok": "Bạn chỉ cần lấy một API Key từ nhà cung cấp AI mình chọn, nhập vào tiện ích rồi chọn một mô hình để sử dụng trực tiếp dịch vụ đó.",
+                    "compatTitle": "Khả năng tương thích với trang web và bố cục trang",
+                    "accuracyTitle": "Về độ chính xác của bản dịch",
+                    "aiTitle": "Về dịch thuật bằng AI",
+                    "speedTitle": "Cân bằng giữa tốc độ và độ ổn định khi dịch",
+                    "footerTitle": "Về dự án và công tác bảo trì",
+                    "footerLead": "Mira Translator ban đầu được phát triển để đáp ứng nhu cầu sử dụng cá nhân của tôi, sau đó tôi quyết định chia sẻ miễn phí với mọi người. Bạn có thể sử dụng tiện ích mà không cần tạo tài khoản hoặc đăng nhập. ",
+                    "footerEmphasis": "chúng tôi không cung cấp dịch vụ phát triển tùy chỉnh miễn phí.",
+                    "footerTail": " Các bản cập nhật tính năng trong tương lai sẽ tùy thuộc vào kế hoạch phát triển chung và nhu cầu bảo trì của dự án.",
+                    "footerFreeEmphasis": "Việc sử dụng hoàn toàn miễn phí và chúng tôi cũng không nhận tiền tip hay quyên góp.",
+                    "footerMiddle": " Việc phát triển và bảo trì đòi hỏi nhiều thời gian và công sức, vì vậy ",
+                    "permissionsTitle": "Về quyền của trình duyệt",
+                    "permissionsTabs": "Quyền truy cập thẻ: dùng để nhận diện trang đang mở, thực hiện dịch song ngữ và áp dụng cài đặt riêng của trang web. Chrome/Edge có thể hiển thị quyền này là “Đọc lịch sử duyệt web”.",
+                    "permissionsSites": "Quyền truy cập trang web và tệp cục bộ: dùng để đọc trang cần dịch, kết nối với dịch vụ dịch Google/Bing và các tính năng YouTube, đồng thời mở tài liệu trên máy. Firefox liệt kê đây là các quyền tùy chọn.",
+                    "permissionsPdf": "Đọc PDF: các tệp PDF phù hợp sẽ được mở bằng trình đọc tích hợp của Mira. Chrome/Edge có thể hiển thị quyền liên quan là “Chặn nội dung trên tất cả các trang”. Với một số PDF được bảo vệ, tiện ích sẽ bổ sung tiêu đề Referer khi cần để hỗ trợ tải tài liệu."
+                }
             }
         ],
         "th": [
@@ -191,9 +769,52 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 วิธีเลือกบริการแปลภาษาด้วย AI · คลิกเพื่อดูรายละเอียด",
                 "level": "info",
-                "content": "ส่วนขยายนี้มี Google/Bing Translate มาให้ในตัว ไม่จำเป็นต้องใช้ API Key สามารถเริ่มใช้งานได้ทันทีหลังติดตั้ง\n\n【เกี่ยวกับความแม่นยำของคำแปล】\n> ส่วนขยายนี้ทำหน้าที่เป็นตัวกลางเชื่อมต่อระหว่างหน้าเว็บกับระบบแปลภาษา คุณภาพของคำแปลขึ้นอยู่กับระบบแปลภาษาที่เลือกใช้ หากพบว่าคำแปลไม่ถูกต้อง โดยทั่วไปมักเกิดจากประสิทธิภาพของระบบแปลภาษาเอง ไม่ใช่ปัญหาของส่วนขยาย การใช้โมเดล AI ที่มีประสิทธิภาพสูงกว่ามักช่วยให้ได้คำแปลที่เป็นธรรมชาติและแม่นยำยิ่งขึ้น\n\n【เกี่ยวกับการแปลด้วย AI】\n> การแปลด้วย AI ต้องใช้ทรัพยากรในการประมวลผลและมีต้นทุนที่เกี่ยวข้อง ดังนั้น ส่วนขยายนี้จึงไม่มีบริการ AI ฟรีในตัว และไม่มีการให้บริการหรือจำหน่ายสมาชิก Pro แพ็กเกจ AI หรือบริการจากบุคคลที่สาม หากต้องการคุณภาพการแปลที่ดียิ่งขึ้น คุณสามารถเชื่อมต่อบริการ AI ของตนเองได้ โดยสมัคร API Key ผ่านช่องทางอย่างเป็นทางการของผู้ให้บริการ แล้วเลือกโมเดลที่เหมาะสม\n\n> เพื่ออธิบายว่าทำไมเราจึงแนะนำให้ใช้ API Key ของตนเอง ลองดูวิธีการใช้งานสองรูปแบบต่อไปนี้:\n\n>> ① สมมติว่าคุณซื้อสมาชิก Pro ผ่าน Mira Translator:\n>>> ผู้ใช้ซื้อสมาชิก Pro → Mira สมัครใช้บริการและจัดการ API Key หนึ่งรายการจากผู้ให้บริการ AI → ผู้ใช้หลายคนใช้ API Key เดียวกันที่ Mira เป็นผู้จัดการร่วมกันเพื่อแปลด้วย AI\n>>> ในรูปแบบนี้ เนื้อหาที่ผู้ใช้ต้องการแปลจะถูกส่งไปยังเซิร์ฟเวอร์ของ Mira ก่อน จากนั้นเซิร์ฟเวอร์ของ Mira จะใช้ API Key ที่ใช้ร่วมกันส่งต่อเนื้อหาไปยังผู้ให้บริการ AI เพื่อประมวลผล เมื่อแปลเสร็จแล้ว ผลลัพธ์จะถูกส่งกลับไปยังผู้ใช้ผ่านเซิร์ฟเวอร์ของ Mira โดยต้นทุนการใช้งาน API ที่เกี่ยวข้องจะรวมอยู่ในราคาสมาชิก\n\n>> ② ใช้ API Key ของตนเอง (Mira Translator แนะนำ):\n>>> สมัคร API Key ของตนเองโดยตรงผ่านช่องทางอย่างเป็นทางการของผู้ให้บริการ AI → กรอก Key ลงในส่วนขยาย → ส่วนขยายจะส่งคำขอแปลไปยังผู้ให้บริการ AI โดยตรงและใช้โมเดลของผู้ให้บริการนั้น\n>>> วิธีนี้ผู้ใช้จะเป็นผู้จัดการ API Key ของตนเอง ส่วนผู้ให้บริการ AI จะดูแลเรื่องการเรียกเก็บเงินและบันทึกปริมาณการใช้งานโดยตรง\n\n> ทั้งสองวิธีใช้โมเดลที่ให้บริการโดยผู้ให้บริการ AI เหมือนกัน ความแตกต่างหลักอยู่ที่ว่าใครเป็นผู้จัดการ API Key วิธีเรียกเก็บค่าใช้จ่าย และเส้นทางการส่งข้อมูลระหว่างการแปล หากใช้ API Key ของตนเอง คุณจะสามารถควบคุมค่าใช้จ่ายและโควตาการใช้งานได้โดยตรง เลือกหรือเปลี่ยนโมเดลได้อย่างอิสระ และลดขั้นตอนการส่งข้อมูลผ่านตัวกลางเพิ่มเติม\n\n> บริการและโมเดลที่รองรับ ได้แก่:\n>> • OpenRouter: ใช้ Key เพียงหนึ่งรายการก็สามารถเข้าถึงโมเดลหลัก ๆ ได้เกือบทั้งหมด;\n>> • Groq: มีโควตาใช้งานฟรีและตอบสนองได้รวดเร็ว;\n>> • Gemini: มีโควตาใช้งานฟรี แต่มีข้อจำกัดในการใช้งานค่อนข้างเข้มงวด;\n>> • GPT, Claude, DeepL, SiliconFlow, Ollama และบริการอื่น ๆ ที่รองรับ OpenAI API\n\n> โปรดตรวจสอบเงื่อนไขและโควตาการใช้งานจากข้อมูลอย่างเป็นทางการของผู้ให้บริการแต่ละราย\n\n【เกี่ยวกับการรักษาสมดุลระหว่างความเร็วและความเสถียรในการแปล】\n> เพื่อลดโอกาสในการใช้งานเกินขีดจำกัดจำนวนคำขอของบริการแปลภาษา เนื้อหาบนหน้าเว็บจะถูกแบ่งเป็นส่วน ๆ และจัดคิวแปลตามลำดับ แทนการส่งคำขอจำนวนมากพร้อมกัน ดังนั้น หน้าเว็บที่มีเนื้อหายาวอาจต้องใช้เวลาในการแปลมากขึ้น ความเร็วจริงยังขึ้นอยู่กับระบบแปลภาษาที่เลือกและสภาพเครือข่ายด้วย\n\nเนื่องจากเว็บไซต์แต่ละแห่งมีโครงสร้างหน้าเว็บและวิธีการทำงานทางเทคนิคที่แตกต่างกันมาก เราจึงไม่สามารถรับประกันได้ว่าจะรองรับทุกเว็บไซต์ เว็บไซต์บางแห่งที่มีโครงสร้างพิเศษอาจไม่สามารถแปลได้อย่างถูกต้อง\n\nโครงการนี้เปิดให้ใช้งานฟรีในปัจจุบัน แต่การพัฒนาและบำรุงรักษาต้องใช้เวลาและความพยายามอย่างมาก เราไม่มีบริการพัฒนาหรือปรับแต่งตามคำขอโดยไม่คิดค่าใช้จ่าย การปรับปรุงและเพิ่มฟีเจอร์ในอนาคตจะขึ้นอยู่กับแผนการพัฒนาโดยรวมและความจำเป็นในการบำรุงรักษา",
                 "gotIt": "เข้าใจแล้ว",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "ส่วนขยายนี้มี Google/Bing Translate มาให้ในตัว ไม่จำเป็นต้องใช้ API Key สามารถเริ่มใช้งานได้ทันทีหลังติดตั้ง",
+                    "compatibility1": "เนื่องจากเว็บไซต์แต่ละแห่งมีโครงสร้างหน้าเว็บและวิธีการทำงานทางเทคนิคที่แตกต่างกันมาก เราจึงไม่สามารถรับประกันได้ว่าจะรองรับทุกเว็บไซต์ เว็บไซต์บางแห่งที่มีโครงสร้างพิเศษอาจไม่สามารถแปลได้อย่างถูกต้อง",
+                    "accuracy": "ส่วนขยายนี้ทำหน้าที่เป็นตัวกลางเชื่อมต่อระหว่างหน้าเว็บกับระบบแปลภาษา คุณภาพของคำแปลขึ้นอยู่กับระบบแปลภาษาที่เลือกใช้ หากพบว่าคำแปลไม่ถูกต้อง โดยทั่วไปมักเกิดจากประสิทธิภาพของระบบแปลภาษาเอง ไม่ใช่ปัญหาของส่วนขยาย การใช้โมเดล AI ที่มีประสิทธิภาพสูงกว่ามักช่วยให้ได้คำแปลที่เป็นธรรมชาติและแม่นยำยิ่งขึ้น",
+                    "aiIntro": "การแปลด้วย AI ต้องใช้ทรัพยากรในการประมวลผลและมีต้นทุนที่เกี่ยวข้อง ดังนั้น ส่วนขยายนี้จึงไม่มีบริการ AI ฟรีในตัว และไม่มีการให้บริการหรือจำหน่ายสมาชิก Pro แพ็กเกจ AI หรือบริการจากบุคคลที่สาม หากต้องการคุณภาพการแปลที่ดียิ่งขึ้น คุณสามารถเชื่อมต่อบริการ AI ของตนเองได้ โดยสมัคร API Key ผ่านช่องทางอย่างเป็นทางการของผู้ให้บริการ แล้วเลือกโมเดลที่เหมาะสม",
+                    "aiWhy": "เพื่ออธิบายว่าทำไมเราจึงแนะนำให้ใช้ API Key ของตนเอง ลองดูวิธีการใช้งานสองรูปแบบต่อไปนี้:",
+                    "proTitle": "① สมมติว่าคุณซื้อสมาชิก Pro ผ่าน Mira Translator:",
+                    "proFlow": "ผู้ใช้ซื้อสมาชิก Pro → Mira สมัครใช้บริการและจัดการ API Key หนึ่งรายการจากผู้ให้บริการ AI → ผู้ใช้หลายคนใช้ API Key เดียวกันที่ Mira เป็นผู้จัดการร่วมกันเพื่อแปลด้วย AI",
+                    "proDetails": "ในรูปแบบนี้ เนื้อหาที่ผู้ใช้ต้องการแปลจะถูกส่งไปยังเซิร์ฟเวอร์ของ Mira ก่อน จากนั้นเซิร์ฟเวอร์ของ Mira จะใช้ API Key ที่ใช้ร่วมกันส่งต่อเนื้อหาไปยังผู้ให้บริการ AI เพื่อประมวลผล เมื่อแปลเสร็จแล้ว ผลลัพธ์จะถูกส่งกลับไปยังผู้ใช้ผ่านเซิร์ฟเวอร์ของ Mira โดยต้นทุนการใช้งาน API ที่เกี่ยวข้องจะรวมอยู่ในราคาสมาชิก",
+                    "byokTitle": "② ใช้ API Key ของตนเอง (Mira Translator แนะนำ):",
+                    "byokFlow": "สมัคร API Key ของตนเองโดยตรงผ่านช่องทางอย่างเป็นทางการของผู้ให้บริการ AI → กรอก Key ลงในส่วนขยาย → ส่วนขยายจะส่งคำขอแปลไปยังผู้ให้บริการ AI โดยตรงและใช้โมเดลของผู้ให้บริการนั้น",
+                    "byokDetails": "วิธีนี้ผู้ใช้จะเป็นผู้จัดการ API Key ของตนเอง ส่วนผู้ให้บริการ AI จะดูแลเรื่องการเรียกเก็บเงินและบันทึกปริมาณการใช้งานโดยตรง",
+                    "aiComparison": "ทั้งสองวิธีใช้โมเดลที่ให้บริการโดยผู้ให้บริการ AI เหมือนกัน ความแตกต่างหลักอยู่ที่ว่าใครเป็นผู้จัดการ API Key วิธีเรียกเก็บค่าใช้จ่าย และเส้นทางการส่งข้อมูลระหว่างการแปล หากใช้ API Key ของตนเอง คุณจะสามารถควบคุมค่าใช้จ่ายและโควตาการใช้งานได้โดยตรง เลือกหรือเปลี่ยนโมเดลได้อย่างอิสระ และลดขั้นตอนการส่งข้อมูลผ่านตัวกลางเพิ่มเติม",
+                    "providersIntro": "บริการและโมเดลที่รองรับ ได้แก่:",
+                    "providers": [
+                        "OpenRouter: ใช้ Key เพียงหนึ่งรายการก็สามารถเข้าถึงโมเดลหลัก ๆ ได้เกือบทั้งหมด;",
+                        "Groq: มีโควตาใช้งานฟรีและตอบสนองได้รวดเร็ว;",
+                        "Gemini: มีโควตาใช้งานฟรี แต่มีข้อจำกัดในการใช้งานค่อนข้างเข้มงวด;",
+                        "GPT, Claude, DeepL, SiliconFlow, Ollama และบริการอื่น ๆ ที่รองรับ OpenAI API"
+                    ],
+                    "providerLimits": "โปรดตรวจสอบเงื่อนไขและโควตาการใช้งานจากข้อมูลอย่างเป็นทางการของผู้ให้บริการแต่ละราย",
+                    "speed": "เพื่อลดโอกาสในการใช้งานเกินขีดจำกัดจำนวนคำขอของบริการแปลภาษา เนื้อหาบนหน้าเว็บจะถูกแบ่งเป็นส่วน ๆ และจัดคิวแปลตามลำดับ แทนการส่งคำขอจำนวนมากพร้อมกัน ดังนั้น หน้าเว็บที่มีเนื้อหายาวอาจต้องใช้เวลาในการแปลมากขึ้น ความเร็วจริงยังขึ้นอยู่กับระบบแปลภาษาที่เลือกและสภาพเครือข่ายด้วย",
+                    "footer": "Mira Translator เริ่มต้นจากการพัฒนาขึ้นเพื่อตอบโจทย์ความต้องการใช้งานส่วนตัวของฉัน ก่อนที่ฉันจะตัดสินใจแบ่งปันให้ทุกคนใช้งานฟรี ส่วนขยายนี้ใช้งานได้โดยไม่ต้องสมัครบัญชีหรือเข้าสู่ระบบ ไม่มีค่าใช้จ่ายในการใช้งาน และเราไม่รับเงินทิปหรือเงินบริจาค การพัฒนาและบำรุงรักษาต้องใช้เวลาและความพยายามอย่างมาก ดังนั้น เราจึงไม่มีบริการพัฒนาหรือปรับแต่งตามคำขอโดยไม่คิดค่าใช้จ่าย การอัปเดตฟีเจอร์ในอนาคตจะขึ้นอยู่กับแผนการพัฒนาโดยรวมและความจำเป็นในการบำรุงรักษาโครงการ",
+                    "summaryTitle": "ข้อมูลสำคัญที่ควรทราบ",
+                    "summaryBuiltinLabel": "การแปลที่มีมาให้",
+                    "summaryAiLabel": "การแปลด้วย AI",
+                    "summaryByokLabel": "วิธีที่แนะนำ",
+                    "summaryAi": "ไม่มีบริการ AI ฟรีในตัว และไม่มีการให้บริการหรือจำหน่ายสมาชิก Pro แพ็กเกจ AI หรือบริการจากบุคคลที่สาม",
+                    "summaryByok": "เพียงรับ API Key จากผู้ให้บริการ AI ที่คุณเลือก กรอกลงในส่วนขยาย แล้วเลือกรุ่นโมเดล ก็สามารถใช้บริการนั้นได้โดยตรง",
+                    "compatTitle": "ความเข้ากันได้กับเว็บไซต์และการจัดวางหน้าเว็บ",
+                    "accuracyTitle": "เกี่ยวกับความแม่นยำของคำแปล",
+                    "aiTitle": "เกี่ยวกับการแปลด้วย AI",
+                    "speedTitle": "ความสมดุลระหว่างความเร็วและความเสถียรในการแปล",
+                    "footerTitle": "เกี่ยวกับโครงการและการดูแลรักษา",
+                    "footerLead": "Mira Translator เริ่มต้นจากการพัฒนาขึ้นเพื่อตอบโจทย์ความต้องการใช้งานส่วนตัวของฉัน ก่อนที่ฉันจะตัดสินใจแบ่งปันให้ทุกคนใช้งานฟรี ส่วนขยายนี้ใช้งานได้โดยไม่ต้องสมัครบัญชีหรือเข้าสู่ระบบ ",
+                    "footerEmphasis": "เราจึงไม่มีบริการพัฒนาหรือปรับแต่งตามคำขอโดยไม่คิดค่าใช้จ่าย",
+                    "footerTail": " การอัปเดตฟีเจอร์ในอนาคตจะขึ้นอยู่กับแผนการพัฒนาโดยรวมและความจำเป็นในการบำรุงรักษาโครงการ",
+                    "footerFreeEmphasis": "ไม่มีค่าใช้จ่ายในการใช้งาน และเราไม่รับเงินทิปหรือเงินบริจาค",
+                    "footerMiddle": " การพัฒนาและบำรุงรักษาต้องใช้เวลาและความพยายามอย่างมาก ดังนั้น ",
+                    "permissionsTitle": "เกี่ยวกับสิทธิ์ของเบราว์เซอร์",
+                    "permissionsTabs": "สิทธิ์เข้าถึงแท็บ: ใช้ระบุหน้าเว็บที่เปิดอยู่ เพื่อแสดงคำแปลสองภาษาและใช้การตั้งค่าเฉพาะของเว็บไซต์ Chrome/Edge อาจแสดงสิทธิ์นี้ว่า “อ่านประวัติการเข้าชม”.",
+                    "permissionsSites": "สิทธิ์เข้าถึงเว็บไซต์และไฟล์ในเครื่อง: ใช้อ่านหน้าเว็บที่ต้องการแปล เชื่อมต่อบริการแปลของ Google/Bing และฟีเจอร์ YouTube รวมถึงเปิดเอกสารในเครื่อง Firefox จะแสดงสิทธิ์เหล่านี้เป็นสิทธิ์ที่เลือกอนุญาตได้.",
+                    "permissionsPdf": "การอ่าน PDF: ไฟล์ PDF ที่ตรงตามเงื่อนไขจะเปิดด้วยโปรแกรมอ่านในตัวของ Mira Chrome/Edge อาจแสดงสิทธิ์ที่เกี่ยวข้องว่า “บล็อกเนื้อหาบนทุกหน้า” สำหรับ PDF ที่มีการป้องกันบางไฟล์ ระบบจะเพิ่มส่วนหัว Referer เมื่อจำเป็นเพื่อช่วยให้โหลดเอกสารได้."
+                }
             }
         ],
         "fa": [
@@ -201,9 +822,251 @@
                 "id": "notice_20261031_free_ai",
                 "title": "💡 راهنمای انتخاب سرویس ترجمه هوش مصنوعی · برای اطلاعات بیشتر کلیک کنید",
                 "level": "info",
-                "content": "این افزونه به‌صورت پیش‌فرض از ترجمه Google/Bing پشتیبانی می‌کند. نیازی به API Key ندارید و می‌توانید بلافاصله پس از نصب از آن استفاده کنید.\n\n【درباره دقت ترجمه】\n> این افزونه تنها نقش واسطه‌ای میان صفحات وب و موتورهای ترجمه را ایفا می‌کند. کیفیت ترجمه به موتور ترجمه‌ای بستگی دارد که انتخاب می‌کنید. اگر ترجمه دقیق نباشد، معمولاً دلیل آن عملکرد خود موتور ترجمه است، نه افزونه. مدل‌های قدرتمندتر هوش مصنوعی معمولاً ترجمه‌هایی طبیعی‌تر و دقیق‌تر ارائه می‌دهند.\n\n【درباره ترجمه با هوش مصنوعی】\n> ترجمه با هوش مصنوعی به منابع پردازشی نیاز دارد و هزینه‌هایی به همراه دارد. به همین دلیل، این افزونه سرویس رایگان هوش مصنوعی داخلی ارائه نمی‌کند و هیچ‌گونه عضویت Pro، بسته هوش مصنوعی یا خدمات شخص ثالث را نیز عرضه یا به فروش نمی‌رساند. برای دستیابی به ترجمه‌ای با کیفیت بهتر، می‌توانید سرویس هوش مصنوعی شخصی خود را متصل کنید: از طریق کانال‌های رسمی ارائه‌دهنده، API Key دریافت کنید و سپس مدل مناسب را انتخاب کنید.\n\n> برای توضیح اینکه چرا استفاده از API Key شخصی را پیشنهاد می‌کنیم، دو روش احتمالی استفاده را در نظر بگیرید:\n\n>> ① فرض کنیم از طریق Mira Translator اشتراک Pro خریداری کنید:\n>>> کاربران اشتراک Pro خریداری می‌کنند. سپس Mira یک API Key از ارائه‌دهنده خدمات هوش مصنوعی تهیه و مدیریت می‌کند. چندین کاربر برای ترجمه با هوش مصنوعی، به‌صورت مشترک از همان یک API Key که Mira مدیریت می‌کند استفاده می‌کنند.\n>>> در این روش، محتوایی که کاربران قصد ترجمه آن را دارند ابتدا به سرور Mira ارسال می‌شود. سپس سرور Mira با استفاده از API Key مشترک، محتوا را برای پردازش به ارائه‌دهنده خدمات هوش مصنوعی ارسال می‌کند. پس از انجام ترجمه، نتیجه از طریق سرور Mira به کاربران بازگردانده می‌شود. هزینه‌های مربوط به استفاده از API نیز در قیمت اشتراک لحاظ می‌شود.\n\n>> ② استفاده از API Key شخصی (پیشنهاد Mira Translator):\n>>> API Key شخصی خود را مستقیماً از طریق کانال‌های رسمی ارائه‌دهنده خدمات هوش مصنوعی دریافت کنید. سپس آن را در افزونه وارد کنید تا افزونه درخواست ترجمه را مستقیماً به ارائه‌دهنده ارسال کند و از مدل‌های آن استفاده کند.\n>>> در این روش، مدیریت API Key بر عهده خود کاربر است و ارائه‌دهنده خدمات هوش مصنوعی نیز مستقیماً هزینه‌ها و میزان استفاده را محاسبه و مدیریت می‌کند.\n\n> در هر دو روش، ترجمه در نهایت با استفاده از مدل‌هایی انجام می‌شود که ارائه‌دهندگان سرویس‌های هوش مصنوعی عرضه می‌کنند. تفاوت‌های اصلی در این است که چه کسی API Key را مدیریت می‌کند، هزینه‌ها چگونه محاسبه می‌شوند و محتوای ترجمه از چه مسیری منتقل می‌شود. با استفاده از API Key شخصی، می‌توانید هزینه‌ها و محدودیت‌های مصرف خود را مستقیماً مدیریت کنید، آزادانه مدل‌ها را انتخاب یا عوض کنید و مراحل واسطه‌ای اضافی در انتقال داده‌ها را کاهش دهید.\n\n> سرویس‌ها و مدل‌های پشتیبانی‌شده عبارت‌اند از:\n>> • OpenRouter: با یک Key می‌توانید تقریباً به تمام مدل‌های اصلی دسترسی داشته باشید؛\n>> • Groq: دارای سهمیه رایگان و سرعت پاسخ‌گویی بالا؛\n>> • Gemini: دارای سهمیه رایگان، اما با محدودیت‌های نسبتاً سخت‌گیرانه؛\n>> • GPT، Claude، DeepL، SiliconFlow، Ollama و هر سرویسی که با OpenAI API سازگار باشد.\n\n> برای اطلاع از قوانین و سهمیه‌های دقیق، لطفاً مستندات رسمی هر ارائه‌دهنده را بررسی کنید.\n\n【درباره ایجاد تعادل میان سرعت و پایداری ترجمه】\n> برای کاهش احتمال رسیدن به محدودیت تعداد درخواست‌های سرویس ترجمه، محتوای صفحات وب به بخش‌های کوچک‌تر تقسیم شده و به‌ترتیب در صف ترجمه قرار می‌گیرد، به‌جای اینکه تعداد زیادی درخواست به‌طور هم‌زمان ارسال شود. به همین دلیل، ترجمه صفحات طولانی ممکن است کمی زمان ببرد. سرعت واقعی همچنین به موتور ترجمه انتخاب‌شده و وضعیت شبکه بستگی دارد.\n\nاز آنجا که ساختار صفحات و پیاده‌سازی فنی وب‌سایت‌ها با یکدیگر تفاوت زیادی دارند، نمی‌توانیم سازگاری با همه وب‌سایت‌ها را تضمین کنیم. ممکن است ترجمه در برخی وب‌سایت‌های خاص به‌درستی انجام نشود.\n\nاین پروژه در حال حاضر رایگان است، اما توسعه و نگهداری آن به زمان و تلاش قابل‌توجهی نیاز دارد. خدمات توسعه یا شخصی‌سازی اختصاصی به‌صورت رایگان ارائه نمی‌شود. افزودن قابلیت‌ها و به‌روزرسانی‌های آینده بر اساس برنامه کلی توسعه و نیازهای نگهداری پروژه انجام خواهد شد.",
                 "gotIt": "متوجه شدم",
-                "scope": "settings"
+                "scope": "settings",
+                "content": {
+                    "intro": "این افزونه به‌صورت پیش‌فرض از ترجمه Google/Bing پشتیبانی می‌کند. نیازی به API Key ندارید و می‌توانید بلافاصله پس از نصب از آن استفاده کنید.",
+                    "compatibility1": "از آنجا که ساختار صفحات و پیاده‌سازی فنی وب‌سایت‌ها با یکدیگر تفاوت زیادی دارند، نمی‌توانیم سازگاری با همه وب‌سایت‌ها را تضمین کنیم. ممکن است ترجمه در برخی وب‌سایت‌های خاص به‌درستی انجام نشود.",
+                    "accuracy": "این افزونه تنها نقش واسطه‌ای میان صفحات وب و موتورهای ترجمه را ایفا می‌کند. کیفیت ترجمه به موتور ترجمه‌ای بستگی دارد که انتخاب می‌کنید. اگر ترجمه دقیق نباشد، معمولاً دلیل آن عملکرد خود موتور ترجمه است، نه افزونه. مدل‌های قدرتمندتر هوش مصنوعی معمولاً ترجمه‌هایی طبیعی‌تر و دقیق‌تر ارائه می‌دهند.",
+                    "aiIntro": "ترجمه با هوش مصنوعی به منابع پردازشی نیاز دارد و هزینه‌هایی به همراه دارد. به همین دلیل، این افزونه سرویس رایگان هوش مصنوعی داخلی ارائه نمی‌کند و هیچ‌گونه عضویت Pro، بسته هوش مصنوعی یا خدمات شخص ثالث را نیز عرضه یا به فروش نمی‌رساند. برای دستیابی به ترجمه‌ای با کیفیت بهتر، می‌توانید سرویس هوش مصنوعی شخصی خود را متصل کنید: از طریق کانال‌های رسمی ارائه‌دهنده، API Key دریافت کنید و سپس مدل مناسب را انتخاب کنید.",
+                    "aiWhy": "برای توضیح اینکه چرا استفاده از API Key شخصی را پیشنهاد می‌کنیم، دو روش احتمالی استفاده را در نظر بگیرید:",
+                    "proTitle": "① فرض کنیم از طریق Mira Translator اشتراک Pro خریداری کنید:",
+                    "proFlow": "کاربران اشتراک Pro خریداری می‌کنند. سپس Mira یک API Key از ارائه‌دهنده خدمات هوش مصنوعی تهیه و مدیریت می‌کند. چندین کاربر برای ترجمه با هوش مصنوعی، به‌صورت مشترک از همان یک API Key که Mira مدیریت می‌کند استفاده می‌کنند.",
+                    "proDetails": "در این روش، محتوایی که کاربران قصد ترجمه آن را دارند ابتدا به سرور Mira ارسال می‌شود. سپس سرور Mira با استفاده از API Key مشترک، محتوا را برای پردازش به ارائه‌دهنده خدمات هوش مصنوعی ارسال می‌کند. پس از انجام ترجمه، نتیجه از طریق سرور Mira به کاربران بازگردانده می‌شود. هزینه‌های مربوط به استفاده از API نیز در قیمت اشتراک لحاظ می‌شود.",
+                    "byokTitle": "② استفاده از API Key شخصی (پیشنهاد Mira Translator):",
+                    "byokFlow": "API Key شخصی خود را مستقیماً از طریق کانال‌های رسمی ارائه‌دهنده خدمات هوش مصنوعی دریافت کنید. سپس آن را در افزونه وارد کنید تا افزونه درخواست ترجمه را مستقیماً به ارائه‌دهنده ارسال کند و از مدل‌های آن استفاده کند.",
+                    "byokDetails": "در این روش، مدیریت API Key بر عهده خود کاربر است و ارائه‌دهنده خدمات هوش مصنوعی نیز مستقیماً هزینه‌ها و میزان استفاده را محاسبه و مدیریت می‌کند.",
+                    "aiComparison": "در هر دو روش، ترجمه در نهایت با استفاده از مدل‌هایی انجام می‌شود که ارائه‌دهندگان سرویس‌های هوش مصنوعی عرضه می‌کنند. تفاوت‌های اصلی در این است که چه کسی API Key را مدیریت می‌کند، هزینه‌ها چگونه محاسبه می‌شوند و محتوای ترجمه از چه مسیری منتقل می‌شود. با استفاده از API Key شخصی، می‌توانید هزینه‌ها و محدودیت‌های مصرف خود را مستقیماً مدیریت کنید، آزادانه مدل‌ها را انتخاب یا عوض کنید و مراحل واسطه‌ای اضافی در انتقال داده‌ها را کاهش دهید.",
+                    "providersIntro": "سرویس‌ها و مدل‌های پشتیبانی‌شده عبارت‌اند از:",
+                    "providers": [
+                        "OpenRouter: با یک Key می‌توانید تقریباً به تمام مدل‌های اصلی دسترسی داشته باشید؛",
+                        "Groq: دارای سهمیه رایگان و سرعت پاسخ‌گویی بالا؛",
+                        "Gemini: دارای سهمیه رایگان، اما با محدودیت‌های نسبتاً سخت‌گیرانه؛",
+                        "GPT، Claude، DeepL، SiliconFlow، Ollama و هر سرویسی که با OpenAI API سازگار باشد."
+                    ],
+                    "providerLimits": "برای اطلاع از قوانین و سهمیه‌های دقیق، لطفاً مستندات رسمی هر ارائه‌دهنده را بررسی کنید.",
+                    "speed": "برای کاهش احتمال رسیدن به محدودیت تعداد درخواست‌های سرویس ترجمه، محتوای صفحات وب به بخش‌های کوچک‌تر تقسیم شده و به‌ترتیب در صف ترجمه قرار می‌گیرد، به‌جای اینکه تعداد زیادی درخواست به‌طور هم‌زمان ارسال شود. به همین دلیل، ترجمه صفحات طولانی ممکن است کمی زمان ببرد. سرعت واقعی همچنین به موتور ترجمه انتخاب‌شده و وضعیت شبکه بستگی دارد.",
+                    "footer": "Mira Translator در ابتدا برای پاسخ‌گویی به نیازهای شخصی من توسعه داده شد و سپس تصمیم گرفتم آن را به‌صورت رایگان با همه به اشتراک بگذارم. این افزونه بدون نیاز به ایجاد حساب کاربری یا ورود به سیستم قابل استفاده است. استفاده از آن هیچ هزینه‌ای ندارد و همچنین انعام یا کمک مالی نمی‌پذیریم. توسعه و نگهداری به زمان و تلاش قابل‌توجهی نیاز دارد؛ بنابراین خدمات توسعه یا شخصی‌سازی اختصاصی به‌صورت رایگان ارائه نمی‌شود. به‌روزرسانی قابلیت‌ها در آینده بر اساس برنامه کلی توسعه و نیازهای نگهداری پروژه انجام خواهد شد.",
+                    "summaryTitle": "نکات مهم در یک نگاه",
+                    "summaryBuiltinLabel": "ترجمه داخلی",
+                    "summaryAiLabel": "ترجمه هوش مصنوعی",
+                    "summaryByokLabel": "روش پیشنهادی",
+                    "summaryAi": "این افزونه سرویس رایگان هوش مصنوعی داخلی ارائه نمی‌کند و عضویت Pro، بسته هوش مصنوعی یا خدمات شخص ثالث را نیز عرضه یا به فروش نمی‌رساند.",
+                    "summaryByok": "کافی است از ارائه‌دهنده هوش مصنوعی دلخواهتان یک API Key دریافت کنید، آن را در افزونه وارد کنید و مدلی را انتخاب کنید تا مستقیماً از سرویس همان ارائه‌دهنده استفاده کنید.",
+                    "compatTitle": "سازگاری با وب‌سایت‌ها و چیدمان صفحات",
+                    "accuracyTitle": "درباره دقت ترجمه",
+                    "aiTitle": "درباره ترجمه با هوش مصنوعی",
+                    "speedTitle": "تعادل میان سرعت و پایداری ترجمه",
+                    "footerTitle": "درباره پروژه و نگهداری آن",
+                    "footerLead": "Mira Translator در ابتدا برای پاسخ‌گویی به نیازهای شخصی من توسعه داده شد و سپس تصمیم گرفتم آن را به‌صورت رایگان با همه به اشتراک بگذارم. این افزونه بدون نیاز به ایجاد حساب کاربری یا ورود به سیستم قابل استفاده است. ",
+                    "footerEmphasis": "خدمات توسعه یا شخصی‌سازی اختصاصی به‌صورت رایگان ارائه نمی‌شود.",
+                    "footerTail": " به‌روزرسانی قابلیت‌ها در آینده بر اساس برنامه کلی توسعه و نیازهای نگهداری پروژه انجام خواهد شد.",
+                    "footerFreeEmphasis": "استفاده از آن هیچ هزینه‌ای ندارد و همچنین انعام یا کمک مالی نمی‌پذیریم.",
+                    "footerMiddle": " توسعه و نگهداری به زمان و تلاش قابل‌توجهی نیاز دارد؛ بنابراین ",
+                    "permissionsTitle": "دربارهٔ مجوزهای مرورگر",
+                    "permissionsTabs": "دسترسی به زبانه‌ها: برای شناسایی صفحهٔ باز، ارائهٔ ترجمهٔ دوزبانه و اعمال تنظیمات همان وب‌سایت استفاده می‌شود. ممکن است Chrome/Edge این مجوز را «خواندن سابقهٔ مرور» نمایش دهد.",
+                    "permissionsSites": "دسترسی به وب‌سایت‌ها و فایل‌های محلی: برای خواندن صفحه‌هایی که ترجمه می‌کنید، اتصال به خدمات ترجمهٔ Google/Bing و قابلیت‌های YouTube و باز کردن اسناد محلی استفاده می‌شود. Firefox این موارد را به‌عنوان مجوزهای اختیاری نشان می‌دهد.",
+                    "permissionsPdf": "خواندن PDF: فایل‌های PDF واجد شرایط در نمایشگر داخلی Mira باز می‌شوند. ممکن است Chrome/Edge مجوز مرتبط را «مسدود کردن محتوا در همهٔ صفحات» نمایش دهد. برای برخی PDFهای محافظت‌شده، در صورت نیاز سرآیند Referer اضافه می‌شود تا بارگیری فایل آسان‌تر شود."
+                }
+            }
+        ],
+        "layout": [
+            {
+                "type": "summary",
+                "titleKey": "summaryTitle",
+                "items": [
+                    {
+                        "labelKey": "summaryBuiltinLabel",
+                        "textKey": "intro",
+                        "tone": "success"
+                    },
+                    {
+                        "labelKey": "summaryAiLabel",
+                        "textKey": "summaryAi",
+                        "tone": "warning"
+                    },
+                    {
+                        "labelKey": "summaryByokLabel",
+                        "textKey": "summaryByok",
+                        "tone": "info"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "compatibility",
+                "titleKey": "compatTitle",
+                "defaultOpen": false,
+                "locales": [
+                    "zh-CN",
+                    "zh-TW"
+                ],
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "compatibility1"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "compatibility2",
+                        "optional": true
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "accuracy",
+                "titleKey": "accuracyTitle",
+                "defaultOpen": false,
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "accuracy"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "ai",
+                "titleKey": "aiTitle",
+                "defaultOpen": false,
+                "blocks": [
+                    {
+                        "type": "callout",
+                        "key": "aiIntro",
+                        "tone": "warning"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "aiWhy"
+                    },
+                    {
+                        "type": "comparison",
+                        "items": [
+                            {
+                                "titleKey": "proTitle",
+                                "flowKey": "proFlow",
+                                "bodyKey": "proDetails",
+                                "tone": "neutral"
+                            },
+                            {
+                                "titleKey": "byokTitle",
+                                "flowKey": "byokFlow",
+                                "bodyKey": "byokDetails",
+                                "tone": "recommended"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "aiComparison"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "providersIntro"
+                    },
+                    {
+                        "type": "list",
+                        "key": "providers"
+                    },
+                    {
+                        "type": "callout",
+                        "key": "providerLimits",
+                        "tone": "info"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "speed",
+                "titleKey": "speedTitle",
+                "defaultOpen": false,
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "speed"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "compatibility",
+                "titleKey": "compatTitle",
+                "defaultOpen": false,
+                "excludeLocales": [
+                    "zh-CN",
+                    "zh-TW"
+                ],
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "compatibility1"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "compatibility2",
+                        "optional": true
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "simplified",
+                "titleKey": "simplifiedTitle",
+                "defaultOpen": false,
+                "locales": [
+                    "zh-CN",
+                    "zh-TW"
+                ],
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "simplified"
+                    }
+                ]
+            },
+            {
+                "type": "section",
+                "id": "permissions",
+                "titleKey": "permissionsTitle",
+                "defaultOpen": false,
+                "blocks": [
+                    {
+                        "type": "paragraph",
+                        "key": "permissionsTabs"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "permissionsSites"
+                    },
+                    {
+                        "type": "paragraph",
+                        "key": "permissionsPdf"
+                    }
+                ]
+            },
+            {
+                "type": "footer",
+                "titleKey": "footerTitle",
+                "parts": [
+                    {
+                        "key": "footerLead"
+                    },
+                    {
+                        "key": "footerFreeEmphasis",
+                        "emphasis": true
+                    },
+                    {
+                        "key": "footerMiddle"
+                    },
+                    {
+                        "key": "footerEmphasis",
+                        "emphasis": true
+                    },
+                    {
+                        "key": "footerTail"
+                    }
+                ]
             }
         ]
     }
