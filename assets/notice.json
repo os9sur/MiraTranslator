@@ -40,8 +40,34 @@
                     "providersIntro": "支持的服务与模型包括：",
                     "providers": [
                         "OpenRouter：一个 Key 即可使用几乎所有主流模型；",
-                        "Groq：有免费额度，响应快；",
-                        "Gemini：有免费额度，但限制较严格；",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq：有"
+                                },
+                                {
+                                    "text": "免费额度",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "，响应快；"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini：有"
+                                },
+                                {
+                                    "text": "免费额度",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "，但限制较严格；"
+                                }
+                            ]
+                        },
                         "GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何兼容 OpenAI 接口的服务。"
                     ],
                     "providerLimits": "具体规则和额度请以各服务商官方说明为准。",
@@ -96,8 +122,34 @@
                     "providersIntro": "支援的服務與模型包括：",
                     "providers": [
                         "OpenRouter：一組 Key 即可使用幾乎所有主流模型；",
-                        "Groq：提供免費額度，回應速度快；",
-                        "Gemini：提供免費額度，但使用限制較多；",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq：提供"
+                                },
+                                {
+                                    "text": "免費額度",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "，回應速度快；"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini：提供"
+                                },
+                                {
+                                    "text": "免費額度",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "，但使用限制較多；"
+                                }
+                            ]
+                        },
                         "GPT、Claude、DeepL、SiliconFlow、Ollama，以及任何相容 OpenAI API 的服務。"
                     ],
                     "providerLimits": "具體使用規則與額度，請以各服務供應商的官方說明為準。",
@@ -151,8 +203,34 @@
                     "providersIntro": "Supported services and models include:",
                     "providers": [
                         "OpenRouter: One Key provides access to almost all major models;",
-                        "Groq: Offers a free tier and fast responses;",
-                        "Gemini: Offers a free tier, but with relatively strict usage limits;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: Offers a "
+                                },
+                                {
+                                    "text": "free tier",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " and fast responses;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: Offers a "
+                                },
+                                {
+                                    "text": "free tier",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", but with relatively strict usage limits;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama, and any service compatible with the OpenAI API."
                     ],
                     "providerLimits": "Please refer to each provider's official documentation for the latest rules and usage limits.",
@@ -204,8 +282,34 @@
                     "providersIntro": "対応しているサービスとモデル：",
                     "providers": [
                         "OpenRouter：1つのKeyで、ほぼすべての主要モデルを利用できます。",
-                        "Groq：無料利用枠があり、応答も高速です。",
-                        "Gemini：無料利用枠がありますが、利用制限は比較的厳しめです。",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq："
+                                },
+                                {
+                                    "text": "無料利用枠",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "があり、応答も高速です。"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini："
+                                },
+                                {
+                                    "text": "無料利用枠",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "がありますが、利用制限は比較的厳しめです。"
+                                }
+                            ]
+                        },
                         "GPT、Claude、DeepL、SiliconFlow、Ollama、およびOpenAI API互換のサービス。"
                     ],
                     "providerLimits": "具体的な利用条件や上限については、各サービス提供元の公式情報をご確認ください。",
@@ -257,8 +361,34 @@
                     "providersIntro": "지원하는 서비스 및 모델은 다음과 같습니다.",
                     "providers": [
                         "OpenRouter: 하나의 Key로 거의 모든 주요 모델 이용 가능;",
-                        "Groq: 무료 사용량을 제공하며 응답 속도가 빠릅니다;",
-                        "Gemini: 무료 사용량을 제공하지만 이용 제한이 비교적 엄격합니다;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: "
+                                },
+                                {
+                                    "text": "무료 사용량",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "을 제공하며 응답 속도가 빠릅니다;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: "
+                                },
+                                {
+                                    "text": "무료 사용량",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "을 제공하지만 이용 제한이 비교적 엄격합니다;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama 및 OpenAI API와 호환되는 모든 서비스."
                     ],
                     "providerLimits": "구체적인 이용 규칙과 한도는 각 서비스 제공업체의 공식 안내를 확인해 주세요.",
@@ -310,8 +440,34 @@
                     "providersIntro": "Entre los servicios y modelos compatibles se incluyen:",
                     "providers": [
                         "OpenRouter: Una sola Key permite acceder a casi todos los modelos principales;",
-                        "Groq: Ofrece un nivel gratuito y respuestas rápidas;",
-                        "Gemini: Ofrece un nivel gratuito, pero sus límites de uso son relativamente estrictos;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: Ofrece un "
+                                },
+                                {
+                                    "text": "nivel gratuito",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " y respuestas rápidas;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: Ofrece un "
+                                },
+                                {
+                                    "text": "nivel gratuito",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", pero sus límites de uso son relativamente estrictos;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama y cualquier servicio compatible con la API de OpenAI."
                     ],
                     "providerLimits": "Consulta la documentación oficial de cada proveedor para conocer las condiciones y los límites de uso específicos.",
@@ -363,8 +519,34 @@
                     "providersIntro": "Entre os serviços e modelos compatíveis estão:",
                     "providers": [
                         "OpenRouter: uma única Key permite acessar praticamente todos os principais modelos;",
-                        "Groq: oferece uma cota gratuita e respostas rápidas;",
-                        "Gemini: oferece uma cota gratuita, mas com limites de uso relativamente rigorosos;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: oferece uma "
+                                },
+                                {
+                                    "text": "cota gratuita",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " e respostas rápidas;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: oferece uma "
+                                },
+                                {
+                                    "text": "cota gratuita",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", mas com limites de uso relativamente rigorosos;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama e qualquer serviço compatível com a API da OpenAI."
                     ],
                     "providerLimits": "Consulte as informações oficiais de cada provedor para conhecer as regras e os limites de uso específicos.",
@@ -416,8 +598,34 @@
                     "providersIntro": "Поддерживаемые сервисы и модели:",
                     "providers": [
                         "OpenRouter: один Key открывает доступ практически ко всем основным моделям;",
-                        "Groq: предоставляет бесплатный лимит и отличается высокой скоростью ответа;",
-                        "Gemini: предоставляет бесплатный лимит, но ограничения на использование сравнительно строгие;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: предоставляет "
+                                },
+                                {
+                                    "text": "бесплатный лимит",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " и отличается высокой скоростью ответа;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: предоставляет "
+                                },
+                                {
+                                    "text": "бесплатный лимит",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", но ограничения на использование сравнительно строгие;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama и любые сервисы, совместимые с OpenAI API."
                     ],
                     "providerLimits": "Актуальные правила и лимиты использования уточняйте в официальной документации соответствующих поставщиков.",
@@ -469,8 +677,34 @@
                     "providersIntro": "تشمل الخدمات والنماذج المدعومة:",
                     "providers": [
                         "OpenRouter: يتيح مفتاح واحد الوصول إلى جميع النماذج الرئيسية تقريبًا؛",
-                        "Groq: يوفر حصة استخدام مجانية مع سرعة استجابة عالية؛",
-                        "Gemini: يوفر حصة استخدام مجانية، لكن قيود الاستخدام أكثر صرامة نسبيًا؛",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: يوفر "
+                                },
+                                {
+                                    "text": "حصة استخدام مجانية",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " مع سرعة استجابة عالية؛"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: يوفر "
+                                },
+                                {
+                                    "text": "حصة استخدام مجانية",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "، لكن قيود الاستخدام أكثر صرامة نسبيًا؛"
+                                }
+                            ]
+                        },
                         "GPT وClaude وDeepL وSiliconFlow وOllama، بالإضافة إلى أي خدمة متوافقة مع OpenAI API."
                     ],
                     "providerLimits": "يرجى الرجوع إلى الوثائق الرسمية لكل مزود خدمة للاطلاع على القواعد وحدود الاستخدام المحددة.",
@@ -522,8 +756,34 @@
                     "providersIntro": "Desteklenen hizmetler ve modeller:",
                     "providers": [
                         "OpenRouter: Tek bir Key ile neredeyse tüm önemli modellere erişebilirsiniz;",
-                        "Groq: Ücretsiz kullanım kotası sunar ve hızlı yanıt verir;",
-                        "Gemini: Ücretsiz kullanım kotası sunar ancak kullanım kısıtlamaları nispeten katıdır;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: "
+                                },
+                                {
+                                    "text": "Ücretsiz kullanım kotası",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " sunar ve hızlı yanıt verir;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: "
+                                },
+                                {
+                                    "text": "Ücretsiz kullanım kotası",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " sunar ancak kullanım kısıtlamaları nispeten katıdır;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama ve OpenAI API ile uyumlu tüm hizmetler."
                     ],
                     "providerLimits": "Güncel kullanım koşulları ve limitler için lütfen ilgili hizmet sağlayıcıların resmî belgelerini inceleyin.",
@@ -575,8 +835,34 @@
                     "providersIntro": "Unterstützte Dienste und Modelle sind unter anderem:",
                     "providers": [
                         "OpenRouter: Mit einem einzigen Key erhältst du Zugriff auf nahezu alle gängigen Modelle;",
-                        "Groq: Bietet ein kostenloses Kontingent und schnelle Antworten;",
-                        "Gemini: Bietet ein kostenloses Kontingent, allerdings mit vergleichsweise strengen Nutzungslimits;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: Bietet ein "
+                                },
+                                {
+                                    "text": "kostenloses Kontingent",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " und schnelle Antworten;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: Bietet ein "
+                                },
+                                {
+                                    "text": "kostenloses Kontingent",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", allerdings mit vergleichsweise strengen Nutzungslimits;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama sowie alle Dienste, die mit der OpenAI API kompatibel sind."
                     ],
                     "providerLimits": "Die genauen Nutzungsbedingungen und Kontingente findest du in den offiziellen Informationen der jeweiligen Anbieter.",
@@ -628,8 +914,34 @@
                     "providersIntro": "Les services et modèles compatibles comprennent notamment :",
                     "providers": [
                         "OpenRouter : une seule Key permet d'accéder à presque tous les principaux modèles ;",
-                        "Groq : propose un quota gratuit et des réponses rapides ;",
-                        "Gemini : propose un quota gratuit, mais avec des limites d'utilisation relativement strictes ;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq : propose un "
+                                },
+                                {
+                                    "text": "quota gratuit",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " et des réponses rapides ;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini : propose un "
+                                },
+                                {
+                                    "text": "quota gratuit",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", mais avec des limites d'utilisation relativement strictes ;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama, ainsi que tout service compatible avec l'API OpenAI."
                     ],
                     "providerLimits": "Pour connaître les conditions et les quotas exacts, veuillez consulter les informations officielles de chaque fournisseur.",
@@ -681,8 +993,34 @@
                     "providersIntro": "Tra i servizi e i modelli supportati figurano:",
                     "providers": [
                         "OpenRouter: una sola Key consente di accedere a quasi tutti i principali modelli;",
-                        "Groq: offre una quota gratuita e risposte rapide;",
-                        "Gemini: offre una quota gratuita, ma con limiti di utilizzo relativamente restrittivi;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: offre una "
+                                },
+                                {
+                                    "text": "quota gratuita",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " e risposte rapide;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: offre una "
+                                },
+                                {
+                                    "text": "quota gratuita",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": ", ma con limiti di utilizzo relativamente restrittivi;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama e qualsiasi servizio compatibile con l'API OpenAI."
                     ],
                     "providerLimits": "Per conoscere le condizioni e i limiti di utilizzo aggiornati, consulta la documentazione ufficiale dei rispettivi fornitori.",
@@ -734,8 +1072,34 @@
                     "providersIntro": "Các dịch vụ và mô hình được hỗ trợ bao gồm:",
                     "providers": [
                         "OpenRouter: Một Key có thể truy cập gần như tất cả các mô hình phổ biến;",
-                        "Groq: Có hạn mức miễn phí và tốc độ phản hồi nhanh;",
-                        "Gemini: Có hạn mức miễn phí nhưng giới hạn sử dụng tương đối nghiêm ngặt;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: Có "
+                                },
+                                {
+                                    "text": "hạn mức miễn phí",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " và tốc độ phản hồi nhanh;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: Có "
+                                },
+                                {
+                                    "text": "hạn mức miễn phí",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " nhưng giới hạn sử dụng tương đối nghiêm ngặt;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama và mọi dịch vụ tương thích với OpenAI API."
                     ],
                     "providerLimits": "Vui lòng tham khảo thông tin chính thức của từng nhà cung cấp để biết các quy định và hạn mức sử dụng cụ thể.",
@@ -787,8 +1151,34 @@
                     "providersIntro": "บริการและโมเดลที่รองรับ ได้แก่:",
                     "providers": [
                         "OpenRouter: ใช้ Key เพียงหนึ่งรายการก็สามารถเข้าถึงโมเดลหลัก ๆ ได้เกือบทั้งหมด;",
-                        "Groq: มีโควตาใช้งานฟรีและตอบสนองได้รวดเร็ว;",
-                        "Gemini: มีโควตาใช้งานฟรี แต่มีข้อจำกัดในการใช้งานค่อนข้างเข้มงวด;",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: มี"
+                                },
+                                {
+                                    "text": "โควตาใช้งานฟรี",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "และตอบสนองได้รวดเร็ว;"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: มี"
+                                },
+                                {
+                                    "text": "โควตาใช้งานฟรี",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " แต่มีข้อจำกัดในการใช้งานค่อนข้างเข้มงวด;"
+                                }
+                            ]
+                        },
                         "GPT, Claude, DeepL, SiliconFlow, Ollama และบริการอื่น ๆ ที่รองรับ OpenAI API"
                     ],
                     "providerLimits": "โปรดตรวจสอบเงื่อนไขและโควตาการใช้งานจากข้อมูลอย่างเป็นทางการของผู้ให้บริการแต่ละราย",
@@ -840,8 +1230,34 @@
                     "providersIntro": "سرویس‌ها و مدل‌های پشتیبانی‌شده عبارت‌اند از:",
                     "providers": [
                         "OpenRouter: با یک Key می‌توانید تقریباً به تمام مدل‌های اصلی دسترسی داشته باشید؛",
-                        "Groq: دارای سهمیه رایگان و سرعت پاسخ‌گویی بالا؛",
-                        "Gemini: دارای سهمیه رایگان، اما با محدودیت‌های نسبتاً سخت‌گیرانه؛",
+                        {
+                            "parts": [
+                                {
+                                    "text": "Groq: دارای "
+                                },
+                                {
+                                    "text": "سهمیه رایگان",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": " و سرعت پاسخ‌گویی بالا؛"
+                                }
+                            ]
+                        },
+                        {
+                            "parts": [
+                                {
+                                    "text": "Gemini: دارای "
+                                },
+                                {
+                                    "text": "سهمیه رایگان",
+                                    "tone": "free"
+                                },
+                                {
+                                    "text": "، اما با محدودیت‌های نسبتاً سخت‌گیرانه؛"
+                                }
+                            ]
+                        },
                         "GPT، Claude، DeepL، SiliconFlow، Ollama و هر سرویسی که با OpenAI API سازگار باشد."
                     ],
                     "providerLimits": "برای اطلاع از قوانین و سهمیه‌های دقیق، لطفاً مستندات رسمی هر ارائه‌دهنده را بررسی کنید.",
