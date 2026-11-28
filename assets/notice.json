@@ -1,18 +1,168 @@
 {
-    "guide": {
-        "enabled": false,
-        "minDays": 0,
-        "zh-CN": [
-            {
-                "id": "notice_20261103_engine_settings_fix",
-                "title": "⚠️ 引擎配置页面临时异常",
-                "level": "warning",
-                "content": "受影响版本：3.5.8.8833。此版本的引擎配置页面存在临时问题，可能无法正常打开或使用。修复版本预计很快发布，请在扩展更新后重新打开引擎配置页面。",
-                "gotIt": "知道了",
-                "scope": "popup"
-            }
-        ]
-    },
+"guide": {
+    "enabled": true,
+    "minDays": 0,
+    "de": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Neu: Video-Shadowing",
+        "level": "info",
+        "content": "Die Untertitellisten von YouTube- und X-Videos unterstützen jetzt Shadowing-Übungen. Spiele einzelne Sätze ab, wiederhole sie und sprich direkt mit dem Video mit. Öffne dazu die Untertitelliste und wähle „Shadowing“ aus.",
+        "gotIt": "Verstanden",
+        "scope": "popup"
+      }
+    ],
+    "en": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 New: Video Shadowing",
+        "level": "info",
+        "content": "Shadowing practice is now available in the subtitle lists for YouTube and X videos. Play individual lines, repeat them, and practise speaking along with the video. Open the subtitle list and select “Shadowing” to get started.",
+        "gotIt": "Got it",
+        "scope": "popup"
+      }
+    ],
+    "vi": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Mới: Tính năng luyện nói theo video",
+        "level": "info",
+        "content": "Danh sách phụ đề của video trên YouTube và X hiện đã có tính năng luyện nói theo từng câu. Bạn có thể phát lại từng câu và luyện nói theo video. Mở danh sách phụ đề rồi chọn “Luyện nói” để bắt đầu.",
+        "gotIt": "Đã hiểu",
+        "scope": "popup"
+      }
+    ],
+    "tr": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Yeni: Video ile Shadowing",
+        "level": "info",
+        "content": "YouTube ve X videolarının altyazı listelerine artık shadowing çalışması eklendi. Cümleleri tek tek oynatabilir, tekrar dinleyebilir ve videoyla birlikte konuşma pratiği yapabilirsiniz. Başlamak için altyazı listesini açıp “Shadowing” seçeneğine tıklayın.",
+        "gotIt": "Anladım",
+        "scope": "popup"
+      }
+    ],
+    "es": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Novedad: Shadowing con vídeos",
+        "level": "info",
+        "content": "Las listas de subtítulos de los vídeos de YouTube y X ya incluyen ejercicios de shadowing. Puedes reproducir cada frase, repetirla y practicar hablando al mismo ritmo que el vídeo. Abre la lista de subtítulos y selecciona «Shadowing» para empezar.",
+        "gotIt": "Entendido",
+        "scope": "popup"
+      }
+    ],
+    "fr": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Nouveau : entraînement au shadowing vidéo",
+        "level": "info",
+        "content": "Les listes de sous-titres des vidéos YouTube et X proposent désormais des exercices de répétition orale. Faites jouer une phrase, répétez-la et entraînez-vous en suivant la vidéo. Ouvrez la liste des sous-titres, puis choisissez « Shadowing » pour commencer.",
+        "gotIt": "Compris",
+        "scope": "popup"
+      }
+    ],
+    "it": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Novità: Shadowing con i video",
+        "level": "info",
+        "content": "Ora puoi esercitarti con lo shadowing direttamente dalle liste dei sottotitoli dei video YouTube e X. Riproduci una frase alla volta, ripetila e allenati a parlare seguendo il video. Apri la lista dei sottotitoli e seleziona “Shadowing” per iniziare.",
+        "gotIt": "Ho capito",
+        "scope": "popup"
+      }
+    ],
+    "pt-BR": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Novidade: Shadowing com vídeos",
+        "level": "info",
+        "content": "Agora você pode praticar shadowing diretamente nas listas de legendas dos vídeos do YouTube e do X. Reproduza uma frase por vez, repita e pratique a fala acompanhando o vídeo. Abra a lista de legendas e selecione “Shadowing” para começar.",
+        "gotIt": "Entendi",
+        "scope": "popup"
+      }
+    ],
+    "ru": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 Новое: повторение за видео",
+        "level": "info",
+        "content": "В списках субтитров YouTube и X теперь доступна тренировка повторения за видео. Воспроизводите фразы по одной, повторяйте их и тренируйте речь, следуя за видео. Откройте список субтитров и выберите «Повторение».",
+        "gotIt": "Понятно",
+        "scope": "popup"
+      }
+    ],
+    "ar": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 جديد: التدرّب على الترديد مع الفيديو",
+        "level": "info",
+        "content": "أصبحت تمارين الترديد مع الفيديو متاحة الآن في قوائم الترجمة النصية لمقاطع YouTube وX. شغّل كل جملة على حدة، وكررها، وتدرّب على التحدث بالتزامن مع الفيديو. افتح قائمة الترجمة النصية واختر «الترديد» للبدء.",
+        "gotIt": "حسنًا",
+        "scope": "popup"
+      }
+    ],
+    "fa": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 قابلیت جدید: تمرین سایه‌گویی با ویدئو",
+        "level": "info",
+        "content": "از این پس می‌توانید در فهرست زیرنویس ویدئوهای YouTube و X تمرین سایه‌گویی انجام دهید. جمله‌ها را یکی‌یکی پخش کنید، آن‌ها را تکرار کنید و هم‌زمان با ویدئو صحبت کردن را تمرین کنید. برای شروع، فهرست زیرنویس را باز کنید و گزینه «سایه‌گویی» را انتخاب کنید.",
+        "gotIt": "متوجه شدم",
+        "scope": "popup"
+      }
+    ],
+    "th": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 ใหม่: ฟีเจอร์ฝึกพูดตามวิดีโอ",
+        "level": "info",
+        "content": "ตอนนี้คุณสามารถฝึกพูดตามทีละประโยคได้จากรายการคำบรรยายของวิดีโอ YouTube และ X เล่นแต่ละประโยคซ้ำ แล้วฝึกพูดตามเสียงในวิดีโอได้เลย เปิดรายการคำบรรยายแล้วเลือก “ฝึกพูดตาม” เพื่อเริ่มต้น",
+        "gotIt": "เข้าใจแล้ว",
+        "scope": "popup"
+      }
+    ],
+    "zh-CN": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 新增视频跟读功能",
+        "level": "info",
+        "content": "YouTube 和 X 视频的字幕列表现已支持跟读练习。你可以逐句播放、重复练习，跟着视频训练听力和口语。打开字幕列表，点击「跟读」即可开始。",
+        "gotIt": "知道了",
+        "scope": "popup"
+      }
+    ],
+    "zh-TW": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 新增影片跟讀功能",
+        "level": "info",
+        "content": "YouTube 和 X 影片的字幕清單現在支援跟讀練習。你可以逐句播放、重複練習，跟著影片訓練聽力與口說。開啟字幕清單，點選「跟讀」即可開始。",
+        "gotIt": "知道了",
+        "scope": "popup"
+      }
+    ],
+    "ja": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 新機能：動画のシャドーイング",
+        "level": "info",
+        "content": "YouTube と X の動画字幕リストで、シャドーイング練習ができるようになりました。文ごとに再生して繰り返し、動画に合わせて声に出して練習できます。字幕リストを開き、「シャドーイング」を選択して始めましょう。",
+        "gotIt": "わかりました",
+        "scope": "popup"
+      }
+    ],
+    "ko": [
+      {
+        "id": "notice_20261128_video_shadowing",
+        "title": "🎧 새 기능: 동영상 쉐도잉",
+        "level": "info",
+        "content": "이제 YouTube와 X 동영상의 자막 목록에서 쉐도잉 연습을 할 수 있습니다. 문장을 하나씩 재생하고 반복하면서 영상에 맞춰 따라 말해 보세요. 자막 목록을 열고 '쉐도잉'을 선택하면 시작할 수 있습니다.",
+        "gotIt": "확인",
+        "scope": "popup"
+      }
+    ]
+  },
     "notices": {
         "enabled": true,
         "minDays": 0,
